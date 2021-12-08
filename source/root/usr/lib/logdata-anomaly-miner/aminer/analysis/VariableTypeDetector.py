@@ -256,11 +256,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.constraint_list = []
 
         if (self.used_gof_test == 'KS' and (gof_alpha not in self.crit_val_ini_ks or gof_alpha not in self.crit_val_upd_ks)) or (
-                self.used_gof_test == 'CM' and (gof_alpha not in self.crit_val_ini_cm or gof_alpha not in self.crit_val_upd_cm)):
+                self.used_gof_test == 'CM' and (gof_alpha not in self.crit_val_ini_cm or gof_alpha not in self.crit_val_upd_cm or
+                                                gof_alpha not in self.crit_val_hom_cm)):
             if self.used_gof_test == 'KS':
                 pos_vals = [val for val in self.crit_val_ini_ks if val in self.crit_val_upd_ks]
             else:
-                pos_vals = [val for val in self.crit_val_ini_cm if val in self.crit_val_upd_cm]
+                pos_vals = [val for val in self.crit_val_ini_cm if val in self.crit_val_upd_cm and val in self.crit_val_hom_cm]
 
             nearest = pos_vals[0]
             for val in pos_vals[1:]:
@@ -275,11 +276,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if (self.used_gof_test == 'KS' and (num_init not in self.crit_val_ini_ks[self.gof_alpha] or num_init not in
                                             self.crit_val_upd_ks[self.gof_alpha])) or (
                 self.used_gof_test == 'CM' and (num_init not in self.crit_val_ini_cm[self.gof_alpha] or
-                                                num_init not in self.crit_val_upd_cm[self.gof_alpha])):
+                                                num_init not in self.crit_val_upd_cm[self.gof_alpha] or
+                                                num_init not in self.crit_val_hom_cm[self.gof_alpha])):
             if self.used_gof_test == 'KS':
                 pos_vals = [val for val in self.crit_val_ini_ks[self.gof_alpha] if val in self.crit_val_upd_ks[self.gof_alpha]]
             else:
-                pos_vals = [val for val in self.crit_val_ini_cm[self.gof_alpha] if val in self.crit_val_upd_cm[self.gof_alpha]]
+                pos_vals = [val for val in self.crit_val_ini_cm[self.gof_alpha] if val in self.crit_val_upd_cm[self.gof_alpha] and
+                            val in self.crit_val_hom_cm[self.gof_alpha]]
 
             nearest = pos_vals[0]
             for val in pos_vals[1:]:
@@ -292,11 +295,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.num_init = nearest
 
         if (self.used_gof_test == 'KS' and (num_s_gof_values not in self.crit_val_upd_ks[self.gof_alpha][self.num_init])) or (
-                self.used_gof_test == 'CM' and (num_s_gof_values not in self.crit_val_upd_cm[self.gof_alpha][self.num_init])):
+                self.used_gof_test == 'CM' and (num_s_gof_values not in self.crit_val_upd_cm[self.gof_alpha][self.num_init] or
+                                                num_s_gof_values not in self.crit_val_hom_cm[self.gof_alpha][self.num_init])):
             if self.used_gof_test == 'KS':
                 pos_vals = list(self.crit_val_upd_ks[self.gof_alpha][self.num_init].keys())
             else:
-                pos_vals = list(self.crit_val_upd_cm[self.gof_alpha][self.num_init].keys())
+                pos_vals = [val for val in self.crit_val_upd_cm[self.gof_alpha][self.num_init] if val in
+                            self.crit_val_hom_cm[self.gof_alpha][self.num_init]]
 
             nearest = pos_vals[0]
             for val in pos_vals[1:]:
@@ -1345,7 +1350,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Change the var type from static to discrete
 
             # list of the values
-            values_set = list(set(self.event_type_detector.values[event_index][var_index][-self.num_update:]))
+            values_set = list(set(self.event_type_detector.values[event_index][var_index][-self.num_init:]))
             values_app = [0 for _ in range(len(values_set))]  # List to store the appearance of the values
 
             for j in range(-self.num_init, 0):

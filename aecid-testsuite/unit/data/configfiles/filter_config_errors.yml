@@ -22,7 +22,6 @@ Parser:
           args: apacheModel
 
 Input:
-        verbose: True
         multi_source: False
         timestamp_paths: "/model/accesslog/time"
 

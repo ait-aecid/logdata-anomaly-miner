@@ -1,3 +1,5 @@
+sudo cp demo/aminerRemoteControl/demo-config.py /tmp/demo-config.py
+sudo sed -i 's/StreamPrinterEventHandler(analysis_context)/StreamPrinterEventHandler(analysis_context, stream=open("\/tmp\/log.txt", "a"))/g' /tmp/demo-config.py
 sudo mkdir /tmp/lib 2> /dev/null
 sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo mkdir /tmp/lib/aminer/log 2> /dev/null
@@ -6,7 +8,7 @@ sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
 
-FILE=demo/aminerRemoteControl/demo-config.py
+FILE=/tmp/demo-config.py
 sudo aminer --config "$FILE" & > /dev/null
 
 sleep 1
@@ -553,6 +555,20 @@ stdout=$(sudo aminerremotecontrol --exec "print_current_config(analysis_context)
 expected="$PREFIX None"
 if [[ "$stdout" == "$expected" ]]; then
 	echo "$ERROR print config had an execution error."
+	echo "$stdout"
+	echo "Expected: $expected"
+	echo
+	exit_code=1
+fi
+stdout=$(echo "$stdout" | sed -e "s/\"next_persist_time\".*,//")
+expected_list="${expected_list}${stdout}
+"
+
+echo "reopen_event_handler_streams(analysis_context)" >> /tmp/commands.txt
+stdout=$(sudo aminerremotecontrol --exec "reopen_event_handler_streams(analysis_context)")
+expected="$PREFIX'Reopened all StreamPrinterEventHandler streams.'"
+if [[ "$stdout" != "$expected" ]]; then
+	echo "$ERROR reopen_event_handler_streams had an execution error."
 	echo "$stdout"
 	echo "Expected: $expected"
 	echo

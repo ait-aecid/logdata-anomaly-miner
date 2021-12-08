@@ -75,6 +75,8 @@ config_properties['LogPrefix'] = 'Original log line: '
 config_properties['Log.StatisticsPeriod'] = 3600
 config_properties['Log.StatisticsLevel'] = 1
 config_properties['Log.DebugLevel'] = 1
+config_properties['Log.Rotation.BackupCount'] = 5
+config_properties['Log.Rotation.MaxBytes'] = 104857600  # 100 Megabytes
 
 # Add your ruleset here:
 
@@ -257,8 +259,7 @@ def build_analysis_pipeline(analysis_context):
         parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers, default_timestamp_paths=["/model/DailyCron/DTM"])
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
-    from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
+    from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
     simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
     atom_filter.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=False)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="SimpleUnparsedHandler")

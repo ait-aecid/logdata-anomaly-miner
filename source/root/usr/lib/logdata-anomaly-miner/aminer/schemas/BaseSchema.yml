@@ -3,11 +3,6 @@
             'required': False,
             'type': 'boolean'
         },
-        'SuppressNewMatchPathDetector': {
-            'required': False,
-            'type': 'boolean',
-            'default': False
-        },
         'AminerUser': {
             'required': False,
             'type': 'string',
@@ -136,6 +131,18 @@
             'type': 'string',
             'empty': False
         },
+        'Log.Rotation.MaxBytes': {
+            'required': False,
+            'type': 'integer',
+            'default': 104857600,  # 100 Megabytes
+            'min': 1
+        },
+        'Log.Rotation.BackupCount': {
+            'required': False,
+            'type': 'integer',
+            'default': 5,
+            'min': 1
+        },
         'Log.Encoding': {
             'required': False,
             'type': 'string',
@@ -145,14 +152,12 @@
             'required': True,
             'type': 'dict',
             'schema': {
-                'verbose': {'type': 'boolean', 'required': False, 'default': True},
                 'multi_source': {'type': 'boolean', 'required': False, 'default': False},
                 'timestamp_paths': {'type': ['string', 'list'], 'empty': False},
                 'adjust_timestamps' : {'type': 'boolean', 'required': False, 'default': False},
                 'sync_wait_time': {'type': 'integer', 'min': 1, 'default': 5},
                 'eol_sep': {'type': 'string', 'required': False, 'default': '\n', 'empty': False},
-                'json_format': {'type': 'boolean', 'required': False, 'default': False},
-                'suppress_unparsed': {'type': 'boolean', 'required': False, 'default': False}
+                'json_format': {'type': 'boolean', 'required': False, 'default': False}
             }
         }
 }

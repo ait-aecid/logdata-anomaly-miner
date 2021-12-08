@@ -21,6 +21,7 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 # Install necessary debian packages
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
+        supervisor \
 	python3 \
 	python3-pip \
 	python3-pip \
@@ -81,6 +82,12 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
         && chmod 0755 /aminerwrapper.sh
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
+
+
+# Prepare Supervisord
+COPY scripts/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN mkdir /var/lib/supervisor && chown $UID.$GID -R /var/lib/supervisor \
+    && chown $UID.$GID -R /var/log/supervisor/
 
 USER aminer
 WORKDIR /home/aminer

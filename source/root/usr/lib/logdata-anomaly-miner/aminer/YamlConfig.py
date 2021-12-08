@@ -129,7 +129,7 @@ def build_analysis_pipeline(analysis_context):
     """
     parsing_model = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model)
-    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter)
+    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model)
     event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
     # do not check UnparsedAtomHandler
     for index, analysis_component in enumerate(atom_filter.subhandler_list[1:]):
@@ -146,9 +146,6 @@ def build_parsing_model():
     start = None
     ws_count = 0
 
-    # We might be able to remove this and us it like the config_properties
-    # skipcq: PYL-W0603
-    global yaml_data
     for item in yaml_data['Parser']:
         if item['id'] in parser_model_dict:
             raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
@@ -260,9 +257,10 @@ def build_parsing_model():
             elif item['type'].name == 'JsonModelElement':
                 key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
                 if 'start' in item and item['start'] is True:
-                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'], item['allow_all_fields'])
                 else:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'])
+                    parser_model_dict[item['id']] = item['type'].func(
+                        item['name'], key_parser_dict, item['optional_key_prefix'], item['allow_all_fields'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -312,32 +310,14 @@ def build_input_pipeline(analysis_context, parsing_model):
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
         json_format=json_format)
-    # Just report all unparsed atoms to the event handlers.
-    if yaml_data['Input']['verbose'] is True:
-        from aminer.input.VerboseUnparsedAtomHandler import VerboseUnparsedAtomHandler
-        atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
-    else:
-        from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
-        atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
-    if yaml_data['Input']['suppress_unparsed'] is True:
-        analysis_context.suppress_detector_list.append(atom_filter.subhandler_list[-1][0])
-    from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    if 'LearnMode' in yaml_data:
-        learn = yaml_data['LearnMode']
-    else:
-        learn = True
-    nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
-    nmpd.output_event_handlers = None
-    analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
-    atom_filter.add_handler(nmpd)
     return anomaly_event_handlers, atom_filter
 
 
-def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter):
+def build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model):
     """Build the analysis components."""
     suppress_detector_list = analysis_context.suppress_detector_list
-    if yaml_data['SuppressNewMatchPathDetector']:
-        suppress_detector_list.append('DefaultNewMatchPathDetector')
+    has_unparsed_handler = False
+    has_new_match_path_handler = False
     if 'Analysis' in yaml_data and yaml_data['Analysis'] is not None:
         analysis_dict = {}
         match_action_dict = {}
@@ -354,6 +334,23 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 break
 
         for item in yaml_data['Analysis']:
+            if item['type'].name in ('SimpleUnparsedAtomHandler', 'VerboseUnparsedAtomHandler'):
+                has_unparsed_handler = True
+                index = yaml_data['Analysis'].index(item)
+                new_analysis_list = [item]
+                del yaml_data['Analysis'][index]
+                new_analysis_list += yaml_data['Analysis']
+                yaml_data['Analysis'] = new_analysis_list
+                break
+        for item in yaml_data['Analysis']:
+            if item['type'].name == 'NewMatchPathDetector':
+                has_new_match_path_handler = True
+                break
+        has_new_match_path_handler, has_unparsed_handler = add_default_analysis_components(
+            analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler, parsing_model)
+
+        for item in yaml_data['Analysis']:
+            stop_when_handled_flag = False
             if item['id'] == 'None':
                 comp_name = None
             else:
@@ -738,8 +735,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    num_init=item['num_init'], num_update=item['num_update'], disc_div_thres=item['disc_div_thres'],
-                    num_steps_create_new_rules=item['num_steps_create_new_rules'],
+                    target_path_list=item['paths'], num_init=item['num_init'], num_update=item['num_update'],
+                    disc_div_thres=item['disc_div_thres'], num_steps_create_new_rules=item['num_steps_create_new_rules'],
                     num_upd_until_validation=item['num_upd_until_validation'], num_end_learning_phase=item['num_end_learning_phase'],
                     check_cor_thres=item['check_cor_thres'], check_cor_prob_thres=item['check_cor_prob_thres'],
                     check_cor_num_thres=item['check_cor_num_thres'], min_values_cors_thres=item['min_values_cors_thres'],
@@ -753,13 +750,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     used_validate_cor_meth=item['used_validate_cor_meth'],
                     validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
                     validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'],
-                    constraint_list=item['constraint_list'])
+                    constraint_list=item['constraint_list'], auto_include_flag=learn)
             elif item['type'].name == 'PathValueTimeIntervalDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                     target_path_list=item['paths'], ignore_list=item['ignore_list'],
                     allow_missing_values_flag=item['allow_missing_values'],
-                    output_log_line=item['output_logline'], time_window_length=item['time_window_length'],
+                    output_log_line=item['output_logline'], time_period_length=item['time_period_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
             elif item['type'].name == 'PathArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
@@ -793,12 +790,50 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_log_line=item['output_logline'],
                     ignore_list=item['ignore_list'], auto_include_flag=learn)
+            elif item['type'].name == 'MinimalTransitionTimeDetector':
+                tmp_analyser = func(
+                    analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
+                    auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['paths'],
+                    id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
+                    num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
+                    time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
+            elif item["type"].name == "VerboseUnparsedAtomHandler":
+                has_unparsed_handler = True
+                stop_when_handled_flag = True
+                tmp_analyser = func(anomaly_event_handlers, parsing_model)
+            elif item["type"].name == "SimpleUnparsedAtomHandler":
+                has_unparsed_handler = True
+                stop_when_handled_flag = True
+                tmp_analyser = func(anomaly_event_handlers)
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
                 tmp_analyser.output_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
-            atom_filter.add_handler(tmp_analyser)
+            atom_filter.add_handler(tmp_analyser, stop_when_handled_flag=stop_when_handled_flag)
+    add_default_analysis_components(
+        analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler, parsing_model)
+
+
+def add_default_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler,
+                                    parsing_model):
+    """Add the default unparsed atom handler and/or NewMatchPathDetector if none is configured."""
+    if not has_unparsed_handler:
+        from aminer.analysis.UnparsedAtomHandlers import VerboseUnparsedAtomHandler
+        atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
+        has_unparsed_handler = True
+    if not has_new_match_path_handler:
+        has_new_match_path_handler = True
+        if 'LearnMode' in yaml_data:
+            learn = yaml_data['LearnMode']
+        else:
+            learn = True
+        from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
+        nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
+        nmpd.output_event_handlers = None
+        analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
+        atom_filter.add_handler(nmpd)
+    return has_new_match_path_handler, has_unparsed_handler
 
 
 def build_event_handlers(analysis_context, anomaly_event_handlers):
@@ -890,16 +925,22 @@ def parse_json_yaml(json_dict, parser_model_dict):
         if isinstance(value, dict):
             key_parser_dict[key] = parse_json_yaml(value, parser_model_dict)
         elif isinstance(value, list):
-            if isinstance(value[0], dict):
-                key_parser_dict[key] = [parse_json_yaml(value[0], parser_model_dict)]
-            elif value[0] in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
-                key_parser_dict[key] = value
-            elif parser_model_dict.get(value[0]) is None:
-                msg = 'The parser model %s does not exist!' % value[0]
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
-            else:
-                key_parser_dict[key] = [parser_model_dict.get(value[0])]
+            key_parser_dict[key] = []
+            for val in value:
+                if isinstance(val, dict):
+                    key_parser_dict[key].append(parse_json_yaml(val, parser_model_dict))
+                elif val in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
+                    if len(value) > 1 and val == "ALLOW_ALL":
+                        msg = "ALLOW_ALL must not be combined with other parsers in lists."
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
+                    key_parser_dict[key] = value
+                elif parser_model_dict.get(val) is None:
+                    msg = 'The parser model %s does not exist!' % val
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                else:
+                    key_parser_dict[key].append(parser_model_dict.get(val))
         elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:

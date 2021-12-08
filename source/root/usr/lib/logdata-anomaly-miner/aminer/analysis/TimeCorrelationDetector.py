@@ -103,7 +103,7 @@ class TimeCorrelationDetector(AtomHandlerInterface):
             result = self.total_records * ['']
             result[0] = self.analysis_status_to_string()
 
-            analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                   'AffectedLogAtomValues': [log_atom.raw_data.decode(AminerConfig.ENCODING)]}
             if self.output_log_line:
                 match_paths_values = {}
@@ -144,7 +144,7 @@ class TimeCorrelationDetector(AtomHandlerInterface):
 
     def rule_to_dict(self, rule):
         """Convert a rule to a dict structure."""
-        r = {'Type': str(rule.__class__.__name__)}
+        r = {'type': str(rule.__class__.__name__)}
         for var in vars(rule):
             attr = getattr(rule, var, None)
             if attr is None:
@@ -153,12 +153,36 @@ class TimeCorrelationDetector(AtomHandlerInterface):
                 tmp_list = []
                 for v in attr:
                     d = self.rule_to_dict(v)
-                    d['Type'] = str(v.__class__.__name__)
+                    d['type'] = str(v.__class__.__name__)
                     tmp_list.append(d)
                 r['subRules'] = tmp_list
             else:
                 r[var] = attr
         return r
+
+    @staticmethod
+    def get_time_trigger_class():
+        """
+        Get the trigger class this component should be registered for.
+        This trigger is used only for persistence, so real-time triggering is needed.
+        """
+        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
+    def do_timer(self, trigger_time):
+        """Check current ruleset should be persisted."""
+        if self.next_persist_time is None:
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+
+        delta = self.next_persist_time - trigger_time
+        if delta < 0:
+            self.next_persist_time = None
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+        return delta
+
+    def do_persist(self):
+        """Immediately write persistence data to storage."""
+        self.next_persist_time = None
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""

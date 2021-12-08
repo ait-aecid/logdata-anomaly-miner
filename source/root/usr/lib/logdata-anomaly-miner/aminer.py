@@ -40,6 +40,7 @@ import tempfile
 import ast
 from pwd import getpwnam
 from grp import getgrnam
+from logging.handlers import RotatingFileHandler
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
@@ -134,6 +135,9 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
               file=sys.stderr)
         sys.exit(1)
 
+    max_bytes = aminer_config.config_properties.get(AminerConfig.KEY_LOG_ROTATION_MAX_BYTES, AminerConfig.DEFAULT_LOG_ROTATION_MAX_BYTES)
+    backup_count = aminer_config.config_properties.get(
+        AminerConfig.KEY_LOG_ROTATION_BACKUP_COUNT, AminerConfig.DEFAULT_LOG_ROTATION_BACKUP_COUNT)
     log_dir_fd = SecureOSFunctions.secure_open_log_directory(log_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_PATH)
     rc_logger = logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME)
     rc_logger.setLevel(logging.DEBUG)
@@ -142,7 +146,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     if not remote_control_log_file.startswith(log_dir):
         remote_control_log_file = os.path.join(log_dir, remote_control_log_file)
     try:
-        rc_file_handler = logging.FileHandler(remote_control_log_file)
+        rc_file_handler = RotatingFileHandler(remote_control_log_file, maxBytes=max_bytes, backupCount=backup_count)
         os.chown(remote_control_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (remote_control_log_file, e), file=sys.stderr)
@@ -158,7 +162,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     if not stat_log_file.startswith(log_dir):
         stat_log_file = os.path.join(log_dir, stat_log_file)
     try:
-        stat_file_handler = logging.FileHandler(stat_log_file)
+        stat_file_handler = RotatingFileHandler(stat_log_file, maxBytes=max_bytes, backupCount=backup_count)
         os.chown(stat_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (stat_log_file, e), file=sys.stderr)
@@ -178,7 +182,7 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     if not debug_log_file.startswith(log_dir):
         debug_log_file = os.path.join(log_dir, debug_log_file)
     try:
-        debug_file_handler = logging.FileHandler(debug_log_file)
+        debug_file_handler = RotatingFileHandler(debug_log_file, maxBytes=max_bytes, backupCount=backup_count)
         os.chown(debug_log_file, aminer_user_id, aminer_grp_id, dir_fd=log_dir_fd, follow_symlinks=False)
     except OSError as e:
         print('Could not create or open %s: %s. Stopping..' % (debug_log_file, e), file=sys.stderr)
@@ -340,7 +344,7 @@ def main():
         if use_temp_config:
             os.remove(config_file_name)
             config_file_name = args.config
-    except ValueError as e:
+    except ValueError:
         sys.exit(1)
 
     for config_property in config_properties:
@@ -391,14 +395,6 @@ def main():
         print('Failed to resolve %s or %s' % (AminerConfig.KEY_AMINER_USER, AminerConfig.KEY_AMINER_GROUP), file=sys.stderr)
         sys.exit(1)
 
-    initialize_loggers(aminer_config, child_user_id, child_group_id)
-
-    if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
-        msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
-        print(msg, sys.stderr)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
-        sys.exit(1)
-
     if not stat_level_console_flag and AminerConfig.KEY_LOG_STAT_LEVEL in aminer_config.config_properties:
         stat_level = aminer_config.config_properties[AminerConfig.KEY_LOG_STAT_LEVEL]
     if not debug_level_console_flag and AminerConfig.KEY_LOG_DEBUG_LEVEL in aminer_config.config_properties:
@@ -408,6 +404,14 @@ def main():
 
     AminerConfig.STAT_LEVEL = stat_level
     AminerConfig.DEBUG_LEVEL = debug_level
+
+    initialize_loggers(aminer_config, child_user_id, child_group_id)
+
+    if restore_relative_persistence_path is not None and (clear_persistence_flag or remove_persistence_dirs):
+        msg = 'The --restore parameter removes all persistence files. Do not use this parameter with --Clear or --Remove!'
+        print(msg, sys.stderr)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+        sys.exit(1)
 
     if clear_persistence_flag:
         if remove_persistence_dirs:

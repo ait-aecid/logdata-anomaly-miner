@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer import AminerConfig
+from aminer.parsing.MatchContext import DebugMatchContext
 
 
 class SimpleUnparsedAtomHandler(AtomHandlerInterface):
@@ -27,11 +28,36 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
         """Receive an unparsed atom to create events for each."""
         if log_atom.is_parsed():
             return False
-        event_data = {}
         try:
             data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
+        self.send_event_to_handlers(data, log_atom)
+        return True
+
+    def send_event_to_handlers(self, data, log_atom):
+        """Send the data to the event handlers."""
+        event_data = {}
         for listener in self.event_handlers:
             listener.receive_event('Input.UnparsedAtomHandler', 'Unparsed atom received', [data], event_data, log_atom, self)
-        return True
+
+
+class VerboseUnparsedAtomHandler(SimpleUnparsedAtomHandler):
+    """Handlers of this class will forward received unparsed atoms to the registered event handlers applying the DebugMatchContext."""
+
+    def __init__(self, event_handlers, parsing_model):
+        super().__init__(event_handlers)
+        self.parsing_model = parsing_model
+
+    def send_event_to_handlers(self, data, log_atom):
+        """Send the data to the event handlers."""
+        match_context = DebugMatchContext(log_atom.raw_data)
+        self.parsing_model.get_match_element('', match_context)
+        debug_info = match_context.get_debug_info()
+        debug_lines = []
+        for line in debug_info.split('\n'):
+            debug_lines.append(line.strip())
+        event_data = {'DebugLog': debug_lines}
+        for listener in self.event_handlers:
+            listener.receive_event(
+                'Input.VerboseUnparsedAtomHandler', 'Unparsed atom received', [debug_info + data], event_data, log_atom, self)

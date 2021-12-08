@@ -116,6 +116,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                     matches = match
                 else:
                     matches.append(match)
+                # the match variable is not needed any more and reused for the iteration.
                 for match in matches:
                     if isinstance(match.match_object, bytes):
                         value = match.match_object.decode(AminerConfig.ENCODING)
@@ -142,15 +143,15 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                     return
             else:
                 matches = []
-                if isinstance(match, list):
-                    matches = match
+                if isinstance(id_match, list):
+                    matches = id_match
                 else:
-                    matches.append(match)
+                    matches.append(id_match)
                 for match in matches:
                     if isinstance(match.match_object, bytes):
-                        id_tuple += (id_match.match_object.decode(AminerConfig.ENCODING),)
+                        id_tuple += (match.match_object.decode(AminerConfig.ENCODING),)
                     else:
-                        id_tuple += (id_match.match_object,)
+                        id_tuple += (match.match_object,)
 
         # Create entry for the id_tuple in the current_sequences dict if it did not occur before.
         if id_tuple not in self.current_sequences:

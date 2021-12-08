@@ -11,10 +11,11 @@ from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 
 def get_model():
     """Return a parser for apache2 access.log."""
+    alphabet = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-:"
     new_time_model = DateTimeModelElement("time", b"[%d/%b/%Y:%H:%M:%S%z")
-    host_name_model = VariableByteDataModelElement("host", b"-.01234567890abcdefghijklmnopqrstuvwxyz:")
-    identity_model = VariableByteDataModelElement("ident", b"-.01234567890abcdefghijklmnopqrstuvwxyz:")
-    user_name_model = VariableByteDataModelElement("user", b"0123456789abcdefghijklmnopqrstuvwxyz.-")
+    host_name_model = VariableByteDataModelElement("host", alphabet)
+    identity_model = VariableByteDataModelElement("ident", alphabet)
+    user_name_model = VariableByteDataModelElement("user", b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-")
     request_method_model = FirstMatchModelElement("fm", [
         FixedDataModelElement("dash", b"-"),
         SequenceModelElement("request", [

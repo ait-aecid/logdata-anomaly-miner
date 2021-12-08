@@ -85,3 +85,6 @@ sudo aminerremotecontrol --exec "suspend"
 
 # activate the aminer.
 sudo aminerremotecontrol --exec "activate"
+
+# reopen all StreamPrinterEventHandler streams.
+sudo aminerremotecontrol --exec "reopen_event_handler_streams(analysis_context)"
