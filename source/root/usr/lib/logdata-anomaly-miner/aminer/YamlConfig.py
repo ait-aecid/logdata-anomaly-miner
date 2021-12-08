@@ -801,6 +801,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 stop_when_handled_flag = True
                 tmp_analyser = func(anomaly_event_handlers, parsing_model)
                 atom_filter.subhandler_list[0] = (tmp_analyser, stop_when_handled_flag)
+                continue
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
