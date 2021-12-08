@@ -8,14 +8,25 @@
 # 4.) Write the config to CFG_PATH from 1st ```yaml to 8th ```.
 # 5.) Extract the resulting outputs between 9th and 10th ``` by comparing following lines with the ones from the output:
 #     - 6,33 with 2,29
-#     - 37,65 with 32,61
+#     - 36,64 with 32,61
 # 6.) Write the config to CFG_PATH from 2nd ```yaml to 11th ```.
 # 7.) Read 1st ```python to 14th ``` and compare the ApacheAccessModel with the ApacheAccessModel in source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py
 # 8.) Write new lines to the access.log from the 4th and 5th line between 21st and 22nd ```.
 # 9.) Read the new command without clearing the persisted data from the 2nd line between 23rd and 24th ```. Run the command and compare the lines 4,32 with the output lines 2,30.
-# 10.)
-
-
+# 10.) Read all log lines between the 27th and 28th ``` and save it to /var/log/apache2/access.log
+# 11.) Extract the resulting outputs and CFG_PATH (1st line) between 30th and 31st ``` by comparing following lines with the ones from the output:
+#     - 4,31 with 2,29
+#     - 34,62 with 33,61
+#     - 65,93 with 64,92
+#     - 96,124 with 95,123
+#     - 127,155 with 126,154
+#     - 158,186 with 157,185
+#     - 189,217 with 188,216
+# 12.) Write the config to CFG_PATH from 5th ```yaml to 29th ```.
+# 13.) Set LearnMode to False.
+# 14.) Parse the last CMD between 34th and 35th ```.
+# 15.) Append the new logline and extract the resulting outputs between 40th and 41st ``` by comparing following lines with the ones from the output:
+#     - 4,32 with 2,30
 ##################################################################
 
 BRANCH=main
@@ -60,7 +71,7 @@ awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PAT
 
 # extract resulting outputs and compare them. (5.)
 OUT1=$(sed -n '6,33p' < $OUT)
-OUT2=$(sed -n '37,65p' < $OUT)
+OUT2=$(sed -n '36,64p' < $OUT)
 
 $CMD > $OUT &
 sleep 5 & wait $!
@@ -141,20 +152,147 @@ if [[ "$OUT1" != "$IN1" ]]; then
   exit_code=1
 fi
 
-exit 1
+# rewrite access.log (10.)
+awk '/^```$/ && ++n == 27, /^```$/ && n++ == 28' < $INPUT_FILE | sed '/^```/ d' > $LOG
 
-# test the fifth yaml config.
-awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```/ d' > /tmp/gettingStarted-config.yml
-sudo cp /tmp/gettingStarted-config.yml $CFG_PATH
-sudo $CMD > /dev/null &
+# extract resulting outputs and CFG_PATH and compare them. (11.)
+awk '/^```$/ && ++n == 30, /^```$/ && n++ == 31' < $INPUT_FILE > $OUT
+CMD=$(sed -n '2p' < $OUT)
+CMD=${CMD#*$ }
+CFG_PATH=/${CMD#*/}
+
+OUT1=$(sed -n '4,31p' < $OUT)
+OUT2=$(sed -n '34,62p' < $OUT)
+OUT3=$(sed -n '65,93p' < $OUT)
+OUT4=$(sed -n '96,124p' < $OUT)
+OUT5=$(sed -n '127,155p' < $OUT)
+OUT6=$(sed -n '158,186p' < $OUT)
+OUT7=$(sed -n '189,217p' < $OUT)
+
+# test the fifth yaml config. (12.)
+awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+sudo $CMD > $OUT &
 sleep 5 & wait $!
 sudo pkill -x aminer
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
+IN1=$(sed -n '2,29p' < $OUT)
+IN2=$(sed -n '33,61p' < $OUT)
+IN3=$(sed -n '64,92p' < $OUT)
+IN4=$(sed -n '95,123p' < $OUT)
+IN5=$(sed -n '126,154p' < $OUT)
+IN6=$(sed -n '157,185p' < $OUT)
+IN7=$(sed -n '188,216p' < $OUT)
+
+if [[ "$OUT1" != "$IN1" ]]; then
+  echo "$OUT1"
+  echo
+  echo "NOT EQUAL WITH (11.)"
+  echo
+  echo "$IN1"
+  echo
+  exit_code=1
+fi
+
+if [[ "$OUT2" != "$IN2" ]]; then
+  echo "$OUT2"
+  echo
+  echo "NOT EQUAL WITH (11.)"
+  echo
+  echo "$IN2"
+  echo
+  exit_code=1
+fi
+
+if [[ "$OUT3" != "$IN3" ]]; then
+  echo "$OUT3"
+  echo
+  echo "NOT EQUAL WITH (11.)"
+  echo
+  echo "$IN3"
+  echo
+  exit_code=1
+fi
+
+if [[ "$OUT4" != "$IN4" ]]; then
+  echo "$OUT4"
+  echo
+  echo "NOT EQUAL WITH (11.)"
+  echo
+  echo "$IN4"
+  echo
+  exit_code=1
+fi
+
+if [[ "$OUT5" != "$IN5" ]]; then
+  echo "$OUT5"
+  echo
+  echo "NOT EQUAL WITH (11.)"
+  echo
+  echo "$IN5"
+  echo
+  exit_code=1
+fi
+
+if [[ "$OUT6" != "$IN6" ]]; then
+  echo "$OUT6"
+  echo
+  echo "NOT EQUAL WITH (11.)"
+  echo
+  echo "$IN6"
+  echo
+  exit_code=1
+fi
+
+if [[ "$OUT7" != "$IN7" ]]; then
+  echo "$OUT7"
+  echo
+  echo "NOT EQUAL WITH (11.)"
+  echo
+  echo "$IN7"
+  echo
+  exit_code=1
+fi
+
+# set LearnModel to False. (13.)
+sed -i 's/LearnMode: True/LearnMode: False/g' $CFG_PATH
+
+# read new command (14.)
+awk '/^```$/ && ++n == 34, /^```$/ && n++ == 35' < $INPUT_FILE > $OUT
+CMD=$(sed -n '2p' < $OUT)
+CMD=${CMD#*$ }
+
+# extract logline and resulting outputs and compare them. (15.)
+awk '/^```$/ && ++n == 40, /^```$/ && n++ == 41' < $INPUT_FILE > $OUT
+OUT1=$(sed -n '32p' < $OUT)
+OUT1=$(echo "$OUT1" | sed "s/b'//g")
+OUT1=$(echo "$OUT1" | sed "s/'//g")
+echo "$OUT1" >> $LOG
+
+OUT1=$(sed -n '4,32p' < $OUT)
+
+sudo $CMD > $OUT &
+sleep 5 & wait $!
+sudo pkill -x aminer
+if [[ $? != 0 ]]; then
+	exit_code=1
+fi
+
+IN1=$(sed -n '2,30p' < $OUT)
+
+if [[ "$OUT1" != "$IN1" ]]; then
+  echo "$OUT1"
+  echo
+  echo "NOT EQUAL WITH (15.)"
+  echo
+  echo "$IN1"
+  echo
+  exit_code=1
+fi
+
 sudo rm -r logdata-anomaly-miner.wiki
 rm $OUT
-rm $OUT2
 sudo rm $CFG_PATH
 exit $exit_code
