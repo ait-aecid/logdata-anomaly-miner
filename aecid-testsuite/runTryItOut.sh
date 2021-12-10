@@ -1,5 +1,24 @@
 #!/bin/bash
 
+##################################################################
+# Description of the test. Line numbers are also considering starting lines with ```, so they are incremented by one compared to the text itself.
+# 1.) Write log lines from 4th to 5th ``` into /tmp/access_00 and /tmp/access_01.
+# 2.) Read 1st ```python to 6th ``` and compare it with ApacheAccessParsingModel.
+# 3.) Run the linking command between 7th and 8th ```.
+# 4.) Run the copy command from the 2nd line between 9th and 10th ``` and extract the CFG_PATH from that line.
+# 5.) Extract the line between 1st ```yaml and 11th ``` and replace LearnMode: False with it in CFG_PATH.
+# 6.) Replace LogResourceList path with "/tmp/access_00" in CFG_PATH.
+# 7.) Replace all Parser config lines in CFG_PATH with Parser config lines between 3rd ```yaml and 13th ```.
+# 8.) Replace all Input config lines in CFG_PATH with Input config lines between 4th ```yaml and 14th ```.
+# 9.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 5th ```yaml and 15th ```.
+# 10.) Replace all EventHandlers config lines in CFG_PATH with EventHandlers config lines between 6th ```yaml and 16th ```.
+# 11.) Parse the aminer CMD between 17th and 18th ``` and run it.
+# 12.) Compare the results with the count report between 19th and 20th ``` (without actual numbers and timestamps - replace them with constant values).
+# 13.) Run the rm command between 21st and 22nd ```.
+# 14.) Replace access_00 with access_01 in CFG_PATH.
+
+##################################################################
+
 BRANCH=main
 
 if [ $# -gt 0 ]

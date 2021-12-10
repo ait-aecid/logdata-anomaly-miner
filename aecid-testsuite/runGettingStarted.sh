@@ -9,12 +9,13 @@
 # 5.) Extract the resulting outputs between 9th and 10th ``` by comparing following lines with the ones from the output:
 #     - 6,33 with 2,29
 #     - 36,64 with 32,61
-# 6.) Write the config to CFG_PATH from 2nd ```yaml to 11th ```.
-# 7.) Read 1st ```python to 14th ``` and compare the ApacheAccessModel with the ApacheAccessModel in source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py
-# 8.) Write new lines to the access.log from the 4th and 5th line between 21st and 22nd ```.
-# 9.) Read the new command without clearing the persisted data from the 2nd line between 23rd and 24th ```. Run the command and compare the lines 4,32 with the output lines 2,30.
-# 10.) Read all log lines between the 27th and 28th ``` and save it to /var/log/apache2/access.log
-# 11.) Extract the resulting outputs and CFG_PATH (1st line) between 30th and 31st ``` by comparing following lines with the ones from the output:
+# 6.) Compare the outputs between 9th and 10th ``` and the outputs between 19th and 20th ```.
+# 7.) Write the config to CFG_PATH from 2nd ```yaml to 11th ```.
+# 8.) Read 1st ```python to 14th ``` and compare the ApacheAccessModel with the ApacheAccessModel in source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py
+# 9.) Write new lines to the access.log from the 4th and 5th line between 21st and 22nd ```.
+# 10.) Read the new command without clearing the persisted data from the 2nd line between 23rd and 24th ```. Run the command and compare the lines 4,32 with the output lines 2,30.
+# 11.) Read all log lines between the 27th and 28th ``` and save it to /var/log/apache2/access.log
+# 12.) Extract the resulting outputs and CFG_PATH (1st line) between 30th and 31st ``` by comparing following lines with the ones from the output:
 #     - 4,31 with 2,29
 #     - 34,62 with 33,61
 #     - 65,93 with 64,92
@@ -22,10 +23,10 @@
 #     - 127,155 with 126,154
 #     - 158,186 with 157,185
 #     - 189,217 with 188,216
-# 12.) Write the config to CFG_PATH from 5th ```yaml to 29th ```.
-# 13.) Set LearnMode to False.
-# 14.) Parse the last CMD between 34th and 35th ```.
-# 15.) Append the new logline and extract the resulting outputs between 40th and 41st ``` by comparing following lines with the ones from the output:
+# 13.) Write the config to CFG_PATH from 5th ```yaml to 29th ```.
+# 14.) Set LearnMode to False.
+# 15.) Parse the last CMD between 34th and 35th ```.
+# 16.) Append the new logline and extract the resulting outputs between 40th and 41st ``` by comparing following lines with the ones from the output:
 #     - 4,32 with 2,30
 ##################################################################
 
@@ -103,10 +104,26 @@ if [[ "$OUT2" != "$IN2" ]]; then
   exit_code=1
 fi
 
-# write the second yaml config (6.)
+# compare the outputs (6.)
+awk '/^```$/ && ++n == 9, /^```$/ && n++ == 10' < $INPUT_FILE > $OUT
+OUT1=$(sed -n '5,$p' < $OUT)
+awk '/^```$/ && ++n == 19, /^```$/ && n++ == 20' < $INPUT_FILE > $OUT
+OUT2=$(sed -n '2,$p' < $OUT)
+
+if [[ "$OUT1" != "$OUT2" ]]; then
+  echo "$OUT1"
+  echo
+  echo "NOT EQUAL WITH (6.)"
+  echo
+  echo "$OUT2"
+  echo
+  exit_code=1
+fi
+
+# write the second yaml config (7.)
 awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
 
-# compare ApacheAccessModel (7.)
+# compare ApacheAccessModel (8.)
 awk '/^```python$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $OUT
 OUT1=$(cat $OUT)
 IN1=$(cat ../source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py)
@@ -114,19 +131,19 @@ IN1=$(cat ../source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py)
 if [[ "$OUT1" != "$IN1" ]]; then
   echo "$OUT1"
   echo
-  echo "NOT EQUAL WITH (7.)"
+  echo "NOT EQUAL WITH (8.)"
   echo
   echo "$IN1"
   echo
   exit_code=1
 fi
 
-# write new loglines. (8.)
+# write new loglines. (9.)
 awk '/^```$/ && ++n == 21, /^```$/ && n++ == 22' < $INPUT_FILE > $LOG
 OUT1=$(sed -n '4,5p' < $LOG)
 echo "$OUT1" > $LOG
 
-# read new command (9.)
+# read new command (10.)
 awk '/^```$/ && ++n == 23, /^```$/ && n++ == 24' < $INPUT_FILE > $OUT
 CMD=$(sed -n '2p' < $OUT)
 CMD=${CMD#*$ }
@@ -145,17 +162,17 @@ IN1=$(sed -n '2,30p' < $OUT)
 if [[ "$OUT1" != "$IN1" ]]; then
   echo "$OUT1"
   echo
-  echo "NOT EQUAL WITH (9.)"
+  echo "NOT EQUAL WITH (10.)"
   echo
   echo "$IN1"
   echo
   exit_code=1
 fi
 
-# rewrite access.log (10.)
+# rewrite access.log (11.)
 awk '/^```$/ && ++n == 27, /^```$/ && n++ == 28' < $INPUT_FILE | sed '/^```/ d' > $LOG
 
-# extract resulting outputs and CFG_PATH and compare them. (11.)
+# extract resulting outputs and CFG_PATH and compare them. (12.)
 awk '/^```$/ && ++n == 30, /^```$/ && n++ == 31' < $INPUT_FILE > $OUT
 CMD=$(sed -n '2p' < $OUT)
 CMD=${CMD#*$ }
@@ -169,7 +186,7 @@ OUT5=$(sed -n '127,155p' < $OUT)
 OUT6=$(sed -n '158,186p' < $OUT)
 OUT7=$(sed -n '189,217p' < $OUT)
 
-# test the fifth yaml config. (12.)
+# test the fifth yaml config. (13.)
 awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
 sudo $CMD > $OUT &
 sleep 5 & wait $!
@@ -189,7 +206,7 @@ IN7=$(sed -n '188,216p' < $OUT)
 if [[ "$OUT1" != "$IN1" ]]; then
   echo "$OUT1"
   echo
-  echo "NOT EQUAL WITH (11.)"
+  echo "NOT EQUAL WITH (13.)"
   echo
   echo "$IN1"
   echo
@@ -199,7 +216,7 @@ fi
 if [[ "$OUT2" != "$IN2" ]]; then
   echo "$OUT2"
   echo
-  echo "NOT EQUAL WITH (11.)"
+  echo "NOT EQUAL WITH (13.)"
   echo
   echo "$IN2"
   echo
@@ -209,7 +226,7 @@ fi
 if [[ "$OUT3" != "$IN3" ]]; then
   echo "$OUT3"
   echo
-  echo "NOT EQUAL WITH (11.)"
+  echo "NOT EQUAL WITH (13.)"
   echo
   echo "$IN3"
   echo
@@ -219,7 +236,7 @@ fi
 if [[ "$OUT4" != "$IN4" ]]; then
   echo "$OUT4"
   echo
-  echo "NOT EQUAL WITH (11.)"
+  echo "NOT EQUAL WITH (13.)"
   echo
   echo "$IN4"
   echo
@@ -229,7 +246,7 @@ fi
 if [[ "$OUT5" != "$IN5" ]]; then
   echo "$OUT5"
   echo
-  echo "NOT EQUAL WITH (11.)"
+  echo "NOT EQUAL WITH (13.)"
   echo
   echo "$IN5"
   echo
@@ -239,7 +256,7 @@ fi
 if [[ "$OUT6" != "$IN6" ]]; then
   echo "$OUT6"
   echo
-  echo "NOT EQUAL WITH (11.)"
+  echo "NOT EQUAL WITH (13.)"
   echo
   echo "$IN6"
   echo
@@ -249,22 +266,22 @@ fi
 if [[ "$OUT7" != "$IN7" ]]; then
   echo "$OUT7"
   echo
-  echo "NOT EQUAL WITH (11.)"
+  echo "NOT EQUAL WITH (13.)"
   echo
   echo "$IN7"
   echo
   exit_code=1
 fi
 
-# set LearnModel to False. (13.)
+# set LearnModel to False. (14.)
 sed -i 's/LearnMode: True/LearnMode: False/g' $CFG_PATH
 
-# read new command (14.)
+# read new command (15.)
 awk '/^```$/ && ++n == 34, /^```$/ && n++ == 35' < $INPUT_FILE > $OUT
 CMD=$(sed -n '2p' < $OUT)
 CMD=${CMD#*$ }
 
-# extract logline and resulting outputs and compare them. (15.)
+# extract logline and resulting outputs and compare them. (16.)
 awk '/^```$/ && ++n == 40, /^```$/ && n++ == 41' < $INPUT_FILE > $OUT
 OUT1=$(sed -n '32p' < $OUT)
 OUT1=$(echo "$OUT1" | sed "s/b'//g")
@@ -285,7 +302,7 @@ IN1=$(sed -n '2,30p' < $OUT)
 if [[ "$OUT1" != "$IN1" ]]; then
   echo "$OUT1"
   echo
-  echo "NOT EQUAL WITH (15.)"
+  echo "NOT EQUAL WITH (16.)"
   echo
   echo "$IN1"
   echo
