@@ -18,6 +18,7 @@ import numpy as np
 import sys
 import statsmodels
 import statsmodels.api as sm
+from scipy.stats import binom_test
 
 from aminer import AminerConfig
 from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
@@ -33,7 +34,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', target_path_list=None,
                  output_log_line=True, auto_include_flag=False, num_init=50, force_period_length=False, set_period_length=10, alpha=0.05,
-                 alpha_bt=0.05, num_results_bt=15, num_min_time_history=20, num_max_time_history=30, num_periods_tsa_ini=10):
+                 alpha_bt=0.05, num_results_bt=15, num_min_time_history=20, num_max_time_history=30, num_periods_tsa_ini=20):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -112,8 +113,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.result_list = []
         # Minimal number of successes for the binomial test in the last num_results_bt results
         self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
-        # Maximal number of successes for the binomial test in the last num_periods_tsa_ini * period_length results
-        self.bt_max_suc = []
 
         # Loads the persistence
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -155,17 +154,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.target_path_index_list = persistence_data[0]
             self.period_length_list = persistence_data[1]
             self.prediction_history = persistence_data[2]
-
-        self.bt_max_suc += [None for _ in range(len(self.target_path_index_list))]
-        for event_index, target_path_index in enumerate(self.target_path_index_list):
-            if target_path_index is not None:
-                self.bt_max_suc[event_index] = [min(
-                                                self.num_periods_tsa_ini * self.period_length_list[event_index][count_index] - 1,
-                                                self.bt_min_successes(self.num_periods_tsa_ini *
-                                                                      self.period_length_list[event_index][count_index], self.alpha,
-                                                                      1 - self.alpha_bt))
-                                                if self.period_length_list[event_index][count_index] is not
-                                                None else None for count_index in range(len(target_path_index))]
 
     def receive_atom(self, log_atom):
         """
@@ -247,7 +235,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if len(self.arima_models) <= event_index:
             self.arima_models += [None for _ in range(event_index + 1 - len(self.arima_models))]
             self.result_list += [None for _ in range(event_index + 1 - len(self.result_list))]
-            self.bt_max_suc += [None for _ in range(event_index + 1 - len(self.bt_max_suc))]
         if len(self.prediction_history) <= event_index:
             self.prediction_history += [None for _ in range(event_index + 1 - len(self.prediction_history))]
 
@@ -255,13 +242,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if self.arima_models[event_index] is None:
             self.arima_models[event_index] = [None for _ in range(len(self.target_path_index_list[event_index]))]
             self.result_list[event_index] = [[] for _ in range(len(self.target_path_index_list[event_index]))]
-            self.bt_max_suc[event_index] = [min(
-                                            self.num_periods_tsa_ini * self.period_length_list[event_index][count_index] - 1,
-                                            self.bt_min_successes(self.num_periods_tsa_ini *
-                                                                  self.period_length_list[event_index][count_index],
-                                                                  self.alpha, 1 - self.alpha_bt)) if
-                                            self.period_length_list[event_index][count_index] is not None else None for count_index in
-                                            range(len(self.target_path_index_list[event_index]))]
         if self.prediction_history[event_index] is None:
             self.prediction_history[event_index] = [[[], [], []] for _ in range(len(self.target_path_index_list[event_index]))]
 
@@ -291,9 +271,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if len(self.result_list) > event_index and len(self.result_list[event_index]) > count_index:
                     self.result_list[event_index] = self.result_list[event_index][:count_index] +\
                             self.result_list[event_index][count_index + 1:]
-                if len(self.bt_max_suc) > event_index and len(self.bt_max_suc[event_index]) > count_index:
-                    self.bt_max_suc[event_index] = self.bt_max_suc[event_index][:count_index] +\
-                            self.bt_max_suc[event_index][count_index + 1:]
 
             message = 'Disabled the TSA for the targetpaths %s of event %s' % (
                     [self.event_type_detector.variable_key_list[event_index][count_index] for count_index in delete_indices],
@@ -378,9 +355,10 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if self.auto_include_flag and (
                         sum(self.result_list[event_index][count_index][-self.num_results_bt:]) +
                         max(0, self.num_results_bt - len(self.result_list[event_index][count_index])) < self.bt_min_suc or
-                        sum(self.result_list[event_index][count_index][
-                        -self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]:]) >
-                        self.bt_max_suc[event_index][count_index]):
+                        binom_test(x=sum(self.result_list[event_index][count_index][
+                        -self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]:]),
+                        n=self.num_periods_tsa_ini * self.period_length_list[event_index][count_index],
+                        p=(1-self.alpha), alternative='greater') < self.alpha_bt):
 
                     message = 'Discard the TSA model for the event %s and path %s' % (
                             self.event_type_detector.get_event_type(event_index),
