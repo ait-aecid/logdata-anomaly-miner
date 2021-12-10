@@ -115,7 +115,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Number of static values of a variable, to stop tracking the variable type and read in in eventTypeD. False if not wanted.
         self.num_stat_stop_update = num_stat_stop_update
         # Number of updatesteps until the variables are tested if they are suitable for an indicator. If not suitable, they are removed
-        # from the tracking of EvTypeD (reduce checked variables). Equals False if disabled.
+        # from the tracking of EvTypeD (reduce checked variables). Equals 0 if disabled.
         self.num_updates_until_var_reduction = num_updates_until_var_reduction
         # Threshold for the reduction of variable types. The most likely none others var type must have a higher relative appearance
         # for the variable to be further checked.
@@ -640,7 +640,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type_history_list[event_index][var_index][6][1][-1] = self.var_type[event_index][var_index][2]
 
             # Reduce the number of variables, which are tracked
-            if (not (isinstance(self.num_updates_until_var_reduction, bool)) and (
+            if (self.num_updates_until_var_reduction > 0 and (
                     self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update ==
                     self.num_updates_until_var_reduction - 1):
 
@@ -696,7 +696,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         # 1 / (1 + np.exp(-4)) = 0.9820137900379085
 
             # Saves the initial reference state of the var_type_history_list for the calculation of the indicator
-            if ((isinstance(self.num_updates_until_var_reduction, bool) and self.num_updates_until_var_reduction is False) or (
+            if ((self.num_updates_until_var_reduction == 0) or (
                     self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update >=
                     self.num_updates_until_var_reduction - 1) and (not isinstance(self.num_var_type_hist_ref, bool)) and (
                     (len(self.var_type_history_list_reference) < event_index + 1) or
@@ -725,7 +725,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
             # Checks the indicator for the varTypes of the Event and generates an output, if it fails
             else:
-                if ((isinstance(self.num_updates_until_var_reduction, bool) and self.num_updates_until_var_reduction is False) or (
+                if ((self.num_updates_until_var_reduction == 0) or (
                         self.event_type_detector.num_eventlines[event_index] - self.num_init) /
                         self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(
                         self.num_var_type_considered_ind, bool)) and (not isinstance(self.num_var_type_hist_ref, bool)) and len(
@@ -2007,7 +2007,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     def print_changed_var_type(self, event_index, vt_old, vt_new, var_index, log_atom, confidence=None):
         """Print the changed variable types."""
-        if self.save_statistics and ((not (isinstance(self.num_updates_until_var_reduction, bool)) and (
+        if self.save_statistics and ((self.num_updates_until_var_reduction > 0 and (
                 self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update >=
                 self.num_updates_until_var_reduction - 1)):
             self.changed_var_types.append(self.event_type_detector.num_eventlines[event_index])

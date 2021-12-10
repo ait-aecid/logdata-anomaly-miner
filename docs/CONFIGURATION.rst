@@ -2135,7 +2135,7 @@ This detector analyses each variable of the event_types by assigning them the im
 * **num_update_var_type_hist_ref** number of update steps before the var_type_history_list is being updated.
 * **num_var_type_considered_ind** this attribute states how many variable types of the history are used as the recent history in the calculation of the indicator. False if no output of the indicator should be generated.
 * **num_stat_stop_update** number of static values of a variable, to stop tracking the variable type and read in in eventTypeD. Default is False.
-* **num_updates_until_var_reduction** number of update steps until the variables are tested, if they are suitable for an indicator. If not suitable, they are removed from the tracking of EvTypeD. Default is False.
+* **num_updates_until_var_reduction** number of update steps until the variables are tested, if they are suitable for an indicator. If not suitable, they are removed from the tracking of EvTypeD. Set to 0 to analyze all variables. Default is 20.
 * **var_reduction_thres** threshold for the reduction of variable types. The most likely none others var type must have a higher relative appearance for the variable to be further checked.
 * **num_skipped_ind_for_weights** number of the skipped indicators for the calculation of the indicator weights.
 * **num_ind_for_weights** number of indicators used in the calculation of the indicator weights.
