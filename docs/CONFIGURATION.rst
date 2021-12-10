@@ -1879,7 +1879,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 * **event_type_detector** used to track the number of event lines in the time windows (string).
 * **acf_pause_interval_percentage** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
 * **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
-* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 15).
+* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 20).
 * **num_division_time_step** Number of divisions of the time window to calculate the time step (integer, defaults to 10).
 * **alpha** significance level of the estimated values (float, defaults to 0.05).
 * **num_min_time_history** minimal number of values of the time_history after it is initialized (integer, defaults to 20).
