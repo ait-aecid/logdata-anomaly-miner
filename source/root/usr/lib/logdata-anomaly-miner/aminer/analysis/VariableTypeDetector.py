@@ -1737,7 +1737,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 if tmp_prob <= prob_of_sample:
                                     smaller_prob_sum += tmp_prob
                             else:
-                                for k in range(self.num_update - (a + b) + 1):
+                                for c in range(self.num_update - (a + b) + 1):
                                     if len(self.var_type[event_index][var_index][1]) == 4:
                                         tmp_prob = self.bt_results[event_index][var_index][1].pmf(
                                             [a, b, c, self.num_update - (a + b + c)])
