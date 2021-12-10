@@ -12,11 +12,28 @@
 # 8.) Replace all Input config lines in CFG_PATH with Input config lines between 4th ```yaml and 14th ```.
 # 9.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 5th ```yaml and 15th ```.
 # 10.) Replace all EventHandlers config lines in CFG_PATH with EventHandlers config lines between 6th ```yaml and 16th ```.
-# 11.) Parse the aminer CMD between 17th and 18th ``` and run it.
+# 11.) Parse the aminer CMD between 17th and 18th ``` and run it. Check if no error is output by the aminer.
 # 12.) Compare the results with the count report between 19th and 20th ``` (without actual numbers and timestamps - replace them with constant values).
 # 13.) Run the rm command between 21st and 22nd ```.
 # 14.) Replace access_00 with access_01 in CFG_PATH.
+# 15.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 8th ```yaml and 26th ```, run CMD and check if no error is output by the aminer.
+# 16.) Change learn_mode: False to learn_mode: True.
+# 17.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 10th ```yaml and 34th ```, run CMD and check if no error is output by the aminer.
+# 18.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 11th ```yaml and 43rd ```, run CMD and check if no error is output by the aminer.
+# 19.) Replace all Parser config lines in CFG_PATH with Parser config lines between 13th ```yaml and 53rd ```, run CMD and check if no error is output by the aminer.
+# TODO: add the apacheAccessModel to the parser config in 13th ```yaml and 53rd ```.!!!!!!!!!!!!!!!!!!!!!!
 
+# 20.) Replace all Parser config lines in CFG_PATH with Parser config lines between 16th ```yaml and 60th ```, run CMD and check if no error is output by the aminer.
+# 21.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 17th ```yaml and 61st ```, run CMD and check if no error is output by the aminer.
+# 22.) Replace all Parser config lines in CFG_PATH with Parser config lines between 19th ```yaml and 69th ```, run CMD and check if no error is output by the aminer.
+# 23.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 20th ```yaml and 70th ```, run CMD and check if no error is output by the aminer.
+# 24.) Replace all Parser config lines in CFG_PATH with Parser config lines between 22nd ```yaml and 76th ```, run CMD and check if no error is output by the aminer.
+# TODO: add the apacheAccessModel and eximModel to the parser config in 22nd ```yaml and 76th ```.!!!!!!!!!!!!!!!!!!!!!!
+
+# 25.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 23rd ```yaml and 77th ```, run CMD and check if no error is output by the aminer.
+# TODO: replace 2nd ```python with ```yaml.
+
+# 26.) Write the config between 25th ```yaml and 87th ``` to CFG_PATH, run CMD and check if no error is output by the aminer.
 ##################################################################
 
 BRANCH=main
