@@ -1725,28 +1725,28 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Sum of the probabilities, which are smaller than the probability of the values
             smaller_prob_sum = 0
             if len(self.var_type[event_index][var_index][1]) <= 5:
-                for i in range(self.num_update + 1):
+                for a in range(self.num_update + 1):
                     if len(self.var_type[event_index][var_index][1]) == 2:
-                        tmp_prob = self.bt_results[event_index][var_index][1].pmf([i, self.num_update - i])
+                        tmp_prob = self.bt_results[event_index][var_index][1].pmf([a, self.num_update - a])
                         if tmp_prob <= prob_of_sample:
                             smaller_prob_sum += tmp_prob
                     else:
-                        for j in range(self.num_update - i + 1):
+                        for b in range(self.num_update - a + 1):
                             if len(self.var_type[event_index][var_index][1]) == 3:
-                                tmp_prob = self.bt_results[event_index][var_index][1].pmf([i, j, self.num_update - (i + j)])
+                                tmp_prob = self.bt_results[event_index][var_index][1].pmf([a, b, self.num_update - (a + b)])
                                 if tmp_prob <= prob_of_sample:
                                     smaller_prob_sum += tmp_prob
                             else:
-                                for k in range(self.num_update - (i + j) + 1):
+                                for k in range(self.num_update - (a + b) + 1):
                                     if len(self.var_type[event_index][var_index][1]) == 4:
                                         tmp_prob = self.bt_results[event_index][var_index][1].pmf(
-                                            [i, j, k, self.num_update - (i + j + k)])
+                                            [a, b, c, self.num_update - (a + b + c)])
                                         if tmp_prob <= prob_of_sample:
                                             smaller_prob_sum += tmp_prob
                                     else:
-                                        for l in range(self.num_update - (i + j + k) + 1):
+                                        for d in range(self.num_update - (a + b + c) + 1):
                                             tmp_prob = self.bt_results[event_index][var_index][1].pmf(
-                                                [i, j, k, l, self.num_update - (i + j + k + l)])
+                                                [a, b, c, d, self.num_update - (a + b + c + d)])
                                             if tmp_prob <= prob_of_sample:
                                                 smaller_prob_sum += tmp_prob
 
