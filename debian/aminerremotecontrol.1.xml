@@ -486,6 +486,18 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             &quot;allowlist_events_from_history(analysis_context,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
           </listitem>
         </varlistentry>
+	<varlistentry>
+          <term>
+            <option>
+              <replaceable>reopen_event_handler_streams(analysis_context)</replaceable>
+            </option>
+          </term>
+          <listitem>
+            <para>Reopen all StreamPrinterEventHandler streams for log rotation.</para>
+            <para><replaceable>example</replaceable>: aminerremotecontrol --exec
+            &quot;reopen_event_handler_streams(analysis_context)&quot;</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </refsect2>
     <refsect2 id="PropertyNames">

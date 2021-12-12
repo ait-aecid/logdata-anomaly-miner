@@ -18,7 +18,6 @@ Parser:
               - host_name_model
 Input:
         timestamp_paths: "/accesslog/time"
-        verbose: False # use this to debug your parser-model
 
 Analysis:
         - type: NewMatchPathValueDetector

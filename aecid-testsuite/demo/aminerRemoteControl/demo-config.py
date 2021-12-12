@@ -157,7 +157,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(simple_monotonic_timestamp_adjust, component_name="SimpleMonotonicTimestampAdjust")
 
     from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-    stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
+    stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)  # skipcq: BAN-B108
     from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory
     volatile_logarithmic_backoff_event_history = VolatileLogarithmicBackoffEventHistory(100)
     anomaly_event_handlers = [stream_printer_event_handler, volatile_logarithmic_backoff_event_history]
@@ -169,7 +169,7 @@ def build_analysis_pipeline(analysis_context):
                                                                             anomaly_event_handlers)
 
     # Just report all unparsed atoms to the event handlers.
-    from aminer.input.SimpleUnparsedAtomHandler import SimpleUnparsedAtomHandler
+    from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
     simple_unparsed_atom_handler = SimpleUnparsedAtomHandler(anomaly_event_handlers)
     atom_filters.add_handler(simple_unparsed_atom_handler, stop_when_handled_flag=True)
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")

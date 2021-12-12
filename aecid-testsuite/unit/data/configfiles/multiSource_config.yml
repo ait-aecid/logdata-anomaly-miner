@@ -18,7 +18,6 @@ Parser:
               - host_name_model
 
 Input:
-        verbose: True # optional
         multi_source: True # optional
         timestamp_paths: "/model/accesslog/time"
 
