@@ -1,0 +1,26 @@
+{
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 2,
+    "AnalysisComponentType": "NewMatchPathValueDetector",
+    "AnalysisComponentName": "NewMatchPathValueDetector2",
+    "Message": "New value(s) detected",
+    "PersistenceFileName": "accesslog_status",
+    "TrainingMode": true,
+    "AffectedLogAtomPaths": [
+      "/parser/model/status_code"
+    ],
+    "AffectedLogAtomValues": [
+      "200"
+    ]
+  },
+  "LogData": {
+    "RawLogData": [
+      "192.168.10.190 - - [29/Feb/2020:00:00:02 +0000] \"GET /login.php HTTP/1.1\" 200 2532 \"-\" \"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:73.0) Gecko/20100101 Firefox/73.0\""
+    ],
+    "Timestamps": [
+      1582934402
+    ],
+    "DetectionTimestamp": 1639755001.06,
+    "LogLinesCount": 1
+  }
+}

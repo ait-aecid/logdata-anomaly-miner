@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./testFunctions.sh
+
 ##################################################################
 # Description of the test. Line numbers are also considering starting lines with ```, so they are incremented by one compared to the text itself.
 # 1.) Read the first log line between the 4th and 5th ``` in the third line and save it to /var/log/apache2/access.log
@@ -84,25 +86,10 @@ fi
 IN1=$(sed -n '2,29p' < $OUT)
 IN2=$(sed -n '33,61p' < $OUT)
 
-if [[ "$OUT1" != "$IN1" ]]; then
-  echo "$OUT1"
-  echo
-  echo "NOT EQUAL WITH (5.)"
-  echo
-  echo "$IN1"
-  echo
-  exit_code=1
-fi
-
-if [[ "$OUT2" != "$IN2" ]]; then
-  echo "$OUT2"
-  echo
-  echo "NOT EQUAL WITH (5.)"
-  echo
-  echo "$IN2"
-  echo
-  exit_code=1
-fi
+compareStrings "$OUT1" "$IN1" "Failed Test in 5."
+exit_code=$((exit_code | $?))
+compareStrings "$OUT2" "$IN2" "Failed Test in 5."
+exit_code=$((exit_code | $?))
 
 # compare the outputs (6.)
 awk '/^```$/ && ++n == 9, /^```$/ && n++ == 10' < $INPUT_FILE > $OUT
@@ -110,15 +97,8 @@ OUT1=$(sed -n '5,$p' < $OUT)
 awk '/^```$/ && ++n == 19, /^```$/ && n++ == 20' < $INPUT_FILE > $OUT
 OUT2=$(sed -n '2,$p' < $OUT)
 
-if [[ "$OUT1" != "$OUT2" ]]; then
-  echo "$OUT1"
-  echo
-  echo "NOT EQUAL WITH (6.)"
-  echo
-  echo "$OUT2"
-  echo
-  exit_code=1
-fi
+compareStrings "$OUT1" "$OUT2" "Failed Test in 6."
+exit_code=$((exit_code | $?))
 
 # write the second yaml config (7.)
 awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
@@ -128,15 +108,8 @@ awk '/^```python$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $OUT
 OUT1=$(cat $OUT)
 IN1=$(cat ../source/root/etc/aminer/conf-available/generic/ApacheAccessModel.py)
 
-if [[ "$OUT1" != "$IN1" ]]; then
-  echo "$OUT1"
-  echo
-  echo "NOT EQUAL WITH (8.)"
-  echo
-  echo "$IN1"
-  echo
-  exit_code=1
-fi
+compareStrings "$OUT1" "$IN1" "Failed Test in 8."
+exit_code=$((exit_code | $?))
 
 # write new loglines. (9.)
 awk '/^```$/ && ++n == 21, /^```$/ && n++ == 22' < $INPUT_FILE > $LOG
@@ -159,15 +132,8 @@ fi
 
 IN1=$(sed -n '2,30p' < $OUT)
 
-if [[ "$OUT1" != "$IN1" ]]; then
-  echo "$OUT1"
-  echo
-  echo "NOT EQUAL WITH (10.)"
-  echo
-  echo "$IN1"
-  echo
-  exit_code=1
-fi
+compareStrings "$OUT1" "$IN1" "Failed Test in 10."
+exit_code=$((exit_code | $?))
 
 # rewrite access.log (11.)
 awk '/^```$/ && ++n == 27, /^```$/ && n++ == 28' < $INPUT_FILE | sed '/^```/ d' > $LOG
@@ -203,75 +169,20 @@ IN5=$(sed -n '126,154p' < $OUT)
 IN6=$(sed -n '157,185p' < $OUT)
 IN7=$(sed -n '188,216p' < $OUT)
 
-if [[ "$OUT1" != "$IN1" ]]; then
-  echo "$OUT1"
-  echo
-  echo "NOT EQUAL WITH (13.)"
-  echo
-  echo "$IN1"
-  echo
-  exit_code=1
-fi
-
-if [[ "$OUT2" != "$IN2" ]]; then
-  echo "$OUT2"
-  echo
-  echo "NOT EQUAL WITH (13.)"
-  echo
-  echo "$IN2"
-  echo
-  exit_code=1
-fi
-
-if [[ "$OUT3" != "$IN3" ]]; then
-  echo "$OUT3"
-  echo
-  echo "NOT EQUAL WITH (13.)"
-  echo
-  echo "$IN3"
-  echo
-  exit_code=1
-fi
-
-if [[ "$OUT4" != "$IN4" ]]; then
-  echo "$OUT4"
-  echo
-  echo "NOT EQUAL WITH (13.)"
-  echo
-  echo "$IN4"
-  echo
-  exit_code=1
-fi
-
-if [[ "$OUT5" != "$IN5" ]]; then
-  echo "$OUT5"
-  echo
-  echo "NOT EQUAL WITH (13.)"
-  echo
-  echo "$IN5"
-  echo
-  exit_code=1
-fi
-
-if [[ "$OUT6" != "$IN6" ]]; then
-  echo "$OUT6"
-  echo
-  echo "NOT EQUAL WITH (13.)"
-  echo
-  echo "$IN6"
-  echo
-  exit_code=1
-fi
-
-if [[ "$OUT7" != "$IN7" ]]; then
-  echo "$OUT7"
-  echo
-  echo "NOT EQUAL WITH (13.)"
-  echo
-  echo "$IN7"
-  echo
-  exit_code=1
-fi
+compareStrings "$OUT1" "$IN1" "Failed Test in 13."
+exit_code=$((exit_code | $?))
+compareStrings "$OUT2" "$IN2" "Failed Test in 13."
+exit_code=$((exit_code | $?))
+compareStrings "$OUT3" "$IN3" "Failed Test in 13."
+exit_code=$((exit_code | $?))
+compareStrings "$OUT4" "$IN4" "Failed Test in 13."
+exit_code=$((exit_code | $?))
+compareStrings "$OUT5" "$IN5" "Failed Test in 13."
+exit_code=$((exit_code | $?))
+compareStrings "$OUT6" "$IN6" "Failed Test in 13."
+exit_code=$((exit_code | $?))
+compareStrings "$OUT7" "$IN7" "Failed Test in 13."
+exit_code=$((exit_code | $?))
 
 # set LearnModel to False. (14.)
 sed -i 's/LearnMode: True/LearnMode: False/g' $CFG_PATH
@@ -299,15 +210,8 @@ fi
 
 IN1=$(sed -n '2,30p' < $OUT)
 
-if [[ "$OUT1" != "$IN1" ]]; then
-  echo "$OUT1"
-  echo
-  echo "NOT EQUAL WITH (16.)"
-  echo
-  echo "$IN1"
-  echo
-  exit_code=1
-fi
+compareStrings "$OUT1" "$IN1" "Failed Test in 16."
+exit_code=$((exit_code | $?))
 
 sudo rm -r logdata-anomaly-miner.wiki
 rm $OUT
