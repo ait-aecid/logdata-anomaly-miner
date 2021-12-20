@@ -535,7 +535,7 @@
                     'num_update_var_type_hist_ref': {'type': 'integer', 'min': 1},
                     'num_var_type_considered_ind': {'type': 'integer', 'min': 1},
                     'num_stat_stop_update': {'type': 'integer', 'min': 1},
-                    'num_updates_until_var_reduction': {'type': 'integer', 'min': 1},
+                    'num_updates_until_var_reduction': {'type': 'integer', 'min': 0},
                     'var_reduction_thres': {'type': 'float'},
                     'num_skipped_ind_for_weights': {'type': 'integer', 'min': 0},
                     'num_ind_for_weights': {'type': 'integer', 'min': 1},

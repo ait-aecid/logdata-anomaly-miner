@@ -95,7 +95,7 @@ pipeline {
              }
          }
 
-
+/*
          stage("Wiki Tests - development"){
              when {
                  branch "development"
@@ -121,7 +121,7 @@ pipeline {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToMissingMatchPathValueDetector main"
              }
          }
-
+*/
 /*         stage("Coverage Tests"){
              when {
                  branch "development"
