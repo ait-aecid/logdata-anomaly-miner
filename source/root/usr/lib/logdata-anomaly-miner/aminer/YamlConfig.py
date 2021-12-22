@@ -457,10 +457,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
-                                    persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
-                                    output_log_line=item['output_logline'], use_path_match=item['use_path_match'],
-                                    use_value_match=item['use_value_match'], min_rule_attributes=item['min_rule_attributes'],
-                                    max_rule_attributes=item['max_rule_attributes'])
+                                    record_count_before_event=item['record_count_before_event'], output_log_line=item['output_logline'],
+                                    use_path_match=item['use_path_match'], use_value_match=item['use_value_match'],
+                                    min_rule_attributes=item['min_rule_attributes'], max_rule_attributes=item['max_rule_attributes'])
             elif item['type'].name == 'ParserCount':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
@@ -681,8 +680,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     ruleset.append(match_rules_dict[rule])
-                tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                                    output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, output_log_line=item['output_logline'])
             elif item['type'].name == 'TimestampsUnsortedDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, exit_on_error_flag=item['exit_on_error_flag'],
                                     output_log_line=item['output_logline'])

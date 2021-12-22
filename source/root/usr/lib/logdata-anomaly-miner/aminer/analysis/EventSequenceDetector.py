@@ -83,17 +83,6 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
 
-        # Persisted data contains lists of sequences, i.e., [[<seq1_elem1>, <seq1_elem2>], [<seq2_elem1, ...], ...]
-        # Thereby, sequence elements may be tuples, i.e., combinations of values, or paths that define events.
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is not None:
-            for sequence in persistence_data:
-                sequence_elem_tuple = []
-                for sequence_elem in sequence:
-                    sequence_elem_tuple.append(tuple(sequence_elem))
-                self.sequences.add(tuple(sequence_elem_tuple))
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
-
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         parser_match = log_atom.parser_match
@@ -226,17 +215,30 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
         if delta < 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         return delta
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        # Persisted data contains lists of sequences, i.e., [[<seq1_elem1>, <seq1_elem2>], [<seq2_elem1, ...], ...]
+        # Thereby, sequence elements may be tuples, i.e., combinations of values, or paths that define events.
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            for sequence in persistence_data:
+                sequence_elem_tuple = []
+                for sequence_elem in sequence:
+                    sequence_elem_tuple.append(tuple(sequence_elem))
+                self.sequences.add(tuple(sequence_elem_tuple))
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, list(self.sequences))
+        PersistenceUtil.store_json(self.persistence_file_name, self.sequences)
         self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
