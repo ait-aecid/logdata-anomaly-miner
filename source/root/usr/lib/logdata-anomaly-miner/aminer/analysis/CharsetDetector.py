@@ -14,8 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 import logging
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
-    DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface

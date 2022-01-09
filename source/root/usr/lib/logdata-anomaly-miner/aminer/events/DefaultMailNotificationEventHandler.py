@@ -40,6 +40,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
     It will pool received events, reduce the amount of events below the maximum number allowed per timeframe, create text representation
     of received events and send them via "sendmail" transport.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
     CONFIG_KEY_MAIL_TARGET_ADDRESS = 'MailAlerting.TargetAddress'
     CONFIG_KEY_MAIL_FROM_ADDRESS = 'MailAlerting.FromAddress'

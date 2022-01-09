@@ -298,9 +298,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         for listener in self.anomaly_event_handlers:
                             implied_event = None
                             trigger_event = None
-                            if rule.implied_event in self.sample_events.keys():
+                            if rule.implied_event in self.sample_events:
                                 implied_event = self.sample_events[rule.implied_event]
-                            if rule.trigger_event in self.sample_events.keys():
+                            if rule.trigger_event in self.sample_events:
                                 trigger_event = self.sample_events[rule.trigger_event]
                             listener.receive_event(
                                 'analysis.EventCorrelationDetector',
