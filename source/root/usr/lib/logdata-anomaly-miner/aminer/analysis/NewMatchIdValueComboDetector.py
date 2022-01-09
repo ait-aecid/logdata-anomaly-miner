@@ -33,6 +33,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
     This class creates events when a new value combination for a given list of match data.
     Paths need to be found in log atoms with the same id value in a specific path.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, min_allowed_time_diff,

@@ -268,6 +268,7 @@ class HistogramData:
 
 class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates a histogram for one or more properties extracted from a parsed atom."""
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, histogram_defs, report_interval, report_event_handlers, reset_after_report_flag=True,
@@ -412,6 +413,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     Then objects of this class will produce 3 histograms: one for common path part including all occurences of the target property
     and one for each separate subpath, counting only those property values where the specific subpath was followed.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, property_path, bin_definition, report_interval, report_event_handlers, reset_after_report_flag=True,

@@ -27,6 +27,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
     This class analyzes the time intervals of the appearance of log_atoms.
     The considered time intervals depend on the combination of values in the target_paths of target_path_list.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None,

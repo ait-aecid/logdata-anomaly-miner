@@ -31,6 +31,7 @@ from aminer.util import PersistenceUtil
 
 class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class is used for an arima time series analysis of the values of the paths in target_path_list."""
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', target_path_list=None,

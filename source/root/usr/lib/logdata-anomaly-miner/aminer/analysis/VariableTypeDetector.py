@@ -31,6 +31,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     This class tests each variable of the event_types for the implemented variable types.
     This module needs to run after the EventTypeDetector is initialized
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
@@ -2163,10 +2164,7 @@ def consists_of_floats(list_in):
 
 def consists_of_ints(list_in):
     """Give back True if all entries are integers an False otherwise."""
-    for item in list_in:
-        if item != int(item):
-            return False
-    return True
+    return all(item == int(item) for item in list_in)
 
 
 def get_vt_string(vt):

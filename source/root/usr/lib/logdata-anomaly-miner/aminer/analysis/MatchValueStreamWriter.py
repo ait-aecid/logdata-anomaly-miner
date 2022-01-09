@@ -25,6 +25,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
     A stream is used instead of a file descriptor to increase performance. To flush it from time to time, add the writer object also to the
     time trigger list.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, stream, match_value_path_list, separator_string, missing_value_string):

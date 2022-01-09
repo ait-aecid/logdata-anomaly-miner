@@ -29,6 +29,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     This detector calculates the average of a given list of values to monitor.
     Reports are generated if the average of the latest diverges significantly from the values observed before.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, analyze_path_list, min_bin_elements, min_bin_time,

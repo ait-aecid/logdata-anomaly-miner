@@ -29,6 +29,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
     This class creates events when one of the given time correlation rules is violated.
     This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose.2014.09.006
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_log_line=True):

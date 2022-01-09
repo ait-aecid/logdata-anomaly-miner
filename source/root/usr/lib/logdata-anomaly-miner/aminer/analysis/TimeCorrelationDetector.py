@@ -33,6 +33,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
     in http://dx.doi.org/10.1016/j.cose.2014.09.006.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id='Default',

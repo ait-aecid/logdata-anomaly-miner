@@ -27,7 +27,7 @@ class TimeTriggeredComponentInterface(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def time_trigger_class(self):
-        pass
+        raise NotImplementedError
 
     def get_time_trigger_class(self):
         """

@@ -32,6 +32,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
     alerting time when currently in error state. When in normal (alerting) state, the value is zero.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,

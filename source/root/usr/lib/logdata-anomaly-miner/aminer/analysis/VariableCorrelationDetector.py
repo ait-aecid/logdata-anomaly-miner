@@ -19,6 +19,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     Thereafter the correlations are checked, with the selected methods. (See self.used_cor_meth)
     This module builds upon the event_type_detector.
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', target_path_list=None,

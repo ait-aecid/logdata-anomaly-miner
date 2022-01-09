@@ -27,6 +27,7 @@ total_processed_lines_str = 'TotalProcessedLines'
 
 class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates a counter for path value combinations."""
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, report_event_handlers, report_interval=60, target_label_list=None,
