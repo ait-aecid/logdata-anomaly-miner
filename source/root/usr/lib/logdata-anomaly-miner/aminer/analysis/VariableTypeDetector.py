@@ -31,6 +31,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     This class tests each variable of the event_types for the implemented variable types.
     This module needs to run after the EventTypeDetector is initialized
     """
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
                  used_gof_test='CM', gof_alpha=0.05, s_gof_alpha=0.05, s_gof_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3,
@@ -432,10 +433,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Processes the current log-line by testing and updating
         self.process_ll(event_index, log_atom)
         return True
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""

@@ -31,6 +31,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when new event or value sequences were found."""
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list=None, target_path_list=None, seq_len=3, allow_missing_id=False,
                  timeout=-1, persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None,
@@ -215,13 +216,6 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New sequence detected', sorted_log_lines, event_data,
                                        log_atom, self)
         self.log_success += 1
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""

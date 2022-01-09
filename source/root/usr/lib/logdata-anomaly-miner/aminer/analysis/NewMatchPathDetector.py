@@ -28,6 +28,7 @@ from aminer.util import PersistenceUtil
 
 class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when new data path was found in a parsed atom."""
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False, output_log_line=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
@@ -105,10 +106,6 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                        log_atom, self)
         self.log_success += 1
         return True
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""

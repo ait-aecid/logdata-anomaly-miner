@@ -27,6 +27,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when event or value frequencies change."""
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, confidence_factor=0.5,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
@@ -184,13 +185,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         else:
             self.counts[log_event] = 1
         self.log_success += 1
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""

@@ -32,6 +32,7 @@ from scipy.signal import savgol_filter
 
 class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class is used for an arima time series analysis of the appearances of log lines to events."""
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, acf_pause_interval_percentage=0.2,
                  acf_auto_pause_interval=True, acf_auto_pause_interval_num_min=10, build_sum_over_values=False, num_periods_tsa_ini=15,
@@ -175,10 +176,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         The log_atom doesn't need to be analysed, because the counting and calls of the predictions is performed by the ETD.
         """
         return True
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""

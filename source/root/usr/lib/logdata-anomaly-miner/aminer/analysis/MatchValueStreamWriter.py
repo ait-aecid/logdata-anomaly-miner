@@ -25,6 +25,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
     A stream is used instead of a file descriptor to increase performance. To flush it from time to time, add the writer object also to the
     time trigger list.
     """
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, stream, match_value_path_list, separator_string, missing_value_string):
         """Initialize the writer."""
@@ -66,13 +67,6 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.stream.write(result)
                 self.stream.write(b'\n')
             self.log_success += 1
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, _trigger_time):
         """Flush the timer."""

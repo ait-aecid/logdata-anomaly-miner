@@ -268,6 +268,7 @@ class HistogramData:
 
 class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates a histogram for one or more properties extracted from a parsed atom."""
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, histogram_defs, report_interval, report_event_handlers, reset_after_report_flag=True,
                  persistence_id='Default', output_log_line=True):
@@ -325,14 +326,6 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if self.next_persist_time is None and data_updated_flag:
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
                 KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
-    @staticmethod
-    def get_time_trigger_class():
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
@@ -419,6 +412,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
     Then objects of this class will produce 3 histograms: one for common path part including all occurences of the target property
     and one for each separate subpath, counting only those property values where the specific subpath was followed.
     """
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, property_path, bin_definition, report_interval, report_event_handlers, reset_after_report_flag=True,
                  persistence_id='Default', output_log_line=True):
@@ -524,14 +518,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
                 KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.log_success += 1
-
-    @staticmethod
-    def get_time_trigger_class():
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""

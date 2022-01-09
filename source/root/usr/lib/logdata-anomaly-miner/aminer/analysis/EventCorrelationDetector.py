@@ -37,6 +37,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class tries to find time correlation patterns between different log atom events."""
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
@@ -681,13 +682,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             if len(self.hypothesis_candidates) < self.candidates_size and random.uniform(0.0, 1.0) < self.generation_probability:
                 self.hypothesis_candidates.append((log_event, log_atom.atom_time))
         self.log_success += 1
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""

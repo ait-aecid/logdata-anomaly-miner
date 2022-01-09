@@ -29,6 +29,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     This detector calculates the average of a given list of values to monitor.
     Reports are generated if the average of the latest diverges significantly from the values observed before.
     """
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, analyze_path_list, min_bin_elements, min_bin_time,
                  debug_mode=False, persistence_id='Default', output_log_line=True):
@@ -145,13 +146,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Statistical data report', res, event_data, log_atom, self)
         self.log_success += 1
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""

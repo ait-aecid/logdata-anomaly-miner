@@ -40,7 +40,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
     It will pool received events, reduce the amount of events below the maximum number allowed per timeframe, create text representation
     of received events and send them via "sendmail" transport.
     """
-
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
     CONFIG_KEY_MAIL_TARGET_ADDRESS = 'MailAlerting.TargetAddress'
     CONFIG_KEY_MAIL_FROM_ADDRESS = 'MailAlerting.FromAddress'
     CONFIG_KEY_MAIL_SUBJECT_PREFIX = 'MailAlerting.SubjectPrefix'
@@ -132,13 +132,6 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
 
         if (self.next_alert_time != 0) and (current_time >= self.next_alert_time):
             self.send_notification(current_time)
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component can be registered for.
-        See AnalysisContext class for different trigger classes available.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check exit status of previous mail sending procedures and check if alerts should be sent."""
