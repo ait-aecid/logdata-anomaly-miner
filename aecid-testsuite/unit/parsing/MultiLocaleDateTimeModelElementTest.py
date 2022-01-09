@@ -44,7 +44,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
             (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S:%f", None, de_at_utf8),
             (b"%H:%M:%S", None, None), (b"%b %d", tz_gmt10, de_at_utf8), (b"%d %b %Y", None, en_gb_utf8),
             (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8), (b"%m-%d-%Y", None, en_us_utf8),
-            (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8)])
+            (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8)], start_year=2021)
 
         # test normal date
         data = b"07.02.2019 11:40:00: it still works"
@@ -100,7 +100,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         date = b"Feb 25"
         match_context = DummyMatchContext(data)
         match_element = multi_locale_dtme.get_match_element(self.path, match_context)
-        dtm = datetime(datetime.now().year, 2, 25, tzinfo=tz_gmt10)
+        dtm = datetime(2021, 2, 25, tzinfo=tz_gmt10)
         # total_seconds should be in UTC, so the timezones are parsed out.
         total_seconds = (dtm - datetime(1970, 1, 1, tzinfo=tz_gmt10)).days * 86400 - dtm.utcoffset().total_seconds()
         self.compare_match_results(data, match_element, match_context, self.id_ + "/format7", self.path, date, total_seconds, None)
@@ -147,7 +147,7 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         date = b"15:12:54:201"
         match_context = DummyMatchContext(data)
         match_element = multi_locale_dtme.get_match_element(self.path, match_context)
-        dtm = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 15, 12, 54, 201, tzinfo=timezone.utc)
+        dtm = datetime(2021, datetime.now().month, datetime.now().day, 15, 12, 54, 201, tzinfo=timezone.utc)
         # total_seconds should be in UTC, so the timezones are parsed out.
         delta = (dtm - datetime(1970, 1, 1, tzinfo=dtm.tzinfo))
         total_seconds = delta.days * 86400 + delta.seconds + delta.microseconds / 1000
