@@ -1,6 +1,9 @@
 # logdata-anomaly-miner Dockerfile
 #
-# Build:
+# Use build-script to create docker:
+#    scripts/build_docker.sh
+#
+# Build manually:
 #    docker build -t aecid/logdata-anomaly-miner:latest -t aecid/logdata-anomaly-miner:$(grep '__version__ =' source/root/usr/lib/logdata-anomaly-miner/metadata.py | awk -F '"' '{print $2}') .
 #
 # See: https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Deployment-with-Docker
