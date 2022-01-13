@@ -32,6 +32,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     This module needs to run after the EventTypeDetector is initialized
     """
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
                  used_gof_test='CM', gof_alpha=0.05, s_gof_alpha=0.05, s_gof_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3,
                  sim_thres=0.1, indicator_thres=0.4, num_init=100, num_update=50, num_update_unq=200, num_s_gof_values=50,
@@ -432,10 +434,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Processes the current log-line by testing and updating
         self.process_ll(event_index, log_atom)
         return True
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -2166,10 +2164,7 @@ def consists_of_floats(list_in):
 
 def consists_of_ints(list_in):
     """Give back True if all entries are integers an False otherwise."""
-    for item in list_in:
-        if item != int(item):
-            return False
-    return True
+    return all(item == int(item) for item in list_in)
 
 
 def get_vt_string(vt):

@@ -38,6 +38,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class tries to find time correlation patterns between different log atom events."""
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
@@ -196,7 +198,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
         # Skip paths from ignore_list.
         for ignore_path in self.ignore_list:
-            if ignore_path in parser_match.get_match_dictionary().keys():
+            if ignore_path in parser_match.get_match_dictionary():
                 return
         if self.paths is None or len(self.paths) == 0:
             # Event is defined by the full path of log atom.
@@ -207,7 +209,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     break
             if not constraint_path_flag and self.constraint_list != []:
                 return
-            log_event = tuple(parser_match.get_match_dictionary().keys())
+            log_event = tuple(parser_match.get_match_dictionary())
         else:
             # Event is defined by value combos in paths
             values = []
@@ -296,9 +298,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         for listener in self.anomaly_event_handlers:
                             implied_event = None
                             trigger_event = None
-                            if rule.implied_event in self.sample_events.keys():
+                            if rule.implied_event in self.sample_events:
                                 implied_event = self.sample_events[rule.implied_event]
-                            if rule.trigger_event in self.sample_events.keys():
+                            if rule.trigger_event in self.sample_events:
                                 trigger_event = self.sample_events[rule.trigger_event]
                             listener.receive_event(
                                 'analysis.EventCorrelationDetector',
@@ -353,9 +355,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             for listener in self.anomaly_event_handlers:
                                 implied_event = None
                                 trigger_event = None
-                                if rule.implied_event in self.sample_events.keys():
+                                if rule.implied_event in self.sample_events:
                                     implied_event = self.sample_events[rule.implied_event]
-                                if rule.trigger_event in self.sample_events.keys():
+                                if rule.trigger_event in self.sample_events:
                                     trigger_event = self.sample_events[rule.trigger_event]
                                 listener.receive_event(
                                     'analysis.EventCorrelationDetector',
@@ -681,13 +683,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             if len(self.hypothesis_candidates) < self.candidates_size and random.uniform(0.0, 1.0) < self.generation_probability:
                 self.hypothesis_candidates.append((log_event, log_atom.atom_time))
         self.log_success += 1
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""

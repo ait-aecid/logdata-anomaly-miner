@@ -28,6 +28,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
     The considered time intervals depend on the combination of values in the target_paths of target_path_list.
     """
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None,
                  allow_missing_values_flag=True, ignore_list=None, output_log_line=True, auto_include_flag=False,
                  time_period_length=86400, max_time_diff=360, num_reduce_time_list=10):
@@ -192,10 +194,6 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             elif self.time_period_length + self.appeared_time_list[match_value_tuple][1] - self.appeared_time_list[match_value_tuple][-1] <\
                     2 * self.max_time_diff:
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:]
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""

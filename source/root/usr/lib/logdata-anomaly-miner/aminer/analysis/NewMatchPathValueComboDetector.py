@@ -30,6 +30,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when a new value combination for a given list of match data pathes were found."""
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
                  auto_include_flag=False, output_log_line=True):
         """
@@ -138,13 +140,6 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                                        event_data, log_atom, self)
         self.log_success += 1
         return True
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""

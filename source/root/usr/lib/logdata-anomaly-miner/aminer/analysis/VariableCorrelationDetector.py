@@ -20,6 +20,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     This module builds upon the event_type_detector.
     """
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', target_path_list=None,
                  num_init=100, num_update=100, disc_div_thres=0.3, num_steps_create_new_rules=-1, num_upd_until_validation=20,
                  num_end_learning_phase=-1, check_cor_thres=0.5, check_cor_prob_thres=1, check_cor_num_thres=10,
@@ -242,11 +244,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     event_index] - self.num_init) / self.num_update / self.num_steps_create_new_rules) % self.num_upd_until_validation == 0:
                 self.validate_cor()  # Validate the correlations and removes the cors, which fail the requirements
         return True
-
-    # skipcq: PYL-R0201
-    def get_time_trigger_class(self):
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in realtime."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     # skipcq: PYL-W0613, PYL-R0201
     def do_timer(self, trigger_time):

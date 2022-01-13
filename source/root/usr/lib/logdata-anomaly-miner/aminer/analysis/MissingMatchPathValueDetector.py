@@ -33,6 +33,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     alerting time when currently in error state. When in normal (alerting) state, the value is zero.
     """
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
                  default_interval=3600, realert_interval=86400, output_log_line=True):
         """
@@ -245,10 +247,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         """Remove checks for given value."""
         del self.expected_values_dict[value]
         logging.getLogger(DEBUG_LOG_NAME).debug('%s removed check value %s.', self.__class__.__name__, str(value))
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""

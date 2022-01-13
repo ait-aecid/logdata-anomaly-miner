@@ -34,6 +34,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     in http://dx.doi.org/10.1016/j.cose.2014.09.006.
     """
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id='Default',
                  record_count_before_event=10000, output_log_line=True, use_path_match=True, use_value_match=True,
                  min_rule_attributes=1, max_rule_attributes=5):
@@ -175,14 +177,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             else:
                 r[var] = attr
         return r
-
-    @staticmethod
-    def get_time_trigger_class():
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
