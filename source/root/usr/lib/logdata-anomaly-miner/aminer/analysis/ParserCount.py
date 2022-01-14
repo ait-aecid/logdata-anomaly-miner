@@ -28,6 +28,8 @@ total_processed_lines_str = 'TotalProcessedLines'
 class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates a counter for path value combinations."""
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, target_path_list, report_event_handlers, report_interval=60, target_label_list=None,
                  split_reports_flag=False):
         """Initialize the ParserCount component."""
@@ -54,10 +56,6 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             if self.target_label_list:
                 target_path = self.target_label_list[self.target_path_list.index(target_path)]
             self.count_dict[target_path] = {current_processed_lines_str: 0, total_processed_lines_str: 0}
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""

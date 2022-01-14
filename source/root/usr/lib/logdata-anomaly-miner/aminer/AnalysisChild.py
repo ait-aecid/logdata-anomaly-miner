@@ -196,7 +196,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     This class defines the child performing the complete analysis workflow.
     When splitting privileges between analysis and monitor  process, this class should only be initialized within the analysis process!
     """
-
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
     offline_mode = False
 
     def __init__(self, program_name, aminer_config):
@@ -501,13 +501,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             msg = 'Unhandled type info on received fd: %s' % repr(received_type_info)
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component can be registered for.
-        See AnalysisContext class for different trigger classes available.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """
