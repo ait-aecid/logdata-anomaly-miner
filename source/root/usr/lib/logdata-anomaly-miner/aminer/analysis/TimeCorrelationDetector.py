@@ -119,7 +119,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             result = self.total_records * ['']
             result[0] = self.analysis_status_to_string()
 
-            analysis_component = {'AffectedLogAtomPathes': list(log_atom.parser_match.get_match_dictionary()),
+            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                   'AffectedLogAtomValues': [log_atom.raw_data.decode(AminerConfig.ENCODING)]}
             if self.output_log_line:
                 match_paths_values = {}
@@ -160,7 +160,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     def rule_to_dict(self, rule):
         """Convert a rule to a dict structure."""
-        r = {'Type': str(rule.__class__.__name__)}
+        r = {'type': str(rule.__class__.__name__)}
         for var in vars(rule):
             attr = getattr(rule, var, None)
             if attr is None:
@@ -169,14 +169,15 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                 tmp_list = []
                 for v in attr:
                     d = self.rule_to_dict(v)
-                    d['Type'] = str(v.__class__.__name__)
+                    d['type'] = str(v.__class__.__name__)
                     tmp_list.append(d)
                 r['subRules'] = tmp_list
             else:
                 r[var] = attr
         return r
 
-    def get_time_trigger_class(self):
+    @staticmethod
+    def get_time_trigger_class():
         """
         Get the trigger class this component should be registered for.
         This trigger is used only for persistence, so real-time triggering is needed.

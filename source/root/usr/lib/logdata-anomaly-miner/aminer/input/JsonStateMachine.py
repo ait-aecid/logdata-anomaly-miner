@@ -97,7 +97,7 @@ def string_machine(emit):  # skipcq: PY-D0003
         if byte_data & 0x80:  # UTF-8 handling
             return utf8_machine(byte_data, on_char_code)
 
-        if byte_data < 0x20:  # ASCII control character
+        if byte_data < 0x20 and byte_data != 0xa:  # ASCII control character - \n is allowed
             return None
             # raise Exception("Unexpected control character: 0x" + str(byte_data))
 
@@ -219,7 +219,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
     start_with_zero = False
 
     def _mid(byte_data):  # skipcq: PY-D0003
-        if start_with_zero and byte_data not in (0x2e, 0x45, 0x65, 0x7d, 0x2c):  # . E e } ,
+        if start_with_zero and byte_data not in (0x2e, 0x45, 0x65, 0x7d, 0x2c, 0xa, 0x20):  # . E e } , \n Space
             return None
 
         if byte_data == 0x2e:  # .

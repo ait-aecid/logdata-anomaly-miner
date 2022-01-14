@@ -75,7 +75,6 @@ Parser:
 
 Input:
         timestamp_paths: None
-        verbose: False
         json_format: True
 
 Analysis:
@@ -91,6 +90,8 @@ Analysis:
             - "/model/menu/id"
             - "/model/menu/value"
           learn_mode: True
+        - type: SimpleUnparsedAtomHandler
+          id: SimpleUnparsedAtomHandler
 
 EventHandlers:
         - id: stpe

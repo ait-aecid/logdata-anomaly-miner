@@ -470,6 +470,7 @@
                     'type': {'type': 'string', 'allowed': ['VariableCorrelationDetector'], 'required': True},
                     'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
                     'persistence_id': {'type': 'string', 'empty': False},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'num_init': {'type': 'integer', 'min': 1},
                     'num_update': {'type': 'integer', 'min': 1},
                     'disc_div_thres': {'type': 'float', 'min': 0.000001, 'max': 1.0},
@@ -554,7 +555,7 @@
                     'persistence_id': {'type': 'string', 'empty': False},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'time_window_length': {'type': 'integer', 'min': 1},
+                    'time_period_length': {'type': 'integer', 'min': 1},
                     'max_time_diff': {'type': 'integer', 'min': 1},
                     'num_reduce_time_list': {'type': 'integer', 'min': 1},
                     'allow_missing_values_flag': {'type': 'boolean'},
@@ -609,6 +610,25 @@
                     'min_log_lines_per_time_step': {'type': 'integer', 'min': 1},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'learn_mode': {'type': 'boolean'},
+                    'suppress': {'type': 'boolean'}
+                },
+                {
+                    'id': {'type': 'string', 'nullable': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['MinimalTransitionTimeDetector'], 'required': True},
+                    'persistence_id': {'type': 'string', 'empty': False},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'id_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'allow_missing_id': {'type': 'boolean'},
+                    'num_log_lines_solidify_matrix': {'type': 'integer', 'min': 1},
+                    'time_output_threshold': {'type': 'integer', 'min': 0},
+                    'anomaly_threshold': {'type': 'float', 'min': 0, 'max': 1.0},
+                    'output_logline': {'type': 'boolean'},
+                    'learn_mode': {'type': 'boolean'}
+                },
+                {
+                    'id': {'type': 'string', 'nullable': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['SimpleUnparsedAtomHandler', 'VerboseUnparsedAtomHandler'], 'required': True},
                     'suppress': {'type': 'boolean'}
                 }
             ]
