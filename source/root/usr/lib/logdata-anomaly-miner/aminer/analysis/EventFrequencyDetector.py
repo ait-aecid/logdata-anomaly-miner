@@ -194,12 +194,14 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                         sorted_log_lines = [data]
                     analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(log_ev)}
                     frequency_info = {'ExpectedLogAtomValuesFrequency': occurrences_mean,
-                                      'ExpectedLogAtomValuesFrequencyRange': [np.ceil(max(0, occurrences_mean - occurrences_std / \
-                                          self.confidence_factor)), np.floor(occurrences_mean + occurrences_std / self.confidence_factor)],
+                                      'ExpectedLogAtomValuesFrequencyRange': [
+                                          np.ceil(max(0, occurrences_mean - occurrences_std /
+                                                  self.confidence_factor)),
+                                          np.floor(occurrences_mean + occurrences_std / self.confidence_factor)],
                                       'LogAtomValuesFrequency': self.counts[log_ev][-2],
                                       'ConfidenceFactor': self.confidence_factor,
-                                      'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-2]) / \
-                                          max(occurrences_mean, self.counts[log_ev][-2])}
+                                      'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-2]) /
+                                      max(occurrences_mean, self.counts[log_ev][-2])}
                     event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency anomaly detected', sorted_log_lines,
