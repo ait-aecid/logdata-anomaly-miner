@@ -31,8 +31,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, num_windows=50, confidence_factor=0.33, empty_window_warnings=True,
-                 persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
+    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, num_windows=50,
+                 confidence_factor=0.33, empty_window_warnings=True, persistence_id='Default', auto_include_flag=False,
+                 output_log_line=True, ignore_list=None, constraint_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -81,7 +82,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
 
-        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev1, ev2>, [<freq1, freq2>]], [<ev1, ev2>, [<freq1, freq2>]], ...]
+        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev>, [<freq1, freq2>]], [<ev>, [<freq1, freq2>]], ...]
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             for entry in persistence_data:
@@ -166,7 +167,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     else:
                         self.counts[log_ev] = self.counts[log_ev][1:] + [0]
                 occurrences_mean = -1
-                occurrences_var = -1
+                occurrences_std = -1
                 if log_ev not in self.counts or len(self.counts[log_ev]) < 3:
                     # At least counts from 1 window necessary for prediction
                     continue
@@ -192,9 +193,13 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     else:
                         sorted_log_lines = [data]
                     analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(log_ev)}
-                    frequency_info = {'ExpectedLogAtomValuesFrequency': occurrences_mean, 'ExpectedLogAtomValuesFrequencyRange': [np.ceil(max(0, occurrences_mean - occurrences_std / self.confidence_factor)), np.floor(occurrences_mean + occurrences_std / self.confidence_factor)], 'LogAtomValuesFrequency': self.counts[log_ev][-2],
+                    frequency_info = {'ExpectedLogAtomValuesFrequency': occurrences_mean,
+                                      'ExpectedLogAtomValuesFrequencyRange': [np.ceil(max(0, occurrences_mean - occurrences_std / \
+                                          self.confidence_factor)), np.floor(occurrences_mean + occurrences_std / self.confidence_factor)],
+                                      'LogAtomValuesFrequency': self.counts[log_ev][-2],
                                       'ConfidenceFactor': self.confidence_factor,
-                                      'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-2]) / max(occurrences_mean, self.counts[log_ev][-2])}
+                                      'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-2]) / \
+                                          max(occurrences_mean, self.counts[log_ev][-2])}
                     event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency anomaly detected', sorted_log_lines,
