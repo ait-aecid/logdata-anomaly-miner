@@ -30,6 +30,7 @@ import shutil
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_STAT_PERIOD,\
     DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME
+from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input.LogStream import LogStream
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
@@ -169,6 +170,23 @@ class AnalysisContext:
         logging.getLogger(DEBUG_LOG_NAME).debug("Started with build_analysis_pipeline.")
         self.aminer_config.build_analysis_pipeline(self)
 
+    def close_event_handler_streams(self, reopen=False):
+        """Close the streams of all StreamPrinterEventHandlers."""
+        for event_handler in self.atomizer_factory.event_handler_list:
+            if isinstance(event_handler, StreamPrinterEventHandler):
+                # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
+                if event_handler.stream.name in ("<stdout>", "<stderr>"):
+                    continue
+                try:
+                    event_handler.stream.close()
+                    if reopen:
+                        event_handler.stream = open(event_handler.stream.name, "w+")
+                except IOError as e:
+                    msg = "Error when closing or opening stream with the name %s, shutting down.\n%s" % (event_handler.stream.name, e)
+                    logging.getLogger(DEBUG_LOG_NAME).critical(msg)
+                    print(msg, file=sys.stderr)
+                    sys.exit(1)
+
 
 suspended_flag = False
 
@@ -178,7 +196,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     This class defines the child performing the complete analysis workflow.
     When splitting privileges between analysis and monitor  process, this class should only be initialized within the analysis process!
     """
-
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
     offline_mode = False
 
     def __init__(self, program_name, aminer_config):
@@ -435,6 +453,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         PersistenceUtil.persist_all()
         for sock in self.tracked_fds_dict.values():
             sock.close()
+        self.analysis_context.close_event_handler_streams()
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):
@@ -482,13 +501,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             msg = 'Unhandled type info on received fd: %s' % repr(received_type_info)
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component can be registered for.
-        See AnalysisContext class for different trigger classes available.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """
@@ -610,6 +622,7 @@ class AnalysisChildRemoteControlHandler:
                     'persist_all': methods.persist_all,
                     'list_backups': methods.list_backups,
                     'create_backup': methods.create_backup,
+                    'reopen_event_handler_streams': methods.reopen_event_handler_streams,
                     'EnhancedNewMatchPathValueComboDetector': EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': EventCorrelationDetector.EventCorrelationDetector,
                     'EventTypeDetector': EventTypeDetector.EventTypeDetector,

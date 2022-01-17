@@ -30,6 +30,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates events if event or value occurrence counts are outliers in PCA space."""
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size, min_anomaly_score, min_variance, num_windows,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
         """
@@ -297,13 +299,6 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         for events in self.event_count_vector.values():
             for value in events:
                 events[value] = 0
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""

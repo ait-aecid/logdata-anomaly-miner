@@ -24,12 +24,20 @@ class TimeTriggeredComponentInterface(metaclass=abc.ABCMeta):
     would require.
     """
 
+    @property
     @abc.abstractmethod
+    def time_trigger_class(self):
+        raise NotImplementedError
+
     def get_time_trigger_class(self):
         """
         Get the trigger class this component can be registered for.
         See AnalysisContext class for different trigger classes available.
         """
+        if self.time_trigger_class not in (1, 2):
+            raise NotImplementedError("The self.time_trigger_class property must be set to AnalysisContext.TIME_TRIGGER_CLASS_REALTIME or "
+                                      "AnalysisContext.TIME_TRIGGER_CLASS_ANALYSISTIME.")
+        return self.time_trigger_class
 
     @abc.abstractmethod
     def do_timer(self, trigger_time):

@@ -32,6 +32,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     This module needs to run after the EventTypeDetector is initialized
     """
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
                  used_gof_test='CM', gof_alpha=0.05, s_gof_alpha=0.05, s_gof_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3,
                  sim_thres=0.1, indicator_thres=0.4, num_init=100, num_update=50, num_update_unq=200, num_s_gof_values=50,
@@ -115,7 +117,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Number of static values of a variable, to stop tracking the variable type and read in in eventTypeD. False if not wanted.
         self.num_stat_stop_update = num_stat_stop_update
         # Number of updatesteps until the variables are tested if they are suitable for an indicator. If not suitable, they are removed
-        # from the tracking of EvTypeD (reduce checked variables). Equals False if disabled.
+        # from the tracking of EvTypeD (reduce checked variables). Equals 0 if disabled.
         self.num_updates_until_var_reduction = num_updates_until_var_reduction
         # Threshold for the reduction of variable types. The most likely none others var type must have a higher relative appearance
         # for the variable to be further checked.
@@ -433,10 +435,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.process_ll(event_index, log_atom)
         return True
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
@@ -640,7 +638,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type_history_list[event_index][var_index][6][1][-1] = self.var_type[event_index][var_index][2]
 
             # Reduce the number of variables, which are tracked
-            if (not (isinstance(self.num_updates_until_var_reduction, bool)) and (
+            if (self.num_updates_until_var_reduction > 0 and (
                     self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update ==
                     self.num_updates_until_var_reduction - 1):
 
@@ -696,7 +694,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         # 1 / (1 + np.exp(-4)) = 0.9820137900379085
 
             # Saves the initial reference state of the var_type_history_list for the calculation of the indicator
-            if ((isinstance(self.num_updates_until_var_reduction, bool) and self.num_updates_until_var_reduction is False) or (
+            if ((self.num_updates_until_var_reduction == 0) or (
                     self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update >=
                     self.num_updates_until_var_reduction - 1) and (not isinstance(self.num_var_type_hist_ref, bool)) and (
                     (len(self.var_type_history_list_reference) < event_index + 1) or
@@ -725,7 +723,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
             # Checks the indicator for the varTypes of the Event and generates an output, if it fails
             else:
-                if ((isinstance(self.num_updates_until_var_reduction, bool) and self.num_updates_until_var_reduction is False) or (
+                if ((self.num_updates_until_var_reduction == 0) or (
                         self.event_type_detector.num_eventlines[event_index] - self.num_init) /
                         self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(
                         self.num_var_type_considered_ind, bool)) and (not isinstance(self.num_var_type_hist_ref, bool)) and len(
@@ -1725,28 +1723,28 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Sum of the probabilities, which are smaller than the probability of the values
             smaller_prob_sum = 0
             if len(self.var_type[event_index][var_index][1]) <= 5:
-                for i in range(self.num_update + 1):
+                for a in range(self.num_update + 1):
                     if len(self.var_type[event_index][var_index][1]) == 2:
-                        tmp_prob = self.bt_results[event_index][var_index][1].pmf([i, self.num_update - i])
+                        tmp_prob = self.bt_results[event_index][var_index][1].pmf([a, self.num_update - a])
                         if tmp_prob <= prob_of_sample:
                             smaller_prob_sum += tmp_prob
                     else:
-                        for j in range(self.num_update - i + 1):
+                        for b in range(self.num_update - a + 1):
                             if len(self.var_type[event_index][var_index][1]) == 3:
-                                tmp_prob = self.bt_results[event_index][var_index][1].pmf([i, j, self.num_update - (i + j)])
+                                tmp_prob = self.bt_results[event_index][var_index][1].pmf([a, b, self.num_update - (a + b)])
                                 if tmp_prob <= prob_of_sample:
                                     smaller_prob_sum += tmp_prob
                             else:
-                                for k in range(self.num_update - (i + j) + 1):
+                                for c in range(self.num_update - (a + b) + 1):
                                     if len(self.var_type[event_index][var_index][1]) == 4:
                                         tmp_prob = self.bt_results[event_index][var_index][1].pmf(
-                                            [i, j, k, self.num_update - (i + j + k)])
+                                            [a, b, c, self.num_update - (a + b + c)])
                                         if tmp_prob <= prob_of_sample:
                                             smaller_prob_sum += tmp_prob
                                     else:
-                                        for l in range(self.num_update - (i + j + k) + 1):
+                                        for d in range(self.num_update - (a + b + c) + 1):
                                             tmp_prob = self.bt_results[event_index][var_index][1].pmf(
-                                                [i, j, k, l, self.num_update - (i + j + k + l)])
+                                                [a, b, c, d, self.num_update - (a + b + c + d)])
                                             if tmp_prob <= prob_of_sample:
                                                 smaller_prob_sum += tmp_prob
 
@@ -2007,7 +2005,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     def print_changed_var_type(self, event_index, vt_old, vt_new, var_index, log_atom, confidence=None):
         """Print the changed variable types."""
-        if self.save_statistics and ((not (isinstance(self.num_updates_until_var_reduction, bool)) and (
+        if self.save_statistics and ((self.num_updates_until_var_reduction > 0 and (
                 self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update >=
                 self.num_updates_until_var_reduction - 1)):
             self.changed_var_types.append(self.event_type_detector.num_eventlines[event_index])
@@ -2166,10 +2164,7 @@ def consists_of_floats(list_in):
 
 def consists_of_ints(list_in):
     """Give back True if all entries are integers an False otherwise."""
-    for item in list_in:
-        if item != int(item):
-            return False
-    return True
+    return all(item == int(item) for item in list_in)
 
 
 def get_vt_string(vt):

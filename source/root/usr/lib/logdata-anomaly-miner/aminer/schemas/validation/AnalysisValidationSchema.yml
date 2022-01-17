@@ -83,8 +83,7 @@
                     'output_logline': {'type': 'boolean'},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'suppress': {'type': 'boolean'},
-                    'learn_mode': {'type': 'boolean'}
+                    'suppress': {'type': 'boolean'}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
@@ -536,7 +535,7 @@
                     'num_update_var_type_hist_ref': {'type': 'integer', 'min': 1},
                     'num_var_type_considered_ind': {'type': 'integer', 'min': 1},
                     'num_stat_stop_update': {'type': 'integer', 'min': 1},
-                    'num_updates_until_var_reduction': {'type': 'integer', 'min': 1},
+                    'num_updates_until_var_reduction': {'type': 'integer', 'min': 0},
                     'var_reduction_thres': {'type': 'float'},
                     'num_skipped_ind_for_weights': {'type': 'integer', 'min': 0},
                     'num_ind_for_weights': {'type': 'integer', 'min': 1},
@@ -626,6 +625,11 @@
                     'anomaly_threshold': {'type': 'float', 'min': 0, 'max': 1.0},
                     'output_logline': {'type': 'boolean'},
                     'learn_mode': {'type': 'boolean'}
+                },
+                {
+                    'id': {'type': 'string', 'nullable': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['SimpleUnparsedAtomHandler', 'VerboseUnparsedAtomHandler'], 'required': True},
+                    'suppress': {'type': 'boolean'}
                 }
             ]
         }

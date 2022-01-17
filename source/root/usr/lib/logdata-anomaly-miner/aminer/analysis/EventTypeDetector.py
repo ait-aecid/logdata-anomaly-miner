@@ -27,6 +27,8 @@ from aminer.util import PersistenceUtil
 class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class keeps track of the found eventtypes and the values of each variable."""
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', path_list=None, id_path_list=None,
                  allow_missing_id=False, allowed_id_tuples=None, min_num_vals=1000, max_num_vals=1500, save_values=True,
                  track_time_for_tsa=False, waiting_time_for_tsa=1000, num_sections_waiting_time_for_tsa=100):
@@ -331,10 +333,6 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.num_eventlines[current_index] += 1
         self.log_success += 1
         return True
-
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persistence triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""

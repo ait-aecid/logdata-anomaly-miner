@@ -15,10 +15,9 @@ Parser:
           type: SequenceModelElement
           name: 'accesslog'
           args:
-                  - host_name_model
+            - host_name_model
 Input:
         timestamp_paths: "/accesslog/time"
-        verbose: False # use this to debug your parser-model
 
 EventHandlers:
         - id: stpe
