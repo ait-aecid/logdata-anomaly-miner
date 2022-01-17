@@ -424,7 +424,7 @@ class AminerRemoteControlExecutionMethods:
             return
         if component.__class__.__name__ not in ["NewMatchPathValueComboDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
-                "FAILURE: component class '%s' does not support the add_to_persistency! Only the following classes support allowlisting: " \
+                "FAILURE: component class '%s' does not support the add_to_persistency_event! Only the following classes support it: " \
                 "NewMatchPathValueComboDetector." \
                 % component.__class__.__name__
             return
