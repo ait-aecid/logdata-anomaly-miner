@@ -180,6 +180,41 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         self.known_values_set.add(event_data)
         return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)
 
+    def add_to_persistency_event(self, event_type, event_data):
+        """
+        Add or overwrite the information of event_data to the persistency of component_name.
+        @return a message with information about allowlisting
+        @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+        if not isinstance(event_data, list) or len(event_data) != len(self.target_path_list):
+            msg = 'Event_data has the wrong format.' \
+                'The supported format is [value_1, value_2, ..., value_n] where n is the number of analyzed paths.'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        match_value_list = []
+        for match_element in event_data:
+            if match_element is None:
+                if not self.allow_missing_values_flag:
+                    msg = 'Empty entry detected in event_data.' \
+                        'Please fill entry or set parameter allow_missing_values_flag to true.'
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise Exception(msg)
+                match_value_list.append(None)
+            else:
+                match_value_list.append(bytes(match_element, 'utf-8'))
+
+        match_value_tuple = tuple(match_value_list)
+        if match_value_tuple not in self.known_values_set:
+            self.known_values_set.add(match_value_tuple)
+            self.log_learned_path_value_combos += 1
+            self.log_new_learned_values.append(match_value_tuple)
+        return 'Added values [%s] of paths [%s] to the persistency.' % (', '.join(event_data), ', '.join(self.target_path_list))
+
     def log_statistics(self, component_name):
         """
         Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
