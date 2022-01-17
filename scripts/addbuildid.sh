@@ -19,6 +19,8 @@ then
 	exit 1
 fi
 
+BUILD_ID=`echo $BUILD_ID | sed 's/^[Vv]//'`
+
 echo "BUILD_ID: $BUILD_ID"
 
 if [ -e $METAPATH ]
