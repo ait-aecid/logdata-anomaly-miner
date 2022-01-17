@@ -417,7 +417,6 @@ class AminerRemoteControlExecutionMethods:
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
         @param event_data the event_data for the add_to_persistency_event method.
-        @param allowlisting_data this data is passed on into the allowlist_event method.
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
@@ -425,7 +424,7 @@ class AminerRemoteControlExecutionMethods:
             return
         if component.__class__.__name__ not in ["NewMatchPathValueComboDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
-                "FAILURE: component class '%s' does not support allowlisting! Only the following classes support allowlisting: " \
+                "FAILURE: component class '%s' does not support the add_to_persistency! Only the following classes support allowlisting: " \
                 "NewMatchPathValueComboDetector." \
                 % component.__class__.__name__
             return

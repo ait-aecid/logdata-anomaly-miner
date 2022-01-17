@@ -183,8 +183,8 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
     def add_to_persistency_event(self, event_type, event_data):
         """
         Add or overwrite the information of event_data to the persistency of component_name.
-        @return a message with information about allowlisting
-        @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
+        @return a message with information about the addition to the persistency.
+        @throws Exception when the addition of this special event using given event_data was not possible.
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
             msg = 'Event not from this source'
