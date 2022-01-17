@@ -51,7 +51,7 @@
                 'timeout': {'type': ['integer', 'float'], 'default': -1},
                 'allow_missing_id': {'type': 'boolean', 'default': False},
                 'window_size': {'type': ['integer', 'float'], 'default': 600},
-                'confidence_factor': {'type': 'float', 'default': 0.5},
+                'confidence_factor': {'type': 'float', 'default': 0.33},
                 'min_allowed_time_diff': {'type': 'float', 'default': 5.0},
                 'lower_limit': {'type': ['integer', 'float']},
                 'upper_limit': {'type': ['integer', 'float']},
