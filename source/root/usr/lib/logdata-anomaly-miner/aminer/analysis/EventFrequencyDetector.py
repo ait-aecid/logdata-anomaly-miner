@@ -175,8 +175,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     # Only compute standard deviation for at least 2 observed counts
                     occurrences_std = np.std(self.counts[log_ev][:-2])
                 else:
-                    # Otherwise use default value so that only confidence_factor relevant (one factor cancels out)
-                    occurrences_std = occurrences_mean * self.confidence_factor * self.confidence_factor
+                    # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
+                    occurrences_std = occurrences_mean * (1 - self.confidence_factor)
                 # Compare log event frequency of previous time windows and current time window
                 if self.counts[log_ev][-2] < occurrences_mean - occurrences_std / self.confidence_factor or \
                    self.counts[log_ev][-2] > occurrences_mean + occurrences_std / self.confidence_factor:
