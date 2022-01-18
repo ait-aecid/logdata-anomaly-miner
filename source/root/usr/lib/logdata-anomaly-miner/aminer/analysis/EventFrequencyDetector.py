@@ -42,7 +42,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
         @param num_windows the number of previous time windows considered for expected frequency estimation.
-        @param confidence_factor defines range of tolerable deviation of measured frequency from expected frequencyi according to
+        @param confidence_factor defines range of tolerable deviation of measured frequency from expected frequency according to
         occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3*sigma deviation. confidence_factor
         must be in range [0, 1].
         @param empty_window_warnings whether anomalies should be generated for too small window sizes.
