@@ -411,6 +411,31 @@ class AminerRemoteControlExecutionMethods:
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
+    def add_to_persistency_event_in_component(self, analysis_context, component_name, event_data):
+        """
+        Add information specified in event_data to the persistency of component_name.
+        @param analysis_context the analysis context of the aminer.
+        @param component_name the name to be registered in the analysis_context.
+        @param event_data the event_data for the add_to_persistency_event method.
+        """
+        component = analysis_context.get_component_by_name(component_name)
+        if component is None:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
+            return
+        if component.__class__.__name__ not in ["NewMatchPathValueComboDetector"]:
+            self.REMOTE_CONTROL_RESPONSE += \
+                "FAILURE: component class '%s' does not support the add_to_persistency_event! Only the following classes support it: " \
+                "NewMatchPathValueComboDetector." \
+                % component.__class__.__name__
+            return
+        try:
+            msg = component.add_to_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            self.REMOTE_CONTROL_RESPONSE += msg
+            logging.getLogger(DEBUG_LOG_NAME).info(msg)
+        # skipcq: PYL-W0703
+        except Exception as e:
+            self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
+
     def add_handler_to_atom_filter_and_register_analysis_component(self, analysis_context, atom_handler, component, component_name):
         """
         Add a new component to the analysis_context.
