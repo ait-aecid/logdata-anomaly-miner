@@ -1359,7 +1359,9 @@ This module defines an detector for event and value frequency deviations.
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **window_size** the length of the time window for counting in seconds (float, defaults to 600).
-* **confidence_factor** defines range of tolerable deviation of measured frequency from ground truth frequency gt by [gf * confidence_factor, gf / confidence_factor], where confidence_factor is in range [0, 1]. (float, defaults to 0.5).
+* **num_windows** the number of previous time windows considered for expected frequency estimation (integer, defaults to 50).
+* **confidence_factor** defines range of tolerable deviation of measured frequency from expected frequency according to occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3 * sigma deviation. confidence_factor must be in range [0, 1] (float, defaults to 0.33).
+* **empty_window_warnings** whether anomalies should be generated for too small window sizes.
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
