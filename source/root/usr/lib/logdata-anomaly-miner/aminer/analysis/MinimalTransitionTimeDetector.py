@@ -349,8 +349,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         if not isinstance(event_data, list) or len(event_data) != 3 or not isinstance(event_data[0], list) or\
                 not isinstance(event_data[1], list) or len(event_data[0]) != len(self.path_list) or\
                 len(event_data[1]) != len(self.path_list) or not all(isinstance(value, str) for value in event_data[0]) or\
-                not all(isinstance(value, str) for value in event_data[1]) or not (isinstance(event_data[2], int) or\
-                isinstance(event_data[2], float)):
+                not all(isinstance(value, str) for value in event_data[1]) or not isinstance(event_data[2], (int, float)):
             msg = 'Event_data has the wrong format.' \
                 'The supported format is [path_value_list_1, path_value_list_2, new_transition_time], ' \
                 'where the path value lists are lists of strings with the same length as paths defined in the config.'
@@ -363,7 +362,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Check in which order the event_values appear in the time matrix
         event_value_1 = None
         event_value_2 = None
-        # return str(event_data[0]) + '                   ' + str(event_data[1]) + '                   ' + str(self.time_matrix)
+
         if event_data[0] in self.time_matrix and event_data[1] in self.time_matrix[event_data[0]]:
             event_value_1 = event_data[0]
             event_value_2 = event_data[1]
@@ -379,10 +378,10 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.time_matrix[event_data[0]][event_data[1]] = float(event_data[2])
 
             return 'Added transition time: %s - %s, %s' % (list(event_data[0]), list(event_data[1]), float(event_data[2]))
-        else:
-            old_transition_time = self.time_matrix[event_value_1][event_value_2]
-            self.time_matrix[event_value_1][event_value_2] = float(event_data[2])
-            return 'Changed transition time %s - %s from %s to %s' % (list(event_data[0]), list(event_data[1]), old_transition_time,
+
+        old_transition_time = self.time_matrix[event_value_1][event_value_2]
+        self.time_matrix[event_value_1][event_value_2] = float(event_data[2])
+        return 'Changed transition time %s - %s from %s to %s' % (list(event_data[0]), list(event_data[1]), old_transition_time,
                                                                       float(event_data[2]))
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
