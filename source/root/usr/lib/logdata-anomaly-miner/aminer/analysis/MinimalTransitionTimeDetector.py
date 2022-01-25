@@ -382,7 +382,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         old_transition_time = self.time_matrix[event_value_1][event_value_2]
         self.time_matrix[event_value_1][event_value_2] = float(event_data[2])
         return 'Changed transition time %s - %s from %s to %s' % (list(event_data[0]), list(event_data[1]), old_transition_time,
-                                                                      float(event_data[2]))
+                                                                  float(event_data[2]))
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """
