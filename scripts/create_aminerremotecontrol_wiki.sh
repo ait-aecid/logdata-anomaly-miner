@@ -26,10 +26,21 @@ sed -i $'s/,MissingMatchPathValueDetector,/,\'MissingMatchPathValueDetector\',/g
 sed -i $'s/,NewMatchPathValueComboDetector,/,\'NewMatchPathValueComboDetector\',/g' /tmp/aminerremotecontrol.md
 sed -i $'s,new/path,\'new/path\',g' /tmp/aminerremotecontrol.md
 sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
-
-
-sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
-sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
-sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
-sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
-sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,MailAlerting.TargetAddress,/,\'MailAlerting.TargetAddress\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/root@localhost/\'root@localhost\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,MailAlerting.FromAddress,/,\'MailAlerting.FromAddress\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,MailAlerting.SubjectPrefix,/,\'MailAlerting.SubjectPrefix\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/aminer Alerts:)/\'aminer Alerts:\')/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,MailAlerting.EventCollectTime,/,\'MailAlerting.EventCollectTime\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,MailAlerting.MinAlertGap,/,\'MailAlerting.MinAlertGap\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,MailAlerting.MaxAlertGap,/,\'MailAlerting.MaxAlertGap\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,MailAlerting.MaxEventsPerMessage,/,\'MailAlerting.MaxEventsPerMessage\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,LogPrefix,/,\'LogPrefix\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/Original log/\'Original log/g' /tmp/aminerremotecontrol.md
+sed -i $'s/line: /line: \'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/This defaults to ./This defaults to \'\'./g' /tmp/aminerremotecontrol.md
+sed -i $'s/,Resources.MaxMemoryUsage,/,\'Resources.MaxMemoryUsage\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,Core.PersistencePeriod,/,\'Core.PersistencePeriod\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,Log.StatisticsLevel,/,\'Log.StatisticsLevel\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,Log.DebugLevel,/,\'Log.DebugLevel\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,Log.StatisticsPeriod,/,\'Log.StatisticsPeriod\',/g' /tmp/aminerremotecontrol.md
