@@ -4,3 +4,32 @@ sudo mv /usr/share/man/man1/aminerremotecontrol.1 /tmp
 sudo chown user:user /tmp/aminerremotecontrol.1
 sudo apt install pandoc
 pandoc --from man --to gfm /tmp/aminerremotecontrol.1 -o /tmp/aminerremotecontrol.md # man-to-github-flawored-markdown
+# quotes are not successfully recreated from the parser..
+sed -i $'s/,property\\\_name/,\'property\\\_name\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,attribute/,\'attribute\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/NewMatchPath,/\'NewMatchPath\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/NewMatchPathDet)/\'NewMatchPathDet\')/g' /tmp/aminerremotecontrol.md
+sed -i $'s/auto\\\_include\\\_flag,/\'auto\\\_include\\\_flag\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/auto\\\_include\\\_flag)/\'auto\\\_include\\\_flag\')/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,old\\\_component\\\_name,/,\'old\\\_component\\\_name\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,new\\\_component\\\_name/,\'new\\\_component\\\_name\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,history\\\_component\\\_name/,\'history\\\_component\\\_name\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/NewMatchPathDetector/\'NewMatchPathDetector\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,component\\\_name/,\'component\\\_name\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/AtomFilter/,\'AtomFilter\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/LogResourceList/\'LogResourceList\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,atom\\\_handler,/,\'atom\\\_handler\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,destination\\\_file/,\'destination\\\_file\'/g' /tmp/aminerremotecontrol.md
+sed -i $'s,/tmp/config.py,\'/tmp/config.py\',g' /tmp/aminerremotecontrol.md
+sed -i $'s/,EnhancedNewMatchPathValueComboDetector,/,\'EnhancedNewMatchPathValueComboDetector\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,MissingMatchPathValueDetector,/,\'MissingMatchPathValueDetector\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,NewMatchPathValueComboDetector,/,\'NewMatchPathValueComboDetector\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s,new/path,\'new/path\',g' /tmp/aminerremotecontrol.md
+sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
+
+
+sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
+sed -i $'s/,VolatileLogarithmicBackoffEventHistory,/,\'VolatileLogarithmicBackoffEventHistory\',/g' /tmp/aminerremotecontrol.md
