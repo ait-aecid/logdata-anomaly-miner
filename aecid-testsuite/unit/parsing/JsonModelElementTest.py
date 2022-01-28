@@ -237,22 +237,6 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-        json_model_element = JsonModelElement(self.id_, self.empty_key_parser_dict)
-        data = b'{"key": "value"}'
-        value = json.loads(data)
-        match_context = DummyMatchContext(data)
-        match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(json.loads(data)).encode()
-        match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(
-            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
-
-        json_model_element = JsonModelElement(self.id_, self.empty_key_parser_dict)
-        data = b'{"key": "another not matching value"}'
-        match_context = DummyMatchContext(data)
-        match_element = json_model_element.get_match_element(self.path, match_context)
-        self.compare_no_match_results(data, match_element, match_context)
-
     def test5get_match_element_with_allow_all(self):
         """Test a simplified key_parser_dict with ALLOW_ALL."""
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_allow_all)
