@@ -271,7 +271,8 @@ class JsonModelElement(ModelElementInterface):
                     logging.getLogger(DEBUG_LOG_NAME).debug(
                         debug_log_prefix + "Key %s not found in json_match_data. RETURN [NONE] 4" % split_key)
                     return [None]
-                match_element, index, data = self.parse_json_object(json_dict, json_match_data, key, split_key, current_path, match_context)
+                match_element, index, data = self.parse_json_object(
+                    json_dict, json_match_data, key, split_key, current_path, match_context)
                 if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                     matches.append(match_element)
                     if index == -1 and match_element is None:
