@@ -880,9 +880,13 @@ Analysis:
           event_type_detector: EventTypeDetector
           silence_output_except_indicator: False
           output_logline: False
+          ignore_list:
+            - "/model/RandomTime"
         - type: VariableCorrelationDetector
           id: VariableCorrelationDetector
           event_type_detector: EventTypeDetector
+          ignore_list:
+            - "/model/RandomTime"
         - type: EventCorrelationDetector
           id: EventCorrelationDetector
           check_rules_flag: True
