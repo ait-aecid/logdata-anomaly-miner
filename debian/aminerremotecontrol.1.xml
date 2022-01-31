@@ -405,7 +405,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>Allowlists a path from <replaceable>event_data</replaceable> with the
              allowlist_event-method from the corresponding class of the component with the
             <replaceable>component_name</replaceable>. Only the following classes
-             support allowlisting: <replaceable>EnhancedNewMatchPathValueComboDetector </replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
+             support allowlisting: <replaceable>EnhancedNewMatchPathValueComboDetector</replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
              <replaceable>NewMatchPathDetector</replaceable> and 
              <replaceable>NewMatchPathValueComboDetector</replaceable>.
              For most of the components no <replaceable>allowlisting_data</replaceable>
