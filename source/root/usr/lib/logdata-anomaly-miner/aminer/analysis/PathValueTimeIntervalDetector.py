@@ -227,6 +227,52 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.counter_reduce_time_intervals[tuple(match_value_tuple)] = counter
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
+    def add_to_persistency_event(self, event_type, event_data):
+        """
+        Add or overwrite the information of event_data to the persistency of component_name.
+        @return a message with information about the addition to the persistency.
+        @throws Exception when the addition of this special event using given event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        if not isinstance(event_data, list) or len(event_data) != 2 or not isinstance(event_data[0], list) or\
+                len(event_data[0]) != len(self.target_path_list) or not all(isinstance(value, str) for value in event_data[0]) or\
+                not isinstance(event_data[1], (int, float)):
+            msg = 'Event_data has the wrong format. ' \
+                'The supported format is [path_value_list, new_transition_time], ' \
+                'where path_value_list is a list of strings with the same length as paths defined in the config.'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        match_value_tuple = tuple([bytes(val, 'utf-8') for val in event_data[0]])
+
+        msg = ''
+        if match_value_tuple not in self.appeared_time_list:
+            # Print message if combination of values is new
+            msg = 'First time (%s) added for [' % (event_data[1] % self.time_period_length)
+            for match_value in match_value_tuple:
+                msg += str(repr(match_value))[1:] + ', '
+            msg = msg[:-2] + ']'
+
+            self.appeared_time_list[match_value_tuple] = [event_data[1] % self.time_period_length]
+            self.counter_reduce_time_intervals[match_value_tuple] = 0
+        else:
+            # Prints an message if the new time is added to the list of observed times
+            msg = 'New time (%s) added to the range of previously observed times %s for [' % (
+                    event_data[1] % self.time_period_length, self.appeared_time_list[match_value_tuple])
+            for match_value in match_value_tuple:
+                msg += str(repr(match_value))[1:] + ', '
+            msg = msg[:-2] + ']'
+
+            # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
+            self.insert_and_reduce_time_intervals(match_value_tuple, event_data[1] % self.time_period_length)
+            msg += str(self.appeared_time_list)
+
+        return msg
+
     def print(self, message, log_atom, affected_path, additional_information=None):
         """Print the message."""
         if isinstance(affected_path, str):
