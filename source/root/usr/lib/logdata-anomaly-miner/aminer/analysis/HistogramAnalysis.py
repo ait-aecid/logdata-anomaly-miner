@@ -305,12 +305,10 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """Receive a log atom from a source."""
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
-        data_updated_flag = False
         for data_item in self.histogram_data:
             match = match_dict.get(data_item.property_path, None)
             if match is None:
                 continue
-            data_updated_flag = True
             self.log_success += 1
             data_item.add_value(match.match_object)
 
