@@ -100,7 +100,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
     <cmdsynopsis>
       <command>aminerremotecontrol</command>
       <arg choice="opt">
-        <option>[--exec <replaceable>command</replaceable>] | [--exec-file <replaceable>file</replaceable>]</option>
+        <option>[--exec</option> <replaceable>command</replaceable><option>] | [--exec-file</option> <replaceable>file</replaceable>
+        <option>]</option>
       </arg>
       <arg choice="plain">
         <option>[OPTIONS]...</option>
@@ -165,7 +166,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
            variablelist.term.break.after parameters to
            control the term elements. -->      <varlistentry>
         <term>
-          <option>--control-socket, -c <replaceable>socket</replaceable></option>
+          <option>--control-socket, -c</option> <replaceable>socket</replaceable>
         </term>
         <listitem>
           <para>Specify the Unix domain remote control socket
@@ -182,7 +183,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       </varlistentry>
       <varlistentry>
         <term>
-          <option>--exec, -e <replaceable>command</replaceable></option>
+          <option>--exec, -e</option> <replaceable>command</replaceable>
         </term>
         <listitem>
           <para>For each --exec option, the next argument is sent
@@ -198,7 +199,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       </varlistentry>
       <varlistentry>
         <term>
-          <option>--exec-file, -f <replaceable>file</replaceable></option>
+          <option>--exec-file, -f</option> <replaceable>file</replaceable>
         </term>
         <listitem>
           <para>For each --exec-file option, the named file is
@@ -209,7 +210,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       </varlistentry>
       <varlistentry>
         <term>
-          <option>--data, -d <replaceable>data</replaceable></option>
+          <option>--data, -d</option> <replaceable>data</replaceable>
         </term>
         <listitem>
           <para>This parameter defines a json string defining
@@ -255,7 +256,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             &quot;<replaceable>property_name</replaceable> changed to
             <replaceable>value</replaceable> successfully.&quot; if the 
             changes were successful and an individual message if the changes failed.</para>
-            <para>Read more about which properties can be changed in the <option>Valid Property Names </option>section.</para>
+            <para>Read more about which properties can be changed in the <option>Valid Property Names</option> section.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -267,7 +268,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para>This method allows you to change attributes from components of the 
             AminerConfig at runtime. For every attribute to be changed this method 
-            must be used. The method prints &quot;<replaceable>component_name.attribute </replaceable> changed to <replaceable>value</replaceable> successfully.
+            must be used. The method prints &quot;<replaceable>component_name.attribute</replaceable> changed to <replaceable>value</replaceable> successfully.
             &quot; if the changes were successful and an individual message if the changes failed.
             The type of the new <replaceable>value</replaceable> must be the same like the
             old value of the <replaceable>component_name.attribute</replaceable></para>
