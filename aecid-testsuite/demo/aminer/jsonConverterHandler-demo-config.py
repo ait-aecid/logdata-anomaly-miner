@@ -19,7 +19,7 @@ from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDa
 # This is a template for the "aminer" logfile miner tool. Copy
 # it to "config.py" and define your ruleset.
 
-config_properties = {}
+config_properties = {}  # skipcq: PY-W0072
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
