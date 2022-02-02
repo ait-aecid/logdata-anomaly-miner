@@ -50,9 +50,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         # above this value will trigger alerting.
         self.next_check_timestamp = 0
         self.last_seen_timestamp = 0
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
 
         self.log_success = 0

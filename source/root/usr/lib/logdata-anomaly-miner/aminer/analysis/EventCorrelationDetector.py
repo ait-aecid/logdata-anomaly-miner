@@ -71,7 +71,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.anomaly_event_handlers = anomaly_event_handlers
         self.paths = paths
         self.last_unhandled_match = None
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.total_records = 0
         self.max_hypotheses = max_hypotheses
         self.hypothesis_max_delta_time = hypothesis_max_delta_time
@@ -116,6 +115,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.min_eval_true = self.get_min_eval_true(self.max_observations, self.p0, self.alpha)
 
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.output_log_line = output_log_line
 
         self.log_success = 0

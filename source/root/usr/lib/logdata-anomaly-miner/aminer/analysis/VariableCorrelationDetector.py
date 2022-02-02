@@ -3,6 +3,7 @@ import numpy as np
 import logging
 import sys
 from scipy.stats import chi2
+import time
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name
 from aminer.AnalysisChild import AnalysisContext
@@ -31,6 +32,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
                  validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, auto_include_flag=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
+        self.aminer_config = aminer_config
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.event_type_detector = event_type_detector
         self.event_type_detector.add_following_modules(self)

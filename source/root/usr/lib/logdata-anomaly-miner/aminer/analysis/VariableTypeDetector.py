@@ -16,6 +16,7 @@ from scipy.stats import kstest, ks_2samp, norm, multinomial, distributions, chis
 import os
 import logging
 import sys
+import time
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
@@ -44,9 +45,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True, ignore_list=None,
                  constraint_list=None, auto_include_flag=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.anomaly_event_handlers = anomaly_event_handlers
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         # General options
         # Used to track the indicators and changed variable types
