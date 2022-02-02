@@ -71,7 +71,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.anomaly_event_handlers = anomaly_event_handlers
         self.paths = paths
         self.last_unhandled_match = None
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.total_records = 0
         self.max_hypotheses = max_hypotheses
         self.hypothesis_max_delta_time = hypothesis_max_delta_time
@@ -690,9 +690,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -707,7 +708,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 known_path_set.add(
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):

@@ -31,7 +31,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
                  validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, auto_include_flag=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.event_type_detector = event_type_detector
         self.event_type_detector.add_following_modules(self)
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -245,10 +245,17 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 self.validate_cor()  # Validate the correlations and removes the cors, which fail the requirements
         return True
 
-    # skipcq: PYL-W0613, PYL-R0201
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
-        return 600
+        """Check if current ruleset should be persisted."""
+        if self.next_persist_time is None:
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+
+        delta = self.next_persist_time - trigger_time
+        if delta <= 0:
+            self.do_persist()
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
+        return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""

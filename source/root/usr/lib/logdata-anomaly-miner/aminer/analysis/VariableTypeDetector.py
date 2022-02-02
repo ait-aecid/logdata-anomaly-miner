@@ -44,7 +44,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  used_multinomial_test='Chi', use_empiric_distr=True, save_statistics=True, output_log_line=True, ignore_list=None,
                  constraint_list=None, auto_include_flag=True):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.anomaly_event_handlers = anomaly_event_handlers
         self.aminer_config = aminer_config
 
@@ -441,9 +441,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -453,7 +454,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         len(self.distr_val[event_index][var_index]) > 0 and self.var_type[event_index][var_index][0] == 'emp') else [] for
                             var_index in range(len(self.distr_val[event_index]))] for event_index in range(len(self.distr_val))]]
         PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
-        self.next_persist_time = None
 
         if self.save_statistics:
             PersistenceUtil.store_json(self.statistics_file_name, [

@@ -289,7 +289,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.report_event_handlers = report_event_handlers
         self.reset_after_report_flag = reset_after_report_flag
         self.persistence_id = persistence_id
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
 
@@ -324,24 +324,20 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
             else:
                 self.send_report(log_atom, timestamp)
 
-        if self.next_persist_time is None and data_updated_flag:
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):
@@ -432,7 +428,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         self.report_event_handlers = report_event_handlers
         self.reset_after_report_flag = reset_after_report_flag
         self.persistence_id = persistence_id
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
 
@@ -516,25 +512,22 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             else:
                 self.send_report(log_atom, timestamp)
 
-        if self.next_persist_time is None:
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.log_success += 1
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def send_report(self, log_atom, timestamp):

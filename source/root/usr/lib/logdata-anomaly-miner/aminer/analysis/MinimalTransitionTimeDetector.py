@@ -71,7 +71,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.persistence_id = persistence_id
         self.auto_include_flag = auto_include_flag
         self.output_log_line = output_log_line
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         # Test if both path_list and id_path_list are not empty
         if [] in (self.path_list, self.id_path_list):
@@ -294,14 +294,15 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             old_pairs = new_pairs
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -314,7 +315,6 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         persist_data.append(keys_1)
         persist_data.append(keys_2)
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
