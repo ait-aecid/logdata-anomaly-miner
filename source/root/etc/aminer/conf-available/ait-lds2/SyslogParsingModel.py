@@ -11,7 +11,6 @@ from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
-from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
 
 
 def get_model():
@@ -175,11 +174,12 @@ def get_model():
                                 DelimitedDataModelElement("user", b" "),
                                 FixedDataModelElement("brack_str1", b" ("),
                                 DelimitedDataModelElement("ip", b")"),
-                                OptionalMatchModelElement("fwd", 
-                                    SequenceModelElement("seq", [
-                                        FixedDataModelElement("brack_str2", b") ("),
-                                        DelimitedDataModelElement("forward", b")"),
-                                    ])
+                                OptionalMatchModelElement("fwd",
+                                    SequenceModelElement(
+                                        "seq", [
+                                            FixedDataModelElement("brack_str2", b") ("),
+                                            DelimitedDataModelElement("forward", b")"),
+                                        ])
                                 ),
                                 FixedDataModelElement("to_str", b") to {"),
                                 DelimitedDataModelElement("imap_addr", b"}"),

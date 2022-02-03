@@ -98,35 +98,38 @@ def get_model():
                             SequenceModelElement('seq', [
                                 FixedDataModelElement("sp1", b" "),
                                 OptionalMatchModelElement("mail_opt",
-                                    SequenceModelElement("mail", [
-                                        FixedDataModelElement("brack1", b"("),
-                                        DelimitedDataModelElement("brack_mail", b")"),
-                                        FixedDataModelElement("brack2", b") "),
-                                    ])
+                                    SequenceModelElement(
+                                        "mail", [
+                                            FixedDataModelElement("brack1", b"("),
+                                            DelimitedDataModelElement("brack_mail", b")"),
+                                            FixedDataModelElement("brack2", b") "),
+                                        ])
                                 ),
                                 OptionalMatchModelElement("opt",
-                                    SequenceModelElement("seq", [
-                                        FixedDataModelElement("sp2", b"<"),
-                                        DelimitedDataModelElement("mail", b">"),
-                                        FixedDataModelElement("closing_brack", b"> "),
-                                    ])
+                                    SequenceModelElement(
+                                        "seq", [
+                                            FixedDataModelElement("sp2", b"<"),
+                                            DelimitedDataModelElement("mail", b">"),
+                                            FixedDataModelElement("closing_brack", b"> "),
+                                        ])
                                 ),
                                 FixedDataModelElement("r_str", b"R="),
                                 DelimitedDataModelElement("r", b" "),
                                 FixedDataModelElement("t_str", b" T="),
                                 VariableByteDataModelElement("t", alphabet),
                                 OptionalMatchModelElement("param_opt",
-                                    SequenceModelElement("seq", [
-                                        FixedDataModelElement("h_str", b" H="),
-                                        DelimitedDataModelElement("h", b" X="),
-                                        FixedDataModelElement("x_str", b" X="),
-                                        DelimitedDataModelElement("x", b" CV="),
-                                        FixedDataModelElement("cv_str", b" CV="),
-                                        DelimitedDataModelElement("cv", b" DN="),
-                                        FixedDataModelElement("dn_str", b" DN="),
-                                        DelimitedDataModelElement("dn", b" C="),
-                                        AnyByteDataModelElement("c"),
-                                    ]))
+                                    SequenceModelElement(
+                                        "seq", [
+                                            FixedDataModelElement("h_str", b" H="),
+                                            DelimitedDataModelElement("h", b" X="),
+                                            FixedDataModelElement("x_str", b" X="),
+                                            DelimitedDataModelElement("x", b" CV="),
+                                            FixedDataModelElement("cv_str", b" CV="),
+                                            DelimitedDataModelElement("cv", b" DN="),
+                                            FixedDataModelElement("dn_str", b" DN="),
+                                            DelimitedDataModelElement("dn", b" C="),
+                                            AnyByteDataModelElement("c"),
+                                        ]))
                                 ]),
                             ])
                         ]),
