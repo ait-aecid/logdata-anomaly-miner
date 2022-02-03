@@ -174,7 +174,8 @@ def get_model():
                                 DelimitedDataModelElement("user", b" "),
                                 FixedDataModelElement("brack_str1", b" ("),
                                 DelimitedDataModelElement("ip", b")"),
-                                OptionalMatchModelElement("fwd",
+                                OptionalMatchModelElement(
+                                    "fwd",
                                     SequenceModelElement(
                                         "seq", [
                                             FixedDataModelElement("brack_str2", b") ("),

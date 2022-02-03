@@ -97,7 +97,8 @@ def get_model():
                         FirstMatchModelElement('fm', [
                             SequenceModelElement('seq', [
                                 FixedDataModelElement("sp1", b" "),
-                                OptionalMatchModelElement("mail_opt",
+                                OptionalMatchModelElement(
+                                    "mail_opt",
                                     SequenceModelElement(
                                         "mail", [
                                             FixedDataModelElement("brack1", b"("),
@@ -105,7 +106,8 @@ def get_model():
                                             FixedDataModelElement("brack2", b") "),
                                         ])
                                 ),
-                                OptionalMatchModelElement("opt",
+                                OptionalMatchModelElement(
+                                    "opt",
                                     SequenceModelElement(
                                         "seq", [
                                             FixedDataModelElement("sp2", b"<"),
@@ -117,7 +119,8 @@ def get_model():
                                 DelimitedDataModelElement("r", b" "),
                                 FixedDataModelElement("t_str", b" T="),
                                 VariableByteDataModelElement("t", alphabet),
-                                OptionalMatchModelElement("param_opt",
+                                OptionalMatchModelElement(
+                                    "param_opt",
                                     SequenceModelElement(
                                         "seq", [
                                             FixedDataModelElement("h_str", b" H="),
