@@ -16,7 +16,7 @@ BUILD_ID=`git describe --tags --long 2> /dev/null`
 if [ $? -ne 0 ]
 then
 	echo "This seems not to be a git installation."
-	exit 1
+	exit 0
 fi
 
 BUILD_ID=`echo $BUILD_ID | sed 's/^[Vv]//'`
