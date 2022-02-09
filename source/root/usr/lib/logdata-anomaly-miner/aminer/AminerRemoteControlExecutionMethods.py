@@ -422,7 +422,8 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
             return
-        if component.__class__.__name__ not in ["NewMatchPathValueComboDetector", "MinimalTransitionTimeDetector", "PathValueTimeIntervalDetector"]:
+        if component.__class__.__name__ not in ["NewMatchPathValueComboDetector", "MinimalTransitionTimeDetector",
+                                                "PathValueTimeIntervalDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
                 "FAILURE: component class '%s' does not support the add_to_persistency_event! Only the following classes support it: " \
                 "NewMatchPathValueComboDetector, MinimalTransitionTimeDetector and PathValueTimeIntervalDetector." \
