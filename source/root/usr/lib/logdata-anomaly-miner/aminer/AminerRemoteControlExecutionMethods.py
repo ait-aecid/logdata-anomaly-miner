@@ -411,6 +411,31 @@ class AminerRemoteControlExecutionMethods:
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
+    def print_persistency_event_in_component(self, analysis_context, component_name, event_data):
+        """
+        Prints the persistency specified in event_data of component_name.
+        @param analysis_context the analysis context of the aminer.
+        @param component_name the name to be registered in the analysis_context.
+        @param event_data the event_data for the print_persistency_event method.
+        """
+        component = analysis_context.get_component_by_name(component_name)
+        if component is None:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
+            return
+        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector"]:
+            self.REMOTE_CONTROL_RESPONSE += \
+                "FAILURE: component class '%s' does not support the print_persistency_event! Only the following classes support it: " \
+                "MinimalTransitionTimeDetector." \
+                % component.__class__.__name__
+            return
+        try:
+            msg = component.print_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            self.REMOTE_CONTROL_RESPONSE += msg
+            logging.getLogger(DEBUG_LOG_NAME).info(msg)
+        # skipcq: PYL-W0703
+        except Exception as e:
+            self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
+
     def add_to_persistency_event_in_component(self, analysis_context, component_name, event_data):
         """
         Add information specified in event_data to the persistency of component_name.
@@ -430,6 +455,31 @@ class AminerRemoteControlExecutionMethods:
             return
         try:
             msg = component.add_to_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            self.REMOTE_CONTROL_RESPONSE += msg
+            logging.getLogger(DEBUG_LOG_NAME).info(msg)
+        # skipcq: PYL-W0703
+        except Exception as e:
+            self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
+
+    def remove_from_persistency_event_in_component(self, analysis_context, component_name, event_data):
+        """
+        Remove information specified in event_data from the persistency of component_name.
+        @param analysis_context the analysis context of the aminer.
+        @param component_name the name to be registered in the analysis_context.
+        @param event_data the event_data for the remove_from_persistency_event method.
+        """
+        component = analysis_context.get_component_by_name(component_name)
+        if component is None:
+            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
+            return
+        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector"]:
+            self.REMOTE_CONTROL_RESPONSE += \
+                "FAILURE: component class '%s' does not support the remove_from_persistency_event! Only the following classes support it: "\
+                "MinimalTransitionTimeDetector." \
+                % component.__class__.__name__
+            return
+        try:
+            msg = component.remove_from_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
