@@ -502,7 +502,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Check if the transition time between the path values exists
         if event_value_1 is None:
             string = 'Transition time for %s - %s does not exist and therefore could not be deleted.' % (
-                    list(event_data[0]),list(event_data[1]))
+                    list(event_data[0]), list(event_data[1]))
         else:
             # Delete the transition time
             deleted_time = self.time_matrix[event_value_1].pop(event_value_2)
