@@ -56,9 +56,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
-        self.next_persist_time = None
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
         self.constraint_list = constraint_list
         if self.constraint_list is None:
@@ -145,9 +145,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             # Log atom exceeded next check time; time window is complete.
             self.next_check_time = self.next_check_time + self.window_size
             self.log_windows += 1
-            if self.next_persist_time is None:
-                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                    KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
             # Output anomaly in case that no log event occurs within a time window
             if self.empty_window_warnings is True and log_atom.atom_time >= self.next_check_time:
@@ -214,14 +211,15 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_success += 1
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -231,7 +229,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             # Skip last count as the time window may not be complete yet and count thus too low
             persist_data.append((log_ev, freqs[:-1]))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
