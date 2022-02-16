@@ -337,6 +337,83 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.constraint_list.append(event_data)
         return 'Allowlisted path %s.' % event_data
 
+    def print_persistency_event(self, event_type, event_data):
+        """
+        Prints the persistency of component_name. Event_data specifies what information is outputed.
+        @return a message with information about the persistency.
+        @throws Exception when the output for the event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Query if event_data has one of the stated formats
+        if not (isinstance(event_data, list) and len(event_data) <= 2 and (
+                    (len(event_data) == 2 and isinstance(event_data[0], list) and isinstance(event_data[1], list) and
+                     len(event_data[0]) == len(self.path_list) and len(event_data[1]) == len(self.path_list) and
+                     all(isinstance(value, str) for value in event_data[0]) and all(isinstance(value, str) for value in event_data[1])) or (
+                     len(event_data) == 1 and isinstance(event_data[0], list) and len(event_data[0]) == len(self.path_list) and
+                     all(isinstance(value, str) for value in event_data[0])) or len(event_data) == 0)):
+            msg = 'Event_data has the wrong format.' \
+                'The supported formats are [], [path_value_list] [path_value_list_1, path_value_list_2], ' \
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Convert path value lists to tuples
+        for i in range(len(event_data)):
+            event_data[i] = tuple(event_data[i])
+
+        if len(event_data) == 0:
+            # Print the set of all appeared path values if no event_data is given
+            values_set = set(self.time_matrix.keys())
+            for value in list(values_set):
+                for value_2 in self.time_matrix[value]:
+                    values_set.add(value_2)
+
+            string = 'Persistency includes transition times to the following path values: %s' % list(values_set)
+        elif len(event_data) == 1:
+            # Print the set of all path values which have a transition time to the path value specified in event_data
+            # Check if the path value has an entry in self.time_matrix
+            if event_data[0] in self.time_matrix:
+                values_set = set(self.time_matrix[event_data[0]].keys())
+            else:
+                values_set = set()
+
+            # Check if key values in self.time_matrix contain the path value of event_data
+            for value in list(self.time_matrix.keys()):
+                if event_data[0] in self.time_matrix[value]:
+                    values_set.add(value)
+
+            # Set output string
+            if len(values_set) > 0:
+                string = 'Persistency includes transition times from %s to the following path values: %s' % (
+                        event_data[0], list(values_set))
+            else:
+                string = 'Persistency includes no transition time from %s.' % event_data[0]
+        else:
+            # Print the transition time
+            # Check in which order the event_values appear in the time matrix
+            event_value_1 = None
+            event_value_2 = None
+
+            if event_data[0] in self.time_matrix and event_data[1] in self.time_matrix[event_data[0]]:
+                event_value_1 = event_data[0]
+                event_value_2 = event_data[1]
+            elif event_data[1] in self.time_matrix and event_data[0] in self.time_matrix[event_data[1]]:
+                event_value_1 = event_data[1]
+                event_value_2 = event_data[0]
+
+            # Set output string
+            if event_value_1 is None:
+                string = 'No transition time for %s - %s.' % (list(event_data[0]), list(event_data[1]))
+            else:
+                string = 'Transition time %s - %s: %s.' % (list(event_data[0]), list(event_data[1]),
+                                                           self.time_matrix[event_value_1][event_value_2])
+
+        return string
+
     def add_to_persistency_event(self, event_type, event_data):
         """
         Add or overwrite the information of event_data to the persistency of component_name.
@@ -348,16 +425,18 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
-        if not isinstance(event_data, list) or len(event_data) != 3 or not isinstance(event_data[0], list) or\
-                not isinstance(event_data[1], list) or len(event_data[0]) != len(self.path_list) or\
-                len(event_data[1]) != len(self.path_list) or not all(isinstance(value, str) for value in event_data[0]) or\
-                not all(isinstance(value, str) for value in event_data[1]) or not isinstance(event_data[2], (int, float)):
+        # Query if event_data has the stated format
+        if not (isinstance(event_data, list) and len(event_data) == 3 and isinstance(event_data[0], list) and
+                isinstance(event_data[1], list) and len(event_data[0]) == len(self.path_list) and
+                len(event_data[1]) == len(self.path_list) and all(isinstance(value, str) for value in event_data[0]) and
+                all(isinstance(value, str) for value in event_data[1]) and isinstance(event_data[2], (int, float))):
             msg = 'Event_data has the wrong format.' \
                 'The supported format is [path_value_list_1, path_value_list_2, new_transition_time], ' \
-                'where the path value lists are lists of strings with the same length as paths defined in the config.'
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
+        # Convert path value lists to tuples
         event_data[0] = tuple(event_data[0])
         event_data[1] = tuple(event_data[1])
 
@@ -385,6 +464,58 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.time_matrix[event_value_1][event_value_2] = float(event_data[2])
         return 'Changed transition time %s - %s from %s to %s' % (list(event_data[0]), list(event_data[1]), old_transition_time,
                                                                   float(event_data[2]))
+
+    def remove_from_persistency_event(self, event_type, event_data):
+        """
+        Removes the information of event_data from the persistency of component_name.
+        @return a message with information about the removal from the persistency.
+        @throws Exception when the addition of this special event using given event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Query if event_data has the stated format
+        if not (len(event_data) == 2 and isinstance(event_data[0], list) and isinstance(event_data[1], list) and
+                len(event_data[0]) == len(self.path_list) and len(event_data[1]) == len(self.path_list) and
+                all(isinstance(value, str) for value in event_data[0]) and all(isinstance(value, str) for value in event_data[1])):
+            msg = 'Event_data has the wrong format.' \
+                'The supported format is [path_value_list_1, path_value_list_2], ' \
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Convert path value lists to tuples
+        event_data[0] = tuple(event_data[0])
+        event_data[1] = tuple(event_data[1])
+
+        # Check in which order the event_values appear in the time matrix
+        event_value_1 = None
+        event_value_2 = None
+
+        if event_data[0] in self.time_matrix and event_data[1] in self.time_matrix[event_data[0]]:
+            event_value_1 = event_data[0]
+            event_value_2 = event_data[1]
+        elif event_data[1] in self.time_matrix and event_data[0] in self.time_matrix[event_data[1]]:
+            event_value_1 = event_data[1]
+            event_value_2 = event_data[0]
+
+        # Check if the transition time between the path values exists
+        if event_value_1 is None:
+            string = 'Transition time for %s - %s does not exist and therefore could not be deleted.' % (
+                    list(event_data[0]), list(event_data[1]))
+        else:
+            # Delete the transition time
+            deleted_time = self.time_matrix[event_value_1].pop(event_value_2)
+
+            # Delete the entry to event_value_1 if it is empty
+            if self.time_matrix[event_value_1] == {}:
+                self.time_matrix.pop(event_value_1)
+
+            string = 'Deleted transition time %s - %s: %s.' % (list(event_data[0]), list(event_data[1]), deleted_time)
+
+        return string
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """
