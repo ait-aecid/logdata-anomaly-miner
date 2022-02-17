@@ -10,7 +10,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
 import time
 import os
 import logging
@@ -159,8 +158,15 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No log events received in time window',
                                            [''], event_data, log_atom, self)
             for log_ev in self.counts:
+                # Check if ranges should be initialised
+                if log_ev not in self.ranges:
+                    self.ranges[log_ev] = None
+                    self.exceeded_range_frequency[log_ev] = False
+                # Calculate the ranges if it was not already calculated
+                if self.ranges[log_ev] is None:
+                    self.ranges[log_ev] = self.calculate_range(log_ev)
                 # Create count index for new time window
-                # In the following the count dictionary has lists of length num_windows + 2, i.e.,
+                # In the following the count dictionary has lists of length num_windows + 1, i.e.,
                 # <count window 1> ... <count window num_windows> <check window> <0>
                 if self.auto_include_flag is True:
                     if len(self.counts[log_ev]) <= self.num_windows + 1:
@@ -170,22 +176,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if log_ev not in self.counts or len(self.counts[log_ev]) < 3:
                     # At least counts from 1 window necessary for prediction
                     continue
-                if log_ev not in self.ranges:
-                    self.ranges[log_ev] = None
-                    self.exceeded_range_frequency[log_ev] = False
-                # Calculate the ranges if if was not already calculated
-                if self.ranges[log_ev] is None:
-                    occurrences_mean = -1
-                    occurrences_std = -1
-                    occurrences_mean = np.mean(self.counts[log_ev][:-2])
-                    if len(self.counts[log_ev]) > 3:
-                        # Only compute standard deviation for at least 2 observed counts
-                        occurrences_std = np.std(self.counts[log_ev][:-2])
-                    else:
-                        # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
-                        occurrences_std = occurrences_mean * (1 - self.confidence_factor)
-                    self.ranges[log_ev] = [occurrences_mean - occurrences_std / self.confidence_factor,
-                                           occurrences_mean + occurrences_std / self.confidence_factor]
                 # Compare log event frequency of previous time windows and current time window
                 if self.counts[log_ev][-2] < self.ranges[log_ev][0] or self.counts[log_ev][-2] > self.ranges[log_ev][1]:
                     occurrences_mean = (self.ranges[log_ev][0] + self.ranges[log_ev][1]) / 2
@@ -222,19 +212,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             if log_event not in self.ranges:
                 self.ranges[log_event] = None
                 self.exceeded_range_frequency[log_event] = False
-            # Calculate the ranges if if was not already calculated
+            # Calculate the ranges if it was not already calculated
             if self.ranges[log_event] is None:
-                occurrences_mean = -1
-                occurrences_std = -1
-                occurrences_mean = np.mean(self.counts[log_event][:-1])
-                if len(self.counts[log_event]) > 2:
-                    # Only compute standard deviation for at least 2 observed counts
-                    occurrences_std = np.std(self.counts[log_event][:-1])
-                else:
-                    # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
-                    occurrences_std = occurrences_mean * (1 - self.confidence_factor)
-                self.ranges[log_event] = [occurrences_mean - occurrences_std / self.confidence_factor,
-                                          occurrences_mean + occurrences_std / self.confidence_factor]
+                self.ranges[log_event] = self.calculate_range(log_event)
             # Compare log event frequency of previous time windows and current time window
             if self.counts[log_event][-1] + 1 > self.ranges[log_event][1] and not self.exceeded_range_frequency[log_event]:
                 occurrences_mean = (self.ranges[log_event][0] + self.ranges[log_event][1]) / 2
@@ -267,6 +247,25 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         else:
             self.counts[log_event] = [1]
         self.log_success += 1
+
+    def calculate_range(self, log_event):
+        """Calculate the corresponding range to log_event."""
+        if log_event not in self.counts or len(self.counts[log_event]) < 2:
+            return None
+        occurrences_mean = -1
+        occurrences_std = -1
+        print(self.counts[log_event])
+        print(self.counts[log_event][-self.num_windows-1:-1])
+        occurrences_mean = np.mean(self.counts[log_event][-self.num_windows-1:-1])
+        if len(self.counts[log_event][-self.num_windows-1:-1]) > 1:
+            # Only compute standard deviation for at least 2 observed counts
+            occurrences_std = np.std(self.counts[log_event][-self.num_windows-1:-1])
+        else:
+            # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
+            occurrences_std = occurrences_mean * (1 - self.confidence_factor)
+        print([occurrences_mean - occurrences_std / self.confidence_factor, occurrences_mean + occurrences_std / self.confidence_factor])
+        return [occurrences_mean - occurrences_std / self.confidence_factor, occurrences_mean + occurrences_std / self.confidence_factor]
+
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
