@@ -453,7 +453,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     num_windows=item['num_windows'], confidence_factor=item['confidence_factor'],
-                                    empty_window_warnings=item['empty_window_warnings'], auto_include_flag=learn,
+                                    empty_window_warnings=item['empty_window_warnings'],
+                                    early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'], auto_include_flag=learn,
                                     output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':

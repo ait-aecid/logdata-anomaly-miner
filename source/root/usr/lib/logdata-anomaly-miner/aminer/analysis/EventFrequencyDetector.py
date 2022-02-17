@@ -32,8 +32,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, num_windows=50,
-                 confidence_factor=0.33, empty_window_warnings=True, persistence_id='Default', auto_include_flag=False,
-                 output_log_line=True, ignore_list=None, constraint_list=None):
+                 confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False, persistence_id='Default',
+                 auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -46,6 +46,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3*sigma deviation. confidence_factor
         must be in range [0, 1].
         @param empty_window_warnings whether anomalies should be generated for too small window sizes.
+        @param early_exceeding_anomaly_output states if a anomaly should be raised the first time the appearance count exceedes the range.
         @param persistence_id name of persistency document.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
@@ -73,8 +74,11 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             confidence_factor = 1
         self.confidence_factor = confidence_factor
         self.empty_window_warnings = empty_window_warnings
+        self.early_exceeding_anomaly_output = early_exceeding_anomaly_output
         self.next_check_time = None
         self.counts = {}
+        self.ranges = {}
+        self.exceeded_range_frequency = {}
         self.log_total = 0
         self.log_success = 0
         self.log_windows = 0
@@ -163,21 +167,28 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                         self.counts[log_ev].append(0)
                     else:
                         self.counts[log_ev] = self.counts[log_ev][1:] + [0]
-                occurrences_mean = -1
-                occurrences_std = -1
                 if log_ev not in self.counts or len(self.counts[log_ev]) < 3:
                     # At least counts from 1 window necessary for prediction
                     continue
-                occurrences_mean = np.mean(self.counts[log_ev][:-2])
-                if len(self.counts[log_ev]) > 3:
-                    # Only compute standard deviation for at least 2 observed counts
-                    occurrences_std = np.std(self.counts[log_ev][:-2])
-                else:
-                    # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
-                    occurrences_std = occurrences_mean * (1 - self.confidence_factor)
+                if log_ev not in self.ranges:
+                    self.ranges[log_ev] = None
+                    self.exceeded_range_frequency[log_ev] = False
+                # Calculate the ranges if if was not already calculated
+                if self.ranges[log_ev] == None:
+                    occurrences_mean = -1
+                    occurrences_std = -1
+                    occurrences_mean = np.mean(self.counts[log_ev][:-2])
+                    if len(self.counts[log_ev]) > 3:
+                        # Only compute standard deviation for at least 2 observed counts
+                        occurrences_std = np.std(self.counts[log_ev][:-2])
+                    else:
+                        # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
+                        occurrences_std = occurrences_mean * (1 - self.confidence_factor)
+                    self.ranges[log_ev] = [occurrences_mean - occurrences_std / self.confidence_factor,
+                                           occurrences_mean + occurrences_std / self.confidence_factor]
                 # Compare log event frequency of previous time windows and current time window
-                if self.counts[log_ev][-2] < occurrences_mean - occurrences_std / self.confidence_factor or \
-                   self.counts[log_ev][-2] > occurrences_mean + occurrences_std / self.confidence_factor:
+                if self.counts[log_ev][-2] < self.ranges[log_ev][0] or self.counts[log_ev][-2] > self.ranges[log_ev][1]:
+                    occurrences_mean = (self.ranges[log_ev][0] + self.ranges[log_ev][1]) / 2
                     try:
                         data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                     except UnicodeError:
@@ -192,9 +203,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(log_ev)}
                     frequency_info = {'ExpectedLogAtomValuesFrequency': occurrences_mean,
                                       'ExpectedLogAtomValuesFrequencyRange': [
-                                          np.ceil(max(0, occurrences_mean - occurrences_std /
-                                                  self.confidence_factor)),
-                                          np.floor(occurrences_mean + occurrences_std / self.confidence_factor)],
+                                          np.ceil(max(0, self.ranges[log_ev][0])),
+                                          np.floor(self.ranges[log_ev][1])],
                                       'LogAtomValuesFrequency': self.counts[log_ev][-2],
                                       'ConfidenceFactor': self.confidence_factor,
                                       'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-2]) /
@@ -203,6 +213,54 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency anomaly detected', sorted_log_lines,
                                                event_data, log_atom, self)
+                    # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
+                    self.exceeded_range_frequency[log_ev] = False
+                # Reset range estimation
+                self.ranges[log_ev] = None
+        elif self.early_exceeding_anomaly_output and log_event in self.counts and len(self.counts[log_event]) >= 2:
+            # Check if the count exceeds the range and output a warning the first time the range exceeds it
+            if log_event not in self.ranges:
+                self.ranges[log_event] = None
+                self.exceeded_range_frequency[log_event] = False
+            # Calculate the ranges if if was not already calculated
+            if self.ranges[log_event] == None:
+                occurrences_mean = -1
+                occurrences_std = -1
+                occurrences_mean = np.mean(self.counts[log_event][:-1])
+                if len(self.counts[log_event]) > 2:
+                    # Only compute standard deviation for at least 2 observed counts
+                    occurrences_std = np.std(self.counts[log_event][:-1])
+                else:
+                    # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
+                    occurrences_std = occurrences_mean * (1 - self.confidence_factor)
+                self.ranges[log_event] = [occurrences_mean - occurrences_std / self.confidence_factor,
+                                       occurrences_mean + occurrences_std / self.confidence_factor]
+            # Compare log event frequency of previous time windows and current time window
+            if self.counts[log_event][-1] + 1 > self.ranges[log_event][1] and not self.exceeded_range_frequency[log_event]:
+                occurrences_mean = (self.ranges[log_event][0] + self.ranges[log_event][1]) / 2
+                self.exceeded_range_frequency[log_event] = True
+                try:
+                    data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+                except UnicodeError:
+                    data = repr(log_atom.raw_data)
+                if self.output_log_line:
+                    original_log_line_prefix = self.aminer_config.config_properties.get(
+                        CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+                    sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
+                                        data]
+                else:
+                    sorted_log_lines = [data]
+                analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(log_event)}
+                frequency_info = {'ExpectedLogAtomValuesFrequency': occurrences_mean,
+                                  'ExpectedLogAtomValuesFrequencyRange': [
+                                      np.ceil(max(0, self.ranges[log_event][0])),
+                                      np.floor(self.ranges[log_event][1])],
+                                  'LogAtomValuesFrequency': self.counts[log_event][-1] + 1,
+                                  'ConfidenceFactor': self.confidence_factor}
+                event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
+                for listener in self.anomaly_event_handlers:
+                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency exceeds range for the first time',
+                                           sorted_log_lines, event_data, log_atom, self)
         # Increase count for observed events
         if log_event in self.counts:
             self.counts[log_event][-1] += 1
