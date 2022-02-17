@@ -266,7 +266,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         print([occurrences_mean - occurrences_std / self.confidence_factor, occurrences_mean + occurrences_std / self.confidence_factor])
         return [occurrences_mean - occurrences_std / self.confidence_factor, occurrences_mean + occurrences_std / self.confidence_factor]
 
-
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
