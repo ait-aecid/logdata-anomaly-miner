@@ -174,7 +174,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     self.ranges[log_ev] = None
                     self.exceeded_range_frequency[log_ev] = False
                 # Calculate the ranges if if was not already calculated
-                if self.ranges[log_ev] == None:
+                if self.ranges[log_ev] is None:
                     occurrences_mean = -1
                     occurrences_std = -1
                     occurrences_mean = np.mean(self.counts[log_ev][:-2])
@@ -223,7 +223,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.ranges[log_event] = None
                 self.exceeded_range_frequency[log_event] = False
             # Calculate the ranges if if was not already calculated
-            if self.ranges[log_event] == None:
+            if self.ranges[log_event] is None:
                 occurrences_mean = -1
                 occurrences_std = -1
                 occurrences_mean = np.mean(self.counts[log_event][:-1])
@@ -234,7 +234,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
                     occurrences_std = occurrences_mean * (1 - self.confidence_factor)
                 self.ranges[log_event] = [occurrences_mean - occurrences_std / self.confidence_factor,
-                                       occurrences_mean + occurrences_std / self.confidence_factor]
+                                          occurrences_mean + occurrences_std / self.confidence_factor]
             # Compare log event frequency of previous time windows and current time window
             if self.counts[log_event][-1] + 1 > self.ranges[log_event][1] and not self.exceeded_range_frequency[log_event]:
                 occurrences_mean = (self.ranges[log_event][0] + self.ranges[log_event][1]) / 2
