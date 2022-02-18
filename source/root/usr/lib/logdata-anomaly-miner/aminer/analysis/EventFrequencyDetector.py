@@ -166,7 +166,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if self.ranges[log_ev] is None:
                     self.ranges[log_ev] = self.calculate_range(log_ev)
                 # Create count index for new time window
-                # In the following the count dictionary has lists of length num_windows + 1, i.e.,
+                # In the following the count dictionary has lists of length num_windows + 2, i.e.,
                 # <count window 1> ... <count window num_windows> <check window> <0>
                 if self.auto_include_flag is True:
                     if len(self.counts[log_ev]) <= self.num_windows + 1:
