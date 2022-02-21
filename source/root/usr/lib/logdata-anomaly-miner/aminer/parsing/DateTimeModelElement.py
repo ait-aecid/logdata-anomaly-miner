@@ -96,6 +96,11 @@ class DateTimeModelElement(ModelElementInterface):
             * %z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.
         Common formats are:
             * "%b %d %H:%M:%S" e.g. for "Nov 19 05:08:43"
+            * "%d.%m.%YT%H:%M:%S" e.g. for "07.02.2019T11:40:00"
+            * "%d.%m.%Y %H:%M:%S.%f" e.g. for "07.02.2019 11:40:00.123456"
+            * "%d.%m.%Y %H:%M:%S%z" e.g. for "07.02.2019 11:40:00+0000" or "07.02.2019 11:40:00 UTC"
+            * "%d.%m.%Y" e.g. for "07.02.2019"
+            * "%H:%M:%S" e.g. for "11:40:23"
         @param time_zone the timezone for parsing the values or UTC when None.
         @param text_locale the locale to use for parsing the day, month names or None to use the default locale. The locale must be a tuple
         of (locale, encoding) or a string.

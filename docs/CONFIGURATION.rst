@@ -651,7 +651,7 @@ This parser can be used as "type" in **/etc/aminer/config.yml**:
            - id: new_time_model
              type: DateTimeModelElement
              name: 'time'
-             args: '[%d/%b/%Y:%H:%M:%S +0000]'
+             date_format: '[%d/%b/%Y:%H:%M:%S +0000]'
 
            - id: sq3
              type: FixedDataModelElement
@@ -813,6 +813,11 @@ This element parses dates using a custom, timezone and locale-aware implementati
 
        Common formats are:
          * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
+         * '%d.%m.%YT%H:%M:%S' e.g. for '07.02.2019T11:40:00'
+         * '%d.%m.%Y %H:%M:%S.%f' e.g. for '07.02.2019 11:40:00.123456'
+         * '%d.%m.%Y %H:%M:%S%z' e.g. for '07.02.2019 11:40:00+0000" or "07.02.2019 11:40:00 UTC'
+         * '%d.%m.%Y' e.g. for '07.02.2019'
+         * '%H:%M:%S' e.g. for '11:40:23'
 
   2. time_zone:
       time_zone the timezone for parsing the values. Default: **UTC**.
@@ -838,7 +843,7 @@ The following code simply adds a custom date_format:
         - id: 'dtm'
           type: DateTimeModelElement
           name: 'DTM'
-          args: '%Y-%m-%d %H:%M:%S'
+          date_format: '%Y-%m-%d %H:%M:%S'
 
 DebugModelElement
 ~~~~~~~~~~~~~~~~~
