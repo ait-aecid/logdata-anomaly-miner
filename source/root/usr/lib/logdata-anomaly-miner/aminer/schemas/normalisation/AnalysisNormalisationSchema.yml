@@ -196,6 +196,7 @@
                 'set_period_length': {'type': 'integer', 'default': 604800},
                 'min_log_lines_per_time_step': {'type': 'integer', 'default': 10},
                 'empty_window_warnings': {'type': 'boolean', 'default': True},
+                'early_exceeding_anomaly_output': {'type': 'boolean', 'default': False},
             }
         }
     }

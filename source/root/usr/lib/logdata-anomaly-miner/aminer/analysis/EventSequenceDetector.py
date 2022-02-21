@@ -58,9 +58,9 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
-        self.next_persist_time = None
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
         self.id_path_list = id_path_list
         self.allow_missing_id = allow_missing_id
@@ -192,9 +192,6 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 self.sequences.add(self.current_sequences[id_tuple])
                 self.log_learned += 1
                 self.log_learned_sequences.append(self.current_sequences[id_tuple])
-                if self.next_persist_time is None:
-                    self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                        KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
@@ -219,20 +216,20 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.log_success += 1
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.sequences))
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):

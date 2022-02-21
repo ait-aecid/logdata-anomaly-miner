@@ -102,7 +102,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = self.num_periods_tsa_ini * int(self.num_init/2) + 500
 
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         # List of the indices of the target_paths in the ETD
         self.target_path_index_list = []
         # List of the period_lengths
@@ -124,12 +124,13 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -140,8 +141,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         persistence_data.append(self.prediction_history)
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def load_persistence_data(self):

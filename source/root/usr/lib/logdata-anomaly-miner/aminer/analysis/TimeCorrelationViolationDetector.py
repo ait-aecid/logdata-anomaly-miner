@@ -69,8 +69,10 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         # Persist the state only quite infrequently: As most correlation rules react in timeline of seconds, the persisted data will most
         # likely be unsuitable to catch lost events. So persistence is mostly to capture the correlation rule context, e.g. the history
         # of loglines matched before.
-        if self.next_persist_time - trigger_time < 0:
+        if self.next_persist_time - trigger_time <= 0:
             self.do_persist()
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         # Check all correlation rules, generate single events for each violated rule, possibly containing multiple records. As we might
         # be processing historic data, the timestamp last seen is unknown here. Hence rules not receiving newer events might not notice
@@ -104,7 +106,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):
