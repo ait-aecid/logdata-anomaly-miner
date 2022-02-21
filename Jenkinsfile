@@ -28,6 +28,7 @@ pipeline {
          stage("Mypy Static Code Analysis"){
              steps {
                  sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runMypy"
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runReleaseStringCheck"
              }
          }
          
