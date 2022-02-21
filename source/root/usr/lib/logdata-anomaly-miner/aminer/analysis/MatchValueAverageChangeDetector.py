@@ -47,10 +47,10 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.min_bin_elements = min_bin_elements
         self.min_bin_time = min_bin_time
         self.debug_mode = debug_mode
-        self.next_persist_time = None
         self.persistence_id = persistence_id
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -137,10 +137,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             analysis_component['DebugMode'] = self.debug_mode
             event_data = {'AnalysisComponent': analysis_component}
 
-            if self.next_persist_time is None:
-                self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                    KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
         if analysis_summary:
             res = [''] * stat_data[2][0]
             res[0] = analysis_summary
@@ -149,20 +145,20 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.log_success += 1
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
-            self.next_persist_time = None
+        if delta <= 0:
+            self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.stat_data)
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def update(self, stat_data, timestamp_value, value):

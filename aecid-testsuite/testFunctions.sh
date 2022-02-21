@@ -33,3 +33,27 @@ function compareStrings() {
   fi
   return $RET
 }
+
+function compareVersionStrings(){
+  if [[ !$# -eq 2 ]]; then
+    echo "compareVersionStrings() needs exactly 2 parameters!"
+		return -1
+	fi
+  IFS='-' read -ra VERSION <<< "$1"
+  VERSION="${VERSION[0]}"
+  IFS='.' read -ra V1 <<< "$VERSION"
+  IFS='-' read -ra VERSION <<< "$2"
+	VERSION="${VERSION[0]}"
+  IFS='.' read -ra V2 <<< "$VERSION"
+  LEN1=${#V1[@]}
+  LEN2=${#V2[@]}
+  LEN=$(( LEN1 < LEN2 ? LEN1 : LEN2 )) # minimum length
+  for ((i=0; i < $LEN; i++)); do
+    if [[ "${V1[i]}" -lt "${V2[i]}" ]]; then
+      return 2
+    elif [[ "${V1[i]}" -gt "${V2[i]}" ]]; then
+      return 1
+    fi
+  done
+  return 0
+}

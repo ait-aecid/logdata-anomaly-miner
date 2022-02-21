@@ -60,7 +60,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.log_total = 0
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
@@ -156,11 +156,20 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                     sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + data]
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
-        if self.auto_include_flag and self.next_persist_time is None:
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.log_success += 1
         return True
+
+    def do_timer(self, trigger_time):
+        """Check if current ruleset should be persisted."""
+        if self.next_persist_time is None:
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+
+        delta = self.next_persist_time - trigger_time
+        if delta <= 0:
+            self.do_persist()
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
+        return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
@@ -168,7 +177,6 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         for dict_record in self.known_values_dict.items():
             persistence_data.append(dict_record)
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):

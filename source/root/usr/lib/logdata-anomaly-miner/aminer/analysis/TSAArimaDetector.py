@@ -73,8 +73,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
         """
-        self.next_persist_time = None
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.anomaly_event_handlers = anomaly_event_handlers
         self.output_log_line = output_log_line
         self.auto_include_flag = auto_include_flag
@@ -187,6 +187,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -198,8 +199,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         persistence_data.append(self.result_list)
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, sorted_log_lines, event_data, allowlisting_data):  # skipcq: PYL-W0613
