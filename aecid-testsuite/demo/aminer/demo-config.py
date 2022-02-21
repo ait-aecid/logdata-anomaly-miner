@@ -1,7 +1,7 @@
 # This is a template for the "aminer" logfile miner tool. Copy
 # it to "config.py" and define your ruleset.
 
-config_properties = {}
+config_properties = {}  # skipcq: PY-W0072
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
@@ -307,12 +307,13 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.VariableTypeDetector import VariableTypeDetector
     vtd = VariableTypeDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, silence_output_except_indicator=False,
-                               output_log_line=False)
+                               output_log_line=False, ignore_list=["/model/RandomTime"])
     analysis_context.register_component(vtd, component_name="VariableTypeDetector")
     atom_filter.add_handler(vtd)
 
     from aminer.analysis.VariableCorrelationDetector import VariableCorrelationDetector
-    vtd = VariableCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, disc_div_thres=0.5)
+    vtd = VariableCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, disc_div_thres=0.5,
+                                      ignore_list=["/model/RandomTime"])
     analysis_context.register_component(vtd, component_name="VariableCorrelationDetector")
     atom_filter.add_handler(vtd)
 
