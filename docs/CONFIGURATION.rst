@@ -164,6 +164,19 @@ This option defines the system-group that owns the aminer-process.
 
    AminerGroup: 'aminer'
 
+AnalysisConfigFile
+~~~~~~~~~~~~~~~~~~
+
+* Default: None
+
+This (optional) configuration file contains the whole analysis child configuration (code). When missing those configuration parameters are also taken from the main config.
+
+.. warning:: This option is only available for python configs. It does not work for yaml configs.
+
+.. code-block:: python
+
+   config_properties['AnalysisConfigFile'] = 'analysis.py'
+
 RemoteControlSocket
 ~~~~~~~~~~~~~~~~~~~
 
@@ -202,7 +215,7 @@ Supported types are:
 .. code-block:: yaml
 
    LogResourceList:
-       - 'file:///var/log/apache2/access.log' 
+       - 'file:///var/log/apache2/access.log'
        - 'file:///home/ubuntu/data/mail.cup.com-train/daemon.log'
        - 'file:///home/ubuntu/data/mail.cup.com-train/auth.log'
        - 'file:///home/ubuntu/data/mail.cup.com-train/suricata/eve.json'
@@ -343,6 +356,18 @@ This option defines the prefix for the output of each anomaly.
 
    LogPrefix: ''
 
+Log.Encoding
+~~~~~~~~~~~~
+
+* Type: string
+* Default: 'utf-8'
+
+This option defines the encoding of the logfiles.
+
+.. code-block:: yaml
+
+   Log.Encoding: 'utf-8'
+
 Log.StatisticsPeriod
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -352,7 +377,7 @@ Log.StatisticsPeriod
 Defines how often to write into stat-logfiles.
 
 .. code-block:: yaml
-   
+
    Log.StatisticsPeriod: 3600
 
 Log.StatisticsLevel
@@ -364,7 +389,7 @@ Log.StatisticsLevel
 Defines the loglevel for the stat logs.
 
 .. code-block:: yaml
-   
+
    Log.StatisticsLevel: 2
 
 Log.DebugLevel
@@ -376,14 +401,14 @@ Log.DebugLevel
 Defines the loglevel of the aminer debug-logfile.
 
 .. code-block:: yaml
-   
+
    Log.DebugLevel: 2
 
 Log.RemoteControlLogFile
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Default: '/var/lib/aminer/log/aminerRemoteLog.txt'
 * Type: string (path to the logfile)
+* Default: '/var/lib/aminer/log/aminerRemoteLog.txt'
 
 Defines the path of the logfile for the RemoteControl.
 
@@ -394,8 +419,8 @@ Defines the path of the logfile for the RemoteControl.
 Log.StatisticsFile
 ~~~~~~~~~~~~~~~~~~
 
-* Default: '/var/lib/aminer/log/statistics.log'
 * Type: string (path to the logfile)
+* Default: '/var/lib/aminer/log/statistics.log'
 
 Defines the path of the stats-file.
 
@@ -406,14 +431,38 @@ Defines the path of the stats-file.
 Log.DebugFile
 ~~~~~~~~~~~~~~~~~~
 
-* Default: '/var/lib/aminer/log/aminer.log'
 * Type: string (path to the logfile)
+* Default: '/var/lib/aminer/log/aminer.log'
 
 Defines the path of the debug-log-file.
 
 .. code-block:: yaml
 
    Log.DebugFile: '/var/log/aminer.log'
+
+Log.Rotation.MaxBytes
+~~~~~~~~~~~~~~~~~~~~~
+
+* Type: number of bytes
+* Default: 1048576 (1 Megabyte)
+
+Defines the number of bytes before "Log.RemoteControlLogFile", "Log.StatisticsFile" and "Log.DebugFile" is rotated.
+
+.. code-block:: yaml
+
+   Log.Rotation.MaxBytes: 1048576
+
+Log.Rotation.BackupCount
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Type: number of old logfiles
+* Default: 5
+
+Defines the number of logfiles saved after rotation of "Log.RemoteControlLogFile", "Log.StatisticsFile" and "Log.DebugFile".
+
+.. code-block:: yaml
+
+   Log.Rotation.BackupCount: 5
 
 
 -----
@@ -434,7 +483,7 @@ Parser paths to DateTimeModelElements to set timestamp of log events.
 
 .. code-block:: yaml
 
-   timestamp_paths: 
+   timestamp_paths:
       - '/parser/model/time'
       - '/parser/model/type/execve/time'
       - '/parser/model/type/proctitle/time'
@@ -470,7 +519,7 @@ eol_sep
 
 * Default: '\n'
 
-End of Line seperator for events. 
+End of Line seperator for events.
 
 .. note:: Enables parsing of multiline logs.
 
@@ -522,11 +571,11 @@ There are some predefined standard-model-elements like *IpAddressDataModelElemen
    from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
    from aminer.parsing.SequenceModelElement import SequenceModelElement
    from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
-   
+
    def get_model():
        """Return a model to parse Apache Access logs from the AIT-LDS."""
        alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
-   
+
        model = SequenceModelElement('model', [
            FirstMatchModelElement('client_ip', [
                IpAddressDataModelElement('client_ip'),
@@ -565,7 +614,7 @@ There are some predefined standard-model-elements like *IpAddressDataModelElemen
                    FixedDataModelElement('sp12', b'"'),
                    ])),
            ])
-   
+
        return model
 
 This parser can be used as "type" in **/etc/aminer/config.yml**:
@@ -588,27 +637,27 @@ This parser can be used as "type" in **/etc/aminer/config.yml**:
              type: VariableByteDataModelElement
              name: 'host'
              args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
-   
+
            - id: identity_model
              type: VariableByteDataModelElement
              name: 'ident'
              args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
-   
+
            - id: user_name_model
              type: VariableByteDataModelElement
              name: 'user'
              args: '0123456789abcdefghijklmnopqrstuvwxyz.-'
-   
+
            - id: new_time_model
              type: DateTimeModelElement
              name: 'time'
-             args: '[%d/%b/%Y:%H:%M:%S +0000]'
-   
+             date_format: '[%d/%b/%Y:%H:%M:%S +0000]'
+
            - id: sq3
              type: FixedDataModelElement
              name: 'sq3'
              args: ' "'
-   
+
            - id: request_method_model
              type: FixedWordlistDataModelElement
              name: 'method'
@@ -622,50 +671,50 @@ This parser can be used as "type" in **/etc/aminer/config.yml**:
                      - 'OPTIONS'
                      - 'TRACE'
                      - 'PATCH'
-   
+
            - id: request_model
              type: VariableByteDataModelElement
              name: 'request'
              args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+'
-   
+
            - id: http1
              type: FixedDataModelElement
              name: 'http1'
              args: ' HTTP/'
-   
+
            - id: version_model
              type: VariableByteDataModelElement
              name: 'version'
              args: '0123456789.'
-   
+
            - id: sq4
              type: FixedDataModelElement
              name: 'sq4'
              args: '" '
-   
+
            - id: status_code_model
              type: DecimalIntegerValueModelElement
              name: 'status'
-   
+
            - id: size_model
              type: DecimalIntegerValueModelElement
              name: 'size'
-   
+
            - id: sq5
              type: FixedDataModelElement
              name: 'sq5'
              args: ' "-" "'
-   
+
            - id: user_agent_model
              type: VariableByteDataModelElement
              name: 'useragent'
              args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+;:_ '
-   
+
            - id: sq6
              type: FixedDataModelElement
              name: 'sq6'
              args: '"'
-   
+
            - id: 'startModel'
              start: True
              type: SequenceModelElement
@@ -764,6 +813,11 @@ This element parses dates using a custom, timezone and locale-aware implementati
 
        Common formats are:
          * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
+         * '%d.%m.%YT%H:%M:%S' e.g. for '07.02.2019T11:40:00'
+         * '%d.%m.%Y %H:%M:%S.%f' e.g. for '07.02.2019 11:40:00.123456'
+         * '%d.%m.%Y %H:%M:%S%z' e.g. for '07.02.2019 11:40:00+0000" or "07.02.2019 11:40:00 UTC'
+         * '%d.%m.%Y' e.g. for '07.02.2019'
+         * '%H:%M:%S' e.g. for '11:40:23'
 
   2. time_zone:
       time_zone the timezone for parsing the values. Default: **UTC**.
@@ -778,7 +832,7 @@ This element parses dates using a custom, timezone and locale-aware implementati
       max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
       of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
       within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
-       
+
 
 
 The following code simply adds a custom date_format:
@@ -789,7 +843,7 @@ The following code simply adds a custom date_format:
         - id: 'dtm'
           type: DateTimeModelElement
           name: 'DTM'
-          args: '%Y-%m-%d %H:%M:%S'
+          date_format: '%Y-%m-%d %H:%M:%S'
 
 DebugModelElement
 ~~~~~~~~~~~~~~~~~
@@ -822,7 +876,7 @@ This model element parses decimal values with optional signum, padding or expone
 
 
 .. code-block:: yaml
-  
+
      Parser:
           - id: decimalFloatValueModelElement
             type: DecimalFloatValueModelElement
@@ -844,7 +898,7 @@ This model element parses integer values with optional signum or padding. With p
 
 
 .. code-block:: yaml
-  
+
      Parser:
        - id: minutes
          type: DecimalIntegerValueModelElement
@@ -862,7 +916,7 @@ This model element takes any string up to a specific delimiter string.
 * **consume_delimiter**: defines whether the delimiter should be processed with the match, default is False
 
 .. code-block:: yaml
-   
+
      Parser:
        - id: delimitedDataModelElement
          type: DelimitedDataModelElement
@@ -1195,7 +1249,7 @@ This model defines a string that is delimited by a white space.
 Analysing
 ---------
 
-All detectors have the following parameters and may have additional specific parameters that are defined in the respective sections. 
+All detectors have the following parameters and may have additional specific parameters that are defined in the respective sections.
 
 * **id**: must be a unique string
 * **type**: must be an existing Analysis component (required)
@@ -2322,7 +2376,7 @@ EventHandling
 
 EventHandler are output modules that allow the logdata-anomaly-miner to write alerts to specific targets.
 
-All EventHandler must have the following parameters and may have additional specific parameters that are defined in the respective sections. 
+All EventHandler must have the following parameters and may have additional specific parameters that are defined in the respective sections.
 
 * **id**: must be a unique string (required)
 * **type**: must be an existing Analysis component (required)
@@ -2377,7 +2431,7 @@ The KafkaEventHandler writes it's output to a `Kafka Message-Queue <https://kafk
 
 * **topic**: String property with the topic-name for the message queue
 * **cfgfile**: String property with the path to the kafka-config file. A comprehensive list of all config-parameters can be found at https://kafka-python.readthedocs.io/en/master/apidoc/KafkaProducer.html
-  
+
   A typical kafka-config-file might look like this:
 
 .. code-block:: yaml
