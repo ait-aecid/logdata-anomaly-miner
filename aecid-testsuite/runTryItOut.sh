@@ -113,7 +113,7 @@ echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 # Parse the aminer CMD and run it. Check if no error is output by the aminer. (11.)
 awk '/^```$/ && ++n == 17, /^```$/ && n++ == 18' < $INPUT_FILE > $OUT
 CMD=$(sed -n '2p' < $OUT)
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -164,7 +164,7 @@ echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 sudo rm -r /var/lib/aminer/NewMatchPathValueDetector/accesslog_status 2> /dev/null
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -190,7 +190,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -207,7 +207,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -224,7 +224,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -238,7 +238,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -252,7 +252,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -266,7 +266,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -280,7 +280,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -294,7 +294,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -318,7 +318,7 @@ fi
 # Run the final configuration. (24.)
 awk '/^```yaml$/ && ++n == 25, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
 
-runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi

@@ -60,13 +60,17 @@ function compareVersionStrings(){
 
 function runAminerUntilEnd() {
   CMD=$1
-  OUT=$2
-  LOGFILE=$3
-  REP_PATH=$4
-  CFG_PATH=$5
+  LOGFILE=$2
+  REP_PATH=$3
+  CFG_PATH=$4
   echo "Core.PersistencePeriod: 1" >> $CFG_PATH
   sudo rm $REP_PATH 2> /dev/null
-  $CMD -f -C > $OUT &
+  if [ $# -eq 5 ]; then
+    OUT=$5
+    $CMD > $OUT &
+  elif [ $# -eq 4 ]; then
+    $CMD &
+  fi
   FILE_SIZE=`stat --printf="%s" $LOGFILE`
   IN=`cat $REP_PATH 2> /dev/null`
   IFS=',' read -ra ADDR <<< "$IN"
