@@ -4,7 +4,6 @@
 
 ##################################################################
 # Description of the test. Line numbers are also considering starting lines with ```, so they are incremented by one compared to the text itself.
-# TODO: remove line numbers from loglines
 # 1.) Write log lines from 4th to 5th ``` into /tmp/access_00 and /tmp/access_01.
 # 2.) Read 1st ```python to 6th ``` and compare it with ApacheAccessParsingModel.
 # 3.) Run the linking command between 7th and 8th ```.
@@ -114,9 +113,7 @@ echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 # Parse the aminer CMD and run it. Check if no error is output by the aminer. (11.)
 awk '/^```$/ && ++n == 17, /^```$/ && n++ == 18' < $INPUT_FILE > $OUT
 CMD=$(sed -n '2p' < $OUT)
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -125,6 +122,7 @@ testConfigError $OUT "Failed Test in 11."
 exit_code=$((exit_code | $?))
 
 # Compare the results with the count report. (12.)
+echo "$(awk '/^{$/ && ++n == 2, /^}$/' < $OUT)" > $OUT # remove NewMatchPathDetector output.
 IN1=$(sed -n '1,7p' < $OUT)
 IN2=$(sed -n '8p' < $OUT)
 IN3=$(sed -n '9p' < $OUT)
@@ -166,12 +164,12 @@ echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 sudo rm -r /var/lib/aminer/NewMatchPathValueDetector/accesslog_status 2> /dev/null
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
+
+echo "$(awk '/^{$/ && ++n == 2, /^}$/' < $OUT)" > $OUT # remove NewMatchPathDetector output.
 IN1=$(sed -n '1,22p' < $OUT)
 IN2=$(sed -n '24,26p' < $OUT)
 
@@ -192,9 +190,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -211,9 +207,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -230,9 +224,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -246,9 +238,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -262,9 +252,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -278,9 +266,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -294,9 +280,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -310,9 +294,7 @@ echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -336,9 +318,7 @@ fi
 # Run the final configuration. (24.)
 awk '/^```yaml$/ && ++n == 25, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
 
-$CMD > $OUT &
-sleep $WAIT & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$OUT" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi

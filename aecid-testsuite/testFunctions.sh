@@ -57,3 +57,31 @@ function compareVersionStrings(){
   done
   return 0
 }
+
+function runAminerUntilEnd() {
+  CMD=$1
+  OUT=$2
+  LOGFILE=$3
+  REP_PATH=$4
+  CFG_PATH=$5
+  echo "Core.PersistencePeriod: 1" >> $CFG_PATH
+  sudo rm $REP_PATH 2> /dev/null
+  $CMD -f -C > $OUT &
+  FILE_SIZE=`stat --printf="%s" $LOGFILE`
+  IN=`cat $REP_PATH 2> /dev/null`
+  IFS=',' read -ra ADDR <<< "$IN"
+  CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
+  CNTR=0
+  while [[ "$CURRENT_SIZE" != "$FILE_SIZE" && $CNTR -lt 20 ]]; do
+     sleep 1
+     IN=`cat $REP_PATH 2> /dev/null`
+     IFS=',' read -ra ADDR <<< "$IN"
+     CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
+     CNTR=$((++CNTR))
+  done
+  sleep 3
+  sudo pkill -x aminer
+  RES=$?
+  wait $!
+  return $RES
+}

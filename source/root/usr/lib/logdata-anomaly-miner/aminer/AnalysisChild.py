@@ -29,7 +29,8 @@ from datetime import datetime
 import shutil
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_STAT_PERIOD,\
-    DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME
+    DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD,\
+    DEFAULT_PERSISTENCE_PERIOD
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input.LogStream import LogStream
 from aminer.util import PersistenceUtil
@@ -201,12 +202,13 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
     def __init__(self, program_name, aminer_config):
         self.program_name = program_name
+        self.aminer_config = aminer_config
         self.analysis_context = AnalysisContext(aminer_config)
         self.run_analysis_loop_flag = True
         self.log_streams_by_name = {}
         self.persistence_file_name = build_persistence_file_name(
             self.analysis_context.aminer_config, self.__class__.__name__ + '/RepositioningData')
-        self.next_persist_time = time.time() + 600
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         self.repositioning_data_dict = {}
         self.master_control_socket = None
@@ -520,7 +522,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 if repositioning_data is not None:
                     self.repositioning_data_dict[log_stream_name] = repositioning_data
             PersistenceUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
             logging.getLogger(DEBUG_LOG_NAME).debug('Repositioning data was persisted.')
         return delta
