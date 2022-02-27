@@ -31,6 +31,10 @@ if ! test -f "$CFG_PATH22"; then
 	exit 1
 fi
 
+# starting download to reduce wait time
+curl $KAFKA_URL --output kafka.tgz 2> /dev/null &
+DOWNLOAD_PID=$!
+
 #start aminer
 sudo aminer --config $CFG_PATH21 > $OUT &
 PID=$!
@@ -113,7 +117,7 @@ sudo rm /tmp/syslog 2> /dev/null
 sudo rm /tmp/auth.log 2> /dev/null
 sudo rm $OUT 2> /dev/null
 sudo cp ../unit/data/kafka-client.conf /etc/aminer/kafka-client.conf
-curl $KAFKA_URL --output kafka.tgz
+wait $DOWNLOAD_PID
 tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
 $KAFKA_VERSIONSTRING/bin/zookeeper-server-start.sh $KAFKA_VERSIONSTRING/config/zookeeper.properties > /dev/null &
