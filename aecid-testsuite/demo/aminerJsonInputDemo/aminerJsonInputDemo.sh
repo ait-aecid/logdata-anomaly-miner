@@ -82,3 +82,4 @@ END
 echo "$VAR" >> $LOGFILE
 
 runAminerUntilEnd "sudo aminer --config $FILE" "$LOGFILE" "/tmp/lib/aminer/AnalysisChild/RepositioningData" "$FILE"
+exit $?

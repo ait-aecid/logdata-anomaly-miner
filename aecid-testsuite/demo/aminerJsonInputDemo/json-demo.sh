@@ -1,12 +1,13 @@
 #!/bin/bash
 
+. ./testFunctions.sh
+
 sudo mkdir /tmp/lib 2> /dev/null
 sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-sudo rm /tmp/syslog 2> /dev/null
 
 echo "Demo started.."
 echo ""
@@ -17,12 +18,19 @@ if ! test -f "$FILE"; then
 	exit 1
 fi
 
-#start aminer
-sudo aminer --config "$FILE" &
+FOUND=false
+LOGFILE=""
+while read p; do
+  if [[ $FOUND = true ]]; then
+    LOGFILE="$p"
+    break
+  fi
+  if [[ "$p" == "LogResourceList:" ]]; then
+    FOUND=true
+  fi
+done < $FILE
+IFS="'" read -ra ADDR <<< "$LOGFILE"
+LOGFILE="${ADDR[1]:7}"  # remove the file:// prefix.
 
-#stop aminer
-sleep 10 & wait $!
-sudo pkill -x aminer
-KILL_PID=$!
-sleep 3
-wait $KILL_PID
+runAminerUntilEnd "sudo aminer --config $FILE" "$LOGFILE" "/tmp/lib/aminer/AnalysisChild/RepositioningData" "$FILE"
+exit $?

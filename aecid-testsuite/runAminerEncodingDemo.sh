@@ -23,6 +23,5 @@ cat $ERR
 
 sudo rm /tmp/demo-config.py 2> /dev/null
 sudo rm /tmp/demo-config.yml 2> /dev/null
-# sudo rm /tmp/syslog
 sudo rm $ERR
 exit $exit_code

@@ -71,6 +71,7 @@ function runAminerUntilEnd() {
   elif [ $# -eq 4 ]; then
     $CMD &
   fi
+  PID=$!
   FILE_SIZE=`stat --printf="%s" $LOGFILE`
   IN=`cat $REP_PATH 2> /dev/null`
   IFS=',' read -ra ADDR <<< "$IN"
@@ -85,7 +86,7 @@ function runAminerUntilEnd() {
   done
   sleep 3
   sudo pkill -x aminer
+  wait $PID
   RES=$?
-  wait $!
   return $RES
 }

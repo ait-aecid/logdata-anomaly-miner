@@ -27,7 +27,7 @@ if grep -Fq "UnicodeDecodeError" $OUT || grep -Fq "Config-Error" $OUT || grep -F
 	sed '/Traceback/,$p' $OUT
 fi
 
-exit $exit_code
 sudo rm $OUT
 sudo rm -r /tmp/json_logs
 sudo rm -r /tmp/windows_json_logs
+exit $exit_code

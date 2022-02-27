@@ -203,3 +203,6 @@ EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
 
+Core.PersistencePeriod: 1
+Core.PersistencePeriod: 1
+Core.PersistencePeriod: 1
