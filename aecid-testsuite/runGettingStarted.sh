@@ -76,9 +76,7 @@ awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PAT
 OUT1=$(sed -n '6,33p' < $OUT)
 OUT2=$(sed -n '36,64p' < $OUT)
 
-$CMD > $OUT &
-sleep 5 & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD -C" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -123,9 +121,7 @@ CMD=${CMD#*$ }
 
 OUT1=$(sed -n '4,32p' < $OUT)
 
-sudo $CMD > $OUT &
-sleep 5 & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -154,9 +150,7 @@ OUT7=$(sed -n '189,217p' < $OUT)
 
 # test the fifth yaml config. (13.)
 awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
-sudo $CMD > $OUT &
-sleep 5 & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -201,9 +195,7 @@ echo "$OUT1" >> $LOG
 
 OUT1=$(sed -n '4,32p' < $OUT)
 
-sudo $CMD > $OUT &
-sleep 5 & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi

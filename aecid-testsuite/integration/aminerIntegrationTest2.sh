@@ -2,10 +2,9 @@
 
 #To add more log lines following positions must be changed: main script, checkAllOutputs, isExpectedOutput. The Position is marked with a "ADD HERE" comment.
 
-NUMBER_OF_LOG_LINES=7
-
 . ./declarations.sh
-
+NUMBER_OF_LOG_LINES=7
+OUT=/tmp/output
 
 #<<'END'
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
@@ -16,24 +15,25 @@ sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 sudo rm /tmp/auth.log 2> /dev/null
-sudo rm /tmp/output 2> /dev/null
+sudo rm $OUT 2> /dev/null
 
 echo "Integration test started.."
 echo ""
 
-FILE=/tmp/config21.py
-if ! test -f "$FILE"; then
-    echo "$FILE does not exist!"
+CFG_PATH21=/tmp/config21.py
+if ! test -f "$CFG_PATH21"; then
+    echo "$CFG_PATH21 does not exist!"
 	exit 1
 fi
-FILE=/tmp/config22.py
-if ! test -f "$FILE"; then
-    echo "$FILE does not exist!"
+CFG_PATH22=/tmp/config22.py
+if ! test -f "$CFG_PATH22"; then
+    echo "$CFG_PATH22 does not exist!"
 	exit 1
 fi
 
 #start aminer
-sudo aminer --config /tmp/config21.py > /tmp/output &
+sudo aminer --config $CFG_PATH21 > $OUT &
+PID=$!
 
 time=`date +%s`
 
@@ -70,11 +70,9 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #ADD HERE
 
 #stop aminer
-sleep 3 & wait $!
-sudo pkill -x aminer
-KILL_PID=$!
 sleep 3
-wait $KILL_PID
+sudo pkill -x aminer
+wait $PID
 
 checkAllOutputs
 if [ $? == 0 ]; then
@@ -113,7 +111,7 @@ sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 sudo rm /tmp/auth.log 2> /dev/null
-sudo rm /tmp/output 2> /dev/null
+sudo rm $OUT 2> /dev/null
 sudo cp ../unit/data/kafka-client.conf /etc/aminer/kafka-client.conf
 curl $KAFKA_URL --output kafka.tgz
 tar xvf kafka.tgz > /dev/null
@@ -126,7 +124,8 @@ sleep 1
 COUNTER=0
 
 #start aminer
-sudo aminer --config /tmp/config22.py > /tmp/output &
+sudo aminer --config $CFG_PATH22 > $OUT &
+PID=$!
 sleep 5
 
 time=`date +%s`
@@ -164,11 +163,9 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #ADD HERE
 
 #stop aminer
-sleep 3 & wait $!
-sudo pkill -x aminer
-KILL_PID=$!
 sleep 3
-wait $KILL_PID
+sudo pkill -x aminer
+wait $PID
 
 result=0
 checkAllOutputs

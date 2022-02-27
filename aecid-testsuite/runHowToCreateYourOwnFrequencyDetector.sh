@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./testFunctions.sh
+
 BRANCH=main
 
 if [ $# -gt 0 ]
@@ -17,14 +19,14 @@ TMP_YML_CONFIG=/tmp/YamlConfig.py
 TMP_SCHEMA=/tmp/schema.py
 FREQ_DET=/usr/lib/logdata-anomaly-miner/aminer/analysis/FrequencyDetector.py
 TMP_FREQ_DET=/tmp/FrequencyDetector.py
-CONFIG=/tmp/config.yml
+CFG_PATH=/tmp/config.yml
 
 # extract the file from the development branch of the wiki project.
 git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git 2> /dev/null
 cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $SRC_FILE | sed '/^```/ d' > $CONFIG
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $SRC_FILE | sed '/^```/ d' > $CFG_PATH
 
 # create backup of schema.
 sudo cp $VAL_SCHEMA $TMP_VAL_SCHEMA
@@ -43,15 +45,13 @@ printf "            " > $TMP_SCHEMA
 awk '/^```python$/ && ++n == 2, /^```$/' < $SRC_FILE | sed '/^```/ d' >> $TMP_SCHEMA
 sudo sed -i "                    /num_sections_waiting_time_for_TSA=item/r $TMP_SCHEMA" $YML_CONFIG
 
-sudo aminer --config $CONFIG > /dev/null &
-sleep 5 & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "sudo aminer --config $CFG_PATH -C" "" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "/dev/null"
 exit_code=$?
 # reset schema to backup.
 sudo cp $TMP_VAL_SCHEMA $VAL_SCHEMA
 sudo cp $TMP_YML_CONFIG $YML_CONFIG
 sudo rm $TMP_VAL_SCHEMA
-sudo rm $CONFIG
+sudo rm $CFG_PATH
 sudo rm $TMP_YML_CONFIG
 sudo rm $FREQ_DET
 sudo rm -r logdata-anomaly-miner.wiki

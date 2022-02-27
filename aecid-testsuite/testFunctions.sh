@@ -63,7 +63,13 @@ function runAminerUntilEnd() {
   LOGFILE=$2
   REP_PATH=$3
   CFG_PATH=$4
-  echo "Core.PersistencePeriod: 1" >> $CFG_PATH
+  if [[ $CFG_PATH == *.py ]]; then
+    echo "config_properties['Core.PersistencePeriod'] = 1" >> $CFG_PATH
+  elif [[ $CFG_PATH == *.yml ]]; then
+    echo "Core.PersistencePeriod: 1" >> $CFG_PATH
+  else
+    return 2
+  fi
   sudo rm $REP_PATH 2> /dev/null
   if [ $# -eq 5 ]; then
     OUT=$5
@@ -72,12 +78,12 @@ function runAminerUntilEnd() {
     $CMD &
   fi
   PID=$!
-  FILE_SIZE=`stat --printf="%s" $LOGFILE`
+  FILE_SIZE=`stat --printf="%s" $LOGFILE 2> /dev/null`
   IN=`cat $REP_PATH 2> /dev/null`
   IFS=',' read -ra ADDR <<< "$IN"
   CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
   CNTR=0
-  while [[ "$CURRENT_SIZE" != "$FILE_SIZE" && $CNTR -lt 20 ]]; do
+  while [[ ("$CURRENT_SIZE" != "$FILE_SIZE" || "$CURRENT_SIZE" == "") && $CNTR -lt 20 ]]; do
      sleep 1
      IN=`cat $REP_PATH 2> /dev/null`
      IFS=',' read -ra ADDR <<< "$IN"

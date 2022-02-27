@@ -21,6 +21,7 @@ SUSPEND_FILE=/tmp/suspend_output.txt
 SUSPEND_FILE_MD5=/tmp/suspend.md5
 
 sudo aminer --config "$FILE" > $SUSPEND_FILE &
+PID=$!
 
 sleep 2
 
@@ -76,9 +77,11 @@ if [[ $activate_diff == "" ]]; then
 fi
 
 sudo pkill -x aminer
-KILL_PID=$!
 sleep 3
-wait $KILL_PID
+wait $PID
+if [[ $? != 0 ]]; then
+	exit_code=1
+fi
 
 sudo rm /tmp/demo-config.py
 sudo rm /tmp/suspend_output.txt
