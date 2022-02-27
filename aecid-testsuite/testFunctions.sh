@@ -94,5 +94,6 @@ function runAminerUntilEnd() {
   sudo pkill -x aminer
   wait $PID
   RES=$?
+  sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
   return $RES
 }

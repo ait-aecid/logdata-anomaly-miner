@@ -6,12 +6,12 @@ sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
+sudo rm $OUT 2> /dev/null
 
 cp -r ./demo/aminerJsonInputDemo/json_logs /tmp/json_logs
 cp -r ./demo/aminerJsonInputDemo/windows_json_logs /tmp/windows_json_logs
 
-sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
-sudo ./demo/aminerJsonInputDemo/json-demo.sh $1 > $OUT
+sudo ./demo/aminerJsonInputDemo/json-demo.sh $1 $OUT
 exit_code=$?
 
 OUTPUT=$(cat $OUT)

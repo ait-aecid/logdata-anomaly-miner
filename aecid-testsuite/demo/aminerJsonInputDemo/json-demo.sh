@@ -12,9 +12,10 @@ sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 echo "Demo started.."
 echo ""
 
-FILE=$1
-if ! test -f "$FILE"; then
-  echo "$FILE does not exist!"
+CFG_PATH=$1
+OUT=$2
+if ! test -f "$CFG_PATH"; then
+  echo "$CFG_PATH does not exist!"
 	exit 1
 fi
 
@@ -28,9 +29,10 @@ while read p; do
   if [[ "$p" == "LogResourceList:" ]]; then
     FOUND=true
   fi
-done < $FILE
+done < $CFG_PATH
 IFS="'" read -ra ADDR <<< "$LOGFILE"
 LOGFILE="${ADDR[1]:7}"  # remove the file:// prefix.
+echo "$LOGFILE" SSS "$CFG_PATH" "$OUT"
 
-runAminerUntilEnd "sudo aminer --config $FILE" "$LOGFILE" "/tmp/lib/aminer/AnalysisChild/RepositioningData" "$FILE"
+runAminerUntilEnd "sudo aminer --config $CFG_PATH" "$LOGFILE" "/tmp/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 exit $?
