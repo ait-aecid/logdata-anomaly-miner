@@ -32,7 +32,6 @@ while read p; do
 done < $CFG_PATH
 IFS="'" read -ra ADDR <<< "$LOGFILE"
 LOGFILE="${ADDR[1]:7}"  # remove the file:// prefix.
-echo "$LOGFILE" SSS "$CFG_PATH" "$OUT"
 
 runAminerUntilEnd "sudo aminer --config $CFG_PATH" "$LOGFILE" "/tmp/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 exit $?
