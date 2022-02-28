@@ -75,6 +75,7 @@ $CMD
 
 IFS=' ' read -ra ADDR <<< "$CMD"
 CFG_PATH=$(echo "${ADDR[-1]}")
+sudo chown $USER:$USER $CFG_PATH
 
 # replace LearnMode: False with LearnMode: True in CFG_PATH. (5.)
 awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $OUT
@@ -103,11 +104,12 @@ CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```
 CFG_ANALYSIS=$(echo "$CFG_ANALYSIS" | sed 's/report_interval: 10/report_interval: 3/g')
 CFG_EVENT_HANDLERS=$(awk '/^```yaml$/ && ++n == 6, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+#cat $CFG_PATH
 
 # Parse the aminer CMD and run it. Check if no error is output by the aminer. (11.)
 awk '/^```$/ && ++n == 17, /^```$/ && n++ == 18' < $INPUT_FILE > $OUT
@@ -155,11 +157,11 @@ $CMD1
 # Replace the Analysis config and compare the output. (14.)
 CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 8, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 sudo rm -r /var/lib/aminer/NewMatchPathValueDetector/accesslog_status 2> /dev/null
 
@@ -183,11 +185,11 @@ exit_code=$((exit_code | $?))
 # Replace the Analysis config and compare the output. (15.)
 CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 10, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
@@ -200,11 +202,11 @@ exit_code=$((exit_code | $?))
 # Replace the Analysis config and compare the output. (16.)
 CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 11, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
@@ -217,11 +219,11 @@ exit_code=$((exit_code | $?))
 # Replace the Parser config. (17.)
 CFG_PARSER=$(awk '/^```yaml$/ && ++n == 13, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
@@ -231,11 +233,11 @@ fi
 # Replace the Parser config. (18.)
 CFG_PARSER=$(awk '/^```yaml$/ && ++n == 16, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
@@ -245,11 +247,11 @@ fi
 # Replace the Analysis config. (19.)
 CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 17, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
@@ -259,11 +261,11 @@ fi
 # Replace the Parser config. (20.)
 CFG_PARSER=$(awk '/^```yaml$/ && ++n == 19, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
@@ -273,11 +275,11 @@ fi
 # Replace the Analysis config. (21.)
 CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 20, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
@@ -287,11 +289,11 @@ fi
 # Replace the Parser config. (22.)
 CFG_PARSER=$(awk '/^```yaml$/ && ++n == 22, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
@@ -301,11 +303,11 @@ fi
 # Replace the Analysis config. (23.)
 CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 23, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
-sudo echo "$CFG_BEFORE" > $CFG_PATH
-sudo echo "$CFG_PARSER" >> $CFG_PATH
-sudo echo "$CFG_INPUT" >> $CFG_PATH
-sudo echo "$CFG_ANALYSIS" >> $CFG_PATH
-sudo echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+echo "$CFG_BEFORE" > $CFG_PATH
+echo "$CFG_PARSER" >> $CFG_PATH
+echo "$CFG_INPUT" >> $CFG_PATH
+echo "$CFG_ANALYSIS" >> $CFG_PATH
+echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
