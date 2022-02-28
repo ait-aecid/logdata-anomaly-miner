@@ -53,7 +53,7 @@ git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
 # replace /etc/aminer/config.yml (0.)
-sed -i 's?/etc/aminer/config.yml?/tmp/gettingStartedConfig.yml?g' $INPUT_FILE
+#sed -i 's?/etc/aminer/config.yml?/tmp/gettingStartedConfig.yml?g' $INPUT_FILE
 
 # create log file (1.)
 mkdir -p /var/log/apache2
