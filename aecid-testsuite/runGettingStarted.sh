@@ -52,6 +52,9 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
+# replace /etc/aminer/config.yml (0.)
+sed -i 's?/etc/aminer/config.yml?/tmp/gettingStartedConfig.yml?g' $INPUT_FILE
+
 # create log file (1.)
 mkdir -p /var/log/apache2
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE > $LOG

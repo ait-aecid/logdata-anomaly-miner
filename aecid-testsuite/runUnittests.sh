@@ -49,6 +49,7 @@ test -e /var/mail/mail && sudo rm -f /var/mail/mail
 sudo rm /tmp/test4unixSocket.sock
 sudo rm /tmp/test5unixSocket.sock
 sudo rm /tmp/test6unixSocket.sock
+sudo rm -r /tmp/lib/aminer/*
 
 $KAFKA_VERSIONSTRING/bin/kafka-server-stop.sh > /dev/null
 $KAFKA_VERSIONSTRING/bin/zookeeper-server-stop.sh > /dev/null

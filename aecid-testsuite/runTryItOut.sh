@@ -52,6 +52,9 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
+# replace /etc/aminer/config.yml (0.)
+sed -i 's?/etc/aminer/config.yml?/tmp/tryItOutConfig.yml?g' $INPUT_FILE
+
 # write access logs (1.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE | sed '/^```/ d' > $LOG1
 cp $LOG1 $LOG2
@@ -109,6 +112,7 @@ echo "$CFG_PARSER" >> $CFG_PATH
 echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
+#cat $CFG_PATH
 
 # Parse the aminer CMD and run it. Check if no error is output by the aminer. (11.)
 awk '/^```$/ && ++n == 17, /^```$/ && n++ == 18' < $INPUT_FILE > $OUT
