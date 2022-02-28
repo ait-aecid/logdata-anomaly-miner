@@ -54,7 +54,7 @@ cd ..
 
 # replace /etc/aminer/config.yml (0.)
 sed -i 's?/etc/aminer/config.yml?/etc/aminer/gettingStartedConfig.yml?g' $INPUT_FILE
-sudo chown -R $USER:USER /etc/aminer
+sudo chown -R $USER:$USER /etc/aminer
 
 # create log file (1.)
 mkdir -p /var/log/apache2
