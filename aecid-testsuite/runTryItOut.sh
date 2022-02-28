@@ -50,12 +50,6 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
-# replace /etc/aminer/config.yml (0.)
-sed -i 's?/etc/aminer/config.yml?/tmp/tryItOutConfig.yml?g' $INPUT_FILE
-sudo touch tmp/tryItOutConfig.yml
-sudo chown -R $USER:$USER /tmp
-ls -la /tmp
-
 # write access logs (1.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE | sed '/^```/ d' > $LOG1
 cp $LOG1 $LOG2
