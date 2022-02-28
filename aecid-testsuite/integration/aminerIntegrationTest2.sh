@@ -20,12 +20,12 @@ sudo rm $OUT 2> /dev/null
 echo "Integration test started.."
 echo ""
 
-CFG_PATH21=/tmp/config21.py
+CFG_PATH21=/tmp/integration-config21.py
 if ! test -f "$CFG_PATH21"; then
     echo "$CFG_PATH21 does not exist!"
 	exit 1
 fi
-CFG_PATH22=/tmp/config22.py
+CFG_PATH22=/tmp/integration-config22.py
 if ! test -f "$CFG_PATH22"; then
     echo "$CFG_PATH22 does not exist!"
 	exit 1
