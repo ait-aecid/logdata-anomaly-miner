@@ -7,7 +7,7 @@ cntr=0
 for var in "$@"
 do
 	if [[ $cntr -gt 0 ]]; then
-    cp "$var" /tmp/integration-"$var"
+    cp "$var" /tmp/"$var"
 	fi
 	cntr=$(($cntr+1))
 done

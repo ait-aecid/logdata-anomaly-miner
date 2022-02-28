@@ -16,7 +16,7 @@ sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 echo "Integration test started.."
 echo ""
 
-CFG_PATH=/tmp/integration-config.py
+CFG_PATH=/tmp/config.py
 if ! test -f "$CFG_PATH"; then
     echo "$CFG_PATH does not exist!"
 	exit 1
@@ -47,7 +47,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 
 #ADD HERE
 
-runAminerUntilEnd "aminer --config $CFG_PATH -C" "$LOGFILE" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "/tmp/output"
+runAminerUntilEnd "sudo aminer --config $CFG_PATH" "$LOGFILE" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "/tmp/output"
 
 checkAllOutputs
 if [ $? == 0 ]; then
