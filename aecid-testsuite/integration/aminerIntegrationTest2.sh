@@ -170,6 +170,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 sleep 3
 sudo pkill -x aminer
 wait $PID
+sleep 3 # leave the kafka handler some time.
 
 result=0
 checkAllOutputs

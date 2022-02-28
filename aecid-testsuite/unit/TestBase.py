@@ -108,12 +108,14 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
 class TestBase(unittest.TestCase):
     """This is the base class for all unittests."""
 
-    __configFilePath = os.getcwd()+'/unit/data/config.py'
+    def get_config_file_path(self):
+        # example: unit.analysis.NewMatchPathDetectorTest - we want to know the directory analysis.
+        return os.getcwd()+'/unit/data/parallel_configs/%s_config.py' % self.__module__.split(".")[1]
 
     def setUp(self):
         """Set up all needed variables and remove persisted data."""
         PersistenceUtil.persistable_components = []
-        self.aminer_config = load_config(self.__configFilePath)
+        self.aminer_config = load_config(self.get_config_file_path())
         self.analysis_context = AnalysisContext(self.aminer_config)
         self.output_stream = StringIO()
         self.stream_printer_event_handler = StreamPrinterEventHandler(self.analysis_context, self.output_stream)
@@ -130,7 +132,7 @@ class TestBase(unittest.TestCase):
 
     def tearDown(self):
         """Delete all persisted data after the tests."""
-        self.aminer_config = load_config(self.__configFilePath)
+        self.aminer_config = load_config(self.get_config_file_path())
         persistence_file_name = build_persistence_file_name(self.aminer_config)
         if os.path.exists(persistence_file_name):
             shutil.rmtree(persistence_file_name)
