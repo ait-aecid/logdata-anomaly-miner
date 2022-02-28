@@ -39,7 +39,6 @@ then
 BRANCH=$1
 fi
 
-sudo chown -R aminer:aminer /var/lib/aminer 2> /dev/null
 INPUT_FILE=logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md
 OUT=/tmp/out.txt
 OUT2=/tmp/out2.txt
@@ -53,8 +52,9 @@ git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
 # replace /etc/aminer/config.yml (0.)
-sed -i 's?/etc/aminer/config.yml?/etc/aminer/gettingStartedConfig.yml?g' $INPUT_FILE
-sudo chown -R $USER:$USER /etc/aminer
+sed -i 's?/etc/aminer/config.yml?/tmp/gettingStartedConfig.yml?g' $INPUT_FILE
+sudo touch /tmp/gettingStartedConfig.yml
+sudo chown -R $USER:$USER /tmp
 
 # create log file (1.)
 mkdir -p /var/log/apache2

@@ -38,7 +38,6 @@ then
 BRANCH=$1
 fi
 
-sudo chown -R aminer:aminer /var/lib/aminer 2> /dev/null
 INPUT_FILE=logdata-anomaly-miner.wiki/aminer-TryItOut.md
 OUT=/tmp/out.txt
 LOG1=/tmp/access_00
@@ -52,9 +51,9 @@ git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
 # replace /etc/aminer/config.yml (0.)
-sed -i 's?/etc/aminer/config.yml?/etc/aminer/tryItOutConfig.yml?g' $INPUT_FILE
-sudo chown -R $USER:$USER /etc/aminer
-ls -la ./
+sed -i 's?/etc/aminer/config.yml?/tmp/tryItOutConfig.yml?g' $INPUT_FILE
+sudo touch tmp/tryItOutConfig.yml
+sudo chown -R $USER:$USER /tmp
 ls -la /tmp
 
 # write access logs (1.)
