@@ -4,6 +4,7 @@ import shutil
 import logging
 import sys
 import errno
+import inspect
 from aminer.AminerConfig import KEY_LOG_DIR, DEFAULT_LOG_DIR, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, DEBUG_LOG_NAME,\
     KEY_REMOTE_CONTROL_LOG_FILE, KEY_STAT_LOG_FILE, KEY_DEBUG_LOG_FILE, REMOTE_CONTROL_LOG_NAME, DEFAULT_REMOTE_CONTROL_LOG_FILE,\
     STAT_LOG_NAME, DEFAULT_STAT_LOG_FILE, DEBUG_LEVEL, load_config, build_persistence_file_name, DEFAULT_DEBUG_LOG_FILE
@@ -109,9 +110,8 @@ class TestBase(unittest.TestCase):
     """This is the base class for all unittests."""
 
     def get_config_file_path(self):
-        # example: unit.analysis.NewMatchPathDetectorTest - we want to know the directory analysis.
-        print(self.__module__, file=sys.stderr)
-        return os.getcwd()+'/unit/data/parallel_configs/%s_config.py' % self.__module__.split(".")[1]
+        # example: logdata-anomaly-miner/aecid-testsuite/unit/analysis/AtomFiltersTest.py - we want to know the directory analysis.
+        return os.getcwd()+'/unit/data/parallel_configs/%s_config.py' % inspect.getmodule(self).__file__.split("unit/")[1].split("/")[0]
 
     def setUp(self):
         """Set up all needed variables and remove persisted data."""
