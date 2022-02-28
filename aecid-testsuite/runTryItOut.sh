@@ -54,6 +54,8 @@ cd ..
 # replace /etc/aminer/config.yml (0.)
 sed -i 's?/etc/aminer/config.yml?/etc/aminer/tryItOutConfig.yml?g' $INPUT_FILE
 sudo chown -R $USER:$USER /etc/aminer
+ls -la ./
+ls -la /tmp
 
 # write access logs (1.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE | sed '/^```/ d' > $LOG1
