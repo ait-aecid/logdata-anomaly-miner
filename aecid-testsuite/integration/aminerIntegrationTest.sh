@@ -47,7 +47,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 
 #ADD HERE
 
-ls -la ./demo
+ls -la ../demo
 runAminerUntilEnd "aminer --config $CFG_PATH -C" "$LOGFILE" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "/tmp/output"
 
 checkAllOutputs
