@@ -51,6 +51,10 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
+# replace /etc/aminer/config.yml (0.)
+sed -i 's?/etc/aminer/config.yml?/etc/aminer/tryItOutConfig.yml?g' $INPUT_FILE
+sudo chown -R $USER:USER /etc/aminer
+
 # write access logs (1.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE | sed '/^```/ d' > $LOG1
 cp $LOG1 $LOG2
@@ -75,7 +79,6 @@ $CMD
 
 IFS=' ' read -ra ADDR <<< "$CMD"
 CFG_PATH=$(echo "${ADDR[-1]}")
-sudo chown $USER:$USER $CFG_PATH
 
 # replace LearnMode: False with LearnMode: True in CFG_PATH. (5.)
 awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $OUT
