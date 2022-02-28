@@ -9,9 +9,7 @@ $KAFKA_VERSIONSTRING/bin/zookeeper-server-start.sh $KAFKA_VERSIONSTRING/config/z
 sleep 1
 $KAFKA_VERSIONSTRING/bin/kafka-server-start.sh $KAFKA_VERSIONSTRING/config/server.properties > /dev/null &
 
-
-echo $KAFKA_VERSIONSTRING "DDDDDDDDDDD"
-exit_code = 0
+exit_code=0
 sudo python3 -m unittest discover -s unit/analysis -p '*Test.py' > /dev/null &
 ANALYSIS_PID=$!
 sudo python3 -m unittest discover -s unit/events -p '*Test.py' > /dev/null &

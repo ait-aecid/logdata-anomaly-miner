@@ -1,7 +1,7 @@
 # This is a template for the "aminer" logfile miner tool. Copy
 # it to "config.py" and define your ruleset.
 
-config_properties = {}
+config_properties = {}  # skipcq: PY-W0072
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
@@ -69,7 +69,6 @@ config_properties['MailAlerting.MaxAlertGap'] = 600
 # Define how many events should be included in one alert mail
 # at most. This defaults to 1000
 config_properties['MailAlerting.MaxEventsPerMessage'] = 1000
-# config_properties['LogPrefix'] = 'Original log line: '
 
 # Add your ruleset here:
 

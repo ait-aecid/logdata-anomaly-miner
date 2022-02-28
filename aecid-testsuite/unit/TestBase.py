@@ -110,7 +110,10 @@ class TestBase(unittest.TestCase):
     """This is the base class for all unittests."""
 
     def get_config_file_path(self):
-        # example: logdata-anomaly-miner/aecid-testsuite/unit/analysis/AtomFiltersTest.py - we want to know the directory analysis.
+        """
+        Get the module name to choose the right config file for parallel execution.
+        Example: logdata-anomaly-miner/aecid-testsuite/unit/analysis/AtomFiltersTest.py - we want to know the directory analysis.
+        """
         return os.getcwd()+'/unit/data/parallel_configs/%s_config.py' % inspect.getmodule(self).__file__.split("unit/")[1].split("/")[0]
 
     def setUp(self):
