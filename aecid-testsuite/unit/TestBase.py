@@ -110,6 +110,7 @@ class TestBase(unittest.TestCase):
 
     def get_config_file_path(self):
         # example: unit.analysis.NewMatchPathDetectorTest - we want to know the directory analysis.
+        print(self.__module__)
         return os.getcwd()+'/unit/data/parallel_configs/%s_config.py' % self.__module__.split(".")[1]
 
     def setUp(self):
