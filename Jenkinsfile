@@ -254,7 +254,9 @@ pipeline {
 
         stage("Wiki Tests - development") {
             when {
-                branch "development"
+                not {
+                    branch "main"
+                }
             }
             parallel {
                 stage("Try It Out") {
