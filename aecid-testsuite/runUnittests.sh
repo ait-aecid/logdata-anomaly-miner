@@ -9,7 +9,9 @@ $KAFKA_VERSIONSTRING/bin/zookeeper-server-start.sh $KAFKA_VERSIONSTRING/config/z
 sleep 1
 $KAFKA_VERSIONSTRING/bin/kafka-server-start.sh $KAFKA_VERSIONSTRING/config/server.properties > /dev/null &
 
-# sudo python3 -m unittest discover -s unit -p '*Test.py' > /dev/null
+
+echo $KAFKA_VERSIONSTRING "DDDDDDDDDDD"
+exit_code = 0
 sudo python3 -m unittest discover -s unit/analysis -p '*Test.py' > /dev/null &
 ANALYSIS_PID=$!
 sudo python3 -m unittest discover -s unit/events -p '*Test.py' > /dev/null &
@@ -24,22 +26,27 @@ wait $ANALYSIS_PID
 if [[ $? -ne 0 ]]; then
   exit_code=$?
   echo "Failed in Analysis unittests."
+fi
 wait $PARSING_PID
 if [[ $? -ne 0 ]]; then
   exit_code=$?
   echo "Failed in Parsing unittests."
+fi
 wait $UTIL_PID
 if [[ $? -ne 0 ]]; then
   exit_code=$?
   echo "Failed in Util unittests."
+fi
 wait $INPUT_PID
 if [[ $? -ne 0 ]]; then
   exit_code=$?
   echo "Failed in Input unittests."
+fi
 wait $EVENTS_PID
 if [[ $? -ne 0 ]]; then
   exit_code=$?
   echo "Failed in Events unittests."
+fi
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
 sudo rm /tmp/test4unixSocket.sock
 sudo rm /tmp/test5unixSocket.sock
