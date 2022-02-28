@@ -4,7 +4,7 @@
 
 METADATA_PATH=../source/root/usr/lib/logdata-anomaly-miner/metadata.py
 CONF_PATH=../docs/conf.py
-pwd
+ls -la /home/aminer
 version=$(grep "__version__ =" $METADATA_PATH)
 version=$(sed 's/__version__ = //g' <<< $version)
 version=$(sed 's/"//g' <<< $version)
