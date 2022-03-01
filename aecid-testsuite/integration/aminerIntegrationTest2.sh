@@ -5,6 +5,8 @@
 . ./declarations.sh
 NUMBER_OF_LOG_LINES=7
 OUT=/tmp/output
+SYSLOG=/tmp/syslog
+AUTH=/tmp/auth.log
 
 #<<'END'
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
@@ -13,8 +15,8 @@ sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-sudo rm /tmp/syslog 2> /dev/null
-sudo rm /tmp/auth.log 2> /dev/null
+sudo rm $SYSLOG 2> /dev/null
+sudo rm $AUTH 2> /dev/null
 sudo rm $OUT 2> /dev/null
 
 echo "Integration test started.."
@@ -39,37 +41,35 @@ DOWNLOAD_PID=$!
 sudo aminer --config $CFG_PATH21 > $OUT &
 PID=$!
 
-time=`date +%s`
-
 #Anomaly FixedDataModel HD Repair
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > /tmp/syslog
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > $SYSLOG
 sleep 1
 #New Path
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") > /tmp/auth.log
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") > $AUTH
 sleep 1
 #Known Path
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> /tmp/syslog
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
 sleep 1
 #Anomaly FixedDataModel HD Repair
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") >> /tmp/auth.log
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") >> $AUTH
 sleep 1
 #Anomaly DateTimeModel
-({ date '+%m.%Y %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> /tmp/syslog
+({ date '+%m.%Y %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
 sleep 1
 #Known Path
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> /tmp/auth.log
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $AUTH
 sleep 1
 #Known Path
-({ date '+%Y-%m-%d %T' && echo 'fedora' && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> /tmp/syslog
+({ date '+%Y-%m-%d %T' && echo 'fedora' && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
 sleep 1
 #Root Home Path
-echo 'The Path of the home directory shown by pwd of the user root is: /root' >> /tmp/auth.log
+echo 'The Path of the home directory shown by pwd of the user root is: /root' >> $AUTH
 sleep 1
 #User Home Path
-echo 'The Path of the home directory shown by pwd of the user user is: /home/user' >> /tmp/syslog
+echo 'The Path of the home directory shown by pwd of the user user is: /home/user' >> $SYSLOG
 sleep 1
 #Guest Home Path
-echo 'The Path of the home directory shown by pwd of the user guest is: /home/guest' >> /tmp/auth.log
+echo 'The Path of the home directory shown by pwd of the user guest is: /home/guest' >> $AUTH
 
 #ADD HERE
 
@@ -113,8 +113,8 @@ sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-sudo rm /tmp/syslog 2> /dev/null
-sudo rm /tmp/auth.log 2> /dev/null
+sudo rm $SYSLOG 2> /dev/null
+sudo rm $AUTH 2> /dev/null
 sudo rm $OUT 2> /dev/null
 sudo cp ../unit/data/kafka-client.conf /etc/aminer/kafka-client.conf
 wait $DOWNLOAD_PID
@@ -130,39 +130,37 @@ COUNTER=0
 #start aminer
 sudo aminer --config $CFG_PATH22 > $OUT &
 PID=$!
-sleep 5
-
-time=`date +%s`
+sleep 8
 
 #Anomaly FixedDataModel HD Repair
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > /tmp/syslog
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > $SYSLOG
 sleep 1
 #New Path
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") > /tmp/auth.log
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") > $AUTH
 sleep 1
 #Known Path
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> /tmp/syslog
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
 sleep 1
 #Anomaly FixedDataModel HD Repair
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") >> /tmp/auth.log
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") >> $AUTH
 sleep 1
 #Anomaly DateTimeModel
-({ date '+%m.%Y %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> /tmp/syslog
+({ date '+%m.%Y %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
 sleep 1
 #Known Path
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> /tmp/auth.log
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $AUTH
 sleep 1
 #Known Path
-({ date '+%Y-%m-%d %T' && echo 'fedora' && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> /tmp/syslog
+({ date '+%Y-%m-%d %T' && echo 'fedora' && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
 sleep 1
 #Root Home Path
-echo 'The Path of the home directory shown by pwd of the user root is: /root' >> /tmp/auth.log
+echo 'The Path of the home directory shown by pwd of the user root is: /root' >> $AUTH
 sleep 1
 #User Home Path
-echo 'The Path of the home directory shown by pwd of the user user is: /home/user' >> /tmp/syslog
+echo 'The Path of the home directory shown by pwd of the user user is: /home/user' >> $SYSLOG
 sleep 1
 #Guest Home Path
-echo 'The Path of the home directory shown by pwd of the user guest is: /home/guest' >> /tmp/auth.log
+echo 'The Path of the home directory shown by pwd of the user guest is: /home/guest' >> $AUTH
 
 #ADD HERE
 
