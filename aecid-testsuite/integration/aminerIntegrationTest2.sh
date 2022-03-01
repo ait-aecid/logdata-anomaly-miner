@@ -128,7 +128,7 @@ sleep 1
 COUNTER=0
 
 #start aminer
-sleep 3
+sleep 10
 sudo aminer --config $CFG_PATH22 -f > $OUT &
 PID=$!
 sleep 8

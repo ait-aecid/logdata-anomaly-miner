@@ -1,5 +1,5 @@
 sudo cp demo/aminerRemoteControl/demo-config.py /tmp/demo-config.py
-echo "config_properties['Core.PersistencePeriod'] = 5" | sudo tee -a /tmp/demo-config.py > /dev/null
+echo "config_properties['Core.PersistencePeriod'] = 10" | sudo tee -a /tmp/demo-config.py > /dev/null
 sudo chown aminer:aminer /tmp/demo-config.py 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir /tmp/lib 2> /dev/null
@@ -27,7 +27,7 @@ sleep 5
 
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
 echo "User username logged in" >> /tmp/syslog
-sleep 3
+sleep 1
 md5_result=`md5sum -c $SUSPEND_FILE_MD5 2> /dev/null`
 if [[ $md5_result == "$SUSPEND_FILE: OK" ]]; then
 	echo 'The aminer should have produced outputs, but md5sum does not indicate any changes. (1)'
