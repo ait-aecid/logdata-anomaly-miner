@@ -107,7 +107,6 @@ echo "$CFG_PARSER" >> $CFG_PATH
 echo "$CFG_INPUT" >> $CFG_PATH
 echo "$CFG_ANALYSIS" >> $CFG_PATH
 echo "$CFG_EVENT_HANDLERS" >> $CFG_PATH
-#cat $CFG_PATH
 
 # Parse the aminer CMD and run it. Check if no error is output by the aminer. (11.)
 awk '/^```$/ && ++n == 17, /^```$/ && n++ == 18' < $INPUT_FILE > $OUT

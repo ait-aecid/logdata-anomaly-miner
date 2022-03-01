@@ -51,7 +51,7 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
-sed -i "s?/var/log/apache2/access.log?/tmp/access.log"
+sed -i "s?/var/log/apache2/access.log?/tmp/access.log?g" $INPUT_FILE
 
 # create log file (1.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE > $LOG
