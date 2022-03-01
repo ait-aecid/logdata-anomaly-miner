@@ -42,7 +42,7 @@ fi
 INPUT_FILE=logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md
 OUT=/tmp/out.txt
 OUT2=/tmp/out2.txt
-LOG=/var/log/apache2/access.log
+LOG=/tmp/access.log
 
 # extract the file from the development branch of the wiki project.
 # the first ```yaml script is searched for.
@@ -51,8 +51,9 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
+sed -i "s?/var/log/apache2/access.log?/tmp/access.log"
+
 # create log file (1.)
-mkdir -p /var/log/apache2
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE > $LOG
 sed -i -n '3p' $LOG
 
