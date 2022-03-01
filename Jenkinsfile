@@ -276,35 +276,35 @@ pipeline {
                 }
             }
         }
-    }
-    stage("Wiki Tests - main") {
-        when {
-            branch "main"
-        }
-        parallel {
-            stage("Try It Out") {
-                steps {
-                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut main"
-                }
+        stage("Wiki Tests - main") {
+            when {
+                branch "main"
             }
-            stage("Getting Started") {
-                steps {
-                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted main"
+            parallel {
+                stage("Try It Out") {
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut main"
+                    }
                 }
-            }
-            stage("Sequence Detector") {
-                steps {
-                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToCreateYourOwnSequenceDetector main"
+                stage("Getting Started") {
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted main"
+                    }
                 }
-            }
-            stage("Frequency Detector") {
-                steps {
-                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToCreateYourOwnFrequencyDetector main"
+                stage("Sequence Detector") {
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToCreateYourOwnSequenceDetector main"
+                    }
                 }
-            }
-            stage("MissingMatchPathDetector") {
-                steps {
-                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToMissingMatchPathValueDetector main"
+                stage("Frequency Detector") {
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToCreateYourOwnFrequencyDetector main"
+                    }
+                }
+                stage("MissingMatchPathDetector") {
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToMissingMatchPathValueDetector main"
+                    }
                 }
             }
         }
