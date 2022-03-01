@@ -135,31 +135,31 @@ sleep 8
 
 #Anomaly FixedDataModel HD Repair
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > $SYSLOG
-sleep 1
+sleep 2
 #New Path
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") > $AUTH
-sleep 1
+sleep 2
 #Known Path
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
-sleep 1
+sleep 2
 #Anomaly FixedDataModel HD Repair
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") >> $AUTH
-sleep 1
+sleep 2
 #Anomaly DateTimeModel
 ({ date '+%m.%Y %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
-sleep 1
+sleep 2
 #Known Path
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $AUTH
-sleep 1
+sleep 2
 #Known Path
 ({ date '+%Y-%m-%d %T' && echo 'fedora' && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
-sleep 1
+sleep 2
 #Root Home Path
 echo 'The Path of the home directory shown by pwd of the user root is: /root' >> $AUTH
-sleep 1
+sleep 2
 #User Home Path
 echo 'The Path of the home directory shown by pwd of the user user is: /home/user' >> $SYSLOG
-sleep 1
+sleep 2
 #Guest Home Path
 echo 'The Path of the home directory shown by pwd of the user guest is: /home/guest' >> $AUTH
 
