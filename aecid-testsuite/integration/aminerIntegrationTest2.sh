@@ -128,7 +128,6 @@ sleep 1
 COUNTER=0
 
 #start aminer
-sleep 10
 sudo aminer --config $CFG_PATH22 -f > $OUT &
 PID=$!
 sleep 8
@@ -166,7 +165,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #ADD HERE
 
 #stop aminer
-sleep 10
+sleep 3
 sudo pkill -x aminer
 wait $PID
 sleep 3 # leave the kafka handler some time.
