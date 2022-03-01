@@ -23,11 +23,11 @@ SUSPEND_FILE_MD5=/tmp/suspend.md5
 sudo aminer --config "$FILE" > $SUSPEND_FILE &
 PID=$!
 
-sleep 2
+sleep 5
 
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
 echo "User username logged in" >> /tmp/syslog
-sleep 1
+sleep 3
 md5_result=`md5sum -c $SUSPEND_FILE_MD5 2> /dev/null`
 if [[ $md5_result == "$SUSPEND_FILE: OK" ]]; then
 	echo 'The aminer should have produced outputs, but md5sum does not indicate any changes. (1)'

@@ -166,7 +166,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #ADD HERE
 
 #stop aminer
-sleep 3
+sleep 10
 sudo pkill -x aminer
 wait $PID
 sleep 3 # leave the kafka handler some time.
