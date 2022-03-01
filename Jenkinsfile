@@ -277,6 +277,38 @@ pipeline {
             }
         }
     }
+    stage("Wiki Tests - main") {
+        when {
+            branch "main"
+        }
+        parallel {
+            stage("Try It Out") {
+                steps {
+                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut main"
+                }
+            }
+            stage("Getting Started") {
+                steps {
+                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runGettingStarted main"
+                }
+            }
+            stage("Sequence Detector") {
+                steps {
+                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToCreateYourOwnSequenceDetector main"
+                }
+            }
+            stage("Frequency Detector") {
+                steps {
+                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToCreateYourOwnFrequencyDetector main"
+                }
+            }
+            stage("MissingMatchPathDetector") {
+                steps {
+                    sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToMissingMatchPathValueDetector main"
+                }
+            }
+        }
+    }
     post {
         always {
             script {
