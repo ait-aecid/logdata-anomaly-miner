@@ -1417,6 +1417,8 @@ This module defines an detector for event and value frequency deviations.
 * **confidence_factor** defines range of tolerable deviation of measured frequency from expected frequency according to occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3 * sigma deviation. confidence_factor must be in range [0, 1] (float, defaults to 0.33).
 * **empty_window_warnings** whether anomalies should be generated for too small window sizes.
 * **early_exceeding_anomaly_output** states if a anomaly should be raised the first time the appearance count exceedes the range.
+* **set_lower_limit** sets the lower limit to the specified value.
+* **set_upper_limit** sets the upper limit to the specified value.
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
