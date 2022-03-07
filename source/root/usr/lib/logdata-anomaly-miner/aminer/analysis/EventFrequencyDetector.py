@@ -47,8 +47,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         must be in range [0, 1].
         @param empty_window_warnings whether anomalies should be generated for too small window sizes.
         @param early_exceeding_anomaly_output states if a anomaly should be raised the first time the appearance count exceedes the range.
-        @param set_lower_limit sets the lower limit to the specified value.
-        @param set_upper_limit sets the upper limit to the specified value.
+        @param set_lower_limit sets the lower limit of the frequency test to the specified value.
+        @param set_upper_limit sets the upper limit of the frequency test to the specified value.
         @param persistence_id name of persistency document.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
