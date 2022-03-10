@@ -70,7 +70,7 @@ CMD=${CMD#*$ }
 CFG_PATH=/${CMD#*/}
 
 # write the yaml config. (4.)
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # extract resulting outputs and compare them. (5.)
 OUT1=$(sed -n '6,33p' < $OUT)
