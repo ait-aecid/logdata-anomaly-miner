@@ -11,7 +11,7 @@
                 'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'persistence_id': {'type': 'string', 'default': 'Default'},
-                'output_logline': {'type': 'boolean', 'default': True},
+                'output_logline': {'type': 'boolean', 'default': False},
                 'learn_mode': {'type': 'boolean'},
                 'num_windows': {'type': 'integer', 'required': True, 'default': 50},
                 'min_anomaly_score': {'type': 'float', 'required': False, 'default': 1.1},

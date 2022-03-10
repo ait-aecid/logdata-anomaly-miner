@@ -1264,7 +1264,7 @@ This module defines a detector for log atoms not matching any allowlisted rule.
 * **allowlist_rules**: list of rules executed in same way as inside Rules.OrMatchRule.list of rules executed in same way as inside Rules.OrMatchRule (required, list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to False).
 
 .. code-block:: yaml
 
@@ -1328,7 +1328,7 @@ In addition to detecting new value combination (see NewMatchPathValueComboDetect
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to False).
 
 .. code-block:: yaml
 
@@ -1352,7 +1352,7 @@ This detector monitors and learns occurrence probabilities of character pairs in
 * **skip_repetitions** boolean that determines whether only distinct values are used for character pair counting. This counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run (boolean, defaults to False).
 * **persistence_id** name of persistency document (string, defaults to "Default").
 * **learn_mode** when set to True, the detector will extend the table of character pair frequencies based on new values (boolean).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
 
@@ -1391,7 +1391,7 @@ This module defines an evaluator and generator for event rules. The overall idea
 * **check_rules_flag** specifies whether existing rules are evaluated (boolean, defaults to True).
 * **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
 * **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **learn_mode**: specifies whether new hypotheses and rules are generated (boolean).
@@ -1418,7 +1418,7 @@ This module defines an detector for event and value frequency deviations.
 * **empty_window_warnings** whether anomalies should be generated for too small window sizes.
 * **early_exceeding_anomaly_output** states if a anomaly should be raised the first time the appearance count exceedes the range.
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1441,7 +1441,7 @@ This module defines an detector for event and value sequences. The concept is ba
 * **id_path_list** one or more paths that specify the trace of the sequence detection, i.e., incorrect sequences that are generated by interleaved events can be avoided when event sequence identifiers are available (list of strings, defaults to empty list).
 * **seq_len** the length of the sequences to be learned (larger lengths increase precision, but may overfit the data). (integer, defaults to 3).
 * **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1512,7 +1512,7 @@ or by creating own subclasses from "HistogramAnalysis.BinDefinition".
 * **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1) **Required**
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
 * **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
-* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
+* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: false)
 * **output_event_handlers**: List of event-handler-id to send the report to. List(strings)
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True. Boolean(Default: false)
 
@@ -1555,7 +1555,7 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
 * **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1)
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
 * **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
-* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
+* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: false)
 * **output_event_handlers**: List of event-handler-id to send the report to List(strings).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True. Boolean(Default: false)
 
@@ -1641,7 +1641,7 @@ This component creates events for specified paths and values.
 
 * **paths**: List of paths defined as strings(Required)
 * **value_list**: List of values(Required)
-* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
 * **output_event_handlers**: List of strings with id's of the event_handlers
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
 
@@ -1669,7 +1669,7 @@ This detector calculates the average of a given list of values to monitor. Repor
 * **min_bin_time**: Evaluate the latest bin only when the first element is received after min_bin_time has elapsed. Integer, min: 1 (**required**)
 * **debug_mode**: Enables debug output. Boolean(Default: False)
 * **persistence_id**: The name of the file where the learned models are stored. String
-* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
 * **output_event_handlers**: List of strings with id's of the event_handlers
 * **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
 
@@ -1722,7 +1722,7 @@ This module defines an detector for minimal transition times between states (e.g
 * **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float, default: 0.05).
 * **persistence_id** name of persistency document (string, default: 'Default').
 * **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean, default: True).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, default: True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, default: False).
 
 .. code-block:: yaml
 
@@ -1752,7 +1752,7 @@ alerting time when currently in error state. When in normal (alerting) state, th
 * **check_interval**: This integer(seconds) defines the interval in which pre-set or learned values need to appear. Integer min:1 (Default: 3600)
 * **realert_interval**: This integer(seconds) defines the interval in which the AMiner should alert us about missing token values. Integer min: 1 (Default: 3600)
 * **persistence_id**: The name of the file where the learned models are stored. String
-* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
 * **output_event_handlers**: List of strings with id's of the event_handlers
 * **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
 
@@ -1782,7 +1782,7 @@ This detector works similar to the NewMatchPathValueComboDetector, but allows to
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object (boolean, defaults to False).
 * **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1813,7 +1813,7 @@ This module defines a detector for new value combinations in multiple parser pat
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object (boolean, defaults to False).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
 
 .. code-block:: yaml
@@ -1835,7 +1835,7 @@ This module defines a detector for new values in a parser path.
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **learn_mode** specifies whether newly observed values should be added to the learned model (boolean).
 
 .. code-block:: yaml
@@ -1878,7 +1878,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **time_period_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
 * **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly (integer, defaults to 360).
@@ -1908,7 +1908,7 @@ This class creates events if event or value occurrence counts are outliers in PC
 * **num_windows** the number of time windows in the sliding window approach. Total covered time span = window_size * num_windows (integer, defaults to 50).
 * **persistence_id** name of persistency document (string, defaults to Default).
 * **learn_mode** specifies whether new count measurements are added to the PCA count matrix (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list)
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
 * **output_event_handlers** list of event handler id that anomalies are forwarded to (list of strings, defaults is to send to all event handlers).
@@ -1947,7 +1947,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 * **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **acf_auto_pause_interval** states if the pause area is automatically set. If enabled, the variable acf_pause_interval_percentage loses its functionality.
 * **acf_auto_pause_interval_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not an outlier.
@@ -2162,7 +2162,7 @@ This detector analyses each variable of the event_types by assigning them the im
 * **learn_mode** states, if found variable types are updated when a test fails.
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **event_type_detector** event_type_detector. Used to get the event numbers and values of the variables, etc.
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
 * **constraint_list** list of paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
 * **save_statistics** tracks the indicators and changed variable types, if set to True.
