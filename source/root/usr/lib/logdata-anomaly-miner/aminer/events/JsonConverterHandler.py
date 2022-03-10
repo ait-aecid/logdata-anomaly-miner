@@ -50,7 +50,10 @@ class JsonConverterHandler(EventHandlerInterface):
             log_data['DetectionTimestamp'] = round(time.time(), 2)
             log_data['LogLinesCount'] = len(sorted_log_lines)
             if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
-                log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')
+                log_data['AnnotatedMatchElement'] = {}
+                for path, match in log_atom.parser_match.get_match_dictionary().items():
+                    log_data['AnnotatedMatchElement'][path] = match.match_object.decode(AminerConfig.ENCODING) if isinstance(
+                            match.match_object, bytes) else str(match.match_object)
 
             analysis_component = {'AnalysisComponentIdentifier': self.analysis_context.get_id_by_component(event_source)}
             if event_source.__class__.__name__ == 'ExtractedData_class':
