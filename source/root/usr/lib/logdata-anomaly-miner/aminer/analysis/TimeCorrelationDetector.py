@@ -121,21 +121,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                   'AffectedLogAtomValues': [log_atom.raw_data.decode(AminerConfig.ENCODING)]}
             if self.output_log_line:
-                match_paths_values = {}
-                for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                    match_value = match_element.match_object
-                    if isinstance(match_value, tuple):
-                        tmp_list = []
-                        for val in match_value:
-                            if isinstance(val, datetime):
-                                tmp_list.append(datetime.timestamp(val))
-                            else:
-                                tmp_list.append(val)
-                        match_value = tmp_list
-                    if isinstance(match_value, bytes):
-                        match_value = match_value.decode(AminerConfig.ENCODING)
-                    match_paths_values[match_path] = match_value
-                analysis_component['ParsedLogAtom'] = match_paths_values
                 feature_list = []
                 for feature in self.feature_list:
                     tmp_list = {}

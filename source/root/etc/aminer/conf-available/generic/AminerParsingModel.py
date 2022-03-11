@@ -64,7 +64,6 @@ def get_model():
                 "TimeLastOccurrence": DecimalFloatValueModelElement("time_last_occurrence"),
                 "NumberOfOccurrences": DecimalIntegerValueModelElement("number_of_occurrences")
             },
-            "_ParsedLogAtom": {"ALLOW_ALL_KEYS": VariableByteDataModelElement("allow_all_keys", alphabet)},
             "_FeatureList": [{
                 "Rule": {
                     "type": VariableByteDataModelElement("type", name_alphabet),

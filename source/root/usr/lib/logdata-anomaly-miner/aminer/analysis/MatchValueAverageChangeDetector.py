@@ -123,14 +123,6 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                         analysis_summary += '  "%s": %s' % (path, analysis_data[0])
                     anomaly_scores.append(d)
             analysis_component = {'AffectedLogAtomPaths': list(value_dict)}
-            if self.output_log_line:
-                match_paths_values = {}
-                for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                    match_value = match_element.match_object
-                    if isinstance(match_value, bytes):
-                        match_value = match_value.decode(AminerConfig.ENCODING)
-                    match_paths_values[match_path] = match_value
-                analysis_component['ParsedLogAtom'] = match_paths_values
             analysis_component['AnomalyScores'] = anomaly_scores
             analysis_component['MinBinElements'] = self.min_bin_elements
             analysis_component['MinBinTime'] = self.min_bin_time

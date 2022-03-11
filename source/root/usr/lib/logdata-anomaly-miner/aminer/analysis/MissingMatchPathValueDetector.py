@@ -211,14 +211,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     affected_log_atom_values.append(e)
                 analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                       'AffectedLogAtomValues': affected_log_atom_values}
-                if self.output_log_line:
-                    match_paths_values = {}
-                    for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                        match_value = match_element.match_object
-                        if isinstance(match_value, bytes):
-                            match_value = match_value.decode(AminerConfig.ENCODING)
-                        match_paths_values[match_path] = match_value
-                    analysis_component['ParsedLogAtom'] = match_paths_values
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
                     self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)])

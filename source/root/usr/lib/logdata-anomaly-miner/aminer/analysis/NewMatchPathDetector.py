@@ -82,22 +82,6 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             else:
                 sorted_log_lines = [repr(unknown_path_list) + os.linesep + original_log_line_prefix + data]
             analysis_component = {'AffectedLogAtomPaths': list(unknown_path_list)}
-            if self.output_log_line:
-                match_paths_values = {}
-                for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                    if isinstance(match_element, list):
-                        match_value = []
-                        for m in match_element:
-                            if isinstance(m.match_object, bytes):
-                                match_value.append(m.match_object.decode(AminerConfig.ENCODING))
-                            else:
-                                match_value.append(m.match_object)
-                    else:
-                        match_value = match_element.match_object
-                    if isinstance(match_value, bytes):
-                        match_value = match_value.decode(AminerConfig.ENCODING)
-                    match_paths_values[match_path] = match_value
-                analysis_component['ParsedLogAtom'] = match_paths_values
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', sorted_log_lines, event_data,

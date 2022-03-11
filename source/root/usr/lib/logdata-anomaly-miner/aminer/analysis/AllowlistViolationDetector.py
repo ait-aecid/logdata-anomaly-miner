@@ -56,26 +56,7 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         except UnicodeError:
             data = repr(log_atom.raw_data)
         analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()), 'AffectedLogAtomValues': [data]}
-        if self.output_log_line:
-            match_paths_values = {}
-            for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                match_value = match_element.match_object
-                if isinstance(match_value, tuple):
-                    tmp_list = []
-                    for val in match_value:
-                        if isinstance(val, datetime):
-                            tmp_list.append(datetime.timestamp(val))
-                        else:
-                            tmp_list.append(val)
-                    match_value = tmp_list
-                if isinstance(match_value, bytes):
-                    match_value = match_value.decode(AminerConfig.ENCODING)
-                match_paths_values[match_path] = match_value
-            analysis_component['ParsedLogAtom'] = match_paths_values
-            sorted_log_lines = [
-                log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + data]
-        else:
-            sorted_log_lines = [original_log_line_prefix + data]
+        sorted_log_lines = [original_log_line_prefix + data]
         event_data['AnalysisComponent'] = analysis_component
         for listener in self.anomaly_event_handlers:
             listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No allowlisting for current atom', sorted_log_lines,
