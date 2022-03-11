@@ -58,23 +58,6 @@ read -r -d '' VAR << END
       "/model/DiskUpgrade/User",
       "/model/DiskUpgrade/HDRepair"
     ],
-    "ParsedLogAtom": {
-      "/model/DiskUpgrade": "
-END
-JSON_OUTPUT+=("$VAR")
-read -r -d '' VAR << END
- localhost root: System rebooted for hard disk upgrade",
-      "/model/DiskUpgrade/DTM":
-END
-JSON_OUTPUT+=("$VAR")
-read -r -d '' VAR << END
-,
-      "/model/DiskUpgrade/UNameSpace1": " ",
-      "/model/DiskUpgrade/UName": "localhost",
-      "/model/DiskUpgrade/UNameSpace2": " ",
-      "/model/DiskUpgrade/User": "root:",
-      "/model/DiskUpgrade/HDRepair": " System rebooted for hard disk upgrade"
-    }
   },
   "LogData": {
     "RawLogData": [
@@ -95,15 +78,21 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/DiskUpgrade: 
+    "AnnotatedMatchElement": {
+      "/model/DiskUpgrade": "
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
- localhost root: System rebooted for hard disk upgrade\n  /model/DiskUpgrade/DTM:
+",
+      "/model/DiskUpgrade/DTM": "
 END
 JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
-\n  /model/DiskUpgrade/UNameSpace1:  \n  /model/DiskUpgrade/UName: localhost\n  /model/DiskUpgrade/UNameSpace2:  \n  /model/DiskUpgrade/User: root:\n  /model/DiskUpgrade/HDRepair:  System rebooted for hard disk upgrade"
+      "/model/DiskUpgrade/UNameSpace1": " ",
+      "/model/DiskUpgrade/UName": "localhost",
+      "/model/DiskUpgrade/UNameSpace2": " ",
+      "/model/DiskUpgrade/User": "root:",
+      "/model/DiskUpgrade/HDRepair": " System rebooted for hard disk upgrade"
   }
 }
 {
@@ -179,13 +168,6 @@ read -r -d '' VAR << END
       "/model/HomePath/Is",
       "/model/HomePath/Path"
     ],
-    "ParsedLogAtom": {
-      "/model/HomePath": "The Path of the home directory shown by pwd of the user root is: /root",
-      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
-      "/model/HomePath/Username": "root",
-      "/model/HomePath/Is": " is: ",
-      "/model/HomePath/Path": "/root"
-    }
   },
   "LogData": {
     "RawLogData": [
@@ -202,7 +184,13 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/HomePath: The Path of the home directory shown by pwd of the user root is: /root\n  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user \n  /model/HomePath/Username: root\n  /model/HomePath/Is:  is: \n  /model/HomePath/Path: /root"
+    "AnnotatedMatchElement": {
+      "/model/HomePath": "The Path of the home directory shown by pwd of the user root is: /root",
+      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
+      "/model/HomePath/Username": "root",
+      "/model/HomePath/Is": " is: ",
+      "/model/HomePath/Path": "/root"
+    }
   }
 }
 {
@@ -221,13 +209,6 @@ read -r -d '' VAR << END
       "root",
       "/root"
     ],
-    "ParsedLogAtom": {
-      "/model/HomePath": "The Path of the home directory shown by pwd of the user root is: /root",
-      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
-      "/model/HomePath/Username": "root",
-      "/model/HomePath/Is": " is: ",
-      "/model/HomePath/Path": "/root"
-    }
   },
   "LogData": {
     "RawLogData": [
@@ -244,7 +225,13 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/HomePath: The Path of the home directory shown by pwd of the user root is: /root\n  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user \n  /model/HomePath/Username: root\n  /model/HomePath/Is:  is: \n  /model/HomePath/Path: /root"
+    "AnnotatedMatchElement": {
+      "/model/HomePath": "The Path of the home directory shown by pwd of the user root is: /root",
+      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
+      "/model/HomePath/Username": "root",
+      "/model/HomePath/Is": " is: ",
+      "/model/HomePath/Path": "/root"
+    }
   }
 }
 {
@@ -263,13 +250,6 @@ read -r -d '' VAR << END
       "user",
       "/home/user"
     ],
-    "ParsedLogAtom": {
-      "/model/HomePath": "The Path of the home directory shown by pwd of the user user is: /home/user",
-      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
-      "/model/HomePath/Username": "user",
-      "/model/HomePath/Is": " is: ",
-      "/model/HomePath/Path": "/home/user"
-    }
   },
   "LogData": {
     "RawLogData": [
@@ -286,7 +266,13 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/HomePath: The Path of the home directory shown by pwd of the user user is: /home/user\n  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user \n  /model/HomePath/Username: user\n  /model/HomePath/Is:  is: \n  /model/HomePath/Path: /home/user"
+    "AnnotatedMatchElement": {
+      "/model/HomePath": "The Path of the home directory shown by pwd of the user user is: /home/user",
+      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
+      "/model/HomePath/Username": "user",
+      "/model/HomePath/Is": " is: ",
+      "/model/HomePath/Path": "/home/user"
+    }
   }
 }
 {
@@ -305,13 +291,6 @@ read -r -d '' VAR << END
       "guest",
       "/home/guest"
     ],
-    "ParsedLogAtom": {
-      "/model/HomePath": "The Path of the home directory shown by pwd of the user guest is: /home/guest",
-      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
-      "/model/HomePath/Username": "guest",
-      "/model/HomePath/Is": " is: ",
-      "/model/HomePath/Path": "/home/guest"
-    }
   },
   "LogData": {
     "RawLogData": [
@@ -328,7 +307,13 @@ JSON_OUTPUT+=("$VAR")
 read -r -d '' VAR << END
 ,
     "LogLinesCount": 1,
-    "AnnotatedMatchElement": "/model/HomePath: The Path of the home directory shown by pwd of the user guest is: /home/guest\n  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user \n  /model/HomePath/Username: guest\n  /model/HomePath/Is:  is: \n  /model/HomePath/Path: /home/guest"
+    "AnnotatedMatchElement": {
+      "/model/HomePath": "The Path of the home directory shown by pwd of the user guest is: /home/guest",
+      "/model/HomePath/Pwd": "The Path of the home directory shown by pwd of the user ",
+      "/model/HomePath/Username": "guest",
+      "/model/HomePath/Is": " is: ",
+      "/model/HomePath/Path": "/home/guest"
+    }
   }
 }
 END
