@@ -64,7 +64,7 @@ CMD=${CMD#*$ }
 $CMD 2> /dev/null
 
 # load the aminer command. (3.)
-awk '/^```$/ && ++n == 9, /^```$/ && n++ == 10' < $INPUT_FILE | sudo tee $OUT > /dev/null
+awk '/^```$/ && ++n == 9, /^```$/ && n++ == 10' < $INPUT_FILE > $OUT
 CMD=$(sed -n '4p' < $OUT)
 CMD=${CMD#*$ }
 CFG_PATH=/${CMD#*/}
@@ -99,7 +99,7 @@ compareStrings "$OUT1" "$OUT2" "Failed Test in 6."
 exit_code=$((exit_code | $?))
 
 # write the second yaml config (7.)
-awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # compare ApacheAccessModel (8.)
 awk '/^```python$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $OUT
@@ -149,7 +149,7 @@ OUT6=$(sed -n '158,186p' < $OUT)
 OUT7=$(sed -n '189,217p' < $OUT)
 
 # test the fifth yaml config. (13.)
-awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 runAminerUntilEnd "$CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
