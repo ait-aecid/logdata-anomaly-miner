@@ -78,11 +78,11 @@ CFG_PATH=$(echo "${ADDR[-1]}")
 # replace LearnMode: False with LearnMode: True in CFG_PATH. (5.)
 awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $OUT
 OUT1=$(cat $OUT)
-sed -i "s/#LearnMode: false/${OUT1}/g" $CFG_PATH
+sed "s/#LearnMode: false/${OUT1}/g" | sudo tee $CFG_PATH > /dev/null
 
 # replace LogResourceList file. (6.)
 OUT1=$(echo $LOG1)
-sed -i "s?file:///var/log/apache2/access.log?file:///${OUT1}?g" $CFG_PATH
+sed "s?file:///var/log/apache2/access.log?file:///${OUT1}?g" | sudo tee $CFG_PATH > /dev/null
 
 # replace parser, input, analysis and event handler config lines (7.-10.)
 CFG_BEFORE=$(sed '/^Parser:$/Q' $CFG_PATH)

@@ -179,7 +179,7 @@ compareStrings "$OUT7" "$IN7" "Failed Test in 13."
 exit_code=$((exit_code | $?))
 
 # set LearnModel to False. (14.)
-sed -i 's/LearnMode: True/LearnMode: False/g' $CFG_PATH
+sed 's/LearnMode: True/LearnMode: False/g' | sudo tee $CFG_PATH > /dev/null
 
 # read new command (15.)
 awk '/^```$/ && ++n == 34, /^```$/ && n++ == 35' < $INPUT_FILE > $OUT
