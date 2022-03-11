@@ -78,11 +78,11 @@ CFG_PATH=$(echo "${ADDR[-1]}")
 # replace LearnMode: False with LearnMode: True in CFG_PATH. (5.)
 awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $OUT
 OUT1=$(cat $OUT)
-sed "s/#LearnMode: false/${OUT1}/g" | sudo tee $CFG_PATH > /dev/null
+sed "s/#LearnMode: false/${OUT1}/g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
 
 # replace LogResourceList file. (6.)
 OUT1=$(echo $LOG1)
-sed "s?file:///var/log/apache2/access.log?file:///${OUT1}?g" | sudo tee $CFG_PATH > /dev/null
+sed "s?file:///var/log/apache2/access.log?file:///${OUT1}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
 
 # replace parser, input, analysis and event handler config lines (7.-10.)
 CFG_BEFORE=$(sed '/^Parser:$/Q' $CFG_PATH)
@@ -312,7 +312,7 @@ if [[ $? != 0 ]]; then
 fi
 
 # Run the final configuration. (24.)
-awk '/^```yaml$/ && ++n == 25, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 25, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
