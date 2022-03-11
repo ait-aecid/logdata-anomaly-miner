@@ -1,4 +1,4 @@
-echo localhost | sudo tee /etc/hostname
+echo localhost | sudo tee /etc/hostname > /dev/null
 cd integration
 script=$1
 sudo chmod +x $script
@@ -7,8 +7,7 @@ cntr=0
 for var in "$@"
 do
 	if [[ $cntr -gt 0 ]]; then
-    	cp "$var" /tmp/"$var"
-		sudo chown aminer:aminer /tmp/"$var"
+    cp "$var" /tmp/"$var"
 	fi
 	cntr=$(($cntr+1))
 done
@@ -20,7 +19,7 @@ cntr=0
 for var in "$@"
 do
 	if [[ $cntr -gt 0 ]]; then
-    	sudo rm /tmp/"$var"
+    sudo rm /tmp/"$var"
 	fi
 	cntr=$(($cntr+1))
 done

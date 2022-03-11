@@ -4,6 +4,7 @@ import shutil
 import logging
 import sys
 import errno
+import inspect
 from aminer.AminerConfig import KEY_LOG_DIR, DEFAULT_LOG_DIR, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, DEBUG_LOG_NAME,\
     KEY_REMOTE_CONTROL_LOG_FILE, KEY_STAT_LOG_FILE, KEY_DEBUG_LOG_FILE, REMOTE_CONTROL_LOG_NAME, DEFAULT_REMOTE_CONTROL_LOG_FILE,\
     STAT_LOG_NAME, DEFAULT_STAT_LOG_FILE, DEBUG_LEVEL, load_config, build_persistence_file_name, DEFAULT_DEBUG_LOG_FILE
@@ -108,12 +109,17 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
 class TestBase(unittest.TestCase):
     """This is the base class for all unittests."""
 
-    __configFilePath = os.getcwd()+'/unit/data/config.py'
+    def get_config_file_path(self):
+        """
+        Get the module name to choose the right config file for parallel execution.
+        Example: logdata-anomaly-miner/aecid-testsuite/unit/analysis/AtomFiltersTest.py - we want to know the directory analysis.
+        """
+        return os.getcwd()+'/unit/data/parallel_configs/%s_config.py' % inspect.getmodule(self).__file__.split("unit/")[1].split("/")[0]
 
     def setUp(self):
         """Set up all needed variables and remove persisted data."""
         PersistenceUtil.persistable_components = []
-        self.aminer_config = load_config(self.__configFilePath)
+        self.aminer_config = load_config(self.get_config_file_path())
         self.analysis_context = AnalysisContext(self.aminer_config)
         self.output_stream = StringIO()
         self.stream_printer_event_handler = StreamPrinterEventHandler(self.analysis_context, self.output_stream)
@@ -130,7 +136,7 @@ class TestBase(unittest.TestCase):
 
     def tearDown(self):
         """Delete all persisted data after the tests."""
-        self.aminer_config = load_config(self.__configFilePath)
+        self.aminer_config = load_config(self.get_config_file_path())
         persistence_file_name = build_persistence_file_name(self.aminer_config)
         if os.path.exists(persistence_file_name):
             shutil.rmtree(persistence_file_name)

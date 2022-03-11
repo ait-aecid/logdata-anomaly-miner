@@ -39,11 +39,10 @@ then
 BRANCH=$1
 fi
 
-sudo chown -R aminer:aminer /var/lib/aminer 2> /dev/null
 INPUT_FILE=logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md
 OUT=/tmp/out.txt
 OUT2=/tmp/out2.txt
-LOG=/var/log/apache2/access.log
+LOG=/tmp/access.log
 
 # extract the file from the development branch of the wiki project.
 # the first ```yaml script is searched for.
@@ -52,8 +51,9 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
+sed -i "s?/var/log/apache2/access.log?/tmp/access.log?g" $INPUT_FILE
+
 # create log file (1.)
-mkdir -p /var/log/apache2
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE > $LOG
 sed -i -n '3p' $LOG
 
@@ -70,21 +70,19 @@ CMD=${CMD#*$ }
 CFG_PATH=/${CMD#*/}
 
 # write the yaml config. (4.)
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # extract resulting outputs and compare them. (5.)
 OUT1=$(sed -n '6,33p' < $OUT)
 OUT2=$(sed -n '36,64p' < $OUT)
 
-$CMD > $OUT &
-sleep 5 & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD -C" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
 IN1=$(sed -n '2,29p' < $OUT)
-IN2=$(sed -n '33,61p' < $OUT)
+IN2=$(sed -n '33,62p' < $OUT)
 
 compareStrings "$OUT1" "$IN1" "Failed Test in 5."
 exit_code=$((exit_code | $?))
@@ -101,7 +99,7 @@ compareStrings "$OUT1" "$OUT2" "Failed Test in 6."
 exit_code=$((exit_code | $?))
 
 # write the second yaml config (7.)
-awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # compare ApacheAccessModel (8.)
 awk '/^```python$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $OUT
@@ -123,9 +121,7 @@ CMD=${CMD#*$ }
 
 OUT1=$(sed -n '4,32p' < $OUT)
 
-sudo $CMD > $OUT &
-sleep 5 & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -153,10 +149,8 @@ OUT6=$(sed -n '158,186p' < $OUT)
 OUT7=$(sed -n '189,217p' < $OUT)
 
 # test the fifth yaml config. (13.)
-awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
-sudo $CMD > $OUT &
-sleep 5 & wait $!
-sudo pkill -x aminer
+awk '/^```yaml$/ && ++n == 5, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
+runAminerUntilEnd "$CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
@@ -185,7 +179,7 @@ compareStrings "$OUT7" "$IN7" "Failed Test in 13."
 exit_code=$((exit_code | $?))
 
 # set LearnModel to False. (14.)
-sed -i 's/LearnMode: True/LearnMode: False/g' $CFG_PATH
+sudo sed -i 's/LearnMode: True/LearnMode: False/g' $CFG_PATH
 
 # read new command (15.)
 awk '/^```$/ && ++n == 34, /^```$/ && n++ == 35' < $INPUT_FILE > $OUT
@@ -201,9 +195,7 @@ echo "$OUT1" >> $LOG
 
 OUT1=$(sed -n '4,32p' < $OUT)
 
-sudo $CMD > $OUT &
-sleep 5 & wait $!
-sudo pkill -x aminer
+runAminerUntilEnd "$CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi

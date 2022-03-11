@@ -13,6 +13,10 @@ release=$(grep "release =" $CONF_PATH)
 release=$(sed "s/release = //g" <<< $release)
 release=$(sed "s/'//g" <<< $release)
 
+if [[ "$version" == "" || "$release" == "" ]]; then
+  exit 1
+fi
+
 if [[ "$version" != "$release" ]]; then
   echo "Version $version not equal with $release."
   if [[ $# -eq 1 ]]; then
