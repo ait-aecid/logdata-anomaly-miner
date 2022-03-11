@@ -64,7 +64,7 @@ CMD=${CMD#*$ }
 $CMD 2> /dev/null
 
 # load the aminer command. (3.)
-awk '/^```$/ && ++n == 9, /^```$/ && n++ == 10' < $INPUT_FILE > $OUT
+awk '/^```$/ && ++n == 9, /^```$/ && n++ == 10' < $INPUT_FILE | sudo tee $OUT > /dev/null
 CMD=$(sed -n '4p' < $OUT)
 CMD=${CMD#*$ }
 CFG_PATH=/${CMD#*/}
