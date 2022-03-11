@@ -19,7 +19,7 @@ TMP_YML_CONFIG=/tmp/YamlConfig.py
 TMP_SCHEMA=/tmp/schema.py
 SEQ_DET=/usr/lib/logdata-anomaly-miner/aminer/analysis/SequenceDetector.py
 TMP_SEQ_DET=/tmp/SequenceDetector.py
-CFG_PATH=/tmp/config.yml
+CFG_PATH=/etc/aminer/config.yml
 
 # extract the file from the development branch of the wiki project.
 git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git 2> /dev/null
@@ -28,11 +28,11 @@ git checkout $BRANCH > /dev/null 2>&1
 cd ..
 awk '/^```yaml$/ && ++n == 1, /^```$/' < $SRC_FILE | sed '/^```/ d' > /tmp/base-config.yml
 # text before EventHandlers:
-sed -e '/EventHandlers:$/,$d' /tmp/base-config.yml > $CFG_PATH
+sed -e '/EventHandlers:$/,$d' /tmp/base-config.yml | sudo tee $CFG_PATH > /dev/null
 # extract the config part for the SequenceDetector.
-awk '/^```yaml$/ && ++n == 2, /^```$/' < $SRC_FILE | sed '/^```/ d' | sed '/^Analysis:$/ d' >> $CFG_PATH
+awk '/^```yaml$/ && ++n == 2, /^```$/' < $SRC_FILE | sed '/^```/ d' | sed '/^Analysis:$/ d' | sudo tee -a $CFG_PATH > /dev/null
 # text after Analysis components:
-sed -n -e '/^EventHandlers:$/,$p' /tmp/base-config.yml >> $CFG_PATH
+sed -n -e '/^EventHandlers:$/,$p' /tmp/base-config.yml | sudo tee -a $CFG_PATH > /dev/null
 
 # create backup of schema.
 sudo cp $VAL_SCHEMA $TMP_VAL_SCHEMA

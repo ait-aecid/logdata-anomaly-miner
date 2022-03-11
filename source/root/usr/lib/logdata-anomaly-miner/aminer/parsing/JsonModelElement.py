@@ -13,7 +13,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import json
-import sys
 import warnings
 import logging
 from typing import List, Union
