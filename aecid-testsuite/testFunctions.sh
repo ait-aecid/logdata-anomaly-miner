@@ -57,3 +57,43 @@ function compareVersionStrings(){
   done
   return 0
 }
+
+function runAminerUntilEnd() {
+  CMD=$1
+  LOGFILE=$2
+  REP_PATH=$3
+  CFG_PATH=$4
+  if [[ $CFG_PATH == *.py ]]; then
+    echo "config_properties['Core.PersistencePeriod'] = 1" | sudo tee -a $CFG_PATH > /dev/null
+  elif [[ $CFG_PATH == *.yml ]]; then
+    echo "Core.PersistencePeriod: 1" | sudo tee -a $CFG_PATH > /dev/null
+  else
+    return 2
+  fi
+  sudo rm $REP_PATH 2> /dev/null
+  if [ $# -eq 5 ]; then
+    OUT=$5
+    $CMD > $OUT &
+  elif [ $# -eq 4 ]; then
+    $CMD &
+  fi
+  PID=$!
+  FILE_SIZE=`stat --printf="%s" $LOGFILE 2> /dev/null`
+  IN=`cat $REP_PATH 2> /dev/null`
+  IFS=',' read -ra ADDR <<< "$IN"
+  CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
+  CNTR=0
+  while [[ ("$CURRENT_SIZE" != "$FILE_SIZE" || "$CURRENT_SIZE" == "") && $CNTR -lt 20 ]]; do
+     sleep 1
+     IN=`cat $REP_PATH 2> /dev/null`
+     IFS=',' read -ra ADDR <<< "$IN"
+     CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
+     CNTR=$((++CNTR))
+  done
+  sleep 3
+  sudo pkill -x aminer
+  wait $PID
+  RES=$?
+  sudo sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
+  return $RES
+}

@@ -1,12 +1,14 @@
 #!/bin/bash
 
+LOGFILE=/tmp/syslog
+
 sudo mkdir /tmp/lib 2> /dev/null
 sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
-sudo rm /tmp/syslog 2> /dev/null
+sudo rm $LOGFILE 2> /dev/null
 
 echo "Demo started.."
 echo ""
@@ -22,13 +24,14 @@ fi
 
 #start aminer
 sudo aminer --config "$FILE" &
+PID=$!
 
 #EventCorrelationDetector, NewMatchPathDetector
 #:<<Comment
 alphabet='ghijkl'
 alphabet_len=$(echo -n $alphabet | wc -m)
 for ((i=0; i<10000; i++)); do
-	echo ${alphabet:$i % $alphabet_len:1} >> /tmp/syslog
+	echo ${alphabet:$i % $alphabet_len:1} >> $LOGFILE
 	sleep 0.0001
 done
 #Comment
@@ -41,7 +44,7 @@ for ((i=0; i<R; i++)); do
 	R2=`shuf -i 1-65000 -n 1`
 	for ((j=0; j<R1; j++)); do
     sleep 0.25
-		({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n"; } | tr "\n" " " && echo " cron[$R2]: Job \`cron.daily\` started.") >> /tmp/syslog
+		({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n"; } | tr "\n" " " && echo " cron[$R2]: Job \`cron.daily\` started.") >> $LOGFILE
 	done
 done
 #Comment
@@ -53,7 +56,7 @@ startTime=`date +%s`
 t=`date +%s`
 while [[ $t -lt `expr $startTime+11` ]]; do
 	R=`shuf -i 0-200 -n 1`
-	echo $R >> /tmp/syslog
+	echo $R >> $LOGFILE
 	t=`date +%s`
 done
 
@@ -64,7 +67,7 @@ startTime=`date +%s`
 t=`date +%s`
 while [[ $t -lt `expr $startTime+11` ]]; do
 	R=`shuf -i 0-86400 -n 1`
-	echo "Random: $R" >> /tmp/syslog
+	echo "Random: $R" >> $LOGFILE
 	t=`date +%s`
 done
 #Comment
@@ -75,7 +78,7 @@ startTime=`date +%s`
 t=`date +%s`
 while [[ $t -lt `expr $startTime+3` ]]; do
 	R=`shuf -i 0-200 -n 1`
-	echo $R >> /tmp/syslog
+	echo $R >> $LOGFILE
 	t=`date +%s`
 done
 
@@ -83,7 +86,7 @@ startTime=`date +%s`
 t=`date +%s`
 while [[ $t -lt `expr $startTime+1` ]]; do
 	R=`shuf -i 300-1000 -n 1`
-	echo $R >> /tmp/syslog
+	echo $R >> $LOGFILE
 	t=`date +%s`
 done
 #Comment
@@ -95,7 +98,7 @@ t=`date +%s`
 while [[ $t -lt `expr $startTime+2` ]]; do
 	R=`shuf -i 30-85 -n 1`
 	R1=`shuf -i 30-85 -n 1`
-	({ echo "CPU Temp: $R°C" && echo ", CPU Workload: $R1%, " && date '+%Y-%m-%d %T' | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+	({ echo "CPU Temp: $R°C" && echo ", CPU Workload: $R1%, " && date '+%Y-%m-%d %T' | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 	t=`date +%s`
 	sleep 0.25
 done
@@ -106,22 +109,22 @@ done
 
 #NewMatchPath expected
 echo first
-echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   %" >> /tmp/syslog
+echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   %" >> $LOGFILE
 sleep 3
 
 #MissingMatchPathValue expected
 echo second
-echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   dd%" >> /tmp/syslog
+echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   dd%" >> $LOGFILE
 sleep 0.5
 
 #No output expected
 echo third
-echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   dd%" >> /tmp/syslog
+echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   dd%" >> $LOGFILE
 sleep 4
 
 #MissingMatchPathValue expected
 echo fourth
-echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   dd%" >> /tmp/syslog
+echo " Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   dd%" >> $LOGFILE
 #Comment
 
 #NewMatchPathValueComboDetector, NewMatchPathValueDetector
@@ -132,7 +135,7 @@ users=(user root admin guest1 guest2)
 while [[ $t -lt `expr $startTime+2` ]]; do
 	R=`shuf -i 0-4 -n 1`
 	R1=`shuf -i 1-255 -n 1`
-	({ echo "User ${users[R]} changed IP address to 10.0.0.$R1" | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+	({ echo "User ${users[R]} changed IP address to 10.0.0.$R1" | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 	t=`date +%s`
 	sleep 0.25
 done
@@ -140,30 +143,30 @@ done
 
 #NewMatchIdValueComboDetector
 #:<<Comment
-echo 'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367386.000:2): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367387.000:2): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367388.000:3): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367389.000:3): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367388.500:100): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367390.000:4): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367391.000:4): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367392.000:5): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367393.000:5): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367394.000:6): arch=c000003e syscall=4 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367395.000:7): item=0 name="five" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367396.000:8): arch=c000003e syscall=6 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367397.000:6): item=0 name="four" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367398.000:7): arch=c000003e syscall=5 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367399.000:8): item=0 name="six" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> /tmp/syslog
-echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
+echo 'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367386.000:2): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367387.000:2): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367388.000:3): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367389.000:3): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367388.500:100): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367390.000:4): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367391.000:4): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367392.000:5): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367393.000:5): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367394.000:6): arch=c000003e syscall=4 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367395.000:7): item=0 name="five" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367396.000:8): arch=c000003e syscall=6 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367397.000:6): item=0 name="four" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367398.000:7): arch=c000003e syscall=5 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367399.000:8): item=0 name="six" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 nametype=NORMAL' >> $LOGFILE
+echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
 
 # StringRegexMatchRule
-echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=no exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> /tmp/syslog
+echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=no exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 comm="apache2" exe="/usr/sbin/apache2" key=(null)' >> $LOGFILE
 #Comment
 
 #TimeCorrelationDetector
@@ -175,82 +178,82 @@ echo 'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success
 
 #:<<Comment
 #too short time difference
-({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Will run job \`cron.daily' in 5 min." | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Will run job \`cron.daily' in 5 min." | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 sleep 4
-({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Job \`cron.daily' started" | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Job \`cron.daily' started" | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 sleep 10
 
 #wrong Job Number
-({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Will run job \`cron.daily' in 5 min." | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Will run job \`cron.daily' in 5 min." | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 sleep 5
-({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50001]: Job \`cron.daily' started" | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50001]: Job \`cron.daily' started" | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 sleep 10
 
 #expected time difference
-({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Will run job \`cron.daily' in 5 min." | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Will run job \`cron.daily' in 5 min." | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 sleep 5
-({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Job \`cron.daily' started" | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Job \`cron.daily' started" | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 sleep 10
 
 #too long time difference
-({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Will run job \`cron.daily' in 5 min." | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Will run job \`cron.daily' in 5 min." | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 sleep 7
-({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Job \`cron.daily' started" | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ date '+%Y-%m-%d %T ' && cat /etc/hostname && echo " cron[50000]: Job \`cron.daily' started" | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 sleep 10
 
 #Comment
 
 # AllowlistRules, AllowlistViolationDetector
 #:<<Comment
-echo "User username logged in" >> /tmp/syslog
-echo "User root logged in" >> /tmp/syslog
+echo "User username logged in" >> $LOGFILE
+echo "User root logged in" >> $LOGFILE
 who | awk '{print $1,$3,$4}' | while read user time; do \
-  echo User $user logged in $(($(($(date +%s) - $(date -d "$time" +%s)))/60)) minutes ago.>> /tmp/syslog
-  echo User root logged in $(($(($(date +%s) - $(date -d "$time" +%s)))/60)) minutes ago. >> /tmp/syslog; done 
+  echo User $user logged in $(($(($(date +%s) - $(date -d "$time" +%s)))/60)) minutes ago.>> $LOGFILE
+  echo User root logged in $(($(($(date +%s) - $(date -d "$time" +%s)))/60)) minutes ago. >> $LOGFILE; done
 #Comment
 
 #:<<Comment
 # Unparsed Atom
-({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n"; } | tr "\n" " " && echo " cron[123]: Job \`cron.daily\`") >> /tmp/syslog
+({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n"; } | tr "\n" " " && echo " cron[123]: Job \`cron.daily\`") >> $LOGFILE
 # AnyByteDataModelElement
-echo "Any:dafsdff12%3§fasß?–_=yy" >> /tmp/syslog
-echo "Any:äöüß" >> /tmp/syslog
+echo "Any:dafsdff12%3§fasß?–_=yy" >> $LOGFILE
+echo "Any:äöüß" >> $LOGFILE
 # Base64StringModelElement
-echo "VXNlcm5hbWU6ICJ1c2VyIgpQYXNzd29yZDogInBhc3N3b3JkIg==" >> /tmp/syslog
+echo "VXNlcm5hbWU6ICJ1c2VyIgpQYXNzd29yZDogInBhc3N3b3JkIg==" >> $LOGFILE
 # DateTimeModelElement
-({ echo "Current DateTime: " && date '+%d.%m.%Y %T' | tr -d "\n"; } | tr -d "\n" && echo "") >> /tmp/syslog
+({ echo "Current DateTime: " && date '+%d.%m.%Y %T' | tr -d "\n"; } | tr -d "\n" && echo "") >> $LOGFILE
 # DecimalFloatValueModelElement
-echo "-25878952156245.222239655488955" >> /tmp/syslog
+echo "-25878952156245.222239655488955" >> $LOGFILE
 # DecimalIntegerValueModelElement
-echo "- 3695465546654" >> /tmp/syslog
+echo "- 3695465546654" >> $LOGFILE
 # DelimitedDataModelElement
-echo "This is some part of a csv file;" >> /tmp/syslog
+echo "This is some part of a csv file;" >> $LOGFILE
 # ElementValueBranchModelElement
-echo "match data: 25000" >> /tmp/syslog
+echo "match data: 25000" >> $LOGFILE
 # HexStringModelElement
-echo "b654686973206973206a7573742061206e6f726d616c2074657874" >> /tmp/syslog
+echo "b654686973206973206a7573742061206e6f726d616c2074657874" >> $LOGFILE
 # IpAddressModelElement
-echo "Gateway IP-Address: 192.168.128.225" >> /tmp/syslog
+echo "Gateway IP-Address: 192.168.128.225" >> $LOGFILE
 # IPv4InRFC1918MatchRule, ValueListMatchRule
-echo "Gateway IP-Address: 8.8.8.8" >> /tmp/syslog
+echo "Gateway IP-Address: 8.8.8.8" >> $LOGFILE
 # IPv4InRFC1918MatchRule, ValueListMatchRule
-echo "Gateway IP-Address: 8.8.4.4" >> /tmp/syslog
+echo "Gateway IP-Address: 8.8.4.4" >> $LOGFILE
 # IPv4InRFC1918MatchRule, ValueRangeMatchRule
-echo "Gateway IP-Address: 10.0.0.0" >> /tmp/syslog
+echo "Gateway IP-Address: 10.0.0.0" >> $LOGFILE
 # IPv4InRFC1918MatchRule, ValueRangeMatchRule
-echo "Gateway IP-Address: 11.0.0.0" >> /tmp/syslog
+echo "Gateway IP-Address: 11.0.0.0" >> $LOGFILE
 # MultiLocaleDateTimeModelElement
-echo "Feb 25 2019" >> /tmp/syslog
+echo "Feb 25 2019" >> $LOGFILE
 # OptionalMatchModelElement
-echo "The-searched-element-was-found!" >> /tmp/syslog
+echo "The-searched-element-was-found!" >> $LOGFILE
 # RepeatedElementDataModelElement
 for i in {1..5}; do
 	R=`shuf -i 1-45 -n 1`
-	echo "[drawn number]: $R" | tr -d "\n" >> /tmp/syslog
+	echo "[drawn number]: $R" | tr -d "\n" >> $LOGFILE
 done
-echo "" >> /tmp/syslog
+echo "" >> $LOGFILE
 # VariableByteDataModelElement
-echo "---------------------------------------------------------------------" >> /tmp/syslog
+echo "---------------------------------------------------------------------" >> $LOGFILE
 # WhiteSpaceLimitedDataModelElement
 alphabet="abcdefghijklmnopqrstuvwxyz "
 text="z"
@@ -261,12 +264,13 @@ for i in {1..1000}; do
 		break
 	fi
 done
-echo "$text" >> /tmp/syslog
+echo "$text" >> $LOGFILE
 #Comment
 
 #stop aminer
 sleep 3 & wait $!
 sudo pkill -x aminer
-KILL_PID=$!
-sleep 3
-wait $KILL_PID
+wait $PID
+RES=$?
+sudo rm $LOGFILE
+exit $RES
