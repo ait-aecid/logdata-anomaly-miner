@@ -1,5 +1,4 @@
 import time
-from datetime import datetime
 from kafka import KafkaConsumer
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.events.KafkaEventHandler import KafkaEventHandler

@@ -17,7 +17,6 @@ import os
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME
-from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
@@ -122,11 +121,11 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                         analysis_summary += os.linesep
                         analysis_summary += '  "%s": %s' % (path, analysis_data[0])
                     anomaly_scores.append(d)
-            analysis_component = {'AffectedLogAtomPaths': list(value_dict)}
-            analysis_component['AnomalyScores'] = anomaly_scores
-            analysis_component['MinBinElements'] = self.min_bin_elements
-            analysis_component['MinBinTime'] = self.min_bin_time
-            analysis_component['DebugMode'] = self.debug_mode
+            analysis_component = {'AffectedLogAtomPaths': list(value_dict),
+                                  'AnomalyScores': anomaly_scores,
+                                  'MinBinElements': self.min_bin_elements,
+                                  'MinBinTime': self.min_bin_time,
+                                  'DebugMode': self.debug_mode}
             event_data = {'AnalysisComponent': analysis_component}
 
         if analysis_summary:

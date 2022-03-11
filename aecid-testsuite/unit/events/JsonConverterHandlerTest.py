@@ -1,6 +1,5 @@
 import time
 import unittest
-from datetime import datetime
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.MatchContext import MatchContext
