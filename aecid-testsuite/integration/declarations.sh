@@ -57,7 +57,7 @@ read -r -d '' VAR << END
       "/model/DiskUpgrade/UNameSpace2",
       "/model/DiskUpgrade/User",
       "/model/DiskUpgrade/HDRepair"
-    ],
+    ]
   },
   "LogData": {
     "RawLogData": [
@@ -93,6 +93,7 @@ read -r -d '' VAR << END
       "/model/DiskUpgrade/UNameSpace2": " ",
       "/model/DiskUpgrade/User": "root:",
       "/model/DiskUpgrade/HDRepair": " System rebooted for hard disk upgrade"
+    }
   }
 }
 {
@@ -167,7 +168,7 @@ read -r -d '' VAR << END
       "/model/HomePath/Username",
       "/model/HomePath/Is",
       "/model/HomePath/Path"
-    ],
+    ]
   },
   "LogData": {
     "RawLogData": [
@@ -208,7 +209,7 @@ read -r -d '' VAR << END
     "AffectedLogAtomValues": [
       "root",
       "/root"
-    ],
+    ]
   },
   "LogData": {
     "RawLogData": [
@@ -249,7 +250,7 @@ read -r -d '' VAR << END
     "AffectedLogAtomValues": [
       "user",
       "/home/user"
-    ],
+    ]
   },
   "LogData": {
     "RawLogData": [
@@ -290,7 +291,7 @@ read -r -d '' VAR << END
     "AffectedLogAtomValues": [
       "guest",
       "/home/guest"
-    ],
+    ]
   },
   "LogData": {
     "RawLogData": [
