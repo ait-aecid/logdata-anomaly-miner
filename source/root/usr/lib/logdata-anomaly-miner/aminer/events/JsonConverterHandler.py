@@ -52,8 +52,16 @@ class JsonConverterHandler(EventHandlerInterface):
             if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
                 log_data['AnnotatedMatchElement'] = {}
                 for path, match in log_atom.parser_match.get_match_dictionary().items():
-                    log_data['AnnotatedMatchElement'][path] = match.match_object.decode(AminerConfig.ENCODING) if isinstance(
-                            match.match_object, bytes) else str(match.match_object)
+                    if isinstance(match, list):
+                        for match_element_id, match_element in enumerate(match):
+                            if isinstance(match_element.match_object, bytes):
+                                log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = match_element.match_object.decode(AminerConfig.ENCODING)
+                            else:
+                                log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = str(match_element.match_object)
+                    elif isinstance(match.match_object, bytes):
+                        log_data['AnnotatedMatchElement'][path] = match.match_object.decode(AminerConfig.ENCODING)
+                    else:
+                        log_data['AnnotatedMatchElement'][path] = str(match.match_object)
 
             analysis_component = {'AnalysisComponentIdentifier': self.analysis_context.get_id_by_component(event_source)}
             if event_source.__class__.__name__ == 'ExtractedData_class':
