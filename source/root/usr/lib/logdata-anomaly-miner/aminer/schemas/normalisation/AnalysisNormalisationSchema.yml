@@ -197,6 +197,8 @@
                 'min_log_lines_per_time_step': {'type': 'integer', 'default': 10},
                 'empty_window_warnings': {'type': 'boolean', 'default': True},
                 'early_exceeding_anomaly_output': {'type': 'boolean', 'default': False},
+                'set_lower_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
+                'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
             }
         }
     }

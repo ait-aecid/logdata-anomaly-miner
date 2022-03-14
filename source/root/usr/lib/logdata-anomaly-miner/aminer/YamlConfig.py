@@ -451,8 +451,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     num_windows=item['num_windows'], confidence_factor=item['confidence_factor'],
                                     empty_window_warnings=item['empty_window_warnings'],
-                                    early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'],
+                                    set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
+                                    auto_include_flag=learn, output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
