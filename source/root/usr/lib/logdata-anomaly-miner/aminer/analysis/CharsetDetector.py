@@ -153,7 +153,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                                       'MissingCharacters': missing_chars_decoded}
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
-                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Value range anomaly detected', sorted_log_lines,
+                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New character(s) detected', sorted_log_lines,
                                            event_data, log_atom, self)
             # Extend charsets if learn mode is active.
             if self.auto_include_flag is True:
