@@ -55,7 +55,8 @@ class JsonConverterHandler(EventHandlerInterface):
                     if isinstance(match, list):
                         for match_element_id, match_element in enumerate(match):
                             if isinstance(match_element.match_object, bytes):
-                                log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = match_element.match_object.decode(AminerConfig.ENCODING)
+                                log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = match_element.match_object.decode(
+                                    AminerConfig.ENCODING)
                             else:
                                 log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = str(match_element.match_object)
                     elif isinstance(match.match_object, bytes):
