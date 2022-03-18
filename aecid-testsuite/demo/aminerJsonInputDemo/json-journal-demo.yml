@@ -103,6 +103,12 @@ Parser:
            - 'pci_bus'
            - 'pci'
            - 'ubs'
+           - 'pnp'
+           - 'scsi'
+           - 'usb'
+           - 'misc'
+           - 'virtio'
+           - 'hid'
 
        - id: optional_key__KERNEL_DEVICE
          type: FixedWordlistDataModelElement
@@ -110,16 +116,37 @@ Parser:
          args:
            - '+acpi:PNP0A03:00'
            - '+pci_bus:0000:00'
+           - '+pci:0000:00:00.0'
            - '+pci:0000:00:01.0'
            - '+pci:0000:00:01.1'
            - '+pci:0000:00:01.2'
+           - '+pci:0000:00:01.3'
+           - '+pci:0000:00:02.0'
+           - '+pci:0000:00:03.0'
+           - '+pci:0000:00:04.0'
+           - '+pci:0000:00:05.0'
+           - '+pnp:00:00'
+           - '+pnp:00:01'
+           - '+pnp:00:02'
+           - '+pnp:00:03'
+           - '+pnp:00:04'
+           - '+scsi:host0'
+           - '+scsi:host1'
            - 'c189:0'
+           - '+usb:1-0:1.0'
+           - '+usb:1-1'
+           - 'c10:236'
+           - '+virtio:virtio0'
+           - 'c189:1'
+           - '+hid:0003:0627:0001.0001'
 
        - id: optional_key__UDEV_DEVNODE
          type: FixedWordlistDataModelElement
          name: 'optional_key__UDEV_DEVNODE'
          args:
            - '/dev/bus/usb/001/001'
+           - '/dev/bus/usb/001/002'
+           - '/dev/mapper/control'
 
        - id: optional_key__UDEV_SYSNAME
          type: FixedWordlistDataModelElement
@@ -127,10 +154,28 @@ Parser:
          args:
            - 'PNP0A03:00'
            - 'usb1'
-#           - '+pci_bus:0000:00'
-#           - '+pci:0000:00:01.0'
-#           - '+pci:0000:00:01.1'
-#           - '+pci:0000:00:01.2'
+           - 'host0'
+           - 'host1'
+           - '00:00'
+           - '00:01'
+           - '00:02'
+           - '00:03'
+           - '00:04'
+           - '0000:00:00.0'
+           - '0000:00:01.0'
+           - '0000:00:01.1'
+           - '0000:00:01.2'
+           - '0000:00:01.3'
+           - '0000:00:02.0'
+           - '0000:00:03.0'
+           - '0000:00:04.0'
+           - '0000:00:05.0'
+           - '0000:00'
+           - '1-0:1.0'
+           - '1-1'
+           - 'device-mapper'
+           - 'virtio0'
+           - '0003:0627:0001.0001'
 
        - id: SYSLOG_FACILITY
          type: DecimalIntegerValueModelElement
@@ -282,6 +327,7 @@ Parser:
            - 'accounts-daemon'
            - 'systemd-logind'
            - 'systemd-hostnam'
+           - 'systemd'
            - 'networkd-dispat'
            - 'snapd'
            - 'sshd'
@@ -313,6 +359,7 @@ Parser:
            - '/usr/sbin/sshd'
            - '/usr/bin/logger'
            - '/usr/bin/sudo'
+           - '/lib/systemd/systemd'
 
        - id: optional_key__CMDLINE
          type: FixedWordlistDataModelElement
@@ -342,6 +389,7 @@ Parser:
            - '/usr/sbin/sshd -D'
            - 'logger -p user info -t ec2 -s'
            - 'sudo -i'
+           - '/sbin/init'
 
        - id: optional_key__CAP_EFFECTIVE
          type: HexStringModelElement
@@ -378,6 +426,7 @@ Parser:
            - '/system.slice/ssh.service'
            - '/system.slice/cloud-final.service'
            - '/user.slice/user-1000.slice/session-1.scope'
+           - '/init.scope'
 
        - id: optional_key__SYSTEMD_UNIT
          type: FixedWordlistDataModelElement
@@ -406,6 +455,7 @@ Parser:
            - 'ssh.service'
            - 'cloud-final.service'
            - 'session-1.scope'
+           - 'init.scope'
 
        - id: optional_key__SYSTEMD_SLICE
          type: FixedWordlistDataModelElement
@@ -424,17 +474,20 @@ Parser:
          name: 'optional_key_JOURNAL_NAME'
          args:
            - 'Runtime journal'
+           - 'System journal'
 
-       - id: fixed_path
-         type: FixedDataModelElement
-         name: 'fixed_path'
-         args: '/run/log/journal/'
+       - id: fixed_journal_paths
+         type: FixedWordlistDataModelElement
+         name: 'fixed_journal_paths'
+         args:
+           - '/var/log/journal/'
+           - '/run/log/journal/'
 
        - id: optional_key_JOURNAL_PATH
          type: SequenceModelElement
          name: 'optional_key_JOURNAL_PATH'
          args:
-           - fixed_path
+           - fixed_journal_paths
            - hex
 
        - id: optional_key_CURRENT_USE
@@ -536,6 +589,15 @@ Parser:
          name: 'optional_key_UNIT'
          args:
            - 'systemd-udevd.service'
+           - 'systemd-journal-flush.service'
+           - 'systemd-sysctl.service'
+           - 'systemd-udev-trigger.service'
+           - 'keyboard-setup.service'
+           - 'systemd-ask-password-console.path'
+           - 'cryptsetup.target'
+           - 'local-fs-pre.target'
+           - 'dev-ttyS0.device'
+           - 'systemd-rfkill.socket'
 
        - id: optional_key_INVOCATION_ID
          type: HexStringModelElement
