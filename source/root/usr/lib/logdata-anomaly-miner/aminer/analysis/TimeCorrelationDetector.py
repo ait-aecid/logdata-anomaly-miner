@@ -54,7 +54,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.min_rule_attributes = min_rule_attributes
         self.max_rule_attributes = max_rule_attributes
         self.last_unhandled_match = None
-        self.next_persist_time = None
         self.total_records = 0
         self.record_count_before_event = record_count_before_event
         self.persistence_id = persistence_id
@@ -62,6 +61,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         self.use_path_match = use_path_match
         self.use_value_match = use_value_match
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -113,9 +113,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
         if not features_found_list:
             self.last_unhandled_match = log_atom
-        elif self.next_persist_time is None:
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         if (self.total_records % self.record_count_before_event) == 0:
             result = self.total_records * ['']
@@ -124,21 +121,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                   'AffectedLogAtomValues': [log_atom.raw_data.decode(AminerConfig.ENCODING)]}
             if self.output_log_line:
-                match_paths_values = {}
-                for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                    match_value = match_element.match_object
-                    if isinstance(match_value, tuple):
-                        tmp_list = []
-                        for val in match_value:
-                            if isinstance(val, datetime):
-                                tmp_list.append(datetime.timestamp(val))
-                            else:
-                                tmp_list.append(val)
-                        match_value = tmp_list
-                    if isinstance(match_value, bytes):
-                        match_value = match_value.decode(AminerConfig.ENCODING)
-                    match_paths_values[match_path] = match_value
-                analysis_component['ParsedLogAtom'] = match_paths_values
                 feature_list = []
                 for feature in self.feature_list:
                     tmp_list = {}
@@ -179,19 +161,19 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         return r
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
-            self.next_persist_time = None
+        if delta <= 0:
+            self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def create_random_rule(self, log_atom):

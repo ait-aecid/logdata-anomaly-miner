@@ -12,7 +12,7 @@ from datetime import datetime
 class MatchFilterTest(TestBase):
     """Unittests for the MatchFilter."""
 
-    __expected_string = '%s Log Atom Filtered\nMatchFilter: "%s" (1 lines)\n  /integer: %d\n%d\n\n'
+    __expected_string = '%s Log Atom Filtered\nMatchFilter: "%s" (1 lines)\n  %d\n\n'
 
     def test1_receive_atom_trigger_event(self):
         """This test checks if an event is triggered if the path is in the target_path_list."""
@@ -26,7 +26,7 @@ class MatchFilterTest(TestBase):
             log_atom = LogAtom(val_str, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
             self.assertEqual(self.__expected_string % (
-                datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val, val), self.output_stream.getvalue())
+                datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val), self.output_stream.getvalue())
             self.reset_output_stream()
 
     def test2_receive_atom_trigger_no_event(self):
@@ -54,7 +54,7 @@ class MatchFilterTest(TestBase):
             val_str = str(val).encode('utf-8')
             log_atom = LogAtom(val_str, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
-            self.assertEqual(self.__expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val, val),
+            self.assertEqual(self.__expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val),
                              self.output_stream.getvalue())
             self.reset_output_stream()
 
@@ -74,7 +74,7 @@ class MatchFilterTest(TestBase):
             log_atom = LogAtom(val_str, ParserMatch(decimal_integer_me.get_match_element('', MatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
             if val <= 500:
-                self.assertEqual(self.__expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val, val),
+                self.assertEqual(self.__expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val),
                                  self.output_stream.getvalue())
             else:
                 self.assertEqual('', self.output_stream.getvalue())

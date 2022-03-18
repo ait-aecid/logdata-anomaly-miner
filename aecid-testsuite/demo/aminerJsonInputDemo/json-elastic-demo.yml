@@ -202,4 +202,3 @@ Input:
 EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
-

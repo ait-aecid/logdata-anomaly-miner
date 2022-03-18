@@ -37,9 +37,9 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
-        self.next_persist_time = None
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
 
         self.log_success = 0
@@ -76,9 +76,6 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                         self.known_values_set.add(match.match_object)
                         self.log_learned_path_values += 1
                         self.log_new_learned_values.append(match.match_object)
-                        if self.next_persist_time is None:
-                            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
                     if isinstance(match.match_object, bytes):
                         affected_log_atom_values.append(match.match_object.decode(AminerConfig.ENCODING))
@@ -97,26 +94,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 except UnicodeError:
                     data = repr(log_atom.raw_data)
                 original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                if self.output_log_line:
-                    match_paths_values = {}
-                    for match_path, match_element in match_dict.items():
-                        if isinstance(match_element, list):
-                            match_value = []
-                            for match in match_element:
-                                if isinstance(match.match_object, bytes):
-                                    match_value.append(match.match_object.decode(AminerConfig.ENCODING))
-                                else:
-                                    match_value.append(match.match_object)
-                        else:
-                            match_value = match_element.match_object
-                            if isinstance(match_value, bytes):
-                                match_value = match_value.decode(AminerConfig.ENCODING)
-                        match_paths_values[match_path] = match_value
-                    analysis_component['ParsedLogAtom'] = match_paths_values
-                    sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
-                        res) + os.linesep + original_log_line_prefix + data]
-                else:
-                    sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + data]
+                sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + data]
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', sorted_log_lines, event_data,
@@ -124,20 +102,20 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 self.log_success += 1
 
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):

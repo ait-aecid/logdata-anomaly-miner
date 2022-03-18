@@ -5,14 +5,16 @@
 DELDIR=1
 BRANCH="main"
 URL="https://github.com/ait-aecid/logdata-anomaly-miner.git"
-AMINERSRC=`mktemp -d`
+AMINERDST=`mktemp -d`
+AMINERSRC=0
+DISON=0
 
 help() {
-	echo "Usage: $0 [-h] [-b BRANCH] [-u GITURL] [-d DIRECTORY]" 1>&2
+	echo "Usage: $0 [-h] [-b BRANCH] [-u GITURL] [-s LOCAL_GITREPO_PATH] [-d DIRECTORY]" 1>&2
 }
 
 
-while getopts "hb:u:d:" options; do
+while getopts "hb:u:s:d:" options; do
 	case "${options}" in
 		b)
 			BRANCH=${OPTARG}
@@ -24,11 +26,21 @@ while getopts "hb:u:d:" options; do
 		u)
 			URL=${OPTARG}
 			;;
-		d)
+		s)
 			AMINERSRC=${OPTARG}
-			if [ -d $AMINERSRC ]
+			DELDIR=0
+			if [ ! -d $AMINERSRC ]
 			then
-				echo "This directory($AMINERSRC) already exists. Please remove it first"
+				echo "Local Git-Repository $AMINERSRC does not exist."
+				exit 1
+			fi
+			;;
+		d)
+			DISON=1
+			AMINERDST=${OPTARG}
+			if [ -d $AMINERDST ]
+			then
+				echo "This directory($AMINERDST) already exists. Please remove it first"
 				exit 1
 			fi
 			DELDIR=0
@@ -56,10 +68,20 @@ else
 	exit 1
 fi
 
+if [ $AMINERSRC -eq 0 ]
+then
+	git clone -b $BRANCH $URL $AMINERDST
+else
+	if [ $DISON -eq 1 ]
+	then
+		cp -rap $AMINERSRC $AMINERDST
+	else	
+		AMINERDST=$AMINERSRC
+	fi
+fi
 
-git clone -b $BRANCH $URL $AMINERSRC
-cd $AMINERSRC
-mkdir roles
+cd $AMINERDST
+test -d roles || mkdir roles
 git clone -b $BRANCH https://github.com/ait-aecid/aminer-ansible roles/aminer
 
 
@@ -68,7 +90,7 @@ cat > playbook.yml << EOF
   vars:
          aminer_gitrepo: False
          # We assume that we cloned the aminer to /home/developer/aminer 
-         aminer_repopath: "${AMINERSRC}"
+         aminer_repopath: "${AMINERDST}"
   roles:
          - aminer
 EOF
@@ -81,7 +103,7 @@ sudo ansible-playbook playbook.yml
 
 if [ $DELDIR -eq 1 ]
 then
-	test -d $AMINERSRC && rm -rf $AMINERSRC
+	test -d $AMINERDST && rm -rf $AMINERDST
 fi
 
 exit 0

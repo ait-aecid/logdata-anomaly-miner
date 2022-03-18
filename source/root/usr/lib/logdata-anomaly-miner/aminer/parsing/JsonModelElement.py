@@ -13,7 +13,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import json
-import sys
 import warnings
 import logging
 from typing import List, Union
@@ -327,7 +326,7 @@ class JsonModelElement(ModelElementInterface):
 
     def parse_json_array(self, json_dict: dict, json_match_data: dict, key: str, split_key: str, current_path: str, matches: list,
                          match_context, i: int):
-        """Parse a array in a json object."""
+        """Parse an array in a json object."""
         if not isinstance(json_match_data[split_key], list):
             if key.startswith(self.optional_key_prefix) and json_match_data[split_key] is None:
                 data = b"null"
