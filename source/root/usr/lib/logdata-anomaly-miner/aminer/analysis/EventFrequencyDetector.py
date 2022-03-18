@@ -31,8 +31,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, num_windows=50,
-                 confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False, persistence_id='Default',
-                 auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
+                 confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False, set_lower_limit=None,
+                 set_upper_limit=None, persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None,
+                 constraint_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -46,6 +47,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         must be in range [0, 1].
         @param empty_window_warnings whether anomalies should be generated for too small window sizes.
         @param early_exceeding_anomaly_output states if a anomaly should be raised the first time the appearance count exceedes the range.
+        @param set_lower_limit sets the lower limit of the frequency test to the specified value.
+        @param set_upper_limit sets the upper limit of the frequency test to the specified value.
         @param persistence_id name of persistency document.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
@@ -74,6 +77,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.confidence_factor = confidence_factor
         self.empty_window_warnings = empty_window_warnings
         self.early_exceeding_anomaly_output = early_exceeding_anomaly_output
+        self.set_lower_limit = set_lower_limit
+        self.set_upper_limit = set_upper_limit
         self.next_check_time = None
         self.counts = {}
         self.ranges = {}
@@ -254,8 +259,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             return None
         occurrences_mean = -1
         occurrences_std = -1
-        print(self.counts[log_event])
-        print(self.counts[log_event][-self.num_windows-1:-1])
         occurrences_mean = np.mean(self.counts[log_event][-self.num_windows-1:-1])
         if len(self.counts[log_event][-self.num_windows-1:-1]) > 1:
             # Only compute standard deviation for at least 2 observed counts
@@ -263,8 +266,16 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         else:
             # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
             occurrences_std = occurrences_mean * (1 - self.confidence_factor)
-        print([occurrences_mean - occurrences_std / self.confidence_factor, occurrences_mean + occurrences_std / self.confidence_factor])
-        return [occurrences_mean - occurrences_std / self.confidence_factor, occurrences_mean + occurrences_std / self.confidence_factor]
+        # Calculate limits
+        if self.set_lower_limit is not None:
+            lower_limit = self.set_lower_limit
+        else:
+            lower_limit = occurrences_mean - occurrences_std / self.confidence_factor
+        if self.set_upper_limit is not None:
+            upper_limit = self.set_upper_limit
+        else:
+            upper_limit = occurrences_mean + occurrences_std / self.confidence_factor
+        return [lower_limit, upper_limit]
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""

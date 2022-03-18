@@ -149,7 +149,7 @@ pipeline {
             }
         }
 
-        stage("System and Documentation Tests") {
+        stage("System, Documentation and Wiki Tests") {
             parallel {
                 stage("Available Configs") {
                     steps {
@@ -249,14 +249,6 @@ pipeline {
                     sh "scripts/deploydocs.sh ${env.BRANCH_NAME} ${env.BUILDDOCSDIR}/html /var/www/aeciddocs/logdata-anomaly-miner"
                     }
                 }
-            }
-        }
-
-        stage("Wiki Tests - development") {
-            when {
-                branch "development"
-            }
-            parallel {
                 stage("Try It Out") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut development"
@@ -284,7 +276,6 @@ pipeline {
                 }
             }
         }
-
         stage("Wiki Tests - main") {
             when {
                 branch "main"

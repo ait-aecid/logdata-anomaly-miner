@@ -11,7 +11,7 @@
                 'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'persistence_id': {'type': 'string', 'default': 'Default'},
-                'output_logline': {'type': 'boolean', 'default': True},
+                'output_logline': {'type': 'boolean', 'default': False},
                 'learn_mode': {'type': 'boolean'},
                 'num_windows': {'type': 'integer', 'required': True, 'default': 50},
                 'min_anomaly_score': {'type': 'float', 'required': False, 'default': 1.1},
@@ -197,6 +197,8 @@
                 'min_log_lines_per_time_step': {'type': 'integer', 'default': 10},
                 'empty_window_warnings': {'type': 'boolean', 'default': True},
                 'early_exceeding_anomaly_output': {'type': 'boolean', 'default': False},
+                'set_lower_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
+                'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
             }
         }
     }

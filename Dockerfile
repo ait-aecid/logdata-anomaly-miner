@@ -24,31 +24,31 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 # Install necessary debian packages
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
-        supervisor \
+    supervisor \
 	python3 \
 	python3-pip \
 	python3-pip \
-        python3-tz \
-        python3-scipy \
-        python3-pkg-resources \
-        python3-setuptools \
-        python3-dateutil \
-        python3-six \
-        python3-scipy \
-        python3-kafka \
-        python3-cerberus \
-        python3-yaml \
-        python3-pylibacl \
-        python3-urllib3 \
-        python3-statsmodels \
-        libacl1-dev
+    python3-tz \
+    python3-scipy \
+    python3-pkg-resources \
+    python3-setuptools \
+    python3-dateutil \
+    python3-six \
+    python3-scipy \
+    python3-kafka \
+    python3-cerberus \
+    python3-yaml \
+    python3-pylibacl \
+    python3-urllib3 \
+    python3-statsmodels \
+    libacl1-dev
 
 # Docs
 RUN apt-get update && apt-get install -y \
-        python3-sphinx \
-        python3-sphinx-rtd-theme \
-        python3-recommonmark \
-        make
+    python3-sphinx \
+    python3-sphinx-rtd-theme \
+    python3-recommonmark \
+    make
 
 # For Docs
 ADD docs /docs
@@ -60,6 +60,12 @@ ADD LICENSE /docs/LICENSE.md
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 
+# copy these files instead as symlinks would need absolute paths.
+ADD source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/ait-lds /etc/aminer/conf-available/ait-lds
+ADD source/root/etc/aminer/conf-available/generic /etc/aminer/conf-available/generic
+
 # Entrypoint-wrapper
 ADD scripts/aminerwrapper.sh /aminerwrapper.sh
 
@@ -68,21 +74,22 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/logdata-anomaly-miner/aminer.py /usr/bin/aminer \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminer.py  \
 	&& chmod 0755 /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py \
-	&& ln -s /usr/lib/python3/dist-packages/kafka /usr/lib/logdata-anomaly-miner/kafka \
-	&& ln -s /usr/lib/python3/dist-packages/cerberus /usr/lib/logdata-anomaly-miner/cerberus \
-	&& ln -s /usr/lib/python3/dist-packages/scipy /usr/lib/logdata-anomaly-miner/scipy \
-	&& ln -s /usr/lib/python3/dist-packages/numpy /usr/lib/logdata-anomaly-miner/numpy \
-	&& ln -s /usr/lib/python3/dist-packages/pkg_resources /usr/lib/logdata-anomaly-miner/pkg_resources \
-	&& ln -s /usr/lib/python3/dist-packages/yaml /usr/lib/logdata-anomaly-miner/yaml \
-	&& ln -s /usr/lib/python3/dist-packages/pytz /usr/lib/logdata-anomaly-miner/pytz \
-	&& ln -s /usr/lib/python3/dist-packages/dateutil /usr/lib/logdata-anomaly-miner/dateutil \
-	&& ln -s /usr/lib/python3/dist-packages/six.py /usr/lib/logdata-anomaly-miner/six.py \
-	&& ln -s /usr/lib/python3/dist-packages/urllib3 /usr/lib/logdata-anomaly-miner/urllib3 \
-	&& ln -s /usr/lib/python3/dist-packages/statsmodels /usr/lib/logdata-anomaly-miner/statsmodels \
-	&& groupadd -g $GID -o $UNAME && useradd -u $UID -g $GID -ms /usr/sbin/nologin $UNAME && mkdir -p /var/lib/aminer/logs && mkdir /etc/aminer \
-        && chown $UID.$GID -R /var/lib/aminer \
-        && chown $UID.$GID -R /docs \
-        && chmod 0755 /aminerwrapper.sh
+	&& chmod 0755 /etc/aminer \
+	&& ln -s /usr/lib/python3/dist-packages/kafka /etc/aminer/conf-enabled/kafka \
+	&& ln -s /usr/lib/python3/dist-packages/cerberus /etc/aminer/conf-enabled/cerberus \
+	&& ln -s /usr/lib/python3/dist-packages/scipy /etc/aminer/conf-enabled/scipy \
+	&& ln -s /usr/lib/python3/dist-packages/numpy /etc/aminer/conf-enabled/numpy \
+	&& ln -s /usr/lib/python3/dist-packages/pkg_resources /etc/aminer/conf-enabled/pkg_resources \
+	&& ln -s /usr/lib/python3/dist-packages/yaml /etc/aminer/conf-enabled/yaml \
+	&& ln -s /usr/lib/python3/dist-packages/pytz /etc/aminer/conf-enabled/pytz \
+	&& ln -s /usr/lib/python3/dist-packages/dateutil /etc/aminer/conf-enabled/dateutil \
+	&& ln -s /usr/lib/python3/dist-packages/six.py /etc/aminer/conf-enabled/six.py \
+	&& ln -s /usr/lib/python3/dist-packages/urllib3 /etc/aminer/conf-enabled/urllib3 \
+	&& ln -s /usr/lib/python3/dist-packages/statsmodels /etc/aminer/conf-enabled/statsmodels \
+	&& groupadd -g $GID -o $UNAME && useradd -u $UID -g $GID -ms /usr/sbin/nologin $UNAME && mkdir -p /var/lib/aminer/logs \
+    && chown $UID.$GID -R /var/lib/aminer \
+    && chown $UID.$GID -R /docs \
+    && chmod 0755 /aminerwrapper.sh
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 

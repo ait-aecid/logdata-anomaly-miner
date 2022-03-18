@@ -1,6 +1,5 @@
 import time
 import unittest
-from datetime import datetime
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.MatchContext import MatchContext
@@ -28,7 +27,7 @@ class JsonConverterHandlerTest(TestBase):
                       '    "PersistenceFileName": "%s",\n    "AffectedParserPaths": [\n      "test/path/1",\n' \
                       '      "test/path/2"\n    ]\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
                       '"Timestamps": [\n      %s\n    ],\n    "DetectionTimestamp": %s,\n    "LogLinesCount": 5,\n' \
-                      '    "AnnotatedMatchElement": "match/s1:  pid="\n  }%s\n}\n'
+                      '    "AnnotatedMatchElement": {\n      "match/s1": " pid="\n    }\n  }%s\n}\n'
 
     def test1receive_expected_event(self):
         """In this test case a normal Event happens and the json output should be sent to a StreamPrinterEventHandler."""

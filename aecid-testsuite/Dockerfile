@@ -1,6 +1,6 @@
 #
 # PLEASE NOTE THAT YOUR WORKING-DIRECTORY MUST BE THE ROOT OF THIS REPOSITORY
-# IN ORDER WO BUIILD THIS CONTAINER-IMAGE!!!
+# IN ORDER WO BUILD THIS CONTAINER-IMAGE!!!
 #
 # Build:
 #    docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:latest .
@@ -59,10 +59,6 @@ RUN apt-get update && apt-get install -y \
     git \
     mypy
 
-
-
-
-
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     sed -i -e 's/# de_AT ISO-8859-1/de_AT ISO-8859-1/' /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
@@ -73,7 +69,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 
-RUN pip3 install coverage
+# RUN pip3 install coverage
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
@@ -105,7 +101,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /etc/aminer/conf-enabled/urllib3 \
 	&& ln -s /usr/lib/python3/dist-packages/statsmodels /etc/aminer/conf-enabled/statsmodels \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
-        && chown aminer.aminer -R /var/lib/aminer
+    && chown aminer.aminer -R /var/lib/aminer && chmod 0755 /etc/aminer
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE 
 
@@ -123,6 +119,8 @@ RUN chown aminer.aminer -R /home/aminer \
     && echo "aminer ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/aminer
 
 ADD scripts/testingwrapper.sh /testingwrapper.sh
+ADD source /home/aminer/source
+ADD docs /home/aminer/docs
 
 USER aminer
 WORKDIR /home/aminer/aecid-testsuite
