@@ -134,26 +134,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                 data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             for listener in self.anomaly_event_handlers:
-                if self.output_log_line:
-                    match_paths_values = {}
-                    for match_path, match_element in match_dict.items():
-                        if isinstance(match_element, list):
-                            match_value = []
-                            for match in match_element:
-                                if isinstance(match.match_object, bytes):
-                                    match_value.append(match.match_object.decode(AminerConfig.ENCODING))
-                                else:
-                                    match_value.append(match.match_object)
-                        else:
-                            match_value = match_element.match_object
-                            if isinstance(match_value, bytes):
-                                match_value = match_value.decode(AminerConfig.ENCODING)
-                        match_paths_values[match_path] = match_value
-                    analysis_component['ParsedLogAtom'] = match_paths_values
-                    sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
-                        self.known_values_dict) + os.linesep + original_log_line_prefix + data]
-                else:
-                    sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + data]
+                sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + data]
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
         self.log_success += 1

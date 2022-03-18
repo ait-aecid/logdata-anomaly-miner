@@ -371,13 +371,6 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
                     bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
                 d['BinDefinition'] = bin_definition
-                match_paths_values = {}
-                for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                    match_value = match_element.match_object
-                    if isinstance(match_value, bytes):
-                        match_value = match_value.decode(AminerConfig.ENCODING)
-                    match_paths_values[match_path] = match_value
-                analysis_component['ParsedLogAtom'] = match_paths_values
             d['PropertyPath'] = data_item.property_path
             for line in data_item.to_string('  ').split('\n'):
                 report_str += os.linesep + line
@@ -553,15 +546,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             d['HasOutlierBinsFlag'] = data_item.has_outlier_bins_flag
             d['Bins'] = bins
             if self.output_log_line:
-                match_paths_values = {}
-                for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                    match_value = match_element.match_object
-                    if isinstance(match_value, datetime):
-                        match_value = match_value.timestamp()
-                    if isinstance(match_value, bytes):
-                        match_value = match_value.decode(AminerConfig.ENCODING)
-                    match_paths_values[match_path] = match_value
-                analysis_component['ParsedLogAtom'] = match_paths_values
                 bin_definition = {
                   'Type': str(data_item.bin_definition.__class__.__name__),
                   'LowerLimit': data_item.bin_definition.lower_limit, 'BinSize': data_item.bin_definition.bin_size,
