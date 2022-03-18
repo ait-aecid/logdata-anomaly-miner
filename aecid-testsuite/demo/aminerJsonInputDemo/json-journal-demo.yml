@@ -194,6 +194,12 @@ Parser:
            - '../src/core/manager.c'
            - '../src/login/logind-session.c'
            - '../src/core/job.c'
+           - '../src/network/networkd-link.c'
+           - '../src/timesync/timesyncd-manager.c'
+           - '../src/network/networkd-dhcp6.c'
+           - '../src/network/networkd-dhcp4.c'
+           - '../src/resolve/resolved-manager.c'
+           - '../src/network/wait-online/manager.c'
 
        - id: optional_key_CODE_LINE
          type: DecimalIntegerValueModelElement
@@ -332,6 +338,7 @@ Parser:
            - 'snapd'
            - 'sshd'
            - 'sudo'
+           - 'cloud-init'
 
        - id: optional_key__EXE
          type: FixedWordlistDataModelElement
@@ -425,6 +432,7 @@ Parser:
            - '/system.slice/snapd.service'
            - '/system.slice/ssh.service'
            - '/system.slice/cloud-final.service'
+           - '/system.slice/cloud-init.service'
            - '/user.slice/user-1000.slice/session-1.scope'
            - '/init.scope'
 
@@ -597,6 +605,9 @@ Parser:
            - 'systemd-ask-password-console.path'
            - 'systemd-tmpfiles-setup.service'
            - 'systemd-timesyncd.service'
+           - 'systemd-networkd.service'
+           - 'systemd-networkd-wait-online.service'
+           - 'systemd-resolved.service'
            - 'keyboard-setup.service'
            - 'cryptsetup.target'
            - 'local-fs-pre.target'
@@ -609,6 +620,12 @@ Parser:
            - 'console-setup.service'
            - 'ebtables.service'
            - 'apparmor.service'
+           - 'time-sync.target'
+           - 'cloud-init-local.service'
+           - 'network-pre.target'
+           - 'nss-lookup.target'
+           - 'network.target'
+           - 'cloud-init.service'
 
        - id: optional_key_INVOCATION_ID
          type: HexStringModelElement
@@ -655,9 +672,14 @@ Parser:
            - '/usr/lib/NetworkManager/nm-dhcp-client.action'
            - '/usr/lib/NetworkManager/nm-dhcp-helper'
            - '/usr/lib/connman/scripts/dhclient-script'
+           - '/usr/lib/snapd/snap-confine//mount-namespace-capture-helper'
+           - '/usr/bin/lxc-start'
+           - '/usr/bin/man'
+           - '/usr/lib/snapd/snap-confine'
+           - '/usr/sbin/tcpdump'
            - 'man_filter'
            - 'man_groff'
-           - '/usr/lib/snapd/snap-confine//mount-namespace-capture-helper'
+           - '/sbin/dhclient'
 
        - id: optional_key_ADDRESS
          type: IpAddressDataModelElement
