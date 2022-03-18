@@ -53,11 +53,11 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_NONE:
-            self.start_characters = b"0123456789"
+            self.start_characters = set(b"0123456789")
         elif value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL:
-            self.start_characters = b"-0123456789"
+            self.start_characters = set(b"-0123456789")
         elif value_sign_type == DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY:
-            self.start_characters = b"+-"
+            self.start_characters = set(b"+-")
         else:
             msg = 'Invalid value_sign_type "%s"' % value_sign_type
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -90,6 +90,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.exponent_type = exponent_type
+        self.digits = set(b"0123456789")
 
     def get_id(self):
         """Get the element ID."""
@@ -109,29 +110,26 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         """
         data = match_context.match_data
 
-        allowed_characters = self.start_characters
-        if not data or (data[0] not in allowed_characters):
+        if not data or (data[0] not in self.start_characters):
             return None
         match_len = 1
 
         if self.pad_characters == b"" and data.startswith(b"0") and not data.startswith(b"0.") and len(data) > 1 and \
-                data[1] in b"0123456789":
+                data[1] in self.digits:
             return None
 
-        allowed_characters = self.pad_characters
         for test_byte in data[match_len:]:
-            if test_byte not in allowed_characters:
+            if test_byte not in self.pad_characters:
                 break
             match_len += 1
         num_start_pos = match_len
-        allowed_characters = b"0123456789"
         for test_byte in data[match_len:]:
-            if test_byte not in allowed_characters:
+            if test_byte not in self.digits:
                 break
             match_len += 1
 
         if match_len == 1:  # skipcq: PTC-W0048
-            if data[0] not in b"0123456789":
+            if data[0] not in self.digits:
                 return None
         elif num_start_pos == match_len and match_len == 1:  # only return None if match_len is 1 to allow 00 with zero padding.
             return None
@@ -141,7 +139,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             match_len += 1
             post_point_start = match_len
             for test_byte in data[match_len:]:
-                if test_byte not in b"0123456789":
+                if test_byte not in self.digits:
                     break
                 match_len += 1
             if match_len == post_point_start - 1:
@@ -156,7 +154,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
                 match_len += 1
             exp_number_start = match_len
             for test_byte in data[match_len:]:
-                if test_byte not in b"0123456789":
+                if test_byte not in self.digits:
                     break
                 match_len += 1
             if match_len == exp_number_start:

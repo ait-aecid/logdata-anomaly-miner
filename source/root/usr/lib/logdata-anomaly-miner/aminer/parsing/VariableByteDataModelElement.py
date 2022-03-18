@@ -39,7 +39,7 @@ class VariableByteDataModelElement(ModelElementInterface):
             msg = "alphabet must not be empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        self.alphabet = alphabet
+        self.alphabet = set(alphabet)
 
     def get_id(self):
         """Get the element ID."""
