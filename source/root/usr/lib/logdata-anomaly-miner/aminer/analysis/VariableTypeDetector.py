@@ -51,15 +51,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.aminer_config = aminer_config
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
-        # General options
+        # Parameters
         # Used to track the indicators and changed variable types
         self.save_statistics = save_statistics
         # States if empiric distributions of the variables should be used if no continuous distribution is detected
         self.use_empiric_distr = use_empiric_distr
         # States the used test statistic for the continous data type. Implemented are the 'KS' and 'CM' tests.
         self.used_gof_test = used_gof_test
-
-        # Input parameters
         # Significance niveau for p-value for the distribution test of the initialization
         # Recomended values are the implemented values of crit_val_ini_ks and crit_val_upd_ks or _cm
         self.gof_alpha = gof_alpha
@@ -964,8 +962,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             float_values = []
 
         if len(float_values) > 0 and (num_diff_vals > self.div_thres * self.num_init):
-            if durbin_watson(float_values) < self.crit_val_dw[self.dw_alpha][len(float_values)] or\
-                    durbin_watson(float_values) > 4 - self.crit_val_dw[self.dw_alpha][len(float_values)]:
+            float_values_mean = np.mean(float_values)
+            dw_result = durbin_watson([val - float_values_mean for val in float_values])
+            if dw_result < self.crit_val_dw[self.dw_alpha][len(float_values)] or\
+                    dw_result > 4 - self.crit_val_dw[self.dw_alpha][len(float_values)]:
                 var_type = self.calculate_value_range(float_values)
             else:
                 # test for a continuous distribution. If none fits, the function will return ['d']
