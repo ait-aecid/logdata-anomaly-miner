@@ -314,6 +314,10 @@ def get_model():
                         ])
                     ])
                 ]),
+            SequenceModelElement("sudo", [
+                FixedDataModelElement("cron_str", b" sudo: "),
+                AnyByteDataModelElement("msg")
+                ]),
             SequenceModelElement("auth", [  # This only occurs in auth.log
                 FixedDataModelElement("auth_str", b" auth: "),
                 DelimitedDataModelElement("pam", b"("),
@@ -344,32 +348,118 @@ def get_model():
                 FixedDataModelElement("systemd_str", b" systemd["),
                 DecimalIntegerValueModelElement("pid"),
                 FixedDataModelElement("brack_str1", b"]: "),
-                FirstMatchModelElement("systemd", [
-                    FixedDataModelElement("php_starting_str", b"Starting Clean php session files..."),
-                    FixedDataModelElement("php_started_str", b"Started Clean php session files."),
-                    FixedDataModelElement("php_starting_str", b"Starting Cleanup of Temporary Directories..."),
-                    FixedDataModelElement("php_started_str", b"Started Cleanup of Temporary Directories."),
-                    FixedDataModelElement("php_started_str", b"Starting Daily apt upgrade and clean activities..."),
-                    FixedDataModelElement("php_started_str", b"Started Daily apt upgrade and clean activities."),
-                    FixedDataModelElement("php_started_str", b"Starting Daily apt download activities..."),
-                    FixedDataModelElement("php_started_str", b"Started Daily apt download activities."),
-                    FixedDataModelElement("php_started_str", b"Starting Security Auditing Service..."),
-                    FixedDataModelElement("php_started_str", b"Started Security Auditing Service."),
-                    FixedDataModelElement("php_started_str", b"Stopping Security Auditing Service..."),
-                    FixedDataModelElement("php_started_str", b"Stopped Security Auditing Service."),
-                    FixedDataModelElement("php_started_str", b"Reloading The Apache HTTP Server."),
-                    FixedDataModelElement("php_started_str", b"Reloaded The Apache HTTP Server."),
-                    FixedDataModelElement("php_started_str", b"Mounting Arbitrary Executable File Formats File System..."),
-                    FixedDataModelElement("php_started_str", b"Mounted Arbitrary Executable File Formats File System."),
-                    SequenceModelElement("apt", [
-                        FixedDataModelElement("apt_str", b"apt"),
-                        AnyByteDataModelElement("apt_msg")
-                        ]),
-                    SequenceModelElement("service", [
-                        DelimitedDataModelElement("service", b":"),
-                        FixedDataModelElement("col_str", b": "),
-                        AnyByteDataModelElement("_msg")
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("systemd2", [
+                FixedDataModelElement("systemd_str", b" systemd: "),
+                DelimitedDataModelElement("pam", b"("),
+                FixedDataModelElement("brack_str", b"("),
+                DelimitedDataModelElement("name", b")"),
+                FixedDataModelElement("session_str", b"): session "),
+                FixedWordlistDataModelElement("status", [b"opened", b"closed"]),
+                FixedDataModelElement("user_str", b" for user "),
+                VariableByteDataModelElement("user", alphabet),
+                OptionalMatchModelElement(
+                    "uid", SequenceModelElement("uid", [
+                        FixedDataModelElement("uid_str", b" by (uid="),
+                        DecimalIntegerValueModelElement("uid"),
+                        FixedDataModelElement("brack_str", b")")
                         ])
+                    )
+                ]),
+            SequenceModelElement("systemd2", [
+                FixedDataModelElement("systemd_str", b" sshd["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str2", b"]: "),
+                FirstMatchModelElement("fm", [
+                    SequenceModelElement("new", [
+                        FixedDataModelElement("brack_str", b"pam_unix("),
+                        DelimitedDataModelElement("name", b")"),
+                        FixedDataModelElement("session_str", b"): session "),
+                        FixedWordlistDataModelElement("status", [b"opened", b"closed"]),
+                        FixedDataModelElement("user_str", b" for user "),
+                        VariableByteDataModelElement("user", alphabet),
+                        OptionalMatchModelElement(
+                            "uid", SequenceModelElement("uid", [
+                                FixedDataModelElement("uid_str", b" by (uid="),
+                                DecimalIntegerValueModelElement("uid"),
+                                FixedDataModelElement("brack_str", b")")
+                                ])
+                            )
+                        ]),
+                    SequenceModelElement("publickey", [
+                        FixedDataModelElement("publickey_str", b"Accepted publickey for "),
+                        DelimitedDataModelElement("user", b" "),
+                        FixedDataModelElement("space", b" from "),
+                        IpAddressDataModelElement("ip"),
+                        FixedDataModelElement("space", b" port "),
+                        DecimalIntegerValueModelElement("port"),
+                        FixedDataModelElement("rsa", b" ssh2: RSA "),
+                        AnyByteDataModelElement("rsa"),
+                        ]),
+                    SequenceModelElement("ident", [
+                        FixedDataModelElement("ident_str", b"Did not receive identification string from "),
+                        IpAddressDataModelElement("ip"),
+                        FixedDataModelElement("space", b" port "),
+                        DecimalIntegerValueModelElement("port"),
+                        ]),
+                    SequenceModelElement("listening", [
+                        FixedDataModelElement("listening_str", b"Server listening on "),
+                        DelimitedDataModelElement("ip", b" "),
+                        FixedDataModelElement("port_str", b" port "),
+                        DecimalIntegerValueModelElement("port"),
+                        FixedDataModelElement("dot", b"."),
+                        ]),
+                    SequenceModelElement("signal", [
+                        FixedDataModelElement("signal_str", b"Received signal"),
+                        AnyByteDataModelElement("remainder"),
+                        ]),
+                    SequenceModelElement("rec_disconnected", [
+                        FixedDataModelElement("rec_disconnected_str", b"Received disconnect from "),
+                        IpAddressDataModelElement("ip"),
+                        FixedDataModelElement("space", b" port "),
+                        DecimalIntegerValueModelElement("port"),
+                        AnyByteDataModelElement("remainder"),
+                        ]),
+                    SequenceModelElement("disconnected", [
+                        FixedDataModelElement("disconnected_str", b"Disconnected from user "),
+                        DelimitedDataModelElement("user", b" "),
+                        FixedDataModelElement("space", b" "),
+                        IpAddressDataModelElement("ip"),
+                        FixedDataModelElement("space", b" port "),
+                        DecimalIntegerValueModelElement("port"),
+                        ]),
+                    ]),
+                ]),
+            SequenceModelElement("systemd2", [
+                FixedDataModelElement("systemd_str", b" su["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str2", b"]: "),
+                FirstMatchModelElement("fm", [
+                    SequenceModelElement("seq", [
+                        FixedDataModelElement("brack_str", b"pam_unix("),
+                        DelimitedDataModelElement("name", b")"),
+                        FixedDataModelElement("session_str", b"): session "),
+                        FixedWordlistDataModelElement("status", [b"opened", b"closed"]),
+                        FixedDataModelElement("user_str", b" for user "),
+                        VariableByteDataModelElement("user", alphabet),
+                        OptionalMatchModelElement(
+                            "uid", SequenceModelElement("uid", [
+                                FixedDataModelElement("uid_str", b" by (uid="),
+                                DecimalIntegerValueModelElement("uid"),
+                                FixedDataModelElement("brack_str", b")")
+                                ])
+                            ),
+                        ]),
+                    SequenceModelElement("seq", [
+                        FixedDataModelElement("brack_str", b"Successful su for "),
+                        VariableByteDataModelElement("user", alphabet),
+                        FixedDataModelElement("by_str", b" by "),
+                        VariableByteDataModelElement("su_user", alphabet),
+                        ]),
+                    SequenceModelElement("seq2", [
+                        FixedDataModelElement("plus", b"+"),
+                        AnyByteDataModelElement("msg")
+                        ]),
                     ]),
                 ]),
             SequenceModelElement("kernel", [
@@ -407,6 +497,117 @@ def get_model():
             SequenceModelElement("liblogging", [
                 FixedDataModelElement("liblogging_str", b" liblogging-stdlog: "),
                 AnyByteDataModelElement("liblogging_msg")
+                ]),
+            SequenceModelElement("os_prober", [
+                FixedDataModelElement("os_prober_str", b" os-prober: "),
+                AnyByteDataModelElement("os_prober_msg")
+                ]),
+            SequenceModelElement("macosx_prober", [
+                FixedDataModelElement("macosx_prober_str", b" macosx-prober: "),
+                AnyByteDataModelElement("macosx_prober_msg")
+                ]),
+            SequenceModelElement("haiku", [
+                FixedDataModelElement("haiku_str", b" 83haiku: "),
+                AnyByteDataModelElement("haiku_msg")
+                ]),
+            SequenceModelElement("efi", [
+                FixedDataModelElement("efi_str", b" 05efi: "),
+                AnyByteDataModelElement("efi_msg")
+                ]),
+            SequenceModelElement("freedos", [
+                FixedDataModelElement("freedos_str", b" 10freedos: "),
+                AnyByteDataModelElement("freedos_msg")
+                ]),
+            SequenceModelElement("qnx", [
+                FixedDataModelElement("qnx_str", b" 10qnx: "),
+                AnyByteDataModelElement("qnx_msg")
+                ]),
+            SequenceModelElement("microsoft", [
+                FixedDataModelElement("microsoft_str", b" 20microsoft: "),
+                AnyByteDataModelElement("microsoft_msg")
+                ]),
+            SequenceModelElement("utility", [
+                FixedDataModelElement("utility_str", b" 30utility: "),
+                AnyByteDataModelElement("utility_msg")
+                ]),
+            SequenceModelElement("mounted_tests", [
+                FixedDataModelElement("mounted_tests_str", b" 50mounted-tests: "),
+                AnyByteDataModelElement("mounted_tests_msg")
+                ]),
+            SequenceModelElement("rsyslogd", [
+                FixedDataModelElement("rsyslogd_str", b" rsyslogd: "),
+                AnyByteDataModelElement("rsyslogd_msg")
+                ]),
+            SequenceModelElement("timesyncd", [
+                FixedDataModelElement("timesyncd_str", b" systemd-timesyncd["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("timesyncd_msg")
+                ]),
+            SequenceModelElement("logind", [
+                FixedDataModelElement("logind_str", b" systemd-logind["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FirstMatchModelElement("fm", [
+                    SequenceModelElement("new", [
+                        FixedDataModelElement("new_str", b"New session "),
+                        DelimitedDataModelElement("session", b" "),
+                        FixedDataModelElement("str", b" of user"),
+                        AnyByteDataModelElement("user"),
+                        ]),
+                    SequenceModelElement("removed", [
+                        FixedDataModelElement("new_str", b"Removed session "),
+                        DecimalIntegerValueModelElement("session"),
+                        FixedDataModelElement("dot", b"."),
+                        ]),
+                ])]),
+            SequenceModelElement("grub", [
+                FixedDataModelElement("grub_str", b" grub-common["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]:"),
+                AnyByteDataModelElement("grub_msg")
+                ]),
+            SequenceModelElement("polkitd", [
+                FixedDataModelElement("polkitd_str", b" polkitd["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]:"),
+                AnyByteDataModelElement("polkitd_msg")
+                ]),
+            SequenceModelElement("dbus", [
+                FixedDataModelElement("dbus_str", b" dbus-daemon["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]:"),
+                AnyByteDataModelElement("dbus_msg")
+                ]),
+            SequenceModelElement("hostnamed", [
+                FixedDataModelElement("hostnamed_str", b" systemd-hostnamed["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]:"),
+                AnyByteDataModelElement("hostnamed_msg")
+                ]),
+            SequenceModelElement("apport", [
+                FixedDataModelElement("apport_str", b" apport["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]:"),
+                AnyByteDataModelElement("apport_msg")
+                ]),
+            SequenceModelElement("resolved", [
+                FixedDataModelElement("resolved_str", b" systemd-resolved["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("resolved_msg")
+                ]),
+            SequenceModelElement("networkd", [
+                FixedDataModelElement("networkd_str", b" systemd-networkd["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("networkd_msg")
+                ]),
+            SequenceModelElement("motd", [
+                FixedDataModelElement("motd_str", b" 50-motd-news["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("motd_msg")
                 ]),
             SequenceModelElement("freshclam", [
                 FixedDataModelElement("freshclam_str", b" freshclam["),
