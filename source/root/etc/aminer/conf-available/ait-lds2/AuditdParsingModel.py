@@ -305,8 +305,8 @@ def get_model():
                 DelimitedDataModelElement("apparmor", b"\""),
                 FixedDataModelElement("operation_str", b"\" operation=\""),
                 DelimitedDataModelElement("operation", b"\""),
-                OptionalMatchModelElement("opt",
-                    SequenceModelElement("seq", [
+                OptionalMatchModelElement(
+                    "opt", SequenceModelElement("seq", [
                         FixedDataModelElement("info_str", b"\" info=\""),
                         DelimitedDataModelElement("info", b"\"")])),
                 FixedDataModelElement("profile_str", b"\" profile=\""),

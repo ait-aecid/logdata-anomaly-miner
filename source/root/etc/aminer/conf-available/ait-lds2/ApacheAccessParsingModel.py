@@ -32,7 +32,8 @@ def get_model():
             FixedDataModelElement("dash", b"-"),
             SequenceModelElement("request", [
                 FixedWordlistDataModelElement("method", [
-                    b"GET", b"POST", b"PUT", b"HEAD", b"DELETE", b"CONNECT", b"OPTIONS", b"TRACE", b"PATCH", b"REPORT", b"PROPFIND", b"MKCOL"]),
+                    b"GET", b"POST", b"PUT", b"HEAD", b"DELETE", b"CONNECT", b"OPTIONS", b"TRACE", b"PATCH", b"REPORT", b"PROPFIND",
+                    b"MKCOL"]),
                 FixedDataModelElement("sp5", b" "),
                 DelimitedDataModelElement("request", b" ", b"\\"),
                 FixedDataModelElement("sp6", b" "),
