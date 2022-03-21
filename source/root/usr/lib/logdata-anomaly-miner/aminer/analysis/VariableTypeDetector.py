@@ -266,8 +266,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.crit_val_hom_cm = {0.05: {1000: {1000: 250.45790499999998, 750: 214.76505847619046, 500: 167.13765355555554, 400: 143.34140714285715, 300: 115.84368512820512, 200: 83.78856944444445, 150: 65.64008811594204, 100: 45.92995272727273, 75: 35.333255503875975, 50: 24.20186603174603, 30: 15.071306472491909, 20: 10.300656209150326, 10: 5.412521782178217}, 750: {750: 187.94798666666668, 500: 150.45562666666666, 400: 130.8715215942029, 300: 107.59431746031746, 200: 79.42039298245614, 150: 62.92309481481481, 100: 44.59799294117647, 75: 34.55483636363636, 50: 23.878958333333333, 30: 14.859858119658119, 20: 10.21919393939394, 10: 5.402328070175439}, 500: {500: 125.503068, 400: 111.5444314814815, 300: 94.26128, 200: 71.8865042857143, 150: 58.17430564102565, 100: 42.119102222222224, 75: 33.121080579710146, 50: 23.146869090909092, 30: 14.620633962264153, 20: 10.067361538461538, 10: 5.362602614379085}, 400: {400: 100.46720625, 300: 86.17663333333333, 200: 67.12748888888889, 150: 55.01036818181819, 100: 40.436935, 75: 32.00267719298246, 50: 22.691451851851852, 30: 14.409891472868217, 20: 9.963246031746031, 10: 5.314048780487806}, 300: {300: 75.4713888888889, 200: 60.46678, 150: 50.42997037037037, 100: 37.9633, 75: 30.453804444444447, 50: 21.899904761904764, 30: 14.075888888888887, 20: 9.838104166666666, 10: 5.271225806451613}, 200: {200: 50.458725, 150: 43.26386190476191, 100: 33.81099444444445, 75: 27.704703030303033, 50: 20.47892, 30: 13.505202898550726, 20: 9.538204545454546, 10: 5.192849206349207}, 150: {150: 37.93966666666667, 100: 30.43725333333333, 75: 25.45431111111111, 50: 19.195833333333333, 30: 12.965740740740742, 20: 9.288392156862745, 10: 5.1022083333333335}, 100: {100: 25.4654, 75: 21.866933333333332, 50: 17.144955555555555, 30: 12.011923076923077, 20: 8.791944444444445, 10: 5.000454545454545}, 75: {75: 19.179288888888887, 50: 15.485066666666667, 30: 11.208, 20: 8.371368421052633, 10: 4.864470588235294}, 50: {50: 13.005400000000002, 30: 9.881416666666667, 20: 7.576285714285715, 10: 4.6065555555555555}, 30: {30: 7.982777777777779, 20: 6.457666666666666, 10: 4.179166666666666}, 20: {20: 5.442500000000001, 10: 3.7661111111111114}, 10: {10: 2.925}}}  # skipcq: FLK-E231, FLK-E501
 
         # List of the critical values of the durbin watson test
-        self.crit_val_dw = {0.01: {1000: 1.855, 750: 1.833, 500: 1.797, 400: 1.773, 300: 1.739, 200: 1.684, 150: 1.637, 100: 1.562, 75: 1.501, 50: 1.403, 30: 1.264, 20: 1.147, 10: 1.001},
-                0.05: {1000: 1.898, 750: 1.883, 500: 1.857, 400: 1.841, 300: 1.817, 200: 1.779, 150: 1.747, 100: 1.694, 75: 1.652, 50: 1.585, 30: 1.489, 20: 1.411, 10: 1.320}}
+        self.crit_val_dw = {0.01: {1000: 1.855, 750: 1.833, 500: 1.797, 400: 1.773, 300: 1.739, 200: 1.684, 150: 1.637, 100: 1.562, 75: 1.501, 50: 1.403, 30: 1.264, 20: 1.147, 10: 1.001},  # skipcq: FLK-E501
+                            0.05: {1000: 1.898, 750: 1.883, 500: 1.857, 400: 1.841, 300: 1.817, 200: 1.779, 150: 1.747, 100: 1.694, 75: 1.652, 50: 1.585, 30: 1.489, 20: 1.411, 10: 1.320}}  # skipcq: FLK-E501
 
         self.ignore_list = ignore_list
         if self.ignore_list is None:
@@ -277,10 +277,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.constraint_list = []
 
         if self.dw_alpha not in self.crit_val_dw:
-            pos_vals = [val for val in self.crit_val_dw]
+            pos_vals = list(self.crit_val_dw.keys())
 
-            nearest = pos_vals[0]
-            for val in pos_vals[1:]:
+            nearest = self.crit_val_dw[0]
+            for val in self.crit_val_dw[1:]:
                 if abs(self.dw_alpha - val) < abs(self.dw_alpha - nearest):
                     nearest = val
             msg = 'Changed the parameter dw_alpha of the VTD from %s to %s to use the pregenerated critical values for the dw-test' % (
@@ -290,7 +290,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.dw_alpha = nearest
 
         if num_init not in self.crit_val_dw[self.dw_alpha]:
-            pos_vals = [val for val in self.crit_val_dw[self.dw_alpha]]
+            pos_vals = list(self.crit_val_dw[self.dw_alpha].keys())
 
             nearest = pos_vals[0]
             for val in pos_vals[1:]:
@@ -769,7 +769,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         if len(type_val) >= 1 and isinstance(type_val[0], list):
                             # Continuous variable type
                             if type_index in [self.var_type_history_list_order.index('cont'),
-                                    self.var_type_history_list_order.index('range')]:
+                                              self.var_type_history_list_order.index('range')]:
                                 # Calculate the mean of all entries not zero
                                 self.var_type_history_list_reference[event_index][var_index].append([sum(
                                         type_val[0][-self.num_var_type_hist_ref:]) / max(len([1 for x in type_val[0][
@@ -896,7 +896,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         for type_index, type_val in enumerate(var_val):
                             if len(type_val) >= 1 and isinstance(type_val[0], list):
                                 if type_index in [self.var_type_history_list_order.index('cont'),
-                                        self.var_type_history_list_order.index('range')]:
+                                                  self.var_type_history_list_order.index('range')]:
                                     # Continuous or range variable type
                                     # Calculate the mean of all entries not zero
                                     self.var_type_history_list_reference[event_index][var_index].append([sum(
@@ -1191,9 +1191,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return ['d']
 
     def calculate_value_range(self, values):
-        """
-        Calculate the lower and upper limit of the expected values through the mean and standard deviation of the given values.
-        """
+        """Calculate the lower and upper limit of the expected values through the mean and standard deviation of the given values."""
         if self.used_range_test == 'MeanSD':
             # Calculate the mean and standard deviation of the test sample
             [ev, sigma] = norm.fit(values)
@@ -1297,10 +1295,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Test and update if the values are in the specified range
         elif self.var_type[event_index][var_index][0] == 'range':
             self.var_type[event_index][var_index][3] += 1
-            # Check if the sum of distances of all values outside the defined limits is greater than range_threshold times the range of the limits
-            if sum(max(0, val - self.var_type[event_index][var_index][2]) for val in\
+            # Check if the sum of distances of all values outside the defined limits is greater than range_threshold times the range of
+            # the limits
+            if sum(max(0, val - self.var_type[event_index][var_index][2]) for val in
                     self.event_type_detector.values[event_index][var_index][-self.num_update:]) +\
-                    sum(max(0, self.var_type[event_index][var_index][1] - val) for val in\
+                    sum(max(0, self.var_type[event_index][var_index][1] - val) for val in
                         self.event_type_detector.values[event_index][var_index][-self.num_update:]) >\
                     self.range_threshold * (self.var_type[event_index][var_index][2] - self.var_type[event_index][var_index][1]):
                 # Do not update variable type
@@ -1313,9 +1312,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.var_type[event_index][var_index] = ['others', 0]
                 self.print_changed_var_type(event_index, VT_old, ['others'], var_index, log_atom)
             # Reset counter if at least one value lies outside of the limits
-            elif any(max(0, val - self.var_type[event_index][var_index][2]) for val in\
-                    self.event_type_detector.values[event_index][var_index][-self.num_update:]) or\
-                    any(max(0, self.var_type[event_index][var_index][1] - val) for val in\
+            elif any(max(0, val - self.var_type[event_index][var_index][2]) for val in
+                     self.event_type_detector.values[event_index][var_index][-self.num_update:]) or\
+                    any(max(0, self.var_type[event_index][var_index][1] - val) for val in
                         self.event_type_detector.values[event_index][var_index][-self.num_update:]):
                 self.var_type[event_index][var_index][3] = 1
             # Reinitialize the range limits if no value was outside of the range in the last num_reinit_range update steps
@@ -2082,8 +2081,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 # Check if the two intervalls intercept
                                 if (upper_limit_ref > lower_limit_cur) and (upper_limit_cur > lower_limit_ref):
                                     diff_list.append(
-                                        (max(0, lower_limit_ref - lower_limit_cur) + max(0, upper_limit_cur - upper_limit_ref)) / (
-                                        max(upper_limit_cur, upper_limit_ref) - min(lower_limit_cur, lower_limit_ref)) * 
+                                        (max(0, lower_limit_ref - lower_limit_cur) + max(0, upper_limit_cur - upper_limit_ref)) /
+                                        (max(upper_limit_cur, upper_limit_ref) - min(lower_limit_cur, lower_limit_ref)) *
                                         len([1 for x in type_val[0][-self.num_var_type_considered_ind:] if x != 0]) / len_cur)
                                 else:
                                     diff_list.append(len([1 for x in type_val[0][-self.num_var_type_considered_ind:] if x != 0]) / len_cur)
