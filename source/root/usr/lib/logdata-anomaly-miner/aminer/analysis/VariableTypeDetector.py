@@ -17,7 +17,6 @@ import os
 import logging
 import sys
 import time
-from statsmodels.stats.stattools import durbin_watson
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
@@ -2437,3 +2436,8 @@ def cramervonmises2(rvs1, rvs2):
             index2 += 1
 
     return sum_val/(n1*n2*(n1+n2)) - (1*n1*n2-1)/(6*(n1+n2))
+
+
+def durbin_watson(rvs):
+    """Return the durbin watson test statistic."""
+    return sum([(rvs[i+1] - rvs[i])**2 for i in range(len(rvs) - 1)]) / sum([rvs[i]**2 for i in range(len(rvs))])
