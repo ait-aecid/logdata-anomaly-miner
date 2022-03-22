@@ -42,6 +42,15 @@ def get_model():
         OptionalMatchModelElement(
             "secured", FixedDataModelElement("secured_str", b", secured")
             ),
+        OptionalMatchModelElement(
+            "tls", FixedDataModelElement("tls_str", b", TLS")
+            ),
+        OptionalMatchModelElement(
+            "handshaking", SequenceModelElement("seq", [
+                FixedDataModelElement("handshaking_str", b" handshaking:"),
+                DelimitedDataModelElement("msg", b", session=<")
+                ])
+            ),
         FixedDataModelElement("session_str", b", session=<"),
         DelimitedDataModelElement("session", b">"),
         FixedDataModelElement("bracket_str", b">"),
