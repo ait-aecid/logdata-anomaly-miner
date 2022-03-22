@@ -264,6 +264,10 @@ class VariableTypeDetectorTest(TestBase):
 
     def test4detect_var_type(self):
         """This unittest tests possible scenarios of the detect_var_type method."""
+        # Load list of an uniformal distributed sample which consists of integers
+        with open('unit/data/vtd_data/uni_data_test4', 'rb') as f:
+            uni_data_list_int = pickle.load(f)  # skipcq: BAN-B301
+
         num_init = 100
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init,
@@ -336,19 +340,16 @@ class VariableTypeDetectorTest(TestBase):
                                    test_gof_int=True, used_gof_test='KS')
 
         # test 'num_init' and 'div_thres'
-        # prevent results from becoming asc or desc
-        stat_data = bytes(str(99), 'utf-8')
-        log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
-        etd.receive_atom(log_atom)
-        values = [float(stat_data)]
-        for i in range(99):
-            stat_data = bytes(str(i), 'utf-8')
+        values = []
+        for i in range(num_init):
+            stat_data = bytes(str(uni_data_list_int[i]), 'utf-8')
             values.append(float(stat_data))
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
         result = vtd.detect_var_type(0, 0)
         # this means that the uniformal distribution must be detected.
-        self.assertNotEqual(result[0] == 'uni' or 'uni' in [distr[0] for distr in result[-1]], result)
+
+        self.assertTrue(result[0] == 'uni' or (isinstance(result[-1], list) and 'uni' in [distr[0] for distr in result[-1]]), result)
 
         # test 'divThres' option for the continuous distribution
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=num_init, div_thres=1.0,
@@ -420,6 +421,8 @@ class VariableTypeDetectorTest(TestBase):
             nor_data_list = pickle.load(f)  # skipcq: BAN-B301
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
             beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+        with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
+            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
 
         nor_data_list = nor_data_list*10
         beta1_data_list = beta1_data_list*10
@@ -447,7 +450,7 @@ class VariableTypeDetectorTest(TestBase):
             self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> uni
-            for uni_data in [((i+1) % update) / update for i in range(2*update)]:
+            for uni_data in uni_data_list[2*update:4*update]:
                 log_atom = LogAtom(uni_data, ParserMatch(MatchElement(self.path, str(uni_data).encode(), str(uni_data), None)), t,
                                    self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
@@ -590,7 +593,7 @@ class VariableTypeDetectorTest(TestBase):
             self.assertEqual(['stat', [stat_data.decode()], True], result, (init, update, result))
 
             # static -> nor
-            for nor_data in nor_data_list[:2*update]:
+            for nor_data in nor_data_list[update:3*update]:
                 log_atom = LogAtom(nor_data, ParserMatch(MatchElement(self.path, str(nor_data).encode(), str(nor_data), None)), t,
                                    self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))

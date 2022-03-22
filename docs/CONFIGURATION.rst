@@ -2198,7 +2198,13 @@ This detector analyses each variable of the event_types by assigning them the im
 * **var_reduction_thres** threshold for the reduction of variable types. The most likely none others var type must have a higher relative appearance for the variable to be further checked.
 * **num_skipped_ind_for_weights** number of the skipped indicators for the calculation of the indicator weights.
 * **num_ind_for_weights** number of indicators used in the calculation of the indicator weights.
-* **used_multinomial_test** states the used multinomial test. the value can be of the list ['MT', 'Approx', 'Chi'], where 'MT' means original MT, 'Approx' is the approximation with single BTs and 'Chi' is the ChisquareTest.
+* **used_multinomial_test** states the used multinomial test. Allowed values are 'MT', 'Approx' and 'Chi'. Where 'MT' means the original MT, 'Approx' is the approximation with single BTs and 'Chi' is the ChisquareTest.
+* **used_range_test** states the used method of range estimation. Allowed values are 'MeanSD', 'EmpiricQuantiles' and 'MinMax'. Where 'MeanSD' means the estimation through mean and standard deviation, 'EmpiricQuantiles' estimation through the empirical quantiles and 'MinMax' the estimation through minimum and maximum.
+* **range_alpha** significance niveau for the range variable type.
+* **range_threshold** maximal proportional deviation from the range before the variable type is rejected.
+* **range_limits_factor** factor for the limits of the range variable type.
+* **num_reinit_range** number of update steps until the range variable type is reinitialized. Set to zero if not desired.
+* **dw_alpha** significance niveau of the durbin watson test to test serial correlation. If the test fails the type range is assigned to the variable instead of continuous.
 
 .. code-block:: yaml
 

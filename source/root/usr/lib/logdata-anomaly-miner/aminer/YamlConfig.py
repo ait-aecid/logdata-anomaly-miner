@@ -726,9 +726,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_updates_until_var_reduction=item['num_updates_until_var_reduction'],
                     var_reduction_thres=item['var_reduction_thres'], num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
-                    use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
-                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'],
-                    auto_include_flag=learn)
+                    use_empiric_distr=item['use_empiric_distr'], used_range_test=item['used_range_test'], range_alpha=item['range_alpha'],
+                    range_threshold=item['range_threshold'], range_limits_factor=item['range_limits_factor'],
+                    num_reinit_range=item['num_reinit_range'], dw_alpha=item['dw_alpha'], output_log_line=item['output_logline'],
+                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'], auto_include_flag=learn)
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
