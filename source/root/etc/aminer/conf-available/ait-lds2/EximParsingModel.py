@@ -36,6 +36,12 @@ def get_model():
                 FixedDataModelElement("no_host_found_str", b"no host name found for IP address "),
                 IpAddressDataModelElement("ip"),
                 ]),
+            SequenceModelElement("start_daemon", [
+                FixedDataModelElement("start_daemon_str", b"exim "),
+                DelimitedDataModelElement("version", b" "),
+                FixedDataModelElement("start_deamon_str2", b" daemon started"),
+                AnyByteDataModelElement("msg")
+                ]),
             SequenceModelElement("vrfy_failed", [
                 FixedDataModelElement("vrfy_failed_str", b"VRFY failed for "),
                 DelimitedDataModelElement("mail", b" "),
