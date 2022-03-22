@@ -270,17 +270,14 @@ class JsonModelElement(ModelElementInterface):
                     logging.getLogger(DEBUG_LOG_NAME).debug(
                         debug_log_prefix + "Key %s not found in json_match_data. RETURN [NONE] 4" % split_key)
                     return [None]
-                match_element, index, data = self.parse_json_object(
-                    json_dict, json_match_data, key, split_key, current_path, match_context)
-                if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
-                    matches.append(match_element)
-                    if index == -1 and match_element is None:
-                        logging.getLogger(DEBUG_LOG_NAME).debug(
-                            debug_log_prefix + "Necessary element did not match! Key: %s, MatchElement: %s, Data: %s, IsFloat %s, "
-                                               "Index: %d, MatchContext: %s" % (
-                                                    key, match_element, data.decode(), isinstance(json_match_data[split_key], float), index,
-                                                    match_context.match_data.replace(b"\\", b"").decode()))
-                        return matches
+                match_element, index, data = self.parse_json_object(json_dict, json_match_data, key, split_key, current_path, match_context)
+                matches.append(match_element)
+                if index == -1 and match_element is None:
+                    logging.getLogger(DEBUG_LOG_NAME).debug(
+                        debug_log_prefix + "Necessary element did not match! Key: %s, MatchElement: %s, Data: %s, IsFloat %s, Index: %d, "
+                                           "MatchContext: %s" % (key, match_element, data.decode(), isinstance(json_match_data[
+                                            split_key], float), index, match_context.match_data.replace(b"\\", b"").decode()))
+                    return matches
                 match_context.update(match_context.match_data[:index + len(data)])
         missing_keys = [x for x in json_dict if x not in json_match_data and x != "ALLOW_ALL_KEYS"]
         for key in missing_keys:

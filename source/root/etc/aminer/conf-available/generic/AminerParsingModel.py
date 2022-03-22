@@ -15,7 +15,7 @@ from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 def get_model():
     """Return the model."""
     name_alphabet = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    alphabet = "!'#$%&\"()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[] °§ß–".encode()
+    alphabet = "!'#$%&\"()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[] °§ß–\n".encode()
     alphabet_with_newline = alphabet + b"\n"
     filename_alphabet = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._-/"
 

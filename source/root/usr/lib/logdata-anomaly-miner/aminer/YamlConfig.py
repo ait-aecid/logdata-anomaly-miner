@@ -164,10 +164,11 @@ def build_parsing_model():
                         # encode string to bytearray
                         for j, val in enumerate(item['args']):
                             if isinstance(val, str):
-                                item['args'][j] = val.encode()
+                                item['args'][j] = val.encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r"). \
+                                    replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
                 else:
-                    if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and isinstance(
-                            item['args'], str):
+                    if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and \
+                            isinstance(item['args'], str):
                         item['args'] = item['args'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
                             replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
             if item['type'].name == 'ElementValueBranchModelElement':

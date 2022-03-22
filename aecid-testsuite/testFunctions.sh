@@ -91,9 +91,9 @@ function runAminerUntilEnd() {
      CNTR=$((++CNTR))
   done
   sleep 3
+  sudo sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
   sudo pkill -x aminer
   wait $PID
   RES=$?
-  sudo sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
   return $RES
 }
