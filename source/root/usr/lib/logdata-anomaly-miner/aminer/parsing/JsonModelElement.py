@@ -290,6 +290,8 @@ class JsonModelElement(ModelElementInterface):
         """Check if no keys are missing and if the value types match."""
         if "ALLOW_ALL_KEYS" in json_dict.keys():
             return True
+        if json_match_data is None:
+            return False
         missing_keys = [x for x in json_dict if x not in json_match_data]
         for key in missing_keys:
             if not key.startswith(self.optional_key_prefix):
