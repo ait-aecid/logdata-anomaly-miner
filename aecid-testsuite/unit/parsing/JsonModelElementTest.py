@@ -298,6 +298,8 @@ class JsonModelElementTest(TestBase):
             "works": "123",
             "null": null
         }"""
+        data3 = b"""{"a": {"b": "c"}}"""
+        data4 = b"""{"a": null}"""
         json_model_element = JsonModelElement(self.id_, key_parser_dict)
         data = data1
         value = json.loads(data)
@@ -316,6 +318,22 @@ class JsonModelElementTest(TestBase):
         match_context.match_data = data[len(match_context.match_string):]
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        key_parser_dict = {"a": {"b": DummyFixedDataModelElement("c", b"c")}}
+        json_model_element = JsonModelElement(self.id_, key_parser_dict)
+        data = data3
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(value).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = data4
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
 
     def test7get_match_element_with_umlaut(self):
         """Test if ä ö ü are used correctly."""
