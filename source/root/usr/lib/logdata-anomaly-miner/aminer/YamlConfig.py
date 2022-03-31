@@ -37,7 +37,7 @@ def load_yaml(config_file):
     import yaml
     from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
-    with open(config_file) as yamlfile:
+    with open(config_file) as yamlfile:  # skipcq: PTC-W6004
         try:
             yaml_data = yaml.safe_load(yamlfile)
             yamlfile.close()
