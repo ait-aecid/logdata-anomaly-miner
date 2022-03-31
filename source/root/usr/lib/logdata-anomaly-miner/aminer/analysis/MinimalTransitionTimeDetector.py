@@ -162,7 +162,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             if self.last_value[id_tuple] == event_value:
                 self.last_time[id_tuple] = log_atom.atom_time
                 return True
-            if log_atom.atom_time - self.last_time[id_tuple] <= 0:
+            if log_atom.atom_time - self.last_time[id_tuple] < 0:
                 additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
                                           'AffectedIdValues': list(id_tuple), 'PreviousTime': self.last_time[id_tuple],
                                           'NewTime': log_atom.atom_time}
