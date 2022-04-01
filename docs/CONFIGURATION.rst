@@ -502,18 +502,6 @@ Flag to enable chronologically correct parsing from multiple input-logfiles.
 
    multi_source: True
 
-verbose
-~~~~~~~
-
-* Type: boolean (True,False)
-* Default: False
-
-Flag to enable that detailed parsing information is shown for unparsed loglines.
-
-.. code-block:: yaml
-
-   verbose: True
-
 eol_sep
 ~~~~~~~
 
@@ -2229,7 +2217,7 @@ The following detectors work with MatchRules:
 * :ref:`AllowlistViolationDetector`
 * :ref:`TimeCorrelationViolationDetector`
 
-.. note:: MatchRules must be defined in the "Analysis"-part of the configuration.
+.. note:: MatchRules must be defined in the "Analysis"-part of the configuration. Every MatchRule can also define a :ref:`MatchAction` which is run when the MatchRule is applied.
 
 AndMatchRule
 ~~~~~~~~~~~~
@@ -2376,6 +2364,50 @@ DebugHistoryMatchRule
 
 This rule can be inserted into a normal ruleset just to see when a match attempt is made.
 It just adds the evaluated log_atom to a ObjectHistory.
+
+
+.. _MatchAction:
+
+----------
+MatchActions
+----------
+
+.. note:: MatchActions must be defined in the "Analysis"-part of the configuration.
+
+EventGenerationMatchAction
+~~~~~~~~~~~~
+
+This generic match action forwards information about a rule match on parsed data to a list of event handlers.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: EventGenerationMatchAction
+          id: ip_match_action
+          event_type: "Analysis.Rules.IPv4InRFC1918MatchRule"
+          event_message: "Private IP address occurred!"
+
+
+AtomFilterMatchAction
+~~~~~~~~~~~~
+
+This generic match rule forwards all rule matches to a list of `AtomHandlerInterface` instances using the `SubhandlerFilter`.
+When `delete_components` is used, all components from the `subhandler_list` are removed from the default `SubhandlerFilter`.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValueDetector1
+          paths:
+            - "/model/second"
+
+        - type: AtomFilterMatchAction
+          id: afma
+          subhandler_list:
+            - NewMatchPathValueDetector1
+          stop_when_handled_flag: True
+          delete_components: True
 
 
 -------------
