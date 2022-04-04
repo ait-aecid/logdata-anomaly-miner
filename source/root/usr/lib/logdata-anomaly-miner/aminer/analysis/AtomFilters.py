@@ -30,7 +30,7 @@ class SubhandlerFilter(AtomHandlerInterface):
         else:
             if (not isinstance(subhandler_list, list)) or \
                     (not all(isinstance(handler, AtomHandlerInterface) for handler in subhandler_list)):
-                msg = 'Only subclasses of AtomHandlerInterface allowed in subhandlerList'
+                msg = 'Only subclasses of AtomHandlerInterface allowed in subhandler_list'
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
             self.subhandler_list = [None] * len(subhandler_list)

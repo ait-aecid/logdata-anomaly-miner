@@ -343,6 +343,14 @@
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['AtomFilterMatchAction'], 'required': True},
+                    # this is optional on purpose. If not used, the default atom_filter is used.
+                    'subhandler_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
+                    'stop_when_handled_flag': {'type': 'boolean'},
+                    'delete_components': {'type': 'boolean'}
+                    },
+                {
+                    'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['AndMatchRule', 'OrMatchRule', 'ParallelMatchRule'], 'required': True},
                     'sub_rules': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'match_action': {'type': 'string', 'nullable': True}

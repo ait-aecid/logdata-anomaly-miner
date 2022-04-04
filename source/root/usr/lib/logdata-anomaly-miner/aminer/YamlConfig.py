@@ -37,7 +37,7 @@ def load_yaml(config_file):
     import yaml
     from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
-    with open(config_file) as yamlfile:
+    with open(config_file) as yamlfile:  # skipcq: PTC-W6004
         try:
             yaml_data = yaml.safe_load(yamlfile)
             yamlfile.close()
@@ -559,7 +559,20 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 if item['type'].name == 'EventGenerationMatchAction':
                     tmp_analyser = func(item['event_type'], item['event_message'], anomaly_event_handlers)
                 elif item['type'].name == 'AtomFilterMatchAction':
-                    tmp_analyser = func(atom_filter, stop_when_handled_flag=item['stop_when_handled_flag'])
+                    if 'subhandler_list' in item:
+                        tmp_analyser = func([analysis_context.get_component_by_name(component) for component in item['subhandler_list']],
+                                            stop_when_handled_flag=item['stop_when_handled_flag'])
+                        if item['delete_components']:
+                            for component_name in item['subhandler_list']:
+                                component = analysis_context.get_component_by_name(component_name)
+                                for i, val in enumerate(atom_filter.subhandler_list):
+                                    if val[0] == component:
+                                        del atom_filter.subhandler_list[i]
+                                        break
+
+                    else:
+                        tmp_analyser = func([handler for handler, stop_when_handled_flag in atom_filter.subhandler_list],
+                                            stop_when_handled_flag=item['stop_when_handled_flag'])
                 match_action_dict[comp_name] = tmp_analyser
                 continue
             elif 'MatchRule' in item['type'].name:

@@ -557,15 +557,15 @@ class DebugMatchRule(MatchRule):
 
     def __init__(self, debug_match_result=False, match_action=None):
         self.debug_match_result = debug_match_result
-        self.matchAction = match_action
+        self.match_action = match_action
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
         print('Rules.DebugMatchRule: triggered while handling "%s"' % repr(log_atom.parser_match.match_element.match_string),
               file=sys.stderr)
-        if self.matchAction is not None:
-            self.matchAction.match_action(log_atom)
+        if self.match_action is not None:
+            self.match_action.match_action(log_atom)
         self.log_success += 1
         return self.debug_match_result
 
