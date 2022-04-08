@@ -87,10 +87,12 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """Check current ruleset should be persisted."""
         if self.next_report_time is None:
             return self.report_interval
+
         delta = self.next_report_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.send_report()
             delta = self.report_interval
+            self.next_report_time = time.time() + delta
         return delta
 
     # skipcq: PYL-R0201
