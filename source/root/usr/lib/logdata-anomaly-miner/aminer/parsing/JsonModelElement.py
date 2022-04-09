@@ -53,7 +53,8 @@ def format_float(val):
 class JsonModelElement(ModelElementInterface):
     """Parse single- or multi-lined JSON data."""
 
-    def __init__(self, element_id: str, key_parser_dict: dict, optional_key_prefix: str = "optional_key_", allow_all_fields: bool = False):
+    def __init__(self, element_id: str, key_parser_dict: dict, optional_key_prefix: str = "optional_key_", nullable_key_prefix: str = "+",
+                 allow_all_fields: bool = False):
         """
         Initialize the JsonModelElement.
         @param element_id: The ID of the element.
@@ -63,6 +64,7 @@ class JsonModelElement(ModelElementInterface):
             To allow only empty strings - "" - use "key": "EMPTY_STRING". To allow all keys in an object for a parser use "ALLOW_ALL_KEYS":
             parser.
         @param optional_key_prefix: If some key starts with the optional_key_prefix it will be considered optional.
+        @param nullable_key_prefix: The value of this key may be null instead of any expected value.
         @param allow_all_fields: Unknown fields are skipped without parsing with any parsing model.
         """
         if not isinstance(element_id, str):
@@ -88,10 +90,21 @@ class JsonModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if len(optional_key_prefix) < 1:
-            msg = "element_id must not be empty."
+            msg = "optional_key_prefix must not be empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.optional_key_prefix = optional_key_prefix
+
+        if not isinstance(nullable_key_prefix, str):
+            msg = "nullable_key_prefix has to be of the type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(nullable_key_prefix) < 1:
+            msg = "nullable_key_prefix must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        self.nullable_key_prefix = nullable_key_prefix
+
         if not isinstance(allow_all_fields, bool):
             msg = "allow_all_fields has to be of the type bool."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -138,9 +151,33 @@ class JsonModelElement(ModelElementInterface):
             return True
         return False
 
+    def get_full_key(self, key, dictionary):
+        """Find the full key in the dictionary."""
+        options = [self.optional_key_prefix + self.nullable_key_prefix + key, self.nullable_key_prefix + self.optional_key_prefix + key,
+                   self.optional_key_prefix + key, self.nullable_key_prefix + key]
+        for option in options:
+            if option in dictionary:
+                return option
+        return key
+
+    def get_stripped_key(self, key):
+        """Return the key without optional_key_prefix and nullable_key_prefix."""
+        if key.startswith(self.optional_key_prefix):
+            key = key[len(self.optional_key_prefix):]
+        if key.startswith(self.nullable_key_prefix):
+            key = key[len(self.nullable_key_prefix):]
+        if key.startswith(self.optional_key_prefix):
+            key = key[len(self.optional_key_prefix):]
+        return key
+
+    def is_nullable_key(self, key):
+        """Check if the key is nullable."""
+        return key.startswith(self.nullable_key_prefix) or (
+                key.startswith(self.optional_key_prefix) and key[len(self.optional_key_prefix):].startswith(self.nullable_key_prefix))
+
     def get_match_element(self, path: str, match_context):
         """
-        Try to parse all of the match_context against JSON.
+        Try to parse all the match_context against JSON.
         When a match is found, the match_context is updated accordingly.
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.
@@ -201,8 +238,7 @@ class JsonModelElement(ModelElementInterface):
 
         for i, key in enumerate(json_match_data.keys()):
             split_key = key
-            if self.optional_key_prefix + key in json_dict:
-                key = self.optional_key_prefix + key
+            key = self.get_full_key(key, json_dict)
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
@@ -224,6 +260,15 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3, Key: " + split_key + ", Value: " + repr(value))
                 return [None]
             if isinstance(value, dict):
+                if json_match_data[split_key] is None and self.is_nullable_key(key):
+                    data = b"null"
+                    matches.append(MatchElement(current_path, data, data, None))
+                    index = match_context.match_data.find(data)
+                    if match_context.match_data[index + 4] == b'"':
+                        index += 1
+                    match_context.update(match_context.match_data[:index + len(data)])
+                    return matches
+
                 matches += self.parse_json_dict(value, json_match_data[split_key], "%s/%s" % (current_path, split_key), match_context)
                 if json_match_data[split_key] == {}:
                     index = match_context.match_data.find(split_key.encode())
@@ -279,11 +324,11 @@ class JsonModelElement(ModelElementInterface):
                                             split_key], float), index, match_context.match_data.replace(b"\\", b"").decode()))
                     return matches
                 match_context.update(match_context.match_data[:index + len(data)])
-        missing_keys = [x for x in json_dict if x not in json_match_data and x != "ALLOW_ALL_KEYS"]
+        missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and x != "ALLOW_ALL_KEYS" and
+                        not x.startswith(self.optional_key_prefix)]
         for key in missing_keys:
-            if not key.startswith(self.optional_key_prefix):
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Missing Key: " + key)
-                return [None]
+            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Missing Key: " + key)
+            return [None]
         return matches
 
     def check_keys(self, json_dict, json_match_data, match_context):
@@ -292,17 +337,16 @@ class JsonModelElement(ModelElementInterface):
             return True
         if json_match_data is None:
             return False
-        missing_keys = [x for x in json_dict if x not in json_match_data]
+        missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and not x.startswith(self.optional_key_prefix)]
         for key in missing_keys:
-            if not key.startswith(self.optional_key_prefix):
+            if (not key.startswith(self.nullable_key_prefix) or (
+                    key.startswith(self.nullable_key_prefix) and key[len(self.nullable_key_prefix):] not in json_match_data)):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 1. Key: " + key)
                 return False
         for key in json_dict.keys():
-            k = key
-            if key.startswith(self.optional_key_prefix):
-                k = key.replace(self.optional_key_prefix, "")
+            k = self.get_stripped_key(key)
             if k in json_match_data and isinstance(json_match_data[k], list) and not isinstance(json_dict[key], list) and json_dict[
                     key] != "EMPTY_ARRAY":
                 index = match_context.match_data.find(key.encode())
@@ -326,6 +370,8 @@ class JsonModelElement(ModelElementInterface):
     def parse_json_array(self, json_dict: dict, json_match_data: dict, key: str, split_key: str, current_path: str, matches: list,
                          match_context, i: int):
         """Parse an array in a json object."""
+        if self.is_nullable_key(key) and json_match_data[split_key] is None:
+            return None
         if not isinstance(json_match_data[split_key], list):
             if key.startswith(self.optional_key_prefix) and json_match_data[split_key] is None:
                 data = b"null"
@@ -427,6 +473,11 @@ class JsonModelElement(ModelElementInterface):
             data = str(data).replace("T", "t").replace("F", "f").encode()
         elif data is None:
             data = b"null"
+            if self.is_nullable_key(key):
+                index = match_context.match_data.find(data)
+                if match_context.match_data[index + 4] == b'"':
+                    index += 1
+                return MatchElement(current_path, data, data, None), index, data
         elif not isinstance(data, bytes):
             data = str(data).encode()
         if json_dict[key] == "ALLOW_ALL":
