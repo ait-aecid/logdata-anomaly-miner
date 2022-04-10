@@ -105,6 +105,11 @@ class JsonModelElement(ModelElementInterface):
             raise ValueError(msg)
         self.nullable_key_prefix = nullable_key_prefix
 
+        if self.optional_key_prefix == self.nullable_key_prefix:
+            msg = "optional_key_prefix must not be the same as nullable_key_prefix!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
         if not isinstance(allow_all_fields, bool):
             msg = "allow_all_fields has to be of the type bool."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -337,7 +342,8 @@ class JsonModelElement(ModelElementInterface):
             return True
         if json_match_data is None:
             return False
-        missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and not x.startswith(self.optional_key_prefix)]
+        missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and not x.startswith(
+            self.optional_key_prefix)]
         for key in missing_keys:
             if (not key.startswith(self.nullable_key_prefix) or (
                     key.startswith(self.nullable_key_prefix) and key[len(self.nullable_key_prefix):] not in json_match_data)):
@@ -442,12 +448,14 @@ class JsonModelElement(ModelElementInterface):
                     if match_element is not None or (match_element is None and not key.startswith(self.optional_key_prefix)):
                         matches.append(match_element)
                         if index == -1:
-                            if len(value) - 1 > k:
+                            if len(value) - 1 == k:
                                 return matches
                             del matches[-1]
                             continue
+                    if len(matches) == 0:
+                        return [None]
                     if matches[-1] is None:
-                        if len(value) - 1 > k:
+                        if len(value) - 1 == k:
                             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN MATCHES 3")
                             return matches
                         del matches[-1]

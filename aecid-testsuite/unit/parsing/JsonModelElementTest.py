@@ -741,6 +741,20 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
+        key_parser_dict = {"a": [{"b": DummyFixedDataModelElement("b", b"ef")}]}
+        json_model_element = JsonModelElement(self.id_, key_parser_dict)
+        data = b'{"a": [{"b": "fe"}]}'
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        key_parser_dict = {"a": [DummyFixedDataModelElement("a", b"gh")]}
+        json_model_element = JsonModelElement(self.id_, key_parser_dict)
+        data = b'{"a": ["hg"]}'
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
     def test14element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, JsonModelElement, "", self.key_parser_dict)  # empty element_id
@@ -834,6 +848,10 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, set())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
+
+    def test20same_optional_key_and_nullable_key_prefix(self):
+        """Test if an exception is thrown if the optional_key_prefix is the same as the nullable_key_prefix."""
+        self.assertRaises(ValueError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix="+", nullable_key_prefix="+")
 
 
 if __name__ == "__main__":
