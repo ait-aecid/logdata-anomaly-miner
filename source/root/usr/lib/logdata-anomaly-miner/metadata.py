@@ -15,3 +15,4 @@ __version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n%sVe
     __website__, " " * _indentation, __version__ + " " * _indentation)
 __all__ = ['__authors__', '__contact__', '__copyright__', '__date__', '__deprecated__', '__email__', '__website__', '__license__',
            '__maintainer__', '__status__', '__version__', '__version_string__']
+del _indentation
