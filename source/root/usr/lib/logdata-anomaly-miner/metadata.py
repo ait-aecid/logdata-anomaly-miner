@@ -10,6 +10,9 @@ __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
 __status__ = "Production"
 __version__ = "2.5.0"
-__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
+_indentation = int(max(0,  max(0, (29 - len(__version__)))) / 2)
+__version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n%sVersion: %s""" % (
+    __website__, " " * _indentation, __version__ + " " * _indentation)
 __all__ = ['__authors__', '__contact__', '__copyright__', '__date__', '__deprecated__', '__email__', '__website__', '__license__',
            '__maintainer__', '__status__', '__version__', '__version_string__']
+del _indentation
