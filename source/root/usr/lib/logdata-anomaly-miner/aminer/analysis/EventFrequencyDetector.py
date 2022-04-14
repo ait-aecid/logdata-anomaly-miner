@@ -178,6 +178,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                         self.counts[log_ev].append(0)
                     else:
                         self.counts[log_ev] = self.counts[log_ev][1:] + [0]
+                else:
+                    self.counts[log_ev][-1] = 0
                 if log_ev not in self.counts or len(self.counts[log_ev]) < 3:
                     # At least counts from 1 window necessary for prediction
                     continue
