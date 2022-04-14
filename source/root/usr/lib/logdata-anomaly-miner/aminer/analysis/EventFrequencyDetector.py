@@ -170,19 +170,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 # Calculate the ranges if it was not already calculated
                 if self.ranges[log_ev] is None:
                     self.ranges[log_ev] = self.calculate_range(log_ev)
-                # Create count index for new time window
-                # In the following the count dictionary has lists of length num_windows + 2, i.e.,
-                # <count window 1> ... <count window num_windows> <check window> <0>
-                if self.auto_include_flag is True:
-                    if len(self.counts[log_ev]) <= self.num_windows + 1:
-                        self.counts[log_ev].append(0)
-                    else:
-                        self.counts[log_ev] = self.counts[log_ev][1:] + [0]
-                if log_ev not in self.counts or len(self.counts[log_ev]) < 3:
+                if log_ev not in self.counts or len(self.counts[log_ev]) < 2:
                     # At least counts from 1 window necessary for prediction
+                    self.reset_counter(log_ev)
                     continue
                 # Compare log event frequency of previous time windows and current time window
-                if self.counts[log_ev][-2] < self.ranges[log_ev][0] or self.counts[log_ev][-2] > self.ranges[log_ev][1]:
+                if self.counts[log_ev][-1] < self.ranges[log_ev][0] or self.counts[log_ev][-1] > self.ranges[log_ev][1]:
                     occurrences_mean = (self.ranges[log_ev][0] + self.ranges[log_ev][1]) / 2
                     try:
                         data = log_atom.raw_data.decode(AminerConfig.ENCODING)
@@ -200,17 +193,19 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                       'ExpectedLogAtomValuesFrequencyRange': [
                                           np.ceil(max(0, self.ranges[log_ev][0])),
                                           np.floor(self.ranges[log_ev][1])],
-                                      'LogAtomValuesFrequency': self.counts[log_ev][-2],
+                                      'LogAtomValuesFrequency': self.counts[log_ev][-1],
                                       'ConfidenceFactor': self.confidence_factor,
-                                      'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-2]) /
-                                      max(occurrences_mean, self.counts[log_ev][-2])}
+                                      'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-1]) /
+                                      max(occurrences_mean, self.counts[log_ev][-1])}
                     event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency anomaly detected', sorted_log_lines,
                                                event_data, log_atom, self)
                     # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
                     self.exceeded_range_frequency[log_ev] = False
-                # Reset range estimation
+
+                # Reset counter and range estimation
+                self.reset_counter(log_ev)
                 self.ranges[log_ev] = None
         elif self.early_exceeding_anomaly_output and log_event in self.counts and len(self.counts[log_event]) >= 2:
             # Check if the count exceeds the range and output a warning the first time the range exceeds it
@@ -252,6 +247,16 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         else:
             self.counts[log_event] = [1]
         self.log_success += 1
+
+    def reset_counter(self, event_type):
+        # Create count index for new time window
+        if self.auto_include_flag is True:
+            if len(self.counts[event_type]) <= self.num_windows + 1:
+                self.counts[event_type].append(0)
+            else:
+                self.counts[event_type] = self.counts[event_type][1:] + [0]
+        else:
+            self.counts[event_type][-1] = 0
 
     def calculate_range(self, log_event):
         """Calculate the corresponding range to log_event."""
