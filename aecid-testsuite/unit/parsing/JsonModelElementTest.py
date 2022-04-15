@@ -322,6 +322,25 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data_null, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
+        # test with null key
+        key_parser_dict = {"+null": DummyFixedDataModelElement("a", b"null")}
+        json_model_element = JsonModelElement(self.id_, key_parser_dict)
+        data = b'{"null": "null"}'
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        null = b'{"null": null}'
+        value = json.loads(null)
+        match_context = DummyMatchContext(null)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        self.compare_match_results(
+            null, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
         # test functionality with arrays
         key_parser_dict = {"+a": [DummyFixedDataModelElement("a", b"a")]}
         json_model_element = JsonModelElement(self.id_, key_parser_dict)

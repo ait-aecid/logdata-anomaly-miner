@@ -269,7 +269,7 @@ class JsonModelElement(ModelElementInterface):
                     data = b"null"
                     matches.append(MatchElement(current_path, data, data, None))
                     index = match_context.match_data.find(data)
-                    if match_context.match_data[index + 4] == b'"':
+                    if match_context.match_data[index + 4] == 34:  # "
                         index += 1
                     match_context.update(match_context.match_data[:index + len(data)])
                     return matches
@@ -482,8 +482,8 @@ class JsonModelElement(ModelElementInterface):
         elif data is None:
             data = b"null"
             if self.is_nullable_key(key):
-                index = match_context.match_data.find(data)
-                if match_context.match_data[index + 4] == b'"':
+                index = match_context.match_data.find(data, len(split_key))
+                if match_context.match_data[index + 4] == 34:
                     index += 1
                 return MatchElement(current_path, data, data, None), index, data
         elif not isinstance(data, bytes):
