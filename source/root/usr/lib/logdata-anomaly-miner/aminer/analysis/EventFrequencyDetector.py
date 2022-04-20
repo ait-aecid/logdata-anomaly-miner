@@ -170,7 +170,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 # Calculate the ranges if it was not already calculated
                 if self.ranges[log_ev] is None:
                     self.ranges[log_ev] = self.calculate_range(log_ev)
-                if log_ev not in self.counts or len(self.counts[log_ev]) < 2:
+                if log_ev not in self.counts or (len(self.counts[log_ev]) < 2 and (
+                        self.set_lower_limit is None or self.set_upper_limit is None)):
                     # At least counts from 1 window necessary for prediction
                     self.reset_counter(log_ev)
                     continue
@@ -207,7 +208,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 # Reset counter and range estimation
                 self.reset_counter(log_ev)
                 self.ranges[log_ev] = None
-        elif self.early_exceeding_anomaly_output and log_event in self.counts and len(self.counts[log_event]) >= 2:
+        elif self.early_exceeding_anomaly_output and log_event in self.counts and (len(self.counts[log_event]) >= 2 or (
+                self.set_lower_limit is not None and self.set_upper_limit is not None)):
             # Check if the count exceeds the range and output a warning the first time the range exceeds it
             if log_event not in self.ranges:
                 self.ranges[log_event] = None
@@ -260,17 +262,18 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def calculate_range(self, log_event):
         """Calculate the corresponding range to log_event."""
-        if log_event not in self.counts or len(self.counts[log_event]) < 2:
-            return None
-        occurrences_mean = -1
-        occurrences_std = -1
-        occurrences_mean = np.mean(self.counts[log_event][-self.num_windows-1:-1])
-        if len(self.counts[log_event][-self.num_windows-1:-1]) > 1:
-            # Only compute standard deviation for at least 2 observed counts
-            occurrences_std = np.std(self.counts[log_event][-self.num_windows-1:-1])
-        else:
-            # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
-            occurrences_std = occurrences_mean * (1 - self.confidence_factor)
+        if self.set_lower_limit is None or self.set_upper_limit is None:
+            if log_event not in self.counts or len(self.counts[log_event]) < 2:
+                return None
+            occurrences_mean = -1
+            occurrences_std = -1
+            occurrences_mean = np.mean(self.counts[log_event][-self.num_windows-1:-1])
+            if len(self.counts[log_event][-self.num_windows-1:-1]) > 1:
+                # Only compute standard deviation for at least 2 observed counts
+                occurrences_std = np.std(self.counts[log_event][-self.num_windows-1:-1])
+            else:
+                # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
+                occurrences_std = occurrences_mean * (1 - self.confidence_factor)
         # Calculate limits
         if self.set_lower_limit is not None:
             lower_limit = self.set_lower_limit
