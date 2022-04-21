@@ -323,10 +323,13 @@ class ValueMatchRule(MatchRule):
         self.log_total += 1
         test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
         if test_value is not None:
-            if isinstance(self.value, bytes) and not isinstance(test_value.match_object, bytes) and test_value.match_object is not None:
+            if isinstance(self.value, bytes) and isinstance(test_value.match_object, str) and test_value.match_object is not None:
                 test_value.match_object = test_value.match_object.encode()
-            elif not isinstance(self.value, bytes) and isinstance(test_value.match_object, bytes) and self.value is not None:
+            elif isinstance(self.value, str) and isinstance(test_value.match_object, bytes) and self.value is not None:
                 self.value = self.value.encode()
+            elif not isinstance(self.value, type(test_value.match_object)):
+                raise ValueError(f"The type of the value of the ValueMatchRule does not match the test_value. value: {type(self.value)}, "
+                                 f"test_value: {type(test_value.match_object)}")
         if (test_value is not None) and (test_value.match_object == self.value):
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
