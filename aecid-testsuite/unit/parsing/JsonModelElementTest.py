@@ -289,6 +289,7 @@ class JsonModelElementTest(TestBase):
         key_parser_dict = {"+a": DummyFixedDataModelElement("a", b"a")}
         json_model_element = JsonModelElement(self.id_, key_parser_dict)
         data_null = b'{"a": null}'
+        data_empty = b"{}"
         data = b'{"a": "a"}'
         value = json.loads(data)
         match_context = DummyMatchContext(data)
@@ -395,6 +396,13 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data_null, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
+        value = json.loads(data_empty)
+        match_context = DummyMatchContext(data_empty)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        self.compare_match_results(
+            data_empty, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
         key_parser_dict = {"optional_key_+a": DummyFixedDataModelElement("a", b"a")}
         json_model_element = JsonModelElement(self.id_, key_parser_dict)
         data = b'{"a": "a"}'
@@ -411,6 +419,13 @@ class JsonModelElementTest(TestBase):
         match_context.match_string = str(json.loads(match_context.match_string)).encode()
         self.compare_match_results(
             data_null, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        value = json.loads(data_empty)
+        match_context = DummyMatchContext(data_empty)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        self.compare_match_results(
+            data_empty, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test7get_match_element_null_value(self):
         """Test if null values are parsed to "null"."""

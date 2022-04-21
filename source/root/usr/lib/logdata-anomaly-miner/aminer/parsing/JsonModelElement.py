@@ -330,7 +330,7 @@ class JsonModelElement(ModelElementInterface):
                     return matches
                 match_context.update(match_context.match_data[:index + len(data)])
         missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and x != "ALLOW_ALL_KEYS" and
-                        not x.startswith(self.optional_key_prefix)]
+                        not (x.startswith(self.optional_key_prefix) or x.startswith(self.nullable_key_prefix + self.optional_key_prefix))]
         for key in missing_keys:
             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Missing Key: " + key)
             return [None]
@@ -342,8 +342,8 @@ class JsonModelElement(ModelElementInterface):
             return True
         if json_match_data is None:
             return False
-        missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and not x.startswith(
-            self.optional_key_prefix)]
+        missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and not (x.startswith(
+            self.optional_key_prefix) or x.startswith(self.nullable_key_prefix + self.optional_key_prefix))]
         for key in missing_keys:
             if (not key.startswith(self.nullable_key_prefix) or (
                     key.startswith(self.nullable_key_prefix) and key[len(self.nullable_key_prefix):] not in json_match_data)):
