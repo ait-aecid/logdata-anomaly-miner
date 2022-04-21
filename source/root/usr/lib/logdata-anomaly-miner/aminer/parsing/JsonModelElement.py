@@ -62,7 +62,7 @@ class JsonModelElement(ModelElementInterface):
             start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL". To allow only empty arrays
             - [] - use "key": "EMPTY_ARRAY". To allow only empty objects - {} - use "key": "EMPTY_OBJECT".
             To allow only empty strings - "" - use "key": "EMPTY_STRING". To allow all keys in an object for a parser use "ALLOW_ALL_KEYS":
-            parser.
+            parser. To allow only null values use "key": "NULL_OBJECT".
         @param optional_key_prefix: If some key starts with the optional_key_prefix it will be considered optional.
         @param nullable_key_prefix: The value of this key may be null instead of any expected value.
         @param allow_all_fields: Unknown fields are skipped without parsing with any parsing model.
@@ -145,7 +145,7 @@ class JsonModelElement(ModelElementInterface):
                 children.append(value_list)
             elif isinstance(value, dict):
                 self.find_children_in_dict(value, children)
-            elif value not in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "EMPTY_STRING", "ALLOW_ALL_KEYS"):
+            elif value not in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "EMPTY_STRING", "ALLOW_ALL_KEYS", "NULL_OBJECT"):
                 msg = "wrong type found in key_parser_dict."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
@@ -265,7 +265,7 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3, Key: " + split_key + ", Value: " + repr(value))
                 return [None]
             if isinstance(value, dict):
-                if json_match_data[split_key] is None and self.is_nullable_key(key):
+                if json_match_data[split_key] is None and (self.is_nullable_key(key) or json_dict[key] == "NULL_OBJECT"):
                     data = b"null"
                     matches.append(MatchElement(current_path, data, data, None))
                     index = match_context.match_data.find(data)
@@ -481,11 +481,16 @@ class JsonModelElement(ModelElementInterface):
             data = str(data).replace("T", "t").replace("F", "f").encode()
         elif data is None:
             data = b"null"
-            if self.is_nullable_key(key):
-                index = match_context.match_data.find(data, len(split_key))
+            if self.is_nullable_key(key) or json_dict[key] == "NULL_OBJECT":
+                start = 0
+                if "null" in key:
+                    start = match_context.match_data.find(data) + 4
+                index = match_context.match_data.find(data, start)
                 if match_context.match_data[index + 4] == 34:
                     index += 1
                 return MatchElement(current_path, data, data, None), index, data
+            else:
+                return None, -1, data
         elif not isinstance(data, bytes):
             data = str(data).encode()
         if json_dict[key] == "ALLOW_ALL":

@@ -291,6 +291,7 @@ class JsonModelElementTest(TestBase):
         data_null = b'{"a": null}'
         data_empty = b"{}"
         data = b'{"a": "a"}'
+        data_object_null = b'{"a": {"b": null}}'
         value = json.loads(data)
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
@@ -378,6 +379,13 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data_null, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
+        # no match with null in object
+        key_parser_dict = {"+a": {"b": DummyFixedDataModelElement("b", b"null")}}
+        json_model_element = JsonModelElement(self.id_, key_parser_dict)
+        match_context = DummyMatchContext(data_object_null)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data_object_null, match_element, match_context)
+
         # test interchangeability with optional_key_prefix
         key_parser_dict = {"+optional_key_a": DummyFixedDataModelElement("a", b"a")}
         json_model_element = JsonModelElement(self.id_, key_parser_dict)
@@ -428,22 +436,18 @@ class JsonModelElementTest(TestBase):
             data_empty, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test7get_match_element_null_value(self):
-        """Test if null values are parsed to "null"."""
+        """Test if null keys and values can be used."""
         key_parser_dict = {
             "works": DummyFirstMatchModelElement("id", [
                 DummyFixedDataModelElement("abc", b"abc"), DummyFixedDataModelElement("123", b"123")]),
-            "null": DummyFirstMatchModelElement("wordlist", [
-                DummyFixedDataModelElement("allowed", b"allowed value"), DummyFixedDataModelElement("problem", b"null")])}
+            "null": "NULL_OBJECT"
+        }
         data1 = b"""{
-            "works": "abc",
-            "null": "allowed value"
-        }"""
-        data2 = b"""{
             "works": "123",
             "null": null
         }"""
-        data3 = b"""{"a": {"b": "c"}}"""
-        data4 = b"""{"a": null}"""
+        data2 = b"""{"a": {"b": "c"}}"""
+        data3 = b"""{"a": null}"""
         json_model_element = JsonModelElement(self.id_, key_parser_dict)
         data = data1
         value = json.loads(data)
@@ -454,6 +458,8 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
+        key_parser_dict = {"a": {"b": DummyFixedDataModelElement("c", b"c")}}
+        json_model_element = JsonModelElement(self.id_, key_parser_dict)
         data = data2
         value = json.loads(data)
         match_context = DummyMatchContext(data)
@@ -463,18 +469,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-        key_parser_dict = {"a": {"b": DummyFixedDataModelElement("c", b"c")}}
-        json_model_element = JsonModelElement(self.id_, key_parser_dict)
         data = data3
-        value = json.loads(data)
-        match_context = DummyMatchContext(data)
-        match_element = json_model_element.get_match_element(self.path, match_context)
-        match_context.match_string = str(value).encode()
-        match_context.match_data = data[len(match_context.match_string):]
-        self.compare_match_results(
-            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
-
-        data = data4
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
@@ -560,13 +555,13 @@ class JsonModelElementTest(TestBase):
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
     def test10get_match_element_empty_array_empty_object_null(self):
-        """Test if the keywords EMPTY_ARRAY, EMPTY_OBJECT, EMPTY_STRING,  and None (null) work properly."""
+        """Test if the keywords EMPTY_ARRAY, EMPTY_OBJECT, EMPTY_STRING,  and None NULL_OBJECT work properly."""
         key_parser_dict = {"menu": {
             "id": "EMPTY_OBJECT",
             "value": "EMPTY_ARRAY",
             "popup": {
                 "menuitem": [{
-                    "value": DummyFixedDataModelElement("null", b"null"),
+                    "value": "NULL_OBJECT",
                     "onclick": DummyFirstMatchModelElement("buttonOnclick", [
                         DummyFixedDataModelElement("create_new_doc", b"CreateNewDoc()"),
                         DummyFixedDataModelElement("open_doc", b"OpenDoc()"), DummyFixedDataModelElement("close_doc", b"CloseDoc()")]),
