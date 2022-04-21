@@ -71,7 +71,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         self.charsets = {}
 
         if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the auto_include_flag is False."
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
@@ -187,7 +187,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New character(s) detected', sorted_log_lines,
                                            event_data, log_atom, self)
             # Extend charsets if learn mode is active.
-            if self.auto_include_flag is True:
+            if self.auto_include_flag:
                 self.charsets[id_event].update(missing_chars)
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                     self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
