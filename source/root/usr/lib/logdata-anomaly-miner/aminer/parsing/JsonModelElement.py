@@ -489,8 +489,7 @@ class JsonModelElement(ModelElementInterface):
                 if match_context.match_data[index + 4] == 34:
                     index += 1
                 return MatchElement(current_path, data, data, None), index, data
-            else:
-                return None, -1, data
+            return None, -1, data
         elif not isinstance(data, bytes):
             data = str(data).encode()
         if json_dict[key] == "ALLOW_ALL":
