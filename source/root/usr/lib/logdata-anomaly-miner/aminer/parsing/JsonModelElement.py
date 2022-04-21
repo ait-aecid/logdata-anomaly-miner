@@ -353,8 +353,8 @@ class JsonModelElement(ModelElementInterface):
                 return False
         for key in json_dict.keys():
             k = self.get_stripped_key(key)
-            if k in json_match_data and isinstance(json_match_data[k], list) and not isinstance(json_dict[key], list) and json_dict[
-                    key] != "EMPTY_ARRAY":
+            if not isinstance(json_match_data, dict) or (k in json_match_data and isinstance(json_match_data[k], list) and not isinstance(
+                    json_dict[key], list) and json_dict[key] != "EMPTY_ARRAY"):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 5. Key: " + key)
