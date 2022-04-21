@@ -949,7 +949,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
             for val in value:
                 if isinstance(val, dict):
                     key_parser_dict[key].append(parse_json_yaml(val, parser_model_dict))
-                elif val in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
+                elif val in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "NULL_OBJECT"):
                     if len(value) > 1 and val == "ALLOW_ALL":
                         msg = "ALLOW_ALL must not be combined with other parsers in lists."
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -961,7 +961,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
                     raise ValueError(msg)
                 else:
                     key_parser_dict[key].append(parser_model_dict.get(val))
-        elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
+        elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "NULL_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
             msg = 'The parser model %s does not exist!' % value
