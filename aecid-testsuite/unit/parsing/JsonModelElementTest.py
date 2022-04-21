@@ -784,6 +784,13 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
+        key_parser_dict = {"a": {"b": DummyFixedDataModelElement("c", b"c")}}
+        json_model_element = JsonModelElement(self.id_, key_parser_dict)
+        data = b'{"a": "b"}'
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
     def test14element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, JsonModelElement, "", self.key_parser_dict)  # empty element_id
