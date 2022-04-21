@@ -328,7 +328,7 @@ class ValueMatchRule(MatchRule):
             elif isinstance(self.value, str) and isinstance(test_value.match_object, bytes) and self.value is not None:
                 self.value = self.value.encode()
             elif not isinstance(self.value, type(test_value.match_object)):
-                raise ValueError(f"The type of the value of the ValueMatchRule does not match the test_value. value: {type(self.value)}, "
+                raise TypeError(f"The type of the value of the ValueMatchRule does not match the test_value. value: {type(self.value)}, "
                                  f"test_value: {type(test_value.match_object)}")
         if (test_value is not None) and (test_value.match_object == self.value):
             if self.match_action is not None:
