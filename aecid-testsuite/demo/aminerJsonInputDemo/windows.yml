@@ -115,17 +115,6 @@ Parser:
            - '\\'
            - 'SYSTEM'
            - 'Lokaler Dienst'
-           - 'null'
-
-       - id: site
-         type: FixedDataModelElement
-         name: 'site'
-         args: 'null'
-
-       - id: container
-         type: FixedDataModelElement
-         name: 'container'
-         args: 'null'
 
        - id: json
          start: True
@@ -145,9 +134,9 @@ Parser:
            InstanceId: instanceid
            TimeGenerated: timegenerated
            TimeWritten: timewritten
-           UserName: username
-           Site: site
-           Container: container
+           +UserName: username
+           Site: "NULL_OBJECT"
+           Container: "NULL_OBJECT"
            _empty_list: EMPTY_ARRAY
            _empty_object: EMPTY_OBJECT
 
