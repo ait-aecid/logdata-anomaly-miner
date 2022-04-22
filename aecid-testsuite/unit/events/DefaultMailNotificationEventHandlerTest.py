@@ -66,16 +66,17 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
             print("ERROR: %s t not found in mail!" % description, file=sys.stderr)
 
         self.assertTrue(self.__expected_string % (
-            "" + match_element.get_path() + ", " + match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__,
-            description, 2, match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode()) in
+            "" + match_element.get_path() + ", " + match_element2.get_path(), repr(match_element.get_match_object()),
+            self.__class__.__name__, description, 2, match_element.get_match_string().decode() + "\n  " +
+            match_element2.get_match_string().decode()) in
             str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (self.__expected_string % (
-                match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+                match_element.get_path(), repr(match_element.get_match_object()), self.__class__.__name__, description, 1,
                 match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
 
         self.assertTrue(self.__expected_string % (
-            "" + match_element.get_path() + ", " + match_element2.get_path(), match_element.get_match_object(), self.__class__.__name__,
-            description, 2, match_element.get_match_string().decode() + "\n  " + match_element2.get_match_string().decode() + "\n\n") in
-                str(result.stdout, 'utf-8'))
+            "" + match_element.get_path() + ", " + match_element2.get_path(), repr(match_element.get_match_object()),
+            self.__class__.__name__, description, 2, match_element.get_match_string().decode() + "\n  " +
+            match_element2.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
     def test2do_timer(self):
         """In this test case the functionality of the timer is tested. The eventCollectTime must not be 0."""
@@ -99,7 +100,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
 
         self.assertFalse(self.__expected_string % (
-            match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+            match_element.get_path(), repr(match_element.get_match_object()), self.__class__.__name__, description, 1,
             match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
         t = time()
@@ -109,7 +110,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         self.assertFalse(self.__expected_string % (
-            match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+            match_element.get_path(), repr(match_element.get_match_object()), self.__class__.__name__, description, 1,
             match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'))
 
         default_mail_notification_event_handler.next_alert_time = t
@@ -125,10 +126,10 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
             print("ERROR: %s t not found in mail!" % description, file=sys.stderr)
 
         self.assertTrue(self.__expected_string % (
-            match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+            match_element.get_path(), repr(match_element.get_match_object()), self.__class__.__name__, description, 1,
             match_element.get_match_string().decode() + "\n\n") in str(result.stdout, 'utf-8'), msg="%s vs \n %s" % (
             self.__expected_string % (
-                match_element.get_path(), match_element.get_match_object(), self.__class__.__name__, description, 1,
+                match_element.get_path(), repr(match_element.get_match_object()), self.__class__.__name__, description, 1,
                 match_element.get_match_string().decode() + "\n\n"), str(result.stdout, 'utf-8')))
 
     def test3check_email_addresses(self):

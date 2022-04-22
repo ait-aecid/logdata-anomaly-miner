@@ -107,8 +107,8 @@ class LogStreamTest(TestBase):
 
         print("Listening...")
         unix_socket_log_data_resource.fill_buffer()
-        self.assertEqual("%s" % unix_socket_log_data_resource.buffer, repr(b'data'))
-        print('Data received: %s' % unix_socket_log_data_resource.buffer)
+        self.assertEqual(repr(unix_socket_log_data_resource.buffer), repr(b'data'))
+        print('Data received: %s' % unix_socket_log_data_resource.buffer.decode())
 
         unix_socket_log_data_resource.update_position(len(unix_socket_log_data_resource.buffer))
         self.assertEqual(unix_socket_log_data_resource.total_consumed_length, 4)
