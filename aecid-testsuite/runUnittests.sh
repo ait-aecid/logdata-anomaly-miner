@@ -22,27 +22,27 @@ sudo python3 -bb -m unittest discover -s unit/util -p '*Test.py' > /dev/null &
 UTIL_PID=$!
 wait $ANALYSIS_PID
 if [[ $? -ne 0 ]]; then
-  exit_code=$?
+  exit_code=1
   echo "Failed in Analysis unittests."
 fi
 wait $PARSING_PID
 if [[ $? -ne 0 ]]; then
-  exit_code=$?
+  exit_code=1
   echo "Failed in Parsing unittests."
 fi
 wait $UTIL_PID
 if [[ $? -ne 0 ]]; then
-  exit_code=$?
+  exit_code=1
   echo "Failed in Util unittests."
 fi
 wait $INPUT_PID
 if [[ $? -ne 0 ]]; then
-  exit_code=$?
+  exit_code=1
   echo "Failed in Input unittests."
 fi
 wait $EVENTS_PID
 if [[ $? -ne 0 ]]; then
-  exit_code=$?
+  exit_code=1
   echo "Failed in Events unittests."
 fi
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
