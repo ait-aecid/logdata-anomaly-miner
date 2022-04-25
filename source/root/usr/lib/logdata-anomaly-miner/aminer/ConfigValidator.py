@@ -1,7 +1,3 @@
-import sys
-import os
-import logging
-
 from cerberus import Validator
 from cerberus import TypeDefinition
 
