@@ -140,16 +140,13 @@ def build_analysis_pipeline(analysis_context):
             atom_filter.subhandler_list[index+1][0].output_event_handlers = event_handlers
 
 
-def build_parsing_model(data=None):
+def build_parsing_model():
     """Build the parsing model."""
     parser_model_dict = {}
     start = None
     ws_count = 0
-    if data is None:
-        global yaml_data
-        data = yaml_data
 
-    for item in data['Parser']:
+    for item in yaml_data['Parser']:
         if item['id'] in parser_model_dict:
             raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
         if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
@@ -272,12 +269,7 @@ def build_parsing_model(data=None):
                 else:
                     parser_model_dict[item['id']] = item['type'].func(item['name'])
         else:
-            if hasattr(item['type'], "__call__"):
-                parser_model_dict[item['id']] = item['type'].func()
-            else:
-                parser_model_dict[item['id']] = item['type'].func
-                while hasattr(parser_model_dict[item['id']], "__call__"):
-                    parser_model_dict[item['id']] = parser_model_dict[item['id']]()
+            parser_model_dict[item['id']] = item['type'].func()
 
     if start.__class__.__name__ == 'JsonModelElement':
         parsing_model = start
