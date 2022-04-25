@@ -69,7 +69,7 @@ class LogStreamTest(TestBase):
         length = 65536
         data = os.read(fd, length)
         # skipcq: PTC-W1003
-        md5 = hashlib.md5()
+        md5 = hashlib.md5(usedforsecurity=False)
         md5.update(data)
         hash_digest = md5.digest()
         os.close(fd)
