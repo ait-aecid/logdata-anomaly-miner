@@ -31,7 +31,8 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False, output_log_line=True):
+    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False, output_log_line=True,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
@@ -44,6 +45,30 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.log_total = 0
         self.log_learned_paths = 0
         self.log_new_learned_paths = []
+
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -63,6 +88,11 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         self.log_total += 1
         unknown_path_list = []
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
+
         for path in log_atom.parser_match.get_match_dictionary().keys():
             if path not in self.known_path_set:
                 unknown_path_list.append(path)
@@ -70,6 +100,8 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.known_path_set.add(path)
                     self.log_learned_paths += 1
                     self.log_new_learned_paths.append(path)
+                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
         if unknown_path_list:
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             try:
