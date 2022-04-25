@@ -28,11 +28,9 @@ class ParserModelType:
             self.func = getattr(__import__(module, fromlist=[name]), name)
         else:
             self.is_model = False
-            # we need this import:
-            # skipcq: PTC-W0034
             try:
-                self.func = getattr(__import__(name), "get_model")
-            except Exception as e:
+                self.func = __import__(name).get_model
+            except (AttributeError, ImportError) as e:
                 ymlext = ['.yml', '.YAML', '.YML', '.yaml']
                 module = None
                 for path in sys.path:
@@ -76,7 +74,7 @@ class ParserModelType:
                         logging.getLogger(DEBUG_LOG_NAME).error(v.errors)
                         raise ValueError(v.errors)
                     self.func = build_parsing_model(yaml_data)
-                    if hasattr(self.func, "__call__"):
+                    if callable(self.func):
                         self.func = self.func()
                 else:
                     raise e

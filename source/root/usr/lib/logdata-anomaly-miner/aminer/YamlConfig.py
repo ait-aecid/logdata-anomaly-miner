@@ -146,7 +146,6 @@ def build_parsing_model(data=None):
     start = None
     ws_count = 0
     if data is None:
-        global yaml_data
         data = yaml_data
 
     for item in data['Parser']:
@@ -158,7 +157,7 @@ def build_parsing_model(data=None):
             if 'args' in item:
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
                     for i, value in enumerate(item["args"]):
-                        if value == b"WHITESPACE":
+                        if (isinstance(value, str) and value == "WHITESPACE") or (isinstance(value, bytes) and value == b"WHITESPACE"):
                             from aminer.parsing.FixedDataModelElement import FixedDataModelElement
                             sp = "sp%d" % ws_count
                             item["args"][i] = FixedDataModelElement(sp, b' ')
@@ -272,11 +271,11 @@ def build_parsing_model(data=None):
                 else:
                     parser_model_dict[item['id']] = item['type'].func(item['name'])
         else:
-            if hasattr(item['type'], "__call__"):
+            if callable(item['type']):
                 parser_model_dict[item['id']] = item['type'].func()
             else:
                 parser_model_dict[item['id']] = item['type'].func
-                while hasattr(parser_model_dict[item['id']], "__call__"):
+                while callable(parser_model_dict[item['id']]):
                     parser_model_dict[item['id']] = parser_model_dict[item['id']]()
 
     if start.__class__.__name__ == 'JsonModelElement':
