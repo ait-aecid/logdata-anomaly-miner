@@ -68,7 +68,7 @@ class LogStreamTest(TestBase):
         fd = os.open('/tmp/log.txt', os.O_RDONLY)  # skipcq: BAN-B108
         length = 65536
         data = os.read(fd, length)
-        # skipcq: BAN-B324
+        # skipcq: BAN-B324, PTC-W1003
         md5 = hashlib.md5()
         md5.update(data)
         hash_digest = md5.digest()
