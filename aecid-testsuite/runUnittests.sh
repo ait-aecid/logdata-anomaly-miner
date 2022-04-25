@@ -1,6 +1,7 @@
 source config
 
 sudo cp unit/data/kafka-client.conf /etc/aminer/kafka-client.conf
+sudo cp unit/data/configfiles/Sub* /etc/aminer/conf-enabled/
 curl $KAFKA_URL --output kafka.tgz
 tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
@@ -57,4 +58,5 @@ sudo rm -r $KAFKA_VERSIONSTRING/
 sudo rm -r /tmp/zookeeper
 sudo rm -r /tmp/kafka-logs
 sudo rm /etc/aminer/kafka-client.conf
+sudo rm etc/aminer/conf-enabled/Sub*
 exit $exit_code
