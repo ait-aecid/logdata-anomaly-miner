@@ -20,6 +20,8 @@ sudo python3 -bb -m unittest discover -s unit/parsing -p '*Test.py' > /dev/null 
 PARSING_PID=$!
 sudo python3 -bb -m unittest discover -s unit/util -p '*Test.py' > /dev/null &
 UTIL_PID=$!
+sudo python3 -bb -m unittest discover -s unit/data -p '*Test.py' > /dev/null &
+DATA_PID=$!
 wait $ANALYSIS_PID
 if [[ $? -ne 0 ]]; then
   exit_code=1
@@ -44,6 +46,11 @@ wait $EVENTS_PID
 if [[ $? -ne 0 ]]; then
   exit_code=1
   echo "Failed in Events unittests."
+fi
+wait $DATA_PID
+if [[ $? -ne 0 ]]; then
+  exit_code=1
+  echo "Failed in Data unittests."
 fi
 test -e /var/mail/mail && sudo rm -f /var/mail/mail
 sudo rm /tmp/test4unixSocket.sock
