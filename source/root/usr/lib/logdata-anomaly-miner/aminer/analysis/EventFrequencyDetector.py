@@ -154,18 +154,18 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             self.next_check_time = self.next_check_time + self.window_size
             self.log_windows += 1
 
-            # Output anomaly in case that no log event occurs within a time window
-            if self.empty_window_warnings is True and log_atom.atom_time >= self.next_check_time:
-                analysis_component = {'AffectedLogAtomPaths': self.target_path_list}
-                event_data = {'AnalysisComponent': analysis_component}
-                for listener in self.anomaly_event_handlers:
-                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No log events received in time window',
-                                           [''], event_data, log_atom, self)
             # Update next_check_time if a time window was skipped
             skipped_windows = 0
             if log_atom.atom_time >= self.next_check_time:
                 skipped_windows = 1 + int((log_atom.atom_time - self.next_check_time) / self.window_size)
                 self.next_check_time = self.next_check_time + skipped_windows * self.window_size
+                # Output anomaly in case that no log event occurs within a time window
+                if self.empty_window_warnings is True:
+                    analysis_component = {'AffectedLogAtomPaths': self.target_path_list}
+                    event_data = {'AnalysisComponent': analysis_component}
+                    for listener in self.anomaly_event_handlers:
+                        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No log events received in time window',
+                                               [''], event_data, log_atom, self)
             for log_ev in self.counts:
                 # Check if ranges should be initialised
                 if log_ev not in self.ranges:
