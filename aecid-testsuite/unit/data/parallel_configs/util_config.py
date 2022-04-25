@@ -34,7 +34,7 @@ config_properties['AminerGroup'] = 'aminer'
 # to the 'AminerUser' but not group/world readable. On violation,
 # py will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer/parsing'  # skipcq: BAN-B108
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer/util'  # skipcq: BAN-B108
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.

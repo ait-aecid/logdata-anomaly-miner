@@ -158,7 +158,7 @@ def build_parsing_model(data=None):
             if 'args' in item:
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
                     for i, value in enumerate(item["args"]):
-                        if value == "WHITESPACE":
+                        if value == b"WHITESPACE":
                             from aminer.parsing.FixedDataModelElement import FixedDataModelElement
                             sp = "sp%d" % ws_count
                             item["args"][i] = FixedDataModelElement(sp, b' ')

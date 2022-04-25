@@ -217,31 +217,26 @@ class EventCorrelationDetectorTest(TestBase):
             # another LogAtom must be received to check the follow anomalies.
             t += 5 * 3
             ecd.receive_atom(LogAtom(char, parser_match, t, self.__class__.__name__))
-            # print(self.output_stream.getvalue())
 
             # precede anomaly
             for i in range(1, int(5 / diff) + 1, 1):
-                # print("in")
-                # print(bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]]))
                 self.assertIn('Event %s is missing, but should precede event %s' % (
-                    bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]]), char), self.output_stream.getvalue())
+                    repr(bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]])), repr(char)),
+                    self.output_stream.getvalue())
             for i in range(int(5 / diff) + 1, len(self.alphabet), 1):  # skipcq: PTC-W0060
-                # print("not in")
-                # print(bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]]))
                 self.assertNotIn('Event %s is missing, but should precede event %s' % (
-                    bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]]), char), self.output_stream.getvalue())
+                    repr(bytes([self.alphabet[(self.alphabet.index(char) - i) % len(self.alphabet)]])), repr(char)),
+                    self.output_stream.getvalue())
 
             # follow anomaly
             for i in range(1, int(5 / diff) + 1, 1):
-                # print("in")
-                # print(bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]]))
                 self.assertIn('Event %s is missing, but should follow event %s' % (
-                    bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]]), char), self.output_stream.getvalue())
+                    repr(bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]])), repr(char)),
+                    self.output_stream.getvalue())
             for i in range(int(5 / diff) + 1, len(self.alphabet), 1):  # skipcq: PTC-W0060
-                # print("not in")
-                # print(bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]]))
                 self.assertNotIn('Event %s is missing, but should follow event %s' % (
-                    bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]]), char), self.output_stream.getvalue())
+                    repr(bytes([self.alphabet[(self.alphabet.index(char) + i) % len(self.alphabet)]])), repr(char)),
+                    self.output_stream.getvalue())
 
     def run_ecd_test(self, ecd, log_atoms):
         """Run the ECD test."""

@@ -55,7 +55,7 @@ class SyslogWriterEventHandlerTest(TestBase):
         string = string.split('Syslog logger initialized\n')
         expected = self.__expected_string % (
             datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), match_element.get_path(), match_element2.get_path(),
-            match_element.get_match_object(), self.__class__.__name__, description, 2, match_element.get_match_string().decode(),
+            repr(match_element.get_match_object()), self.__class__.__name__, description, 2, match_element.get_match_string().decode(),
             match_element2.get_match_string().decode())
 
         for log in string:
@@ -96,7 +96,7 @@ class SyslogWriterEventHandlerTest(TestBase):
         string = string.split('Syslog logger initialized\n')
         expected = self.__expected_string2 % (
             datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), match_element.get_path(), match_element2.get_path(),
-            match_element.get_match_object(), self.__class__.__name__, description, 0)
+            repr(match_element.get_match_object()), self.__class__.__name__, description, 0)
 
         for log in string:
             if expected in log:
