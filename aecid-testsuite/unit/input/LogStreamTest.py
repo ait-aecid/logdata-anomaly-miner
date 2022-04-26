@@ -68,7 +68,7 @@ class LogStreamTest(TestBase):
         fd = os.open('/tmp/log.txt', os.O_RDONLY)  # skipcq: BAN-B108
         length = 65536
         data = os.read(fd, length)
-        # skipcq: PTC-W1003
+        # skipcq: BAN-B324, PTC-W1003
         md5 = hashlib.md5()
         md5.update(data)
         hash_digest = md5.digest()
@@ -107,8 +107,8 @@ class LogStreamTest(TestBase):
 
         print("Listening...")
         unix_socket_log_data_resource.fill_buffer()
-        self.assertEqual("%s" % unix_socket_log_data_resource.buffer, repr(b'data'))
-        print('Data received: %s' % unix_socket_log_data_resource.buffer)
+        self.assertEqual(repr(unix_socket_log_data_resource.buffer), repr(b'data'))
+        print('Data received: %s' % unix_socket_log_data_resource.buffer.decode())
 
         unix_socket_log_data_resource.update_position(len(unix_socket_log_data_resource.buffer))
         self.assertEqual(unix_socket_log_data_resource.total_consumed_length, 4)
