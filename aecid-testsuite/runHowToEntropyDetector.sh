@@ -128,6 +128,7 @@ CMD="${ADDR[1]}"
 OUTPUT="$(eval $CMD)"
 IN="$(tail -n 1 $OUT)"
 compareStrings "$OUTPUT" "$IN" "Failed Test in 6."
+exit_code=$((exit_code | $?))
 
 # extract second config (7.)
 awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
