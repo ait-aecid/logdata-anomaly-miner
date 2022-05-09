@@ -1,3 +1,39 @@
+logdata-anomaly-miner (2.5.1) unstable; urgency=low
+  Bugfixes:
+  * EFD: Fixed problem that appears with empty windows
+  * Fixed index out of range if matches are empty in JsonModelElement array.
+  * EFD: Fixed problem that appears with empty windows
+  * EFD: Enabled immediate detection without training, if both limits are set
+  * EFD: Fixed bug related to auto_include_flag
+  * Remove spaces in aminer logo
+  * ParserCounter: Fixed do_timer
+  * Fixed code to allow the usage of AtomFilterMatchAction in yaml configs
+  * Fixed JsonModelElement when json object is null
+  * Fix incorrect message of charset detector
+  * Fix match list handling for json objects
+  * Fix incorrect message of charset detector
+  Changes:
+  * Added nullable functionality to JsonModelElements
+  * Added include-directive to supervisord.conf
+  * ETD: Output warning when count first exceeds range
+  * EFD: Added option to output anomaly when the count first exceeds the range
+  * VTD: Added variable type 'range'
+  * EFD: Added the function reset_counter
+  * EFD: Added option to set the lower and upper limit of the range interval
+  * Enhance EFD to consider multiple time windows
+  * VTD: Changed the value of parameter num_updates_until_var_reduction to track all variables from False to 0.
+  * PAD: Used the binom_test of the scipy package as test if the model should be reinitialized if too few anomalies occur than are expected
+  * Add ParsedLogAtom to aminer parser to ensure compatibility with lower versions
+  * Added script to add build-id to the version-string
+  * Support for installations from source in install-script
+  * Fixed and stadardize the persistence time of various detectors
+  * Refactoring
+  * Improve performance
+  * Improve output handling
+  * Improved testing
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at> Mon,  09 May 2022 12:00:00 +0000
+
 logdata-anomaly-miner (2.5.0) unstable; urgency=low
   Bugfixes:
   * Fixed bug in YamlConfig
