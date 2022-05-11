@@ -192,11 +192,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistence_data = []
-        persistence_data.append(self.time_window_history)
-        persistence_data.append(self.prediction_history)
-        persistence_data.append(self.time_history)
-        persistence_data.append(self.result_list)
+        persistence_data = [self.time_window_history, self.prediction_history, self.time_history, self.result_list]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
