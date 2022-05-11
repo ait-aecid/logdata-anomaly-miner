@@ -13,9 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import sys
-import importlib
-# skipcq: PYL-W0611
-from importlib import util
+import importlib.util
 import logging
 
 KEY_LOG_SOURCES_LIST = 'LogResourceList'
