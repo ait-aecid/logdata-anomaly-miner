@@ -181,5 +181,6 @@ class NewMatchPathDetectorTest(TestBase):
             'Allowlisted path(es) %s in %s.' % (
                 self.match_element_decimal_integer_value_me.path, self.analysis % new_match_path_detector.__class__.__name__))
 
+
 if __name__ == "__main__":
     unittest.main()
