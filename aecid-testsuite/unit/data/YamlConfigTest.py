@@ -16,7 +16,6 @@ from aminer.analysis.MatchFilter import MatchFilter
 from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
 from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
 from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector
-from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
 from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
