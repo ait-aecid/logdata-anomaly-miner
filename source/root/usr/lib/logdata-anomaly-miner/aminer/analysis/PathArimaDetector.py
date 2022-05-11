@@ -135,10 +135,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistence_data = []
-        persistence_data.append(self.target_path_index_list)
-        persistence_data.append(self.period_length_list)
-        persistence_data.append(self.prediction_history)
+        persistence_data = [self.target_path_index_list, self.period_length_list, self.prediction_history]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
