@@ -230,15 +230,6 @@ def run():
 """
         _setup100 = import_setup + string100_setup + end_setup
         _setup4096 = import_setup + string4096_setup + end_setup
-        # import timeit
-        # times = 100000
-        # print("All text lengths are given from the original text. Base64 encoding needs 33% more characters."
-        #       " Every text length is run 100.000 times.")
-        # t = timeit.timeit(setup=_setup100, stmt="run()", number=times)
-        # print("Text length 100: ", t)
-        # t = timeit.timeit(setup=_setup4096, stmt="run()", number=times)
-        # print("Text length 4096: ", t)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -154,14 +154,6 @@ def run():
 """
         _setup_short = import_setup + string_short_setup + end_setup
         _setup_long = import_setup + string_long_setup + end_setup
-        # import timeit
-        # times = 100000
-        # print("Every hex string is run 100.000 times.")
-        # t = timeit.timeit(setup=_setup_short, stmt="run()", number=times)
-        # print("Hex string 100: ", t)
-        # t = timeit.timeit(setup=_setup_long, stmt="run()", number=times)
-        # print("Hex string 23999EA30A3430DA: ", t)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -250,21 +250,6 @@ def run():
         _setup192 = import_setup + ip_192_setup + end_setup
         _setup0 = import_setup + ip_0_setup + end_setup
         _setup255 = import_setup + ip_255_setup + end_setup
-        # import timeit
-        # times = 300000
-        # print()
-        # print("192.168.0.155 is run 300.000 times.")
-        # t = timeit.timeit(setup=_setup192, stmt="run()", number=times)
-        # print("time: ", t)
-        # print()
-        # print("0.0.0.0 is run 300.000 times.")
-        # t = timeit.timeit(setup=_setup0, stmt="run()", number=times)
-        # print("time: ", t)
-        # print()
-        # print("255.255.255.255 is run 300.000 times.")
-        # t = timeit.timeit(setup=_setup255, stmt="run()", number=times)
-        # print("time: ", t)
-
 
 if __name__ == "__main__":
     unittest.main()

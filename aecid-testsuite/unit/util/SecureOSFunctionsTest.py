@@ -19,15 +19,6 @@ class SecureOSFunctionsTestLocal(TestBase):
     listening = 'Listening...'
 
     """This test case is commented out, because it is still not implemented."""
-    # '''
-    # A file is tried to be opened by using the secure function.
-    # '''
-    # def test1_secure_open_file(self):
-    #   error = sys.stderr = StringIO()
-    #   # if an exception is thrown, the test fails.
-    #   secure_open_file(b'/etc/aminer/conf-enabled/Readme.txt', os.O_RDONLY)
-    #   SecureOSFunctions.no_secure_open_warn_once_flag = True
-    #   self.assertEqual(error.getvalue(), '')
 
     def test2_secure_open_file_relative_path(self):
         """A file is tried to be opened by using a relative path."""
@@ -54,27 +45,22 @@ class SecureOSFunctionsTestLocal(TestBase):
         if os.path.exists(sock_name):
             os.remove(sock_name)
 
-        # print(self.opening_socket)
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.bind(sock_name)
         server.listen(1)
         connection = server.accept()[0]
         unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test4unixSocket.sock', connection.fileno())
 
-        # print(self.listening)
         unix_socket_log_data_resource.fill_buffer()
         self.assertEqual(unix_socket_log_data_resource.buffer, data)
-        # print('Data received: %s' % unix_socket_log_data_resource.buffer)
 
         unix_socket_log_data_resource.update_position(len(unix_socket_log_data_resource.buffer))
         self.assertEqual(unix_socket_log_data_resource.total_consumed_length, 80)
         self.assertEqual(unix_socket_log_data_resource.buffer, b'')
 
-        # print("Shutting down...")
         unix_socket_log_data_resource.close()
         proc.terminate()
         proc.wait()
-        # print("Done")
 
     def test5send_annotated_file_descriptor_invalid_parameters(self):
         """An invalid access is to be performed by using a closed socket."""
@@ -95,25 +81,20 @@ class SecureOSFunctionsTestLocal(TestBase):
         if os.path.exists(sock_name):
             os.remove(sock_name)
 
-        # print(self.opening_socket)
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.bind(sock_name)
         server.listen(1)
         connection = server.accept()[0]
         unix_socket_log_data_resource = UnixSocketLogDataResource(b'unix:///tmp/test6unixSocket.sock', connection.fileno())
 
-        # print(self.listening)
         unix_socket_log_data_resource.fill_buffer()
         self.assertEqual(unix_socket_log_data_resource.buffer, data)
-        # print('Data received: %s' % unix_socket_log_data_resource.buffer)
 
         unix_socket_log_data_resource.update_position(len(unix_socket_log_data_resource.buffer))
         self.assertEqual(unix_socket_log_data_resource.total_consumed_length, 25)
         self.assertEqual(unix_socket_log_data_resource.buffer, b'')
 
-        # print("Shutting down...")
         unix_socket_log_data_resource.close()
-        # print("Done")
 
     def test7receive_annotated_file_descriptor(self):
         """A valid annotated file descriptor is to be received by a socket."""
@@ -128,19 +109,15 @@ class SecureOSFunctionsTestLocal(TestBase):
         if os.path.exists(sock_name):
             os.remove(sock_name)
 
-        # print(self.opening_socket)
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.bind(sock_name)
         server.listen(1)
         connection = server.accept()[0]
         data_tuple = receive_annoted_file_descriptor(connection)
 
-        # print(self.listening)
         self.assertEqual(data_tuple[1], data[0])
         self.assertEqual(data_tuple[2], data[1])
-        # print('Data received: (%i, %s, %s)' % data_tuple)
         self.assertEqual(len(data_tuple[1]) + len(data_tuple[2]), 24)
-        # print("Done")
 
 
 if __name__ == "__main__":
