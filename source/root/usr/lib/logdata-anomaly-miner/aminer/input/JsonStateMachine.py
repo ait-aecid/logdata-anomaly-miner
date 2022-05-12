@@ -42,7 +42,6 @@ def json_machine(emit, next_func=None):  # skipcq: PY-D0003
 
         if next_func is _value:
             return None
-            # raise Exception("Unexpected 0x" + str(byte_data))
 
         return next_func(byte_data)
 
@@ -72,7 +71,6 @@ def constant_machine(bytes_data, value, emit):  # skipcq: PY-D0003
         if byte_data != bytes_data[i]:
             i += 1
             return None
-            # raise Exception("Unexpected 0x" + str(byte_data))
 
         i += 1
         if i < length:
@@ -99,7 +97,6 @@ def string_machine(emit):  # skipcq: PY-D0003
 
         if byte_data < 0x20 and byte_data != 0xa:  # ASCII control character - \n is allowed
             return None
-            # raise Exception("Unexpected control character: 0x" + str(byte_data))
 
         string += chr(byte_data)
         return _string
@@ -153,7 +150,6 @@ def utf8_machine(byte_data, emit):  # skipcq: PY-D0003
         nonlocal num, left
         if (byte_data & 0xc0) != 0x80:
             return None
-            # raise Exception("Invalid byte in UTF-8 character: 0x" + byte_data.toString(16))
 
         left = left - 1
 
@@ -178,7 +174,6 @@ def utf8_machine(byte_data, emit):  # skipcq: PY-D0003
         return _utf8
 
     return None
-    # raise Exception("Invalid byte in UTF-8 string: 0x" + str(byte_data))
 
 
 # Nestable state machine for hex escaped characters
@@ -245,7 +240,6 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
             return _number(byte_data)
 
         return None
-        # raise Exception("Invalid number: 0x" + str(byte_data))
 
     def _decimal(byte_data):  # skipcq: PY-D0003
         nonlocal decimal
@@ -322,7 +316,6 @@ def array_machine(emit):  # skipcq: PY-D0003
             return emit(array_data)
 
         return None
-        # raise Exception("Unexpected byte: 0x" + str(byte_data) + " in array body")
 
     return _array
 
@@ -345,7 +338,6 @@ def object_machine(emit):  # skipcq: PY-D0003
             return string_machine(on_key)
 
         return None
-        # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     def on_key(result):  # skipcq: PY-D0003, PTC-W0065
         nonlocal key
@@ -360,7 +352,6 @@ def object_machine(emit):  # skipcq: PY-D0003
             return json_machine(on_value, _comma)
 
         return None
-        # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     def on_value(value):  # skipcq: PY-D0003, PTC-W0065
         object_data[key] = value
@@ -376,6 +367,5 @@ def object_machine(emit):  # skipcq: PY-D0003
             return emit(object_data)
 
         return None
-        # raise Exception("Unexpected byte: 0x" + str(byte_data))
 
     return _object
