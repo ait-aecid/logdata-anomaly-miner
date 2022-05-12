@@ -1,5 +1,9 @@
 version = 1
 
+exclude_patterns = [
+  "aecid-testsuite/**"
+]
+
 [[analyzers]]
 name = "python"
 enabled = true
@@ -11,7 +15,3 @@ enabled = true
 [[analyzers]]
 name = "test-coverage"
 enabled = true
-
-exclude_patterns = [
-  "aecid-testsuite/**"
-]
