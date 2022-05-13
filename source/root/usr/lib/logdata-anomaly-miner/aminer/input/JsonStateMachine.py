@@ -192,7 +192,6 @@ def hex_machine(emit):  # skipcq: PY-D0003
             i = byte_data - 0x37
         else:
             return None
-            # raise Exception("Expected hex char in string hex escape")
 
         left -= 1
         num |= i << (left * 4)

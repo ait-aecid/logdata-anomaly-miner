@@ -55,6 +55,7 @@ def open_persistence_file(file_name, flags):
             logging.getLogger(DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
     create_missing_directories(file_name)
+    return None
 
 
 def replace_persistence_file(file_name, new_file_handle):

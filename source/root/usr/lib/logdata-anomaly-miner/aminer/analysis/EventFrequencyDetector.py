@@ -256,7 +256,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_success += 1
 
     def reset_counter(self, event_type):
-        # Create count index for new time window
+        """Create count index for new time window"""
         if self.auto_include_flag is True:
             if len(self.counts[event_type]) <= self.num_windows + 1:
                 self.counts[event_type].append(0)
