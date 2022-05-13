@@ -180,7 +180,7 @@ class UnixSocketLogDataResource(LogDataResource):
     The characteristics of this type of resource is, that reopening works only after end of stream of was reached.
     """
 
-    # skipcq: PYL-W0231
+    # skipcq: PYL-W0231, PYL-W0613
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
         """
         Create a new unix socket type resource.
@@ -252,6 +252,7 @@ class UnixSocketLogDataResource(LogDataResource):
         self.total_consumed_length += length
         self.buffer = self.buffer[length:]
 
+    # skipcq: PYL-R0201
     def get_repositioning_data(self):
         """Get the data for repositioning the stream. The returned structure has to be JSON serializable."""
         return None
