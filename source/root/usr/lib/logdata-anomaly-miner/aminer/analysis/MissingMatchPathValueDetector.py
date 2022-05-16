@@ -33,6 +33,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     alerting time when currently in error state. When in normal (alerting) state, the value is zero.
     """
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
                  default_interval=3600, realert_interval=86400, output_log_line=True):
         """
@@ -48,9 +50,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         # above this value will trigger alerting.
         self.next_check_timestamp = 0
         self.last_seen_timestamp = 0
-        self.next_persist_time = None
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
 
         self.log_success = 0
@@ -109,10 +111,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.log_learned_values += 1
             self.log_new_learned_values.append(value)
 
-        # Always enforce persistence syncs from time to time, the timestamps in the records change even when no new hosts are added.
-        if self.next_persist_time is None:
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.check_timeouts(timestamp, log_atom)
         self.log_success += 1
         return True
@@ -213,14 +211,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     affected_log_atom_values.append(e)
                 analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                       'AffectedLogAtomValues': affected_log_atom_values}
-                if self.output_log_line:
-                    match_paths_values = {}
-                    for match_path, match_element in log_atom.parser_match.get_match_dictionary().items():
-                        match_value = match_element.match_object
-                        if isinstance(match_value, bytes):
-                            match_value = match_value.decode(AminerConfig.ENCODING)
-                        match_paths_values[match_path] = match_value
-                    analysis_component['ParsedLogAtom'] = match_paths_values
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
                     self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)])
@@ -235,36 +225,27 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         """Add or overwrite a value to be monitored by the detector."""
         self.expected_values_dict[value] = [self.last_seen_timestamp, interval, 0, target_path]
         self.next_check_timestamp = 0
-        # Explicitely trigger a persistence sync to avoid staying in unsynced state too long when no new received atoms trigger it. But do
-        # not sync immediately, that would make bulk calls to this method quite inefficient.
-        if self.next_persist_time is None:
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
     def remove_check_value(self, value):
         """Remove checks for given value."""
         del self.expected_values_dict[value]
         logging.getLogger(DEBUG_LOG_NAME).debug('%s removed check value %s.', self.__class__.__name__, str(value))
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
-            PersistenceUtil.store_json(self.persistence_file_name, self.expected_values_dict)
-            self.next_persist_time = None
+        if delta <= 0:
+            self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.expected_values_dict)
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):

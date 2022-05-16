@@ -164,6 +164,19 @@ This option defines the system-group that owns the aminer-process.
 
    AminerGroup: 'aminer'
 
+AnalysisConfigFile
+~~~~~~~~~~~~~~~~~~
+
+* Default: None
+
+This (optional) configuration file contains the whole analysis child configuration (code). When missing those configuration parameters are also taken from the main config.
+
+.. warning:: This option is only available for python configs. It does not work for yaml configs.
+
+.. code-block:: python
+
+   config_properties['AnalysisConfigFile'] = 'analysis.py'
+
 RemoteControlSocket
 ~~~~~~~~~~~~~~~~~~~
 
@@ -202,7 +215,7 @@ Supported types are:
 .. code-block:: yaml
 
    LogResourceList:
-       - 'file:///var/log/apache2/access.log' 
+       - 'file:///var/log/apache2/access.log'
        - 'file:///home/ubuntu/data/mail.cup.com-train/daemon.log'
        - 'file:///home/ubuntu/data/mail.cup.com-train/auth.log'
        - 'file:///home/ubuntu/data/mail.cup.com-train/suricata/eve.json'
@@ -343,6 +356,18 @@ This option defines the prefix for the output of each anomaly.
 
    LogPrefix: ''
 
+Log.Encoding
+~~~~~~~~~~~~
+
+* Type: string
+* Default: 'utf-8'
+
+This option defines the encoding of the logfiles.
+
+.. code-block:: yaml
+
+   Log.Encoding: 'utf-8'
+
 Log.StatisticsPeriod
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -352,7 +377,7 @@ Log.StatisticsPeriod
 Defines how often to write into stat-logfiles.
 
 .. code-block:: yaml
-   
+
    Log.StatisticsPeriod: 3600
 
 Log.StatisticsLevel
@@ -364,7 +389,7 @@ Log.StatisticsLevel
 Defines the loglevel for the stat logs.
 
 .. code-block:: yaml
-   
+
    Log.StatisticsLevel: 2
 
 Log.DebugLevel
@@ -376,14 +401,14 @@ Log.DebugLevel
 Defines the loglevel of the aminer debug-logfile.
 
 .. code-block:: yaml
-   
+
    Log.DebugLevel: 2
 
 Log.RemoteControlLogFile
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Default: '/var/lib/aminer/log/aminerRemoteLog.txt'
 * Type: string (path to the logfile)
+* Default: '/var/lib/aminer/log/aminerRemoteLog.txt'
 
 Defines the path of the logfile for the RemoteControl.
 
@@ -394,8 +419,8 @@ Defines the path of the logfile for the RemoteControl.
 Log.StatisticsFile
 ~~~~~~~~~~~~~~~~~~
 
-* Default: '/var/lib/aminer/log/statistics.log'
 * Type: string (path to the logfile)
+* Default: '/var/lib/aminer/log/statistics.log'
 
 Defines the path of the stats-file.
 
@@ -406,14 +431,38 @@ Defines the path of the stats-file.
 Log.DebugFile
 ~~~~~~~~~~~~~~~~~~
 
-* Default: '/var/lib/aminer/log/aminer.log'
 * Type: string (path to the logfile)
+* Default: '/var/lib/aminer/log/aminer.log'
 
 Defines the path of the debug-log-file.
 
 .. code-block:: yaml
 
    Log.DebugFile: '/var/log/aminer.log'
+
+Log.Rotation.MaxBytes
+~~~~~~~~~~~~~~~~~~~~~
+
+* Type: number of bytes
+* Default: 1048576 (1 Megabyte)
+
+Defines the number of bytes before "Log.RemoteControlLogFile", "Log.StatisticsFile" and "Log.DebugFile" is rotated.
+
+.. code-block:: yaml
+
+   Log.Rotation.MaxBytes: 1048576
+
+Log.Rotation.BackupCount
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Type: number of old logfiles
+* Default: 5
+
+Defines the number of logfiles saved after rotation of "Log.RemoteControlLogFile", "Log.StatisticsFile" and "Log.DebugFile".
+
+.. code-block:: yaml
+
+   Log.Rotation.BackupCount: 5
 
 
 -----
@@ -434,7 +483,7 @@ Parser paths to DateTimeModelElements to set timestamp of log events.
 
 .. code-block:: yaml
 
-   timestamp_paths: 
+   timestamp_paths:
       - '/parser/model/time'
       - '/parser/model/type/execve/time'
       - '/parser/model/type/proctitle/time'
@@ -453,24 +502,12 @@ Flag to enable chronologically correct parsing from multiple input-logfiles.
 
    multi_source: True
 
-verbose
-~~~~~~~
-
-* Type: boolean (True,False)
-* Default: False
-
-Flag to enable that detailed parsing information is shown for unparsed loglines.
-
-.. code-block:: yaml
-
-   verbose: True
-
 eol_sep
 ~~~~~~~
 
 * Default: '\n'
 
-End of Line seperator for events. 
+End of Line seperator for events.
 
 .. note:: Enables parsing of multiline logs.
 
@@ -522,11 +559,11 @@ There are some predefined standard-model-elements like *IpAddressDataModelElemen
    from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
    from aminer.parsing.SequenceModelElement import SequenceModelElement
    from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
-   
+
    def get_model():
        """Return a model to parse Apache Access logs from the AIT-LDS."""
        alphabet = b'!"#$%&\'()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
-   
+
        model = SequenceModelElement('model', [
            FirstMatchModelElement('client_ip', [
                IpAddressDataModelElement('client_ip'),
@@ -565,7 +602,7 @@ There are some predefined standard-model-elements like *IpAddressDataModelElemen
                    FixedDataModelElement('sp12', b'"'),
                    ])),
            ])
-   
+
        return model
 
 This parser can be used as "type" in **/etc/aminer/config.yml**:
@@ -588,27 +625,27 @@ This parser can be used as "type" in **/etc/aminer/config.yml**:
              type: VariableByteDataModelElement
              name: 'host'
              args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
-   
+
            - id: identity_model
              type: VariableByteDataModelElement
              name: 'ident'
              args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
-   
+
            - id: user_name_model
              type: VariableByteDataModelElement
              name: 'user'
              args: '0123456789abcdefghijklmnopqrstuvwxyz.-'
-   
+
            - id: new_time_model
              type: DateTimeModelElement
              name: 'time'
-             args: '[%d/%b/%Y:%H:%M:%S +0000]'
-   
+             date_format: '[%d/%b/%Y:%H:%M:%S +0000]'
+
            - id: sq3
              type: FixedDataModelElement
              name: 'sq3'
              args: ' "'
-   
+
            - id: request_method_model
              type: FixedWordlistDataModelElement
              name: 'method'
@@ -622,50 +659,50 @@ This parser can be used as "type" in **/etc/aminer/config.yml**:
                      - 'OPTIONS'
                      - 'TRACE'
                      - 'PATCH'
-   
+
            - id: request_model
              type: VariableByteDataModelElement
              name: 'request'
              args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+'
-   
+
            - id: http1
              type: FixedDataModelElement
              name: 'http1'
              args: ' HTTP/'
-   
+
            - id: version_model
              type: VariableByteDataModelElement
              name: 'version'
              args: '0123456789.'
-   
+
            - id: sq4
              type: FixedDataModelElement
              name: 'sq4'
              args: '" '
-   
+
            - id: status_code_model
              type: DecimalIntegerValueModelElement
              name: 'status'
-   
+
            - id: size_model
              type: DecimalIntegerValueModelElement
              name: 'size'
-   
+
            - id: sq5
              type: FixedDataModelElement
              name: 'sq5'
              args: ' "-" "'
-   
+
            - id: user_agent_model
              type: VariableByteDataModelElement
              name: 'useragent'
              args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&=<?*+;:_ '
-   
+
            - id: sq6
              type: FixedDataModelElement
              name: 'sq6'
              args: '"'
-   
+
            - id: 'startModel'
              start: True
              type: SequenceModelElement
@@ -764,6 +801,11 @@ This element parses dates using a custom, timezone and locale-aware implementati
 
        Common formats are:
          * '%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'
+         * '%d.%m.%YT%H:%M:%S' e.g. for '07.02.2019T11:40:00'
+         * '%d.%m.%Y %H:%M:%S.%f' e.g. for '07.02.2019 11:40:00.123456'
+         * '%d.%m.%Y %H:%M:%S%z' e.g. for '07.02.2019 11:40:00+0000" or "07.02.2019 11:40:00 UTC'
+         * '%d.%m.%Y' e.g. for '07.02.2019'
+         * '%H:%M:%S' e.g. for '11:40:23'
 
   2. time_zone:
       time_zone the timezone for parsing the values. Default: **UTC**.
@@ -778,7 +820,7 @@ This element parses dates using a custom, timezone and locale-aware implementati
       max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
       of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
       within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
-       
+
 
 
 The following code simply adds a custom date_format:
@@ -789,7 +831,7 @@ The following code simply adds a custom date_format:
         - id: 'dtm'
           type: DateTimeModelElement
           name: 'DTM'
-          args: '%Y-%m-%d %H:%M:%S'
+          date_format: '%Y-%m-%d %H:%M:%S'
 
 DebugModelElement
 ~~~~~~~~~~~~~~~~~
@@ -822,7 +864,7 @@ This model element parses decimal values with optional signum, padding or expone
 
 
 .. code-block:: yaml
-  
+
      Parser:
           - id: decimalFloatValueModelElement
             type: DecimalFloatValueModelElement
@@ -844,7 +886,7 @@ This model element parses integer values with optional signum or padding. With p
 
 
 .. code-block:: yaml
-  
+
      Parser:
        - id: minutes
          type: DecimalIntegerValueModelElement
@@ -862,7 +904,7 @@ This model element takes any string up to a specific delimiter string.
 * **consume_delimiter**: defines whether the delimiter should be processed with the match, default is False
 
 .. code-block:: yaml
-   
+
      Parser:
        - id: delimitedDataModelElement
          type: DelimitedDataModelElement
@@ -1195,7 +1237,7 @@ This model defines a string that is delimited by a white space.
 Analysing
 ---------
 
-All detectors have the following parameters and may have additional specific parameters that are defined in the respective sections. 
+All detectors have the following parameters and may have additional specific parameters that are defined in the respective sections.
 
 * **id**: must be a unique string
 * **type**: must be an existing Analysis component (required)
@@ -1210,7 +1252,7 @@ This module defines a detector for log atoms not matching any allowlisted rule.
 * **allowlist_rules**: list of rules executed in same way as inside Rules.OrMatchRule.list of rules executed in same way as inside Rules.OrMatchRule (required, list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to False).
 
 .. code-block:: yaml
 
@@ -1274,7 +1316,7 @@ In addition to detecting new value combination (see NewMatchPathValueComboDetect
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to False).
 
 .. code-block:: yaml
 
@@ -1298,7 +1340,7 @@ This detector monitors and learns occurrence probabilities of character pairs in
 * **skip_repetitions** boolean that determines whether only distinct values are used for character pair counting. This counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run (boolean, defaults to False).
 * **persistence_id** name of persistency document (string, defaults to "Default").
 * **learn_mode** when set to True, the detector will extend the table of character pair frequencies based on new values (boolean).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
 
@@ -1337,7 +1379,7 @@ This module defines an evaluator and generator for event rules. The overall idea
 * **check_rules_flag** specifies whether existing rules are evaluated (boolean, defaults to True).
 * **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
 * **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
-* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to True).
+* **output_logline**: a boolean that specifies whether full log event parsing information should be appended to the anomaly when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **learn_mode**: specifies whether new hypotheses and rules are generated (boolean).
@@ -1359,9 +1401,14 @@ This module defines an detector for event and value frequency deviations.
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **window_size** the length of the time window for counting in seconds (float, defaults to 600).
-* **confidence_factor** defines range of tolerable deviation of measured frequency from ground truth frequency gt by [gf * confidence_factor, gf / confidence_factor], where confidence_factor is in range [0, 1]. (float, defaults to 0.5).
+* **num_windows** the number of previous time windows considered for expected frequency estimation (integer, defaults to 50).
+* **confidence_factor** defines range of tolerable deviation of measured frequency from expected frequency according to occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3 * sigma deviation. confidence_factor must be in range [0, 1] (float, defaults to 0.33).
+* **empty_window_warnings** whether anomalies should be generated for too small window sizes.
+* **early_exceeding_anomaly_output** states if a anomaly should be raised the first time the appearance count exceedes the range.
+* **set_lower_limit** sets the lower limit of the frequency test to the specified value.
+* **set_upper_limit** sets the upper limit of the frequency test to the specified value.
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1384,7 +1431,7 @@ This module defines an detector for event and value sequences. The concept is ba
 * **id_path_list** one or more paths that specify the trace of the sequence detection, i.e., incorrect sequences that are generated by interleaved events can be avoided when event sequence identifiers are available (list of strings, defaults to empty list).
 * **seq_len** the length of the sequences to be learned (larger lengths increase precision, but may overfit the data). (integer, defaults to 3).
 * **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1455,7 +1502,7 @@ or by creating own subclasses from "HistogramAnalysis.BinDefinition".
 * **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1) **Required**
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
 * **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
-* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
+* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: false)
 * **output_event_handlers**: List of event-handler-id to send the report to. List(strings)
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True. Boolean(Default: false)
 
@@ -1498,7 +1545,7 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
 * **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1)
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
 * **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
-* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: true)
+* **output_logline**: specifies whether the full parsed log atom should be provided in the output. Boolean(Default: false)
 * **output_event_handlers**: List of event-handler-id to send the report to List(strings).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True. Boolean(Default: false)
 
@@ -1584,7 +1631,7 @@ This component creates events for specified paths and values.
 
 * **paths**: List of paths defined as strings(Required)
 * **value_list**: List of values(Required)
-* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
 * **output_event_handlers**: List of strings with id's of the event_handlers
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
 
@@ -1612,7 +1659,7 @@ This detector calculates the average of a given list of values to monitor. Repor
 * **min_bin_time**: Evaluate the latest bin only when the first element is received after min_bin_time has elapsed. Integer, min: 1 (**required**)
 * **debug_mode**: Enables debug output. Boolean(Default: False)
 * **persistence_id**: The name of the file where the learned models are stored. String
-* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
 * **output_event_handlers**: List of strings with id's of the event_handlers
 * **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
 
@@ -1665,7 +1712,7 @@ This module defines an detector for minimal transition times between states (e.g
 * **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float, default: 0.05).
 * **persistence_id** name of persistency document (string, default: 'Default').
 * **learn_mode** specifies whether newly observed sequences should be added to the learned model (boolean, default: True).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, default: True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, default: False).
 
 .. code-block:: yaml
 
@@ -1695,7 +1742,7 @@ alerting time when currently in error state. When in normal (alerting) state, th
 * **check_interval**: This integer(seconds) defines the interval in which pre-set or learned values need to appear. Integer min:1 (Default: 3600)
 * **realert_interval**: This integer(seconds) defines the interval in which the AMiner should alert us about missing token values. Integer min: 1 (Default: 3600)
 * **persistence_id**: The name of the file where the learned models are stored. String
-* **output_logline**: Defines if logline should be added to the output. Boolean(Default: True)
+* **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
 * **output_event_handlers**: List of strings with id's of the event_handlers
 * **suppress**: A boolean that suppresses anomaly output of that detector when set to True.
 
@@ -1725,7 +1772,7 @@ This detector works similar to the NewMatchPathValueComboDetector, but allows to
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object (boolean, defaults to False).
 * **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1756,7 +1803,7 @@ This module defines a detector for new value combinations in multiple parser pat
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths does not refer to an existing parsed data object (boolean, defaults to False).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
 
 .. code-block:: yaml
@@ -1778,7 +1825,7 @@ This module defines a detector for new values in a parser path.
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to True).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **learn_mode** specifies whether newly observed values should be added to the learned model (boolean).
 
 .. code-block:: yaml
@@ -1821,7 +1868,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **time_period_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
 * **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly (integer, defaults to 360).
@@ -1851,7 +1898,7 @@ This class creates events if event or value occurrence counts are outliers in PC
 * **num_windows** the number of time windows in the sliding window approach. Total covered time span = window_size * num_windows (integer, defaults to 50).
 * **persistence_id** name of persistency document (string, defaults to Default).
 * **learn_mode** specifies whether new count measurements are added to the PCA count matrix (boolean).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list)
 * **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
 * **output_event_handlers** list of event handler id that anomalies are forwarded to (list of strings, defaults is to send to all event handlers).
@@ -1879,7 +1926,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 * **event_type_detector** used to track the number of event lines in the time windows (string).
 * **acf_pause_interval_percentage** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
 * **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
-* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 15).
+* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 20).
 * **num_division_time_step** Number of divisions of the time window to calculate the time step (integer, defaults to 10).
 * **alpha** significance level of the estimated values (float, defaults to 0.05).
 * **num_min_time_history** minimal number of values of the time_history after it is initialized (integer, defaults to 20).
@@ -1890,7 +1937,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 * **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **acf_auto_pause_interval** states if the pause area is automatically set. If enabled, the variable acf_pause_interval_percentage loses its functionality.
 * **acf_auto_pause_interval_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not an outlier.
@@ -2105,7 +2152,7 @@ This detector analyses each variable of the event_types by assigning them the im
 * **learn_mode** states, if found variable types are updated when a test fails.
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **event_type_detector** event_type_detector. Used to get the event numbers and values of the variables, etc.
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to true).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
 * **constraint_list** list of paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
 * **save_statistics** tracks the indicators and changed variable types, if set to True.
@@ -2135,11 +2182,17 @@ This detector analyses each variable of the event_types by assigning them the im
 * **num_update_var_type_hist_ref** number of update steps before the var_type_history_list is being updated.
 * **num_var_type_considered_ind** this attribute states how many variable types of the history are used as the recent history in the calculation of the indicator. False if no output of the indicator should be generated.
 * **num_stat_stop_update** number of static values of a variable, to stop tracking the variable type and read in in eventTypeD. Default is False.
-* **num_updates_until_var_reduction** number of update steps until the variables are tested, if they are suitable for an indicator. If not suitable, they are removed from the tracking of EvTypeD. Default is False.
+* **num_updates_until_var_reduction** number of update steps until the variables are tested, if they are suitable for an indicator. If not suitable, they are removed from the tracking of EvTypeD. Set to 0 to analyze all variables. Default is 20.
 * **var_reduction_thres** threshold for the reduction of variable types. The most likely none others var type must have a higher relative appearance for the variable to be further checked.
 * **num_skipped_ind_for_weights** number of the skipped indicators for the calculation of the indicator weights.
 * **num_ind_for_weights** number of indicators used in the calculation of the indicator weights.
-* **used_multinomial_test** states the used multinomial test. the value can be of the list ['MT', 'Approx', 'Chi'], where 'MT' means original MT, 'Approx' is the approximation with single BTs and 'Chi' is the ChisquareTest.
+* **used_multinomial_test** states the used multinomial test. Allowed values are 'MT', 'Approx' and 'Chi'. Where 'MT' means the original MT, 'Approx' is the approximation with single BTs and 'Chi' is the ChisquareTest.
+* **used_range_test** states the used method of range estimation. Allowed values are 'MeanSD', 'EmpiricQuantiles' and 'MinMax'. Where 'MeanSD' means the estimation through mean and standard deviation, 'EmpiricQuantiles' estimation through the empirical quantiles and 'MinMax' the estimation through minimum and maximum.
+* **range_alpha** significance niveau for the range variable type.
+* **range_threshold** maximal proportional deviation from the range before the variable type is rejected.
+* **range_limits_factor** factor for the limits of the range variable type.
+* **num_reinit_range** number of update steps until the range variable type is reinitialized. Set to zero if not desired.
+* **dw_alpha** significance niveau of the durbin watson test to test serial correlation. If the test fails the type range is assigned to the variable instead of continuous.
 
 .. code-block:: yaml
 
@@ -2164,7 +2217,7 @@ The following detectors work with MatchRules:
 * :ref:`AllowlistViolationDetector`
 * :ref:`TimeCorrelationViolationDetector`
 
-.. note:: MatchRules must be defined in the "Analysis"-part of the configuration.
+.. note:: MatchRules must be defined in the "Analysis"-part of the configuration. Every MatchRule can also define a :ref:`MatchAction` which is run when the MatchRule is applied.
 
 AndMatchRule
 ~~~~~~~~~~~~
@@ -2313,13 +2366,57 @@ This rule can be inserted into a normal ruleset just to see when a match attempt
 It just adds the evaluated log_atom to a ObjectHistory.
 
 
+.. _MatchAction:
+
+----------
+MatchActions
+----------
+
+.. note:: MatchActions must be defined in the "Analysis"-part of the configuration.
+
+EventGenerationMatchAction
+~~~~~~~~~~~~
+
+This generic match action forwards information about a rule match on parsed data to a list of event handlers.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: EventGenerationMatchAction
+          id: ip_match_action
+          event_type: "Analysis.Rules.IPv4InRFC1918MatchRule"
+          event_message: "Private IP address occurred!"
+
+
+AtomFilterMatchAction
+~~~~~~~~~~~~
+
+This generic match rule forwards all rule matches to a list of `AtomHandlerInterface` instances using the `SubhandlerFilter`.
+When `delete_components` is used, all components from the `subhandler_list` are removed from the default `SubhandlerFilter`.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValueDetector1
+          paths:
+            - "/model/second"
+
+        - type: AtomFilterMatchAction
+          id: afma
+          subhandler_list:
+            - NewMatchPathValueDetector1
+          stop_when_handled_flag: True
+          delete_components: True
+
+
 -------------
 EventHandling
 -------------
 
 EventHandler are output modules that allow the logdata-anomaly-miner to write alerts to specific targets.
 
-All EventHandler must have the following parameters and may have additional specific parameters that are defined in the respective sections. 
+All EventHandler must have the following parameters and may have additional specific parameters that are defined in the respective sections.
 
 * **id**: must be a unique string (required)
 * **type**: must be an existing Analysis component (required)
@@ -2374,7 +2471,7 @@ The KafkaEventHandler writes it's output to a `Kafka Message-Queue <https://kafk
 
 * **topic**: String property with the topic-name for the message queue
 * **cfgfile**: String property with the path to the kafka-config file. A comprehensive list of all config-parameters can be found at https://kafka-python.readthedocs.io/en/master/apidoc/KafkaProducer.html
-  
+
   A typical kafka-config-file might look like this:
 
 .. code-block:: yaml

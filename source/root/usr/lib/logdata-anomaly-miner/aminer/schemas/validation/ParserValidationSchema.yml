@@ -78,6 +78,7 @@
                     'name': {'type': 'string', 'required': True, 'empty': False},
                     'key_parser_dict': {'type': 'dict', 'required': True},
                     'optional_key_prefix': {'type': 'string'},
+                    'nullable_key_prefix': {'type': 'string'},
                     'allow_all_fields': {'type': 'boolean'}
                 },
             ]

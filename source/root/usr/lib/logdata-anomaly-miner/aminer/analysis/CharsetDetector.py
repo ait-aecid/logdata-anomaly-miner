@@ -11,12 +11,12 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
 import os
 import logging
+import time
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, KEY_PERSISTENCE_PERIOD,\
+    DEFAULT_PERSISTENCE_PERIOD
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
@@ -27,6 +27,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when numeric values are outside learned intervals."""
+
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list, target_path_list=None, persistence_id='Default',
                  auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
@@ -47,9 +49,9 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
-        self.next_persist_time = None
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
         self.id_path_list = id_path_list
         if constraint_list is None:
@@ -151,7 +153,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                                       'MissingCharacters': missing_chars_decoded}
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
-                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Value range anomaly detected', sorted_log_lines,
+                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New character(s) detected', sorted_log_lines,
                                            event_data, log_atom, self)
             # Extend charsets if learn mode is active.
             if self.auto_include_flag is True:
@@ -160,22 +162,16 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             self.charsets[id_event] = set(b''.join(values))
         self.log_success += 1
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -184,7 +180,6 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         for id_ev, charset in self.charsets.items():
             lst.append([id_ev, list(charset)])
         PersistenceUtil.store_json(self.persistence_file_name, lst)
-        self.next_persist_time = None
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):

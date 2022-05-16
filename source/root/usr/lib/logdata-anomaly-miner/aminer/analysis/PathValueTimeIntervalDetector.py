@@ -11,11 +11,12 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
+import time
 import os
 import logging
 
 from aminer import AminerConfig
-from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -27,6 +28,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
     This class analyzes the time intervals of the appearance of log_atoms.
     The considered time intervals depend on the combination of values in the target_paths of target_path_list.
     """
+
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None,
                  allow_missing_values_flag=True, ignore_list=None, output_log_line=True, auto_include_flag=False,
@@ -50,11 +53,11 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         greater than max_time_diff the new time is considered an anomaly.
         @param num_reduce_time_list number of new time entries appended to the time list, before the list is being reduced.
         """
-        self.next_persist_time = None
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
         self.allow_missing_values_flag = allow_missing_values_flag
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.output_log_line = output_log_line
         self.ignore_list = ignore_list
         if self.ignore_list is None:
@@ -193,19 +196,16 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                     2 * self.max_time_diff:
                 self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:]
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """Get the trigger class this component can be registered for. This detector only needs persisteny triggers in real time."""
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = self.aminer_config.config_properties.get(AminerConfig.KEY_PERSISTENCE_PERIOD, AminerConfig.DEFAULT_PERSISTENCE_PERIOD)
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -216,7 +216,6 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         for match_value_tuple, counter in self.counter_reduce_time_intervals.items():
             persist_data[1].append((match_value_tuple, counter))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        self.next_persist_time = None
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def load_persistence_data(self):
@@ -228,6 +227,52 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             for match_value_tuple, counter in persistence_data[1]:
                 self.counter_reduce_time_intervals[tuple(match_value_tuple)] = counter
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
+    def add_to_persistency_event(self, event_type, event_data):
+        """
+        Add or overwrite the information of event_data to the persistency of component_name.
+        @return a message with information about the addition to the persistency.
+        @throws Exception when the addition of this special event using given event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        if not isinstance(event_data, list) or len(event_data) != 2 or not isinstance(event_data[0], list) or\
+                len(event_data[0]) != len(self.target_path_list) or not all(isinstance(value, str) for value in event_data[0]) or\
+                not isinstance(event_data[1], (int, float)):
+            msg = 'Event_data has the wrong format. ' \
+                'The supported format is [path_value_list, new_transition_time], ' \
+                'where path_value_list is a list of strings with the same length as paths defined in the config.'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        match_value_tuple = tuple([bytes(val, 'utf-8') for val in event_data[0]])
+
+        msg = ''
+        if match_value_tuple not in self.appeared_time_list:
+            # Print message if combination of values is new
+            msg = 'First time (%s) added for [' % (event_data[1] % self.time_period_length)
+            for match_value in match_value_tuple:
+                msg += str(repr(match_value))[1:] + ', '
+            msg = msg[:-2] + ']'
+
+            self.appeared_time_list[match_value_tuple] = [event_data[1] % self.time_period_length]
+            self.counter_reduce_time_intervals[match_value_tuple] = 0
+        else:
+            # Prints an message if the new time is added to the list of observed times
+            msg = 'New time (%s) added to the range of previously observed times %s for [' % (
+                    event_data[1] % self.time_period_length, self.appeared_time_list[match_value_tuple])
+            for match_value in match_value_tuple:
+                msg += str(repr(match_value))[1:] + ', '
+            msg = msg[:-2] + ']'
+
+            # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
+            self.insert_and_reduce_time_intervals(match_value_tuple, event_data[1] % self.time_period_length)
+            msg += str(self.appeared_time_list)
+
+        return msg
 
     def print(self, message, log_atom, affected_path, additional_information=None):
         """Print the message."""

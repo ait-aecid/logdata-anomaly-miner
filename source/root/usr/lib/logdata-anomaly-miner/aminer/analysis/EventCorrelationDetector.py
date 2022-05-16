@@ -38,6 +38,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class tries to find time correlation patterns between different log atom events."""
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
@@ -69,7 +71,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.anomaly_event_handlers = anomaly_event_handlers
         self.paths = paths
         self.last_unhandled_match = None
-        self.next_persist_time = None
         self.total_records = 0
         self.max_hypotheses = max_hypotheses
         self.hypothesis_max_delta_time = hypothesis_max_delta_time
@@ -114,6 +115,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.min_eval_true = self.get_min_eval_true(self.max_observations, self.p0, self.alpha)
 
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.output_log_line = output_log_line
 
         self.log_success = 0
@@ -196,7 +198,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
         # Skip paths from ignore_list.
         for ignore_path in self.ignore_list:
-            if ignore_path in parser_match.get_match_dictionary().keys():
+            if ignore_path in parser_match.get_match_dictionary():
                 return
         if self.paths is None or len(self.paths) == 0:
             # Event is defined by the full path of log atom.
@@ -207,7 +209,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     break
             if not constraint_path_flag and self.constraint_list != []:
                 return
-            log_event = tuple(parser_match.get_match_dictionary().keys())
+            log_event = tuple(parser_match.get_match_dictionary())
         else:
             # Event is defined by value combos in paths
             values = []
@@ -296,9 +298,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         for listener in self.anomaly_event_handlers:
                             implied_event = None
                             trigger_event = None
-                            if rule.implied_event in self.sample_events.keys():
+                            if rule.implied_event in self.sample_events:
                                 implied_event = self.sample_events[rule.implied_event]
-                            if rule.trigger_event in self.sample_events.keys():
+                            if rule.trigger_event in self.sample_events:
                                 trigger_event = self.sample_events[rule.trigger_event]
                             listener.receive_event(
                                 'analysis.EventCorrelationDetector',
@@ -353,9 +355,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             for listener in self.anomaly_event_handlers:
                                 implied_event = None
                                 trigger_event = None
-                                if rule.implied_event in self.sample_events.keys():
+                                if rule.implied_event in self.sample_events:
                                     implied_event = self.sample_events[rule.implied_event]
-                                if rule.trigger_event in self.sample_events.keys():
+                                if rule.trigger_event in self.sample_events:
                                     trigger_event = self.sample_events[rule.trigger_event]
                                 listener.receive_event(
                                     'analysis.EventCorrelationDetector',
@@ -682,22 +684,16 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 self.hypothesis_candidates.append((log_event, log_atom.atom_time))
         self.log_success += 1
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -712,7 +708,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 known_path_set.add(
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def log_statistics(self, component_name):

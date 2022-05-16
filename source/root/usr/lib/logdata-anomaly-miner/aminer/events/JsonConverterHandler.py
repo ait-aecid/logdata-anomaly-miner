@@ -50,7 +50,19 @@ class JsonConverterHandler(EventHandlerInterface):
             log_data['DetectionTimestamp'] = round(time.time(), 2)
             log_data['LogLinesCount'] = len(sorted_log_lines)
             if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_log_line:
-                log_data['AnnotatedMatchElement'] = log_atom.parser_match.match_element.annotate_match('')
+                log_data['AnnotatedMatchElement'] = {}
+                for path, match in log_atom.parser_match.get_match_dictionary().items():
+                    if isinstance(match, list):
+                        for match_element_id, match_element in enumerate(match):
+                            if isinstance(match_element.match_object, bytes):
+                                log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = match_element.match_object.decode(
+                                    AminerConfig.ENCODING)
+                            else:
+                                log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = str(match_element.match_object)
+                    elif isinstance(match.match_object, bytes):
+                        log_data['AnnotatedMatchElement'][path] = match.match_object.decode(AminerConfig.ENCODING)
+                    else:
+                        log_data['AnnotatedMatchElement'][path] = str(match.match_object)
 
             analysis_component = {'AnalysisComponentIdentifier': self.analysis_context.get_id_by_component(event_source)}
             if event_source.__class__.__name__ == 'ExtractedData_class':
@@ -67,7 +79,7 @@ class JsonConverterHandler(EventHandlerInterface):
             detector_analysis_component = event_data.get('AnalysisComponent')
             if detector_analysis_component is not None:
                 for key in detector_analysis_component:
-                    if key in analysis_component.keys():
+                    if key in analysis_component:
                         continue
                     analysis_component[key] = detector_analysis_component.get(key)
 

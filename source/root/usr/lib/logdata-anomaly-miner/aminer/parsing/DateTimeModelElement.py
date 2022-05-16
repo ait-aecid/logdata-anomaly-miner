@@ -18,11 +18,9 @@ import time
 import logging
 import locale
 from typing import Union, List, Set, Optional
-from dateutil.parser import parse
 from datetime import timezone, datetime
 
 from aminer.AminerConfig import DEBUG_LOG_NAME
-from aminer import AminerConfig
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -96,6 +94,11 @@ class DateTimeModelElement(ModelElementInterface):
             * %z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.
         Common formats are:
             * "%b %d %H:%M:%S" e.g. for "Nov 19 05:08:43"
+            * "%d.%m.%YT%H:%M:%S" e.g. for "07.02.2019T11:40:00"
+            * "%d.%m.%Y %H:%M:%S.%f" e.g. for "07.02.2019 11:40:00.123456"
+            * "%d.%m.%Y %H:%M:%S%z" e.g. for "07.02.2019 11:40:00+0000" or "07.02.2019 11:40:00 UTC"
+            * "%d.%m.%Y" e.g. for "07.02.2019"
+            * "%H:%M:%S" e.g. for "11:40:23"
         @param time_zone the timezone for parsing the values or UTC when None.
         @param text_locale the locale to use for parsing the day, month names or None to use the default locale. The locale must be a tuple
         of (locale, encoding) or a string.
@@ -408,7 +411,7 @@ class DateTimeModelElement(ModelElementInterface):
                 parse_pos += 1
                 resulting_key = None
                 # only if the next character is in A-Z, a valid resulting_key can exist.
-                if match_context.match_data[parse_pos] in search_tz_dict.keys():
+                if match_context.match_data[parse_pos] in search_tz_dict:
                     # search the first fitting resulting_key in the sorted tz_dict and break the loop.
                     for key in search_tz_dict[match_context.match_data[parse_pos]]:
                         if match_context.match_data[parse_pos:].startswith(key):

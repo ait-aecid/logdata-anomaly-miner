@@ -100,7 +100,8 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
     <cmdsynopsis>
       <command>aminerremotecontrol</command>
       <arg choice="opt">
-        <option>[--exec <replaceable>command</replaceable>] | [--exec-file <replaceable>file</replaceable>]</option>
+        <option>[--exec</option> <replaceable>command</replaceable><option>] | [--exec-file</option> <replaceable>file</replaceable>
+        <option>]</option>
       </arg>
       <arg choice="plain">
         <option>[OPTIONS]...</option>
@@ -165,7 +166,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
            variablelist.term.break.after parameters to
            control the term elements. -->      <varlistentry>
         <term>
-          <option>--control-socket, -c <replaceable>socket</replaceable></option>
+          <option>--control-socket, -c</option> <replaceable>socket</replaceable>
         </term>
         <listitem>
           <para>Specify the Unix domain remote control socket
@@ -182,7 +183,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       </varlistentry>
       <varlistentry>
         <term>
-          <option>--exec, -e <replaceable>command</replaceable></option>
+          <option>--exec, -e</option> <replaceable>command</replaceable>
         </term>
         <listitem>
           <para>For each --exec option, the next argument is sent
@@ -198,7 +199,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       </varlistentry>
       <varlistentry>
         <term>
-          <option>--exec-file, -f <replaceable>file</replaceable></option>
+          <option>--exec-file, -f</option> <replaceable>file</replaceable>
         </term>
         <listitem>
           <para>For each --exec-file option, the named file is
@@ -209,7 +210,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
       </varlistentry>
       <varlistentry>
         <term>
-          <option>--data, -d <replaceable>data</replaceable></option>
+          <option>--data, -d</option> <replaceable>data</replaceable>
         </term>
         <listitem>
           <para>This parameter defines a json string defining
@@ -245,7 +246,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>change_config_property(analysis_context,property_name,value)</replaceable>
+              <replaceable>change_config_property(analysis_context,&apos;property_name&apos;,&apos;value&apos;)</replaceable>
             </option>
           </term>
           <listitem>
@@ -255,31 +256,31 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             &quot;<replaceable>property_name</replaceable> changed to
             <replaceable>value</replaceable> successfully.&quot; if the 
             changes were successful and an individual message if the changes failed.</para>
-            <para>Read more about which properties can be changed in the <option>Valid Property Names </option>section.</para>
+            <para>Read more about which properties can be changed in the <option>Valid Property Names</option> section.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term>
             <option>
-              <replaceable>change_attribute_of_registered_analysis_component(analysis_context,component_name,attribute,value)</replaceable>
+              <replaceable>change_attribute_of_registered_analysis_component(analysis_context,&apos;component_name&apos;,&apos;attribute&apos;,&apos;value&apos;)</replaceable>
             </option>
           </term>
           <listitem>
             <para>This method allows you to change attributes from components of the 
             AminerConfig at runtime. For every attribute to be changed this method 
-            must be used. The method prints &quot;<replaceable>component_name.attribute </replaceable> changed to <replaceable>value</replaceable> successfully.
+            must be used. The method prints &quot;<replaceable>component_name.attribute</replaceable> changed to <replaceable>value</replaceable> successfully.
             &quot; if the changes were successful and an individual message if the changes failed.
             The type of the new <replaceable>value</replaceable> must be the same like the
             old value of the <replaceable>component_name.attribute</replaceable></para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec 
             &quot;change_attribute_of_registered_analysis_component(analysis_context,
-            &apos;NewMatchPath&apos;, &apos;auto_include_flag&apos;, False)&quot;</para>
+            &apos;NewMatchPath&apos;,&apos;auto_include_flag&apos;, False)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term>
             <option>
-              <replaceable>rename_registered_analysis_component(analysis_context,old_component_name,new_component_name)</replaceable>
+              <replaceable>rename_registered_analysis_component(analysis_context,&apos;old_component_name&apos;,&apos;new_component_name&apos;)</replaceable>
             </option>
           </term>
           <listitem>
@@ -294,21 +295,21 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>add_handler_to_atom_filter_and_register_analysis_component(analysis_context,atom_handler,component,component_name)</replaceable>
+              <replaceable>add_handler_to_atom_filter_and_register_analysis_component(analysis_context,&apos;atom_handler&apos;,component,&apos;component_name&apos;)</replaceable>
             </option>
           </term>
           <listitem>
             <para>Adds the <replaceable>component</replaceable> to the <replaceable>atom_filter</replaceable> and registers
             it with the <replaceable>component_name</replaceable>.</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec 
-           &quot;add_handler_to_atom_filter_and_register_analysis_component(analysis_context, &apos;AtomFilter&apos;,
-           NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, auto_include_flag=True), &apos;NewMatchPathDet&apos;)&quot;</para>
+           &quot;add_handler_to_atom_filter_and_register_analysis_component(analysis_context,&apos;AtomFilter&apos;,
+           NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, auto_include_flag=True),&apos;NewMatchPathDet&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term>
             <option>
-              <replaceable>print_config_property(analysis_context,property_name)</replaceable>
+              <replaceable>print_config_property(analysis_context,&apos;property_name&apos;)</replaceable>
             </option>
           </term>
           <listitem>
@@ -321,14 +322,14 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>print_attribute_of_registered_analysis_component(analysis_context,component_name, attribute)</replaceable>
+              <replaceable>print_attribute_of_registered_analysis_component(analysis_context,&apos;component_name&apos;,&apos;attribute&apos;)</replaceable>
             </option>
           </term>
           <listitem>
             <para>Prints the <replaceable>attribute</replaceable> of the component 
             with the <replaceable>component_name</replaceable>.</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec 
-            &quot;print_attribute_of_registered_analysis_component(analysis_context,&apos;NewMatchPath&apos;, &apos;auto_include_flag&apos;)&quot;</para>
+            &quot;print_attribute_of_registered_analysis_component(analysis_context,&apos;NewMatchPath&apos;,&apos;auto_include_flag&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -347,7 +348,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>save_current_config(analysis_context,destination_file)</replaceable>
+              <replaceable>save_current_config(analysis_context,&apos;destination_file&apos;)</replaceable>
             </option>
           </term>
           <listitem>
@@ -358,7 +359,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
              &quot;save_current_config(analysis_context,&apos;/tmp/config.py&apos;)&quot;</para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+        <varlistentry>
           <term>
             <option>
               <replaceable>persist_all()</replaceable>
@@ -370,7 +371,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
              &quot;persist_all()&quot;</para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+        <varlistentry>
           <term>
             <option>
               <replaceable>create_backup()</replaceable>
@@ -378,12 +379,12 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           </term>
           <listitem>
             <para>Creates a backup of the current persistence directory and saves it in
-			 {persistence_dir}/backup/{timestamp}. Use this preferably after persist_all().</para>
+    {persistence_dir}/backup/{timestamp}. Use this preferably after persist_all().</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec
              &quot;create_backup()&quot;</para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+        <varlistentry>
           <term>
             <option>
               <replaceable>list_backups()</replaceable>
@@ -398,14 +399,14 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>allowlist_event_in_component(analysis_context,component_name,event_data,allowlisting_data=None)</replaceable>
+              <replaceable>allowlist_event_in_component(analysis_context,&apos;component_name&apos;,event_data,allowlisting_data=None)</replaceable>
             </option>
           </term>
           <listitem>
             <para>Allowlists a path from <replaceable>event_data</replaceable> with the
              allowlist_event-method from the corresponding class of the component with the
             <replaceable>component_name</replaceable>. Only the following classes
-             support allowlisting: <replaceable>EnhancedNewMatchPathValueComboDetector </replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
+             support allowlisting: <replaceable>EnhancedNewMatchPathValueComboDetector</replaceable>, <replaceable>MissingMatchPathValueDetector</replaceable>, 
              <replaceable>NewMatchPathDetector</replaceable> and 
              <replaceable>NewMatchPathValueComboDetector</replaceable>.
              For most of the components no <replaceable>allowlisting_data</replaceable>
@@ -429,7 +430,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>dump_events_from_history(analysis_context,history_component_name,dump_event_id)</replaceable>
+              <replaceable>dump_events_from_history(analysis_context,&apos;history_component_name&apos;,dump_event_id)</replaceable>
             </option>
           </term>
           <listitem>
@@ -445,7 +446,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>ignore_events_from_history(analysis_context,history_component_name,event_ids)</replaceable>
+              <replaceable>ignore_events_from_history(analysis_context,&apos;history_component_name&apos;,event_ids)</replaceable>
             </option>
           </term>
           <listitem>
@@ -460,7 +461,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>list_events_from_history(analysis_context,history_component_name,max_event_count=None)</replaceable>
+              <replaceable>list_events_from_history(analysis_context,&apos;history_component_name&apos;,max_event_count=None)</replaceable>
             </option>
           </term>
           <listitem>
@@ -475,7 +476,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         <varlistentry>
           <term>
             <option>
-              <replaceable>allowlist_events_from_history(analysis_context,history_component_name,id_spec_list,allowlisting_data=None)</replaceable>
+              <replaceable>allowlist_events_from_history(analysis_context,&apos;history_component_name&apos;,id_spec_list,allowlisting_data=None)</replaceable>
             </option>
           </term>
           <listitem>
@@ -486,7 +487,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             &quot;allowlist_events_from_history(analysis_context,&apos;VolatileLogarithmicBackoffEventHistory&apos;,[12,13,15])&quot;</para>
           </listitem>
         </varlistentry>
-	<varlistentry>
+        <varlistentry>
           <term>
             <option>
               <replaceable>reopen_event_handler_streams(analysis_context)</replaceable>
@@ -510,7 +511,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: &apos;E-Mail Address&apos;</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;MailAlerting.TargetAddress&apos;,
+            &quot;change_config_property(analysis_context,&apos;MailAlerting.TargetAddress&apos;,
             &apos;root@localhost&apos;)&quot;</para>
             <para>Define a target e-mail address to send alerts to. When undefined, no e-mail notification hooks are added.</para>
           </listitem>
@@ -522,7 +523,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: &apos;E-Mail Address&apos;</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;MailAlerting.FromAddress&apos;,
+            &quot;change_config_property(analysis_context,&apos;MailAlerting.FromAddress&apos;,
             &apos;root@localhost&apos;)&quot;</para>
             <para>Sender address of e-mail alerts.</para>
           </listitem>
@@ -534,7 +535,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;MailAlerting.SubjectPrefix&apos;,
+            &quot;change_config_property(analysis_context,&apos;MailAlerting.SubjectPrefix&apos;,
             &apos;aminer Alerts:&apos;)&quot;</para>
             <para>Define, which text should be prepended to the standard aminer subject. 
             Defaults to &quot;aminer Alerts:&quot;</para>
@@ -547,7 +548,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;MailAlerting.EventCollectTime&apos;, 10)&quot;</para>
+            &quot;change_config_property(analysis_context,&apos;MailAlerting.EventCollectTime&apos;, 10)&quot;</para>
             <para>Define how many seconds to wait after a first event triggered the alerting procedure 
             before really sending out the e-mail. In that timespan, events are collected and will be sent 
             all using a single e-mail. Defaults to 10 seconds.</para>
@@ -560,7 +561,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;MailAlerting.MinAlertGap&apos;, 600)&quot;</para>
+            &quot;change_config_property(analysis_context,&apos;MailAlerting.MinAlertGap&apos;, 600)&quot;</para>
             <para>Define the minimum time between two alert e-mails in seconds to avoid spamming. 
              All events during this timespan are collected and sent out with the next report. Defaults to 600 seconds.</para>
           </listitem>
@@ -572,7 +573,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;MailAlerting.MaxAlertGap&apos;, 1000)&quot;</para>
+            &quot;change_config_property(analysis_context,&apos;MailAlerting.MaxAlertGap&apos;, 1000)&quot;</para>
             <para>Define the maximum time between two alert e-mails in seconds. 
             When undefined this defaults to &quot;MailAlerting.MinAlertGap&quot;. 
             Otherwise this will activate an exponential backoff to reduce messages 
@@ -587,7 +588,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: Number of messages (Integer)</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;MailAlerting.MaxEventsPerMessage&apos;, 1000)&quot;</para>
+            &quot;change_config_property(analysis_context,&apos;MailAlerting.MaxEventsPerMessage&apos;,1000)&quot;</para>
             <para>Define how many events should be included in one alert mail at most. This defaults to 1000.</para>
           </listitem>
         </varlistentry>
@@ -598,8 +599,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
           <listitem>
             <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;LogPrefix&apos;, &apos;
-            Original log line: &apos;)&quot;</para>
+            &quot;change_config_property(analysis_context,&apos;LogPrefix&apos;,&apos;Original log line: &apos;)&quot;</para>
             <para>Most analysis components implement the output_log_line-property, which is True by default.
               Define a prefix to the original captured log lines. This defaults to &apos;&apos;.</para>
           </listitem>
@@ -612,56 +612,56 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para><replaceable>Value</replaceable>: &apos;Allowed RAM usage in Megabytes 
             (Integer: 32-maxSystemRAM)&apos;</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
-            &quot;change_config_property(analysis_context, &apos;Resources.MaxMemoryUsage&apos;, -1)&quot;</para>
+            &quot;change_config_property(analysis_context,&apos;Resources.MaxMemoryUsage&apos;, -1)&quot;</para>
             <para>This property limits the maximal possible RAM in MB which the aminer process can use. 
             Be careful at choosing the value, as a shortage of memory causes a MemoryError. This defaults to 
            -1, which means that there is no limit.</para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+        <varlistentry>
           <term>
             <replaceable>Core.PersistencePeriod</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec
-             &quot;change_config_property(analysis_context, &apos;Core.PersistencePeriod&apos;, 300)&quot;</para>
+             &quot;change_config_property(analysis_context,&apos;Core.PersistencePeriod&apos;, 300)&quot;</para>
             <para>Use this property to change the time between persisting data in analysis components.
-			 Defaults to 600 seconds.</para>
+    Defaults to 600 seconds.</para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+        <varlistentry>
           <term>
             <replaceable>Log.StatisticsLevel</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: Level [0, 1, 2]</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec
-             &quot;change_config_property(analysis_context, &apos;Log.StatisticsLevel&apos;, 2)&quot;</para>
+             &quot;change_config_property(analysis_context,&apos;Log.StatisticsLevel&apos;,2)&quot;</para>
             <para>Change the amount of data saved in statistics. Possible stat-levels are 0 for no statistics, 1 for
              normal statistic level and 2 for verbose statistics. Defaults to 1.</para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+        <varlistentry>
           <term>
             <replaceable>Log.DebugLevel</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: Level [0, 1, 2]</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec
-             &quot;change_config_property(analysis_context, &apos;Log.DebugLevel&apos;, 2)&quot;</para>
+             &quot;change_config_property(analysis_context,&apos;Log.DebugLevel&apos;,2)&quot;</para>
             <para>Change the debug logging level. Possible debug-levels are 0 for no logging, 1 for normal output
             (INFO and above), 2 for printing all debug information. Defaults to 1.</para>
           </listitem>
         </varlistentry>
-		<varlistentry>
+        <varlistentry>
           <term>
             <replaceable>Log.StatisticsPeriod</replaceable>
           </term>
           <listitem>
             <para><replaceable>Value</replaceable>: Seconds (Integer)</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec
-             &quot;change_config_property(analysis_context, &apos;Log.StatisticsPeriod&apos;, 360)&quot;</para>
+             &quot;change_config_property(analysis_context,&apos;Log.StatisticsPeriod&apos;, 360)&quot;</para>
             <para>Change how often statistics are logged and reset. This defaults to 3600 seconds.</para>
           </listitem>
         </varlistentry>

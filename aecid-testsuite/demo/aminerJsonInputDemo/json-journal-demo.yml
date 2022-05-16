@@ -103,6 +103,12 @@ Parser:
            - 'pci_bus'
            - 'pci'
            - 'ubs'
+           - 'pnp'
+           - 'scsi'
+           - 'usb'
+           - 'misc'
+           - 'virtio'
+           - 'hid'
 
        - id: optional_key__KERNEL_DEVICE
          type: FixedWordlistDataModelElement
@@ -110,16 +116,37 @@ Parser:
          args:
            - '+acpi:PNP0A03:00'
            - '+pci_bus:0000:00'
+           - '+pci:0000:00:00.0'
            - '+pci:0000:00:01.0'
            - '+pci:0000:00:01.1'
            - '+pci:0000:00:01.2'
+           - '+pci:0000:00:01.3'
+           - '+pci:0000:00:02.0'
+           - '+pci:0000:00:03.0'
+           - '+pci:0000:00:04.0'
+           - '+pci:0000:00:05.0'
+           - '+pnp:00:00'
+           - '+pnp:00:01'
+           - '+pnp:00:02'
+           - '+pnp:00:03'
+           - '+pnp:00:04'
+           - '+scsi:host0'
+           - '+scsi:host1'
            - 'c189:0'
+           - '+usb:1-0:1.0'
+           - '+usb:1-1'
+           - 'c10:236'
+           - '+virtio:virtio0'
+           - 'c189:1'
+           - '+hid:0003:0627:0001.0001'
 
        - id: optional_key__UDEV_DEVNODE
          type: FixedWordlistDataModelElement
          name: 'optional_key__UDEV_DEVNODE'
          args:
            - '/dev/bus/usb/001/001'
+           - '/dev/bus/usb/001/002'
+           - '/dev/mapper/control'
 
        - id: optional_key__UDEV_SYSNAME
          type: FixedWordlistDataModelElement
@@ -127,10 +154,28 @@ Parser:
          args:
            - 'PNP0A03:00'
            - 'usb1'
-#           - '+pci_bus:0000:00'
-#           - '+pci:0000:00:01.0'
-#           - '+pci:0000:00:01.1'
-#           - '+pci:0000:00:01.2'
+           - 'host0'
+           - 'host1'
+           - '00:00'
+           - '00:01'
+           - '00:02'
+           - '00:03'
+           - '00:04'
+           - '0000:00:00.0'
+           - '0000:00:01.0'
+           - '0000:00:01.1'
+           - '0000:00:01.2'
+           - '0000:00:01.3'
+           - '0000:00:02.0'
+           - '0000:00:03.0'
+           - '0000:00:04.0'
+           - '0000:00:05.0'
+           - '0000:00'
+           - '1-0:1.0'
+           - '1-1'
+           - 'device-mapper'
+           - 'virtio0'
+           - '0003:0627:0001.0001'
 
        - id: SYSLOG_FACILITY
          type: DecimalIntegerValueModelElement
@@ -149,6 +194,16 @@ Parser:
            - '../src/core/manager.c'
            - '../src/login/logind-session.c'
            - '../src/core/job.c'
+           - '../src/network/networkd-link.c'
+           - '../src/timesync/timesyncd-manager.c'
+           - '../src/network/networkd-dhcp6.c'
+           - '../src/network/networkd-dhcp4.c'
+           - '../src/resolve/resolved-manager.c'
+           - '../src/network/wait-online/manager.c'
+           - '../src/network/networkd-manager.c'
+           - '../src/login/logind-button.c'
+           - '../src/hostname/hostnamed.c'
+           - '../src/resolve/resolved-dns-transaction.c'
 
        - id: optional_key_CODE_LINE
          type: DecimalIntegerValueModelElement
@@ -167,6 +222,20 @@ Parser:
            - 'seat_start'
            - 'manager_notify_finished'
            - 'session_start'
+           - 'link_update'
+           - 'manager_network_event_handler'
+           - 'link_ipv6ll_gained'
+           - 'dhcp6_verify_link'
+           - 'link_enable_ipv6'
+           - 'dhcp_lease_acquired'
+           - 'manager_watch_hostname'
+           - 'link_enter_configured'
+           - 'manager_all_configured'
+           - 'manager_set_hostname'
+           - 'button_open'
+           - 'method_set_hostname'
+           - 'manager_receive_response'
+           - 'dns_transaction_process_reply'
 
        - id: optional_key_INTERFACE
          type: FixedWordlistDataModelElement
@@ -254,11 +323,11 @@ Parser:
 
        - id: optional_key__UID
          type: DecimalIntegerValueModelElement
-         name: 'optional_key__PID'
+         name: 'optional_key__UID'
 
        - id: optional_key__GID
          type: DecimalIntegerValueModelElement
-         name: 'optional_key__PID'
+         name: 'optional_key__GID'
 
        - id: optional_key__COMM
          type: FixedWordlistDataModelElement
@@ -282,10 +351,14 @@ Parser:
            - 'accounts-daemon'
            - 'systemd-logind'
            - 'systemd-hostnam'
+           - 'systemd'
            - 'networkd-dispat'
            - 'snapd'
            - 'sshd'
            - 'sudo'
+           - 'cloud-init'
+           - 'logger'
+           - '(systemd)'
 
        - id: optional_key__EXE
          type: FixedWordlistDataModelElement
@@ -313,6 +386,7 @@ Parser:
            - '/usr/sbin/sshd'
            - '/usr/bin/logger'
            - '/usr/bin/sudo'
+           - '/lib/systemd/systemd'
 
        - id: optional_key__CMDLINE
          type: FixedWordlistDataModelElement
@@ -342,6 +416,15 @@ Parser:
            - '/usr/sbin/sshd -D'
            - 'logger -p user info -t ec2 -s'
            - 'sudo -i'
+           - '/sbin/init'
+           - '/usr/bin/python3 /usr/bin/cloud-init init'
+           - 'logger --id=787 -t pollinate client verified challenge/response with [https://entropy.ubuntu.com/]'
+           - 'logger --id=787 -t pollinate client hashed response from [https://entropy.ubuntu.com/]'
+           - 'logger --id=787 -t pollinate client successfully seeded [/dev/urandom]'
+           - '/usr/bin/python3 /usr/bin/cloud-init modules --mode=config'
+           - 'sshd: ubuntu [priv]'
+           - '(systemd)'
+           - '/lib/systemd/systemd --user'
 
        - id: optional_key__CAP_EFFECTIVE
          type: HexStringModelElement
@@ -377,20 +460,28 @@ Parser:
            - '/system.slice/snapd.service'
            - '/system.slice/ssh.service'
            - '/system.slice/cloud-final.service'
+           - '/system.slice/cloud-init.service'
+           - '/system.slice/pollinate.service'
+           - '/system.slice/cloud-config.service'
            - '/user.slice/user-1000.slice/session-1.scope'
+           - '/init.scope'
+           - '/user.slice/user-1000.slice/user@1000.service/init.scope'
+           - '/user.slice/user-1000.slice/user@1000.service'
 
        - id: optional_key__SYSTEMD_UNIT
          type: FixedWordlistDataModelElement
          name: 'optional_key__SYSTEMD_UNIT'
          args:
            - 'systemd-journald.service'
-           - 'apparmor.service'
-           - 'systemd-udevd.service'
-           - 'cloud-init-local.service'
            - 'systemd-networkd.service'
            - 'systemd-timesyncd.service'
            - 'systemd-resolved.service'
            - 'systemd-networkd-wait-online.service'
+           - 'systemd-udevd.service'
+           - 'systemd-logind.service'
+           - 'systemd-hostnamed.service'
+           - 'apparmor.service'
+           - 'cloud-init-local.service'
            - 'rsyslog.service'
            - 'cron.service'
            - 'apport.service'
@@ -399,13 +490,16 @@ Parser:
            - 'grub-common.service'
            - 'lxcfs.service'
            - 'accounts-daemon.service'
-           - 'systemd-logind.service'
-           - 'systemd-hostnamed.service'
            - 'networkd-dispatcher.service'
            - 'snapd.service'
            - 'ssh.service'
            - 'cloud-final.service'
            - 'session-1.scope'
+           - 'init.scope'
+           - 'cloud-init.service'
+           - 'pollinate.service'
+           - 'cloud-config.service'
+           - 'user@1000.service'
 
        - id: optional_key__SYSTEMD_SLICE
          type: FixedWordlistDataModelElement
@@ -424,17 +518,20 @@ Parser:
          name: 'optional_key_JOURNAL_NAME'
          args:
            - 'Runtime journal'
+           - 'System journal'
 
-       - id: fixed_path
-         type: FixedDataModelElement
-         name: 'fixed_path'
-         args: '/run/log/journal/'
+       - id: fixed_journal_paths
+         type: FixedWordlistDataModelElement
+         name: 'fixed_journal_paths'
+         args:
+           - '/var/log/journal/'
+           - '/run/log/journal/'
 
        - id: optional_key_JOURNAL_PATH
          type: SequenceModelElement
          name: 'optional_key_JOURNAL_PATH'
          args:
-           - fixed_path
+           - fixed_journal_paths
            - hex
 
        - id: optional_key_CURRENT_USE
@@ -536,6 +633,93 @@ Parser:
          name: 'optional_key_UNIT'
          args:
            - 'systemd-udevd.service'
+           - 'systemd-journal-flush.service'
+           - 'systemd-sysctl.service'
+           - 'systemd-udev-trigger.service'
+           - 'systemd-machine-id-commit.service'
+           - 'systemd-update-utmp.service'
+           - 'systemd-ask-password-console.path'
+           - 'systemd-tmpfiles-setup.service'
+           - 'systemd-timesyncd.service'
+           - 'systemd-networkd.service'
+           - 'systemd-networkd-wait-online.service'
+           - 'systemd-resolved.service'
+           - 'systemd-tmpfiles-clean.timer'
+           - 'systemd-logind.service'
+           - 'systemd-user-sessions.service'
+           - 'systemd-hostnamed.service'
+           - 'systemd-update-utmp-runlevel.service'
+           - 'network-online.target'
+           - 'keyboard-setup.service'
+           - 'cryptsetup.target'
+           - 'local-fs-pre.target'
+           - 'dev-ttyS0.device'
+           - 'systemd-rfkill.socket'
+           - 'dev-disk-by-label-UEFI.device'
+           - 'boot-efi.mount'
+           - 'local-fs.target'
+           - 'plymouth-read-write.service'
+           - 'console-setup.service'
+           - 'ebtables.service'
+           - 'apparmor.service'
+           - 'time-sync.target'
+           - 'cloud-init-local.service'
+           - 'network-pre.target'
+           - 'nss-lookup.target'
+           - 'network.target'
+           - 'cloud-init.service'
+           - 'blk-availability.service'
+           - 'remote-fs-pre.target'
+           - 'remote-fs.target'
+           - 'cloud-config.target'
+           - 'sysinit.target'
+           - 'uuidd.socket'
+           - 'snapd.socket'
+           - 'motd-news.timer'
+           - 'dbus.socket'
+           - 'apt-daily.timer'
+           - 'apt-daily-upgrade.timer'
+           - 'lxd.socket'
+           - 'iscsid.socket'
+           - 'fstrim.timer'
+           - 'timers.target'
+           - 'acpid.path'
+           - 'acpid.socket'
+           - 'paths.target'
+           - 'basic.target'
+           - 'lxd-containers.service'
+           - 'atd.service'
+           - 'cron.service'
+           - 'sockets.target'
+           - 'networkd-dispatcher.service'
+           - 'apport.service'
+           - 'irqbalance.service'
+           - 'rsyslog.service'
+           - 'accounts-daemon.service'
+           - 'pollinate.service'
+           - 'grub-common.service'
+           - 'lxcfs.service'
+           - 'dbus.service'
+           - 'snapd.service'
+           - 'polkit.service'
+           - 'unattended-upgrades.service'
+           - 'plymouth-quit.service'
+           - 'plymouth-quit-wait.service'
+           - 'serial-getty@ttyS0.service'
+           - 'setvtrgb.service'
+           - 'system-getty.slice'
+           - 'getty@tty1.service'
+           - 'getty.target'
+           - 'ssh.service'
+           - 'snapd.seeded.service'
+           - 'cloud-config.service'
+           - 'multi-user.target'
+           - 'graphical.target'
+           - 'cloud-final.service'
+           - 'cloud-init.target'
+           - 'user-1000.slice'
+           - 'user@1000.service'
+           - 'session-1.scope'
 
        - id: optional_key_INVOCATION_ID
          type: HexStringModelElement
@@ -582,9 +766,14 @@ Parser:
            - '/usr/lib/NetworkManager/nm-dhcp-client.action'
            - '/usr/lib/NetworkManager/nm-dhcp-helper'
            - '/usr/lib/connman/scripts/dhclient-script'
+           - '/usr/lib/snapd/snap-confine//mount-namespace-capture-helper'
+           - '/usr/bin/lxc-start'
+           - '/usr/bin/man'
+           - '/usr/lib/snapd/snap-confine'
+           - '/usr/sbin/tcpdump'
            - 'man_filter'
            - 'man_groff'
-           - '/usr/lib/snapd/snap-confine//mount-namespace-capture-helper'
+           - '/sbin/dhclient'
 
        - id: optional_key_ADDRESS
          type: IpAddressDataModelElement
@@ -633,11 +822,22 @@ Parser:
          name: 'optional_key__SYSTEMD_OWNER_UID'
 
        - id: optional_key_USER_UNIT
-         type: DecimalIntegerValueModelElement
+         type: FixedWordlistDataModelElement
          name: 'optional_key_USER_UNIT'
+         args:
+           - 'gpg-agent-ssh.socket'
+           - 'gpg-agent-browser.socket'
+           - 'gpg-agent-extra.socket'
+           - 'paths.target'
+           - 'dirmngr.socket'
+           - 'gpg-agent.socket'
+           - 'sockets.target'
+           - 'basic.target'
+           - 'default.target'
+           - 'timers.target'
 
        - id: optional_key_USER_INVOCATION_ID
-         type: DecimalIntegerValueModelElement
+         type: HexStringModelElement
          name: 'optional_key_USER_INVOCATION_ID'
 
        - id: optional_key__SYSTEMD_USER_SLICE
@@ -651,6 +851,7 @@ Parser:
          name: 'optional_key__SYSTEMD_USER_UNIT'
          args:
            - 'init.scope'
+           - 'cloud-config.service'
 
        - id: optional_key__SYSTEMD_SESSION
          type: DecimalIntegerValueModelElement
@@ -746,4 +947,4 @@ Input:
 EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
-
+Core.PersistencePeriod: 1

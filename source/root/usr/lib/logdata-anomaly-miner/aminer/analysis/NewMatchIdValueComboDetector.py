@@ -34,6 +34,8 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
     Paths need to be found in log atoms with the same id value in a specific path.
     """
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, min_allowed_time_diff,
                  persistence_id='Default', allow_missing_values_flag=False, auto_include_flag=False, output_log_line=True):
         """
@@ -64,7 +66,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         self.log_new_learned_values = []
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.load_persistence_data()
         PersistenceUtil.add_persistable_component(self)
 
@@ -167,9 +169,6 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 self.known_values.append(id_dict_entry)
                 self.log_learned_path_value_combos += 1
                 self.log_new_learned_values.append(id_dict_entry)
-                if self.next_persist_time is None:
-                    self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                        KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
             analysis_component = {'AffectedLogAtomValues': [str(i) for i in list(id_dict_entry.values())]}
             event_data = {'AnalysisComponent': analysis_component}
@@ -187,28 +186,21 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.known_values)
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):

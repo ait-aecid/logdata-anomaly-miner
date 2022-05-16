@@ -19,8 +19,10 @@ import copy
 import numpy as np
 import logging
 import os
+import time
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, KEY_PERSISTENCE_PERIOD,\
+    DEFAULT_PERSISTENCE_PERIOD
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import PersistenceUtil
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -29,6 +31,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """This class creates events if event or value occurrence counts are outliers in PCA space."""
+
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size, min_anomaly_score, min_variance, num_windows,
                  persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
@@ -53,9 +57,9 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
-        self.next_persist_time = None
         self.output_log_line = output_log_line
         self.aminer_config = aminer_config
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
         self.block_time = window_size
         self.anomaly_score_threshold = min_anomaly_score
@@ -298,30 +302,22 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for value in events:
                 events[value] = 0
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = 600
-
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         if self.auto_include_flag is True:
             PersistenceUtil.store_json(self.persistence_file_name, list(self.event_count_matrix))
-        self.next_persist_time = None
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """

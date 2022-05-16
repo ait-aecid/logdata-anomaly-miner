@@ -48,7 +48,8 @@ class DebugModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         match_element = debug_model_element.get_match_element(self.path, match_context)
         self.assertEqual(
-            output.getvalue(), 'DebugModelElement path = "%s", unmatched = "%s"\n' % (match_element.get_path(), match_context.match_data))
+            output.getvalue(), 'DebugModelElement path = "%s", unmatched = "%s"\n' % (match_element.get_path(), repr(
+                match_context.match_data)))
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, b"", b"", None)
 
         output.seek(0)
@@ -58,7 +59,8 @@ class DebugModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         match_element = debug_model_element.get_match_element(self.path, match_context)
         self.assertEqual(
-            output.getvalue(), 'DebugModelElement path = "%s", unmatched = "%s"\n' % (match_element.get_path(), match_context.match_data))
+            output.getvalue(), 'DebugModelElement path = "%s", unmatched = "%s"\n' % (match_element.get_path(), repr(
+                match_context.match_data)))
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, b"", b"", None)
 
         sys.stderr = old_stderr

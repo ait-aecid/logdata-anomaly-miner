@@ -12,13 +12,13 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
 import os
 import logging
 import sys
+import time
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX,\
+    KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
@@ -29,6 +29,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when minimal transition times between states (e.g. value combinations of stated paths) are undercut."""
+
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, path_list=None, id_path_list=None, ignore_list=None, allow_missing_id=False,
                  num_log_lines_solidify_matrix=100, time_output_threshold=0, anomaly_threshold=0.05, persistence_id='Default',
@@ -71,7 +73,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.persistence_id = persistence_id
         self.auto_include_flag = auto_include_flag
         self.output_log_line = output_log_line
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         # Test if both path_list and id_path_list are not empty
         if [] in (self.path_list, self.id_path_list):
@@ -160,7 +162,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             if self.last_value[id_tuple] == event_value:
                 self.last_time[id_tuple] = log_atom.atom_time
                 return True
-            if log_atom.atom_time - self.last_time[id_tuple] <= 0:
+            if log_atom.atom_time - self.last_time[id_tuple] < 0:
                 additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
                                           'AffectedIdValues': list(id_tuple), 'PreviousTime': self.last_time[id_tuple],
                                           'NewTime': log_atom.atom_time}
@@ -293,22 +295,16 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
 
             old_pairs = new_pairs
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
-            return 600
+            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
-            delta = 600
+            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
@@ -321,7 +317,6 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         persist_data.append(keys_1)
         persist_data.append(keys_2)
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
@@ -341,6 +336,186 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
         return 'Allowlisted path %s.' % event_data
+
+    def print_persistency_event(self, event_type, event_data):
+        """
+        Prints the persistency of component_name. Event_data specifies what information is outputed.
+        @return a message with information about the persistency.
+        @throws Exception when the output for the event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Query if event_data has one of the stated formats
+        if not (isinstance(event_data, list) and len(event_data) <= 2 and (
+                    (len(event_data) == 2 and isinstance(event_data[0], list) and isinstance(event_data[1], list) and
+                     len(event_data[0]) == len(self.path_list) and len(event_data[1]) == len(self.path_list) and
+                     all(isinstance(value, str) for value in event_data[0]) and all(isinstance(value, str) for value in event_data[1])) or (
+                     len(event_data) == 1 and isinstance(event_data[0], list) and len(event_data[0]) == len(self.path_list) and
+                     all(isinstance(value, str) for value in event_data[0])) or len(event_data) == 0)):
+            msg = 'Event_data has the wrong format.' \
+                'The supported formats are [], [path_value_list] [path_value_list_1, path_value_list_2], ' \
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Convert path value lists to tuples
+        for i in range(len(event_data)):
+            event_data[i] = tuple(event_data[i])
+
+        if len(event_data) == 0:
+            # Print the set of all appeared path values if no event_data is given
+            values_set = set(self.time_matrix.keys())
+            for value in list(values_set):
+                for value_2 in self.time_matrix[value]:
+                    values_set.add(value_2)
+
+            string = 'Persistency includes transition times to the following path values: %s' % list(values_set)
+        elif len(event_data) == 1:
+            # Print the set of all path values which have a transition time to the path value specified in event_data
+            # Check if the path value has an entry in self.time_matrix
+            if event_data[0] in self.time_matrix:
+                values_set = set(self.time_matrix[event_data[0]].keys())
+            else:
+                values_set = set()
+
+            # Check if key values in self.time_matrix contain the path value of event_data
+            for value in list(self.time_matrix.keys()):
+                if event_data[0] in self.time_matrix[value]:
+                    values_set.add(value)
+
+            # Set output string
+            if len(values_set) > 0:
+                string = 'Persistency includes transition times from %s to the following path values: %s' % (
+                        event_data[0], list(values_set))
+            else:
+                string = 'Persistency includes no transition time from %s.' % event_data[0]
+        else:
+            # Print the transition time
+            # Check in which order the event_values appear in the time matrix
+            event_value_1 = None
+            event_value_2 = None
+
+            if event_data[0] in self.time_matrix and event_data[1] in self.time_matrix[event_data[0]]:
+                event_value_1 = event_data[0]
+                event_value_2 = event_data[1]
+            elif event_data[1] in self.time_matrix and event_data[0] in self.time_matrix[event_data[1]]:
+                event_value_1 = event_data[1]
+                event_value_2 = event_data[0]
+
+            # Set output string
+            if event_value_1 is None:
+                string = 'No transition time for %s - %s.' % (list(event_data[0]), list(event_data[1]))
+            else:
+                string = 'Transition time %s - %s: %s.' % (list(event_data[0]), list(event_data[1]),
+                                                           self.time_matrix[event_value_1][event_value_2])
+
+        return string
+
+    def add_to_persistency_event(self, event_type, event_data):
+        """
+        Add or overwrite the information of event_data to the persistency of component_name.
+        @return a message with information about the addition to the persistency.
+        @throws Exception when the addition of this special event using given event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Query if event_data has the stated format
+        if not (isinstance(event_data, list) and len(event_data) == 3 and isinstance(event_data[0], list) and
+                isinstance(event_data[1], list) and len(event_data[0]) == len(self.path_list) and
+                len(event_data[1]) == len(self.path_list) and all(isinstance(value, str) for value in event_data[0]) and
+                all(isinstance(value, str) for value in event_data[1]) and isinstance(event_data[2], (int, float))):
+            msg = 'Event_data has the wrong format.' \
+                'The supported format is [path_value_list_1, path_value_list_2, new_transition_time], ' \
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Convert path value lists to tuples
+        event_data[0] = tuple(event_data[0])
+        event_data[1] = tuple(event_data[1])
+
+        # Check in which order the event_values appear in the time matrix
+        event_value_1 = None
+        event_value_2 = None
+
+        if event_data[0] in self.time_matrix and event_data[1] in self.time_matrix[event_data[0]]:
+            event_value_1 = event_data[0]
+            event_value_2 = event_data[1]
+        elif event_data[1] in self.time_matrix and event_data[0] in self.time_matrix[event_data[1]]:
+            event_value_1 = event_data[1]
+            event_value_2 = event_data[0]
+
+        if event_value_1 is None:
+            # Initialize the entry in the time matrix
+            if event_data[0] not in self.time_matrix:
+                self.time_matrix[event_data[0]] = {}
+
+            self.time_matrix[event_data[0]][event_data[1]] = float(event_data[2])
+
+            return 'Added transition time: %s - %s, %s' % (list(event_data[0]), list(event_data[1]), float(event_data[2]))
+
+        old_transition_time = self.time_matrix[event_value_1][event_value_2]
+        self.time_matrix[event_value_1][event_value_2] = float(event_data[2])
+        return 'Changed transition time %s - %s from %s to %s' % (list(event_data[0]), list(event_data[1]), old_transition_time,
+                                                                  float(event_data[2]))
+
+    def remove_from_persistency_event(self, event_type, event_data):
+        """
+        Removes the information of event_data from the persistency of component_name.
+        @return a message with information about the removal from the persistency.
+        @throws Exception when the addition of this special event using given event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Query if event_data has the stated format
+        if not (len(event_data) == 2 and isinstance(event_data[0], list) and isinstance(event_data[1], list) and
+                len(event_data[0]) == len(self.path_list) and len(event_data[1]) == len(self.path_list) and
+                all(isinstance(value, str) for value in event_data[0]) and all(isinstance(value, str) for value in event_data[1])):
+            msg = 'Event_data has the wrong format.' \
+                'The supported format is [path_value_list_1, path_value_list_2], ' \
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Convert path value lists to tuples
+        event_data[0] = tuple(event_data[0])
+        event_data[1] = tuple(event_data[1])
+
+        # Check in which order the event_values appear in the time matrix
+        event_value_1 = None
+        event_value_2 = None
+
+        if event_data[0] in self.time_matrix and event_data[1] in self.time_matrix[event_data[0]]:
+            event_value_1 = event_data[0]
+            event_value_2 = event_data[1]
+        elif event_data[1] in self.time_matrix and event_data[0] in self.time_matrix[event_data[1]]:
+            event_value_1 = event_data[1]
+            event_value_2 = event_data[0]
+
+        # Check if the transition time between the path values exists
+        if event_value_1 is None:
+            string = 'Transition time for %s - %s does not exist and therefore could not be deleted.' % (
+                    list(event_data[0]), list(event_data[1]))
+        else:
+            # Delete the transition time
+            deleted_time = self.time_matrix[event_value_1].pop(event_value_2)
+
+            # Delete the entry to event_value_1 if it is empty
+            if self.time_matrix[event_value_1] == {}:
+                self.time_matrix.pop(event_value_1)
+
+            string = 'Deleted transition time %s - %s: %s.' % (list(event_data[0]), list(event_data[1]), deleted_time)
+
+        return string
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """

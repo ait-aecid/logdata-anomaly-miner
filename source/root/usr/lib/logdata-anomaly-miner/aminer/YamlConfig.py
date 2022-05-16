@@ -37,7 +37,7 @@ def load_yaml(config_file):
     import yaml
     from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
-    with open(config_file) as yamlfile:
+    with open(config_file) as yamlfile:  # skipcq: PTC-W6004
         try:
             yaml_data = yaml.safe_load(yamlfile)
             yamlfile.close()
@@ -155,7 +155,7 @@ def build_parsing_model():
             if 'args' in item:
                 if isinstance(item['args'], list):  # skipcq: PTC-W0048
                     for i, value in enumerate(item["args"]):
-                        if value == "WHITESPACE":
+                        if (isinstance(value, str) and value == "WHITESPACE") or (isinstance(value, bytes) and value == b"WHITESPACE"):
                             from aminer.parsing.FixedDataModelElement import FixedDataModelElement
                             sp = "sp%d" % ws_count
                             item["args"][i] = FixedDataModelElement(sp, b' ')
@@ -164,10 +164,11 @@ def build_parsing_model():
                         # encode string to bytearray
                         for j, val in enumerate(item['args']):
                             if isinstance(val, str):
-                                item['args'][j] = val.encode()
+                                item['args'][j] = val.encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r"). \
+                                    replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
                 else:
-                    if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and isinstance(
-                            item['args'], str):
+                    if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement') and \
+                            isinstance(item['args'], str):
                         item['args'] = item['args'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
                             replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
             if item['type'].name == 'ElementValueBranchModelElement':
@@ -257,10 +258,11 @@ def build_parsing_model():
             elif item['type'].name == 'JsonModelElement':
                 key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
                 if 'start' in item and item['start'] is True:
-                    start = item['type'].func(item['name'], key_parser_dict, item['optional_key_prefix'], item['allow_all_fields'])
+                    start = item['type'].func(
+                        item['name'], key_parser_dict, item['optional_key_prefix'], item['nullable_key_prefix'], item['allow_all_fields'])
                 else:
                     parser_model_dict[item['id']] = item['type'].func(
-                        item['name'], key_parser_dict, item['optional_key_prefix'], item['allow_all_fields'])
+                        item['name'], key_parser_dict, item['optional_key_prefix'], item['nullable_key_prefix'], item['allow_all_fields'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -336,11 +338,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
         for item in yaml_data['Analysis']:
             if item['type'].name in ('SimpleUnparsedAtomHandler', 'VerboseUnparsedAtomHandler'):
                 has_unparsed_handler = True
-                index = yaml_data['Analysis'].index(item)
-                new_analysis_list = [item]
-                del yaml_data['Analysis'][index]
-                new_analysis_list += yaml_data['Analysis']
-                yaml_data['Analysis'] = new_analysis_list
+                # make room for the UnparsedAtomHandler.
+                atom_filter.add_handler(None, True)
                 break
         for item in yaml_data['Analysis']:
             if item['type'].name == 'NewMatchPathDetector':
@@ -452,8 +451,11 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
-                                    confidence_factor=item['confidence_factor'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    num_windows=item['num_windows'], confidence_factor=item['confidence_factor'],
+                                    empty_window_warnings=item['empty_window_warnings'],
+                                    early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'],
+                                    set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
+                                    auto_include_flag=learn, output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
@@ -558,7 +560,20 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 if item['type'].name == 'EventGenerationMatchAction':
                     tmp_analyser = func(item['event_type'], item['event_message'], anomaly_event_handlers)
                 elif item['type'].name == 'AtomFilterMatchAction':
-                    tmp_analyser = func(atom_filter, stop_when_handled_flag=item['stop_when_handled_flag'])
+                    if 'subhandler_list' in item:
+                        tmp_analyser = func([analysis_context.get_component_by_name(component) for component in item['subhandler_list']],
+                                            stop_when_handled_flag=item['stop_when_handled_flag'])
+                        if item['delete_components']:
+                            for component_name in item['subhandler_list']:
+                                component = analysis_context.get_component_by_name(component_name)
+                                for i, val in enumerate(atom_filter.subhandler_list):
+                                    if val[0] == component:
+                                        del atom_filter.subhandler_list[i]
+                                        break
+
+                    else:
+                        tmp_analyser = func([handler for handler, stop_when_handled_flag in atom_filter.subhandler_list],
+                                            stop_when_handled_flag=item['stop_when_handled_flag'])
                 match_action_dict[comp_name] = tmp_analyser
                 continue
             elif 'MatchRule' in item['type'].name:
@@ -726,9 +741,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_updates_until_var_reduction=item['num_updates_until_var_reduction'],
                     var_reduction_thres=item['var_reduction_thres'], num_skipped_ind_for_weights=item['num_skipped_ind_for_weights'],
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
-                    use_empiric_distr=item['use_empiric_distr'], save_statistics=item['save_statistics'],
-                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'], constraint_list=item['constraint_list'],
-                    auto_include_flag=learn)
+                    use_empiric_distr=item['use_empiric_distr'], used_range_test=item['used_range_test'], range_alpha=item['range_alpha'],
+                    range_threshold=item['range_threshold'], range_limits_factor=item['range_limits_factor'],
+                    num_reinit_range=item['num_reinit_range'], dw_alpha=item['dw_alpha'], output_log_line=item['output_logline'],
+                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'], auto_include_flag=learn)
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -799,14 +815,16 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
                     num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
                     time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
-            elif item["type"].name == "VerboseUnparsedAtomHandler":
+            elif item["type"].name in ("VerboseUnparsedAtomHandler", "SimpleUnparsedAtomHandler"):
                 has_unparsed_handler = True
                 stop_when_handled_flag = True
-                tmp_analyser = func(anomaly_event_handlers, parsing_model)
-            elif item["type"].name == "SimpleUnparsedAtomHandler":
-                has_unparsed_handler = True
-                stop_when_handled_flag = True
-                tmp_analyser = func(anomaly_event_handlers)
+                if item["type"].name == "VerboseUnparsedAtomHandler":
+                    tmp_analyser = func(anomaly_event_handlers, parsing_model)
+                else:
+                    tmp_analyser = func(anomaly_event_handlers)
+                analysis_context.register_component(tmp_analyser, component_name=comp_name)
+                atom_filter.subhandler_list[0] = (tmp_analyser, stop_when_handled_flag)
+                continue
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
             if item['output_event_handlers'] is not None:
@@ -931,7 +949,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
             for val in value:
                 if isinstance(val, dict):
                     key_parser_dict[key].append(parse_json_yaml(val, parser_model_dict))
-                elif val in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
+                elif val in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "NULL_OBJECT"):
                     if len(value) > 1 and val == "ALLOW_ALL":
                         msg = "ALLOW_ALL must not be combined with other parsers in lists."
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -943,7 +961,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
                     raise ValueError(msg)
                 else:
                     key_parser_dict[key].append(parser_model_dict.get(val))
-        elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT"):
+        elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "NULL_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
             msg = 'The parser model %s does not exist!' % value

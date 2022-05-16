@@ -1,4 +1,3 @@
-import sys
 import unittest
 from aminer.analysis.ValueRangeDetector import ValueRangeDetector
 from aminer.input.LogAtom import LogAtom

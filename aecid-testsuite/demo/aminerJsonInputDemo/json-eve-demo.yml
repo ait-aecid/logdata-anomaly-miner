@@ -207,11 +207,17 @@ Parser:
            - 'image/vnd.microsoft.icon'
            - 'application/json'
            - 'image/gif'
+           - 'audio/x-wav'
 
        - id: http_refer_base_url
          type: FixedDataModelElement
          name: 'http_refer_base_url'
          args: 'http://mail.spiral.com/'
+
+       - id: optional_http_refer_base_url
+         type: OptionalMatchModelElement
+         name: 'optional_http_refer_base_url'
+         args: http_refer_base_url
 
        - id: _http_refer
          type: SequenceModelElement
@@ -240,7 +246,7 @@ Parser:
          type: SequenceModelElement
          name: '_redirect'
          args:
-           - http_refer_base_url
+           - optional_http_refer_base_url
            - url
 
        - id: length
@@ -253,6 +259,8 @@ Parser:
          args:
            - 'http'
            - 'failed'
+           - 'dns'
+           - 'tls'
 
        - id: _app_proto_tc
          type: FixedDataModelElement
@@ -981,4 +989,3 @@ Input:
 EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
-

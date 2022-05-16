@@ -13,9 +13,8 @@ sudo chmod +x demo/aminer/aminerDemo.sh
 sudo ./demo/aminer/aminerDemo.sh > /dev/null 2> $ERR
 exit_code=$?
 
-OUTPUT=$(cat $ERR)
-if grep -Fq "Traceback" $ERR; then
-	exit_code=1
+if `grep -Fq "Traceback" $ERR` || `grep -Fq "{'Parser'" $ERR` || `grep -Fq "FATAL" $ERR` || `grep -Fq "Config-Error" $ERR`; then
+  exit_code=1
 fi
 cat $ERR
 

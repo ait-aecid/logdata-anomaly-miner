@@ -1,5 +1,5 @@
 sudo cp demo/aminerRemoteControl/demo-config.py /tmp/demo-config.py
-echo "config_properties['Core.PersistencePeriod'] = 5" | sudo tee -a /tmp/demo-config.py > /dev/null
+echo "config_properties['Core.PersistencePeriod'] = 10" | sudo tee -a /tmp/demo-config.py > /dev/null
 sudo chown aminer:aminer /tmp/demo-config.py 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir /tmp/lib 2> /dev/null
@@ -21,8 +21,9 @@ SUSPEND_FILE=/tmp/suspend_output.txt
 SUSPEND_FILE_MD5=/tmp/suspend.md5
 
 sudo aminer --config "$FILE" > $SUSPEND_FILE &
+PID=$!
 
-sleep 2
+sleep 5
 
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
 echo "User username logged in" >> /tmp/syslog
@@ -76,9 +77,11 @@ if [[ $activate_diff == "" ]]; then
 fi
 
 sudo pkill -x aminer
-KILL_PID=$!
 sleep 3
-wait $KILL_PID
+wait $PID
+if [[ $? != 0 ]]; then
+	exit_code=1
+fi
 
 sudo rm /tmp/demo-config.py
 sudo rm /tmp/suspend_output.txt

@@ -129,8 +129,8 @@ def secure_open_file(file_name, flags):
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
-    global base_dir_path  # skipcq: PYL-W0603
-    global base_dir_fd  # skipcq: PYL-W0603
+    global base_dir_path  # skipcq: PYL-W0603, PYL-W0602
+    global base_dir_fd  # skipcq: PYL-W0603, PYL-W0602
     if base_dir_path is not None:
         if file_name.startswith(base_dir_path):
             base_name = file_name.replace(base_dir_path, b'').lstrip(b'/')

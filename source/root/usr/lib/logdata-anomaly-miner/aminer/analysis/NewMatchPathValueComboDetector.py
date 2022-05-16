@@ -30,6 +30,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
     """This class creates events when a new value combination for a given list of match data pathes were found."""
 
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
                  auto_include_flag=False, output_log_line=True):
         """
@@ -54,7 +56,8 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         self.log_new_learned_values = []
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        self.next_persist_time = None
+        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+            KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.known_values_set = set()
         self.load_persistence_data()
         PersistenceUtil.add_persistable_component(self)
@@ -102,9 +105,6 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                 self.known_values_set.add(match_value_tuple)
                 self.log_learned_path_value_combos += 1
                 self.log_new_learned_values.append(match_value_tuple)
-                if self.next_persist_time is None:
-                    self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                        KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values}
             event_data = {'AnalysisComponent': analysis_component}
@@ -113,54 +113,28 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-            if self.output_log_line:
-                match_paths_values = {}
-                for match_path, match_element in match_dict.items():
-                    if isinstance(match_element, list):
-                        match_value = []
-                        for match in match_element:
-                            if isinstance(match.match_object, bytes):
-                                match_value.append(match.match_object.decode(AminerConfig.ENCODING))
-                            else:
-                                match_value.append(match.match_object)
-                    else:
-                        match_value = match_element.match_object
-                        if isinstance(match_value, bytes):
-                            match_value = match_value.decode(AminerConfig.ENCODING)
-                    match_paths_values[match_path] = match_value
-                analysis_component['ParsedLogAtom'] = match_paths_values
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + str(
-                    match_value_tuple) + os.linesep + original_log_line_prefix + data]
-            else:
-                sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + data]
+            sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + data]
             for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
         self.log_success += 1
         return True
 
-    def get_time_trigger_class(self):  # skipcq: PYL-R0201
-        """
-        Get the trigger class this component should be registered for.
-        This trigger is used only for persistence, so real-time triggering is needed.
-        """
-        return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
     def do_timer(self, trigger_time):
-        """Check current ruleset should be persisted."""
+        """Check if current ruleset should be persisted."""
         if self.next_persist_time is None:
             return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         delta = self.next_persist_time - trigger_time
-        if delta < 0:
+        if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = time.time() + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
-        self.next_persist_time = None
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
@@ -179,6 +153,41 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             raise Exception(msg)
         self.known_values_set.add(event_data)
         return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)
+
+    def add_to_persistency_event(self, event_type, event_data):
+        """
+        Add or overwrite the information of event_data to the persistency of component_name.
+        @return a message with information about the addition to the persistency.
+        @throws Exception when the addition of this special event using given event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+        if not isinstance(event_data, list) or len(event_data) != len(self.target_path_list):
+            msg = 'Event_data has the wrong format.' \
+                'The supported format is [value_1, value_2, ..., value_n] where n is the number of analyzed paths.'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        match_value_list = []
+        for match_element in event_data:
+            if match_element is None:
+                if not self.allow_missing_values_flag:
+                    msg = 'Empty entry detected in event_data.' \
+                        'Please fill entry or set parameter allow_missing_values_flag to true.'
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise Exception(msg)
+                match_value_list.append(None)
+            else:
+                match_value_list.append(bytes(match_element, 'utf-8'))
+
+        match_value_tuple = tuple(match_value_list)
+        if match_value_tuple not in self.known_values_set:
+            self.known_values_set.add(match_value_tuple)
+            self.log_learned_path_value_combos += 1
+            self.log_new_learned_values.append(match_value_tuple)
+        return 'Added values [%s] of paths [%s] to the persistency.' % (', '.join(event_data), ', '.join(self.target_path_list))
 
     def log_statistics(self, component_name):
         """
