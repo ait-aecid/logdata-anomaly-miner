@@ -137,11 +137,13 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
                     try:
                         if not self.build_sum_over_values:
-                            model = ARIMA(self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
+                            model = ARIMA(
+                                    self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                     order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                             self.arima_models[event_index] = model.fit()
                         else:
-                            model = ARIMA([sum(self.time_window_history[event_index][
+                            model = ARIMA(
+                                    [sum(self.time_window_history[event_index][
                                     -self.num_periods_tsa_ini*self.num_division_time_step+i:
                                     -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
                                     range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
@@ -308,7 +310,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if not self.build_sum_over_values:
                     # Add the arima_model to the list
                     try:
-                        model = ARIMA(self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
+                        model = ARIMA(
+                                self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models[event_index] = model.fit()
                     except:  # skipcq FLK-E722
@@ -316,7 +319,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     # Add the arima_model to the list
                     try:
-                        model = ARIMA([sum(self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step+i:
+                        model = ARIMA(
+                                [sum(self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step+i:
                                 -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
                                 range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
                                 sum(self.time_window_history[event_index][-self.num_division_time_step:])],
