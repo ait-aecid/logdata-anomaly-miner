@@ -25,8 +25,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 from aminer.util import PersistenceUtil
 
 import numpy as np
-import statsmodels
-import statsmodels.api as sm
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.stattools import acf
 from scipy.signal import savgol_filter
 
 
@@ -163,12 +163,12 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
                     try:
                         if not self.build_sum_over_values:
-                            model = statsmodels.tsa.arima.model.ARIMA(
+                            model = ARIMA(
                                     self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                     order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                             self.arima_models[event_index] = model.fit()
                         else:
-                            model = statsmodels.tsa.arima.model.ARIMA([sum(self.time_window_history[event_index][
+                            model = ARIMA([sum(self.time_window_history[event_index][
                                     -self.num_periods_tsa_ini*self.num_division_time_step+i:
                                     -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
                                     range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
@@ -262,7 +262,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     time_step_list.append(-1)
                 else:
                     # Apply the autocorrelation function to the data of the single event types.
-                    corr = list(map(abs, sm.tsa.acf(data, nlags=len(data), fft=True)))
+                    corr = list(map(abs, acf(data, nlags=len(data), fft=True)))
                     corr = np.array(corr)
                     # Apply the Savitzky-Golay-Filter to the list corr, to smooth the curve and get better results
                     corrfit = savgol_filter(corr, min(max(3, int(len(corr)/100)-int(int(len(corr)/100) % 2 == 0)), 101), 1)
@@ -302,7 +302,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Print a message of the length of the time steps
         message = 'Calculated the periods for the single event types in seconds: %s' % [
                 time_step * self.num_division_time_step if time_step != -1 else 'None' for time_step in time_step_list]
-        affected_path = None
+        affected_path = []
         self.print(message, log_atom, affected_path)
 
         return time_step_list
@@ -340,7 +340,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if not self.build_sum_over_values:
                     # Add the arima_model to the list
                     try:
-                        model = statsmodels.tsa.arima.model.ARIMA(
+                        model = ARIMA(
                                 self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models[event_index] = model.fit()
@@ -349,7 +349,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     # Add the arima_model to the list
                     try:
-                        model = statsmodels.tsa.arima.model.ARIMA([sum(self.time_window_history[event_index][
+                        model = ARIMA([sum(self.time_window_history[event_index][
                                 -self.num_periods_tsa_ini*self.num_division_time_step+i:
                                 -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
                                 range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
