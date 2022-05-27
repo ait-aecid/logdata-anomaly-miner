@@ -31,7 +31,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list, target_path_list=None, persistence_id='Default',
-                 auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None):
+                 auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None, stop_learning_time=None,
+                 stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -39,12 +40,14 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         @param id_path_list to specify group identifiers for which numeric ranges should be learned.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
         are considered for value range generation.
-        @param persistence_id name of persistency document.
+        @param persistence_id name of persistence document.
         @param auto_include_flag specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
         omitted.
-        @param constrain_list list of paths that have to be present in the log atom to be analyzed.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
+        @param stop_learning_time switch the auto_include_flag to False after the time.
+        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -68,6 +71,30 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         self.ranges_min = {}
         self.ranges_max = {}
 
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+
         # Persisted data consists of min and max values for each identifier, i.e.,
         # [["min", [<id1, id2, ...>], <min_value>], ["max", [<id1, id2, ...>], <max_value>]]
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -81,6 +108,10 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         """Receive a log atom from a source."""
         self.log_total += 1
         parser_match = log_atom.parser_match
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
 
         # Skip atom when ignore paths in atom or constraint paths not in atom.
         all_paths_set = set(parser_match.get_match_dictionary().keys())
@@ -158,6 +189,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
                 self.ranges_max[id_event] = max(self.ranges_max[id_event], max(values))
             else:
                 self.ranges_max[id_event] = max(values)
+            if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
         self.log_success += 1
 
     def do_timer(self, trigger_time):

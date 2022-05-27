@@ -43,7 +43,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
-                 auto_include_flag=True, ignore_list=None, persistence_id='Default', output_log_line=True, constraint_list=None):
+                 auto_include_flag=True, ignore_list=None, persistence_id='Default', output_log_line=True, constraint_list=None,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -66,7 +67,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param auto_include_flag specifies whether new hypotheses are generated.
         @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
-        @param persistence_id name of persitency document.
+        @param persistence_id name of persistence document.
+        @param stop_learning_time switch the auto_include_flag to False after the time.
+        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.anomaly_event_handlers = anomaly_event_handlers
         self.paths = paths
@@ -117,6 +120,30 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.aminer_config = aminer_config
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.output_log_line = output_log_line
+
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         self.log_success = 0
         self.log_total = 0
@@ -188,10 +215,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         self.log_total += 1
-        timestamp = log_atom.get_timestamp()
-        if timestamp is None:
+        if log_atom.get_timestamp() is None:
             log_atom.atom_time = time.time()
-            timestamp = log_atom.atom_time
+
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
 
         parser_match = log_atom.parser_match
         self.total_records += 1
@@ -626,6 +656,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             else:
                                 self.forward_hypotheses_inv[log_event] = [implication]
                             self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses + 1
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
             # Periodically remove old or unstable hypotheses.
             if log_atom.atom_time >= self.last_hypotheses_eval_timestamp + self.hypotheses_eval_delta_time:
