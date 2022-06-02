@@ -25,8 +25,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 from aminer.util import PersistenceUtil
 
 import numpy as np
-import statsmodels
-import statsmodels.api as sm
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.stattools import acf
 from scipy.signal import savgol_filter
 
 
@@ -40,7 +40,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                  num_division_time_step=10, alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05,
                  acf_threshold=0.2, round_time_inteval_threshold=0.02, force_period_length=False, set_period_length=604800,
                  min_log_lines_per_time_step=10, persistence_id='Default', path_list=None, ignore_list=None, output_log_line=True,
-                 auto_include_flag=True):
+                 auto_include_flag=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -72,6 +72,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         omitted. The default value is [] as None is not iterable.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
+        @param stop_learning_time switch the auto_include_flag to False after the time.
+        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.aminer_config = aminer_config
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
@@ -127,6 +129,30 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+
         # Import the persistence
         if persistence_data is not None:
             self.time_window_history = persistence_data[0]
@@ -137,12 +163,12 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
                     try:
                         if not self.build_sum_over_values:
-                            model = statsmodels.tsa.arima.model.ARIMA(
+                            model = ARIMA(
                                     self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                     order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                             self.arima_models[event_index] = model.fit()
                         else:
-                            model = statsmodels.tsa.arima.model.ARIMA([sum(self.time_window_history[event_index][
+                            model = ARIMA([sum(self.time_window_history[event_index][
                                     -self.num_periods_tsa_ini*self.num_division_time_step+i:
                                     -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
                                     range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
@@ -192,11 +218,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistence_data = []
-        persistence_data.append(self.time_window_history)
-        persistence_data.append(self.prediction_history)
-        persistence_data.append(self.time_history)
-        persistence_data.append(self.result_list)
+        persistence_data = [self.time_window_history, self.prediction_history, self.time_history, self.result_list]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
@@ -240,7 +262,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     time_step_list.append(-1)
                 else:
                     # Apply the autocorrelation function to the data of the single event types.
-                    corr = list(map(abs, sm.tsa.acf(data, nlags=len(data), fft=True)))
+                    corr = list(map(abs, acf(data, nlags=len(data), fft=True)))
                     corr = np.array(corr)
                     # Apply the Savitzky-Golay-Filter to the list corr, to smooth the curve and get better results
                     corrfit = savgol_filter(corr, min(max(3, int(len(corr)/100)-int(int(len(corr)/100) % 2 == 0)), 101), 1)
@@ -280,13 +302,18 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Print a message of the length of the time steps
         message = 'Calculated the periods for the single event types in seconds: %s' % [
                 time_step * self.num_division_time_step if time_step != -1 else 'None' for time_step in time_step_list]
-        affected_path = None
+        affected_path = []
         self.print(message, log_atom, affected_path)
 
         return time_step_list
 
     def test_num_appearance(self, event_index, count, current_time, log_atom):
         """This function makes a one step prediction and raises an alert if the count do not match the expected appearance"""
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
+
         # Append the list of time_window_history and arima_models if it is to short
         if len(self.time_window_history) <= event_index:
             self.time_window_history += [[] for _ in range(event_index + 1 - len(self.time_window_history))]
@@ -298,7 +325,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Initialize the arima_model if needed
         if self.auto_include_flag and self.arima_models[event_index] is None:
 
-            # Add the new count to the history and shorten it, if neccessary
+            # Add the new count to the history and shorten it, if necessary
             self.time_window_history[event_index].append(count)
             if len(self.time_window_history[event_index]) > 2 * self.num_periods_tsa_ini * self.num_division_time_step:
                 self.time_window_history[event_index] = self.time_window_history[event_index][
@@ -313,7 +340,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if not self.build_sum_over_values:
                     # Add the arima_model to the list
                     try:
-                        model = statsmodels.tsa.arima.model.ARIMA(
+                        model = ARIMA(
                                 self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models[event_index] = model.fit()
@@ -322,7 +349,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     # Add the arima_model to the list
                     try:
-                        model = statsmodels.tsa.arima.model.ARIMA([sum(self.time_window_history[event_index][
+                        model = ARIMA([sum(self.time_window_history[event_index][
                                 -self.num_periods_tsa_ini*self.num_division_time_step+i:
                                 -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
                                 range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
@@ -332,6 +359,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     except:  # skipcq FLK-E722
                         self.arima_models[event_index] = None
                         self.time_window_history[event_index] = []
+            if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
         # Add the new value and make a one step prediction
         elif self.arima_models[event_index] is not None:
             if not self.build_sum_over_values:
@@ -389,6 +418,9 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Discard the trained model and reset the result_list
                     self.arima_models[event_index] = None
                     self.result_list[event_index] = [1]*self.num_results_bt
+
+                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
                 else:
                     # Update the model
                     self.arima_models[event_index] = self.arima_models[event_index].append([count])

@@ -36,10 +36,13 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
-                 default_interval=3600, realert_interval=86400, output_log_line=True):
+                 default_interval=3600, realert_interval=86400, output_log_line=True, stop_learning_time=None,
+                 stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list to extract a source identification value from each logatom.
+        @param stop_learning_time switch the auto_include_flag to False after the time.
+        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -59,6 +62,30 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.log_total = 0
         self.log_learned_values = 0
         self.log_new_learned_values = []
+
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -88,6 +115,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         at each source implementation sending LogAtoms.
         """
         self.log_total += 1
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
+
         value = self.get_channel_key(log_atom)
         if value is None:
             return False
@@ -110,6 +142,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
             self.log_learned_values += 1
             self.log_new_learned_values.append(value)
+            if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
         self.check_timeouts(timestamp, log_atom)
         self.log_success += 1

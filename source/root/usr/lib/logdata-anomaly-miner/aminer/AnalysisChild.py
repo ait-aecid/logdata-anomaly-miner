@@ -197,6 +197,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     This class defines the child performing the complete analysis workflow.
     When splitting privileges between analysis and monitor  process, this class should only be initialized within the analysis process!
     """
+
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
     offline_mode = False
 
