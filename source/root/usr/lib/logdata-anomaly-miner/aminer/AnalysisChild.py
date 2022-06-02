@@ -32,6 +32,7 @@ from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY
     DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD,\
     DEFAULT_PERSISTENCE_PERIOD
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.input.LogStream import LogStream
 from aminer.util import PersistenceUtil
 from aminer.util import SecureOSFunctions
@@ -171,9 +172,9 @@ class AnalysisContext:
         logging.getLogger(DEBUG_LOG_NAME).debug("Started with build_analysis_pipeline.")
         self.aminer_config.build_analysis_pipeline(self)
 
-    def close_event_handler_streams(self, reopen=False):
+    def close_event_handler_streams(self, event_handlers, reopen=False):
         """Close the streams of all StreamPrinterEventHandlers."""
-        for event_handler in self.atomizer_factory.event_handler_list:
+        for event_handler in event_handlers:
             if isinstance(event_handler, StreamPrinterEventHandler):
                 # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
                 if event_handler.stream.name in ("<stdout>", "<stderr>"):
@@ -187,6 +188,8 @@ class AnalysisContext:
                     logging.getLogger(DEBUG_LOG_NAME).critical(msg)
                     print(msg, file=sys.stderr)
                     sys.exit(1)
+            elif isinstance(event_handler, JsonConverterHandler):
+                self.close_event_handler_streams(event_handler.json_event_handlers)
 
 
 suspended_flag = False
@@ -456,7 +459,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         PersistenceUtil.persist_all()
         for sock in self.tracked_fds_dict.values():
             sock.close()
-        self.analysis_context.close_event_handler_streams()
+        self.analysis_context.close_event_handler_streams(self.analysis_context.atomizer_factory.event_handler_list)
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):
