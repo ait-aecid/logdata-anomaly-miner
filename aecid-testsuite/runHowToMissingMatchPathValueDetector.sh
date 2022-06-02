@@ -62,10 +62,9 @@ CMD=${CMD#*$ }
 OLD_CFG_PATH=/${CMD#*/}
 AMINER_CMD="${CMD/"$OLD_CFG_PATH"/"$CFG_PATH"}"
 
-# $CMD > $OUT_AMINER &
 $AMINER_CMD > $OUT_AMINER &
 PID=$!
-sleep 8
+sleep 15
 
 # compare results (5.)
 IN=$(tail -n +2 $OUT)
@@ -121,7 +120,7 @@ cat <<EOT > $LOG
 ::1 - - [18/Jul/2020:20:28:13 +0000] "GET / HTTP/1.1" 200 11012 "-" "bob"
 EOT
 
-sleep 8
+sleep 15
 
 # compare results (11.)
 awk '/^```$/ && ++n == 20, /^```$/ && n++ == 21' < $INPUT_FILE | sed '/^```/ d' > $OUT
