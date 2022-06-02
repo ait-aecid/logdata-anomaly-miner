@@ -11,12 +11,13 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import time
 import os
 import logging
+import time
 
 from aminer import AminerConfig
-from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, CONFIG_KEY_LOG_LINE_PREFIX,\
+    DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
@@ -33,7 +34,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None,
                  allow_missing_values_flag=True, ignore_list=None, output_log_line=True, auto_include_flag=False,
-                 time_period_length=86400, max_time_diff=360, num_reduce_time_list=10):
+                 time_period_length=86400, max_time_diff=360, num_reduce_time_list=10, stop_learning_time=None,
+                 stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -52,6 +54,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param max_time_diff maximal time difference in seconds for new times. If the difference of the new time to all previous times is
         greater than max_time_diff the new time is considered an anomaly.
         @param num_reduce_time_list number of new time entries appended to the time list, before the list is being reduced.
+        @param stop_learning_time switch the auto_include_flag to False after the time.
+        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
@@ -74,6 +78,30 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Keys: Tuple of values of the paths of target_path_list, Entries: Counter of appended times to the time list since last reduction.
         self.counter_reduce_time_intervals = {}
 
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+
         # Loads the persistence
         self.persistence_id = persistence_id
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -91,6 +119,10 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         """
         if log_atom.atom_time is None:
             return False
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
 
         match_dict = log_atom.parser_match.get_match_dictionary()
         # Skip paths from ignore_list.
@@ -149,6 +181,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                     if not self.auto_include_flag:
                         return True
 
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
                 # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
                 self.insert_and_reduce_time_intervals(match_value_tuple, log_atom.atom_time % self.time_period_length)
 

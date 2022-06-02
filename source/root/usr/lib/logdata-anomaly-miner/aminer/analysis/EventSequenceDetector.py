@@ -36,7 +36,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list=None, target_path_list=None, seq_len=3, allow_missing_id=False,
                  timeout=-1, persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None,
-                 constraint_list=None):
+                 constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -48,12 +48,14 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         @param seq_len the length of the sequences to be learned (larger lengths increase precision, but may overfit the data).
         @param allow_missing_id specifies whether log atoms without id path should be omitted (only if id path is set).
         @param timeout maximum allowed seconds between two entries of sequence; sequence is split in subsequences if exceeded.
-        @param persistence_id name of persistency document.
+        @param persistence_id name of persistence document.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
-        @param constrain_list list of paths that have to be present in the log atom to be analyzed.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
+        @param stop_learning_time switch the auto_include_flag to False after the time.
+        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -82,6 +84,30 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.log_learned = 0
         self.log_learned_sequences = []
 
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
 
@@ -100,6 +126,10 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """Receive a log atom from a source."""
         parser_match = log_atom.parser_match
         self.log_total += 1
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
 
         # Skip paths from ignore list.
         for ignore_path in self.ignore_list:
@@ -192,6 +222,8 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 self.sequences.add(self.current_sequences[id_tuple])
                 self.log_learned += 1
                 self.log_learned_sequences.append(self.current_sequences[id_tuple])
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:

@@ -44,7 +44,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
                  used_multinomial_test='Chi', use_empiric_distr=True, used_range_test='MinMax', range_alpha=0.05, range_threshold=1,
                  num_reinit_range=100, range_limits_factor=1, dw_alpha=0.05, save_statistics=True, output_log_line=True, ignore_list=None,
-                 constraint_list=None, auto_include_flag=True):
+                 constraint_list=None, auto_include_flag=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.anomaly_event_handlers = anomaly_event_handlers
         self.aminer_config = aminer_config
@@ -382,6 +382,30 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values) + 500
 
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+
         # Loads the persistence
         self.persistence_id = persistence_id
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -429,6 +453,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         event_index = self.event_type_detector.current_index
         if event_index == -1:
             return False
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
 
         self.log_total += 1
 
@@ -909,6 +937,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             else:
                                 self.var_type_history_list_reference[event_index][var_index].append(sum(
                                         type_val[-self.num_var_type_hist_ref:]))
+                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
     def detect_var_type(self, event_index, var_index):
         """Give back the assumed variable type of the variable with the in self.event_type_detector stored values."""
@@ -1321,6 +1351,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.var_type[event_index][var_index][3] % self.num_reinit_range == 0:
                 self.var_type[event_index][var_index] = self.calculate_value_range(
                     self.event_type_detector.values[event_index][var_index][-self.num_update:])
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
         # Test and update for ascending values
         elif self.var_type[event_index][var_index][0] == 'asc':
@@ -1448,6 +1480,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 # Check if the discrete distribution has to be updated
                 if ((self.var_type[event_index][var_index][3] - self.num_init) % self.num_pause_discrete) == 0:
                     self.d_init_bt(event_index, var_index)
+
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
                 return
 
         # Test and update for static variables

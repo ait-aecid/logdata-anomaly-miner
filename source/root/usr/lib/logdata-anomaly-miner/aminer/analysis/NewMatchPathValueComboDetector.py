@@ -33,7 +33,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
-                 auto_include_flag=False, output_log_line=True):
+                 auto_include_flag=False, output_log_line=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
@@ -41,6 +41,8 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
+        @param stop_learning_time switch the auto_include_flag to False after the time.
+        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -54,6 +56,30 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         self.log_total = 0
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
+
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
@@ -77,6 +103,10 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         values were new or not.
         """
         self.log_total += 1
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
         match_dict = log_atom.parser_match.get_match_dictionary()
         match_value_list = []
         for target_path in self.target_path_list:
@@ -105,6 +135,8 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                 self.known_values_set.add(match_value_tuple)
                 self.log_learned_path_value_combos += 1
                 self.log_new_learned_values.append(match_value_tuple)
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values}
             event_data = {'AnalysisComponent': analysis_component}

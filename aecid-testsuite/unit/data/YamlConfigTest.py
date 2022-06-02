@@ -16,7 +16,6 @@ from aminer.analysis.MatchFilter import MatchFilter
 from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
 from aminer.analysis.MatchValueStreamWriter import MatchValueStreamWriter
 from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector
-from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
 from aminer.analysis.TimestampsUnsortedDetector import TimestampsUnsortedDetector
 from aminer.analysis.AllowlistViolationDetector import AllowlistViolationDetector
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
@@ -25,6 +24,7 @@ from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotific
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
 from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
@@ -32,6 +32,7 @@ from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.DateTimeModelElement import DateTimeModelElement
 from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
 from aminer.parsing.RepeatedElementDataModelElement import RepeatedElementDataModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.ElementValueBranchModelElement import ElementValueBranchModelElement
@@ -671,6 +672,60 @@ class YamlConfigTest(TestBase):
             self.assertEqual(msg, str(e))
         context = AnalysisContext(aminer_config)
         self.assertRaises(ValueError, context.build_analysis_pipeline)
+
+    def test30_parser_model_files(self):
+        """Test if parser models from conf-enabled work properly."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/main.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        pm = context.atomizer_factory.parsing_model
+        self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
+        self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
+        self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
+        self.assertEqual(context.atomizer_factory.default_timestamp_paths, [""])
+        self.assertTrue(isinstance(pm, FirstMatchModelElement))
+
+        # Sub1
+        self.assertTrue(isinstance(pm.children[0], SequenceModelElement))
+        self.assertTrue(isinstance(pm.children[0].children[0], FixedDataModelElement))
+        self.assertEqual(pm.children[0].children[0].element_id, "fix1")
+        self.assertTrue(isinstance(pm.children[0].children[1], DecimalIntegerValueModelElement))
+        self.assertEqual(pm.children[0].children[1].element_id, "decimal1")
+
+        # Sub2
+        self.assertTrue(isinstance(pm.children[1], SequenceModelElement))
+        self.assertTrue(isinstance(pm.children[1].children[0], DecimalIntegerValueModelElement))
+        self.assertEqual(pm.children[1].children[0].element_id, "decimal2")
+        self.assertTrue(isinstance(pm.children[1].children[1], FixedDataModelElement))
+        self.assertEqual(pm.children[1].children[1].element_id, "fix2")
+        self.assertTrue(isinstance(pm.children[1].children[2], DecimalFloatValueModelElement))
+        self.assertEqual(pm.children[1].children[2].element_id, "decimalFloat2")
+
+        # Sub2 - Sub3
+        self.assertTrue(isinstance(pm.children[1].children[3], FirstMatchModelElement))
+        self.assertTrue(isinstance(pm.children[1].children[3].children[0], SequenceModelElement))
+        self.assertTrue(isinstance(pm.children[1].children[3].children[0].children[0], FixedDataModelElement))
+        self.assertEqual(pm.children[1].children[3].children[0].children[0].element_id, "fix3")
+        self.assertTrue(isinstance(pm.children[1].children[3].children[0].children[1], DecimalFloatValueModelElement))
+        self.assertEqual(pm.children[1].children[3].children[0].children[1].element_id, "decimalFloat3")
+        self.assertTrue(isinstance(pm.children[1].children[3].children[1], AnyByteDataModelElement))
+        self.assertEqual(pm.children[1].children[3].children[1].element_id, "any3")
+
+        # Sub3
+        self.assertTrue(isinstance(pm.children[2], FirstMatchModelElement))
+        self.assertTrue(isinstance(pm.children[2].children[0], SequenceModelElement))
+        self.assertTrue(isinstance(pm.children[2].children[0].children[0], FixedDataModelElement))
+        self.assertEqual(pm.children[2].children[0].children[0].element_id, "fix3")
+        self.assertTrue(isinstance(pm.children[2].children[0].children[1], DecimalFloatValueModelElement))
+        self.assertEqual(pm.children[2].children[0].children[1].element_id, "decimalFloat3")
+        self.assertTrue(isinstance(pm.children[2].children[1], AnyByteDataModelElement))
+        self.assertEqual(pm.children[2].children[1].element_id, "any3")
+
+        # ApacheAccessModel
+        self.assertEqual(pm.children[3].element_id, "accesslog")
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""

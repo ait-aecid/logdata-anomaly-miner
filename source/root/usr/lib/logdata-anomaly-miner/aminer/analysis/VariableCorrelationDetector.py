@@ -30,7 +30,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  alpha_chisquare_test=0.05, max_dist_rule_distr=0.1, used_presel_meth=None, intersect_presel_meth=False,
                  percentage_random_cors=0.20, match_disc_vals_sim_tresh=0.7, exclude_due_distr_lower_limit=0.4,
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
-                 validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, auto_include_flag=True):
+                 validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, auto_include_flag=True, stop_learning_time=None,
+                 stop_learning_no_anomaly_time=None):
         """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
         self.aminer_config = aminer_config
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
@@ -176,6 +177,30 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.w_rel_confidences = []  # List for the confidences of the homogeneity tests
         self.log_atom = None
 
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+
         # Loads the persistence
         self.persistence_id = persistence_id
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -196,6 +221,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         event_index = self.event_type_detector.current_index
         if event_index == -1:
             return False
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
 
         parser_match = log_atom.parser_match
         for ignore_path in self.ignore_list:
@@ -214,6 +243,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
             if self.update_rules[event_index] and self.auto_include_flag:
                 self.validate_cor()  # Validate the correlations and removes the cors, which fail the requirements
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
             # Print the found correlations
             if 'Rel' in self.used_cor_meth:
@@ -681,6 +712,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     for j_val in failed_j_vals:
                         if j_val in self.rel_list[event_index][pos_var_cor_index][1]:
                             del self.rel_list[event_index][pos_var_cor_index][1][j_val]
+
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
             else:
                 # Only update the possible correlations which have been initialized and print warnings
@@ -1157,6 +1191,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 for i_val in self.w_rel_list[event_index][pos_var_cor_index][1][j_val]:
                                     self.w_rel_list[event_index][pos_var_cor_index][1][j_val][i_val] += current_appearance_list[
                                         pos_var_cor_index][1][j_val][i_val]
+
+                        if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                            self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
                     else:
                         # Print the rules, which failed the binomial test

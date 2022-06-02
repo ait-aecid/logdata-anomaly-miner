@@ -43,7 +43,7 @@ def get_model():
             return self.element_id
 
         @staticmethod
-        def get_child_elements():
+        def get_child_elements():  # skipcq: PYL-W0221
             """Get the children of this element (none)."""
             return None
 
