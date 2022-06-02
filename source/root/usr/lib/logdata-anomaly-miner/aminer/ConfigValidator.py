@@ -1,3 +1,7 @@
+import sys
+import os
+import logging
+
 from cerberus import Validator
 from cerberus import TypeDefinition
 
@@ -24,9 +28,56 @@ class ParserModelType:
             self.func = getattr(__import__(module, fromlist=[name]), name)
         else:
             self.is_model = False
-            # we need this import:
-            # skipcq: PTC-W0034
-            self.func = getattr(__import__(name), "get_model")
+            try:
+                self.func = __import__(name).get_model
+            except (AttributeError, ImportError) as e:
+                ymlext = ['.yml', '.YAML', '.YML', '.yaml']
+                module = None
+                for path in sys.path:
+                    for extension in ymlext:
+                        abs_path = os.path.join(path, name + extension)
+                        if os.path.exists(abs_path):
+                            module = abs_path
+                            break
+                if module is not None:
+                    import yaml
+                    import copy
+                    from aminer.AminerConfig import DEBUG_LOG_NAME
+                    from aminer.YamlConfig import filter_config_errors, build_parsing_model
+                    with open(module) as yamlfile:  # skipcq: PTC-W6004
+                        try:
+                            yaml_data = yaml.safe_load(yamlfile)
+                        except yaml.YAMLError as exception:
+                            logging.getLogger(DEBUG_LOG_NAME).error(exception)
+                            raise exception
+
+                    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.yml',
+                              'r') as sma:
+                        # skipcq: PYL-W0123
+                        parser_normalisation_schema = eval(sma.read())
+                    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.yml',
+                              'r') as sma:
+                        # skipcq: PYL-W0123
+                        parser_validation_schema = eval(sma.read())
+                    normalisation_schema = {**parser_normalisation_schema}
+                    validation_schema = {**parser_validation_schema}
+
+                    v = ConfigValidator(validation_schema)
+                    if not v.validate(yaml_data, validation_schema):
+                        filtered_errors = copy.deepcopy(v.errors)
+                        filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
+                    v = NormalisationValidator(normalisation_schema)
+                    if v.validate(yaml_data, normalisation_schema):
+                        test = v.normalized(yaml_data)
+                        yaml_data = test
+                    else:
+                        logging.getLogger(DEBUG_LOG_NAME).error(v.errors)
+                        raise ValueError(v.errors)
+                    self.func = build_parsing_model(yaml_data)
+                    if callable(self.func):
+                        self.func = self.func()
+                else:
+                    raise e
 
     def __str__(self):
         return self.name
