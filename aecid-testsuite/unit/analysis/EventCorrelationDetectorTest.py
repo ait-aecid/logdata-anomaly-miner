@@ -166,7 +166,7 @@ class EventCorrelationDetectorTest(TestBase):
         self.run_ecd_test(ecd, self.errored_data_diff1[:10000])
 
     def test7constraint_list(self):
-        """Test the allowlisting of target_path_list."""
+        """Test the allowlisting of paths."""
         description = 'test7eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(
             self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, auto_include_flag=True)

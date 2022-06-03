@@ -38,14 +38,14 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param id_path_list to specify group identifiers for which numeric ranges should be learned.
-        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that all values occurring in these target_path_list
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
         are considered for value range generation.
         @param persistence_id name of persistence document.
         @param auto_include_flag specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
-        @param ignore_list list of target_path_list that are not considered for analysis, i.e., events that contain one of these target_path_list are
+        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
         omitted.
-        @param constraint_list list of target_path_list that have to be present in the log atom to be analyzed.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
@@ -113,7 +113,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
             self.auto_include_flag = False
 
-        # Skip atom when ignore target_path_list in atom or constraint target_path_list not in atom.
+        # Skip atom when ignore paths in atom or constraint paths not in atom.
         all_paths_set = set(parser_match.get_match_dictionary().keys())
         if len(all_paths_set.intersection(self.ignore_list)) > 0 or \
            len(all_paths_set.intersection(self.constraint_list)) != len(self.constraint_list):
@@ -139,7 +139,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         if all_values_none is True:
             return
 
-        # Store all values from id target_path_list in a list. Use empty list as default path if not applicable.
+        # Store all values from id paths in a list. Use empty list as default path if not applicable.
         id_vals = []
         for path in self.id_path_list:
             match = parser_match.get_match_dictionary().get(path)

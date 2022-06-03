@@ -37,7 +37,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
@@ -198,7 +198,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             raise Exception(msg)
         if not isinstance(event_data, list) or len(event_data) != len(self.target_path_list):
             msg = 'Event_data has the wrong format.' \
-                'The supported format is [value_1, value_2, ..., value_n] where n is the number of analyzed target_path_list.'
+                'The supported format is [value_1, value_2, ..., value_n] where n is the number of analyzed paths.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -219,7 +219,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             self.known_values_set.add(match_value_tuple)
             self.log_learned_path_value_combos += 1
             self.log_new_learned_values.append(match_value_tuple)
-        return 'Added values [%s] of target_path_list [%s] to the persistency.' % (', '.join(event_data), ', '.join(self.target_path_list))
+        return 'Added values [%s] of paths [%s] to the persistence.' % (', '.join(event_data), ', '.join(self.target_path_list))
 
     def log_statistics(self, component_name):
         """

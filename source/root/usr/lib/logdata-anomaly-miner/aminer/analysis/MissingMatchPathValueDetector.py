@@ -28,7 +28,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     """
     This class creates events when an expected value is not seen within a given timespan.
     For example because the service was deactivated or logging disabled unexpectedly. This is complementary to the function provided by
-    NewMatchPathValueDetector. For each unique value extracted by target_path_list, a tracking record is added to expected_values_dict.
+    NewMatchPathValueDetector. For each unique value extracted by paths, a tracking record is added to expected_values_dict.
     It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
     alerting time when currently in error state. When in normal (alerting) state, the value is zero.
     """
@@ -327,9 +327,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     """
     This detector works similar to the MissingMatchPathValueDetector.
-    It only can lookup values from a list of target_path_list until one path really exists. It then uses this value as key to detect logAtoms
+    It only can lookup values from a list of paths until one path really exists. It then uses this value as key to detect logAtoms
     belonging to the same data stream. This is useful when e.g. due to different log formats, the hostname, servicename or any other
-    relevant channel identifier has alternative target_path_list.
+    relevant channel identifier has alternative paths.
     """
 
     def get_channel_key(self, log_atom):

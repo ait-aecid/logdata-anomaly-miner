@@ -1,4 +1,4 @@
-"""This module defines a filter for parsed target_path_list and values.
+"""This module defines a filter for parsed paths and values.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,7 +18,7 @@ from aminer import AminerConfig
 
 
 class MatchFilter(AtomHandlerInterface):
-    """This class creates events for specified target_path_list and values."""
+    """This class creates events for specified paths and values."""
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, target_value_list=None, output_log_line=True):
         """Initialize the detector."""

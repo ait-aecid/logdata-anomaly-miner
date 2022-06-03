@@ -1,5 +1,5 @@
 """
-This module defines a detector for new data target_path_list.
+This module defines a detector for new data paths.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -162,12 +162,12 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new target_path_list in the last 60"
+                "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"
                 " minutes.", component_name, self.log_success, self.log_total, self.log_learned_paths)
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new target_path_list in the last 60"
-                " minutes. Following new target_path_list were learned: %s", component_name, self.log_success, self.log_total, self.log_learned_paths,
+                "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"
+                " minutes. Following new paths were learned: %s", component_name, self.log_success, self.log_total, self.log_learned_paths,
                 self.log_new_learned_paths)
         self.log_success = 0
         self.log_total = 0

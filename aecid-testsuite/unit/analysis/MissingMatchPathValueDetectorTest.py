@@ -287,7 +287,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
               "match3/s2, match4/d2: ' pid=' overdue 400s (interval -400)")))
 
     def test11multiple_paths(self):
-        """Test the functionality of the MissingMatchPathValueDetector with multiple target_path_list."""
+        """Test the functionality of the MissingMatchPathValueDetector with multiple paths."""
         description = "Test11MissingMatchPathValueDetector"
         match_context = MatchContext(self.pid + b"22")
         fixed_dme = FixedDataModelElement('s1', self.pid)
@@ -303,7 +303,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertTrue(missing_match_path_value_detector.receive_atom(log_atom))
 
     def test12multiple_paths_data_from_file(self):
-        """Test the functionality of the MissingMatchPathValueDetector with multiple target_path_list with more data."""
+        """Test the functionality of the MissingMatchPathValueDetector with multiple paths with more data."""
         description = "Test12MissingMatchPathValueDetector"
         with open('unit/data/multiple_pathes_mmpvd.txt', 'rb') as f:
             data = f.readlines()
@@ -376,7 +376,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
             res = missing_match_path_value_detector22.receive_atom(log_atom)
             if match_element.get_path() == "match/first/seq22":
                 self.assertTrue(res)
-        # need to produce a valid match to trigger missing match target_path_list.
+        # need to produce a valid match to trigger missing match paths.
         line = b"host1 service1host1 service2host2 service1host2 service2"
         match_context = MatchContext(line)
         match_element = first.get_match_element("match", match_context)

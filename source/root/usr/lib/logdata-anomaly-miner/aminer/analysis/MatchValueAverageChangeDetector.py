@@ -36,7 +36,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param timestamp_path if not None, use this path value for timestamp based bins.
-        @param analyze_path_list list of match target_path_list to analyze in this detector.
+        @param analyze_path_list list of match paths to analyze in this detector.
         @param min_bin_elements evaluate the latest bin only after at least that number of elements was added to it.
         @param min_bin_time evaluate the latest bin only when the first element is received after min_bin_time has elapsed.
         @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.

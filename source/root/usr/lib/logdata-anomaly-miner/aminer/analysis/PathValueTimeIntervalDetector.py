@@ -41,11 +41,11 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param persistence_id name of persistency document.
-        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that values are analyzed by their combined
-        occurrences. When no target_path_list are specified, the events given by the full path list are analyzed.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
+        occurrences. When no paths are specified, the events given by the full path list are analyzed.
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from paths
         does not refer to an existing parsed data object.
-        @param ignore_list list of target_path_list that are not considered for correlation, i.e., events that contain one of these target_path_list are
+        @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
@@ -73,9 +73,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.max_time_diff = max_time_diff
         self.num_reduce_time_list = num_reduce_time_list
 
-        # Keys: Tuple of values of the target_path_list of target_path_list, Entries: List of all appeared times to the tuple.
+        # Keys: Tuple of values of the paths of target_path_list, Entries: List of all appeared times to the tuple.
         self.appeared_time_list = {}
-        # Keys: Tuple of values of the target_path_list of target_path_list, Entries: Counter of appended times to the time list since last reduction.
+        # Keys: Tuple of values of the paths of target_path_list, Entries: Counter of appended times to the time list since last reduction.
         self.counter_reduce_time_intervals = {}
 
         if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
@@ -125,7 +125,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.auto_include_flag = False
 
         match_dict = log_atom.parser_match.get_match_dictionary()
-        # Skip target_path_list from ignore_list.
+        # Skip paths from ignore_list.
         for ignore_path in self.ignore_list:
             if ignore_path in match_dict.keys():
                 return False
@@ -278,7 +278,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 not isinstance(event_data[1], (int, float)):
             msg = 'Event_data has the wrong format. ' \
                 'The supported format is [path_value_list, new_transition_time], ' \
-                'where path_value_list is a list of strings with the same length as target_path_list defined in the config.'
+                'where path_value_list is a list of strings with the same length as paths defined in the config.'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 

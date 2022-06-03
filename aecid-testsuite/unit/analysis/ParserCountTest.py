@@ -46,7 +46,7 @@ class ParserCountTest(TestBase):
         self.assertEqual(parser_count.count_dict, old_count_dict)
 
     def test3log_atom_matches_multiple_paths(self):
-        """This unittest tests the receive_atom method with multiple target_path_list matching."""
+        """This unittest tests the receive_atom method with multiple paths matching."""
         parser_count = ParserCount(self.aminer_config, ['fixed/seq', 'fixed/seq/m1', 'fixed/seq/m2', 'fixed/m3'],
                                    [self.stream_printer_event_handler])
         t = time.time()
@@ -98,7 +98,7 @@ class ParserCountTest(TestBase):
         self.assertEqual(parser_count.count_dict, old_count_dict)
 
     def test6receive_atom_without_target_paths(self):
-        """This unittest tests the receive_atom method with multiple target_path_list matching without having target_paths specified."""
+        """This unittest tests the receive_atom method with multiple paths matching without having target_paths specified."""
         parser_count = ParserCount(self.aminer_config, None, [self.stream_printer_event_handler])
         t = time.time()
         log_atom = LogAtom(self.match_context_seq.match_data, ParserMatch(self.match_element_seq), t, parser_count)

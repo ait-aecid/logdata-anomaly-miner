@@ -46,7 +46,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         @param min_allowed_time_diff the minimum amount of time in seconds after the first appearance of a log atom with a specific id
         that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo
         is 2*min_allowed_time_diff
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
@@ -186,7 +186,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                         id_dict[id_match_object][target_path] = match_element.match_object
 
         if len(id_dict[id_match_object]) == len(self.target_path_list):
-            # Found value for all target target_path_list. No need to wait more.
+            # Found value for all target paths. No need to wait more.
             self.process_id_dict_entry(id_dict[id_match_object], log_atom)
             del id_dict[id_match_object]
         self.log_success += 1

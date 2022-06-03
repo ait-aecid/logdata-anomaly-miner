@@ -39,7 +39,7 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
-        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that all values occurring in these target_path_list
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
                are considered as if they occur in the same path.
         @param prob_thresh limit for the average probability of character pairs for which anomalies are reported.
         @param default_freqs initializes the probabilities with default values from https://github.com/markbaggett/freq.
@@ -48,9 +48,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param persistence_id name of persistence file.
         @param learn_mode when set to True, the detector will extend the table of character pair frequencies based on new values.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
-        @param ignore_list list of target_path_list that are not considered for analysis, i.e., events that contain one of these target_path_list are
-        omitted.
-        @param constraint_list list of target_path_list that have to be present in the log atom to be analyzed.
+        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
@@ -108,7 +107,7 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
             self.learn_mode = False
 
-        # Skip atom when ignore target_path_list in atom or constraint target_path_list not in atom.
+        # Skip atom when ignore paths in atom or constraint paths not in atom.
         all_paths_set = set(parser_match.get_match_dictionary().keys())
         if len(all_paths_set.intersection(self.ignore_list)) > 0 \
                 or len(all_paths_set.intersection(self.constraint_list)) != len(self.constraint_list):

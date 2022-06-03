@@ -205,7 +205,7 @@ class VariableCorrelationDetectorTest(TestBase):
     def test6initialize_variables_with_random_preselection_method(self):
         """
         This test case checks the functionality of the random preselection method. It tests all percentage_random_cors in [0.01..1.0[.
-        For all target_path_list the possible amount of combinations is 10. The expected number of correlations is rounded. For example with
+        For all paths the possible amount of combinations is 10. The expected number of correlations is rounded. For example with
         0.05 <= percentage_random_cors < 0.15 exactly one combination is expected. The combinations also must not be repeated reversed and
         combinations with itself are not allowed. The used discrete data is for every path the same.
         """

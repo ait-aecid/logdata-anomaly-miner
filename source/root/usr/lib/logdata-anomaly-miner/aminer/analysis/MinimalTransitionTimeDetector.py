@@ -1,6 +1,6 @@
 """
 This module defines an detector for minimal transition times between states
-(e.g. value combinations of stated target_path_list).
+(e.g. value combinations of stated paths).
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -28,7 +28,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
-    """This class creates events when minimal transition times between states (e.g. value combinations of stated target_path_list) are undercut."""
+    """This class creates events when minimal transition times between states (e.g. value combinations of stated paths) are undercut."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -39,12 +39,12 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
-        @param path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that values are analyzed by their combined
-        occurrences. When no target_path_list are specified, the events given by the full path list are analyzed.
-        @param id_path_list the list of target_path_list where id values can be stored in all relevant log event types.
-        @param ignore_list list of target_path_list that are not considered for analysis, i.e., events that contain one of these target_path_list are
+        @param path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
+        occurrences. When no paths are specified, the events given by the full path list are analyzed.
+        @param id_path_list the list of paths where id values can be stored in all relevant log event types.
+        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
-        @param allow_missing_id when set to True, the detector will also use matches, where one of the pathes from target_path_list
+        @param allow_missing_id when set to True, the detector will also use matches, where one of the pathes from paths
         does not refer to an existing parsed data object.
         @param num_log_lines_solidify_matrix number of processed log lines after which the matrix is solidified.
         This process is periodically repeated.
@@ -131,7 +131,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         if [] in (self.path_list, self.id_path_list):
             return False
 
-        # Skip target_path_list from ignore list.
+        # Skip paths from ignore list.
         if any(ignore_path in parser_match.get_match_dictionary().keys() for ignore_path in self.ignore_list):
             return False
 
@@ -153,7 +153,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                     # Insert placeholder for path that is not available
                     event_value += ('',)
                 else:
-                    # Omit log atom if one of the id target_path_list is not found.
+                    # Omit log atom if one of the id paths is not found.
                     return False
             else:
                 if isinstance(match.match_object, bytes):
@@ -161,7 +161,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 else:
                     event_value += (match.match_object,)
 
-        # Get current index from combination of values of target_path_list of id_path_list
+        # Get current index from combination of values of paths of id_path_list
         id_tuple = ()
         for id_path in self.id_path_list:
             id_match = log_atom.parser_match.get_match_dictionary().get(id_path)
@@ -170,7 +170,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                     # Insert placeholder for id_path that is not available
                     id_tuple += ('',)
                 else:
-                    # Omit log atom if one of the id target_path_list is not found.
+                    # Omit log atom if one of the id paths is not found.
                     return False
             else:
                 if isinstance(id_match.match_object, bytes):
@@ -387,7 +387,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                      all(isinstance(value, str) for value in event_data[0])) or len(event_data) == 0)):
             msg = 'Event_data has the wrong format.' \
                 'The supported formats are [], [path_value_list] [path_value_list_1, path_value_list_2], ' \
-                'where the path value lists are lists of strings with the same length as the defined target_path_list in the config.'
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -462,7 +462,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 all(isinstance(value, str) for value in event_data[1]) and isinstance(event_data[2], (int, float))):
             msg = 'Event_data has the wrong format.' \
                 'The supported format is [path_value_list_1, path_value_list_2, new_transition_time], ' \
-                'where the path value lists are lists of strings with the same length as the defined target_path_list in the config.'
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -512,7 +512,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 all(isinstance(value, str) for value in event_data[0]) and all(isinstance(value, str) for value in event_data[1])):
             msg = 'Event_data has the wrong format.' \
                 'The supported format is [path_value_list_1, path_value_list_2], ' \
-                'where the path value lists are lists of strings with the same length as the defined target_path_list in the config.'
+                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 

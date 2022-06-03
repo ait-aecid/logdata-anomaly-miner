@@ -640,7 +640,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             pos_var_cor_index][0][i_val]:
                         if not self.generate_rules[event_index] or i_val not in new_i_vals:
                             sorted_log_lines.append(
-                                'New value occurred in correlation of the target_path_list %s = %s -> %s = old value: %s / New appeared value: %s' % (
+                                'New value occurred in correlation of the paths %s = %s -> %s = old value: %s / New appeared value: %s' % (
                                     self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                         pos_var_cor_val[0]]], repr(i_val),
                                     self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
@@ -668,7 +668,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             pos_var_cor_index][1][j_val]:
                         if not self.generate_rules[event_index] or j_val not in new_j_vals:
                             sorted_log_lines.append(
-                                'New value occurred in correlation of the target_path_list %s = %s -> %s = old value: %s / New appeared value: %s' % (
+                                'New value occurred in correlation of the paths %s = %s -> %s = old value: %s / New appeared value: %s' % (
                                     self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                         pos_var_cor_val[1]]], repr(j_val),
                                     self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
@@ -749,7 +749,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                 # Print the message of the reported values
                 for i_val in reported_values_ij:
-                    message = 'Correlation of the target_path_list %s = %s -> %s = %s would be rejected after the %s-th line' % (
+                    message = 'Correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line' % (
                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                             pos_var_cor_val[0]]], repr(i_val),
                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][pos_var_cor_val[
@@ -778,7 +778,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                 # Print the message of the reported values
                 for j_val in reported_values_ji:
-                    message = 'Correlation of the target_path_list %s = %s -> %s = %s would be rejected after the %s-th line' % (
+                    message = 'Correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line' % (
                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                             pos_var_cor_val[1]]], repr(j_val),
                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][self.pos_var_cor[
@@ -1082,13 +1082,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 if len(current_appearance_list[pos_var_cor_index][0][i_val]) / len(self.w_rel_list[event_index][
                                         pos_var_cor_index][0][i_val]) >= self.new_vals_alarm_thres:
                                     sorted_log_lines.append(
-                                        'Alarm: New value occurred in correlation of the target_path_list %s = %s -> %s =' % (
+                                        'Alarm: New value occurred in correlation of the paths %s = %s -> %s =' % (
                                                 self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                                     pos_var_cor_val[0]]], repr(i_val),
                                                 self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                                     pos_var_cor_val[1]]]))
                                 else:
-                                    sorted_log_lines.append('New value occurred in correlation of the target_path_list %s = %s -> %s =' % (
+                                    sorted_log_lines.append('New value occurred in correlation of the paths %s = %s -> %s =' % (
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             pos_var_cor_val[0]]], repr(i_val),
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
@@ -1120,13 +1120,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                     pos_var_cor_index][1][j_val]):
                                 if len(current_appearance_list[pos_var_cor_index][1][j_val]) / len(self.w_rel_list[event_index][
                                         pos_var_cor_index][1][j_val]) >= self.new_vals_alarm_thres:
-                                    sorted_log_lines.append('Alarm: New value occurred in correlation of the target_path_list %s = %s -> %s =' % (
+                                    sorted_log_lines.append('Alarm: New value occurred in correlation of the paths %s = %s -> %s =' % (
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             pos_var_cor_val[1]]],  repr(j_val),
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             pos_var_cor_val[0]]]))
                                 else:
-                                    sorted_log_lines.append('New value occurred in correlation of the target_path_list %s = %s -> %s =' % (
+                                    sorted_log_lines.append('New value occurred in correlation of the paths %s = %s -> %s =' % (
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             pos_var_cor_val[1]]], repr(j_val),
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
@@ -1561,7 +1561,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if cor_direction == 0:
             cor_direction_neg = 1
 
-        message = 'Correlation of the target_path_list %s = %s -> %s = %s would be rejected after the %s-th line' % (
+        message = 'Correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line' % (
             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                 self.pos_var_cor[event_index][pos_var_cor_index][cor_direction]]], repr(value1),
             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][

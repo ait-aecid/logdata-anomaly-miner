@@ -49,8 +49,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
-        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that all values occurring
-               in these target_path_list are considered for value range generation.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
         @param max_hypotheses maximum amount of hypotheses and rules hold in memory.
         @param hypothesis_max_delta_time time span of events considered for hypothesis generation.
         @param generation_probability probability in [0, 1] that currently processed log line is considered for hypothesis with each of the
@@ -67,8 +67,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param delta_time_to_discard_hypothesis time span required for old hypotheses to be discarded.
         @param check_rules_flag specifies whether existing rules are evaluated.
         @param learn_mode specifies whether new hypotheses are generated.
-        @param ignore_list list of target_path_list that are not considered for correlation, i.e., events that contain one of these
-               target_path_list are omitted. The default value is [] as None is not iterable.
+        @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
+               The default value is [] as None is not iterable.
         @param persistence_id name of persistence file.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param stop_learning_time switch the learn_mode to False after the time.
@@ -190,7 +190,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         parser_match = log_atom.parser_match
         self.total_records += 1
 
-        # Skip target_path_list from ignore_list.
+        # Skip paths from ignore_list.
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary():
                 return

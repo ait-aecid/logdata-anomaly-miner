@@ -1378,7 +1378,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
     def test21variable_correlation_detector(self):
         """Start performance tests for VariableCorrelationDetector."""
-        # The VCD should never been run without restrictions of target_path_list (in ETD or via ignore_list, constraint_list) as the performance is
+        # The VCD should never been run without restrictions of paths (in ETD or via ignore_list, constraint_list) as the performance is
         # terrible.
         # self.run_variable_correlation_detector(None)
         self.run_variable_correlation_detector(1)
