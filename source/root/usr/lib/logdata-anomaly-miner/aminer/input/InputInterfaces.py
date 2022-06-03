@@ -67,9 +67,29 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
     output_event_handlers = None
 
     def __init__(
-            self, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None, id_path_list=None,
-            stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None, constraint_list=None,
-            ignore_list=None):
+            self, mutable_default_args=None, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None,
+            id_path_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None,
+            constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None):
+        """
+        Initialize the parameters of analysis components.
+        @param aminer_config configuration from analysis_context.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param id_path_list specifies group identifiers for which data should be learned/analyzed.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
+        are considered for value range generation.
+        @param persistence_id name of persistence file.
+        @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
+        @param allowlist_rules list of rules executed until the first rule matches.
+        @param subhandler_list a list of objects implementing the AtomHandlerInterface which are run until the end, if
+               stop_when_handled_flag is False or until an atom handler can handle the log atom.
+        @param stop_when_handled_flag True, if the atom handler processing should stop after successfully receiving the log atom.
+        """
+        self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
             if value is not None:
                 setattr(self, argument, value)
@@ -102,14 +122,24 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
                 KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
-        if constraint_list is None:
-            self.constraint_list = []
-        else:
-            self.constraint_list = set(constraint_list)
-        if ignore_list is None:
-            self.ignore_list = []
-        else:
-            self.ignore_list = set(ignore_list)
+        if mutable_default_args is not None:
+            for argument in mutable_default_args:
+                if hasattr(self, argument):
+                    continue
+                if "list" in argument:
+                    setattr(self, argument, [])
+                elif "dict" in argument:
+                    setattr(self, argument, {})
+
+        if hasattr(self, "subhandler_list"):
+            if (not isinstance(self.subhandler_list, list)) or \
+                    (not all(isinstance(handler, AtomHandlerInterface) for handler in self.subhandler_list)):
+                msg = "Only subclasses of AtomHandlerInterface allowed in subhandler_list."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            self.subhandler_list = [None] * len(subhandler_list)
+            for handler_pos, handler_element in enumerate(subhandler_list):
+                self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):

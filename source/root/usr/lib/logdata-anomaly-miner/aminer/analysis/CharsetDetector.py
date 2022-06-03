@@ -37,10 +37,10 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
-        @param id_path_list to specify group identifiers for which numeric ranges should be learned.
+        @param id_path_list specifies group identifiers for which data should be learned/analyzed.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
         are considered for value range generation.
-        @param persistence_id name of persistence document.
+        @param persistence_id name of persistence file.
         @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
@@ -49,17 +49,17 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time = [None]*3  # avoid "defined outside init" issue
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*3
         super().__init__(
-            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, learn_mode=learn_mode, id_path_list=id_path_list,
-            persistence_id=persistence_id, stop_learning_time=stop_learning_time, output_logline=output_logline,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, target_path_list=target_path_list, constraint_list=constraint_list,
-            ignore_list=ignore_list
+            mutable_default_args=["id_path_list", "target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
+            anomaly_event_handlers=anomaly_event_handlers, learn_mode=learn_mode, id_path_list=id_path_list, persistence_id=persistence_id,
+            stop_learning_time=stop_learning_time, output_logline=output_logline, ignore_list=ignore_list,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, target_path_list=target_path_list, constraint_list=constraint_list
         )
 
-        self.charsets = {}
-
         # Persisted data stores characters as bytes for each id, i.e., [[[<id1, id2, ...>], [<byte1, byte2, ...>]], ...]]
+        self.charsets = {}
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
