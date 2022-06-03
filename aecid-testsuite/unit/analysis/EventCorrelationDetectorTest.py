@@ -249,7 +249,7 @@ class EventCorrelationDetectorTest(TestBase):
         self.assertEqual(len(sorted_forward_rules), len(self.alphabet_model.children))
         self.assertEqual(len(sorted_back_rules), len(self.alphabet_model.children))
         self.check_rules(sorted_back_rules, sorted_forward_rules, diff)
-        ecd.auto_include_flag = False
+        ecd.learn_mode = False
         self.check_anomaly_detection(ecd, log_atom.atom_time, diff)
 
     def generate_perfect_data(self, iterations, diff):

@@ -208,9 +208,9 @@ def build_analysis_pipeline(analysis_context):
         if extra_data is not None:
             mod = 10000
             if (extra_data[2] + 1) % mod == 0:
-                enhanced_new_match_path_value_combo_detector.auto_include_flag = False
+                enhanced_new_match_path_value_combo_detector.learn_mode = False
             else:
-                enhanced_new_match_path_value_combo_detector.auto_include_flag = True
+                enhanced_new_match_path_value_combo_detector.learn_mode = True
         return match_value_list
 
     from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector

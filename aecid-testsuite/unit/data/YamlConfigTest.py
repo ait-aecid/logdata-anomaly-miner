@@ -279,9 +279,9 @@ class YamlConfigTest(TestBase):
         # specific learn_mode arguments should be preferred.
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(context.registered_components[1][0].auto_include_flag)
-        self.assertTrue(context.registered_components[2][0].auto_include_flag)
-        self.assertFalse(context.registered_components[3][0].auto_include_flag)
+        self.assertTrue(context.registered_components[1][0].learn_mode)
+        self.assertTrue(context.registered_components[2][0].learn_mode)
+        self.assertFalse(context.registered_components[3][0].learn_mode)
 
         # unset specific learn_mode parameters and set LearnMode True.
         for component in aminer_config.yaml_data['Analysis']:
@@ -290,7 +290,7 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
         for key in context.registered_components:
             if hasattr(context.registered_components[key][0], 'auto_include_flag'):
-                self.assertTrue(context.registered_components[key][0].auto_include_flag)
+                self.assertTrue(context.registered_components[key][0].learn_mode)
 
         # unset specific learn_mode parameters and set LearnMode False.
         aminer_config.yaml_data['LearnMode'] = False
@@ -298,7 +298,7 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
         for key in context.registered_components:
             if hasattr(context.registered_components[key][0], 'auto_include_flag'):
-                self.assertFalse(context.registered_components[key][0].auto_include_flag)
+                self.assertFalse(context.registered_components[key][0].learn_mode)
 
         # unset LearnMode config property. An Error should be raised.
         del aminer_config.yaml_data['LearnMode']
@@ -511,7 +511,7 @@ class YamlConfigTest(TestBase):
         context.aminer_config.yaml_data['Analysis'][2]['suppress'] = False
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         default_nmpd = context.registered_components[3][0]
-        default_nmpd.output_log_line = False
+        default_nmpd.output_logline = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
             datetime.fromtimestamp(t).strftime(datetime_format_string), default_nmpd.__class__.__name__, 'DefaultNewMatchPathDetector', 1,
@@ -523,7 +523,7 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         default_nmpd = context.registered_components[3][0]
-        default_nmpd.output_log_line = False
+        default_nmpd.output_logline = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), "")
         self.reset_output_stream()

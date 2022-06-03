@@ -14,8 +14,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
 import abc
+import time
 import logging
-from aminer.AminerConfig import STAT_LOG_NAME
+from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer import AminerConfig
 
 
@@ -64,6 +65,51 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
     log_success = 0
     log_total = 0
     output_event_handlers = None
+
+    def __init__(
+            self, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None, id_path_list=None,
+            stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None, constraint_list=None,
+            ignore_list=None):
+        for argument, value in list(locals().items())[1:]:  # skip self parameter
+            if value is not None:
+                setattr(self, argument, value)
+
+        if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+
+        if hasattr(self, "aminer_config"):
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+
+        if constraint_list is None:
+            self.constraint_list = []
+        else:
+            self.constraint_list = set(constraint_list)
+        if ignore_list is None:
+            self.ignore_list = []
+        else:
+            self.ignore_list = set(ignore_list)
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):

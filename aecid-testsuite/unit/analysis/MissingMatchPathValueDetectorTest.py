@@ -340,25 +340,25 @@ class MissingMatchPathValueDetectorTest(TestBase):
             date = date.astimezone(timezone.utc)
             t = (date - datetime(1970, 1, 1, tzinfo=timezone.utc)).total_seconds()
             # initialize the detectors and remove the first output.
-            if missing_match_path_value_detector11.auto_include_flag is True:
+            if missing_match_path_value_detector11.learn_mode is True:
                 line = b"host1 service1host1 service2host2 service1host2 service2"
                 match_context = MatchContext(line)
                 match_element = first.get_match_element("match", match_context)
                 log_atom = LogAtom(line, ParserMatch(match_element), t, missing_match_path_value_detector11)
                 missing_match_path_value_detector11.receive_atom(log_atom)
-                missing_match_path_value_detector11.auto_include_flag = False
+                missing_match_path_value_detector11.learn_mode = False
                 match_element = first.get_match_element("match", match_context)
                 log_atom = LogAtom(line, ParserMatch(match_element), t, missing_match_path_value_detector12)
                 missing_match_path_value_detector12.receive_atom(log_atom)
-                missing_match_path_value_detector12.auto_include_flag = False
+                missing_match_path_value_detector12.learn_mode = False
                 match_element = first.get_match_element("match", match_context)
                 log_atom = LogAtom(line, ParserMatch(match_element), t, missing_match_path_value_detector21)
                 missing_match_path_value_detector21.receive_atom(log_atom)
-                missing_match_path_value_detector21.auto_include_flag = False
+                missing_match_path_value_detector21.learn_mode = False
                 match_element = first.get_match_element("match", match_context)
                 log_atom = LogAtom(line, ParserMatch(match_element), t, missing_match_path_value_detector22)
                 missing_match_path_value_detector22.receive_atom(log_atom)
-                missing_match_path_value_detector22.auto_include_flag = False
+                missing_match_path_value_detector22.learn_mode = False
                 self.reset_output_stream()
             line = split_line[1] + b" " + split_line[2]
             match_context = MatchContext(line)

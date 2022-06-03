@@ -182,7 +182,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(), ParserMatch(self.match_element_sequence_me2), t,
                                         enhanced_new_match_path_value_combo_detector)
 
-        enhanced_new_match_path_value_combo_detector.auto_include_flag = False
+        enhanced_new_match_path_value_combo_detector.learn_mode = False
         self.assertEqual(enhanced_new_match_path_value_combo_detector.allowlist_event(
             'Analysis.%s' % enhanced_new_match_path_value_combo_detector.__class__.__name__,
             [log_atom_sequence_me2.get_timestamp(), self.match_element_sequence_me2.get_path()], None),

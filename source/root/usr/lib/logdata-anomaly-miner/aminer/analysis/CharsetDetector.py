@@ -31,7 +31,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list, target_path_list=None, persistence_id='Default',
-                 auto_include_flag=False, output_log_line=True, ignore_list=None, constraint_list=None, stop_learning_time=None,
+                 learn_mode=False, output_logline=True, ignore_list=None, constraint_list=None, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -40,59 +40,24 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param id_path_list to specify group identifiers for which numeric ranges should be learned.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
         are considered for value range generation.
-        @param persistence_id name of persistency document.
-        @param auto_include_flag specifies whether value ranges should be extended when values outside of ranges are observed.
-        @param output_log_line specifies whether the full parsed log atom should be provided in the output.
+        @param persistence_id name of persistence document.
+        @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
         omitted.
         @param constraint_list list of paths that have to be present in the log atom to be analyzed.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.target_path_list = target_path_list
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.auto_include_flag = auto_include_flag
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.persistence_id = persistence_id
-        self.id_path_list = id_path_list
-        if constraint_list is None:
-            self.constraint_list = []
-        else:
-            self.constraint_list = set(constraint_list)
-        if ignore_list is None:
-            self.ignore_list = []
-        else:
-            self.ignore_list = set(ignore_list)
-        self.log_total = 0
-        self.log_success = 0
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time = [None]*3  # avoid "defined outside init" issue
+        super().__init__(
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, learn_mode=learn_mode, id_path_list=id_path_list,
+            persistence_id=persistence_id, stop_learning_time=stop_learning_time, output_logline=output_logline,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, target_path_list=target_path_list, constraint_list=constraint_list,
+            ignore_list=ignore_list
+        )
 
         self.charsets = {}
-
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         # Persisted data stores characters as bytes for each id, i.e., [[[<id1, id2, ...>], [<byte1, byte2, ...>]], ...]]
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
@@ -106,10 +71,10 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         """Receive a log atom from a source."""
         self.log_total += 1
         parser_match = log_atom.parser_match
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
 
         # Skip atom when ignore paths in atom or constraint paths not in atom.
         all_paths_set = set(parser_match.get_match_dictionary().keys())
@@ -167,7 +132,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                     data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                 except UnicodeError:
                     data = repr(log_atom.raw_data)
-                if self.output_log_line:
+                if self.output_logline:
                     original_log_line_prefix = self.aminer_config.config_properties.get(
                         CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                     sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
@@ -187,7 +152,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New character(s) detected', sorted_log_lines,
                                            event_data, log_atom, self)
             # Extend charsets if learn mode is active.
-            if self.auto_include_flag:
+            if self.learn_mode:
                 self.charsets[id_event].update(missing_chars)
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                     self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time

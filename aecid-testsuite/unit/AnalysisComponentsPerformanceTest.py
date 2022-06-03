@@ -879,7 +879,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             ecd.__class__.__name__, avg, results,
             'auto_include_flag: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
             'ates_size %d, hypothesis_eval_delta_time: %.2f, delta_time_to_discard_hypothesis: %.2f' % (
-                ecd.auto_include_flag, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
+                ecd.learn_mode, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
 
         # check_phase
@@ -887,7 +887,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            ecd.auto_include_flag = False
+            ecd.learn_mode = False
             t = time.time()
             measured_time = 0
             i = 0
@@ -905,7 +905,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             ecd.__class__.__name__, avg, results,
             'auto_include_flag: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
             'ates_size %d, hypothesis_eval_delta_time: %.2f, delta_time_to_discard_hypothesis: %.2f' % (
-                ecd.auto_include_flag, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
+                ecd.learn_mode, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
 
     def run_match_filter(self, number_of_paths):
