@@ -32,7 +32,7 @@ INPUT_FILE=logdata-anomaly-miner.wiki/HowTo-MissingMatchPathValueDetector.md
 OUT=/tmp/out.txt
 OUT_AMINER=/tmp/aminer_output.txt
 LOG=/tmp/access.log
-CFG_PATH=/tmp/config.yml
+CFG_PATH=/etc/aminer/config.yml
 
 # extract the file from the development branch of the wiki project.
 # the first ```yaml script is searched for.
