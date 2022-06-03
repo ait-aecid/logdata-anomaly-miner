@@ -1,0 +1,33 @@
+LogResourceList:
+        - 'file:///var/log/apache2/access.log'
+
+Parser:
+        - id: 'sub1'
+          type: Sub1
+          name: 'sub1'
+        - id: 'sub2'
+          type: Sub2
+          name: 'sub2'
+        - id: 'sub3'
+          type: Sub3
+          name: 'sub3'
+        - id: 'apacheModel'
+          type: ApacheAccessModel
+          name: 'apache'
+
+        - id: 'START'
+          start: True
+          type: FirstMatchModelElement
+          name: 'model'
+          args:
+            - sub1
+            - sub2
+            - sub3
+            - apacheModel
+
+Input:
+        timestamp_paths: [""]
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler
