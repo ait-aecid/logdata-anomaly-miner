@@ -75,7 +75,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             max_hypotheses=None, hypothesis_max_delta_time=None, generation_probability=None, generation_factor=None, max_observations=None,
             p0=None, alpha=None, candidates_size=None, hypotheses_eval_delta_time=None, delta_time_to_discard_hypothesis=None,
             check_rules_flag=None, window_size=None, num_windows=None, confidence_factor=None, empty_window_warnings=None,
-            early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None,
+            early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None, seq_len=None, allow_missing_id=None,
+            timeout=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -137,6 +138,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param early_exceeding_anomaly_output states if an anomaly should be raised the first time the appearance count exceeds the range.
         @param set_lower_limit sets the lower limit of the frequency test to the specified value.
         @param set_upper_limit sets the upper limit of the frequency test to the specified value.
+        @param seq_len the length of the sequences to be learned (larger lengths increase precision, but may overfit the data).
+        @param allow_missing_id specifies whether log atoms without id path should be omitted (only if id path is set).
+        @param timeout maximum allowed seconds between two entries of sequence; sequence is split in subsequences if exceeded.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter

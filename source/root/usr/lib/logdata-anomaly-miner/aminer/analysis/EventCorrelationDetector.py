@@ -70,6 +70,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param ignore_list list of target_path_list that are not considered for correlation, i.e., events that contain one of these
                target_path_list are omitted. The default value is [] as None is not iterable.
         @param persistence_id name of persistence file.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
@@ -82,7 +83,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             generation_factor=generation_factor, max_observations=max_observations, p0=p0, alpha=alpha, candidates_size=candidates_size,
             hypotheses_eval_delta_time=hypotheses_eval_delta_time, delta_time_to_discard_hypothesis=delta_time_to_discard_hypothesis,
             check_rules_flag=check_rules_flag, learn_mode=learn_mode, ignore_list=ignore_list, persistence_id=persistence_id,
-            constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            output_logline=output_logline, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
         self.last_unhandled_match = None
