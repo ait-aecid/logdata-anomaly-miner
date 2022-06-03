@@ -41,7 +41,7 @@ cp files/entropy_test.log $LOG2
 cd ..
 
 # extract config (1.)
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # replace LogResourceList (2.)
 sed "s?file:///home/ubuntu/entropy/entropy_train.log?file:///${LOG1}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
@@ -125,13 +125,13 @@ awk '/^```$/ && ++n == 10, /^```$/ && n++ == 11' < $INPUT_FILE | sed '/^```/ d' 
 CMD=$(cat $OUT)
 IFS='#' read -ra ADDR <<< "$CMD"
 CMD="${ADDR[1]}"
-OUTPUT="$(eval $CMD)"
+OUTPUT="$(eval sudo $CMD)"
 IN="$(tail -n 1 $OUT)"
 compareStrings "$OUTPUT" "$IN" "Failed Test in 6."
 exit_code=$((exit_code | $?))
 
 # extract second config (7.)
-awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # replace LogResourceList (8.)
 sed "s?file:///home/ubuntu/demo-detectors/entropy/entropy_test.log?file:///${LOG2}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
