@@ -43,7 +43,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the target_path_list from target_path_list
         does not refer to an existing parsed data object.
         @param learn_mode when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.

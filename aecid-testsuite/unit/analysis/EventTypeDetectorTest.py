@@ -98,7 +98,7 @@ class EventTypeDetectorTest(TestBase):
     def test1receive_atoms_with_default_values(self):
         """
         In this test case multiple log_atoms are received with default values of the EventTypeDetector.
-        path_list is empty and all paths are learned dynamically in variable_key_list.
+        path_list is empty and all target_path_list are learned dynamically in variable_key_list.
         """
         event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         log_atoms = []
@@ -113,7 +113,7 @@ class EventTypeDetectorTest(TestBase):
     def test2receive_atoms_with_defined_path_list(self):
         """
         In this test case multiple log_atoms are received with default values of the EventTypeDetector.
-        path_list is set to a static list of paths and variable_key_list should not be used.
+        path_list is set to a static list of target_path_list and variable_key_list should not be used.
         """
         event_type_detector = EventTypeDetector(
             self.aminer_config, [self.stream_printer_event_handler], path_list=['parser/type/path/nametype'])

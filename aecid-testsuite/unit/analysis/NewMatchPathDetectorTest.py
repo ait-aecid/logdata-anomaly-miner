@@ -123,7 +123,7 @@ class NewMatchPathDetectorTest(TestBase):
 
     def test4_get_time_trigger_class(self):
         """
-        The known paths are to be periodically stored after a certain time. This requires a synchronization class.
+        The known target_path_list are to be periodically stored after a certain time. This requires a synchronization class.
         The return of the correct class is to be checked in this test case.
         """
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,

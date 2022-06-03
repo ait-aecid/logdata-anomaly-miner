@@ -65,13 +65,13 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @param delta_time_to_discard_hypothesis time span required for old hypotheses to be discarded.
         @param check_rules_flag specifies whether existing rules are evaluated.
         @param auto_include_flag specifies whether new hypotheses are generated.
-        @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
+        @param ignore_list list of target_path_list that are not considered for correlation, i.e., events that contain one of these target_path_list are
         omitted. The default value is [] as None is not iterable.
         @param persistence_id name of persistence document.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.anomaly_event_handlers = anomaly_event_handlers
+        super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers)
         self.paths = paths
         self.last_unhandled_match = None
         self.total_records = 0
@@ -226,7 +226,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         parser_match = log_atom.parser_match
         self.total_records += 1
 
-        # Skip paths from ignore_list.
+        # Skip target_path_list from ignore_list.
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary():
                 return
@@ -241,7 +241,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 return
             log_event = tuple(parser_match.get_match_dictionary())
         else:
-            # Event is defined by value combos in paths
+            # Event is defined by value combos in target_path_list
             values = []
             all_values_none = True
             for path in self.paths:

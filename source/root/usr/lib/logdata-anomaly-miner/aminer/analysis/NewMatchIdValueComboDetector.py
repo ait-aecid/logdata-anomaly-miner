@@ -186,7 +186,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                         id_dict[id_match_object][target_path] = match_element.match_object
 
         if len(id_dict[id_match_object]) == len(self.target_path_list):
-            # Found value for all target paths. No need to wait more.
+            # Found value for all target target_path_list. No need to wait more.
             self.process_id_dict_entry(id_dict[id_match_object], log_atom)
             del id_dict[id_match_object]
         self.log_success += 1

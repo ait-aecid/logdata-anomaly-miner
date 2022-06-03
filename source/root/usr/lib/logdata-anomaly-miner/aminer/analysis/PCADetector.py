@@ -40,8 +40,8 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
-        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed as separate
-        dimensions. When no paths are specified, the events given by the full path list are analyzed (one dimension).
+        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that values are analyzed as separate
+        dimensions. When no target_path_list are specified, the events given by the full path list are analyzed (one dimension).
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
         @param min_anomaly_score the minimum computed outlier score for reporting anomalies. Scores are scaled by training data, i.e.,
@@ -51,9 +51,9 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param persistence_id name of persistency document.
         @param auto_include_flag specifies whether new count measurements are added to the PCA count matrix.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
-        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
+        @param ignore_list list of target_path_list that are not considered for analysis, i.e., events that contain one of these target_path_list are
         omitted. The default value is [] as None is not iterable.
-        @param constrain_list list of paths that have to be present in the log atom to be analyzed.
+        @param constrain_list list of target_path_list that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
@@ -137,7 +137,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
             self.auto_include_flag = False
 
-        # Skip paths from ignore list.
+        # Skip target_path_list from ignore list.
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary().keys():
                 return
@@ -211,7 +211,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             else:
                 self.event_count_vector[''][log_event] = 1
         else:
-            # Event is defined by values in paths
+            # Event is defined by values in target_path_list
             all_values_none = True
             for path in self.target_path_list:
                 match = parser_match.get_match_dictionary().get(path)

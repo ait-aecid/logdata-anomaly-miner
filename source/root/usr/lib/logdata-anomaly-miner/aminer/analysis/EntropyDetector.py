@@ -33,72 +33,38 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, prob_thresh=0.05, default_freqs=False,
-                 skip_repetitions=False, persistence_id='Default', auto_include_flag=False, output_log_line=True,
+                 skip_repetitions=False, persistence_id='Default', learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
-        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
-        are considered as if they occur in the same path.
+        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that all values occurring in these target_path_list
+               are considered as if they occur in the same path.
         @param prob_thresh limit for the average probability of character pairs for which anomalies are reported.
-        @param default_probs initializes the probabilities with default values from https://github.com/markbaggett/freq.
+        @param default_freqs initializes the probabilities with default values from https://github.com/markbaggett/freq.
         @param skip_repetitions boolean that determines whether only distinct values are used for character pair counting. This
-        counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run.
-        @param persistence_id name of persistency document.
-        @param auto_include_flag when set to True, the detector will extend the table of character pair frequencies based on new values.
-        @param output_log_line specifies whether the full parsed log atom should be provided in the output.
-        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
+               counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run.
+        @param persistence_id name of persistence file.
+        @param learn_mode when set to True, the detector will extend the table of character pair frequencies based on new values.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param ignore_list list of target_path_list that are not considered for analysis, i.e., events that contain one of these target_path_list are
         omitted.
-        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
+        @param constraint_list list of target_path_list that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.target_path_list = target_path_list
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.auto_include_flag = auto_include_flag
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.persistence_id = persistence_id
-        self.prob_thresh = prob_thresh
-        self.skip_repetitions = skip_repetitions
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        super().__init__(
+            mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
+            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, prob_thresh=prob_thresh,
+            skip_repetitions=skip_repetitions, persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline,
+            ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
+
         self.value_set = set()
-        if constraint_list is None:
-            self.constraint_list = []
-        else:
-            self.constraint_list = set(constraint_list)
-        if ignore_list is None:
-            self.ignore_list = []
-        else:
-            self.ignore_list = set(ignore_list)
-        self.log_total = 0
-        self.log_success = 0
-
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
-
         self.freq = {}
         if default_freqs is True:
             # Default probabilities taken from https://github.com/markbaggett/freq
@@ -137,18 +103,18 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         self.log_total += 1
         parser_match = log_atom.parser_match
 
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
 
-        # Skip atom when ignore paths in atom or constraint paths not in atom.
+        # Skip atom when ignore target_path_list in atom or constraint target_path_list not in atom.
         all_paths_set = set(parser_match.get_match_dictionary().keys())
         if len(all_paths_set.intersection(self.ignore_list)) > 0 \
                 or len(all_paths_set.intersection(self.constraint_list)) != len(self.constraint_list):
             return
 
-        # Store all values from target paths in a list.
+        # Store all values from target target_path_list in a list.
         values = []
         all_values_none = True
         for path in self.target_path_list:
@@ -192,7 +158,7 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                     data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                 except UnicodeError:
                     data = repr(log_atom.raw_data)
-                if self.output_log_line:
+                if self.output_logline:
                     original_log_line_prefix = self.aminer_config.config_properties.get(
                         CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                     sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
@@ -208,7 +174,7 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                                            event_data, log_atom, self)
 
         # Extend frequency table if learn mode is active.
-        if self.auto_include_flag is True:
+        if self.learn_mode is True:
             for value in values:
                 if self.skip_repetitions is True:
                     # Do not consider repeating values multiple times for extending frequency table to avoid distortions.

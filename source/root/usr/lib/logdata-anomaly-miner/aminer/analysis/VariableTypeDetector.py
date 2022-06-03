@@ -129,7 +129,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # States the used multinomial test. Allowed values are 'MT', 'Approx' and 'Chi', where 'MT' means original MT, 'Approx'
         # is the approximation with single BTs and 'Chi' is the ChisquareTest
         self.used_multinomial_test = used_multinomial_test
-        # List of paths, which variables are being tested for a type. All other paths will not get a type assigned. If None all paths are
+        # List of target_path_list, which variables are being tested for a type. All other target_path_list will not get a type assigned. If None all target_path_list are
         # being tested.
         self.path_list = path_list
         # States the used method of range estimation. Allowed values are 'MeanSD', 'EmpiricQuantiles' and 'MinMax'. Where 'MeanSD' means the
@@ -202,7 +202,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.failed_indicators_total = []
             # List of the confidences of the indicators
             self.failed_indicators_values = []
-            # List of the paths of the indicators
+            # List of the target_path_list of the indicators
             self.failed_indicators_paths = []
             # List of the numbers of total parsed log lines, when a variable changed its type. Only used for the statistics
             self.changed_var_types = []
@@ -461,7 +461,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.log_total += 1
 
         parser_match = log_atom.parser_match
-        # Skip paths from ignore_list.
+        # Skip target_path_list from ignore_list.
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary().keys():
                 return False
@@ -612,7 +612,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     else:
                         self.var_type[event_index][var_index] = tmp_var_type
 
-            # Test only the variables with paths in the path_list
+            # Test only the variables with target_path_list in the path_list
             else:
                 for var_index in self.variable_path_num[event_index]:
                     tmp_var_type = self.detect_var_type(event_index, var_index)
@@ -2008,7 +2008,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.var_type[event_index]))]
 
             # Append the first entries to the history list
-            # Test only the variables with paths in the path_list
+            # Test only the variables with target_path_list in the path_list
             if self.path_list is None:
                 index_list = range(self.length[event_index])
             # Test all variables

@@ -395,8 +395,8 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
 class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
     """
-    This class provides a histogram analysis for only one property but separate histograms for each group of correlated match paths.
-    Assume there two paths that include the requested property but they separate after the property was found on the path.
+    This class provides a histogram analysis for only one property but separate histograms for each group of correlated match target_path_list.
+    Assume there two target_path_list that include the requested property but they separate after the property was found on the path.
     Then objects of this class will produce 3 histograms: one for common path part including all occurences of the target property
     and one for each separate subpath, counting only those property values where the specific subpath was followed.
     """
@@ -449,7 +449,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             if histogram_mapping is None:
                 unmapped_path.append(path)
                 continue
-            # So the path is already mapped to one histogram. See if all paths
+            # So the path is already mapped to one histogram. See if all target_path_list
             # to the given histogram are still in all_path_set. If not, a split
             # within the mapping is needed.
             clone_set = all_path_set.copy()
@@ -472,7 +472,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 histogram_mapping[2] = log_atom.parser_match
             else:
                 # We need to split the current set here. Keep the current statistics for all the missingPaths but clone the data for the
-                # remaining paths.
+                # remaining target_path_list.
                 new_histogram = histogram_mapping[1].clone()
                 match = match_dict.get(mapped_path, None)
                 match_value = match.match_object

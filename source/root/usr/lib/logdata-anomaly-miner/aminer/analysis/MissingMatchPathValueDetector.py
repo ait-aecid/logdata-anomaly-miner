@@ -327,9 +327,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     """
     This detector works similar to the MissingMatchPathValueDetector.
-    It only can lookup values from a list of paths until one path really exists. It then uses this value as key to detect logAtoms
+    It only can lookup values from a list of target_path_list until one path really exists. It then uses this value as key to detect logAtoms
     belonging to the same data stream. This is useful when e.g. due to different log formats, the hostname, servicename or any other
-    relevant channel identifier has alternative paths.
+    relevant channel identifier has alternative target_path_list.
     """
 
     def get_channel_key(self, log_atom):

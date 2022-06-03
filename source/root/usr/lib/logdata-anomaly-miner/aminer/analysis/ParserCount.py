@@ -42,7 +42,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.count_dict = {}
         self.next_report_time = None
         if (target_path_list is None or target_path_list == []) and (target_label_list is not None and target_label_list != []):
-            msg = 'Target labels cannot be used without specifying target paths.'
+            msg = 'Target labels cannot be used without specifying target target_path_list.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         if target_path_list is not None and target_label_list is not None and len(target_path_list) != len(target_label_list):
@@ -102,7 +102,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def send_report(self):
         """Send a report to the event handlers."""
-        output_string = 'Parsed paths in the last ' + str(self.report_interval) + ' seconds:\n'
+        output_string = 'Parsed target_path_list in the last ' + str(self.report_interval) + ' seconds:\n'
         if not self.split_reports_flag:
             for k in self.count_dict:
                 c = self.count_dict[k]
@@ -114,7 +114,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
         else:
             for k in self.count_dict:
-                output_string = 'Parsed paths in the last ' + str(self.report_interval) + ' seconds:\n'
+                output_string = 'Parsed target_path_list in the last ' + str(self.report_interval) + ' seconds:\n'
                 c = self.count_dict[k]
                 output_string += '\t' + str(k) + ': ' + str(c)
                 status_info = {k: {

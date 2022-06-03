@@ -7,7 +7,7 @@ sudo aminerremotecontrol --exec "rename_registered_analysis_component(analysis_c
 #changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' to False.
 sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'learn_mode', False)"
 
-#prints the current list of paths
+#prints the current list of target_path_list
 sudo aminerremotecontrol --exec "print_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'target_path_list')"
 
 #adds a new path to the 'NewMatchPathValueComboDetector' component.

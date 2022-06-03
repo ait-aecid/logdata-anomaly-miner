@@ -67,8 +67,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param set_period_length states how long the period length is if force_period_length is set to True.
         @param min_log_lines_per_time_step states the minimal average number of log lines per time step to make a TSA.
         @param persistence_id name of persistency document.
-        @param path_list At least one of the parser paths in this list needs to appear in the event to be analysed.
-        @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
+        @param path_list At least one of the parser target_path_list in this list needs to appear in the event to be analysed.
+        @param ignore_list list of target_path_list that are not considered for correlation, i.e., events that contain one of these target_path_list are
         omitted. The default value is [] as None is not iterable.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.

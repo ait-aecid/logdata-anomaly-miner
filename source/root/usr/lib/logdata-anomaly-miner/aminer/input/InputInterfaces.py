@@ -71,20 +71,26 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             id_path_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None,
             constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None,
             parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, path=None, parsed_atom_handler_dict=None,
-            allow_missing_values_flag=None, tuple_transformation_function=None
+            allow_missing_values_flag=None, tuple_transformation_function=None, prob_thresh=None, skip_repetitions=None,
+            max_hypotheses=None, hypothesis_max_delta_time=None, generation_probability=None, generation_factor=None, max_observations=None,
+            p0=None, alpha=None, candidates_size=None, hypotheses_eval_delta_time=None, delta_time_to_discard_hypothesis=None,
+            check_rules_flag=None,
     ):
         """
         Initialize the parameters of analysis components.
+        @param mutable_default_args a list of arguments which contain mutable values and should be set to their default value indicated by
+               the argument name (i.e. ending with list or dict).
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param id_path_list specifies group identifiers for which data should be learned/analyzed.
-        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
-               are considered for value range generation.
+        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that all values occurring
+               in these target_path_list are considered for value range generation.
         @param persistence_id name of persistence file.
         @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
-        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
-        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
+        @param ignore_list list of target_path_list that are not considered for analysis, i.e., events that contain one of these
+               target_path_list are omitted.
+        @param constraint_list list of target_path_list that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         @param allowlist_rules list of rules executed until the first rule matches.
@@ -99,10 +105,28 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param parsed_atom_handler_dict a dictionary of match value to atom handler.
         @param default_parsed_atom_handler invoke this default handler when no value handler was found or do not invoke any handler
                when None.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
-               does not refer to an existing parsed data object.
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the target_path_list from
+               target_path_list does not refer to an existing parsed data object.
         @param tuple_transformation_function when not None, this function will be invoked on each extracted value combination list to
                transform it. It may modify the list directly or create a new one to return it.
+        @param prob_thresh limit for the average probability of character pairs for which anomalies are reported.
+        @param skip_repetitions boolean that determines whether only distinct values are used for character pair counting. This
+               counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run.
+        @param max_hypotheses maximum amount of hypotheses and rules hold in memory.
+        @param hypothesis_max_delta_time time span of events considered for hypothesis generation.
+        @param generation_probability probability in [0, 1] that currently processed log line is considered for hypothesis with each of the
+               candidates.
+        @param generation_factor likelihood in [0, 1] that currently processed log line is added to the set of candidates for hypothesis
+               generation.
+        @param max_observations maximum amount of evaluations before hypothesis is transformed into a rule or discarded or rule is
+               evaluated.
+        @param p0 expected value for hypothesis evaluation distribution.
+        @param alpha confidence value for hypothesis evaluation.
+        @param candidates_size maximum number of stored candidates used for hypothesis generation.
+        @param hypotheses_eval_delta_time duration between hypothesis evaluation phases that remove old hypotheses that are likely to remain
+               unused.
+        @param delta_time_to_discard_hypothesis time span required for old hypotheses to be discarded.
+        @param check_rules_flag specifies whether existing rules are evaluated.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter

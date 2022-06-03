@@ -1,5 +1,5 @@
 """
-This module is a detector which uses a tsa-arima model to analyze the values of the paths in target_path_list.
+This module is a detector which uses a tsa-arima model to analyze the values of the target_path_list in target_path_list.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,7 @@ from aminer.util import PersistenceUtil
 
 
 class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This class is used for an arima time series analysis of the values of the paths in target_path_list."""
+    """This class is used for an arima time series analysis of the values of the target_path_list in target_path_list."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -44,8 +44,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param event_type_detector used to track the number of events in the time windows.
         @param persistence_id name of persistency document.
-        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
-        occurrences. When no paths are specified, the events given by the full path list are analyzed.
+        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that values are analyzed by their combined
+        occurrences. When no target_path_list are specified, the events given by the full path list are analyzed.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
         @param num_init number of lines processed before the period length is calculated.
@@ -178,7 +178,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         """
-        Receive an parsed atom and the information about the parser match. Tests if the event type includes paths of target_path_list and
+        Receive an parsed atom and the information about the parser match. Tests if the event type includes target_path_list of target_path_list and
         analyzes their values with an TSA Arima model.
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
@@ -197,7 +197,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 self.period_length_list += [None for _ in range(len(self.period_length_list), event_index + 2)]
                 self.target_path_index_list += [None for _ in range(len(self.target_path_index_list), event_index + 2)]
 
-            # Add all paths to the target_path_list if they are included in the ET and solely consist of floats
+            # Add all target_path_list to the target_path_list if they are included in the ET and solely consist of floats
             self.target_path_index_list[event_index] = []
             for target_path in self.target_path_list:
                 if target_path in self.event_type_detector.variable_key_list[event_index]:

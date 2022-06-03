@@ -8,7 +8,7 @@ from unit.TestBase import TestBase
 '''
 These testcases are testing the CronParsingModel with the Basis Path Testing method. The Modified Condition / Decisision
 Coverage is also accomplished, because the conditions are all simple, which means it is tested if the path is reached.
-The used paths can be seen in the provided flowchart.
+The used target_path_list can be seen in the provided flowchart.
 The child elements of the CronParsingModel could be tested, but they are assumed to be working as intended,
 because there should be individual test cases for every parser model.
 '''

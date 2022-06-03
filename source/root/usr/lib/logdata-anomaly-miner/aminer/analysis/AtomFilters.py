@@ -53,7 +53,7 @@ class SubhandlerFilter(AtomHandlerInterface):
 
 
 class MatchPathFilter(AtomHandlerInterface):
-    """This class just splits incoming matches according to existence of paths in the match."""
+    """This class just splits incoming matches according to existence of target_path_list in the match."""
 
     def __init__(self, parsed_atom_handler_lookup_list, default_parsed_atom_handler=None):
         """
