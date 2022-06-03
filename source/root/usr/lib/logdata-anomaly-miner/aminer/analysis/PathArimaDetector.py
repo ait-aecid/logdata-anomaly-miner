@@ -36,7 +36,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', target_path_list=None,
                  output_log_line=True, auto_include_flag=False, num_init=50, force_period_length=False, set_period_length=10, alpha=0.05,
-                 alpha_bt=0.05, num_results_bt=15, num_min_time_history=20, num_max_time_history=30, num_periods_tsa_ini=20):
+                 alpha_bt=0.05, num_results_bt=15, num_min_time_history=20, num_max_time_history=30, num_periods_tsa_ini=20,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -57,6 +58,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param num_min_time_history number of lines processed before the period length is calculated.
         @param num_max_time_history maximum number of values of the time_history.
         @param num_periods_tsa_ini number of periods used to initialize the Arima-model.
+        @param stop_learning_time switch the auto_include_flag to False after the time.
+        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.aminer_config = aminer_config
         self.anomaly_event_handlers = anomaly_event_handlers
@@ -116,6 +119,30 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # Minimal number of successes for the binomial test in the last num_results_bt results
         self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
 
+        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
+            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
+            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(stop_learning_time, (type(None), int)):
+            msg = "stop_learning_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        self.stop_learning_timestamp = None
+        if stop_learning_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
+        if stop_learning_no_anomaly_time is not None:
+            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+
         # Loads the persistence
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -135,10 +162,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistence_data = []
-        persistence_data.append(self.target_path_index_list)
-        persistence_data.append(self.period_length_list)
-        persistence_data.append(self.prediction_history)
+        persistence_data = [self.target_path_index_list, self.period_length_list, self.prediction_history]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
@@ -160,6 +184,10 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @return True if this handler was really able to handle and process the match.
         """
         event_index = self.event_type_detector.current_index
+        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.auto_include_flag = False
 
         # Check if enough log lines have appeared to calculate the period length, initilize the arima model, or make a prediction
         if (len(self.period_length_list) <= event_index or self.period_length_list[event_index] is None) and\
@@ -305,6 +333,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                             self.arima_models[event_index][count_index] = model.fit()
                         except:  # skipcq FLK-E722
                             self.arima_models[event_index][count_index] = None
+                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
             # Make a one step prediction with the new values
             elif self.arima_models[event_index][count_index] is not None:
@@ -366,6 +396,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Discard the trained model and reset the result_list
                     self.arima_models[event_index][count_index] = None
                     self.result_list[event_index][count_index] = []
+
+                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
                 else:
                     # Update the model
                     self.arima_models[event_index][count_index] = self.arima_models[event_index][count_index].append([count])
