@@ -54,8 +54,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param max_time_diff maximal time difference in seconds for new times. If the difference of the new time to all previous times is
         greater than max_time_diff the new time is considered an anomaly.
         @param num_reduce_time_list number of new time entries appended to the time list, before the list is being reduced.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag

@@ -50,7 +50,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*3
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
             mutable_default_args=["id_path_list", "target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, learn_mode=learn_mode, id_path_list=id_path_list, persistence_id=persistence_id,

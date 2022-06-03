@@ -50,8 +50,8 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         does not refer to an existing parsed data object.
         @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers

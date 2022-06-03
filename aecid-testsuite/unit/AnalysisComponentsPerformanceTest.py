@@ -877,7 +877,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             ecd.__class__.__name__, avg, results,
-            'auto_include_flag: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
+            'learn_mode: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
             'ates_size %d, hypothesis_eval_delta_time: %.2f, delta_time_to_discard_hypothesis: %.2f' % (
                 ecd.learn_mode, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
@@ -903,7 +903,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             ecd.__class__.__name__, avg, results,
-            'auto_include_flag: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
+            'learn_mode: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
             'ates_size %d, hypothesis_eval_delta_time: %.2f, delta_time_to_discard_hypothesis: %.2f' % (
                 ecd.learn_mode, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))

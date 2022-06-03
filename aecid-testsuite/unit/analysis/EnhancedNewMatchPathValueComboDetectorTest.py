@@ -40,7 +40,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     def test1_log_atom_not_known(self):
         """
         This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found.
-        The output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be
+        The output is directed to an output stream and compared for accuracy. The learn_mode is False and the output must be
         repeatable on second run.
         """
         description = "Test1EnhancedNewMatchPathValueComboDetector"
@@ -85,8 +85,8 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
 
     def test2_log_atom_known(self):
         """
-        This test case checks the functionality of the auto_include_flag.
-        If the same MatchElement is processed a second time and the auto_include_flag was True, no event must be triggered.
+        This test case checks the functionality of the learn_mode.
+        If the same MatchElement is processed a second time and the learn_mode was True, no event must be triggered.
         """
         description = "Test2EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [

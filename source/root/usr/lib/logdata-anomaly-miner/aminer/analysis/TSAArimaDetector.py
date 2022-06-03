@@ -72,8 +72,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         omitted. The default value is [] as None is not iterable.
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
         @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         self.aminer_config = aminer_config
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)

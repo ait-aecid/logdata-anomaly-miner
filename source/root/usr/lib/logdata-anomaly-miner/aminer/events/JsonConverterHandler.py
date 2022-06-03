@@ -49,7 +49,7 @@ class JsonConverterHandler(EventHandlerInterface):
             log_data['Timestamps'] = [round(log_atom.atom_time, 2)]
             log_data['DetectionTimestamp'] = round(time.time(), 2)
             log_data['LogLinesCount'] = len(sorted_log_lines)
-            if log_atom.parser_match is not None and hasattr(event_source, 'output_log_line') and event_source.output_logline:
+            if log_atom.parser_match is not None and hasattr(event_source, 'output_logline') and event_source.output_logline:
                 log_data['AnnotatedMatchElement'] = {}
                 for path, match in log_atom.parser_match.get_match_dictionary().items():
                     if isinstance(match, list):
@@ -73,7 +73,7 @@ class JsonConverterHandler(EventHandlerInterface):
             analysis_component['Message'] = event_message
             if hasattr(event_source, "persistence_id"):
                 analysis_component['PersistenceFileName'] = event_source.persistence_id
-            if hasattr(event_source, 'auto_include_flag'):
+            if hasattr(event_source, 'learn_mode'):
                 analysis_component['TrainingMode'] = event_source.learn_mode
 
             detector_analysis_component = event_data.get('AnalysisComponent')

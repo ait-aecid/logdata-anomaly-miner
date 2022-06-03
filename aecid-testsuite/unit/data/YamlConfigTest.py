@@ -289,7 +289,7 @@ class YamlConfigTest(TestBase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
-            if hasattr(context.registered_components[key][0], 'auto_include_flag'):
+            if hasattr(context.registered_components[key][0], 'learn_mode'):
                 self.assertTrue(context.registered_components[key][0].learn_mode)
 
         # unset specific learn_mode parameters and set LearnMode False.
@@ -297,7 +297,7 @@ class YamlConfigTest(TestBase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
-            if hasattr(context.registered_components[key][0], 'auto_include_flag'):
+            if hasattr(context.registered_components[key][0], 'learn_mode'):
                 self.assertFalse(context.registered_components[key][0].learn_mode)
 
         # unset LearnMode config property. An Error should be raised.

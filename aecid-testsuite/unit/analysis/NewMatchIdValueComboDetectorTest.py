@@ -97,7 +97,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             AnyByteDataModelElement('remainding_data')])])
 
     def test1receive_match_in_time_with_auto_include_flag(self):
-        """This test case checks if log_atoms are accepted as expected with the auto_include_flag=True."""
+        """This test case checks if log_atoms are accepted as expected with the learn_mode=True."""
         description = 'test1newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, True, True, True, True, True, True, False, False,
                                        False, True, False, True, False]
@@ -135,7 +135,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.reset_output_stream()
 
     def test2receive_match_after_max_allowed_time_diff_with_auto_include_flag(self):
-        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the auto_include_flag=True."""
+        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the learn_mode=True."""
         description = 'test2newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, True, True, True, True, True, True, False, False,
                                        False, True, False, True, False]
@@ -172,7 +172,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.reset_output_stream()
 
     def test3receive_match_in_time_without_auto_include_flag(self):
-        """This test case checks if log_atoms are accepted as expected with the auto_include_flag=False."""
+        """This test case checks if log_atoms are accepted as expected with the learn_mode=False."""
         description = 'test3newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, False, True, False, True, True, True, False,
                                        False, False, True, False, True, False]
@@ -211,7 +211,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.reset_output_stream()
 
     def test4receive_match_after_max_allowed_time_diff_without_auto_include_flag(self):
-        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the auto_include_flag=False."""
+        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the learn_mode=False."""
         description = 'test4newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, False, True, False, True, True, True, False,
                                        False, False, True, False, True, False]

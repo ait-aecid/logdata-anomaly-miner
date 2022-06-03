@@ -4,7 +4,7 @@ sudo aminerremotecontrol --exec "change_config_property(analysis_context, 'LogPr
 #renames the 'NewMatchPathValueCombo' component to 'NewMatchPathValueComboDetector'
 sudo aminerremotecontrol --exec "rename_registered_analysis_component(analysis_context,'NewMatchPathValueCombo','NewMatchPathValueComboDetector')"
 
-#changes the 'auto_include_flag' of the 'NewMatchPathValueComboDetector' to False.
+#changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' to False.
 sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', False)"
 
 #prints the current list of paths
@@ -13,11 +13,11 @@ sudo aminerremotecontrol --exec "print_attribute_of_registered_analysis_componen
 #adds a new path to the 'NewMatchPathValueComboDetector' component.
 sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'target_path_list', ['/model/IPAddresses/Username', '/model/IPAddresses/IP', 'new/path'])"
 
-#changes the 'auto_include_flag' of the 'NewMatchPathValueComboDetector' to True to start the learning phase.
+#changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' to True to start the learning phase.
 sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', True)"
 sleep 1
 
-#changes the 'auto_include_flag' of the 'NewMatchPathValueComboDetector' to False to end the learning phase.
+#changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' to False to end the learning phase.
 sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', False)"
 
 #prints the 'Resources.MaxMemoryUsage'; changes the property 'Resources.MaxMemoryUsage' to -1, which means all the available memory can be used and prints it again.

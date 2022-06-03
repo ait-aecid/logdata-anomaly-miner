@@ -25,7 +25,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
     string = b'25537 uid=2'
 
     def test1_receive_atom(self):
-        """This test case checks whether a missing value is created without using the auto_include_flag (should not be the case)."""
+        """This test case checks whether a missing value is created without using the learn_mode (should not be the case)."""
         description = "Test1MissingMatchPathValueDetector"
         match_context_fixed_dme = MatchContext(self.pid)
         fixed_dme = FixedDataModelElement('s1', self.pid)
@@ -133,7 +133,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
                             other_missing_match_path_value_detector.__class__.__name__, description + "2", 1, self.match1_s1_overdue)))
 
     def test6_receive_atom_list(self):
-        """This test case checks, whether a missing value is created by a list without using the auto_include_flag."""
+        """This test case checks, whether a missing value is created by a list without using the learn_mode."""
         description = "Test6MissingMatchPathValueDetector"
         match_context_fixed_dme = MatchContext(self.pid)
         fixed_dme = FixedDataModelElement('s1', self.pid)

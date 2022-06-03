@@ -54,8 +54,8 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
         omitted. The default value is [] as None is not iterable.
         @param constrain_list list of paths that have to be present in the log atom to be analyzed.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers

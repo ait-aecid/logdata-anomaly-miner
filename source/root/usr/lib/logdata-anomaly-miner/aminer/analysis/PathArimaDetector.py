@@ -58,8 +58,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param num_min_time_history number of lines processed before the period length is calculated.
         @param num_max_time_history maximum number of values of the time_history.
         @param num_periods_tsa_ini number of periods used to initialize the Arima-model.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         self.aminer_config = aminer_config
         self.anomaly_event_handlers = anomaly_event_handlers

@@ -41,8 +41,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list to extract a source identification value from each logatom.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers

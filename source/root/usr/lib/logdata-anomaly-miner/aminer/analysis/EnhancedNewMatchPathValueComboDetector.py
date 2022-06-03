@@ -49,8 +49,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         in the known values set automatically.
         @param tuple_transformation_function when not None, this function will be invoked on each extracted value combination list to
         transform it. It may modify the list directly or create a new one to return it.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         self.known_values_dict = {}
         self.stop_learning_timestamp = None

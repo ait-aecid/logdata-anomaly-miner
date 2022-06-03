@@ -35,7 +35,7 @@ class NewMatchPathDetectorTest(TestBase):
     def test1_log_atom_not_known(self):
         """
         This test case checks the correct processing of unknown log lines, which in reality means that an anomaly has been found.
-        The output is directed to an output stream and compared for accuracy. The auto_include_flag is False and the output must be
+        The output is directed to an output stream and compared for accuracy. The learn_mode is False and the output must be
         repeatable on second run.
         """
         description = "Test1NewMatchPathDetector"
@@ -68,8 +68,8 @@ class NewMatchPathDetectorTest(TestBase):
 
     def test2_log_atom_known(self):
         """
-        This test case checks the functionality of the auto_include_flag.
-        If the same MatchElement is processed a second time and the auto_include_flag was True, no event must be triggered.
+        This test case checks the functionality of the learn_mode.
+        If the same MatchElement is processed a second time and the learn_mode was True, no event must be triggered.
         """
         description = "Test2NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
@@ -137,7 +137,7 @@ class NewMatchPathDetectorTest(TestBase):
     #     """During initialization, the next time is not determined (the value is initialized with None). In this case, the persistence is
     #     expected to occur after 600 milliseconds."""
     #     self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-    #                                                         output_log_line=False)
+    #                                                         output_logline=False)
     #     self.assertEqual(self.new_match_path_detector.do_timer(200), 600)
     #     self.assertEqual(self.new_match_path_detector.do_timer(400), 600)
     #     self.assertEqual(self.new_match_path_detector.do_timer(10000), 600)
@@ -145,7 +145,7 @@ class NewMatchPathDetectorTest(TestBase):
     # def test6_do_timer_delta_smaller_or_equal_zero(self):
     #     """If the NextPersistTime is less than or equal to zero, the data must be saved."""
     #     self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-    #                                                         output_log_line=False)
+    #                                                         output_logline=False)
     #     self.new_match_path_detector.nextPersistTime = 400
     #     self.assertEqual(self.new_match_path_detector.do_timer(400), 600)
     #     self.assertEqual(self.new_match_path_detector.do_timer(1000), 600)
@@ -154,7 +154,7 @@ class NewMatchPathDetectorTest(TestBase):
     #     """If the delta does not fall below the limit value, only the delta value should be returned."""
     #     # this test fails due to the missing update of the nextPersistTime variable in the doTimer method
     #     self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-    #                                                         output_log_line=False)
+    #                                                         output_logline=False)
     #     self.new_match_path_detector.nextPersistTime = 400
     #     self.assertEqual(self.new_match_path_detector.do_timer(200), 200)
     #     self.assertEqual(self.new_match_path_detector.do_timer(200), 600)
@@ -211,7 +211,7 @@ class NewMatchPathDetectorTest(TestBase):
     # This test case checks what happens when no EventHandler is used in the parameters. Requires type check (not yet implemented).
     # '''
     # def test11_fuzzing_anomaly_event_handler(self):
-    #   self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, None, 'Default', True, output_log_line=False)
+    #   self.new_match_path_detector = NewMatchPathDetector(self.aminer_config, None, 'Default', True, output_logline=False)
     #   t = datetime.fromtimestamp(time.time())
     #   self.log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data,
     #     ParserMatch(self.match_context_fixed_dme), t, self.new_match_path_detector)

@@ -70,7 +70,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             self, mutable_default_args=None, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None,
             id_path_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None,
             constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None,
-            parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, path=None, parsed_atom_handler_dict=None
+            parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, path=None, parsed_atom_handler_dict=None,
+            allow_missing_values_flag=None, tuple_transformation_function=None
     ):
         """
         Initialize the parameters of analysis components.
@@ -78,7 +79,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param id_path_list specifies group identifiers for which data should be learned/analyzed.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths
-        are considered for value range generation.
+               are considered for value range generation.
         @param persistence_id name of persistence file.
         @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
@@ -91,13 +92,17 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                stop_when_handled_flag is False or until an atom handler can handle the log atom.
         @param stop_when_handled_flag True, if the atom handler processing should stop after successfully receiving the log atom.
         @param parsed_atom_handler_lookup_list contains tuples with search path string and handler. When the handler is None,
-        the filter will just drop a received atom without forwarding.
+               the filter will just drop a received atom without forwarding.
         @param default_parsed_atom_handler invoke this handler when no handler was found for given match path or do not invoke any
-        handler when None.
+               handler when None.
         @param path the path to be analyzed in the parser match of the log atom.
         @param parsed_atom_handler_dict a dictionary of match value to atom handler.
         @param default_parsed_atom_handler invoke this default handler when no value handler was found or do not invoke any handler
-        when None.
+               when None.
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
+               does not refer to an existing parsed data object.
+        @param tuple_transformation_function when not None, this function will be invoked on each extracted value combination list to
+               transform it. It may modify the list directly or create a new one to return it.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter

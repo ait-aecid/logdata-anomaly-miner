@@ -53,8 +53,8 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param persistence_id name of persistency document.
         @param auto_include_flag specifies whether newly observed sequences should be added to the learned model
         @param output_log_line specifies whether the full parsed log atom should be provided in the output.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # Input parameters
         self.aminer_config = aminer_config
