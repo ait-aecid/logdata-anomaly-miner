@@ -38,35 +38,31 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     """
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
-                 auto_include_flag=False, tuple_transformation_function=None, output_log_line=True, stop_learning_time=None,
+                 learn_mode=False, tuple_transformation_function=None, output_logline=True, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
         @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
         does not refer to an existing parsed data object.
-        @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
+        @param learn_mode when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
         @param tuple_transformation_function when not None, this function will be invoked on each extracted value combination list to
         transform it. It may modify the list directly or create a new one to return it.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         self.known_values_dict = {}
-        self.stop_learning_timestamp = None
-        super(EnhancedNewMatchPathValueComboDetector, self).__init__(
-            aminer_config, target_path_list, anomaly_event_handlers, persistence_id, allow_missing_values_flag, auto_include_flag,
-            stop_learning_time, stop_learning_no_anomaly_time)
-        self.tuple_transformation_function = tuple_transformation_function
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.auto_include_flag = auto_include_flag
+        super().__init__(
+            aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
+            persistence_id=persistence_id, allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode,
+            tuple_transformation_function=tuple_transformation_function, output_logline=output_logline,
+            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time)
         self.date_string = "%Y-%m-%d %H:%M:%S"
-        self.log_success = 0
-        self.log_total = 0
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
@@ -86,10 +82,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         """
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
             timestamp = time.time()
@@ -136,7 +132,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': affected_log_atom_values,
                               'Metadata': metadata}
         event_data = {'AnalysisComponent': analysis_component}
-        if (self.auto_include_flag and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.auto_include_flag:
+        if (self.learn_mode and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.learn_mode:
             self.log_learned_path_value_combos += 1
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
@@ -147,7 +143,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
                 sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + data]
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
-            if self.auto_include_flag and self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+            if self.learn_mode and self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                 self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
         self.log_success += 1
         return True

@@ -5,7 +5,7 @@ sudo aminerremotecontrol --exec "change_config_property(analysis_context, 'LogPr
 sudo aminerremotecontrol --exec "rename_registered_analysis_component(analysis_context,'NewMatchPathValueCombo','NewMatchPathValueComboDetector')"
 
 #changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' to False.
-sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', False)"
+sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'learn_mode', False)"
 
 #prints the current list of paths
 sudo aminerremotecontrol --exec "print_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'target_path_list')"
@@ -14,19 +14,19 @@ sudo aminerremotecontrol --exec "print_attribute_of_registered_analysis_componen
 sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'target_path_list', ['/model/IPAddresses/Username', '/model/IPAddresses/IP', 'new/path'])"
 
 #changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' to True to start the learning phase.
-sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', True)"
+sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'learn_mode', True)"
 sleep 1
 
 #changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' to False to end the learning phase.
-sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', False)"
+sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'learn_mode', False)"
 
 #prints the 'Resources.MaxMemoryUsage'; changes the property 'Resources.MaxMemoryUsage' to -1, which means all the available memory can be used and prints it again.
 sudo aminerremotecontrol --data '["Resources.MaxMemoryUsage", -1]' --exec 'print_config_property(analysis_context,  "%s" % remote_control_data[0])' --exec 'change_config_property(analysis_context, "%s" % remote_control_data[0], remote_control_data[1])' --exec 'print_config_property(analysis_context, "%s" % remote_control_data[0])'
 
 #add a new NewMatchPathDetector to the config.
-sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, auto_include_flag=True), 'NewMatchPathDet')"
+sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True), 'NewMatchPathDet')"
 
-sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, auto_include_flag=True), 'NewMatchPathDet1')"
+sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True), 'NewMatchPathDet1')"
 
 #prints the current config to the console.
 #sudo aminerremotecontrol --exec "print_current_config(analysis_context)" --string-response
