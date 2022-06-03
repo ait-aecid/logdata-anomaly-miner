@@ -69,7 +69,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
     def __init__(
             self, mutable_default_args=None, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None,
             id_path_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None,
-            constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None):
+            constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None,
+            parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, path=None, parsed_atom_handler_dict=None
+    ):
         """
         Initialize the parameters of analysis components.
         @param aminer_config configuration from analysis_context.
@@ -88,6 +90,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param subhandler_list a list of objects implementing the AtomHandlerInterface which are run until the end, if
                stop_when_handled_flag is False or until an atom handler can handle the log atom.
         @param stop_when_handled_flag True, if the atom handler processing should stop after successfully receiving the log atom.
+        @param parsed_atom_handler_lookup_list contains tuples with search path string and handler. When the handler is None,
+        the filter will just drop a received atom without forwarding.
+        @param default_parsed_atom_handler invoke this handler when no handler was found for given match path or do not invoke any
+        handler when None.
+        @param path the path to be analyzed in the parser match of the log atom.
+        @param parsed_atom_handler_dict a dictionary of match value to atom handler.
+        @param default_parsed_atom_handler invoke this default handler when no value handler was found or do not invoke any handler
+        when None.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter

@@ -60,20 +60,18 @@ class MatchPathFilter(AtomHandlerInterface):
     def __init__(self, parsed_atom_handler_lookup_list, default_parsed_atom_handler=None):
         """
         Initialize the filter.
-        @param parsed_atom_handler_lookup_list has to contain tuples with search path string and handler. When the handler is None,
+        @param parsed_atom_handler_lookup_list contains tuples with search path string and handler. When the handler is None,
         the filter will just drop a received atom without forwarding.
         @param default_parsed_atom_handler invoke this handler when no handler was found for given match path or do not invoke any
         handler when None.
         """
         super().__init__(
-            mutable_default_args=["subhandler_list"], subhandler_list=subhandler_list, stop_when_handled_flag=stop_when_handled_flag)
-        self.parsed_atom_handler_lookup_list = parsed_atom_handler_lookup_list
-        self.default_parsed_atom_handler = default_parsed_atom_handler
+            parsed_atom_handler_lookup_list=parsed_atom_handler_lookup_list, default_parsed_atom_handler=default_parsed_atom_handler)
 
     def receive_atom(self, log_atom):
         """
-        Receive an atom and pass it to the subhandlers.
-        @return False when logAtom did not contain match data or was not forwarded to any handler, True otherwise.
+        Receive a parsed atom and the information about the parser match.
+        @return False when log_atom did not contain match data or was not forwarded to any handler, True otherwise.
         """
         self.log_total += 1
         if log_atom.parser_match is None:
@@ -95,22 +93,23 @@ class MatchPathFilter(AtomHandlerInterface):
 class MatchValueFilter(AtomHandlerInterface):
     """This class just splits incoming matches using a given match value and forward them to different handlers."""
 
-    def __init__(self, target_path, parsed_atom_handler_dict, default_parsed_atom_handler=None):
+    def __init__(self, path, parsed_atom_handler_dict, default_parsed_atom_handler=None):
         """
         Initialize the splitter.
+        @param path the path to be analyzed in the parser match of the log atom.
+        @param parsed_atom_handler_dict a dictionary of match value to atom handler.
         @param default_parsed_atom_handler invoke this default handler when no value handler was found or do not invoke any handler
         when None.
         """
-        self.target_path = target_path
-        self.parsed_atom_handler_dict = parsed_atom_handler_dict
-        self.default_parsed_atom_handler = default_parsed_atom_handler
+        super().__init__(
+            path=path, parsed_atom_handler_dict=parsed_atom_handler_dict, default_parsed_atom_handler=default_parsed_atom_handler)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         self.log_total += 1
         if log_atom.parser_match is None:
             return False
-        target_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
+        target_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
         if target_value is not None:
             target_value = target_value.match_object
         target_handler = self.parsed_atom_handler_dict.get(target_value, self.default_parsed_atom_handler)
