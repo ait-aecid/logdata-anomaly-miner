@@ -74,7 +74,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             allow_missing_values_flag=None, tuple_transformation_function=None, prob_thresh=None, skip_repetitions=None,
             max_hypotheses=None, hypothesis_max_delta_time=None, generation_probability=None, generation_factor=None, max_observations=None,
             p0=None, alpha=None, candidates_size=None, hypotheses_eval_delta_time=None, delta_time_to_discard_hypothesis=None,
-            check_rules_flag=None,
+            check_rules_flag=None, window_size=None, num_windows=None, confidence_factor=None, empty_window_warnings=None,
+            early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -127,6 +128,15 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                unused.
         @param delta_time_to_discard_hypothesis time span required for old hypotheses to be discarded.
         @param check_rules_flag specifies whether existing rules are evaluated.
+        @param window_size the length of the time window for counting in seconds.
+        @param num_windows the number of previous time windows considered for expected frequency estimation.
+        @param confidence_factor defines range of tolerable deviation of measured frequency from expected frequency according to
+               occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3*sigma deviation. confidence_factor
+               must be in range [0, 1].
+        @param empty_window_warnings whether anomalies should be generated for too small window sizes.
+        @param early_exceeding_anomaly_output states if an anomaly should be raised the first time the appearance count exceeds the range.
+        @param set_lower_limit sets the lower limit of the frequency test to the specified value.
+        @param set_upper_limit sets the upper limit of the frequency test to the specified value.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
@@ -179,6 +189,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             self.subhandler_list = [None] * len(self.subhandler_list)
             for handler_pos, handler_element in enumerate(self.subhandler_list):
                 self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
+
+        if hasattr(self, "confidence_factor") and not 0 <= self.confidence_factor <= 1:
+            logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
+            self.confidence_factor = 1
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):
