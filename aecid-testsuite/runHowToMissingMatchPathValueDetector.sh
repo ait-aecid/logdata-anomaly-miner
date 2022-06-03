@@ -44,11 +44,11 @@ sudo rm -rf /var/lib/aminer/*
 exit_code=0
 
 # write config (1.)
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # adapt config (2.)
 sed "s?file:///var/log/apache2/access.log?file:///${LOG}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
-echo "Core.PersistencePeriod: 1" >> $CFG_PATH
+echo "Core.PersistencePeriod: 1" | sudo tee -a $CFG_PATH > /dev/null
 
 # write log lines (3.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE | sed '/^```/ d' > $OUT
@@ -158,7 +158,7 @@ cat <<EOT > $LOG
 ::1 - - [18/Jul/2020:20:28:43 +0000] "GET / HTTP/1.1" 200 11012 "-" "bob"
 EOT
 
-runAminerUntilEnd "$AMINER_CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT_AMINER" # "not exit aminer"
+runAminerUntilEnd "$AMINER_CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT_AMINER"
 PID=$!
 sudo pkill -x aminer
 wait $PID
@@ -180,8 +180,7 @@ compareStrings "$IN" "$OUTPUT" "Failed Test in 13."
 exit_code=$((exit_code | $?))
 
 sudo rm -r logdata-anomaly-miner.wiki
-rm $CFG_PATH
+sudo rm $CFG_PATH
 rm $OUT
-rm $OUT_AMINER
 rm $LOG
 exit $exit_code
