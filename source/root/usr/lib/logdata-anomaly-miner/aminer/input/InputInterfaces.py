@@ -85,14 +85,13 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param id_path_list specifies group identifiers for which data should be learned/analyzed.
-        @param target_path_list parser target_path_list of values to be analyzed. Multiple target_path_list mean that all values occurring
-               in these target_path_list are considered for value range generation.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
         @param persistence_id name of persistence file.
         @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
-        @param ignore_list list of target_path_list that are not considered for analysis, i.e., events that contain one of these
-               target_path_list are omitted.
-        @param constraint_list list of target_path_list that have to be present in the log atom to be analyzed.
+        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         @param allowlist_rules list of rules executed until the first rule matches.
@@ -107,8 +106,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param parsed_atom_handler_dict a dictionary of match value to atom handler.
         @param default_parsed_atom_handler invoke this default handler when no value handler was found or do not invoke any handler
                when None.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the target_path_list from
-               target_path_list does not refer to an existing parsed data object.
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from paths does not
+               refer to an existing parsed data object.
         @param tuple_transformation_function when not None, this function will be invoked on each extracted value combination list to
                transform it. It may modify the list directly or create a new one to return it.
         @param prob_thresh limit for the average probability of character pairs for which anomalies are reported.

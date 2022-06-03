@@ -81,7 +81,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                 len(all_paths_set.intersection(self.constraint_list)) != len(self.constraint_list):
             return
 
-        # Store all values from target target_path_list in a list.
+        # Store all values from target paths in a list.
         values = []
         all_values_none = True
         for path in self.target_path_list:

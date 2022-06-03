@@ -1,5 +1,5 @@
 """
-This module is a detector which uses a tsa-arima model to analyze the values of the target_path_list in target_path_list.
+This module is a detector which uses a tsa-arima model to analyze the values of the paths in target_path_list.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
