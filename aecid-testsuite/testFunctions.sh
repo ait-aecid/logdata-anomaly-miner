@@ -71,7 +71,7 @@ function runAminerUntilEnd() {
     return 2
   fi
   sudo rm $REP_PATH 2> /dev/null
-  if [ $# -eq 5 ]; then
+  if [ $# -ge 5 ]; then
     OUT=$5
     $CMD > $OUT &
   elif [ $# -eq 4 ]; then
@@ -92,8 +92,11 @@ function runAminerUntilEnd() {
   done
   sleep 3
   sudo sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
-  sudo pkill -x aminer
-  wait $PID
-  RES=$?
-  return $RES
+  if [ $# -lt 6 ]; then
+    sudo pkill -x aminer
+    wait $PID
+    RES=$?
+    return $RES
+  fi
+  return $PID
 }

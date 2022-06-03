@@ -62,13 +62,12 @@ CMD=${CMD#*$ }
 OLD_CFG_PATH=/${CMD#*/}
 AMINER_CMD="${CMD/"$OLD_CFG_PATH"/"$CFG_PATH"}"
 
-$AMINER_CMD > $OUT_AMINER &
+runAminerUntilEnd "$AMINER_CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT_AMINER"
 PID=$!
-sleep 15
 
 # compare results (5.)
 IN=$(tail -n +2 $OUT)
-OUTPUT=$(cat $OUT_AMINER)
+OUTPUT=$(tail -n +2 $OUT_AMINER)
 compareStrings "$IN" "$OUTPUT" "Failed Test in 5."
 exit_code=$((exit_code | $?))
 
@@ -92,16 +91,11 @@ exit_code=$((exit_code | $?))
 #compareStrings "$IN" "$OUTPUT" "Failed Test in 7."
 #exit_code=$((exit_code | $?))
 
-sudo pkill -x aminer
-wait $PID
-
 # set LearnMode False (8.)
 sed "s/LearnMode: True/LearnMode: False/g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
 
 # run aminer CMD (9.)
 rm $LOG
-$AMINER_CMD > $OUT_AMINER &
-PID=$!
 
 # write log lines (10.)
 cat <<EOT > $LOG
@@ -120,11 +114,12 @@ cat <<EOT > $LOG
 ::1 - - [18/Jul/2020:20:28:13 +0000] "GET / HTTP/1.1" 200 11012 "-" "bob"
 EOT
 
-sleep 15
+runAminerUntilEnd "$AMINER_CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT_AMINER" "not exit aminer"
+PID=$!
 
 # compare results (11.)
 awk '/^```$/ && ++n == 20, /^```$/ && n++ == 21' < $INPUT_FILE | sed '/^```/ d' > $OUT
-IN=$(tail -n +2 $OUT)
+IN=$(cat $OUT)
 OUTPUT=$(cat $OUT_AMINER)
 compareStrings "$IN" "$OUTPUT" "Failed Test in 11."
 exit_code=$((exit_code | $?))
@@ -163,7 +158,10 @@ cat <<EOT > $LOG
 ::1 - - [18/Jul/2020:20:28:43 +0000] "GET / HTTP/1.1" 200 11012 "-" "bob"
 EOT
 
-sleep 2
+runAminerUntilEnd "$AMINER_CMD" "$LOG" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT_AMINER" # "not exit aminer"
+PID=$!
+sudo pkill -x aminer
+wait $PID
 
 awk '/^```$/ && ++n == 24, /^```$/ && n++ == 25' < $INPUT_FILE | sed '/^```/ d' > $OUT
 IN=$(cat $OUT)
@@ -180,9 +178,6 @@ OUTPUT=$($CMD)
 IN="$(sed -n '2p' < $OUT)"
 compareStrings "$IN" "$OUTPUT" "Failed Test in 13."
 exit_code=$((exit_code | $?))
-
-sudo pkill -x aminer
-wait $PID
 
 sudo rm -r logdata-anomaly-miner.wiki
 rm $CFG_PATH
