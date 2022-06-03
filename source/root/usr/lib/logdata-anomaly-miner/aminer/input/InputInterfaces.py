@@ -152,8 +152,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 msg = "Only subclasses of AtomHandlerInterface allowed in subhandler_list."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
-            self.subhandler_list = [None] * len(subhandler_list)
-            for handler_pos, handler_element in enumerate(subhandler_list):
+            self.subhandler_list = [None] * len(self.subhandler_list)
+            for handler_pos, handler_element in enumerate(self.subhandler_list):
                 self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
 
     @abc.abstractmethod
