@@ -359,7 +359,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if not (isinstance(event_data, list) and len(event_data) <= 1 and ((len(event_data) == 1 and (self.target_path_list is None or (
                     isinstance(event_data[0], list) and len(event_data[0]) in [0, len(self.target_path_list)])) and
                     all(isinstance(value, str) for value in event_data[0])) or len(event_data) == 0)):
-            msg = 'Event_data has the wrong format.' \
+            msg = 'Event_data has the wrong format. ' \
                 'The supported formats are [] and [path_value_list], where the path value list is a list of strings with the same ' \
                 'length as the defined paths in the config.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -382,18 +382,18 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.ranges[event_data[0]] = self.calculate_range(event_data[0])
 
             # Set output string
-            if event_data[0] in self.counts.keys() and self.ranges[event_data[0]] is not None:
+            if event_data[0] in self.counts and self.ranges[event_data[0]] is not None:
                 if self.counts[event_data[0]][-1] < self.ranges[event_data[0]][0] or\
                         self.counts[event_data[0]][-1] > self.ranges[event_data[0]][1]:
                     string = 'The current count %s is outside the frequency interval [%s, %s] for %s. '\
-                            'The count will reset at %s (Unix)' % (
-                            self.counts[event_data[0]][-1], self.ranges[event_data[0]][0], self.ranges[event_data[0]][1],
-                            event_data[0], self.next_check_time)
+                            'The count will reset at %s (unix time stamp)' % (
+                                self.counts[event_data[0]][-1], self.ranges[event_data[0]][0], self.ranges[event_data[0]][1],
+                                event_data[0], self.next_check_time)
                 else:
                     string = 'The current count %s is in the frequency interval [%s, %s] for %s. '\
-                            'The count will reset at %s (Unix)' % (
-                            self.counts[event_data[0]][-1], self.ranges[event_data[0]][0], self.ranges[event_data[0]][1],
-                            event_data[0], self.next_check_time)
+                            'The count will reset at %s (unix time stamp)' % (
+                                self.counts[event_data[0]][-1], self.ranges[event_data[0]][0], self.ranges[event_data[0]][1],
+                                event_data[0], self.next_check_time)
             else:
                 string = 'Persistency includes no information for %s.' % event_data[0]
 
