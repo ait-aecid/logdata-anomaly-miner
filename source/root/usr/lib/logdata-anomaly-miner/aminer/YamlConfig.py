@@ -865,6 +865,7 @@ def add_default_analysis_components(analysis_context, anomaly_event_handlers, at
 
 def build_event_handlers(analysis_context, anomaly_event_handlers):
     """Build the event handlers."""
+    import os
     try:
         event_handler_id_list = []
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
@@ -891,7 +892,6 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     ctx = func(analysis_context, item['instance_name'])
                 if item['type'].name == 'KafkaEventHandler':
                     import configparser
-                    import os
                     config = configparser.ConfigParser()
                     if os.access(item['cfgfile'], os.R_OK):
                         config.read(item['cfgfile'])
@@ -908,9 +908,14 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                         except:  # skipcq: FLK-E722
                             pass
                     ctx = func(analysis_context, item['topic'], options)
+                if item['type'].name == 'ZmqEventHandler':
+                       """if topic is "None" zmq will send messages without using any topic."""
+                       if 'topic' not in item:
+                           item['topic'] = None
+                       ctx = func(analysis_context, item['topic'], item['url'])
                 if ctx is None:
                     ctx = func(analysis_context)
-                if item['json'] is True or item['type'].name == 'KafkaEventHandler':
+                if item['json'] is True or item['type'].name == 'KafkaEventHandler' or item['type'].name == 'ZmqEventHandler':
                     from aminer.events.JsonConverterHandler import JsonConverterHandler
                     if item['pretty'] is True:
                         ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=True)
