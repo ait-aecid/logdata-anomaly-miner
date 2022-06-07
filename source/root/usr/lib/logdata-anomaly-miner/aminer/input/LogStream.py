@@ -124,7 +124,7 @@ class FileLogDataResource(LogDataResource):
             if openOsError.errno == errno.ENOENT:
                 return False
             raise
-        if not stat.S_ISREG(stat_data.st_mode):
+        if not stat.S_ISREG(stat_data.st_mode) and not stat.S_ISFIFO(stat_data.st_mode):
             os.close(log_file_fd)
             msg = 'Attempting to open non-regular file %s as file' % encode_byte_string_as_string(self.log_resource_name)
             print(msg, file=sys.stderr)
