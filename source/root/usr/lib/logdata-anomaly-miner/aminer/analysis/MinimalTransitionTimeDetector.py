@@ -386,7 +386,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                      len(event_data) == 1 and isinstance(event_data[0], list) and len(event_data[0]) == len(self.path_list) and
                      all(isinstance(value, str) for value in event_data[0])) or len(event_data) == 0)):
             msg = 'Event_data has the wrong format.' \
-                'The supported formats are [], [path_value_list] [path_value_list_1, path_value_list_2], ' \
+                'The supported formats are [], [path_value_list] and [path_value_list_1, path_value_list_2], ' \
                 'where the path value lists are lists of strings with the same length as the defined paths in the config.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
