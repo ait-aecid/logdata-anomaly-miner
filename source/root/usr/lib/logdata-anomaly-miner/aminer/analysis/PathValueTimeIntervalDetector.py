@@ -301,7 +301,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 return 'Persistency includes no information for %s.' % id_tuple
 
             # Calculate the current time intervals
-            time_intervals = [[max(0, t - self.max_time_diff), min(self.time_period_length, t + self.max_time_diff)] for t in self.appeared_time_list[id_tuple]]
+            time_intervals = [[max(0, t - self.max_time_diff), min(self.time_period_length, t + self.max_time_diff)] for t in
+                              self.appeared_time_list[id_tuple]]
             # Add time intervals, when the time intervals exceed the time period length or undercuts zero.
             if self.appeared_time_list[id_tuple][-1] + self.max_time_diff > self.time_period_length:
                 time_intervals = [[0, self.appeared_time_list[id_tuple][-1] + self.max_time_diff - self.time_period_length]] +\
@@ -403,7 +404,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                             self.appeared_time_list[id_tuple][index + 1:]
 
             # Print a message if the new time is added to the list of observed times
-            msg = 'Time (%s) was removed to the range of previously observed times %s for %s' % (
+            msg = 'Time (%s) was removed from the range of previously observed times %s for %s' % (
                     new_time % self.time_period_length, self.appeared_time_list[id_tuple], id_tuple)
 
         return msg
