@@ -866,6 +866,8 @@ def add_default_analysis_components(analysis_context, anomaly_event_handlers, at
 def build_event_handlers(analysis_context, anomaly_event_handlers):
     """Build the event handlers."""
     import os
+    import stat
+
     try:
         event_handler_id_list = []
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
@@ -878,7 +880,10 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                 if item['type'].name == 'StreamPrinterEventHandler':
                     if 'output_file_path' in item:
                         try:
-                            stream = open(item['output_file_path'], 'w+')
+                            mode = 'w+'
+                            if os.path.exists(item['output_file_path']) and stat.S_ISFIFO(os.stat(item['output_file_path']).st_mode):
+                                mode = 'w'
+                            stream = open(item['output_file_path'], mode)
                             ctx = func(analysis_context, stream)
                         except OSError as e:
                             msg = 'Error occured when opening stream to output_file_path %s. Error: %s' % (item['output_file_path'], e)
