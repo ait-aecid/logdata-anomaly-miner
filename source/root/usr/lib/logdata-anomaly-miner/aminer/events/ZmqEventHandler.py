@@ -1,5 +1,4 @@
 """
-                logging.gitLogger(DEBUG_LOG_NAME).error(msg)
 This module defines an event handler that forwards anomalies to ZeroMQ.
 
 This program is free software: you can redistribute it and/or modify it under
