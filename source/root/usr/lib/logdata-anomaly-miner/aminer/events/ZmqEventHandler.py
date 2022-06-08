@@ -29,7 +29,7 @@ class ZmqEventHandler(EventHandlerInterface):
         self.topic = topic
         self.producer = None
         self.zmq_imported = False
-        logging.getLogger(DEBUG_LOG_NAME).info("ZmqEventHandler initialized" )
+        logging.getLogger(DEBUG_LOG_NAME).info("ZmqEventHandler initialized")
 
     def receive_event(self, _event_type, _event_message, _sorted_log_lines, event_data, _log_atom, event_source):
         """Receive information about a detected event in json format."""
