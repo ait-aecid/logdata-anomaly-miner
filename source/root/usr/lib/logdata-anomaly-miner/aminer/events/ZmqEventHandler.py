@@ -60,11 +60,9 @@ class ZmqEventHandler(EventHandlerInterface):
         try:
             if self.topic:
                 self.producer.send_string(self.topic, flags=zmq.SNDMORE)
-            '''
-            please note that if the JsonConvertHandler was used(json: true)
-            then it is possible to use the socket.recv_json() for the
-            consumer. recv_json() will decode the json-string
-            '''
+            # please note that if the JsonConvertHandler was used(json: true)
+            # then it is possible to use the socket.recv_json() for the
+            # consumer. recv_json() will decode the json-string
             self.producer.send_string(event_data)
         except zmq.ZMQError as err:
             msg = str(err)
