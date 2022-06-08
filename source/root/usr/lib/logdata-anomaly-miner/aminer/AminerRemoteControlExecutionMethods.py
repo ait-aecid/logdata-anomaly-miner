@@ -422,10 +422,10 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
             return
-        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector"]:
+        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector", "PathValueTimeIntervalDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
                 "FAILURE: component class '%s' does not support the print_persistency_event! Only the following classes support it: " \
-                "MinimalTransitionTimeDetector." \
+                "MinimalTransitionTimeDetector and PathValueTimeIntervalDetector." \
                 % component.__class__.__name__
             return
         try:
@@ -473,10 +473,10 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
             return
-        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector"]:
+        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector", "PathValueTimeIntervalDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
                 "FAILURE: component class '%s' does not support the remove_from_persistency_event! Only the following classes support it: "\
-                "MinimalTransitionTimeDetector." \
+                "MinimalTransitionTimeDetector and PathValueTimeIntervalDetector." \
                 % component.__class__.__name__
             return
         try:
