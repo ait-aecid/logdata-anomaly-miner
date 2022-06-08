@@ -909,10 +909,10 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                             pass
                     ctx = func(analysis_context, item['topic'], options)
                 if item['type'].name == 'ZmqEventHandler':
-                       """if topic is "None" zmq will send messages without using any topic."""
-                       if 'topic' not in item:
-                           item['topic'] = None
-                       ctx = func(analysis_context, item['topic'], item['url'])
+                    """if topic is "None" zmq will send messages without using any topic."""
+                    if 'topic' not in item:
+                        item['topic'] = None
+                    ctx = func(analysis_context, item['topic'], item['url'])
                 if ctx is None:
                     ctx = func(analysis_context)
                 if item['json'] is True or item['type'].name == 'KafkaEventHandler' or item['type'].name == 'ZmqEventHandler':
