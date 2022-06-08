@@ -28,6 +28,7 @@ class ZmqEventHandler(EventHandlerInterface):
         self.url = url
         self.topic = topic
         self.producer = None
+        self.context = None
         self.zmq_imported = False
         logging.getLogger(DEBUG_LOG_NAME).info("ZmqEventHandler initialized")
 
