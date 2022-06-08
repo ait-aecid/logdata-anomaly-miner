@@ -620,7 +620,7 @@ class YamlConfigTest(TestBase):
         except ValueError as e:
             msg = "Config-Error: {'AMinerGroup': ['unknown field'], 'Analysis': [{0: ['none or more than one rule validate', {'oneof " \
                   "definition 25': [{'learn_mode': ['unknown field'], 'reset_after_report_flag': ['unknown field'], 'type': {'allowed': [" \
-                  "'ParserCount']}}]}]}], 'EventHandlers': [{1: ['none or more than one rule validate', {'oneof definition 3': [{" \
+                  "'ParserCount']}}]}]}], 'EventHandlers': [{1: ['none or more than one rule validate', {'oneof definition 4': [{" \
                   "'output_file_path': ['unknown field'], 'type': {'allowed': ['SyslogWriterEventHandler']}}]}]}], 'Parser': [{0: ['none " \
                   "or more than one rule validate', {'oneof definition 0': [{'args2': ['unknown field'], 'type': {'forbidden': [" \
                   "'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement', " \

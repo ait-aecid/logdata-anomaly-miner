@@ -130,50 +130,50 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             if ignore_path in match_dict.keys():
                 return False
 
-        # Save the values of the target paths in match_value_list and build a tuple of them
-        match_value_list = []
-        for target_path in self.target_path_list:
-            match_element = match_dict.get(target_path)
-            if match_element is None:
-                if not self.allow_missing_values_flag:
-                    return False
-                match_value_list.append(None)
-            else:
-                if isinstance(match_element, list):
-                    matches = match_element
+        # Get current index from combination of values of paths of target_path_list
+        id_tuple = ()
+        for id_path in self.target_path_list:
+            id_match = log_atom.parser_match.get_match_dictionary().get(id_path)
+            if id_match is None:
+                if self.allow_missing_values_flag is True:
+                    # Insert placeholder for id_path that is not available
+                    id_tuple += ('',)
                 else:
-                    matches = [match_element]
-                for match_element in matches:
-                    match_value_list.append(match_element.match_object)
-        match_value_tuple = tuple(match_value_list)
+                    # Omit log atom if one of the id paths is not found.
+                    return False
+            else:
+                if isinstance(id_match.match_object, bytes):
+                    id_tuple += (id_match.match_object.decode(AminerConfig.ENCODING),)
+                else:
+                    id_tuple += (id_match.match_object,)
 
         # Print message if combination of values is new
-        if match_value_tuple not in self.appeared_time_list:
-            additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in match_value_tuple],
+        if id_tuple not in self.appeared_time_list:
+            additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in id_tuple],
                                       'NewTime': log_atom.atom_time % self.time_period_length}
 
             msg = 'First time (%s) detected for [' % (log_atom.atom_time % self.time_period_length)
-            for match_value in match_value_tuple:
+            for match_value in id_tuple:
                 msg += str(repr(match_value))[1:] + ', '
             msg = msg[:-2] + ']'
             self.print(msg, log_atom=log_atom, affected_path=self.target_path_list, additional_information=additional_information)
-            self.appeared_time_list[match_value_tuple] = [log_atom.atom_time % self.time_period_length]
-            self.counter_reduce_time_intervals[match_value_tuple] = 0
+            self.appeared_time_list[id_tuple] = [log_atom.atom_time % self.time_period_length]
+            self.counter_reduce_time_intervals[id_tuple] = 0
         else:
             # Checks if the time has already been observed
-            if log_atom.atom_time % self.time_period_length not in self.appeared_time_list[match_value_tuple]:
-                # Check and prints an message if the new time is out of range of the observed times
+            if log_atom.atom_time % self.time_period_length not in self.appeared_time_list[id_tuple]:
+                # Check and print a message if the new time is out of range of the observed times
                 # The second query is needed when time intevals exceed over 0/self.time_period_length
                 if all((abs(log_atom.atom_time % self.time_period_length - time) > self.max_time_diff) and
                        (abs(log_atom.atom_time % self.time_period_length - time) < self.time_period_length - self.max_time_diff)
-                        for time in self.appeared_time_list[match_value_tuple]):
-                    additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in match_value_tuple],
-                                              'PreviousAppearedTimes': [float(val) for val in self.appeared_time_list[match_value_tuple]],
+                        for time in self.appeared_time_list[id_tuple]):
+                    additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in id_tuple],
+                                              'PreviousAppearedTimes': [float(val) for val in self.appeared_time_list[id_tuple]],
                                               'NewTime': log_atom.atom_time % self.time_period_length}
 
                     msg = 'New time (%s) out of range of previously observed times %s detected for [' % (
-                            log_atom.atom_time % self.time_period_length, self.appeared_time_list[match_value_tuple])
-                    for match_value in match_value_tuple:
+                            log_atom.atom_time % self.time_period_length, self.appeared_time_list[id_tuple])
+                    for match_value in id_tuple:
                         msg += str(repr(match_value))[1:] + ', '
                     msg = msg[:-2] + ']'
                     self.print(msg, log_atom=log_atom, affected_path=self.target_path_list, additional_information=additional_information)
@@ -184,51 +184,51 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                     self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
                 # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
-                self.insert_and_reduce_time_intervals(match_value_tuple, log_atom.atom_time % self.time_period_length)
+                self.insert_and_reduce_time_intervals(id_tuple, log_atom.atom_time % self.time_period_length)
 
         return True
 
-    def insert_and_reduce_time_intervals(self, match_value_tuple, new_time):
+    def insert_and_reduce_time_intervals(self, id_tuple, new_time):
         """Add the new time to the time list and reduce the time list after num_reduce_time_list of times have been appended."""
         # Increase the counter of new times since last reduction
-        self.counter_reduce_time_intervals[match_value_tuple] += 1
+        self.counter_reduce_time_intervals[id_tuple] += 1
 
         # Get the index in which the new time is inserted
-        if new_time > self.appeared_time_list[match_value_tuple][-1]:
-            time_index = len(self.appeared_time_list[match_value_tuple])
+        if new_time > self.appeared_time_list[id_tuple][-1]:
+            time_index = len(self.appeared_time_list[id_tuple])
         else:
             # skipcq: PTC-W0063
-            time_index = next(index for index, time in enumerate(self.appeared_time_list[match_value_tuple]) if time > new_time)
+            time_index = next(index for index, time in enumerate(self.appeared_time_list[id_tuple]) if time > new_time)
 
         # Insert the new time
-        self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][:time_index] + [new_time] +\
-            self.appeared_time_list[match_value_tuple][time_index:]
+        self.appeared_time_list[id_tuple] = self.appeared_time_list[id_tuple][:time_index] + [new_time] +\
+            self.appeared_time_list[id_tuple][time_index:]
 
         # Reduce the time intervals, by removing the obsolete entries
-        if self.counter_reduce_time_intervals[match_value_tuple] >= self.num_reduce_time_list:
+        if self.counter_reduce_time_intervals[id_tuple] >= self.num_reduce_time_list:
             # Reset the counter
-            self.counter_reduce_time_intervals[match_value_tuple] = 0
+            self.counter_reduce_time_intervals[id_tuple] = 0
             # Check every entry if it enlarges the time intervals, and remove it, if not.
-            last_accepted_time = self.appeared_time_list[match_value_tuple][0] + self.time_period_length
-            for index in range(len(self.appeared_time_list[match_value_tuple])-1, 0, -1):
-                if last_accepted_time - self.appeared_time_list[match_value_tuple][index-1] < 2 * self.max_time_diff:
-                    del self.appeared_time_list[match_value_tuple][index]
+            last_accepted_time = self.appeared_time_list[id_tuple][0] + self.time_period_length
+            for index in range(len(self.appeared_time_list[id_tuple])-1, 0, -1):
+                if last_accepted_time - self.appeared_time_list[id_tuple][index-1] < 2 * self.max_time_diff:
+                    del self.appeared_time_list[id_tuple][index]
                 else:
-                    last_accepted_time = self.appeared_time_list[match_value_tuple][index]
+                    last_accepted_time = self.appeared_time_list[id_tuple][index]
 
             # Checks the last and first two time of the time list, and removes the obsolete entries
-            if (len(self.appeared_time_list[match_value_tuple]) >= 4) and (
-                    self.time_period_length + self.appeared_time_list[match_value_tuple][1] -
-                    self.appeared_time_list[match_value_tuple][-2] < 2 * self.max_time_diff):
-                self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:len(self.appeared_time_list[
-                        match_value_tuple])-1]
-            elif self.time_period_length + self.appeared_time_list[match_value_tuple][0] - self.appeared_time_list[match_value_tuple][-2] <\
+            if (len(self.appeared_time_list[id_tuple]) >= 4) and (
+                    self.time_period_length + self.appeared_time_list[id_tuple][1] -
+                    self.appeared_time_list[id_tuple][-2] < 2 * self.max_time_diff):
+                self.appeared_time_list[id_tuple] = self.appeared_time_list[id_tuple][1:len(self.appeared_time_list[
+                        id_tuple])-1]
+            elif self.time_period_length + self.appeared_time_list[id_tuple][0] - self.appeared_time_list[id_tuple][-2] <\
                     2 * self.max_time_diff:
-                self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][:len(self.appeared_time_list[
-                        match_value_tuple])-1]
-            elif self.time_period_length + self.appeared_time_list[match_value_tuple][1] - self.appeared_time_list[match_value_tuple][-1] <\
+                self.appeared_time_list[id_tuple] = self.appeared_time_list[id_tuple][:len(self.appeared_time_list[
+                        id_tuple])-1]
+            elif self.time_period_length + self.appeared_time_list[id_tuple][1] - self.appeared_time_list[id_tuple][-1] <\
                     2 * self.max_time_diff:
-                self.appeared_time_list[match_value_tuple] = self.appeared_time_list[match_value_tuple][1:]
+                self.appeared_time_list[id_tuple] = self.appeared_time_list[id_tuple][1:]
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -245,10 +245,10 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
     def do_persist(self):
         """Immediately write persistence data to storage."""
         persist_data = [[], []]
-        for match_value_tuple, time_list in self.appeared_time_list.items():
-            persist_data[0].append((match_value_tuple, time_list))
-        for match_value_tuple, counter in self.counter_reduce_time_intervals.items():
-            persist_data[1].append((match_value_tuple, counter))
+        for id_tuple, time_list in self.appeared_time_list.items():
+            persist_data[0].append((id_tuple, time_list))
+        for id_tuple, counter in self.counter_reduce_time_intervals.items():
+            persist_data[1].append((id_tuple, counter))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
@@ -256,11 +256,74 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         """Load the persistence data from storage."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
-            for match_value_tuple, time_list in persistence_data[0]:
-                self.appeared_time_list[tuple(match_value_tuple)] = time_list
-            for match_value_tuple, counter in persistence_data[1]:
-                self.counter_reduce_time_intervals[tuple(match_value_tuple)] = counter
+            for id_tuple, time_list in persistence_data[0]:
+                self.appeared_time_list[tuple(id_tuple)] = time_list
+            for id_tuple, counter in persistence_data[1]:
+                self.counter_reduce_time_intervals[tuple(id_tuple)] = counter
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+
+    def print_persistency_event(self, event_type, event_data):
+        """
+        Print the persistency of component_name. Event_data specifies what information is outputed.
+        @return a message with information about the persistency.
+        @throws Exception when the output for the event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Query if event_data has one of the stated formats
+        if not (isinstance(event_data, list) and len(event_data) <= 1 and ((len(event_data) == 1 and (
+                    isinstance(event_data[0], list) and len(event_data[0]) in [0, len(self.target_path_list)]) and
+                    all(isinstance(value, str) for value in event_data[0])) or len(event_data) == 0)):
+            msg = 'Event_data has the wrong format. ' \
+                'The supported formats are [] and [path_value_list], where the path value list is a list of strings with the same ' \
+                'length as the defined paths in the config.'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        # Convert path value lists to tuples
+        for i in range(len(event_data)):
+            event_data[i] = tuple(event_data[i])
+
+        if len(event_data) == 0:
+            # Print the set of all appeared path values if no event_data is given
+            values_set = set(self.appeared_time_list.keys())
+            values_list = list(values_set)
+            values_list.sort()
+
+            string = 'Time intervals are tracked for the following path values: %s' % values_list
+        elif len(event_data) == 1:
+            id_tuple = event_data[0]
+            # Check if the path value is tracked
+            if id_tuple not in self.appeared_time_list:
+                return 'Persistency includes no information for %s.' % id_tuple
+
+            # Calculate the current time intervals
+            time_intervals = [[max(0, t - self.max_time_diff), min(self.time_period_length, t + self.max_time_diff)] for t in
+                              self.appeared_time_list[id_tuple]]
+            # Add time intervals, when the time intervals exceed the time period length or undercuts zero.
+            if self.appeared_time_list[id_tuple][-1] + self.max_time_diff > self.time_period_length:
+                time_intervals = [[0, self.appeared_time_list[id_tuple][-1] + self.max_time_diff - self.time_period_length]] +\
+                    time_intervals
+            if self.appeared_time_list[id_tuple][0] - self.max_time_diff < 0:
+                time_intervals = time_intervals +\
+                    [[self.appeared_time_list[id_tuple][0] - self.max_time_diff + self.time_period_length, self.time_period_length]]
+
+            # Get the indices of the time windows whoch intercept and therefore are merged
+            indices = [i for i in range(len(time_intervals) - 1) if time_intervals[i][1] > time_intervals[i + 1][0]]
+
+            # Merge the time intervals
+            for index in reversed(indices):
+                time_intervals[index + 1][0] = time_intervals[index][0]
+                time_intervals = time_intervals[:index] + time_intervals[index + 1:]
+
+            # Set output string
+            string = 'The list of appeared times is %s and the resulting time intervals are %s for path value %s' % (
+                        self.appeared_time_list[id_tuple], time_intervals, id_tuple)
+
+        return string
 
     def add_to_persistency_event(self, event_type, event_data):
         """
@@ -277,34 +340,72 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 len(event_data[0]) != len(self.target_path_list) or not all(isinstance(value, str) for value in event_data[0]) or\
                 not isinstance(event_data[1], (int, float)):
             msg = 'Event_data has the wrong format. ' \
-                'The supported format is [path_value_list, new_transition_time], ' \
+                'The supported format is [path_value_list, new_appeared_time], ' \
                 'where path_value_list is a list of strings with the same length as paths defined in the config.'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
-        match_value_tuple = tuple([bytes(val, 'utf-8') for val in event_data[0]])
+        id_tuple = tuple(event_data[0])
+        new_time = event_data[1]
 
         msg = ''
-        if match_value_tuple not in self.appeared_time_list:
+        if id_tuple not in self.appeared_time_list:
             # Print message if combination of values is new
-            msg = 'First time (%s) added for [' % (event_data[1] % self.time_period_length)
-            for match_value in match_value_tuple:
-                msg += str(repr(match_value))[1:] + ', '
-            msg = msg[:-2] + ']'
+            msg = 'First time (%s) added for %s' % (new_time % self.time_period_length, id_tuple)
 
-            self.appeared_time_list[match_value_tuple] = [event_data[1] % self.time_period_length]
-            self.counter_reduce_time_intervals[match_value_tuple] = 0
+            self.appeared_time_list[id_tuple] = [new_time % self.time_period_length]
+            self.counter_reduce_time_intervals[id_tuple] = 0
         else:
-            # Prints an message if the new time is added to the list of observed times
-            msg = 'New time (%s) added to the range of previously observed times %s for [' % (
-                    event_data[1] % self.time_period_length, self.appeared_time_list[match_value_tuple])
-            for match_value in match_value_tuple:
-                msg += str(repr(match_value))[1:] + ', '
-            msg = msg[:-2] + ']'
+            # Print a message if the new time is added to the list of observed times
+            msg = 'New time (%s) added to the range of previously observed times %s for %s' % (
+                    new_time % self.time_period_length, self.appeared_time_list[id_tuple], id_tuple)
 
             # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
-            self.insert_and_reduce_time_intervals(match_value_tuple, event_data[1] % self.time_period_length)
-            msg += str(self.appeared_time_list)
+            self.insert_and_reduce_time_intervals(id_tuple, new_time % self.time_period_length)
+
+        return msg
+
+    def remove_from_persistency_event(self, event_type, event_data):
+        """
+        Add or overwrite the information of event_data to the persistency of component_name.
+        @return a message with information about the addition to the persistency.
+        @throws Exception when the addition of this special event using given event_data was not possible.
+        """
+        if event_type != 'Analysis.%s' % self.__class__.__name__:
+            msg = 'Event not from this source'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        if not isinstance(event_data, list) or len(event_data) != 2 or not isinstance(event_data[0], list) or\
+                len(event_data[0]) != len(self.target_path_list) or not all(isinstance(value, str) for value in event_data[0]) or\
+                not isinstance(event_data[1], (int, float)):
+            msg = 'Event_data has the wrong format. ' \
+                'The supported format is [path_value_list, old_appeared_time], ' \
+                'where path_value_list is a list of strings with the same length as paths defined in the config.'
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+        id_tuple = tuple(event_data[0])
+        new_time = event_data[1]
+
+        msg = ''
+        if id_tuple not in self.appeared_time_list:
+            # Print message if combination of values is new
+            msg = '%s has previously not appeared' % (id_tuple)
+        elif not any(abs(new_time - val) < 0.5 for val in self.appeared_time_list[id_tuple]):
+            # Print a message if the new time does not appear the list of observed times
+            msg = 'Time (%s) does not appear in the previously observed times %s for %s' % (
+                    new_time % self.time_period_length, self.appeared_time_list[id_tuple], id_tuple)
+        else:
+            # Remove the old time from the time list.
+            for index in reversed(range(len(self.appeared_time_list[id_tuple]))):
+                if abs(new_time - self.appeared_time_list[id_tuple][index]) < 0.5:
+                    self.appeared_time_list[id_tuple] = self.appeared_time_list[id_tuple][:index] +\
+                            self.appeared_time_list[id_tuple][index + 1:]
+
+            # Print a message if the new time is added to the list of observed times
+            msg = 'Time (%s) was removed from the range of previously observed times %s for %s' % (
+                    new_time % self.time_period_length, self.appeared_time_list[id_tuple], id_tuple)
 
         return msg
 
