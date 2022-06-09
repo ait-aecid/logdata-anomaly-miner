@@ -402,7 +402,10 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 for value_2 in self.time_matrix[value]:
                     values_set.add(value_2)
 
-            string = 'Persistency includes transition times to the following path values: %s' % list(values_set)
+            values_list = list(values_set)
+            values_list.sort()
+
+            string = 'Persistency includes transition times to the following path values: %s' % values_list
         elif len(event_data) == 1:
             # Print the set of all path values which have a transition time to the path value specified in event_data
             # Check if the path value has an entry in self.time_matrix
@@ -416,10 +419,13 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 if event_data[0] in self.time_matrix[value]:
                     values_set.add(value)
 
+            values_list = list(values_set)
+            values_list.sort()
+
             # Set output string
             if len(values_set) > 0:
                 string = 'Persistency includes transition times from %s to the following path values: %s' % (
-                        event_data[0], list(values_set))
+                        event_data[0], values_list)
             else:
                 string = 'Persistency includes no transition time from %s.' % event_data[0]
         else:
