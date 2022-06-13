@@ -132,8 +132,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
             timestamp = time.time()
-        for i in range(len(target_paths)):
-            target_path = target_paths[i]
+        for i, target_path in enumerate(target_paths):
             value = value_list[i]
             detector_info = self.expected_values_dict.get(value)
             if detector_info is not None:
