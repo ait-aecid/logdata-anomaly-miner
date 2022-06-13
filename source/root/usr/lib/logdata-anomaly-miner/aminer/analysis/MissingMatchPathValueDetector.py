@@ -36,11 +36,12 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
-                 default_interval=3600, realert_interval=86400, output_log_line=True, stop_learning_time=None,
+                 default_interval=3600, realert_interval=86400, combine_values=True, output_log_line=True, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list to extract a source identification value from each logatom.
+        @param combine_values if true the combined values are used as identifiers. When false, individual values are checked.
         @param stop_learning_time switch the auto_include_flag to False after the time.
         @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
@@ -49,6 +50,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.auto_include_flag = auto_include_flag
         self.default_interval = default_interval
         self.realert_interval = realert_interval
+        self.combine_values = combine_values
         # This timestamps is compared with timestamp values from log atoms for activation of alerting logic. The first timestamp from logs
         # above this value will trigger alerting.
         self.next_check_timestamp = 0
@@ -121,7 +123,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.auto_include_flag = False
 
         value = self.get_channel_key(log_atom)
-        if value is None:
+        if value is None or (not value[0] and not value[1]):
             return False
         target_paths, value_list = value
         if isinstance(target_paths, str) and isinstance(value_list, str):
@@ -162,6 +164,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         for target_path in self.target_path_list:
             match = log_atom.parser_match.get_match_dictionary().get(target_path)
             if match is None:
+                if self.combine_values:
+                    return None
                 continue
             matches = []
             if isinstance(match, list):
@@ -175,6 +179,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     affected_log_atom_values = match.match_object
                 value_list.append(str(affected_log_atom_values))
             path_list.append(target_path)
+        if self.combine_values:
+            value_list = str(value_list)
+            path_list = str(path_list)
         return path_list, value_list
 
     def check_timeouts(self, timestamp, log_atom):
