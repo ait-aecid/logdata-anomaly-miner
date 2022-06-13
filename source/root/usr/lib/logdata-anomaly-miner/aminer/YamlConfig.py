@@ -429,7 +429,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathListValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
             elif item['type'].name == 'EventSequenceDetector':

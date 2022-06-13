@@ -123,27 +123,33 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         value = self.get_channel_key(log_atom)
         if value is None:
             return False
-        target_path, value = value
+        target_paths, value_list = value
+        if isinstance(target_paths, str) and isinstance(value_list, str):
+            target_paths = [target_paths]
+            value_list = [value_list]
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
             timestamp = time.time()
-        detector_info = self.expected_values_dict.get(value)
-        if detector_info is not None:
-            # Just update the last seen value and switch from non-reporting error state to normal state.
-            detector_info[0] = timestamp
-            if detector_info[2] != 0:
-                if timestamp >= detector_info[2]:
-                    detector_info[2] = 0
-                # Delta of this detector might be lower than the default maximum recheck time.
-                self.next_check_timestamp = min(self.next_check_timestamp, timestamp + detector_info[1])
+        for i in range(len(target_paths)):
+            target_path = target_paths[i]
+            value = value_list[i]
+            detector_info = self.expected_values_dict.get(value)
+            if detector_info is not None:
+                # Just update the last seen value and switch from non-reporting error state to normal state.
+                detector_info[0] = timestamp
+                if detector_info[2] != 0:
+                    if timestamp >= detector_info[2]:
+                        detector_info[2] = 0
+                    # Delta of this detector might be lower than the default maximum recheck time.
+                    self.next_check_timestamp = min(self.next_check_timestamp, timestamp + detector_info[1])
 
-        elif self.auto_include_flag:
-            self.expected_values_dict[value] = [timestamp, self.default_interval, 0, target_path]
-            self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
-            self.log_learned_values += 1
-            self.log_new_learned_values.append(value)
-            if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+            elif self.auto_include_flag:
+                self.expected_values_dict[value] = [timestamp, self.default_interval, 0, target_path]
+                self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
+                self.log_learned_values += 1
+                self.log_new_learned_values.append(value)
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
         self.check_timeouts(timestamp, log_atom)
         self.log_success += 1
@@ -152,10 +158,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     def get_channel_key(self, log_atom):
         """Get the key identifying the channel this log_atom is coming from."""
         value_list = []
+        path_list = []
         for target_path in self.target_path_list:
             match = log_atom.parser_match.get_match_dictionary().get(target_path)
             if match is None:
-                return None
+                continue
             matches = []
             if isinstance(match, list):
                 matches = match
@@ -167,7 +174,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 else:
                     affected_log_atom_values = match.match_object
                 value_list.append(str(affected_log_atom_values))
-        return self.target_path_list, str(value_list)
+            path_list.append(target_path)
+        return path_list, value_list
 
     def check_timeouts(self, timestamp, log_atom):
         """Check if there was any timeout on a channel, thus triggering event dispatching."""
@@ -192,10 +200,10 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                         old = self.next_check_timestamp
                         self.next_check_timestamp = min(self.next_check_timestamp, self.last_seen_timestamp - value_overdue_time)
                         if old > self.next_check_timestamp or self.next_check_timestamp < detector_info[2]:
-                            continue
+                            break
                 # avoid early re-alerting
                 if value_overdue_time > 0:
-                    missing_value_list.append([value, value_overdue_time, detector_info[1]])
+                    missing_value_list.append([detector_info[3], value, value_overdue_time, detector_info[1]])
                     # Set the next alerting time.
                     detector_info[2] = self.last_seen_timestamp + self.realert_interval
                     self.expected_values_dict[value] = detector_info
@@ -204,14 +212,14 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 # on the arrival of tokens following a longer gap
                 elif self.last_seen_timestamp > old_last_seen_timestamp + detector_info[1]:
                     value_overdue_time = self.last_seen_timestamp - old_last_seen_timestamp - detector_info[1]
-                    missing_value_list.append([value, value_overdue_time, detector_info[1]])
+                    missing_value_list.append([detector_info[3], value, value_overdue_time, detector_info[1]])
                     # Set the next alerting time.
                     detector_info[2] = self.last_seen_timestamp + self.realert_interval
                     self.expected_values_dict[value] = detector_info
             if missing_value_list:
                 message_part = []
                 affected_log_atom_values = []
-                for value, overdue_time, interval in missing_value_list:
+                for target_path_list, value, overdue_time, interval in missing_value_list:
                     e = {}
                     try:
                         if isinstance(value, list):
@@ -230,15 +238,15 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     except UnicodeError:
                         data = repr(value)
                     if self.__class__.__name__ == 'MissingMatchPathValueDetector':
-                        e['TargetPathList'] = self.target_path_list
-                        message_part.append('  %s: %s overdue %ss (interval %s)' % (self.target_path_list, data, overdue_time,
+                        e['TargetPathList'] = target_path_list
+                        message_part.append('  %s: %s overdue %ss (interval %s)\n' % (target_path_list, data, overdue_time,
                                             interval))
                     else:
                         target_paths = ''
                         for target_path in self.target_path_list:
                             target_paths += target_path + ', '
                         e['TargetPathList'] = self.target_path_list
-                        message_part.append('  %s: %s overdue %ss (interval %s)' % (target_paths[:-2], data, overdue_time, interval))
+                        message_part.append('  %s: %s overdue %ss (interval %s)\n' % (target_paths[:-2], data, overdue_time, interval))
                     e['Value'] = str(value)
                     e['OverdueTime'] = str(overdue_time)
                     e['Interval'] = str(interval)
@@ -247,7 +255,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                                       'AffectedLogAtomValues': affected_log_atom_values}
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
-                    self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part)])
+                    self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part).strip()])
         return True
 
     def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):

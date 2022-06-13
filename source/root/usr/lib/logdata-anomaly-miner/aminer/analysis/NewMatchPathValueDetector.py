@@ -127,6 +127,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 if self.output_logline:
                     original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                     sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + data]
+                else:
+                    sorted_log_lines = [str(res)]
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', sorted_log_lines, event_data,
