@@ -63,21 +63,25 @@ function runAminerUntilEnd() {
   LOGFILE=$2
   REP_PATH=$3
   CFG_PATH=$4
-  if [[ $CFG_PATH == *.py ]]; then
-    echo "config_properties['Core.PersistencePeriod'] = 1" | sudo tee -a $CFG_PATH > /dev/null
-  elif [[ $CFG_PATH == *.yml ]]; then
-    echo "Core.PersistencePeriod: 1" | sudo tee -a $CFG_PATH > /dev/null
-  else
-    return 2
+  ps cax | grep aminer > /dev/null
+  test_aminer=$?
+  if [[ $test_aminer != 0 ]]; then
+    if [[ $CFG_PATH == *.py ]]; then
+      echo "config_properties['Core.PersistencePeriod'] = 1" | sudo tee -a $CFG_PATH > /dev/null
+    elif [[ $CFG_PATH == *.yml ]]; then
+      echo "Core.PersistencePeriod: 1" | sudo tee -a $CFG_PATH > /dev/null
+    else
+      return 2
+    fi
+    sudo rm $REP_PATH 2> /dev/null
+    if [ $# -ge 5 ]; then
+      OUT=$5
+      $CMD > $OUT &
+    elif [ $# -eq 4 ]; then
+      $CMD &
+    fi
+    PID=$!
   fi
-  sudo rm $REP_PATH 2> /dev/null
-  if [ $# -ge 5 ]; then
-    OUT=$5
-    $CMD > $OUT &
-  elif [ $# -eq 4 ]; then
-    $CMD &
-  fi
-  PID=$!
   FILE_SIZE=`stat --printf="%s" $LOGFILE 2> /dev/null`
   IN=`cat $REP_PATH 2> /dev/null`
   IFS=',' read -ra ADDR <<< "$IN"
