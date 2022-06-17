@@ -170,7 +170,7 @@ while [[ ("$CURRENT_SIZE" != "$FILE_SIZE" || "$CURRENT_SIZE" == "") && $CNTR -lt
   CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
   CNTR=$((++CNTR))
 done
-sleep 8
+sleep 3
 sudo pkill -x aminer
 wait $PID
 

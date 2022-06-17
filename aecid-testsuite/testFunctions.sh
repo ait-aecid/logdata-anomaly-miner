@@ -90,7 +90,7 @@ function runAminerUntilEnd() {
      CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
      CNTR=$((++CNTR))
   done
-  sleep 8
+  sleep 3
   sudo sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
   if [ $# -lt 6 ]; then
     sudo pkill -x aminer
