@@ -427,11 +427,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'MissingMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
-                                    realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
+                                    realert_interval=item['realert_interval'], combine_values=item['combine_values'],
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathListValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
-                                    realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
+                                    realert_interval=item['realert_interval'], combine_values=item['combine_values'],
+                                    output_log_line=item['output_logline'])
             elif item['type'].name == 'EventSequenceDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], seq_len=item['seq_len'],
