@@ -162,7 +162,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # List of the numbers of variables of the eventTypes
         self.length = []
-        # Used to keep track of the indices of the variables if the path_list is not empty
+        # Used to keep track of the indices of the variables if the target_path_list is not empty
         self.variable_path_num = []
         # List of the found vartypes
         self.var_type = []
@@ -496,7 +496,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # List of the successes of the binomialtest for the rejection in the s_gof or variables of discrete type
             self.bt_results[event_index] = [[] for i in range(self.length[event_index])]
 
-            # Adds the variable indices to the variable_path_num-list if the path_list is not empty
+            # Adds the variable indices to the variable_path_num-list if the target_path_list is not empty
             if self.path_list is not None:
                 for var_index in range(self.length[event_index]):
                     if self.event_type_detector.variable_key_list[event_index][var_index] in self.path_list:
@@ -553,7 +553,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Updates the lists for each eventType individually
         for event_index in range(self.num_events):
-            # Adds the variable indices to the variable_path_num-list if the path_list is not empty
+            # Adds the variable indices to the variable_path_num-list if the target_path_list is not empty
             if self.path_list is not None:
                 for var_index in range(self.length[event_index]):
                     if self.event_type_detector.variable_key_list[event_index][var_index] in self.path_list:
@@ -577,7 +577,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
         # Initial detection of variable types
-        if self.event_type_detector.num_eventlines[event_index] == self.num_init and self.var_type[event_index][0] == []:
+        if self.event_type_detector.num_event_lines[event_index] == self.num_init and self.var_type[event_index][0] == []:
             # Test all variables
 
             logging.getLogger(DEBUG_LOG_NAME).debug('%s started initial detection of var types.', self.__class__.__name__)
@@ -612,7 +612,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     else:
                         self.var_type[event_index][var_index] = tmp_var_type
 
-            # Test only the variables with paths in the path_list
+            # Test only the variables with paths in the target_path_list
             else:
                 for var_index in self.variable_path_num[event_index]:
                     tmp_var_type = self.detect_var_type(event_index, var_index)
@@ -654,8 +654,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.log_new_learned_values.append(self.var_type[event_index])
 
         # Update variable types
-        elif self.event_type_detector.num_eventlines[event_index] > self.num_init and (
-                self.event_type_detector.num_eventlines[event_index] - self.num_init) % self.num_update == 0:
+        elif self.event_type_detector.num_event_lines[event_index] > self.num_init and (
+                self.event_type_detector.num_event_lines[event_index] - self.num_init) % self.num_update == 0:
 
             logging.getLogger(DEBUG_LOG_NAME).debug('%s started update phase of var types.', self.__class__.__name__)
             # Check if the updates of the variable types should be stopped
@@ -723,7 +723,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
             # Reduce the number of variables, which are tracked
             if (self.num_updates_until_var_reduction > 0 and (
-                    self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update ==
+                    self.event_type_detector.num_event_lines[event_index] - self.num_init) / self.num_update ==
                     self.num_updates_until_var_reduction - 1):
 
                 for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
@@ -779,11 +779,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
             # Saves the initial reference state of the var_type_history_list for the calculation of the indicator
             if ((self.num_updates_until_var_reduction == 0) or (
-                    self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update >=
-                    self.num_updates_until_var_reduction - 1) and (not isinstance(self.num_var_type_hist_ref, bool)) and (
+                    self.event_type_detector.num_event_lines[event_index] - self.num_init) / self.num_update >=
+                self.num_updates_until_var_reduction - 1) and (not isinstance(self.num_var_type_hist_ref, bool)) and (
                     (len(self.var_type_history_list_reference) < event_index + 1) or
                     self.var_type_history_list_reference[event_index] == []) and (
-                    (self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update >=
+                    (self.event_type_detector.num_event_lines[event_index] - self.num_init) / self.num_update >=
                     self.num_var_type_hist_ref - 1):
 
                 if len(self.var_type_history_list_reference) < event_index + 1:
@@ -811,12 +811,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Check the indicator for the variable types of the Event and generates an output, if it fails
             else:
                 if ((self.num_updates_until_var_reduction == 0) or (
-                        self.event_type_detector.num_eventlines[event_index] - self.num_init) /
-                        self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(
+                        self.event_type_detector.num_event_lines[event_index] - self.num_init) /
+                    self.num_update >= self.num_updates_until_var_reduction - 1) and (not isinstance(
                         self.num_var_type_considered_ind, bool)) and (not isinstance(self.num_var_type_hist_ref, bool)) and len(
                     self.var_type_history_list_reference) > event_index and (self.var_type_history_list_reference[event_index] != []) and (
-                        ((self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update
-                            - self.num_var_type_hist_ref) % self.num_var_type_considered_ind) == 0:
+                        ((self.event_type_detector.num_event_lines[event_index] - self.num_init) / self.num_update
+                         - self.num_var_type_hist_ref) % self.num_var_type_considered_ind) == 0:
 
                     # Shorten the var_type_history_list
                     if len(self.var_type_history_list[event_index]) > 0 and len(self.var_type_history_list[event_index][0]) > 0 and len(
@@ -849,15 +849,15 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         for var_index in range(len(self.var_type[event_index])):  # skipcq: PTC-W0060
                             if indicator_list[var_index] >= self.indicator_thres:
                                 indices_failed_tests.append(var_index)
-                                self.failed_indicators[event_index][var_index].append(self.event_type_detector.num_eventlines[event_index])
+                                self.failed_indicators[event_index][var_index].append(self.event_type_detector.num_event_lines[event_index])
 
                         # Multiply the single values of the indicator with their corresponding weights
                         # Number of the log line which corresponds to the first indicator, which is taken into account
-                        first_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update *\
-                            self.num_var_type_considered_ind * (self.num_ind_for_weights + self.num_skipped_ind_for_weights)
+                        first_line_num = self.event_type_detector.num_event_lines[event_index] - self.num_update * \
+                                         self.num_var_type_considered_ind * (self.num_ind_for_weights + self.num_skipped_ind_for_weights)
                         # Number of the log line which corresponds to the last indicator, which is taken into account
-                        last_line_num = self.event_type_detector.num_eventlines[event_index] - self.num_update *\
-                            self.num_var_type_considered_ind * self.num_skipped_ind_for_weights
+                        last_line_num = self.event_type_detector.num_event_lines[event_index] - self.num_update * \
+                                        self.num_var_type_considered_ind * self.num_skipped_ind_for_weights
 
                         for var_index in indices_failed_tests:
                             lower_ind = False  # Index of the lower limit of the considered values of the failed_indicator list
@@ -915,8 +915,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         not isinstance(self.num_update_var_type_hist_ref, bool)) and len(
                         self.var_type_history_list_reference) >= event_index + 1 and \
                         self.var_type_history_list_reference[event_index] != [] and (((
-                        self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update
-                        - self.num_var_type_hist_ref) % self.num_update_var_type_hist_ref == 0):
+                                                                                              self.event_type_detector.num_event_lines[event_index] - self.num_init) / self.num_update
+                                                                                      - self.num_var_type_hist_ref) % self.num_update_var_type_hist_ref == 0):
 
                     for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
                         self.var_type_history_list_reference[event_index][var_index] = []
@@ -1490,7 +1490,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Check if still static
             if all(new_values[i] == self.event_type_detector.values[event_index][var_index][0] for i in range(self.num_update)):
                 if self.var_type[event_index][var_index][2] and self.num_stat_stop_update is True and \
-                        self.event_type_detector.num_eventlines[event_index] >= self.num_stat_stop_update:
+                        self.event_type_detector.num_event_lines[event_index] >= self.num_stat_stop_update:
                     self.event_type_detector.check_variables[event_index][var_index] = False
                     self.event_type_detector.values[event_index][var_index] = []
                     self.var_type[event_index][var_index] = []
@@ -2008,7 +2008,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.var_type[event_index]))]
 
             # Append the first entries to the history list
-            # Test only the variables with paths in the path_list
+            # Test only the variables with paths in the target_path_list
             if self.path_list is None:
                 index_list = range(self.length[event_index])
             # Test all variables
@@ -2222,9 +2222,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def print_changed_var_type(self, event_index, vt_old, vt_new, var_index, log_atom, confidence=None):
         """Print the changed variable types."""
         if self.save_statistics and ((self.num_updates_until_var_reduction > 0 and (
-                self.event_type_detector.num_eventlines[event_index] - self.num_init) / self.num_update >=
-                self.num_updates_until_var_reduction - 1)):
-            self.changed_var_types.append(self.event_type_detector.num_eventlines[event_index])
+                self.event_type_detector.num_event_lines[event_index] - self.num_init) / self.num_update >=
+                                      self.num_updates_until_var_reduction - 1)):
+            self.changed_var_types.append(self.event_type_detector.num_event_lines[event_index])
 
         if (self.silence_output_without_confidence and confidence is None) or self.silence_output_except_indicator:
             return
@@ -2248,12 +2248,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         if self.event_type_detector.id_path_list != []:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                          'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]},
+                          'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_event_lines[event_index]},
                           'IDpaths': self.event_type_detector.id_path_list,
                           'IDvalues': list(self.event_type_detector.id_path_list_tuples[event_index])}
         else:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                          'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
+                          'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_event_lines[event_index]}}
         vt_old_string = get_vt_string(vt_old)
         vt_new_string = get_vt_string(vt_new)
         for listener in self.anomaly_event_handlers:
@@ -2262,7 +2262,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 "Variable type of path '%s' of event %s changed from %s to %s after the %s-th analysed line" % (
                     self.event_type_detector.variable_key_list[event_index][var_index],
                     self.event_type_detector.get_event_type(event_index), vt_old_string, vt_new_string,
-                    self.event_type_detector.num_eventlines[event_index]), sorted_log_lines, event_data, log_atom, self)
+                    self.event_type_detector.num_event_lines[event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print_reject_var_type(self, event_index, vt, var_index, log_atom):
         """Print the changed variable types."""
@@ -2288,18 +2288,18 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         if self.event_type_detector.id_path_list != []:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                          'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_eventlines[event_index]},
+                          'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_event_lines[event_index]},
                           'IDpaths': self.event_type_detector.id_path_list,
                           'IDvalues': list(self.event_type_detector.id_path_list_tuples[event_index])}
         else:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                          'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_eventlines[event_index]}}
+                          'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_event_lines[event_index]}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Analysis.%s' % self.__class__.__name__,
                 "Variable type of path '%s' of event %s would reject the type '%s' after the %s-th analysed line" % (
                     self.event_type_detector.variable_key_list[event_index][var_index],
-                    self.event_type_detector.get_event_type(event_index), vt[0], self.event_type_detector.num_eventlines[
+                    self.event_type_detector.get_event_type(event_index), vt[0], self.event_type_detector.num_event_lines[
                         event_index]), sorted_log_lines, event_data, log_atom, self)
 
     def print(self, message, log_atom, affected_path, confidence=None, indicator=None):

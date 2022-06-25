@@ -27,7 +27,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MatchValueFilter'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'empty': False},
                     'parsed_atom_handler_dict': {
                         'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': 'string'}}, 'required': True},
                     'default_parsed_atom_handler': {'type': 'string', 'nullable': True},
@@ -37,7 +37,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True},
                     'type': {'type': 'string', 'allowed': ['PCADetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
                     'window_size': {'type': ['integer', 'float'], 'min': 0.001},
                     'min_anomaly_score': {'type': 'float'},
                     'min_variance': {'type': 'float'},
@@ -52,7 +52,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EnhancedNewMatchPathValueComboDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True, 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'allow_missing_values': {'type': 'boolean'},
                     'learn_mode': {'type': 'boolean'},
@@ -64,7 +64,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EventCorrelationDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'max_hypotheses': {'type': 'integer', 'min': 1},
                     'hypothesis_max_delta_time': {'type': 'float', 'min': 0.01},
                     'generation_probability': {'type': 'float', 'min': 0, 'max': 1},
@@ -88,7 +88,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EventFrequencyDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'window_size': {'type': ['integer', 'float'], 'min': 0.001},
                     'num_windows': {'type': 'integer'},
                     'empty_window_warnings': {'type': 'boolean'},
@@ -107,7 +107,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EventSequenceDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'seq_len': {'type': 'integer', 'min': 1},
                     'timeout': {'type': 'integer', 'min': -1},
@@ -123,7 +123,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueRangeDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
@@ -136,7 +136,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['CharsetDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
@@ -149,7 +149,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EntropyDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'prob_thresh': {'type': 'float'},
                     'default_freqs': {'type': 'boolean'},
                     'skip_repetitions': {'type': 'boolean'},
@@ -164,7 +164,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EventTypeDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'allow_missing_id': {'type': 'boolean'},
@@ -216,7 +216,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['PathDependentHistogramAnalysis'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'empty': False},
                     'bin_definition': {'type': 'string', 'required': True, 'empty': False},
                     'report_interval': {'type': 'integer', 'required': True, 'min': 1},
                     'reset_after_report_flag': {'type': 'boolean'},
@@ -228,7 +228,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MatchFilter'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'value_list': {
                         'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True},
                     'output_logline': {'type': 'boolean'},
@@ -239,7 +239,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MatchValueAverageChangeDetector'], 'required': True},
                     'timestamp_path': {'type': 'string', 'required': True, 'nullable': True, 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'min_bin_elements': {'type': 'integer', 'required': True, 'min': 1},
                     'min_bin_time': {'type': 'integer', 'required': True, 'min': 1},
                     'debug_mode': {'type': 'boolean'},
@@ -252,7 +252,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MatchValueStreamWriter'], 'required': True},
                     'stream': {'type': 'string', 'allowed': ['sys.stdout', 'sys.stderr'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'separator': {'type': 'string', 'required': True},
                     'missing_value_string': {'type': 'string', 'required': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
@@ -261,7 +261,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MissingMatchPathValueDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
                     'check_interval': {'type': 'integer', 'min': 1},
@@ -273,7 +273,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MissingMatchPathListValueDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
                     'check_interval': {'type': 'integer', 'min': 1},
@@ -285,7 +285,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['NewMatchIdValueComboDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'id_path_list': {'type': 'list', 'required': True},
                     'min_allowed_time_diff': {'type': 'float', 'required': True, 'min': 0.01},
                     'persistence_id': {'type': 'string', 'empty': False},
@@ -307,7 +307,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['NewMatchPathValueComboDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'allow_missing_values': {'type': 'boolean'},
                     'learn_mode': {'type': 'boolean'},
@@ -318,7 +318,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['NewMatchPathValueDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
@@ -328,7 +328,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ParserCount'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'report_interval': {'type': 'integer', 'min': 1},
                     'labels': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'split_reports_flag': {'type': 'boolean'},
@@ -358,7 +358,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueDependentDelegatedMatchRule'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'rule_lookup_dict': {'type': 'dict', 'valuesrules': {'type': 'string'}, 'required': True},
                     'default_rule': {'type': 'string', 'nullable': True, 'empty': False},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
@@ -372,20 +372,20 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['PathExistsMatchRule', 'IPv4InRFC1918MatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'empty': False},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueMatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'empty': False},
                     'value': {'type': ['boolean', 'float', 'integer', 'string'], 'required': True},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueListMatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'empty': False},
                     'value_list': {
                         'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'required': True},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
@@ -393,7 +393,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueRangeMatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'empty': False},
                     'lower_limit': {'type': ['integer', 'float'], 'required': True},
                     'upper_limit': {'type': ['integer', 'float'], 'required': True, 'bigger_than_or_equal': ['lower_limit', None]},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
@@ -401,14 +401,14 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['StringRegexMatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'empty': False},
                     'regex': {'type': 'string', 'required': True, 'empty': False},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ModuloTimeMatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'nullable': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'nullable': True, 'empty': False},
                     'seconds_modulo': {'type': 'integer', 'required': True, 'min': 1},
                     'lower_limit': {'type': ['integer', 'float'], 'required': True, 'min': 0},
                     'upper_limit': {
@@ -418,9 +418,9 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueDependentModuloTimeMatchRule'], 'required': True},
-                    'path': {'type': 'string', 'required': True, 'nullable': True, 'empty': False},
+                    'target_path': {'type': 'string', 'required': True, 'nullable': True, 'empty': False},
                     'seconds_modulo': {'type': 'integer', 'required': True, 'min': 1},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'limit_lookup_dict': {'type': 'dict', 'valuesrules': {'type': 'list', 'schema': {
                             'type': ['integer', 'float'], 'min': 0}}, 'required': True},
                     'default_limit': {'type': 'list', 'schema': {'type': 'integer', 'min': 0}, 'nullable': True},
@@ -483,7 +483,7 @@
                     'type': {'type': 'string', 'allowed': ['VariableCorrelationDetector'], 'required': True},
                     'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
                     'persistence_id': {'type': 'string', 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'num_init': {'type': 'integer', 'min': 1},
                     'num_update': {'type': 'integer', 'min': 1},
                     'disc_div_thres': {'type': 'float', 'min': 0.000001, 'max': 1.0},
@@ -522,7 +522,7 @@
                     'type': {'type': 'string', 'allowed': ['VariableTypeDetector'], 'required': True},
                     'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
                     'persistence_id': {'type': 'string', 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'used_gof_test': {'type': 'string', 'allowed': ['CM', 'KS']},
                     'gof_alpha': {'type': 'float', 'min': 0.000001, 'max': 1.0},
                     's_gof_alpha': {'type': 'float', 'min': 0.000001, 'max': 1.0},
@@ -572,7 +572,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['PathValueTimeIntervalDetector'], 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'time_period_length': {'type': 'integer', 'min': 1},
                     'max_time_diff': {'type': 'integer', 'min': 1},
@@ -588,7 +588,7 @@
                     'type': {'type': 'string', 'allowed': ['PathArimaDetector'], 'required': True},
                     'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
                     'persistence_id': {'type': 'string', 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_logline': {'type': 'boolean'},
                     'num_init': {'type': 'integer', 'min': 1},
                     'force_period_length': {'type': 'boolean'},
@@ -608,7 +608,7 @@
                     'type': {'type': 'string', 'allowed': ['TSAArimaDetector'], 'required': True},
                     'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
                     'persistence_id': {'type': 'string', 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_logline': {'type': 'boolean'},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'acf_pause_interval_percentage': {'type': 'float', 'min': 0.000001, 'max': 1.0},
@@ -635,7 +635,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MinimalTransitionTimeDetector'], 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'allow_missing_id': {'type': 'boolean'},

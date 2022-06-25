@@ -234,7 +234,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         raise Exception('No allowlisting for algorithm malfunction or configuration errors')
 
     def calculate_time_steps(self, counts, log_atom):
-        """Returns a list of the timestep lenghts in seconds, if no timestep should be created the value is set to -1"""
+        """Returns a list of the timestep lengths in seconds, if no timestep should be created the value is set to -1"""
         # List of the resulting time_steps
         time_step_list = []
         # Initialize time_window_history

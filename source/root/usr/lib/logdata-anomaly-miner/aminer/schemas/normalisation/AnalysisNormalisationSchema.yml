@@ -8,7 +8,7 @@
             'schema': {
                 'id': {'type': 'string', 'nullable': True, 'default': None},
                 'type': {'type': 'analysistype', 'coerce': 'toanalysistype', 'required': True},
-                'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                'target_path_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'persistence_id': {'type': 'string', 'default': 'Default'},
                 'output_logline': {'type': 'boolean', 'default': False},
@@ -21,7 +21,7 @@
                 'realert_interval': {'type': 'integer', 'default': 36000},
                 'report_interval': {'type': 'integer', 'default': 10},
                 'reset_after_report_flag': {'type': 'boolean', 'default': False},
-                'path': {'type': 'string', 'nullable': True, 'default': 'Default'},
+                'target_path': {'type': 'string', 'nullable': True, 'default': 'Default'},
                 'parallel_check_count': {'type': 'integer', 'required': True, 'default': 10},
                 'record_count_before_event': {'type': 'integer', 'default': 1000},
                 'use_path_match': {'type': 'boolean', 'default': True},

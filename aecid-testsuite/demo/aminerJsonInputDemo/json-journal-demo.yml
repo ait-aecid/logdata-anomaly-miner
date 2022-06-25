@@ -941,10 +941,9 @@ Parser:
            optional_key__SYSTEMD_SESSION: optional_key__SYSTEMD_SESSION
 
 Input:
-        timestamp_paths: None
+        timestamp_path_list: None
         json_format: True
 
 EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
-Core.PersistencePeriod: 1

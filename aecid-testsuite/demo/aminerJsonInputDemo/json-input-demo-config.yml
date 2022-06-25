@@ -74,19 +74,19 @@ Parser:
                    onclick: buttonOnclick
 
 Input:
-        timestamp_paths: None
+        timestamp_path_list: None
         json_format: True
 
 Analysis:
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueCombo
-          paths:
+          target_path_list:
             - "/model/menu/id"
             - "/model/menu/value"
           learn_mode: True
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
-          paths:
+          target_path_list:
             - "/model/menu/id"
             - "/model/menu/value"
           learn_mode: True

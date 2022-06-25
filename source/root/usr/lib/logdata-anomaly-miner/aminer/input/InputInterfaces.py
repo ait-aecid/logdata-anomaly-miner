@@ -76,7 +76,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             p0=None, alpha=None, candidates_size=None, hypotheses_eval_delta_time=None, delta_time_to_discard_hypothesis=None,
             check_rules_flag=None, window_size=None, num_windows=None, confidence_factor=None, empty_window_warnings=None,
             early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None, seq_len=None, allow_missing_id=None,
-            timeout=None,
+            timeout=None, allowed_id_tuples=None, min_num_vals=None, max_num_vals=None, save_values=None, track_time_for_tsa=None,
+            waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -140,6 +141,13 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param seq_len the length of the sequences to be learned (larger lengths increase precision, but may overfit the data).
         @param allow_missing_id specifies whether log atoms without id path should be omitted (only if id path is set).
         @param timeout maximum allowed seconds between two entries of sequence; sequence is split in subsequences if exceeded.
+        @param allowed_id_tuples specifies a list of tuples of allowed id's. Log atoms are omitted if not matching.
+        @param min_num_vals number of the values which the list of stored logline values is being reduced to.
+        @param max_num_vals the maximum list size of the stored logline values before being reduced to the last min_num_values.
+        @param save_values if false the values of the log atom are not saved for further analysis. This disables values and check_variables.
+        @param track_time_for_tsa if true time windows are tracked for time series analysis (necessary for the TSAArimaDetector).
+        @param waiting_time_for_tsa time in seconds before the time windows tracking is initialized.
+        @param num_sections_waiting_time_for_tsa the number used to initialize the TSAArimaDetector with calculate_time_steps.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
@@ -178,10 +186,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             for argument in mutable_default_args:
                 if hasattr(self, argument):
                     continue
-                if "list" in argument:
+                if argument.endswith("list"):
                     setattr(self, argument, [])
-                elif "dict" in argument:
+                elif argument.endswith("dict"):
                     setattr(self, argument, {})
+                elif argument.endswith("set"):
+                    setattr(self, argument, set())
+                elif argument.endswith("tuple"):
+                    setattr(self, argument, tuple())
 
         if hasattr(self, "subhandler_list"):
             if (not isinstance(self.subhandler_list, list)) or \
@@ -192,6 +204,11 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             self.subhandler_list = [None] * len(self.subhandler_list)
             for handler_pos, handler_element in enumerate(self.subhandler_list):
                 self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
+        if hasattr(self, "allowed_id_tuples"):
+            if allowed_id_tuples is None:
+                self.allowed_id_tuples = []
+            else:
+                self.allowed_id_tuples = [tuple(tuple_list) for tuple_list in allowed_id_tuples]
 
         if hasattr(self, "confidence_factor") and not 0 <= self.confidence_factor <= 1:
             logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')

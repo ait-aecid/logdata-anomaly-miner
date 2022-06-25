@@ -319,7 +319,7 @@ Parser:
            location: location
 
 Input:
-        timestamp_paths: None
+        timestamp_path_list: None
         json_format: True
 
 EventHandlers:

@@ -823,7 +823,7 @@ Parser:
            - parsingME
 
 Input:
-        timestamp_paths: ["/model/DailyCron/DTM"]
+        timestamp_path_list: ["/model/DailyCron/DTM"]
         adjust_timestamps: True
 
 Analysis:
@@ -911,7 +911,7 @@ Analysis:
             - '/model/DailyCron'
         - type: MatchFilter
           id: MatchFilter
-          paths:
+          target_path_list:
             - "/model/Random"
           value_list:
             - 1
@@ -919,7 +919,7 @@ Analysis:
             - 100
         - type: EnhancedNewMatchPathValueComboDetector
           id: EnhancedNewValueCombo
-          paths:
+          target_path_list:
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
           tuple_transformation_function: "demo"
@@ -934,7 +934,7 @@ Analysis:
           id: "vdmt"
           path: null
           seconds_modulo: 3
-          paths:
+          target_path_list:
             - "/model/ECD/g"
             - "/model/ECD/h"
             - "/model/ECD/i"
@@ -950,7 +950,7 @@ Analysis:
             - 3
         - type: ValueDependentDelegatedMatchRule
           id: "value_dependent_delegated_match_rule"
-          paths:
+          target_path_list:
             - "/model/ECD/g"
             - "/model/ECD/h"
             - "/model/ECD/i"
@@ -1044,14 +1044,14 @@ Analysis:
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChange
           timestamp_path: null
-          paths:
+          target_path_list:
             - "/model/Random"
           min_bin_elements: 100
           min_bin_time: 10
         - type: MatchValueStreamWriter
           id: MatchValueStreamWriter
           stream: "sys.stdout"
-          paths:
+          target_path_list:
             - "/model/Sensors/CPUTemp"
             - "/model/Sensors/CPUWorkload"
             - "/model/Sensors/DTM"
@@ -1059,13 +1059,13 @@ Analysis:
           missing_value_string: ""
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueCombo
-          paths:
+          target_path_list:
             - "/model/IPAddresses/Username"
             - "/model/IPAddresses/IP"
           learn_mode: True
         - type: NewMatchIdValueComboDetector
           id: NewMatchIdValueComboDetector
-          paths:
+          target_path_list:
             - "/model/type/path/name"
             - "/model/type/syscall/syscall"
           id_path_list:
@@ -1076,13 +1076,13 @@ Analysis:
           learn_mode: True
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
-          paths:
+          target_path_list:
             - "/model/DailyCron/JobNumber"
             - "/model/IPAddresses/Username"
           learn_mode: True
         - type: MissingMatchPathValueDetector
           id: MissingMatch
-          paths:
+          target_path_list:
             - "/model/DiskReport/Space"
           check_interval: 2
           realert_interval: 5

@@ -77,7 +77,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.output_log_line = output_log_line
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
-        # Test if both path_list and id_path_list are not empty
+        # Test if both target_path_list and id_path_list are not empty
         if [] in (self.path_list, self.id_path_list):
             msg = 'Both target_path_list and id_path_list must not be empty.'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
@@ -127,7 +127,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         """Receive a log atom from a source and analyzes minimal times between transitions."""
         parser_match = log_atom.parser_match
 
-        # Do not analyze the log line if path_list or id_path_list is empty
+        # Do not analyze the log line if target_path_list or id_path_list is empty
         if [] in (self.path_list, self.id_path_list):
             return False
 
@@ -144,7 +144,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         if self.log_total % self.num_log_lines_solidify_matrix == 0:
             self.solidify_matrix()
 
-        # Use path_list to differentiate sequences by their id.
+        # Use target_path_list to differentiate sequences by their id.
         event_value = ()
         for path in self.path_list:
             match = log_atom.parser_match.get_match_dictionary().get(path)

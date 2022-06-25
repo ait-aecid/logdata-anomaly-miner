@@ -238,7 +238,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if not constraint_path_flag and self.constraint_list != []:
             return False
         self.log_atom = log_atom
-        if self.event_type_detector.num_eventlines[event_index] == self.num_init:  # Initialisation Phase
+        if self.event_type_detector.num_event_lines[event_index] == self.num_init:  # Initialisation Phase
             self.init_cor(event_index)  # Initialise the correlations
 
             if self.update_rules[event_index] and self.auto_include_flag:
@@ -253,14 +253,14 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 self.print_ini_w_rel(event_index)
 
         # Updates or tests the correlations
-        elif self.event_type_detector.num_eventlines[event_index] > self.num_init and \
-                (self.event_type_detector.num_eventlines[event_index]-self.num_init) % self.num_update == 0:
+        elif self.event_type_detector.num_event_lines[event_index] > self.num_init and \
+                (self.event_type_detector.num_event_lines[event_index] - self.num_init) % self.num_update == 0:
             # Checks if the correlations should be updated or tested
-            if self.num_end_learning_phase < 0 or self.event_type_detector.num_eventlines[event_index]-self.num_init <= \
+            if self.num_end_learning_phase < 0 or self.event_type_detector.num_event_lines[event_index]-self.num_init <= \
                     (self.num_update*self.num_end_learning_phase):
                 # Update Phase
                 self.update_rules[event_index] = True
-                if self.num_steps_create_new_rules > 0 and ((self.event_type_detector.num_eventlines[
+                if self.num_steps_create_new_rules > 0 and ((self.event_type_detector.num_event_lines[
                         event_index]-self.num_init) / self.num_update) % self.num_steps_create_new_rules == 0:  # generate new rules
                     self.generate_rules[event_index] = True
                 else:
@@ -273,7 +273,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             # Updates or tests the correlations
             self.update_or_test_cor(event_index)
 
-            if self.generate_rules[event_index] and ((self.event_type_detector.num_eventlines[
+            if self.generate_rules[event_index] and ((self.event_type_detector.num_event_lines[
                     event_index] - self.num_init) / self.num_update / self.num_steps_create_new_rules) % self.num_upd_until_validation == 0:
                 self.validate_cor()  # Validate the correlations and removes the cors, which fail the requirements
         return True
@@ -1342,13 +1342,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # Check if the correlations i=i_val -> j=j_val have a high enough score
                         tmp_sum = sum([sum(event_val[pos_var_cor_index][0][i_val].values()) for i_val in event_val[pos_var_cor_index][0]])
 
-                        if tmp_sum < self.event_type_detector.num_eventlines[event_index]*self.validate_cor_cover_vals_thres:
+                        if tmp_sum < self.event_type_detector.num_event_lines[event_index]*self.validate_cor_cover_vals_thres:
                             event_val[pos_var_cor_index][0] = {}
 
                         # Check if the correlations j=j_val -> i=i_val have a high enough score
                         tmp_sum = sum([sum(event_val[pos_var_cor_index][1][j_val].values()) for j_val in event_val[pos_var_cor_index][1]])
 
-                        if tmp_sum < self.event_type_detector.num_eventlines[event_index]*self.validate_cor_cover_vals_thres:
+                        if tmp_sum < self.event_type_detector.num_event_lines[event_index]*self.validate_cor_cover_vals_thres:
                             event_val[pos_var_cor_index][1] = {}
 
             elif meth == 'WRel':
@@ -1357,13 +1357,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # Check if the correlations i=i_val -> j=j_val have a high enough score
                         tmp_sum = sum([sum(event_val[pos_var_cor_index][0][i_val].values()) for i_val in event_val[pos_var_cor_index][0]])
 
-                        if tmp_sum < self.event_type_detector.num_eventlines[event_index]*self.validate_cor_cover_vals_thres:
+                        if tmp_sum < self.event_type_detector.num_event_lines[event_index]*self.validate_cor_cover_vals_thres:
                             event_val[pos_var_cor_index][0] = {}
 
                         # Check if the correlations j=j_val -> i=i_val have a high enough score
                         tmp_sum = sum([sum(event_val[pos_var_cor_index][1][j_val].values()) for j_val in event_val[pos_var_cor_index][1]])
 
-                        if tmp_sum < self.event_type_detector.num_eventlines[event_index]*self.validate_cor_cover_vals_thres:
+                        if tmp_sum < self.event_type_detector.num_event_lines[event_index]*self.validate_cor_cover_vals_thres:
                             event_val[pos_var_cor_index][1] = {}
 
     def validate_cor_distinct_distr(self):
