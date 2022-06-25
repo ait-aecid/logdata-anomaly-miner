@@ -421,6 +421,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         @param persistence_id name of persistence file.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
+        # avoid "defined outside init" issue
         self.next_persist_time, self.log_success, self.log_total = [None]*3
         super().__init__(
             aminer_config=aminer_config, target_path=target_path, bin_definition=bin_definition, report_interval=report_interval,

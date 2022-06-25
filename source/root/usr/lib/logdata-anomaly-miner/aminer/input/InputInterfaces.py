@@ -78,7 +78,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None, seq_len=None, allow_missing_id=None,
             timeout=None, allowed_id_tuples=None, min_num_vals=None, max_num_vals=None, save_values=None, track_time_for_tsa=None,
             waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None, histogram_definitions=None, report_interval=None,
-            reset_after_report_flag=None, bin_definition=None,
+            reset_after_report_flag=None, bin_definition=None, target_value_list=None
     ):
         """
         Initialize the parameters of analysis components.
@@ -154,7 +154,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                time. Hence, reports can be delayed when no data is received.
         @param reset_after_report_flag reset the histogram data after reporting.
         @param bin_definition the bin definition (LinearNumericBinDefinition, ModuloTimeBinDefinition) to be used.
-
+        @param target_value_list if not None, only match log atom if the match value is contained in the list.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter

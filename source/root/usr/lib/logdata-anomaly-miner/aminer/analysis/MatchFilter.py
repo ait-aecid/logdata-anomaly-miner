@@ -20,13 +20,22 @@ from aminer import AminerConfig
 class MatchFilter(AtomHandlerInterface):
     """This class creates events for specified paths and values."""
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, target_value_list=None, output_log_line=True):
-        """Initialize the detector."""
-        self.target_path_list = target_path_list
-        self.target_value_list = target_value_list
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.aminer_config = aminer_config
-        self.output_log_line = output_log_line
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, target_value_list=None, output_logline=True):
+        """
+        Initialize the detector.
+        @param aminer_config configuration from analysis_context.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
+               occurrences. When no paths are specified, the events given by the full path list are analyzed.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param target_value_list if not None, only match log atom if the match value is contained in the list.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        """
+        # avoid "defined outside init" issue
+        self.next_persist_time, self.log_success, self.log_total = [None]*3
+        super().__init__(
+            mutable_default_args=["target_value_list"], aminer_config=aminer_config, target_path_list=target_path_list,
+            anomaly_event_handlers=anomaly_event_handlers, target_value_list=target_value_list, output_logline=output_logline
+        )
         self.persistence_id = 'Not persisted'
 
     def receive_atom(self, log_atom):
