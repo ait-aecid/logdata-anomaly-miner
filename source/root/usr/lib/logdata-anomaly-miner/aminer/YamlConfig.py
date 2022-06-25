@@ -133,11 +133,11 @@ def build_analysis_pipeline(analysis_context):
     event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
     # do not check UnparsedAtomHandler
     for index, analysis_component in enumerate(atom_filter.subhandler_list[1:]):
-        if analysis_component[0].output_event_handlers is not None:
+        if analysis_component[0].anomaly_event_handlers is not None:
             event_handlers = []
-            for i in analysis_component[0].output_event_handlers:
+            for i in analysis_component[0].anomaly_event_handlers:
                 event_handlers.append(anomaly_event_handlers[event_handler_id_list.index(i)])
-            atom_filter.subhandler_list[index+1][0].output_event_handlers = event_handlers
+            atom_filter.subhandler_list[index+1][0].anomaly_event_handlers = event_handlers
 
 
 def build_parsing_model(data=None):
@@ -510,20 +510,20 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                                 item['bin_count'], item['outlier_bins_flag'])
                 continue
             elif item['type'].name == 'HistogramAnalysis':
-                histogram_defs = []
-                for histogram_def in item['histogram_defs']:
-                    if len(histogram_def) != 2:
-                        msg = 'Every item of the histogram_defs must have an size of 2!'
+                histogram_definitions = []
+                for histogram_definition in item['histogram_definitions']:
+                    if len(histogram_definition) != 2:
+                        msg = 'Every item of the histogram_definitions must have an size of 2!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    if histogram_def[1] not in analysis_dict:
-                        msg = '%s first must be defined before used.' % histogram_def[1]
+                    if histogram_definition[1] not in analysis_dict:
+                        msg = '%s first must be defined before used.' % histogram_definition[1]
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    histogram_defs.append([histogram_def[0], analysis_dict[histogram_def[1]]])
-                tmp_analyser = func(analysis_context.aminer_config, histogram_defs, item['report_interval'], anomaly_event_handlers,
+                    histogram_definitions.append([histogram_definition[0], analysis_dict[histogram_definition[1]]])
+                tmp_analyser = func(analysis_context.aminer_config, histogram_definitions, item['report_interval'], anomaly_event_handlers,
                                     reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
                     msg = '%s first must be defined before used.' % item['bin_definition']
@@ -836,8 +836,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 continue
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, auto_include_flag=learn)
-            if item['output_event_handlers'] is not None:
-                tmp_analyser.output_event_handlers = item['output_event_handlers']
+            if item['anomaly_event_handlers'] is not None:
+                tmp_analyser.anomaly_event_handlers = item['anomaly_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser, stop_when_handled_flag=stop_when_handled_flag)
     add_default_analysis_components(
@@ -859,7 +859,7 @@ def add_default_analysis_components(analysis_context, anomaly_event_handlers, at
             learn = True
         from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
         nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
-        nmpd.output_event_handlers = None
+        nmpd.anomaly_event_handlers = None
         analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
         atom_filter.add_handler(nmpd)
     return has_new_match_path_handler, has_unparsed_handler

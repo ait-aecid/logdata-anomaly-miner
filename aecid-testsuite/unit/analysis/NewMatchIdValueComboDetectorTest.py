@@ -249,7 +249,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.reset_output_stream()
 
     def test5allowlist_unknown_target_path(self):
-        """This test case checks if a unknown target path can be added to the known_values with the allowlist_event method."""
+        """This test case checks if an unknown target path can be added to the known_values with the allowlist_event method."""
         description = 'test5newMatchIdValueComboDetectorTest'
         min_allowed_time_diff = 5
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [

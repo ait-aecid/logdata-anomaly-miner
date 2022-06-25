@@ -145,7 +145,7 @@ class HistogramAnalysisTest(TestBase):
 
         modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, False)
         histogram_data = HistogramData(self.match_crontab, modulo_time_bin_definition)
-        histogram_analysis = HistogramAnalysis(self.aminer_config, [(histogram_data.property_path, modulo_time_bin_definition)], 604800,
+        histogram_analysis = HistogramAnalysis(self.aminer_config, [(histogram_data.target_path, modulo_time_bin_definition)], 604800,
                                                [self.stream_printer_event_handler], True, 'Default')
         self.analysis_context.register_component(histogram_analysis, description)
         match_element = MatchElement(self.match_crontab, str(start_time).encode(), start_time, None)
@@ -185,7 +185,7 @@ class HistogramAnalysisTest(TestBase):
 
         modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, False)
         histogram_data = HistogramData(self.match_crontab, modulo_time_bin_definition)
-        histogram_analysis = HistogramAnalysis(self.aminer_config, [(histogram_data.property_path, modulo_time_bin_definition)], 604800,
+        histogram_analysis = HistogramAnalysis(self.aminer_config, [(histogram_data.target_path, modulo_time_bin_definition)], 604800,
                                                [self.stream_printer_event_handler], True, 'Default')
         self.analysis_context.register_component(histogram_analysis, description)
         match_element = MatchElement(self.match_crontab, str(start_time).encode(), start_time, None)
@@ -240,7 +240,7 @@ class HistogramAnalysisTest(TestBase):
         modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, False)
         histogram_data = HistogramData(self.match_crontab, modulo_time_bin_definition)
         path_dependent_histogram_analysis = PathDependentHistogramAnalysis(
-            self.aminer_config, histogram_data.property_path, modulo_time_bin_definition, 604800,
+            self.aminer_config, histogram_data.target_path, modulo_time_bin_definition, 604800,
             [self.stream_printer_event_handler], True, 'Default')
         self.analysis_context.register_component(path_dependent_histogram_analysis, description)
         match_element = MatchElement(self.match_crontab, str(start_time).encode(), start_time, None)
@@ -292,7 +292,7 @@ class HistogramAnalysisTest(TestBase):
         modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 3600, 0, 1, 24, False)
         histogram_data = HistogramData(self.match_crontab, modulo_time_bin_definition)
         path_dependent_histogram_analysis = PathDependentHistogramAnalysis(
-            self.aminer_config, histogram_data.property_path, modulo_time_bin_definition, 604800,
+            self.aminer_config, histogram_data.target_path, modulo_time_bin_definition, 604800,
             [self.stream_printer_event_handler], True, 'Default')
         self.analysis_context.register_component(path_dependent_histogram_analysis, description)
         match_element = MatchElement(self.match_crontab, str(start_time).encode(), start_time, None)

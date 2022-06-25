@@ -60,7 +60,7 @@
                 'outlier_bins_flag': {'type': 'boolean', 'default': False},
                 'modulo_value': {'type': 'integer'},
                 'time_unit': {'type': 'integer'},
-                'histogram_defs': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}},
+                'histogram_definitions': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}},
                 'bin_definition': {'type': 'string'},
                 'tuple_transformation_function': {'type': 'string', 'allowed': ['demo'], 'nullable': True, 'default': None},
                 'value_list': {
@@ -183,7 +183,7 @@
                 'time_period_length': {'type': 'integer', 'min': 1, 'required': True, 'default': 86400},
                 'max_time_diff': {'type': 'integer', 'min': 1, 'required': True, 'default': 360},
                 'num_reduce_time_list': {'type': 'integer', 'min': 1, 'required': True, 'default': 10},
-                'output_event_handlers': {'type': 'list', 'nullable': True, 'default': None},
+                'anomaly_event_handlers': {'type': 'list', 'nullable': True, 'default': None},
                 'suppress': {'type': 'boolean', 'default': False},
                 'build_sum_over_values': {'type': 'boolean', 'default': False},
                 'num_division_time_step': {'type': 'integer', 'default': 10},

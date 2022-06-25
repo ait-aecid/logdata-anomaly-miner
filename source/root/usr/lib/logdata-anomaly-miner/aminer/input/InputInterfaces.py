@@ -70,14 +70,15 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             self, mutable_default_args=None, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None,
             id_path_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None,
             constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None,
-            parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, path=None, parsed_atom_handler_dict=None,
+            parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, target_path=None, parsed_atom_handler_dict=None,
             allow_missing_values_flag=None, tuple_transformation_function=None, prob_thresh=None, skip_repetitions=None,
             max_hypotheses=None, hypothesis_max_delta_time=None, generation_probability=None, generation_factor=None, max_observations=None,
             p0=None, alpha=None, candidates_size=None, hypotheses_eval_delta_time=None, delta_time_to_discard_hypothesis=None,
             check_rules_flag=None, window_size=None, num_windows=None, confidence_factor=None, empty_window_warnings=None,
             early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None, seq_len=None, allow_missing_id=None,
             timeout=None, allowed_id_tuples=None, min_num_vals=None, max_num_vals=None, save_values=None, track_time_for_tsa=None,
-            waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None,
+            waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None, histogram_definitions=None, report_interval=None,
+            reset_after_report_flag=None, bin_definition=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -103,7 +104,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                the filter will just drop a received atom without forwarding.
         @param default_parsed_atom_handler invoke this handler when no handler was found for given match path or do not invoke any
                handler when None.
-        @param path the path to be analyzed in the parser match of the log atom.
+        @param target_path the path to be analyzed in the parser match of the log atom.
         @param parsed_atom_handler_dict a dictionary of match value to atom handler.
         @param default_parsed_atom_handler invoke this default handler when no value handler was found or do not invoke any handler
                when None.
@@ -148,6 +149,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param track_time_for_tsa if true time windows are tracked for time series analysis (necessary for the TSAArimaDetector).
         @param waiting_time_for_tsa time in seconds before the time windows tracking is initialized.
         @param num_sections_waiting_time_for_tsa the number used to initialize the TSAArimaDetector with calculate_time_steps.
+        @param histogram_definitions a list of tuples containing the target property path to analyze and the BinDefinition to apply.
+        @param report_interval delay in seconds before re-reporting. The parameter is applied to the parsed record data time, not the system
+               time. Hence, reports can be delayed when no data is received.
+        @param reset_after_report_flag reset the histogram data after reporting.
+        @param bin_definition the bin definition (LinearNumericBinDefinition, ModuloTimeBinDefinition) to be used.
+
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
