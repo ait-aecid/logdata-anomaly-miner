@@ -208,6 +208,7 @@
                 'early_exceeding_anomaly_output': {'type': 'boolean', 'default': False},
                 'set_lower_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
                 'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
+                'combine_values': {'type': 'boolean', 'nullable': True, 'default': True},
             }
         }
     }
