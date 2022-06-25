@@ -546,7 +546,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'].name == 'MatchFilter':
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers,
-                                    target_value_list=item['value_list'], output_log_line=item['output_logline'])
+                                    target_value_list=item['target_value_list'], output_log_line=item['output_logline'])
             elif item['type'].name == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['timestamp_path'], item['target_path_list'],
                                     item['min_bin_elements'], item['min_bin_time'], debug_mode=item['debug_mode'],
@@ -631,7 +631,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     tmp_analyser = func(item['target_path'], item['value'], match_action=match_action)
                 if item['type'].name == 'ValueListMatchRule':
                     value_list = []
-                    for val in item['value_list']:
+                    for val in item['target_value_list']:
                         if isinstance(val, str):
                             val = val.encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
                                 replace(b"\\\\", b"\\").replace(b"\\b", b"\b")

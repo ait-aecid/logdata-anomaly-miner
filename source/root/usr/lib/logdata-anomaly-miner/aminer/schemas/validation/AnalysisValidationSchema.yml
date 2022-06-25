@@ -229,7 +229,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['MatchFilter'], 'required': True},
                     'target_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
-                    'value_list': {
+                    'target_value_list': {
                         'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'nullable': True},
                     'output_logline': {'type': 'boolean'},
                     'anomaly_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},

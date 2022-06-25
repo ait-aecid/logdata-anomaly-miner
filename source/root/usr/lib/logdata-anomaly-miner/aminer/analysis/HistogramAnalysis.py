@@ -132,8 +132,7 @@ class LinearNumericBinDefinition(BinDefinition):
 
     def get_bin_names(self):
         """Get the names of the bins for reporting, including the outlier bins if any."""
-        # Cache the names here so that multiple histograms using same
-        # BinDefinition do not use separate copies of the strings.
+        # Cache the names here so that multiple histograms using same BinDefinition do not use separate copies of the strings.
         if self.bin_names is not None:
             return self.bin_names
         self.bin_names = []
@@ -239,7 +238,7 @@ class HistogramData:
 
     def clone(self):
         """
-        Clone this object so that calls to addValue do not influence the old object any more.
+        Clone this object so that calls to add_value do not influence the old object anymore.
         This behavior is a mixture of shallow and deep copy.
         """
         histogram_data = HistogramData(self.property_path, self.bin_definition)
@@ -460,9 +459,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             if histogram_mapping is None:
                 unmapped_path.append(path)
                 continue
-            # So the path is already mapped to one histogram. See if all paths
-            # to the given histogram are still in all_path_set. If not, a split
-            # within the mapping is needed.
+            # So the path is already mapped to one histogram. See if all paths to the given histogram are still in all_path_set. If not,
+            # a split  within the mapping is needed.
             clone_set = all_path_set.copy()
             mapped_path = None
             for mapped_path in histogram_mapping[0]:

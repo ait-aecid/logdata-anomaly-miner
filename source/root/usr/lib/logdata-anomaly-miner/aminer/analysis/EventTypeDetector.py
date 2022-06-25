@@ -357,7 +357,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def init_values(self, current_index):
         """Initialize the variable_key_list and the list for the values."""
-        # Initializes the value_list
+        # Initializes the target_value_list
         if not self.values:
             self.values = [[[] for _ in range(len(self.variable_key_list[current_index]))]]
         else:
@@ -396,7 +396,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     self.values[current_index][var_index].append(log_atom.parser_match.get_match_dictionary()[var_key].match_string)
 
-        # Reduce the numbers of entries in the value_list
+        # Reduce the numbers of entries in the target_value_list
         if len(self.variable_key_list[current_index]) > 0 and len([i for i in self.check_variables[current_index] if i]) > 0 and \
                 len(self.values[current_index][self.check_variables[current_index].index(True)]) > self.max_num_vals:
             for var_index in range(len(self.variable_key_list[current_index])):  # skipcq: PTC-W0060

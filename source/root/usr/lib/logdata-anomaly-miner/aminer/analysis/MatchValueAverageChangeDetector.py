@@ -31,31 +31,34 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, analyze_path_list, min_bin_elements, min_bin_time,
-                 debug_mode=False, persistence_id='Default', output_log_line=True):
+    def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, target_path_list, min_bin_elements, min_bin_time,
+                 debug_mode=False, persistence_id='Default', output_logline=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param timestamp_path if not None, use this path value for timestamp based bins.
-        @param analyze_path_list list of match paths to analyze in this detector.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
         @param min_bin_elements evaluate the latest bin only after at least that number of elements was added to it.
         @param min_bin_time evaluate the latest bin only when the first element is received after min_bin_time has elapsed.
         @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.
+        @param persistence_id name of persistence file.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.timestamp_path = timestamp_path
-        self.min_bin_elements = min_bin_elements
-        self.min_bin_time = min_bin_time
-        self.debug_mode = debug_mode
-        self.persistence_id = persistence_id
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+        # avoid "defined outside init" issue
+        self.next_persist_time, self.log_success, self.log_total = [None] * 3
+        super().__init__(
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, timestamp_path=timestamp_path,
+            target_path_list=target_path_list, min_bin_elements=min_bin_elements, min_bin_time=min_bin_time, debug_mode=debug_mode,
+            persistence_id=persistence_id, output_logline=output_logline
+        )
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.stat_data = []
-        for path in analyze_path_list:
+        for path in target_path_list:
             self.stat_data.append((path, [],))
         if persistence_data is not None:
             for val in persistence_data:
