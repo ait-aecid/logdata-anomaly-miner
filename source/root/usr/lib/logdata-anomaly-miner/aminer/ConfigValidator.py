@@ -98,6 +98,8 @@ class AnalysisType:
         elif name in ("LinearNumericBinDefinition", "ModuloTimeBinDefinition", "PathDependentHistogramAnalysis", "BinDefinition",
                       "HistogramData"):
             module += ".HistogramAnalysis"
+        elif name == "MissingMatchPathListValueDetector":
+            module += ".MissingMatchPathValueDetector"
         elif name in ("AndMatchRule", "OrMatchRule", "AtomFilterMatchAction", "DebugHistoryMatchRule", "EventGenerationMatchAction",
                       "DebugMatchRule", "IPv4InRFC1918MatchRule", "ModuloTimeMatchRule", "NegationMatchRule", "ParallelMatchRule",
                       "PathExistsMatchRule", "StringRegexMatchRule", "ValueDependentDelegatedMatchRule",

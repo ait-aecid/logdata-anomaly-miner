@@ -37,7 +37,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.target_path_list = target_path_list
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
-        self.output_log_line = output_log_line
+        self.output_logline = output_log_line
         self.aminer_config = aminer_config
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.persistence_id = persistence_id
@@ -124,8 +124,11 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                 except UnicodeError:
                     data = repr(log_atom.raw_data)
-                original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + data]
+                if self.output_logline:
+                    original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+                    sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + data]
+                else:
+                    sorted_log_lines = [str(res)]
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value(s) detected', sorted_log_lines, event_data,

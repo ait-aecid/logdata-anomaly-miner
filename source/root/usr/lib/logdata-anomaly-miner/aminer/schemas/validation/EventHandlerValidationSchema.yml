@@ -11,8 +11,16 @@
                 {
                     'id': {'type': 'string', 'required': True, 'empty': False},
                     'type': {'type': 'string', 'forbidden': [
-                        'KafkaEventHandler', 'StreamPrinterEventHandler', 'SyslogWriterEventHandler'], 'required': True},
+                        'KafkaEventHandler', 'ZmqEventHandler', 'StreamPrinterEventHandler', 'SyslogWriterEventHandler'], 'required': True},
                     'json': {'type': 'boolean'}
+                },
+                {
+                    'id': {'type': 'string', 'required': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['ZmqEventHandler'], 'required': True},
+                    'json': {'type': 'boolean'},
+                    'pretty': {'type': 'boolean'},
+                    'topic': {'type': 'string', 'required': False},
+                    'url': {'type': 'string', 'empty': False},
                 },
                 {
                     'id': {'type': 'string', 'required': True, 'empty': False},

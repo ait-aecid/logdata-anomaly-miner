@@ -63,17 +63,6 @@ read -r -d '' VAR << END
 New value(s) detected
 NewMatchPathValueDetector: "NewMatchPathValue" (1 lines)
   {'/model/menu/id': 'file'}
-Original log line: {"menu": {
-  "id": "file",
-  "value": "File",
-  "popup": {
-    "menuitem": [
-      {"value": "New", "onclick": "CreateNewDoc()"},
-      {"value": "Open", "onclick": "OpenDoc()"},
-      {"value": "Close", "onclick": "CloseDoc()"}
-    ]
-  }
-}}
 END
 if [[ "$OUTPUT" != *"$VAR"* ]]; then
   echo "$VAR"
@@ -85,17 +74,6 @@ read -r -d '' VAR << END
 New value(s) detected
 NewMatchPathValueDetector: "NewMatchPathValue" (1 lines)
   {'/model/menu/value': 'File'}
-Original log line: {"menu": {
-  "id": "file",
-  "value": "File",
-  "popup": {
-    "menuitem": [
-      {"value": "New", "onclick": "CreateNewDoc()"},
-      {"value": "Open", "onclick": "OpenDoc()"},
-      {"value": "Close", "onclick": "CloseDoc()"}
-    ]
-  }
-}}
 END
 if [[ "$OUTPUT" != *"$VAR"* ]]; then
   echo "$VAR"
