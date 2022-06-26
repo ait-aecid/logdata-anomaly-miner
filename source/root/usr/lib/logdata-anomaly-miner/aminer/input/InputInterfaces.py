@@ -84,7 +84,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None, event_type_detector=None, num_init=None,
             force_period_length=None, set_period_length=None, alpha_bt=None, num_results_bt=None, num_min_time_history=None,
             num_max_time_history=None, num_periods_tsa_ini=None, time_period_length=None, max_time_diff=None, num_reduce_time_list=None,
-            min_anomaly_score=None, min_variance=None,
+            min_anomaly_score=None, min_variance=None, parallel_check_count=None, record_count_before_event=None, use_path_match=None,
+            use_value_match=None, min_rule_attributes=None, max_rule_attributes=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -198,6 +199,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param min_anomaly_score the minimum computed outlier score for reporting anomalies. Scores are scaled by training data, i.e.,
                reasonable minimum scores are >1 to detect outliers with respect to currently trained PCA matrix.
         @param min_variance the minimum variance covered by the principal components in range [0, 1].
+        @param parallel_check_count number of rule detection checks to run in parallel.
+        @param record_count_before_event number of events used to calculate statistics (i.e., window size)
+        @param use_path_match if true rules are build based on path existence
+        @param use_value_match if true rules are built based on actual values
+        @param min_rule_attributes minimum number of attributes forming a rule
+        @param max_rule_attributes maximum number of attributes forming a rule
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
