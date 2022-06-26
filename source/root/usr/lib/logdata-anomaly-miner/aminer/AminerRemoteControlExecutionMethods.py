@@ -430,7 +430,7 @@ class AminerRemoteControlExecutionMethods:
                 % component.__class__.__name__
             return
         try:
-            msg = component.print_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.print_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -456,7 +456,7 @@ class AminerRemoteControlExecutionMethods:
                 % component.__class__.__name__
             return
         try:
-            msg = component.add_to_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.add_to_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -481,7 +481,7 @@ class AminerRemoteControlExecutionMethods:
                 % component.__class__.__name__
             return
         try:
-            msg = component.remove_from_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.remove_from_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703

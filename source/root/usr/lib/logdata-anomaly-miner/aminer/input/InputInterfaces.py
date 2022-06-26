@@ -79,7 +79,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             timeout=None, allowed_id_tuples=None, min_num_vals=None, max_num_vals=None, save_values=None, track_time_for_tsa=None,
             waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None, histogram_definitions=None, report_interval=None,
             reset_after_report_flag=None, bin_definition=None, target_value_list=None, timestamp_path=None, min_bin_elements=None,
-            min_bin_time=None, debug_mode=None, stream=None, separator_string=None, missing_value_string=None,
+            min_bin_time=None, debug_mode=None, stream=None, separator=None, missing_value_string=None, num_log_lines_solidify_matrix=None,
+            time_output_threshold=None, anomaly_threshold=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -161,8 +162,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param min_bin_time evaluate the latest bin only when the first element is received after min_bin_time has elapsed.
         @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.
         @param stream the stream on which the match results are written.
-        @param separator_string a string to be added between match values in the output stream.
+        @param separator a string to be added between match values in the output stream.
         @param missing_value_string a string which is added if no match was found.
+        @param time_output_threshold threshold for the tested minimal transition time which has to be exceeded to be tested.
+        @param anomaly_threshold threshold for the confidence which must be exceeded to raise an anomaly.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
