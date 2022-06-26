@@ -28,12 +28,20 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, stream, match_value_path_list, separator_string, missing_value_string):
-        """Initialize the writer."""
-        self.stream = stream
-        self.match_value_path_list = match_value_path_list
-        self.separator_string = separator_string
-        self.missing_value_string = missing_value_string
+    def __init__(self, stream, target_path_list, separator_string, missing_value_string):
+        """
+        Initialize the writer.
+        @param stream the stream on which the match results are written.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
+        @param separator_string a string to be added between match values in the output stream.
+        @param missing_value_string a string which is added if no match was found.
+        """
+        # avoid "defined outside init" issue
+        self.log_success, self.log_total = [None]*2
+        super().__init__(
+            stream=stream, target_path_list=target_path_list, separator_string=separator_string, missing_value_string=missing_value_string
+        )
 
     def receive_atom(self, log_atom):
         """Forward match value information to the stream."""
@@ -42,7 +50,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
         add_sep_flag = False
         contains_data = False
         result = b''
-        for path in self.match_value_path_list:
+        for path in self.target_path_list:
             if add_sep_flag:
                 result += self.separator_string
             match = match_dict.get(path)
