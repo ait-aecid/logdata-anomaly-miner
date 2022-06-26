@@ -81,7 +81,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             reset_after_report_flag=None, bin_definition=None, target_value_list=None, timestamp_path=None, min_bin_elements=None,
             min_bin_time=None, debug_mode=None, stream=None, separator=None, missing_value_string=None, num_log_lines_solidify_matrix=None,
             time_output_threshold=None, anomaly_threshold=None, default_interval=None, realert_interval=None, combine_values=None,
-
+            min_allowed_time_diff=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -172,6 +172,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param realert_interval time in seconds before a value is reported missing for a second time. The parameter is applied to the
                parsed record data time, not the system time. Hence, reports can be delayed when no data is received.
         @param combine_values if true the combined values are used as identifiers. When false, individual values are checked.
+        @param min_allowed_time_diff the minimum amount of time in seconds after the first appearance of a log atom with a specific id
+               that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo
+               is 2*min_allowed_time_diff
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
