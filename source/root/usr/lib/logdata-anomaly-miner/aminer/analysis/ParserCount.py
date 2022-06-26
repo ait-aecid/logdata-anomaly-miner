@@ -30,15 +30,25 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, target_path_list, report_event_handlers, report_interval=60, target_label_list=None,
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, report_interval=60, target_label_list=None,
                  split_reports_flag=False):
-        """Initialize the ParserCount component."""
-        self.aminer_config = aminer_config
-        self.target_path_list = target_path_list
-        self.target_label_list = target_label_list
-        self.report_interval = report_interval
-        self.report_event_handlers = report_event_handlers
-        self.split_reports_flag = split_reports_flag
+        """
+        Initialize the ParserCount component.
+        @param aminer_config configuration from analysis_context.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param report_interval delay in seconds before reporting.
+        @param target_label_list a list of labels for the target_path_list. This list must have the same size as target_path_list.
+        @param split_reports_flag if true every path produces an own report, otherwise one report for all paths is produced.
+        """
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        super().__init__(
+            mutable_default_args=["target_label_list"], aminer_config=aminer_config, target_path_list=target_path_list,
+            anomaly_event_handlers=anomaly_event_handlers, report_interval=report_interval, target_label_list=target_label_list,
+            split_reports_flag=split_reports_flag
+        )
         self.count_dict = {}
         self.next_report_time = None
         if (target_path_list is None or target_path_list == []) and (target_label_list is not None and target_label_list != []):

@@ -31,45 +31,33 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
-                 output_log_line=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-        self.target_path_list = target_path_list
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.auto_include_flag = auto_include_flag
-        self.output_logline = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.persistence_id = persistence_id
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', learn_mode=False,
+                 output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param persistence_id name of persistence file.
+        @param learn_mode when set to True, this detector will report a new value only the first time before including it
+        in the known values set automatically.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
+        """
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        super().__init__(
+            aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
+            persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
 
         self.log_success = 0
         self.log_total = 0
         self.log_learned_path_values = 0
         self.log_new_learned_values = []
-
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -84,10 +72,10 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """Receive a log atom from a source."""
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
 
         for target_path in self.target_path_list:
             match = match_dict.get(target_path)
@@ -101,7 +89,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             affected_log_atom_values = []
             for match in matches:
                 if match.match_object not in self.known_values_set:
-                    if self.auto_include_flag:
+                    if self.learn_mode:
                         self.known_values_set.add(match.match_object)
                         self.log_learned_path_values += 1
                         self.log_new_learned_values.append(match.match_object)

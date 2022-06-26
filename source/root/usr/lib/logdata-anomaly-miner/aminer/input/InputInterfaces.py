@@ -81,7 +81,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             reset_after_report_flag=None, bin_definition=None, target_value_list=None, timestamp_path=None, min_bin_elements=None,
             min_bin_time=None, debug_mode=None, stream=None, separator=None, missing_value_string=None, num_log_lines_solidify_matrix=None,
             time_output_threshold=None, anomaly_threshold=None, default_interval=None, realert_interval=None, combine_values=None,
-            min_allowed_time_diff=None,
+            min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None
     ):
         """
         Initialize the parameters of analysis components.
@@ -175,6 +175,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param min_allowed_time_diff the minimum amount of time in seconds after the first appearance of a log atom with a specific id
                that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo
                is 2*min_allowed_time_diff
+        @param target_label_list a list of labels for the target_path_list. This list must have the same size as target_path_list.
+        @param split_reports_flag if true every path produces an own report, otherwise one report for all paths is produced.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter

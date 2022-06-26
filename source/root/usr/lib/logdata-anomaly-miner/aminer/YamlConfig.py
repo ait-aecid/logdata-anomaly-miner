@@ -378,8 +378,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         'Config-Error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
                 suppress_detector_list.append(comp_name)
             if item['type'].name == 'NewMatchPathValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, auto_include_flag=learn,
-                                    persistence_id=item['persistence_id'], output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, learn_mode=learn,
+                                    persistence_id=item['persistence_id'], output_logline=item['output_logline'])
             elif item['type'].name == 'MatchPathFilter':
                 parsed_atom_handler_lookup_list = []
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
@@ -418,44 +418,44 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers,
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     min_anomaly_score=item['min_anomaly_score'], min_variance=item['min_variance'],
-                                    num_windows=item['num_windows'], auto_include_flag=learn, output_log_line=item['output_logline'],
+                                    num_windows=item['num_windows'], learn_mode=learn, output_logline=item['output_logline'],
                                     ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], combine_values=item['combine_values'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathListValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['target_path'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['target_path'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], combine_values=item['combine_values'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'EventSequenceDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['target_path_list'], persistence_id=item['persistence_id'], seq_len=item['seq_len'],
-                                    auto_include_flag=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    learn_mode=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'ValueRangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
-                                    target_path_list=item['target_path_list'], persistence_id=item['persistence_id'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    target_path_list=item['target_path_list'], persistence_id=item['persistence_id'], learn_mode=learn,
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'CharsetDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
-                                    target_path_list=item['target_path_list'], persistence_id=item['persistence_id'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    target_path_list=item['target_path_list'], persistence_id=item['persistence_id'], learn_mode=learn,
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'EntropyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['target_path_list'],
                                     prob_thresh=item['prob_thresh'], default_freqs=item['default_freqs'],
                                     skip_repetitions=item['skip_repetitions'],
-                                    persistence_id=item['persistence_id'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    persistence_id=item['persistence_id'], learn_mode=learn,
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['target_path_list'],
@@ -464,12 +464,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     empty_window_warnings=item['empty_window_warnings'],
                                     early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'],
                                     set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
-                                    auto_include_flag=learn, output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
                                     persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
-                                    output_log_line=item['output_logline'], use_path_match=item['use_path_match'],
+                                    output_logline=item['output_logline'], use_path_match=item['use_path_match'],
                                     use_value_match=item['use_value_match'], min_rule_attributes=item['min_rule_attributes'],
                                     max_rule_attributes=item['max_rule_attributes'])
             elif item['type'].name == 'ParserCount':
@@ -478,7 +478,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     item['target_path_list'],
                     anomaly_event_handlers,
                     report_interval=item['report_interval'],
-                    target_label_list=item['labels'],
+                    target_label_list=item['target_label_list'],
                     split_reports_flag=item['split_reports_flag'])
             elif item['type'].name == 'EventCorrelationDetector':
                 tmp_analyser = func(
@@ -488,12 +488,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     max_observations=item['max_observations'], p0=item['p0'], alpha=item['alpha'], candidates_size=item['candidates_size'],
                     hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'], constraint_list=item['constraint_list'],
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'], check_rules_flag=item['check_rules_flag'],
-                    auto_include_flag=learn, ignore_list=item['ignore_list'], persistence_id=item['persistence_id'])
+                    learn_mode=learn, ignore_list=item['ignore_list'], persistence_id=item['persistence_id'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers,
                                     id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
-                                    auto_include_flag=learn, persistence_id=item['persistence_id'],
-                                    allow_missing_values_flag=item['allow_missing_values'], output_log_line=item['output_logline'])
+                                    learn_mode=learn, persistence_id=item['persistence_id'],
+                                    allow_missing_values_flag=item['allow_missing_values'], output_logline=item['output_logline'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
                     msg = 'The %s must have an id!' % item['type'].name
@@ -532,25 +532,25 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(
                     analysis_context.aminer_config, item['target_path'], analysis_dict[item['bin_definition']], item['report_interval'],
                     anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
-                    output_log_line=item['output_logline'])
+                    output_logline=item['output_logline'])
             elif item['type'].name == 'EnhancedNewMatchPathValueComboDetector':
                 tuple_transformation_function = None
                 if item['tuple_transformation_function'] == 'demo':
                     tuple_transformation_function = tuple_transformation_function_demo_print_every_10th_value
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
-                                    auto_include_flag=learn, tuple_transformation_function=tuple_transformation_function,
-                                    output_log_line=item['output_logline'])
+                                    learn_mode=learn, tuple_transformation_function=tuple_transformation_function,
+                                    output_logline=item['output_logline'])
                 # skipcq: PYL-W0603
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'].name == 'MatchFilter':
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers,
-                                    target_value_list=item['target_value_list'], output_log_line=item['output_logline'])
+                                    target_value_list=item['target_value_list'], output_logline=item['output_logline'])
             elif item['type'].name == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['timestamp_path'], item['target_path_list'],
                                     item['min_bin_elements'], item['min_bin_time'], debug_mode=item['debug_mode'],
-                                    persistence_id=item['persistence_id'], output_log_line=item['output_logline'])
+                                    persistence_id=item['persistence_id'], output_logline=item['output_logline'])
             elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
@@ -560,7 +560,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").replace(b"\\\\", b"\\").replace(b"\\b", b"\b"))
             elif item['type'].name == 'NewMatchPathDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                                    auto_include_flag=learn, output_log_line=item['output_logline'])
+                                    learn_mode=learn, output_logline=item['output_logline'])
             elif 'MatchAction' in item['type'].name:
                 if comp_name is None:
                     msg = 'The %s must have an id!' % item['type'].name
@@ -706,10 +706,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         raise ValueError(msg)
                     ruleset.append(match_rules_dict[rule])
                 tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'TimestampsUnsortedDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, exit_on_error_flag=item['exit_on_error_flag'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'AllowlistViolationDetector':
                 allowlist_rules = []
                 for rule in item['allowlist_rules']:
@@ -719,7 +719,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         raise ValueError(msg)
                     allowlist_rules.append(match_rules_dict[rule])
                 tmp_analyser = func(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'EventTypeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
@@ -752,8 +752,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
                     use_empiric_distr=item['use_empiric_distr'], used_range_test=item['used_range_test'], range_alpha=item['range_alpha'],
                     range_threshold=item['range_threshold'], range_limits_factor=item['range_limits_factor'],
-                    num_reinit_range=item['num_reinit_range'], dw_alpha=item['dw_alpha'], output_log_line=item['output_logline'],
-                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'], auto_include_flag=learn)
+                    num_reinit_range=item['num_reinit_range'], dw_alpha=item['dw_alpha'], output_logline=item['output_logline'],
+                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'], learn_mode=learn)
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -777,14 +777,14 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     used_validate_cor_meth=item['used_validate_cor_meth'],
                     validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
                     validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'],
-                    constraint_list=item['constraint_list'], auto_include_flag=learn)
+                    constraint_list=item['constraint_list'], learn_mode=learn)
             elif item['type'].name == 'PathValueTimeIntervalDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                     target_path_list=item['target_path_list'], ignore_list=item['ignore_list'],
                     allow_missing_values_flag=item['allow_missing_values'],
-                    output_log_line=item['output_logline'], time_period_length=item['time_period_length'],
-                    max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
+                    output_logline=item['output_logline'], time_period_length=item['time_period_length'],
+                    max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], learn_mode=learn)
             elif item['type'].name == 'PathArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -793,7 +793,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    target_path_list=item['target_path_list'], output_log_line=item['output_logline'], auto_include_flag=learn,
+                    target_path_list=item['target_path_list'], output_logline=item['output_logline'], learn_mode=learn,
                     num_init=item['num_init'], force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     alpha=item['alpha'], alpha_bt=item['alpha_bt'], num_results_bt=item['num_results_bt'],
                     num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
@@ -815,12 +815,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'], acf_threshold=item['acf_threshold'],
                     round_time_inteval_threshold=item['round_time_inteval_threshold'],
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
-                    min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_log_line=item['output_logline'],
-                    ignore_list=item['ignore_list'], auto_include_flag=learn)
+                    min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_logline=item['output_logline'],
+                    ignore_list=item['ignore_list'], learn_mode=learn)
             elif item['type'].name == 'MinimalTransitionTimeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                    auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['target_path_list'],
+                    learn_mode=learn, output_logline=item['output_logline'], path_list=item['target_path_list'],
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
                     num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
                     time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
@@ -835,7 +835,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 atom_filter.subhandler_list[0] = (tmp_analyser, stop_when_handled_flag)
                 continue
             else:
-                tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, auto_include_flag=learn)
+                tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, learn_mode=learn)
             if item['anomaly_event_handlers'] is not None:
                 tmp_analyser.anomaly_event_handlers = item['anomaly_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
@@ -858,7 +858,7 @@ def add_default_analysis_components(analysis_context, anomaly_event_handlers, at
         else:
             learn = True
         from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-        nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
+        nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=learn)
         nmpd.anomaly_event_handlers = None
         analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
         atom_filter.add_handler(nmpd)
@@ -944,9 +944,9 @@ def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
     if extra_data is not None:
         mod = 10
         if (extra_data[2] + 1) % mod == 0:
-            enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = False
+            enhanced_new_match_path_value_combo_detector_reference.learn_mode = False
         else:
-            enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = True
+            enhanced_new_match_path_value_combo_detector_reference.learn_mode = True
     return match_value_list
 
 
