@@ -81,7 +81,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             reset_after_report_flag=None, bin_definition=None, target_value_list=None, timestamp_path=None, min_bin_elements=None,
             min_bin_time=None, debug_mode=None, stream=None, separator=None, missing_value_string=None, num_log_lines_solidify_matrix=None,
             time_output_threshold=None, anomaly_threshold=None, default_interval=None, realert_interval=None, combine_values=None,
-            min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None
+            min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None, event_type_detector=None, num_init=None,
+            force_period_length=None, set_period_length=None, alpha_bt=None, num_results_bt=None, num_min_time_history=None,
+            num_max_time_history=None, num_periods_tsa_ini=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -127,7 +129,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param max_observations maximum amount of evaluations before hypothesis is transformed into a rule or discarded or rule is
                evaluated.
         @param p0 expected value for hypothesis evaluation distribution.
-        @param alpha confidence value for hypothesis evaluation.
+        @param alpha significance level of the estimated values.
         @param candidates_size maximum number of stored candidates used for hypothesis generation.
         @param hypotheses_eval_delta_time duration between hypothesis evaluation phases that remove old hypotheses that are likely to remain
                unused.
@@ -177,6 +179,16 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                is 2*min_allowed_time_diff
         @param target_label_list a list of labels for the target_path_list. This list must have the same size as target_path_list.
         @param split_reports_flag if true every path produces an own report, otherwise one report for all paths is produced.
+        @param event_type_detector used to track the number of occurring events.
+        @param num_init number of lines processed before the period length is calculated.
+        @param force_period_length states if the period length is calculated through the ACF, or if the period length is forced to
+               be set to set_period_length.
+        @param set_period_length states how long the period length is if force_period_length is set to True.
+        @param alpha_bt significance level for the bt test.
+        @param num_results_bt number of results which are used in the binomial test.
+        @param num_min_time_history number of lines processed before the period length is calculated.
+        @param num_max_time_history maximum number of values of the time_history.
+        @param num_periods_tsa_ini number of periods used to initialize the Arima-model.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
