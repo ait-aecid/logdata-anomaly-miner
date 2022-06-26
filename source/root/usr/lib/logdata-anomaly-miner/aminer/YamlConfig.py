@@ -614,7 +614,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         rule_lookup_dict[ast.literal_eval(key)] = match_rules_dict[rule]
-                    tmp_analyser = func(item['target_path_list'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
+                    tmp_analyser = func(
+                        item['target_path_list'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
                         msg = 'The match rule %s does not exist!' % item['sub_rule']

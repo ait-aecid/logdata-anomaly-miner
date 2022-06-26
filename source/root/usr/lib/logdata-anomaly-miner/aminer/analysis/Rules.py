@@ -222,17 +222,17 @@ class ValueDependentDelegatedMatchRule(MatchRule):
     The result of this rule is the result of the selected delegation rule.
     """
 
-    def __init__(self, value_path_list, rule_lookup_dict, default_rule=None, match_action=None):
+    def __init__(self, target_path_list, rule_lookup_dict, default_rule=None, match_action=None):
         """
         Create the rule.
         @param list with value paths that are used to extract the lookup keys for ruleLookupDict. If value lookup fails, None
         will be used for lookup.
         @param rule_lookup_dict dictionary with tuple containing values for valuePathList as key and target rule as value.
-        @param default_rule when not none, this rule will be executed as default. Otherwise when rule lookup failed, False will
+        @param default_rule when not none, this rule will be executed as default. Otherwise, when rule lookup failed, False will
         be returned unconditionally.
         @param match_action if None, no action is performed.
         """
-        self.value_path_list = value_path_list
+        self.target_path_list = target_path_list
         self.rule_lookup_dict = rule_lookup_dict
         self.default_rule = default_rule
         self.match_action = match_action
@@ -245,7 +245,7 @@ class ValueDependentDelegatedMatchRule(MatchRule):
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
-        for path in self.value_path_list:
+        for path in self.target_path_list:
             value_element = match_dict.get(path)
             if value_element is not None:
                 value_list.append(value_element.match_object)
@@ -290,16 +290,16 @@ class NegationMatchRule(MatchRule):
 
 
 class PathExistsMatchRule(MatchRule):
-    """Match elements of this class return true when the given path was found in the parsed match data."""
+    """Match elements of this class return true when the given target_path was found in the parsed match data."""
 
-    def __init__(self, path, match_action=None):
-        self.path = path
+    def __init__(self, target_path, match_action=None):
+        self.target_path = target_path
         self.match_action = match_action
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        if self.path in log_atom.parser_match.get_match_dictionary():
+        if self.target_path in log_atom.parser_match.get_match_dictionary():
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
             self.log_success += 1
@@ -307,21 +307,21 @@ class PathExistsMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'hasPath(%s)' % self.path
+        return 'hasPath(%s)' % self.target_path
 
 
 class ValueMatchRule(MatchRule):
-    """Match elements of this class return true when the given path exists and has exactly the given parsed value."""
+    """Match elements of this class return true when the given target_path exists and has exactly the given parsed value."""
 
-    def __init__(self, path, value, match_action=None):
-        self.path = path
+    def __init__(self, target_path, value, match_action=None):
+        self.target_path = target_path
         self.value = value
         self.match_action = match_action
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
+        test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if test_value is not None:
             if isinstance(self.value, bytes) and isinstance(test_value.match_object, str) and test_value.match_object is not None:
                 test_value.match_object = test_value.match_object.encode()
@@ -340,21 +340,21 @@ class ValueMatchRule(MatchRule):
     def __str__(self):
         if isinstance(self.value, bytes):
             self.value = self.value.decode()
-        return 'value(%s)==%s' % (self.path, self.value)
+        return 'value(%s)==%s' % (self.target_path, self.value)
 
 
 class ValueListMatchRule(MatchRule):
-    """Match elements of this class return true when the given path exists and has exactly one of the values included in the value list."""
+    """Match elements of this class return true when the given target_path exists and has exactly one of the values included in the value list."""
 
-    def __init__(self, path, value_list, match_action=None):
-        self.path = path
+    def __init__(self, target_path, value_list, match_action=None):
+        self.target_path = target_path
         self.value_list = value_list
         self.match_action = match_action
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        test_value = log_atom.parser_match.get_match_dictionary().get(self.path)
+        test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path)
         if (test_value is not None) and (test_value.match_object in self.value_list):
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
@@ -363,14 +363,14 @@ class ValueListMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'value(%s) in %s' % (' '.join([str(value) for value in self.value_list]), self.path)
+        return 'value(%s) in %s' % (' '.join([str(value) for value in self.value_list]), self.target_path)
 
 
 class ValueRangeMatchRule(MatchRule):
-    """Match elements of this class return true when the given path exists and the value is included in [lower, upper] range."""
+    """Match elements of this class return true when the given target_path exists and the value is included in [lower, upper] range."""
 
-    def __init__(self, path, lower_limit, upper_limit, match_action=None):
-        self.path = path
+    def __init__(self, target_path, lower_limit, upper_limit, match_action=None):
+        self.target_path = target_path
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
         self.match_action = match_action
@@ -378,7 +378,7 @@ class ValueRangeMatchRule(MatchRule):
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
+        test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if test_value is None:
             return False
         test_value = test_value.match_object
@@ -390,14 +390,14 @@ class ValueRangeMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'value(%s) inrange (%s, %s)' % (self.path, self.lower_limit, self.upper_limit)
+        return 'value(%s) inrange (%s, %s)' % (self.target_path, self.lower_limit, self.upper_limit)
 
 
 class StringRegexMatchRule(MatchRule):
-    """Elements of this class return true when the given path exists and the string repr of the value matches the regular expression."""
+    """Elements of this class return true when the given target_path exists and the string repr of the value matches the regular expression."""
 
-    def __init__(self, path, match_regex, match_action=None):
-        self.path = path
+    def __init__(self, target_path, match_regex, match_action=None):
+        self.target_path = target_path
         self.match_regex = match_regex
         self.match_action = match_action
 
@@ -405,7 +405,7 @@ class StringRegexMatchRule(MatchRule):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self. log_total += 1
         # Use the class object as marker for nonexisting entries
-        test_value = log_atom.parser_match.get_match_dictionary().get(self.path, None)
+        test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if (test_value is None) or (self.match_regex.match(test_value.match_string) is None):
             return False
         if self.match_action is not None:
@@ -414,22 +414,22 @@ class StringRegexMatchRule(MatchRule):
         return True
 
     def __str__(self):
-        return 'string(%s) =regex= %s' % (self.path, self.match_regex.pattern)
+        return 'string(%s) =regex= %s' % (self.target_path, self.match_regex.pattern)
 
 
 class ModuloTimeMatchRule(MatchRule):
     """
     Match elements of this class return true when the following conditions are met.
-    The given path exists, denotes a datetime object and the seconds since 1970 from that date modulo the given value are included in
+    The given target_path exists, denotes a datetime object and the seconds since 1970 from that date modulo the given value are included in
     [lower, upper] range.
     """
 
-    def __init__(self, path, seconds_modulo, lower_limit, upper_limit, match_action=None, tzinfo=None):
+    def __init__(self, target_path, seconds_modulo, lower_limit, upper_limit, match_action=None, tzinfo=None):
         """
-        @param path the path to the datetime object to use to evaluate the modulo time rules on.
+        @param target_path the target_path to the datetime object to use to evaluate the modulo time rules on.
         When None, the default timestamp associated with the match is used.
         """
-        self.path = path
+        self.target_path = target_path
         self.seconds_modulo = seconds_modulo
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
@@ -442,10 +442,10 @@ class ModuloTimeMatchRule(MatchRule):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
         test_value = None
-        if self.path is None:
+        if self.target_path is None:
             test_value = log_atom.get_timestamp()
         else:
-            time_match = log_atom.parser_match.get_match_dictionary().get(self.path, None)
+            time_match = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
             if time_match is None:
                 return False
             test_value = time_match.match_object + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
@@ -464,20 +464,20 @@ class ModuloTimeMatchRule(MatchRule):
 class ValueDependentModuloTimeMatchRule(MatchRule):
     """
     Match elements of this class return true when the following conditions are met.
-    The given path exists, denotes a datetime object and the seconds since 1970 rom that date modulo the given value are included in a
+    The given target_path exists, denotes a datetime object and the seconds since 1970 rom that date modulo the given value are included in a
     [lower, upper] range selected by values from the match.
     """
 
-    def __init__(self, path, seconds_modulo, value_path_list, limit_lookup_dict, default_limit=None, match_action=None, tzinfo=None):
+    def __init__(self, target_path, seconds_modulo, target_path_list, limit_lookup_dict, default_limit=None, match_action=None, tzinfo=None):
         """
-        @param path the path to the datetime object to use to evaluate the modulo time rules on.
+        @param target_path the target_path to the datetime object to use to evaluate the modulo time rules on.
         When None, the default timestamp associated with the match is used.
         @param default_limit use this default limit when limit lookup failed. Without a default limit, a failed lookup will cause
         the rule not to match.
         """
-        self.path = path
+        self.target_path = target_path
         self.seconds_modulo = seconds_modulo
-        self.value_path_list = value_path_list
+        self.target_path_list = target_path_list
         self.limit_lookup_dict = limit_lookup_dict
         self.default_limit = default_limit
         self.match_action = match_action
@@ -490,7 +490,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
-        for path in self.value_path_list:
+        for path in self.target_path_list:
             value_element = match_dict.get(path)
             if value_element is not None:
                 value_list.append(value_element.match_object)
@@ -504,10 +504,10 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
             return False
 
         test_value = None
-        if self.path is None:
+        if self.target_path is None:
             test_value = log_atom.get_timestamp()
         else:
-            time_match = log_atom.parser_match.get_match_dictionary().get(self.path, None)
+            time_match = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
             if time_match is None:
                 return False
             test_value = time_match.match_object + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
@@ -525,18 +525,18 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
 
 class IPv4InRFC1918MatchRule(MatchRule):
     """
-    Match elements of this class return true when the path matches and contains a valid IPv4 address from the RFC1918 private IP ranges.
+    Match elements of this class return true when the target_path matches and contains a valid IPv4 address from the RFC1918 private IP ranges.
     This could also be done by distinct range match elements, but as this kind of matching is common, have an own element for it.
     """
 
-    def __init__(self, path, match_action=None):
-        self.path = path
+    def __init__(self, target_path, match_action=None):
+        self.target_path = target_path
         self.match_action = match_action
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        match_element = log_atom.parser_match.get_match_dictionary().get(self.path)
+        match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path)
         if (match_element is None) or not isinstance(match_element.match_object, int):
             return False
         value = match_element.match_object
@@ -548,7 +548,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'hasPath(%s)' % self.path
+        return 'hasPath(%s)' % self.target_path
 
 
 class DebugMatchRule(MatchRule):
