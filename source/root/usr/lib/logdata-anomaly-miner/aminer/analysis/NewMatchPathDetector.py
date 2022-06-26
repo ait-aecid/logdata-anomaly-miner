@@ -44,7 +44,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None] * 5
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id,
             learn_mode=learn_mode, output_logline=output_logline,  stop_learning_time=stop_learning_time,
