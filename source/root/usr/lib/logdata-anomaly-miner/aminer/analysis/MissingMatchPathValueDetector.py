@@ -35,59 +35,42 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False,
-                 default_interval=3600, realert_interval=86400, combine_values=True, output_log_line=True, stop_learning_time=None,
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', learn_mode=False,
+                 default_interval=3600, realert_interval=86400, combine_values=True, output_logline=True, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
-        @param target_path_list to extract a source identification value from each logatom.
+        @param aminer_config configuration from analysis_context.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param persistence_id name of persistence file.
+        @param learn_mode specifies whether new expected values should be learned.
+        @param default_interval time in seconds before a value is reported missing. The parameter is applied to the parsed record data time,
+               not the system time. Hence, reports can be delayed when no data is received.
+        @param realert_interval time in seconds before a value is reported missing for a second time. The parameter is applied to the
+               parsed record data time, not the system time. Hence, reports can be delayed when no data is received.
         @param combine_values if true the combined values are used as identifiers. When false, individual values are checked.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.target_path_list = target_path_list
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.auto_include_flag = auto_include_flag
-        self.default_interval = default_interval
-        self.realert_interval = realert_interval
-        self.combine_values = combine_values
-        # This timestamps is compared with timestamp values from log atoms for activation of alerting logic. The first timestamp from logs
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None] * 5
+        super().__init__(
+            aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
+            persistence_id=persistence_id, learn_mode=learn_mode, default_interval=default_interval, realert_interval=realert_interval,
+            output_logline=output_logline, combine_values=combine_values, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
+        # This timestamp is compared with timestamp values from log atoms for activation of alerting logic. The first timestamp from logs
         # above this value will trigger alerting.
         self.next_check_timestamp = 0
         self.last_seen_timestamp = 0
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.persistence_id = persistence_id
 
         self.log_success = 0
         self.log_total = 0
         self.log_learned_values = 0
         self.log_new_learned_values = []
-
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -113,14 +96,14 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         Receive a log atom from a source.
         @param log_atom binary raw atom data
         @return True if this handler was really able to handle and process the atom. Depending on this information, the caller
-        may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
-        at each source implementation sending LogAtoms.
+                may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
+                at each source implementation sending log atoms.
         """
         self.log_total += 1
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
 
         value = self.get_channel_key(log_atom)
         if value is None or (not value[0] and not value[1]):
@@ -144,7 +127,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     # Delta of this detector might be lower than the default maximum recheck time.
                     self.next_check_timestamp = min(self.next_check_timestamp, timestamp + detector_info[1])
 
-            elif self.auto_include_flag:
+            elif self.learn_mode:
                 self.expected_values_dict[value] = [timestamp, self.default_interval, 0, target_path]
                 self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
                 self.log_learned_values += 1

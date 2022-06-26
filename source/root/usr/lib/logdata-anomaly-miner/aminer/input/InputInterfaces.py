@@ -80,7 +80,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None, histogram_definitions=None, report_interval=None,
             reset_after_report_flag=None, bin_definition=None, target_value_list=None, timestamp_path=None, min_bin_elements=None,
             min_bin_time=None, debug_mode=None, stream=None, separator=None, missing_value_string=None, num_log_lines_solidify_matrix=None,
-            time_output_threshold=None, anomaly_threshold=None,
+            time_output_threshold=None, anomaly_threshold=None, default_interval=None, realert_interval=None, combine_values=None,
+
     ):
         """
         Initialize the parameters of analysis components.
@@ -92,7 +93,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
                considered for value range generation.
         @param persistence_id name of persistence file.
-        @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
+        @param learn_mode specifies whether new values should be learned.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
         @param constraint_list list of paths that have to be present in the log atom to be analyzed.
@@ -166,6 +167,11 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param missing_value_string a string which is added if no match was found.
         @param time_output_threshold threshold for the tested minimal transition time which has to be exceeded to be tested.
         @param anomaly_threshold threshold for the confidence which must be exceeded to raise an anomaly.
+        @param default_interval time in seconds before a value is reported missing. The parameter is applied to the parsed record data time,
+               not the system time. Hence, reports can be delayed when no data is received.
+        @param realert_interval time in seconds before a value is reported missing for a second time. The parameter is applied to the
+               parsed record data time, not the system time. Hence, reports can be delayed when no data is received.
+        @param combine_values if true the combined values are used as identifiers. When false, individual values are checked.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
