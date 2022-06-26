@@ -55,7 +55,7 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
         it will invoke this method with zero-length data, which has to be consumed with a zero-length reply.
         @return the number of consumed bytes, 0 if the atomizer would need more data for a complete atom or -1 when no data was
         consumed at the moment but data might be consumed later on. The only situation where 0 is not an allowed return value
-        is when endOfStreamFlag is set and streamData not empty.
+        is when end_of_stream_flag is set and stream_data not empty.
         """
 
 
@@ -83,7 +83,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             time_output_threshold=None, anomaly_threshold=None, default_interval=None, realert_interval=None, combine_values=None,
             min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None, event_type_detector=None, num_init=None,
             force_period_length=None, set_period_length=None, alpha_bt=None, num_results_bt=None, num_min_time_history=None,
-            num_max_time_history=None, num_periods_tsa_ini=None,
+            num_max_time_history=None, num_periods_tsa_ini=None, time_period_length=None, max_time_diff=None, num_reduce_time_list=None,
+
     ):
         """
         Initialize the parameters of analysis components.
@@ -189,6 +190,11 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param num_min_time_history number of lines processed before the period length is calculated.
         @param num_max_time_history maximum number of values of the time_history.
         @param num_periods_tsa_ini number of periods used to initialize the Arima-model.
+        @param time_period_length length of the time window for which the appearances of log lines are identified with each other.
+               Value of 86400 specifies a day and 604800 a week.
+        @param max_time_diff maximal time difference in seconds for new times. If the difference of the new time to all previous times is
+               greater than max_time_diff the new time is considered an anomaly.
+        @param num_reduce_time_list number of new time entries appended to the time list, before the list is being reduced.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter

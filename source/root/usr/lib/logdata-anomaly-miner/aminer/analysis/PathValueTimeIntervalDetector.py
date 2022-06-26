@@ -33,74 +33,44 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None,
-                 allow_missing_values_flag=True, ignore_list=None, output_log_line=True, auto_include_flag=False,
-                 time_period_length=86400, max_time_diff=360, num_reduce_time_list=10, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None):
+                 allow_missing_values_flag=True, ignore_list=None, output_logline=True, learn_mode=False, time_period_length=86400,
+                 max_time_diff=360, num_reduce_time_list=10, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
-        @param persistence_id name of persistency document.
+        @param persistence_id name of persistence file.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
         occurrences. When no paths are specified, the events given by the full path list are analyzed.
         @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from paths
-        does not refer to an existing parsed data object.
+               does not refer to an existing parsed data object.
         @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
-        omitted. The default value is [] as None is not iterable.
-        @param output_log_line specifies whether the full parsed log atom should be provided in the output.
-        @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
+               omitted. The default value is [] as None is not iterable.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param learn_mode specifies whether new frequency measurements override ground truth frequencies.
         @param time_period_length length of the time window for which the appearances of log lines are identified with each other.
-        Value of 86400 specfies a day and 604800 a week.
+               Value of 86400 specifies a day and 604800 a week.
         @param max_time_diff maximal time difference in seconds for new times. If the difference of the new time to all previous times is
-        greater than max_time_diff the new time is considered an anomaly.
+               greater than max_time_diff the new time is considered an anomaly.
         @param num_reduce_time_list number of new time entries appended to the time list, before the list is being reduced.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.auto_include_flag = auto_include_flag
-        self.allow_missing_values_flag = allow_missing_values_flag
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.output_log_line = output_log_line
-        self.ignore_list = ignore_list
-        if self.ignore_list is None:
-            self.ignore_list = []
-        self.target_path_list = target_path_list
-        if self.target_path_list is None:
-            self.target_path_list = []
-        self.time_period_length = time_period_length
-        self.max_time_diff = max_time_diff
-        self.num_reduce_time_list = num_reduce_time_list
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None] * 5
+        super().__init__(
+            mutable_default_args=["target_path_list", "ignore_list"], aminer_config=aminer_config,
+            anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id, target_path_list=target_path_list,
+            allow_missing_values_flag=allow_missing_values_flag, ignore_list=ignore_list, output_logline=output_logline,
+            learn_mode=learn_mode, time_period_length=time_period_length, max_time_diff=max_time_diff,
+            num_reduce_time_list=num_reduce_time_list, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
 
         # Keys: Tuple of values of the paths of target_path_list, Entries: List of all appeared times to the tuple.
         self.appeared_time_list = {}
         # Keys: Tuple of values of the paths of target_path_list, Entries: Counter of appended times to the time list since last reduction.
         self.counter_reduce_time_intervals = {}
-
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         # Loads the persistence
         self.persistence_id = persistence_id
@@ -119,10 +89,10 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         """
         if log_atom.atom_time is None:
             return False
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
 
         match_dict = log_atom.parser_match.get_match_dictionary()
         # Skip paths from ignore_list.
@@ -163,7 +133,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             # Checks if the time has already been observed
             if log_atom.atom_time % self.time_period_length not in self.appeared_time_list[id_tuple]:
                 # Check and print a message if the new time is out of range of the observed times
-                # The second query is needed when time intevals exceed over 0/self.time_period_length
+                # The second query is needed when time intervals exceed over 0/self.time_period_length
                 if all((abs(log_atom.atom_time % self.time_period_length - time) > self.max_time_diff) and
                        (abs(log_atom.atom_time % self.time_period_length - time) < self.time_period_length - self.max_time_diff)
                         for time in self.appeared_time_list[id_tuple]):
@@ -178,7 +148,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                     msg = msg[:-2] + ']'
                     self.print(msg, log_atom=log_atom, affected_path=self.target_path_list, additional_information=additional_information)
 
-                    if not self.auto_include_flag:
+                    if not self.learn_mode:
                         return True
 
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
@@ -262,10 +232,10 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.counter_reduce_time_intervals[tuple(id_tuple)] = counter
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
-    def print_persistency_event(self, event_type, event_data):
+    def print_persistence_event(self, event_type, event_data):
         """
-        Print the persistency of component_name. Event_data specifies what information is outputed.
-        @return a message with information about the persistency.
+        Print the persistence of component_name. Event_data specifies what information is output.
+        @return a message with information about the persistence.
         @throws Exception when the output for the event_data was not possible.
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
@@ -298,7 +268,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             id_tuple = event_data[0]
             # Check if the path value is tracked
             if id_tuple not in self.appeared_time_list:
-                return 'Persistency includes no information for %s.' % id_tuple
+                return 'Persistence includes no information for %s.' % id_tuple
 
             # Calculate the current time intervals
             time_intervals = [[max(0, t - self.max_time_diff), min(self.time_period_length, t + self.max_time_diff)] for t in
@@ -325,7 +295,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
         return string
 
-    def add_to_persistency_event(self, event_type, event_data):
+    def add_to_persistence_event(self, event_type, event_data):
         """
         Add or overwrite the information of event_data to the persistency of component_name.
         @return a message with information about the addition to the persistency.
@@ -365,10 +335,10 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
         return msg
 
-    def remove_from_persistency_event(self, event_type, event_data):
+    def remove_from_persistence_event(self, event_type, event_data):
         """
-        Add or overwrite the information of event_data to the persistency of component_name.
-        @return a message with information about the addition to the persistency.
+        Add or overwrite the information of event_data to the persistence of component_name.
+        @return a message with information about the addition to the persistence.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """
         if event_type != 'Analysis.%s' % self.__class__.__name__:
@@ -391,7 +361,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         msg = ''
         if id_tuple not in self.appeared_time_list:
             # Print message if combination of values is new
-            msg = '%s has previously not appeared' % (id_tuple)
+            msg = '%s has previously not appeared' % id_tuple
         elif not any(abs(new_time - val) < 0.5 for val in self.appeared_time_list[id_tuple]):
             # Print a message if the new time does not appear the list of observed times
             msg = 'Time (%s) does not appear in the previously observed times %s for %s' % (
@@ -417,7 +387,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             additional_information = {}
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-        if self.output_log_line:
+        if self.output_logline:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
                 tmp_str += '  ' + x + os.linesep
