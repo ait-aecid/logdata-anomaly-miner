@@ -32,21 +32,24 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_log_line=True):
+    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_logline=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
         @param ruleset a list of MatchRule rules with appropriate CorrelationRules attached as actions.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param persistence_id name of persistence file.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
-        self.aminer_config = aminer_config
-        self.event_classification_ruleset = ruleset
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.persistence_id = persistence_id
-        self.output_log_line = output_log_line
+        self.next_persist_time, self.log_success, self.log_total = [None]*3
+        super().__init__(
+            aminer_config=aminer_config, ruleset=ruleset, anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id,
+            output_logline=output_logline
+        )
         self.last_log_atom = None
 
         event_correlation_set = set()
-        for rule in self.event_classification_ruleset:
+        for rule in self.ruleset:
             if rule.match_action.artefact_a_rules is not None:
                 event_correlation_set |= set(rule.match_action.artefact_a_rules)
             if rule.match_action.artefact_b_rules is not None:
@@ -60,7 +63,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
         self.log_total += 1
         self.last_log_atom = log_atom
-        for rule in self.event_classification_ruleset:
+        for rule in self.ruleset:
             rule.match(log_atom)
         self.log_success += 1
 
@@ -75,7 +78,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                 KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         # Check all correlation rules, generate single events for each violated rule, possibly containing multiple records. As we might
-        # be processing historic data, the timestamp last seen is unknown here. Hence rules not receiving newer events might not notice
+        # be processing historic data, the timestamp last seen is unknown here. Hence, rules not receiving newer events might not notice
         # for a long time, that they hold information about correlation impossible to fulfil. Take the newest timestamp of any rule
         # and use it for checking.
         newest_timestamp = 0.0
@@ -88,9 +91,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                 continue
             self.last_log_atom.set_timestamp(trigger_time)
             r = {'RuleId': rule.rule_id, 'MinTimeDelta': rule.min_time_delta, 'MaxTimeDelta': rule.max_time_delta,
-                 'MaxArtefactsAForSingleB': rule.max_artefacts_a_for_single_b, 'ArtefactMatchParameters': rule.artefact_match_parameters,
-                 'HistoryAEvents': rule.history_a_events, 'HistoryBEvents': rule.history_b_events,
-                 'LastTimestampSeen': rule.last_timestamp_seen}
+                 'ArtefactMatchParameters': rule.artefact_match_parameters, 'HistoryAEvents': rule.history_a_events,
+                 'HistoryBEvents': rule.history_b_events, 'LastTimestampSeen': rule.last_timestamp_seen}
             history = {'MaxItems': rule.correlation_history.max_items}
             h = []
             for item in rule.correlation_history.history:
@@ -114,7 +116,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         @param component_name the name of the component which is printed in the log line.
         """
         super().log_statistics(component_name)
-        for i, rule in enumerate(self.event_classification_ruleset):
+        for i, rule in enumerate(self.ruleset):
             rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))
 
 
@@ -142,21 +144,23 @@ class EventClassSelector(Rules.MatchAction):
 class CorrelationRule:
     """
     This class defines a correlation rule to match artefacts A and B.
-    A hidden event A* always triggers at least one artefact A and the the hidden event B*, thus triggering also at least one artefact B.
+    A hidden event A* always triggers at least one artefact A and the hidden event B*, thus triggering also at least one artefact B.
     """
 
-    def __init__(self, rule_id, min_time_delta, max_time_delta, max_artefacts_a_for_single_b=1, artefact_match_parameters=None):
+    def __init__(self, rule_id, min_time_delta, max_time_delta, artefact_match_parameters=None):
         """
         Create the correlation rule.
-        @param artefact_match_parameters if not none, two artefacts A and B will be only treated as correlated when all the
-        parsed artefact attributes identified by the list of attribute path tuples match.
+        @param rule_id a unique identifier of the rule.
         @param min_time_delta minimal delta in seconds, that artefact B may be observed after artefact A. Negative values are allowed
-        as artefact B may be found before A.
+               as artefact B may be found before A.
+        @param max_time_delta maximum delta in seconds, that artefact B may be observed after artefact A. Negative values are allowed
+               as artefact B may be found before A.
+        @param artefact_match_parameters if not none, two artefacts A and B will be only treated as correlated when all the
+               parsed artefact attributes identified by the list of attribute path tuples match.
         """
         self.rule_id = rule_id
         self.min_time_delta = min_time_delta
         self.max_time_delta = max_time_delta
-        self.max_artefacts_a_for_single_b = max_artefacts_a_for_single_b
         self.artefact_match_parameters = artefact_match_parameters
         self.history_a_events = []
         self.history_b_events = []

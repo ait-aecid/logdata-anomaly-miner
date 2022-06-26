@@ -85,7 +85,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             force_period_length=None, set_period_length=None, alpha_bt=None, num_results_bt=None, num_min_time_history=None,
             num_max_time_history=None, num_periods_tsa_ini=None, time_period_length=None, max_time_diff=None, num_reduce_time_list=None,
             min_anomaly_score=None, min_variance=None, parallel_check_count=None, record_count_before_event=None, use_path_match=None,
-            use_value_match=None, min_rule_attributes=None, max_rule_attributes=None,
+            use_value_match=None, min_rule_attributes=None, max_rule_attributes=None, ruleset=ruleset,
     ):
         """
         Initialize the parameters of analysis components.
@@ -205,6 +205,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param use_value_match if true rules are built based on actual values
         @param min_rule_attributes minimum number of attributes forming a rule
         @param max_rule_attributes maximum number of attributes forming a rule
+        @param ruleset a list of MatchRule rules with appropriate CorrelationRules attached as actions.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
