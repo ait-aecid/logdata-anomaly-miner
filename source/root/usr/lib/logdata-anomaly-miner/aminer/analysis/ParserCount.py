@@ -43,7 +43,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param split_reports_flag if true every path produces an own report, otherwise one report for all paths is produced.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.log_success, self.log_total = [None]*2
         super().__init__(
             mutable_default_args=["target_label_list"], aminer_config=aminer_config, target_path_list=target_path_list,
             anomaly_event_handlers=anomaly_event_handlers, report_interval=report_interval, target_label_list=target_label_list,

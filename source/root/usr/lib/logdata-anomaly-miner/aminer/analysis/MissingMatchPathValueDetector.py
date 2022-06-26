@@ -66,9 +66,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         # above this value will trigger alerting.
         self.next_check_timestamp = 0
         self.last_seen_timestamp = 0
-
-        self.log_success = 0
-        self.log_total = 0
         self.log_learned_values = 0
         self.log_new_learned_values = []
 

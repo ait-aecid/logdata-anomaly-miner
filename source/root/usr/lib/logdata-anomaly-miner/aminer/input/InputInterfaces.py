@@ -84,7 +84,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None, event_type_detector=None, num_init=None,
             force_period_length=None, set_period_length=None, alpha_bt=None, num_results_bt=None, num_min_time_history=None,
             num_max_time_history=None, num_periods_tsa_ini=None, time_period_length=None, max_time_diff=None, num_reduce_time_list=None,
-
+            min_anomaly_score=None, min_variance=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -195,6 +195,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param max_time_diff maximal time difference in seconds for new times. If the difference of the new time to all previous times is
                greater than max_time_diff the new time is considered an anomaly.
         @param num_reduce_time_list number of new time entries appended to the time list, before the list is being reduced.
+        @param min_anomaly_score the minimum computed outlier score for reporting anomalies. Scores are scaled by training data, i.e.,
+               reasonable minimum scores are >1 to detect outliers with respect to currently trained PCA matrix.
+        @param min_variance the minimum variance covered by the principal components in range [0, 1].
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter

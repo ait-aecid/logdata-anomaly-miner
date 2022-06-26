@@ -57,9 +57,6 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             output_logline=output_logline, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
-
-        self.log_success = 0
-        self.log_total = 0
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
 
