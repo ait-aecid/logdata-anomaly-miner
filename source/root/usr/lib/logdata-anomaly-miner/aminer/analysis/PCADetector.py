@@ -78,6 +78,12 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.feature_list = []
         self.ecm = None
         self.log_windows = 0
+        self.pca_ecm = None
+        self.eigen_vectors = None
+        # number of components (n_comp): how many components should be used for reconstruction
+        self.n_comp = None
+        # Calculate Anomaly-Score (Reconstruction Error) for the whole dataset
+        self.loss = None
 
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -206,7 +212,6 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         self.event_count_vector[path] = {value: 1}
             if all_values_none is True:
                 return
-
         self.log_success += 1
 
     def compute_pca(self):
@@ -226,7 +231,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             matrix.append(row)
         self.ecm = np.array(matrix)
 
-        # Principial Component Analysis (PCA)
+        # Principal Component Analysis (PCA)
         normalized_ecm = (self.ecm - self.ecm.mean()) / self.ecm.std()
         covariance_matrix = np.cov(normalized_ecm.T)
         eigen_values, eigen_vectors = np.linalg.eigh(covariance_matrix)
@@ -234,10 +239,10 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.eigen_vectors = eigen_vectors
 
         # number of components (n_comp): how many components should be used for reconstruction
-        self.nComp = self.get_nComp(eigen_values)
+        self.n_comp = self.get_n_comp(eigen_values)
 
         # PCA Inverse with only these components which describes the min_variance
-        pca_inverse = self.pca_ecm[:, :self.nComp] @ eigen_vectors[:self.nComp, :]
+        pca_inverse = self.pca_ecm[:, :self.n_comp] @ eigen_vectors[:self.n_comp, :]
 
         # Calculate Anomaly-Score (Reconstruction Error) for the whole dataset
         self.loss = np.sum((normalized_ecm - pca_inverse)**2, axis=1)
@@ -253,12 +258,11 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # calculate the reduced pca for current log-sequence with given eigen_vectors
         pca_ecv = normalized_ecv @ self.eigen_vectors
         # calculate the pca_inverse with reduced number of components / do reconstruction
-        pca_inverse_ecv = pca_ecv[:, :self.nComp] @ self.eigen_vectors[:self.nComp, :]
+        pca_inverse_ecv = pca_ecv[:, :self.n_comp] @ self.eigen_vectors[:self.n_comp, :]
         # calculate the reconstruction error / anomaly score
         loss = np.sum((normalized_ecv - pca_inverse_ecv)**2, axis=1)
         # scale the reconstruction error with the min, max of ecm-loss
         loss = (loss - np.min(self.loss)) / (np.max(self.loss) - np.min(self.loss))
-
         return loss
 
     def vector2array(self):
@@ -268,10 +272,9 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for feature, value in event.items():
                 if feature in self.feature_list:
                     vector.append(value)
-
         return np.array(vector)
 
-    def get_nComp(self, eigen_values):
+    def get_n_comp(self, eigen_values):
         """Return the number of components, which describe the variance threshold."""
         # Calculate the explained variance on each of components
         variance_explained = []
@@ -282,7 +285,6 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         for n, i in enumerate(cumulative_variance_explained):
             if i > (self.min_variance * 100):
                 return n
-
         return None
 
     def repair_dict(self):
