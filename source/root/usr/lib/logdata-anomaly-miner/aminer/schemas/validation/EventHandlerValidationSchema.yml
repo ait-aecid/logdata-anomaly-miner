@@ -12,13 +12,18 @@
                     'id': {'type': 'string', 'required': True, 'empty': False},
                     'type': {'type': 'string', 'forbidden': [
                         'KafkaEventHandler', 'ZmqEventHandler', 'StreamPrinterEventHandler', 'SyslogWriterEventHandler'], 'required': True},
-                    'json': {'type': 'boolean'}
+                    'json': {'type': 'boolean'},
+                    'score': {'type': 'boolean'}
                 },
                 {
                     'id': {'type': 'string', 'required': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ZmqEventHandler'], 'required': True},
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
+                    'score': {'type': 'boolean'},
+                    'analyzed_field': {'type': 'string', 'required': False, 'empty': False},
+                    'confidence_field': {'type': 'string', 'required': False, 'empty': False},
+                    'weights': {'type': 'dict', 'required': False},
                     'topic': {'type': 'string', 'required': False},
                     'url': {'type': 'string', 'empty': False},
                 },
@@ -27,6 +32,10 @@
                     'type': {'type': 'string', 'allowed': ['KafkaEventHandler'], 'required': True},
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
+                    'score': {'type': 'boolean'},
+                    'analyzed_field': {'type': 'string', 'required': False, 'empty': False},
+                    'confidence_field': {'type': 'string', 'required': False, 'empty': False},
+                    'weights': {'type': 'dict', 'required': False},
                     'topic': {'type': 'string', 'required': True, 'empty': False},
                     'cfgfile': {'type': 'string', 'empty': False},
                     'options': {'type': 'dict', 'schema': {
@@ -37,6 +46,10 @@
                     'type': {'type': 'string', 'allowed': ['StreamPrinterEventHandler'], 'required': True},
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
+                    'score': {'type': 'boolean'},
+                    'analyzed_field': {'type': 'string', 'required': False, 'empty': False},
+                    'confidence_field': {'type': 'string', 'required': False, 'empty': False},
+                    'weights': {'type': 'dict', 'required': False},
                     'output_file_path': {'type': 'string', 'empty': False}
                 },
                 {
@@ -44,6 +57,10 @@
                     'type': {'type': 'string', 'allowed': ['SyslogWriterEventHandler'], 'required': True},
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
+                    'score': {'type': 'boolean'},
+                    'analyzed_field': {'type': 'string', 'required': False, 'empty': False},
+                    'confidence_field': {'type': 'string', 'required': False, 'empty': False},
+                    'weights': {'type': 'dict', 'required': False},
                     'instance_name': {'type': 'string', 'default': 'aminer', 'empty': False}
                 }
             ]
