@@ -27,7 +27,7 @@ from aminer import AminerConfig
 
 class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     """
-    This class creates events when a new value combination for a given list of match data pathes were found.
+    This class creates events when a new value combination for a given list of match data paths were found.
     It is similar to the NewMatchPathValueComboDetector basic detector but also provides support for storing meta information about each
     detected value combination, e.g.
     * the first time a tuple was detected using the LogAtom default timestamp.
