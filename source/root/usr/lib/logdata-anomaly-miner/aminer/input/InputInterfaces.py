@@ -88,7 +88,13 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             use_value_match=None, min_rule_attributes=None, max_rule_attributes=None, ruleset=None, exit_on_error_flag=None,
             acf_pause_interval_percentage=None, acf_auto_pause_interval=None, acf_auto_pause_interval_num_min=None,
             build_sum_over_values=None, num_division_time_step=None, acf_threshold=None, round_time_interval_threshold=None,
-            min_log_lines_per_time_step=None,
+            min_log_lines_per_time_step=None, num_update=None, disc_div_thres=None, num_steps_create_new_rules=None,
+            num_upd_until_validation=None, num_end_learning_phase=None, check_cor_thres=None, check_cor_prob_thres=None,
+            check_cor_num_thres=None, min_values_cors_thres=None, new_vals_alarm_thres=None, num_bt=None, used_homogeneity_test=None,
+            alpha_chisquare_test=None, max_dist_rule_distr=None, used_presel_meth=None, intersect_presel_meth=None,
+            percentage_random_cors=None, match_disc_vals_sim_tresh=None, exclude_due_distr_lower_limit=None,
+            match_disc_distr_threshold=None, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=None,
+            validate_cor_distinct_thres=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -222,6 +228,42 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param round_time_interval_threshold threshold for the rounding of the time_steps to the times in self.assumed_time_steps.
                The higher the threshold the easier the time is rounded to the next time in the list.
         @param min_log_lines_per_time_step states the minimal average number of log lines per time step to make a TSA.
+        @param num_update number of lines after the initialization after which the correlations are periodically tested and updated.
+        @param disc_div_thres diversity threshold for variables to be considered discrete.
+        @param num_steps_create_new_rules number of update steps, for which new rules are generated periodically.
+               States False if rules should not be updated.
+        @param num_end_learning_phase number of update steps until the update phase ends and the test phase begins;
+               False if no End should be defined.
+        @param check_cor_thres threshold for the number of allowed different values of the distribution to be considered a correlation.
+        @param check_cor_prob_thres threshold for the difference of the probability of the values to be considered a correlation.
+        @param check_cor_num_thres number of allowed different values for the calculation if the distribution can be considered a
+               correlation.
+        @param min_values_cors_thres minimal number of appearances of values on the left side to consider the distribution as a possible
+               correlation.
+        @param new_vals_alarm_thres threshold which has to be exceeded by number of new values divided by number of old values to generate
+               an alarm.
+        @param num_bt number of considered test-samples for the binomial test.
+        @param used_homogeneity_test states the used homogeneity test which is used for the updates and tests of the correlations.
+               The implemented methods are ['Chi', 'MaxDist'].
+        @param alpha_chisquare_test significance level alpha for the chi-square test.
+        @param max_dist_rule_distr maximum distance between the distribution of the rule and the distribution of the read in values before
+               the rule fails.
+        @param used_presel_meth used preselection methods.
+               The implemented methods are ['matchDiscDistr', 'excludeDueDistr', 'matchDiscVals', 'random']
+        @param intersect_presel_meth states if the intersection or the union of the possible correlations found by the used_presel_meth is
+               used for the resulting correlations.
+        @param percentage_random_cors percentage of the randomly picked correlations of all possible ones in the preselection method random.
+        @param match_disc_vals_sim_tresh similarity threshold for the preselection method pick_cor_match_disc_vals.
+        @param exclude_due_distr_lower_limit lower limit for the maximal appearance to one value of the distributions.
+               If the maximal appearance is exceeded the variable is excluded.
+        @param match_disc_distr_threshold threshold for the preselection method pick_cor_match_disc_distr.
+        @param used_cor_meth used correlation detection methods. The implemented methods are ['Rel', 'WRel'].
+        @param used_validate_cor_meth used validation methods. The implemented methods are ['coverVals', 'distinctDistr'].
+        @param validate_cor_cover_vals_thres threshold for the validation method cover_vals. The higher the threshold the more correlations
+               must be detected to be validated a correlation.
+        @param validate_cor_distinct_thres threshold for the validation method distinct_distr. The threshold states which value the variance
+               of the distributions have to surpass to be considered real correlations. The lower the value the less likely that the
+               correlations are being rejected.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
