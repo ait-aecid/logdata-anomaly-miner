@@ -22,12 +22,29 @@ class JsonConverterHandler(EventHandlerInterface):
     """This class implements an event record listener, that will convert event data to JSON format."""
 
     def __init__(self, json_event_handlers, analysis_context, pretty_print=True):
+        """
+        Initialize the event handler.
+        @param json_event_handlers the event handlers to which the json converted data is sent.
+        @param analysis_context the analysis context used to get the component.
+        @param pretty_print if true, the json is printed pretty; otherwise the json is printed with less space needed.
+        """
         self.json_event_handlers = json_event_handlers
         self.analysis_context = analysis_context
         self.pretty_print = pretty_print
 
-    def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
-        """Receive information about a detected event."""
+    def receive_event(self, event_type, event_message, sorted_loglines, event_data, log_atom, event_source):
+        """
+        Receive information about a detected event.
+        @param event_type is a string with the event type class this event belongs to. This information can be used to interpret
+               type-specific event_data objects. Together with the eventMessage and sorted_loglines, this can be used to create generic log
+               messages.
+        @param event_message the first output line of the event.
+        @param sorted_loglines sorted list of log lines that were considered when generating the event, as far as available to the time
+               of the event. The list has to contain at least one line.
+        @param event_data type-specific event data object, should not be used unless listener really knows about the event_type.
+        @param log_atom the log atom which produced the event.
+        @param event_source reference to detector generating the event.
+        """
         if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
                 event_source.output_event_handlers:
             return
@@ -48,7 +65,7 @@ class JsonConverterHandler(EventHandlerInterface):
                 log_atom.set_timestamp(time.time())
             log_data['Timestamps'] = [round(log_atom.atom_time, 2)]
             log_data['DetectionTimestamp'] = round(time.time(), 2)
-            log_data['LogLinesCount'] = len(sorted_log_lines)
+            log_data['LogLinesCount'] = len(sorted_loglines)
             if log_atom.parser_match is not None and hasattr(event_source, 'output_logline') and event_source.output_logline:
                 log_data['AnnotatedMatchElement'] = {}
                 for path, match in log_atom.parser_match.get_match_dictionary().items():
@@ -91,7 +108,7 @@ class JsonConverterHandler(EventHandlerInterface):
             json_data = json.dumps(event_data, indent=2)
         else:
             json_data = json.dumps(event_data)
-        res = [''] * len(sorted_log_lines)
+        res = [''] * len(sorted_loglines)
         res[0] = str(json_data)
 
         for listener in self.json_event_handlers:

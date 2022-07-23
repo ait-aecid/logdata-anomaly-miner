@@ -444,7 +444,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.alternative_distribution_types[event_index] = [[] for i in range(self.length[event_index])]
             # Stores the values the distribution, which are needed for the s_gof
             self.distr_val[event_index] = [[] for i in range(self.length[event_index])]
-            # List of the successes of the binomialtest for the rejection in the s_gof or variables of discrete type
+            # List of the successes of the binomial test for the rejection in the s_gof or variables of discrete type
             self.bt_results[event_index] = [[] for i in range(self.length[event_index])]
 
             # Adds the variable indices to the variable_path_num-list if the target_path_list is not empty

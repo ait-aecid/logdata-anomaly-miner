@@ -204,12 +204,12 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
-                                   hypothesis_max_delta_time=1.0, auto_include_flag=True)
+                                   hypothesis_max_delta_time=1.0, learn_mode=True)
     analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
     atom_filters.add_handler(ecd)
 
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filters.add_handler(new_match_path_detector)
 
@@ -227,7 +227,7 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
     enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(
         analysis_context.aminer_config, ['/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers,
-        auto_include_flag=False, tuple_transformation_function=tuple_transformation_function)
+        learn_mode=False, tuple_transformation_function=tuple_transformation_function)
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
     atom_filters.add_handler(enhanced_new_match_path_value_combo_detector)
 
@@ -261,27 +261,27 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        '/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers, auto_include_flag=False)
+        '/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers, learn_mode=False)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filters.add_handler(new_match_path_value_combo_detector)
 
     from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
     new_match_id_value_combo_detector = NewMatchIdValueComboDetector(
         analysis_context.aminer_config, ['/model/type/path/name', '/model/type/syscall/syscall'], anomaly_event_handlers,
-        id_path_list=['/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, auto_include_flag=True,
+        id_path_list=['/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, learn_mode=True,
         allow_missing_values_flag=True, output_log_line=True)
     analysis_context.register_component(new_match_id_value_combo_detector, component_name="NewMatchIdValueComboDetector")
     atom_filters.add_handler(new_match_id_value_combo_detector)
 
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, [
-        '/model/DailyCron/Job Number', '/model/IPAddresses/Username'], anomaly_event_handlers, auto_include_flag=False)
+        '/model/DailyCron/Job Number', '/model/IPAddresses/Username'], anomaly_event_handlers, learn_mode=False)
     analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
     atom_filters.add_handler(new_match_path_value_detector)
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=False, default_interval=2,
+        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, learn_mode=False, default_interval=2,
         realert_interval=5)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filters.add_handler(missing_match_path_value_detector)
