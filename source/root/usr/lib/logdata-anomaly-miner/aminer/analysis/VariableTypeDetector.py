@@ -35,118 +35,103 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', path_list=None,
+    def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id='Default', target_path_list=None,
                  used_gof_test='CM', gof_alpha=0.05, s_gof_alpha=0.05, s_gof_bt_alpha=0.05, d_alpha=0.1, d_bt_alpha=0.1, div_thres=0.3,
                  sim_thres=0.1, indicator_thres=0.4, num_init=100, num_update=50, num_update_unq=200, num_s_gof_values=50,
                  num_s_gof_bt=30, num_d_bt=30, num_pause_discrete=5, num_pause_others=2, test_gof_int=True,
                  num_stop_update=False, silence_output_without_confidence=False, silence_output_except_indicator=True,
-                 num_var_type_hist_ref=10, num_update_var_type_hist_ref=10,  num_var_type_considered_ind=10, num_stat_stop_update=200,
+                 num_var_type_hist_ref=10, num_update_var_type_hist_ref=10, num_var_type_considered_ind=10, num_stat_stop_update=200,
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
                  used_multinomial_test='Chi', use_empiric_distr=True, used_range_test='MinMax', range_alpha=0.05, range_threshold=1,
-                 num_reinit_range=100, range_limits_factor=1, dw_alpha=0.05, save_statistics=True, output_log_line=True, ignore_list=None,
-                 constraint_list=None, auto_include_flag=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+                 num_reinit_range=100, range_limits_factor=1, dw_alpha=0.05, save_statistics=True, output_logline=True, ignore_list=None,
+                 constraint_list=None, learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param event_type_detector used to track the number of occurring events.
+        @param persistence_id name of persistence file.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+        @param used_gof_test states the used test statistic for the continuous data type. Implemented are the 'KS' and 'CM' tests.
+        @param gof_alpha significance niveau for p-value for the distribution test of the initialization. Recomended values are the
+               implemented values of crit_val_ini_ks and crit_val_upd_ks or _cm.
+        @param s_gof_alpha significance niveau for p-value for the sliding KS-test in the update step. Recommended values are the
+               implemented values of crit_val_upd_ks.
+        @param s_gof_bt_alpha significance niveau for the binomial test of the test results of the s_gof-test.
+        @param d_alpha significance niveau for the binomialtest of the single discrete variables. If used_multinomial_test == 'Approx' then
+               faster runtime for values in the p list of bt_min_succ_data.
+        @param d_bt_alpha significance niveau for the binomialtest of the test results of the discrete tests.
+        @param div_thres threshold for diversity of the values of a variable (the higher the more values have to be distinct to be
+               considered to be continuous distributed).
+        @param sim_thres threshold for similarity of the values of a variable (the higher the more values have to be common to be considered
+               discrete).
+        @param indicator_thres threshold for the variable indicators to be used in the event indicator.
+        @param num_init number of lines processed before detecting the variable types. Recommended values are the implemented values of
+               crit_val_ini_ks and crit_val_upd_ks or _cm.
+        @param num_update number of values for which the variable type is updated. If used_multinomial_test == 'Approx' then faster runtime
+               for values in the p list of bt_min_succ_data.
+        @param num_update_unq number of values for which the values of type unq is unique (the last num_update + num_update_unq values are
+               unique).
+        @param num_s_gof_values number of values which are tested in the s_gof-test. The value has to be <= num_init, >= num_update.
+               Recommended values are the implemented values of crit_val_upd_ks.
+        @param num_s_gof_bt number of tested s_gof-Tests for the binomialtest of the testresults of the s_gof tests.
+        @param num_d_bt number of tested discrete samples for the binomial test of the test results of the discrete tests.
+        @param num_pause_discrete number of paused updates, before the discrete var type is adapted.
+        @param num_pause_others number of paused update runs, before trying to find a new var_type.
+        @param test_gof_int states if integer number should be tested for the continuous variable type.
+        @param num_stop_update stops updating the found variable types after num_stop_update processed lines. If False the updating of lines
+               will not be stopped.
+        @param silence_output_without_confidence silences the all messages without a confidence-entry.
+        @param silence_output_except_indicator silences the all messages which are not related with the calculated indicator.
+        @param num_var_type_hist_ref states how long the reference for the var_type_hist_ref is. The reference is used in the evaluation.
+        @param num_update_var_type_hist_ref number of update steps before the var_type_hist_ref is being updated.
+        @param num_var_type_considered_ind this attribute states how many variable types of the history are used as the recent history in
+               the calculation of the indicator. False if no output of the indicator should be generated.
+        @param num_stat_stop_update number of static values of a variable, to stop tracking the variable type and read in the ETD.
+               False if not wanted.
+        @param num_updates_until_var_reduction number of update steps until the variables are tested if they are suitable for an indicator.
+               If not suitable, they are removed from the tracking of ETD (reduce checked variables). Equals 0 if disabled.
+        @param var_reduction_thres threshold for the reduction of variable types. The most likely none others var type must have a higher
+               relative appearance for the variable to be further checked.
+        @param num_skipped_ind_for_weights number of the skipped indicators for the calculation of the indicator weights.
+        @param num_ind_for_weights number of indicators used in the calculation of the indicator weights.
+        @param used_multinomial_test states the used multinomial test. Allowed values are 'MT', 'Approx' and 'Chi', where 'MT' means
+               original MT, 'Approx' is the approximation with single BTs and 'Chi' is the Chi-square test.
+        @param use_empiric_distr states if empiric distributions of the variables should be used if no continuous distribution is detected.
+        @param used_range_test states the used method of range estimation. Allowed values are 'MeanSD', 'EmpiricQuantiles' and 'MinMax'.
+               Where 'MeanSD' means the estimation through mean and standard deviation, 'EmpiricQuantiles' estimation through the empirical
+               quantiles and 'MinMax' the estimation through minimum and maximum.
+        @param range_alpha significance niveau for the range variable type.
+        @param range_threshold maximal proportional deviation from the range before the variable type is rejected.
+        @param num_reinit_range number of update steps until the range variable type is reinitialized. Set to zero if not desired.
+        @param range_limits_factor factor for the limits of the range variable type.
+        @param dw_alpha significance niveau of the durbin watson test to test serial correlation. If the test fails the type range is
+               assigned to the variable instead of continuous.
+        @param save_statistics used to track the indicators and changed variable types.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
 
-        # Parameters
-        # Used to track the indicators and changed variable types
-        self.save_statistics = save_statistics
-        # States if empiric distributions of the variables should be used if no continuous distribution is detected
-        self.use_empiric_distr = use_empiric_distr
-        # States the used test statistic for the continous data type. Implemented are the 'KS' and 'CM' tests.
-        self.used_gof_test = used_gof_test
-        # Significance niveau for p-value for the distribution test of the initialization
-        # Recomended values are the implemented values of crit_val_ini_ks and crit_val_upd_ks or _cm
-        self.gof_alpha = gof_alpha
-        # Significance niveau for p-value for the sliding KS-test in the update step
-        # Recomended values are the implemented values of crit_val_upd_ks
-        self.s_gof_alpha = s_gof_alpha
-        # Significance niveau for the binomialtest of the testresults of the s_gof-test
-        self.s_gof_bt_alpha = s_gof_bt_alpha
-        # Significance niveau for the binomialtest of the single discrete variables
-        # If used_multinomial_test == 'Approx' then faster runtime for values in the p list of bt_min_succ_data
-        self.d_alpha = d_alpha
-        # Significance niveau for the binomialtest of the testresults of the discrete tests
-        self.d_bt_alpha = d_bt_alpha
-        # Threshold for diversity of the values of a variable (the higher the more values have to be distinct to be considered to be
-        # continuous distributed)
-        self.div_thres = div_thres
-        # Threshold for similarity of the values of a variable (the higher the more values have to be common to be considered discrete)
-        self.sim_thres = sim_thres
-        # Threshold for the variable indicators to be used in the event indicator
-        self.indicator_thres = indicator_thres
-        # Number of lines processed before detecting the variable types
-        # Recomended values are the implemented values of crit_val_ini_ks and crit_val_upd_ks or _cm
-        self.num_init = num_init
-        # Number of values for which the variable type is updated
-        # If used_multinomial_test == 'Approx' then faster runtime for values in the p list of bt_min_succ_data
-        self.num_update = num_update
-        # Number of values for which the values of type unq is unique (the last num_update + num_update_unq values are unique)
-        self.num_update_unq = num_update_unq
-        # Number of values which are tested in the s_gof-test. The value has to be <= num_init, >= num_update.
-        # Recomended values are the implemented values of crit_val_upd_ks
-        self.num_s_gof_values = num_s_gof_values
-        # Number of tested s_gof-Tests for the binomialtest of the testresults of the s_gof tests
-        self.num_s_gof_bt = num_s_gof_bt
-        # Number of tested discrete samples for the binomialtest of the testresults of the discrete tests
-        self.num_d_bt = num_d_bt
-        # Number of paused updates, before the discrete var type is adapted
-        self.num_pause_discrete = num_pause_discrete
-        # Number of paused update runs, before trying to find a new var_type
-        self.num_pause_others = num_pause_others
-        # States if integer number should be tested for the continuous variable type
-        self.test_gof_int = test_gof_int
-        # States, if the the found variable types are updated if a test fails
-        self.auto_include_flag = auto_include_flag
-        # Stops updating the found variable types after num_stop_update processed lines. If False the updating of lines will not be stopped
-        self.num_stop_update = num_stop_update
-        # Silences the all messages without a confidence-entry
-        self.silence_output_without_confidence = silence_output_without_confidence
-        # Silences the all messages which are not related with the calculated indicator
-        self.silence_output_except_indicator = silence_output_except_indicator
-        self.output_log_line = output_log_line
-        # States how long the reference for the var_type_hist_ref is. The reference is used in the evaluation.
-        self.num_var_type_hist_ref = num_var_type_hist_ref
-        # Number of updatesteps before the var_type_hist_ref is being updated
-        self.num_update_var_type_hist_ref = num_update_var_type_hist_ref
-        # This attribute states how many variable types of the history are used as the recent history in the calculation of the
-        # indicator. False if no output of the indicator should be generated
-        self.num_var_type_considered_ind = num_var_type_considered_ind
-        # Number of static values of a variable, to stop tracking the variable type and read in in the ETD. False if not wanted.
-        self.num_stat_stop_update = num_stat_stop_update
-        # Number of updatesteps until the variables are tested if they are suitable for an indicator. If not suitable, they are removed
-        # from the tracking of ETD (reduce checked variables). Equals 0 if disabled.
-        self.num_updates_until_var_reduction = num_updates_until_var_reduction
-        # Threshold for the reduction of variable types. The most likely none others var type must have a higher relative appearance
-        # for the variable to be further checked.
-        self.var_reduction_thres = var_reduction_thres
-        # Number of the skipped indicators for the calculation of the indicator weights
-        self.num_skipped_ind_for_weights = num_skipped_ind_for_weights
-        # Number of indicators used in the calculation of the indicator weights
-        self.num_ind_for_weights = num_ind_for_weights
-        # States the used multinomial test. Allowed values are 'MT', 'Approx' and 'Chi', where 'MT' means original MT, 'Approx'
-        # is the approximation with single BTs and 'Chi' is the ChisquareTest
-        self.used_multinomial_test = used_multinomial_test
-        # List of paths, which variables are being tested for a type. All other paths will not get a type assigned. If None all paths are
-        # being tested.
-        self.path_list = path_list
-        # States the used method of range estimation. Allowed values are 'MeanSD', 'EmpiricQuantiles' and 'MinMax'. Where 'MeanSD' means the
-        # estimation through mean and standard deviation, 'EmpiricQuantiles' estimation through the empirical quantiles and 'MinMax' the
-        # estimation through minimum and maximum.
-        self.used_range_test = used_range_test
-        # Significance niveau for the range variable type.
-        self.range_alpha = range_alpha
-        # Maximal proportional deviation from the range before the variable type is rejected.
-        self.range_threshold = range_threshold
-        # Factor for the limits of the range variable type.
-        self.range_limits_factor = range_limits_factor
-        # Number of update steps until the range variable type is reinitialized. Set to zero if not desired.
-        self.num_reinit_range = num_reinit_range
-        # Significance niveau of the durbin watson test to test serial correlation. If the test fails the type range is assigned to the
-        # variable instead of continuous
-        self.dw_alpha = dw_alpha
+        """
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        super().__init__(
+            mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
+            anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector, persistence_id=persistence_id,
+            target_path_list=target_path_list, used_gof_test=used_gof_test, gof_alpha=gof_alpha, s_gof_alpha=s_gof_alpha,
+            s_gof_bt_alpha=s_gof_bt_alpha, d_alpha=d_alpha, d_bt_alpha=d_bt_alpha, div_thres=div_thres, sim_thres=sim_thres,
+            indicator_thres=indicator_thres, num_init=num_init, num_update=num_update, num_update_unq=num_update_unq,
+            num_s_gof_values=num_s_gof_values, num_s_gof_bt=num_s_gof_bt, num_d_bt=num_d_bt, num_pause_discrete=num_pause_discrete,
+            num_pause_others=num_pause_others, test_gof_int=test_gof_int, num_stop_update=num_stop_update,
+            silence_output_without_confidence=silence_output_without_confidence,
+            silence_output_except_indicator=silence_output_except_indicator, num_var_type_hist_ref=num_var_type_hist_ref,
+            num_update_var_type_hist_ref=num_update_var_type_hist_ref, num_var_type_considered_ind=num_var_type_considered_ind,
+            num_stat_stop_update=num_stat_stop_update, num_updates_until_var_reduction=num_updates_until_var_reduction,
+            var_reduction_thres=var_reduction_thres, num_skipped_ind_for_weights=num_skipped_ind_for_weights,
+            num_ind_for_weights=num_ind_for_weights, used_multinomial_test=used_multinomial_test, use_empiric_distr=use_empiric_distr,
+            used_range_test=used_range_test, range_alpha=range_alpha, range_threshold=range_threshold, num_reinit_range=num_reinit_range,
+            range_limits_factor=range_limits_factor, dw_alpha=dw_alpha, save_statistics=save_statistics, output_logline=output_logline,
+            ignore_list=ignore_list, constraint_list=constraint_list, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
 
         # Initialization of variables, which are no input parameters
         # Saves the minimal number of successes for the BT for the s_gof-test
@@ -155,8 +140,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.d_bt_min_success = self.bt_min_successes(self.num_d_bt, 1 - self.d_alpha, self.d_bt_alpha)
         # Number of eventTypes
         self.num_events = 0
-        # event_type_detector. Used to get the eventNumbers and values of the variables, etc.
-        self.event_type_detector = event_type_detector
         # Add the variable_type_detector to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
 
@@ -170,7 +153,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.alternative_distribution_types = []
         # Stores the values the betam and special distributions. The values are needed in the s_gof test
         self.distr_val = []
-        # List of the successes of the binomialtest for the rejection in the s_gof or variables of discrete type
+        # List of the successes of the binomial test for the rejection in the s_gof or variables of discrete type
         self.bt_results = []
         # List of the history of variable types of the single variables. The lists to the variables take the form
         # [others, static, [discrete, number of appended steps], asc, desc, unique, range, ev of continuous distributions]
@@ -186,7 +169,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.failed_indicators = []
         # Stores the standardised values of all tested distributions for better performance. The list is hardcoded below
         self.quantiles = {}
-        # Stores the number of minimal successes for the BT for selected samplesize and probabilities.
+        # Stores the number of minimal successes for the BT for selected sample-size and probabilities.
         self.bt_min_succ_data = {}
 
         self.log_success = 0
@@ -218,7 +201,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         }
 
         if self.used_multinomial_test == 'Approx':
-            # Stores the number of minimal successes for the BT with the stated samplesizes and probabilities
+            # Stores the number of minimal successes for the BT with the stated sample-sizes and probabilities
             self.bt_min_succ_data = {
                 'num_bt = 1000, alpha = 0.1': [0.00010537719726562501, 0.00053192138671875, 0.0011025695800781247, 0.001745849609375, 0.002434478759765625, 0.0031548461914062496, 0.0038988952636718746, 0.004661621093749999, 0.0054394836425781246, 0.00622998046875, 0.007031219482421876, 0.007841796875000001, 0.008660491943359376, 0.009486450195312503, 0.010318756103515628, 0.011156921386718754, 0.01200039672851563, 0.012848632812500007, 0.013701263427734384, 0.014557983398437509, 0.015418487548828134, 0.01628247070312501, 0.017149749755859388, 0.018020080566406263, 0.01889334106445314, 0.019769226074218764, 0.02064773559570314, 0.021528625488281265, 0.022411773681640636, 0.02329711914062501, 0.024184600830078132, 0.025073974609375008, 0.025965240478515637, 0.026858337402343765, 0.027753143310546888, 0.028649597167968763, 0.029547637939453135, 0.030447204589843763, 0.031348175048828135, 0.03225061035156251, 0.03315444946289064, 0.03405950927734376, 0.03496591186523438, 0.035873535156250004, 0.03678231811523438, 0.037692199707031256, 0.03860324096679688, 0.03951538085937501, 0.04042855834960939, 0.041342712402343766, 0.04225790405273439, 0.043174011230468774, 0.04409109497070315, 0.04500903320312503, 0.04592788696289065, 0.046847595214843774, 0.04776815795898439, 0.04868951416015627, 0.0496116638183594, 0.050534606933593774, 0.05145828247070316, 0.05238275146484379, 0.05330795288085941, 0.054233825683593785, 0.05516036987304691, 0.05608764648437504, 0.05701559448242192, 0.0579441528320313, 0.058873382568359424, 0.05980322265625005, 0.060733673095703176, 0.0616647338867188, 0.06259634399414066, 0.06352856445312505, 0.06446139526367192, 0.06539471435546879, 0.06632864379882816, 0.06726306152343753, 0.06819802856445314, 0.06913348388671878, 0.07006948852539066, 0.07100598144531253, 0.07194296264648442, 0.07288037109375006, 0.07381832885742196, 0.07475677490234384, 0.07569564819335947, 0.07663494873046883, 0.07757473754882821, 0.07851495361328134, 0.0794555969238282, 0.08039666748046884, 0.0813381652832032, 0.08228002929687508, 0.08322238159179696, 0.08416510009765632, 0.08510824584960947, 0.0860517578125001, 0.08699563598632823, 0.08793994140625011, 0.08888455200195325, 0.08982958984375011, 0.0907749938964845, 0.09172076416015637, 0.0926668395996095, 0.09361334228515636, 0.09456015014648447, 0.0955073242187501, 0.09645480346679697, 0.09740264892578135, 0.09835079956054699, 0.09929931640625012, 0.10024807739257824, 0.10119726562500012, 0.10214669799804699, 0.10309643554687511, 0.10404653930664076, 0.10499694824218764, 0.10594760131835951, 0.10689855957031263, 0.10784988403320328, 0.10880145263671892, 0.10975332641601579, 0.11070544433593765, 0.11165786743164077, 0.11261059570312515, 0.11356356811523452, 0.11451684570312515, 0.11547036743164077, 0.11642419433593765, 0.11737826538085952, 0.11833258056640639, 0.11928720092773451, 0.12024206542968766, 0.1211971740722658, 0.12215252685546893, 0.12310818481445332, 0.12406402587890647, 0.12502017211914085, 0.12597650146484402, 0.12693313598632844, 0.1278899536132816, 0.128847076416016, 0.12980438232421915, 0.13076193237304728, 0.13171972656250042, 0.13267776489257854, 0.13363598632812546, 0.13459445190429736, 0.13555316162109426, 0.13651211547851616, 0.1374712524414068, 0.1384306335449224, 0.13939019775390682, 0.14035000610351622, 0.14130999755859436, 0.1422702331542975, 0.14323065185546935, 0.1441913146972662, 0.14515216064453185, 0.14611318969726622, 0.14707446289062565, 0.1480359191894538, 0.14899761962890695, 0.14995944213867257, 0.15092150878906319, 0.1518837585449226, 0.15284625244140698, 0.15380886840820385, 0.1547717285156257, 0.1557347717285163, 0.15669799804687568, 0.15766140747070378, 0.15862500000000063, 0.15958877563476626, 0.16055273437500062, 0.16151693725586003, 0.1624812622070319, 0.16344577026367252, 0.16441046142578192, 0.16537533569336005, 0.1663403930664069, 0.1673056335449225, 0.1682710571289069, 0.16923660278320374, 0.17020239257812564, 0.17116830444336, 0.17213439941406317, 0.17310067749023506, 0.17406707763671947, 0.17503372192382888, 0.17600048828125076, 0.17696737670898516, 0.17793450927734455, 0.17890176391601642, 0.17986920166015702, 0.18083676147461014, 0.18180456542968826, 0.18277243041992264, 0.18374053955078207, 0.18470877075195397, 0.1856771240234384, 0.18664566040039154, 0.18761437988281343, 0.18858322143554784, 0.189552246093751, 0.1905213928222666, 0.191490722656251, 0.19246017456054787, 0.19342980957031353, 0.19439956665039165, 0.19536950683593857, 0.196339569091798, 0.1973097534179699, 0.19828012084961055, 0.19925061035156372, 0.2002212829589856, 0.20119207763672003, 0.20216299438476693, 0.20313409423828255, 0.2041053161621107, 0.20507672119140757, 0.20604818725586072, 0.2070198364257826, 0.2079916687011732, 0.20896356201172006, 0.20993563842773566, 0.21090783691406378, 0.21188021850586064, 0.21285266113281376, 0.21382528686523566, 0.21479803466797004, 0.21577090454101694, 0.21674395751953257, 0.21771707153320446, 0.2186903686523451, 0.21966378784179824, 0.22063732910156386, 0.221610992431642, 0.22258483886718888, 0.22355874633789202, 0.2245328369140639, 0.2255070495605483, 0.22648138427734515, 0.22745584106445454, 0.2284304199218764, 0.2294051208496108, 0.23037994384765764, 0.23135494995117323, 0.23233001708984508, 0.23330520629882945, 0.23428057861328255, 0.23525601196289192, 0.23623162841797002, 0.23720730590820438, 0.23818316650390753, 0.23915908813476694, 0.24013519287109508, 0.2411113586425795, 0.24208764648437636, 0.24306411743164197, 0.24404064941406384, 0.24501730346679823, 0.24599414062500136, 0.24697103881836074, 0.2479480590820326, 0.24892520141601698, 0.24990246582031383, 0.25087985229492316, 0.251857360839845, 0.2528349304199231, 0.25381268310547, 0.25479049682617305, 0.2557684936523449, 0.256746551513673, 0.2577247314453136, 0.25870303344726675, 0.2596814575195324, 0.26065994262695436, 0.26163861083984497, 0.26261734008789184, 0.26359619140625123, 0.26457516479492316, 0.2655542602539076, 0.2665334167480483, 0.2675127563476577, 0.26849215698242335, 0.2694716796875015, 0.2704513244628922, 0.2714310302734392, 0.2724109191894548, 0.2733908691406267, 0.27437094116211114, 0.2753510742187518, 0.2763313293457049, 0.2773117675781268, 0.2782922058105487, 0.2792728271484394, 0.2802535095214863, 0.28123431396484566, 0.28221524047851754, 0.28319628906250194, 0.2841773986816426, 0.2851586303710957, 0.286139923095705, 0.28712139892578314, 0.28810293579101753, 0.28908459472656445, 0.2900663146972675, 0.2910481567382831, 0.2920301208496112, 0.2930121459960956, 0.2939942932128925, 0.2949765625000019, 0.2959589538574239, 0.296941406250002, 0.29792391967773635, 0.2989066162109395, 0.2998893737792989, 0.3008721923828146, 0.30185519409179906, 0.3028382568359398, 0.3038213806152368, 0.3048046264648462, 0.3057879943847681, 0.30677148437500257, 0.3077550354003933, 0.30873864746094026, 0.3097224426269559, 0.3107062377929716, 0.311690216064456, 0.3126742553710967, 0.3136583557128937, 0.31464263916015933, 0.315626922607425, 0.3166113891601594, 0.3175959167480501, 0.31858050537109706, 0.3195652160644564, 0.3205500488281283, 0.3215349426269565, 0.32251995849609716, 0.3235050354003941, 0.32449023437500346, 0.3254754943847691, 0.3264608764648472, 0.3274463806152379, 0.32843194580078483, 0.3294175720214879, 0.3304033813476598, 0.33138919067383166, 0.33237512207031605, 0.333361175537113, 0.33434729003906616, 0.33533352661133187, 0.33631982421875384, 0.3373062438964882, 0.33829272460937887, 0.33927932739258204, 0.3402659912109415, 0.34125277709961344, 0.34223962402344166, 0.3432265930175824, 0.3442136230468794, 0.34520077514648884, 0.3461879882812545, 0.34717532348633273, 0.3481627197265672, 0.34915017700195794, 0.35013781738281735, 0.35112545776367676, 0.3521132202148487, 0.35310110473633316, 0.3540890502929739, 0.35507705688477087, 0.35606518554688027, 0.3570534362793022, 0.3580417480468804, 0.35903012084961483, 0.3600186157226618, 0.36100717163086493, 0.3619957885742243, 0.3629845886230525, 0.36397338867188067, 0.36496231079102137, 0.3659513549804745, 0.3669403991699276, 0.3679296264648495, 0.3689188537597714, 0.3699082641601621, 0.3708976745605528, 0.3718872070312559, 0.3728768615722715, 0.3738665771484434, 0.37485635375977155, 0.37584625244141223, 0.37683621215820917, 0.37782623291016226, 0.3788163757324279, 0.379806640625006, 0.38079690551758416, 0.3817873535156311, 0.382777801513678, 0.38376837158203736, 0.3847590637207092, 0.3857497558593811, 0.38674063110352175, 0.3877315063476624, 0.38872250366211547, 0.38971362304688106, 0.39070474243164666, 0.39169604492188104, 0.3926873474121154, 0.3936787719726623, 0.39467031860352164, 0.39566186523438096, 0.3966535339355528, 0.3976453247070372, 0.3986371765136778, 0.3996290893554747, 0.4006211242675841, 0.4016132202148498, 0.40260537719727174, 0.4035976562500061, 0.4045899963378967, 0.40558245849609986, 0.40657498168945927, 0.40756756591797494, 0.40856027221680313, 0.4095530395507876, 0.4105458679199283, 0.41153881835938144, 0.41253182983399084, 0.4135249023437565, 0.4145180969238347, 0.4155113525390691, 0.4165047302246161, 0.4174981689453192, 0.4184916687011786, 0.4194852905273505, 0.4204789733886787, 0.4214727172851631, 0.42246658325196007, 0.4234605102539132, 0.42445449829102255, 0.42544860839844445, 0.4264427795410226, 0.42743701171875703, 0.428431365966804, 0.4294257812500071, 0.4304203186035227, 0.4314149169921946, 0.43240957641602273, 0.43340429687500714, 0.4343991394043041, 0.43539404296875717, 0.4363890686035228, 0.43738415527344465, 0.4383793029785228, 0.43937457275391345, 0.4403698425293041, 0.44136529541016345, 0.4423607482910228, 0.44335632324219465, 0.4443519592285228, 0.4453477172851634, 0.44634353637696034, 0.4473394165039134, 0.448335418701179, 0.44933148193360084, 0.45032760620117895, 0.4513238525390696, 0.4523201599121165, 0.45331652832031955, 0.45431295776367886, 0.4553095092773507, 0.45630618286133506, 0.45730285644531943, 0.4582996520996163, 0.45929650878906936, 0.4602934875488349, 0.46129052734375675, 0.46228762817383484, 0.46328485107422546, 0.46428213500977233, 0.46527947998047536, 0.46627688598633465, 0.46727441406250647, 0.46827200317383455, 0.46926971435547515, 0.470267486572272, 0.47126531982422515, 0.4722632751464908, 0.47326123046875646, 0.4742593688964908, 0.4752575073242251, 0.47625576782227197, 0.4772540893554751, 0.47825247192383447, 0.47925097656250637, 0.48024954223633454, 0.48124822998047523, 0.4822469787597722, 0.4832457885742253, 0.48424465942383466, 0.48524365234375655, 0.4862427062988347, 0.4872418212890691, 0.48824105834961606, 0.48924035644531916, 0.4902397155761785, 0.4912391967773504, 0.49223873901367854, 0.4932384033203192, 0.4942380676269599, 0.49523785400391296, 0.49623776245117857, 0.4972376708984442, 0.4982377014160223, 0.49923785400391296, 0.5002380065918036, 0.5012382812500068, 0.5022386779785225, 0.5032390747070382, 0.5042395935058663, 0.505240234375007, 0.5062408752441475, 0.5072416381836006, 0.5082425231933662, 0.5092434082031317, 0.5102444152832099, 0.5112454833984442, 0.5122466735839911, 0.5132479248046943, 0.5142492370605537, 0.5152506713867255, 0.5162521667480537, 0.5172537231445381, 0.5182554016113349, 0.5192571411132879, 0.5202589416503972, 0.521260864257819, 0.5222628479003971, 0.5232648925781315, 0.5242670593261783, 0.5252692871093815, 0.5262715759277409, 0.5272739868164127, 0.5282764587402409, 0.5292790527343815, 0.530281646728522, 0.531284362792975, 0.5322872009277405, 0.5332901000976623, 0.5342930603027404, 0.5352960815429747, 0.5362992248535216, 0.5373024291992247, 0.5383057556152403, 0.5393091430664122, 0.5403125915527404, 0.541316162109381, 0.542319793701178, 0.5433234863281312, 0.544327301025397, 0.5453311767578188, 0.546335113525397, 0.5473391723632876, 0.5483432922363344, 0.5493475341796937, 0.5503517761230531, 0.5513562011718812, 0.5523606262207094, 0.55336517333985, 0.5543698425293032, 0.5553745117187564, 0.5563793029785221, 0.5573842163086004, 0.5583891906738349, 0.5593942260742256, 0.5603993225097726, 0.5614045410156322, 0.5624098815918042, 0.563415222167976, 0.5644207458496165, 0.5654262695312572, 0.5664319152832104, 0.5674376220703198, 0.5684434509277417, 0.56944934082032, 0.5704552917480544, 0.5714613647461014, 0.5724674987793047, 0.5734737548828205, 0.5744800720214924, 0.5754864501953205, 0.576492950439461, 0.5774995727539142, 0.5785061950683673, 0.579512939453133, 0.5805198059082112, 0.5815267333984456, 0.5825337219238363, 0.5835408325195396, 0.5845480041503991, 0.5855552368164149, 0.586562591552743, 0.5875700073242273, 0.5885775451660241, 0.5895851440429772, 0.5905928649902429, 0.5916006469726648, 0.5926085510253992, 0.5936165161132899, 0.5946245422363369, 0.5956326904296964, 0.5966408996582121, 0.5976492309570403, 0.5986576232910245, 0.599666076660165, 0.6006746520996181, 0.6016833496093837, 0.6026921081543056, 0.6037009277343838, 0.6047098693847744, 0.6057188720703214, 0.6067279968261808, 0.6077371826171966, 0.6087464904785247, 0.6097558593750089, 0.6107653503418057, 0.6117749023437588, 0.6127845764160244, 0.6137943115234462, 0.6148041076660243, 0.615814025878915, 0.6168240661621182, 0.6178341674804776, 0.6188443298339933, 0.6198546142578214, 0.6208650207519618, 0.6218754882812586, 0.6228860168457117, 0.6238966674804772, 0.6249074401855553, 0.6259182739257897, 0.6269291687011803, 0.6279401855468835, 0.6289513244628991, 0.629962524414071, 0.6309738464355553, 0.6319852294921958, 0.6329966735839926, 0.6340083007812581, 0.6350199279785237, 0.636031738281258, 0.6370436096191486, 0.6380555419921955, 0.6390675964355549, 0.6400797119140705, 0.6410919494628986, 0.6421043090820392, 0.6431167297363359, 0.6441292724609452, 0.6451418762207107, 0.6461546020507888, 0.6471674499511794, 0.6481803588867262, 0.6491933288574293, 0.6502064208984449, 0.651219635009773, 0.6522329711914135, 0.6532463684082103, 0.6542598266601632, 0.6552734069824288, 0.6562871093750068, 0.6573009338378973, 0.6583148193359442, 0.6593288269043035, 0.6603428955078191, 0.6613570861816471, 0.6623713378906314, 0.6633857727050844, 0.6644002075195373, 0.6654148254394591, 0.6664295043945371, 0.6674443054199276, 0.6684591674804744, 0.6694741516113337, 0.6704892578125056, 0.6715044860839899, 0.6725197753906306, 0.6735351867675837, 0.6745506591796931, 0.675566253662115, 0.6765819702148493, 0.6775978088378961, 0.6786137084960991, 0.6796297302246147, 0.6806458740234428, 0.6816621398925834, 0.6826784667968803, 0.6836949157714897, 0.6847114257812553, 0.6857281188964898, 0.6867448730468805, 0.6877617492675837, 0.6887786865234432, 0.6897958068847714, 0.6908129882812556, 0.6918302917480524, 0.6928476562500056, 0.6938652038574274, 0.6948828125000056, 0.6959005432128963, 0.6969183959960995, 0.6979363708496152, 0.6989544067382871, 0.6999726257324276, 0.7009909057617244, 0.7020093078613338, 0.7030278320312556, 0.7040464172363338, 0.7050651855468807, 0.7060840148925839, 0.7071029663085996, 0.7081220397949277, 0.7091412353515684, 0.7101605529785214, 0.711179992675787, 0.7121994934082089, 0.7132191772460995, 0.7142389221191464, 0.7152587890625058, 0.7162787780761777, 0.717298889160162, 0.7183191833496151, 0.7193395385742244, 0.72035995483399, 0.7213805541992243, 0.7224012756347712, 0.7234221191406306, 0.7244430847168024, 0.7254641723632868, 0.7264853210449272, 0.7275066528320365, 0.7285281066894583, 0.7295496826171927, 0.7305713195800833, 0.7315931396484426, 0.7326150817871144, 0.7336371459960987, 0.7346593322753955, 0.7356816406250047, 0.7367040710449265, 0.7377266235351608, 0.7387492980957077, 0.7397721557617233, 0.740795074462895, 0.7418181762695356, 0.7428413391113323, 0.7438646850585978, 0.7448881530761758, 0.7459117431640664, 0.7469355163574257, 0.7479593505859413, 0.7489833679199255, 0.7500074462890659, 0.7510317077636751, 0.7520561523437531, 0.7530806579589874, 0.7541053466796904, 0.755130157470706, 0.756155090332034, 0.7571801452636745, 0.7582053833007837, 0.7592307434082054, 0.7602562255859396, 0.7612818908691427, 0.762307617187502, 0.7633335876464861, 0.7643596191406264, 0.7653858337402356, 0.7664121704101573, 0.7674386901855478, 0.7684653320312508, 0.7694920959472663, 0.7705190429687506, 0.7715461120605475, 0.7725733642578131, 0.7736007385253911, 0.7746282348632817, 0.7756559143066409, 0.776683776855469, 0.7777117614746095, 0.7787398681640626, 0.7797681579589845, 0.7807966308593751, 0.7818252258300783, 0.7828540039062502, 0.7838829040527345, 0.7849119873046876, 0.7859411926269532, 0.7869705810546875, 0.7880001525878907, 0.7890299072265625, 0.7900597839355469, 0.7910897827148436, 0.7921200256347655, 0.7931503906249998, 0.794180938720703, 0.7952116699218748, 0.7962425231933591, 0.7972735595703121, 0.7983047790527339, 0.7993361816406245, 0.8003677673339838, 0.8013994750976556, 0.8024314270019525, 0.8034635009765617, 0.8044957580566398, 0.8055281982421866, 0.8065608215332022, 0.8075936279296864, 0.8086266174316393, 0.8096597900390611, 0.8106932067871079, 0.8117267456054672, 0.8127604675292952, 0.813794372558592, 0.8148285217285137, 0.815862792968748, 0.8168973083496073, 0.8179320068359354, 0.8189668884277322, 0.8200019531249979, 0.8210372619628884, 0.8220726928710914, 0.8231084289550757, 0.8241442871093726, 0.8251803894042945, 0.8262166748046852, 0.8272532043457009, 0.8282899169921852, 0.8293268127441383, 0.8303639526367165, 0.8314012756347634, 0.8324388427734353, 0.8334766540527322, 0.8345146484374978, 0.8355528869628884, 0.8365913085937479, 0.8376299743652321, 0.8386688842773414, 0.8397080383300758, 0.8407473754882789, 0.841786956787107, 0.8428267822265602, 0.8438668518066382, 0.8449071655273414, 0.8459476623535132, 0.8469884643554663, 0.8480295104980443, 0.8490707397460912, 0.8501122741699192, 0.8511540527343723, 0.8521960754394503, 0.8532384033203096, 0.8542809143066378, 0.8553237304687472, 0.8563667907714815, 0.8574101562499971, 0.8584537658691377, 0.8594976196289034, 0.8605417785644504, 0.8615862426757785, 0.8626309509277316, 0.863675964355466, 0.8647212219238255, 0.8657667846679661, 0.866812652587888, 0.8678588256835912, 0.8689053039550755, 0.8699520874023411, 0.8709991149902317, 0.8720465087890599, 0.8730942077636693, 0.8741422119140599, 0.8751905212402318, 0.8762391967773412, 0.8772881774902318, 0.8783374633789036, 0.879387115478513, 0.8804371337890599, 0.881487457275388, 0.8825381469726538, 0.8835892028808568, 0.8846405639648413, 0.8856922912597632, 0.886744445800779, 0.887796905517576, 0.8888497924804667, 0.8899030456542949, 0.8909566650390605, 0.89201071166992, 0.8930651245117168, 0.8941199645996075, 0.8951751708984357, 0.8962308654785137, 0.8972869262695294, 0.8983434143066388, 0.899400329589842, 0.900457733154295, 0.9015155639648419, 0.9025738220214824, 0.903632568359373, 0.9046917419433572, 0.9057514648437478, 0.906811614990232, 0.9078722534179663, 0.9089334411621067, 0.9099951171874973, 0.9110572814941379, 0.9121199951171847, 0.9131832580566378, 0.9142470703124973, 0.9153114318847629, 0.9163763427734348, 0.9174418640136691, 0.9185079345703097, 0.9195746765136691, 0.9206419677734347, 0.9217098693847627, 0.9227784423828097, 0.9238476867675752, 0.9249175415039033, 0.9259881286621064, 0.9270593872070282, 0.9281313781738249, 0.9292041015624966, 0.9302774963378871, 0.9313517456054652, 0.9324267272949184, 0.9335025024414026, 0.9345790710449183, 0.9356565551757777, 0.9367348327636683, 0.9378140258789026, 0.9388941345214806, 0.9399751586914024, 0.941057098388668, 0.9421400756835899, 0.9432240905761681, 0.9443091430664025, 0.9453952331542931, 0.9464824218749962, 0.9475708312988242, 0.9486603393554648, 0.9497511291503867, 0.95084320068359, 0.9519365539550743, 0.9530312499999961, 0.9541274108886679, 0.9552249755859336, 0.9563241271972618, 0.9574248046874961, 0.9585271301269492, 0.9596312255859335, 0.9607370910644492, 0.9618448486328085, 0.9629546203613241, 0.964066406249996, 0.9651803894042928, 0.9662966308593709, 0.9674153137206989, 0.9685365600585895, 0.969660491943355, 0.9707873535156205, 0.9719172058105424, 0.9730503540039018, 0.9741870422363237, 0.9753275146484331, 0.976472015380855, 0.9776209716796831, 0.9787746887206988, 0.9799337158203082, 0.9810985412597611, 0.9822698364257768, 0.9834483337402299, 0.9846350097656206, 0.9858310241699174, 0.987037719726558, 0.9882571716308547, 0.9894917602539016, 0.9907451477050735, 0.9920223388671828, 0.9933315124511671, 0.9946865234374952, 0.9961158752441358, 0.9977000732421827],  # skipcq: FLK-E501
                 'num_bt = 1000, alpha = 0.05,': [5.1300048828125e-05, 0.00035546875, 0.0008181457519531249, 0.001367431640625, 0.0019721374511718747, 0.002616149902343749, 0.0032897644042968735, 0.003986877441406248, 0.0047030334472656235, 0.005435119628906249, 0.006180877685546875, 0.006938415527343749, 0.007706207275390624, 0.008483215332031249, 0.009268402099609375, 0.010061035156249998, 0.010860321044921874, 0.011665710449218752, 0.012476776123046877, 0.013293029785156254, 0.01411404418945313, 0.014939575195312506, 0.015769256591796878, 0.016602905273437503, 0.017440155029296876, 0.0182808837890625, 0.019124908447265623, 0.01997198486328125, 0.020821990966796877, 0.0216748046875, 0.022530242919921874, 0.02338818359375, 0.024248565673828125, 0.0251112060546875, 0.02597610473632813, 0.02684307861328126, 0.02771206665039063, 0.028583007812500005, 0.029455841064453134, 0.03033050537109376, 0.03120687866210939, 0.03208489990234376, 0.03296456909179689, 0.03384582519531252, 0.0347286071777344, 0.03561279296875002, 0.03649844360351565, 0.03738549804687503, 0.038273895263671906, 0.03916351318359378, 0.04005447387695316, 0.04094659423828129, 0.04183999633789067, 0.04273449707031255, 0.04363015747070318, 0.04452685546875006, 0.04542471313476568, 0.046323608398437556, 0.04722348022460943, 0.048124389648437564, 0.04902621459960944, 0.04992907714843756, 0.0508327941894532, 0.05173748779296882, 0.052643035888671946, 0.053549438476562565, 0.05445669555664069, 0.05536480712890631, 0.05627371215820319, 0.05718347167968756, 0.05809396362304694, 0.05900524902343756, 0.05991732788085944, 0.06083007812500007, 0.06174356079101569, 0.06265783691406254, 0.06357272338867193, 0.06448834228515629, 0.06540463256835943, 0.0663215942382813, 0.06723916625976567, 0.0681574096679688, 0.06907632446289066, 0.06999578857421879, 0.07091592407226566, 0.0718366088867188, 0.07275790405273444, 0.07367980957031256, 0.07460226440429693, 0.07552526855468755, 0.07644888305664069, 0.07737298583984381, 0.07829763793945319, 0.07922283935546881, 0.08014852905273445, 0.08107476806640634, 0.08200155639648449, 0.08292877197265636, 0.08385653686523448, 0.08478479003906261, 0.08571347045898448, 0.08664270019531259, 0.08757235717773446, 0.08850244140625008, 0.08943307495117195, 0.09036407470703131, 0.09129556274414069, 0.09222747802734382, 0.09315982055664071, 0.09409265136718759, 0.09502584838867195, 0.09595947265625007, 0.09689352416992195, 0.09782800292968757, 0.0987628479003907, 0.09969812011718757, 0.1006338195800782, 0.10156982421875008, 0.10250631713867195, 0.10344311523437508, 0.10438034057617196, 0.10531793212890633, 0.10625588989257823, 0.10719415283203138, 0.10813284301757825, 0.10907189941406262, 0.1100113220214845, 0.11095104980468765, 0.11189114379882828, 0.1128316040039064, 0.11377243041992202, 0.11471350097656266, 0.11565499877929702, 0.11659680175781265, 0.11753890991210952, 0.11848138427734389, 0.11942416381835952, 0.1203672485351564, 0.12131063842773454, 0.12225439453125017, 0.12319839477539082, 0.12414276123046897, 0.1250874328613284, 0.12603234863281282, 0.1269776306152347, 0.12792315673828158, 0.12886904907226598, 0.12981518554687538, 0.13076162719726603, 0.13170831298828167, 0.13265536499023484, 0.133602661132813, 0.13455020141601615, 0.13549804687500056, 0.13644619750976617, 0.13739459228515677, 0.13834323120117237, 0.13929223632812548, 0.1402414245605474, 0.14119091796875055, 0.1421406555175787, 0.14309063720703186, 0.14404092407226626, 0.14499145507812566, 0.14594223022461006, 0.14689324951171945, 0.14784451293945383, 0.14879608154296942, 0.1497478332519538, 0.15069989013671942, 0.15165219116211004, 0.15260467529296945, 0.15355746459961006, 0.15451043701171946, 0.15546371459961006, 0.15641717529296945, 0.15737088012695383, 0.1583248291015632, 0.15927902221679757, 0.160233459472657, 0.16118807983398514, 0.1621429443359383, 0.16309805297851643, 0.16405340576171956, 0.16500894165039143, 0.1659647216796883, 0.16692068481445393, 0.16787689208984458, 0.1688333435058602, 0.16978997802734463, 0.1707467956542978, 0.1717039184570322, 0.17266116333007908, 0.17361865234375096, 0.17457638549804783, 0.17553430175781348, 0.17649240112304787, 0.1774507446289073, 0.17840927124023548, 0.17936804199218864, 0.18032699584961054, 0.18128613281250117, 0.18224545288086058, 0.183205017089845, 0.18416476440429813, 0.18512469482422, 0.1860848083496106, 0.1870451660156262, 0.1880057067871106, 0.1889664306640637, 0.18992733764648562, 0.19088842773437625, 0.19184976196289188, 0.19281121826172004, 0.1937729187011732, 0.1947347412109388, 0.19569680786132942, 0.19665905761718883, 0.19762149047851696, 0.19858404541015756, 0.19954684448242316, 0.20050982666015754, 0.20147299194336066, 0.20243627929687624, 0.20339981079101682, 0.20436346435546993, 0.20532736206054802, 0.20629138183593865, 0.20725558471679806, 0.20822003173828246, 0.20918460083007934, 0.21014929199218874, 0.21111422729492313, 0.21207928466797, 0.21304458618164185, 0.21401000976562623, 0.21497561645507934, 0.21594134521484498, 0.21690731811523561, 0.21787341308593877, 0.21883969116211066, 0.21980609130859508, 0.22077267456054822, 0.2217394409179701, 0.2227063903808607, 0.22367346191406384, 0.2246407165527357, 0.2256081542968763, 0.22657571411132943, 0.22754345703125134, 0.22851138305664198, 0.22947943115234515, 0.23044766235351705, 0.23141601562500147, 0.23238455200195463, 0.2333532714843765, 0.23432211303711092, 0.2352910766601578, 0.23626028442382968, 0.23722955322265782, 0.23819906616211095, 0.23916864013672035, 0.24013845825195473, 0.24110833740234539, 0.24207846069336103, 0.24304864501953294, 0.24401901245117358, 0.244989562988283, 0.2459602355957049, 0.24693109130859553, 0.24790206909179868, 0.2488731689453143, 0.24984445190429871, 0.25081585693359565, 0.25178744506836126, 0.2527591552734394, 0.25373098754883006, 0.2547030029296894, 0.25567514038086125, 0.2566474609375019, 0.2576198425292988, 0.25859246826172066, 0.2595651550292988, 0.2605380249023457, 0.261511016845705, 0.2624841918945331, 0.26345742797851746, 0.2644308471679705, 0.2654044494628923, 0.2663781738281267, 0.2673519592285173, 0.26832598876953284, 0.26930007934570466, 0.27027435302734526, 0.2712487487792984, 0.27222326660156404, 0.27319796752929837, 0.27417272949218896, 0.27514767456054834, 0.27612274169922024, 0.27709799194336093, 0.2780733032226579, 0.2790487976074235, 0.28002441406250167, 0.28100015258789235, 0.2819760742187517, 0.2829520568847673, 0.2839282226562517, 0.28490451049804866, 0.285880920410158, 0.28685745239257987, 0.28783410644531426, 0.28881094360351733, 0.28978784179687667, 0.2907649230957048, 0.29174212646484543, 0.2927194519042985, 0.29369689941406407, 0.2946744689941422, 0.2956521606445328, 0.29662997436523586, 0.2976079711914077, 0.2985860290527358, 0.2995642700195327, 0.3005426330566421, 0.301521118164064, 0.3024996643066421, 0.303478393554689, 0.30445724487304837, 0.3054362182617203, 0.30641531372070474, 0.3073945312500017, 0.3083738708496111, 0.30935339355468927, 0.3103329772949237, 0.31131268310547067, 0.31229251098633004, 0.3132725219726582, 0.3142525939941426, 0.3152327880859396, 0.31621310424804894, 0.3171936035156271, 0.3181741638183615, 0.31915484619140844, 0.3201356506347678, 0.3211166381835959, 0.3220976867675803, 0.32307885742187725, 0.3240601501464866, 0.32504156494140846, 0.32602310180664285, 0.32700476074218976, 0.3279865417480491, 0.32896844482422094, 0.3299504699707053, 0.3309326171875022, 0.33191488647461165, 0.33289721679687734, 0.3338797302246117, 0.3348623657226586, 0.33584506225586175, 0.3368278808593774, 0.3378108825683619, 0.3387939453125026, 0.33977713012695576, 0.34076043701172143, 0.3417438659667996, 0.34272741699219034, 0.34371109008789347, 0.34469482421875286, 0.34567874145508104, 0.3466627197265655, 0.34764682006836245, 0.3486311035156281, 0.34961544799805, 0.35059991455078443, 0.3515844421386751, 0.3525691528320345, 0.3535539855957064, 0.35453887939453455, 0.3555238952636752, 0.3565090332031283, 0.35749429321289394, 0.3584796752929721, 0.35946517944336276, 0.3604507446289097, 0.3614364929199253, 0.36242230224609717, 0.36340823364258157, 0.3643942871093785, 0.36538046264648794, 0.36636669921875364, 0.36735311889648803, 0.3683395996093787, 0.36932620239258185, 0.37031292724609755, 0.3712997131347695, 0.37228668212891025, 0.37327371215820726, 0.3742608642578167, 0.37524813842773863, 0.3762355346679731, 0.37722299194336384, 0.37821063232422325, 0.3791983337402389, 0.3801861572265671, 0.38117410278320785, 0.38216210937500483, 0.38315023803711423, 0.3841385498046924, 0.3851268615722706, 0.3861153564453176, 0.38710397338867697, 0.3880926513671926, 0.3890814514160208, 0.3900703735351615, 0.39105935668945846, 0.3920485229492241, 0.393037750244146, 0.3940270996093804, 0.3950165100097711, 0.3960061035156305, 0.3969957580566461, 0.39798553466797426, 0.39897543334961494, 0.3999653930664119, 0.40095547485352123, 0.4019456787109431, 0.4029360046386775, 0.40392645263672444, 0.4049169616699275, 0.4059075927734431, 0.40689834594727126, 0.40788916015625565, 0.4088801574707087, 0.40987121582031805, 0.41086233520508364, 0.411853637695318, 0.41284500122070866, 0.4138364868164117, 0.4148280944824273, 0.41581976318359914, 0.4168115539550835, 0.4178034667968804, 0.4187955017089898, 0.4197875976562555, 0.42077987670898986, 0.4217721557617242, 0.42276461791992737, 0.4237571411132868, 0.4247497863769587, 0.42574255371094316, 0.42673544311524014, 0.4277283935546933, 0.42872146606445893, 0.4297146606445371, 0.43070791625977156, 0.43170129394531853, 0.4326947937011779, 0.43368835449219356, 0.434682098388678, 0.4356759033203187, 0.43666976928711565, 0.4376638183593813, 0.4386579284668032, 0.4396521606445376, 0.4406464538574283, 0.44164093017578765, 0.4426354675293033, 0.44363006591797516, 0.44462484741211583, 0.44561968994141277, 0.4466146545410221, 0.4476096801757877, 0.44860482788086586, 0.4496000976562565, 0.4505954895019596, 0.45159094238281894, 0.4525865173339908, 0.4535822143554752, 0.4545780334472721, 0.45557391357422516, 0.45656991577149075, 0.4575659790039126, 0.45856222534180324, 0.45955853271485014, 0.4605549011230532, 0.46155145263672503, 0.46254806518555314, 0.46354479980469376, 0.46454159545899065, 0.4655385742187562, 0.4665355529785218, 0.46753271484375614, 0.46852993774414675, 0.4695272827148498, 0.47052474975586533, 0.4715223388671934, 0.47251998901367775, 0.4735177612304746, 0.47451559448242775, 0.4755135498046934, 0.47651162719727147, 0.47750982666016206, 0.4785080871582089, 0.4795064697265683, 0.4805049743652402, 0.48150354003906837, 0.4825022888183653, 0.4835010375976623, 0.4844999694824279, 0.4854989624023498, 0.4864980773925842, 0.48749731445313116, 0.48849661254883425, 0.48949603271484987, 0.490495574951178, 0.4914951782226624, 0.4924949645996155, 0.4934947509765686, 0.49449472045899046, 0.4954947509765686, 0.49649490356445924, 0.4974951782226623, 0.49849551391602165, 0.49949603271484977, 0.5004965515136779, 0.5014972534179748, 0.5024980163574279, 0.5034989013671934, 0.5044999084472716, 0.5055009765625059, 0.5065021667480528, 0.5075034790039122, 0.5085048522949279, 0.5095064086914122, 0.5105080261230527, 0.5115097045898495, 0.512511566162115, 0.5135134887695368, 0.5145154724121149, 0.5155176391601618, 0.5165198669433649, 0.5175222167968806, 0.5185246887207087, 0.519527221679693, 0.5205298767089898, 0.521532653808599, 0.5225355529785208, 0.5235385131835989, 0.5245415954589895, 0.5255447998046926, 0.526548065185552, 0.5275514526367239, 0.5285549621582083, 0.5295585937500052, 0.5305622863769585, 0.5315661010742242, 0.5325700378418023, 0.533574096679693, 0.5345782165527398, 0.5355824584960992, 0.5365868225097711, 0.5375913085937555, 0.5385958557128961, 0.5396005249023493, 0.540605316162115, 0.541610168457037, 0.5426152038574278, 0.5436203002929748, 0.5446255187988344, 0.5456307983398502, 0.5466361999511784, 0.5476417236328189, 0.5486473693847721, 0.5496531372070378, 0.5506589660644597, 0.5516649169921942, 0.5526709899902412, 0.5536771850586008, 0.5546834411621165, 0.5556898193359447, 0.5566963195800853, 0.5577029418945384, 0.5587096252441478, 0.559716491699226, 0.5607234191894604, 0.5617304077148512, 0.5627375793457107, 0.5637448120117264, 0.5647522277832108, 0.5657597045898514, 0.5667672424316482, 0.5677749633789139, 0.5687827453613358, 0.5697906494140702, 0.5707986755371172, 0.5718068237304766, 0.5728150329589924, 0.5738234252929767, 0.5748318786621173, 0.5758404541015704, 0.576849151611336, 0.5778579101562579, 0.5788668518066485, 0.5798758544921955, 0.5808849792480549, 0.5818942260742268, 0.5829035339355548, 0.5839130249023515, 0.5849225769043046, 0.5859322509765702, 0.5869420471191483, 0.587951965332039, 0.5889620056152421, 0.5899721679687578, 0.5909823913574297, 0.5919927368164138, 0.5930032043457106, 0.59401379394532, 0.5950245056152418, 0.5960353393554761, 0.5970462341308668, 0.5980573120117262, 0.5990684509277419, 0.60007971191407, 0.6010910949707106, 0.6021026000976636, 0.6031142272949291, 0.604125915527351, 0.6051377868652416, 0.6061497192382884, 0.6071618347168041, 0.6081740112304759, 0.6091863098144602, 0.610198730468757, 0.6112112731933662, 0.612223937988288, 0.6132366638183661, 0.6142495727539129, 0.6152626037597723, 0.6162756958007879, 0.6172889709472721, 0.6183023071289125, 0.6193157653808655, 0.6203294067382873, 0.6213431091308653, 0.6223569335937559, 0.623370880126959, 0.6243849487304746, 0.6253991394043026, 0.6264134521484431, 0.6274278869628961, 0.6284424438476616, 0.6294571228027396, 0.6304719238281301, 0.6314867858886769, 0.6325018310546925, 0.6335169982910206, 0.6345322875976612, 0.6355476989746144, 0.6365631713867238, 0.6375788269043019, 0.6385946044921925, 0.6396105041503956, 0.6406265258789111, 0.6416426086425829, 0.6426588745117235, 0.6436752624511767, 0.6446917724609423, 0.6457084045410205, 0.6467251586914112, 0.6477420349121145, 0.6487590942382864, 0.6497762145996144, 0.6507934570312549, 0.6518108825683643, 0.6528283691406299, 0.6538459777832081, 0.654863769531255, 0.6558816833496145, 0.6568997192382864, 0.6579178161621144, 0.6589361572265674, 0.6599545593261767, 0.6609730834960986, 0.661991729736333, 0.6630105590820362, 0.6640294494628957, 0.6650485229492238, 0.6660677185058644, 0.6670870361328175, 0.6681064758300831, 0.6691260986328175, 0.6701457824707081, 0.6711656494140675, 0.6721856384277394, 0.6732057495117237, 0.6742259826660205, 0.6752463989257861, 0.6762669372558642, 0.6772875366210985, 0.6783083801269579, 0.6793292846679736, 0.6803503112793017, 0.6813715209960985, 0.6823928527832078, 0.6834143676757859, 0.6844359436035202, 0.6854577026367233, 0.686479583740239, 0.6875016479492232, 0.6885237731933637, 0.6895460815429729, 0.690568572998051, 0.6915911254882853, 0.6926138610839884, 0.693636718750004, 0.6946597595214882, 0.6956829223632849, 0.6967062072753941, 0.6977296142578159, 0.6987532043457064, 0.6997769775390658, 0.7008008117675814, 0.7018248291015655, 0.7028490295410185, 0.7038733520507839, 0.7048977966308619, 0.7059224243164087, 0.706947174072268, 0.7079720458984398, 0.7089971008300803, 0.7100223388671895, 0.7110476989746112, 0.7120731811523454, 0.7130988464355484, 0.714124633789064, 0.7151506042480481, 0.7161766967773447, 0.7172029724121102, 0.7182293701171881, 0.7192559509277349, 0.7202827148437504, 0.7213096008300784, 0.722336608886719, 0.7233638000488284, 0.7243911743164064, 0.725418670654297, 0.7264463500976562, 0.7274742126464843, 0.7285021972656248, 0.7295303649902342, 0.730558654785156, 0.7315871276855467, 0.7326157836914061, 0.733644561767578, 0.7346735229492186, 0.7357026672363279, 0.736731994628906, 0.7377614440917967, 0.7387910766601561, 0.7398208923339842, 0.7408508300781248, 0.7418809509277341, 0.7429112548828122, 0.743941741943359, 0.7449724121093747, 0.7460032043457028, 0.7470341796874996, 0.7480653381347652, 0.7490966796874995, 0.7501282043457026, 0.7511599121093744, 0.752191802978515, 0.7532238159179679, 0.754256072998046, 0.7552884521484365, 0.7563210144042959, 0.7573538208007801, 0.7583867492675768, 0.7594198608398423, 0.7604532165527328, 0.7614866943359359, 0.7625203552246076, 0.7635542602539044, 0.7645882873535136, 0.7656225585937478, 0.7666569519042946, 0.7676915893554664, 0.7687264099121071, 0.7697614135742165, 0.7707966613769507, 0.7718320312499974, 0.7728676452636692, 0.7739034423828098, 0.7749394226074192, 0.7759755859374974, 0.7770119934082006, 0.7780485839843725, 0.7790853576660132, 0.7801223754882788, 0.7811595153808569, 0.7821969604492164, 0.7832345275878883, 0.7842723999023414, 0.785310394287107, 0.7863486328124977, 0.7873870544433571, 0.7884257202148414, 0.7894646301269507, 0.7905037231445288, 0.7915429992675757, 0.7925825195312475, 0.7936222839355443, 0.7946622314453099, 0.7957024230957005, 0.7967428588867161, 0.7977834777832004, 0.7988243408203096, 0.7998654479980439, 0.800906738281247, 0.8019482727050751, 0.8029901123046844, 0.8040320739746062, 0.8050743408203093, 0.8061168518066374, 0.8071595458984343, 0.8082025451660124, 0.8092457275390593, 0.8102892150878874, 0.8113328857421843, 0.8123768615722625, 0.8134210205078095, 0.8144654846191377, 0.8155101928710907, 0.8165551452636689, 0.8176003417968721, 0.8186458435058565, 0.8196915283203096, 0.820737518310544, 0.8217838134765597, 0.822830291748044, 0.8238770751953096, 0.8249241638183565, 0.8259714965820284, 0.8270190734863253, 0.8280669555664034, 0.8291151428222628, 0.8301635742187471, 0.8312123107910127, 0.8322612915039033, 0.8333106384277313, 0.8343602294921845, 0.8354100646972625, 0.8364602661132782, 0.8375107727050751, 0.838561523437497, 0.8396125793457002, 0.8406640014648409, 0.8417156677246066, 0.8427677001953099, 0.8438200378417943, 0.84487268066406, 0.845925628662107, 0.8469788818359352, 0.8480325012207007, 0.8490864257812477, 0.850140716552732, 0.8511953124999977, 0.8522502746582009, 0.8533055419921852, 0.8543611755371071, 0.8554171752929666, 0.8564734802246071, 0.8575302124023415, 0.8585872497558572, 0.8596446533203103, 0.8607024230957009, 0.8617606201171851, 0.8628191223144507, 0.8638780517578101, 0.8649373474121068, 0.8659970092773411, 0.8670570983886692, 0.8681175537109348, 0.8691784362792941, 0.8702396850585908, 0.8713013610839814, 0.8723634643554657, 0.8734259948730438, 0.8744889526367157, 0.8755523376464812, 0.8766161499023407, 0.8776803894042938, 0.8787450561523408, 0.8798102111816376, 0.8808758544921845, 0.8819419250488251, 0.8830084838867157, 0.8840754699707, 0.8851430053710906, 0.8862109680175748, 0.8872794799804654, 0.8883484802246059, 0.8894179687499965, 0.8904880065917932, 0.89155853271484, 0.8926296081542929, 0.8937012329101522, 0.8947733459472614, 0.8958460693359331, 0.8969194030761675, 0.8979932250976518, 0.8990676574706985, 0.9001427001953078, 0.9012183532714797, 0.9022945556640579, 0.9033714294433547, 0.9044489135742141, 0.9055270690917921, 0.9066058349609326, 0.9076853332519482, 0.9087654418945262, 0.9098462829589792, 0.910927795410151, 0.9120100402831978, 0.9130929565429634, 0.9141766662597602, 0.9152611694335884, 0.9163464050292917, 0.9174323730468698, 0.9185191955566353, 0.9196068725585883, 0.9206953430175725, 0.9217846679687444, 0.9228748474121037, 0.9239659423828069, 0.9250579528808539, 0.9261508789062446, 0.927244720458979, 0.9283395996093696, 0.9294354553222602, 0.9305323486328071, 0.9316302795410102, 0.9327292480468697, 0.933829376220698, 0.9349306030273384, 0.9360329895019478, 0.9371365966796822, 0.9382414245605416, 0.9393475341796821, 0.9404549255371039, 0.9415635986328069, 0.9426737365722601, 0.943785278320307, 0.9448982849121038, 0.946012817382807, 0.9471288757324162, 0.9482465820312442, 0.9493659973144474, 0.9504871215820254, 0.9516100769042911, 0.9527348632812441, 0.9538616638183534, 0.954990478515619, 0.9561213684081972, 0.9572545166015566, 0.958389923095697, 0.9595277709960878, 0.9606681213378846, 0.9618111572265564, 0.9629569396972596, 0.9641056518554628, 0.9652574768066347, 0.966412597656244, 0.9675711364746035, 0.9687333984374941, 0.9698995056152283, 0.9710698852539001, 0.9722447204589783, 0.9734243774414001, 0.9746092224121033, 0.9757997436523377, 0.9769964294433534, 0.9781998901367127, 0.9794107360839782, 0.9806298217773376, 0.9818581237792906, 0.9830968017578062, 0.9843474426269468, 0.9856117553710874, 0.9868923034667906, 0.988192199707025, 0.9895158996581969, 0.9908700561523373, 0.9922647399902279, 0.9937177124023372, 0.9952649841308528, 0.9970087280273371],  # skipcq: FLK-E501
@@ -240,7 +223,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 'num_bt = 20, alpha = 0.025': [0.0012650966644287111, 0.012348556518554692, 0.032070970535278326, 0.05733404159545899, 0.08657145500183107, 0.11893157958984377, 0.1539091587066651, 0.19119005203247075, 0.2305778980255127, 0.27195787429809565, 0.31527810096740716, 0.36054258346557605, 0.4078114986419677, 0.4572108268737792, 0.5089540958404539, 0.5633859634399412, 0.6210731983184814, 0.6830172538757324, 0.7512671947479248, 0.8315665245056152]  # skipcq: FLK-E501
                 }
 
-        # List of the maximal values to the significance niveau 'gof_alpha', the samplesize 'num_init' and the single
+        # List of the maximal values to the significance niveau 'gof_alpha', the sample-size 'num_init' and the single
         # distributions in the initial KS-tests
         self.crit_val_ini_ks = {0.001: {1000: {'uni': 0.06174732010933548, 'nor': 0.03896795290941646, 'beta1': 0.06139681196262953, 'beta2': 0.12199585736700946, 'beta4': 0.04582502097984753}, 750: {'uni': 0.07024635538683371, 'nor': 0.04459569470155689, 'beta1': 0.07021684632565739, 'beta2': 0.12815976069728274, 'beta4': 0.05264080908630758}, 500: {'uni': 0.08642770525355598, 'nor': 0.05509110394413119, 'beta1': 0.08761941562012493, 'beta2': 0.14913744793549832, 'beta4': 0.06421826877149445}, 400: {'uni': 0.09655798845997815, 'nor': 0.0613993273533881, 'beta1': 0.0964224097850293, 'beta2': 0.15858083637195353, 'beta4': 0.07290090814924588}, 300: {'uni': 0.11164843625013415, 'nor': 0.07106128126671396, 'beta1': 0.11009775320915205, 'beta2': 0.17523769295342007, 'beta4': 0.08305783948716328}, 200: {'uni': 0.13628359610263507, 'nor': 0.08740964922426725, 'beta1': 0.1376486743610651, 'beta2': 0.2010516066361282, 'beta4': 0.10286264686710184}, 150: {'uni': 0.15651662849813364, 'nor': 0.10038713469524929, 'beta1': 0.15819608234185656, 'beta2': 0.22229910725996993, 'beta4': 0.11634654326012955}, 100: {'uni': 0.19072306639877157, 'nor': 0.12280360833310089, 'beta1': 0.19321091289173042, 'beta2': 0.2581947494944321, 'beta4': 0.14328917055317145}, 75: {'uni': 0.21934961884964826, 'nor': 0.14015948249260646, 'beta1': 0.2219326490803759, 'beta2': 0.2846540951939676, 'beta4': 0.1652852320527448}, 50: {'uni': 0.2645907926740654, 'nor': 0.1710961682554944, 'beta1': 0.2678719773943101, 'beta2': 0.3289035352446858, 'beta4': 0.1999598991299047}, 30: {'uni': 0.3379078488296823, 'nor': 0.21594948610382936, 'beta1': 0.3441129978995892, 'beta2': 0.39361692414493443, 'beta4': 0.2508472086556259}, 20: {'uni': 0.3959074827161117, 'nor': 0.2608433948642659, 'beta1': 0.4133477648489873, 'beta2': 0.44853631830721913, 'beta4': 0.29952120108891395}, 10: {'uni': 0.5170765814161853, 'nor': 0.35733312354157704, 'beta1': 0.5398708466808257, 'beta2': 0.5422967523113658, 'beta4': 0.40686356644018595}}, 0.005: {1000: {'uni': 0.05458116632544635, 'nor': 0.03504577921766977, 'beta1': 0.054517449744692026, 'beta2': 0.10728185476765839, 'beta4': 0.040733497260050544}, 750: {'uni': 0.06253533672182854, 'nor': 0.04046369401135186, 'beta1': 0.06282543848266553, 'beta2': 0.11279561980513325, 'beta4': 0.04705273659300363}, 500: {'uni': 0.07714054796228054, 'nor': 0.0496468687606364, 'beta1': 0.07693955943931102, 'beta2': 0.1327433163224424, 'beta4': 0.05731924299024538}, 400: {'uni': 0.08617878042484084, 'nor': 0.05541748786526407, 'beta1': 0.08588821546881897, 'beta2': 0.13875443390078235, 'beta4': 0.06439825899654178}, 300: {'uni': 0.0986714495305242, 'nor': 0.06407724459065156, 'beta1': 0.09855314389102021, 'beta2': 0.1548737996243767, 'beta4': 0.07467900099977004}, 200: {'uni': 0.12062451647295991, 'nor': 0.07827596978503826, 'beta1': 0.12126943895923059, 'beta2': 0.17825544608232347, 'beta4': 0.09076754278924304}, 150: {'uni': 0.1396796839473482, 'nor': 0.09009210049264571, 'beta1': 0.14063288933757345, 'beta2': 0.1973907310236372, 'beta4': 0.10499002205047378}, 100: {'uni': 0.16922995185830964, 'nor': 0.10980683219099052, 'beta1': 0.17129406122009094, 'beta2': 0.22813210844235704, 'beta4': 0.12749534525918932}, 75: {'uni': 0.1953541681412001, 'nor': 0.12554665985678326, 'beta1': 0.19610381489611384, 'beta2': 0.25287194709425875, 'beta4': 0.1469739325714672}, 50: {'uni': 0.23503320028575814, 'nor': 0.15335710820924087, 'beta1': 0.23890161565850354, 'beta2': 0.2925965166545206, 'beta4': 0.17739407623100112}, 30: {'uni': 0.2976485313317806, 'nor': 0.19613498929034934, 'beta1': 0.3040864499477276, 'beta2': 0.35138347538048526, 'beta4': 0.22579108547722582}, 20: {'uni': 0.35388424243927113, 'nor': 0.23656926834477043, 'beta1': 0.36668171084515955, 'beta2': 0.39736542044382106, 'beta4': 0.2701286497170594}, 10: {'uni': 0.4630097657380493, 'nor': 0.3225433246916215, 'beta1': 0.47835376241010186, 'beta2': 0.4896209566095471, 'beta4': 0.36159750656596396}}, 0.01: {1000: {'uni': 0.05134454385349413, 'nor': 0.03330600875133105, 'beta1': 0.051275152087156495, 'beta2': 0.10009870323144221, 'beta4': 0.03865995666339189}, 750: {'uni': 0.05905726508494702, 'nor': 0.0383879788508078, 'beta1': 0.059272477516056354, 'beta2': 0.10502806705945988, 'beta4': 0.04450291981279328}, 500: {'uni': 0.07249296242654668, 'nor': 0.046932424204244594, 'beta1': 0.07240630431885364, 'beta2': 0.12408220110978818, 'beta4': 0.05424039706492939}, 400: {'uni': 0.080902691313323, 'nor': 0.05248129300353904, 'beta1': 0.08043677899242607, 'beta2': 0.12974923298059704, 'beta4': 0.06073621209890695}, 300: {'uni': 0.09306590895115929, 'nor': 0.06042909220901882, 'beta1': 0.0929294897119688, 'beta2': 0.14441139871845998, 'beta4': 0.07029934609881988}, 200: {'uni': 0.11331581936959173, 'nor': 0.07407780477974035, 'beta1': 0.11400852794991234, 'beta2': 0.16697088723911058, 'beta4': 0.08578814408291241}, 150: {'uni': 0.13110747055603822, 'nor': 0.08511174074211825, 'beta1': 0.13197498872552438, 'beta2': 0.18525721022812291, 'beta4': 0.09923887427643563}, 100: {'uni': 0.15947898396010982, 'nor': 0.10396630211898589, 'beta1': 0.16076780252138057, 'beta2': 0.21274473456821097, 'beta4': 0.1203847339328595}, 75: {'uni': 0.18341423985159883, 'nor': 0.11924687585622445, 'beta1': 0.1847923465861807, 'beta2': 0.23689175806686585, 'beta4': 0.13862384194648647}, 50: {'uni': 0.22065058332465762, 'nor': 0.14525710370631756, 'beta1': 0.2245287846345721, 'beta2': 0.27453195725371937, 'beta4': 0.16751626430377106}, 30: {'uni': 0.2806366070013675, 'nor': 0.18585975643934483, 'beta1': 0.28507040255377625, 'beta2': 0.32929770986141144, 'beta4': 0.2134224231720387}, 20: {'uni': 0.3334575751692692, 'nor': 0.22511252321148278, 'beta1': 0.3441640350433964, 'beta2': 0.3740749374193295, 'beta4': 0.2544162136548306}, 10: {'uni': 0.4366755558485817, 'nor': 0.3071991308976279, 'beta1': 0.4527891584489994, 'beta2': 0.46379050302844543, 'beta4': 0.34067023770504523}}, 0.05: {1000: {'uni': 0.04280142303978185, 'nor': 0.02860827073335037, 'beta1': 0.04282682578644642, 'beta2': 0.07986970874762322, 'beta4': 0.03275686429767982}, 750: {'uni': 0.049427811587210435, 'nor': 0.03298169164204601, 'beta1': 0.049275909605582924, 'beta2': 0.08486927467601035, 'beta4': 0.03775404114622272}, 500: {'uni': 0.06038458458366747, 'nor': 0.04027106205628239, 'beta1': 0.060195942616294934, 'beta2': 0.09995114375214009, 'beta4': 0.04613912209290452}, 400: {'uni': 0.0671626804698282, 'nor': 0.044967180104620696, 'beta1': 0.06747611786364349, 'beta2': 0.10571668604744544, 'beta4': 0.05152182574562672}, 300: {'uni': 0.07742312239112692, 'nor': 0.051666837623702166, 'beta1': 0.07767087703759445, 'beta2': 0.1178767433776362, 'beta4': 0.059452507414415046}, 200: {'uni': 0.09469966587530276, 'nor': 0.06343358521113673, 'beta1': 0.0950578895294647, 'beta2': 0.1366784736556006, 'beta4': 0.07255703928500457}, 150: {'uni': 0.10900935208153273, 'nor': 0.07289171579483816, 'beta1': 0.11002479909769114, 'beta2': 0.15242729269865973, 'beta4': 0.08373240678443566}, 100: {'uni': 0.13281274766076206, 'nor': 0.08920713936479638, 'beta1': 0.13377803165947766, 'beta2': 0.17499650468558625, 'beta4': 0.10190606958299475}, 75: {'uni': 0.15239779918045748, 'nor': 0.10243980804370362, 'beta1': 0.1541106817008704, 'beta2': 0.19485071272087295, 'beta4': 0.11705102736538112}, 50: {'uni': 0.18438141684534104, 'nor': 0.12466885274854955, 'beta1': 0.18728113451838269, 'beta2': 0.22658281610394648, 'beta4': 0.14239913459102727}, 30: {'uni': 0.23331654346299174, 'nor': 0.15906588455123438, 'beta1': 0.2387860500631408, 'beta2': 0.2718245732806131, 'beta4': 0.18048185108580744}, 20: {'uni': 0.2786314950878662, 'nor': 0.19349526617388257, 'beta1': 0.28589622085949756, 'beta2': 0.31147388293415956, 'beta4': 0.2164769385370286}, 10: {'uni': 0.3661289030334679, 'nor': 0.2658953985567251, 'beta1': 0.379401813819888, 'beta2': 0.38802519102270194, 'beta4': 0.2910744690699496}}, 0.1: {1000: {'uni': 0.038515938269794825, 'nor': 0.026313661922827247, 'beta1': 0.03860111298969593, 'beta2': 0.0695550650755411, 'beta4': 0.029845093507530562}, 750: {'uni': 0.04446055609985289, 'nor': 0.030266189959470058, 'beta1': 0.044472158939188655, 'beta2': 0.07438972690212953, 'beta4': 0.03440796201601326}, 500: {'uni': 0.054329235300242695, 'nor': 0.03705807984250126, 'beta1': 0.054235810729029665, 'beta2': 0.08755778874782771, 'beta4': 0.04215154900032181}, 400: {'uni': 0.06062042253055755, 'nor': 0.04134489759753035, 'beta1': 0.06087419042912867, 'beta2': 0.09290608277922241, 'beta4': 0.04695774138644898}, 300: {'uni': 0.06979122578785563, 'nor': 0.04752352646874458, 'beta1': 0.06987407314079985, 'beta2': 0.1036455137376669, 'beta4': 0.05408391441556548}, 200: {'uni': 0.08525612760509743, 'nor': 0.05822021391999288, 'beta1': 0.08573405996535222, 'beta2': 0.12083720989995606, 'beta4': 0.06606270634268102}, 150: {'uni': 0.09822498098395582, 'nor': 0.0670687425730856, 'beta1': 0.09891726246491339, 'beta2': 0.134942222786968, 'beta4': 0.07625187550090379}, 100: {'uni': 0.11942187198187654, 'nor': 0.08196700841704041, 'beta1': 0.12048182599113988, 'beta2': 0.15542188429324677, 'beta4': 0.0927888394179889}, 75: {'uni': 0.13700377353508753, 'nor': 0.09413798516069916, 'beta1': 0.13863023455324552, 'beta2': 0.1728224431499087, 'beta4': 0.10651114960711697}, 50: {'uni': 0.16595760075302907, 'nor': 0.11446069154286698, 'beta1': 0.1684755311187931, 'beta2': 0.20208064524892055, 'beta4': 0.12935863603313313}, 30: {'uni': 0.2099293273700812, 'nor': 0.1463282048690624, 'beta1': 0.21473921841431154, 'beta2': 0.24269192295102882, 'beta4': 0.1646851441089735}, 20: {'uni': 0.25056763248182895, 'nor': 0.17786313124907188, 'beta1': 0.2575087202242632, 'beta2': 0.27927953593860777, 'beta4': 0.19740515280724447}, 10: {'uni': 0.3304962789807138, 'nor': 0.2447591671591835, 'beta1': 0.3420336141758848, 'beta2': 0.34940564498843646, 'beta4': 0.26587190498978686}}, 0.2: {1000: {'uni': 0.033759081350374254, 'nor': 0.02372992290154119, 'beta1': 0.03379104644423217, 'beta2': 0.05775603239505678, 'beta4': 0.026618493861847614}, 750: {'uni': 0.03897357249045624, 'nor': 0.027281398645080723, 'beta1': 0.038972994365299635, 'beta2': 0.0621653283130667, 'beta4': 0.030665891126849754}, 500: {'uni': 0.04758909935471711, 'nor': 0.03337684532828111, 'beta1': 0.047570804678383094, 'beta2': 0.07333077050088904, 'beta4': 0.037565566599256583}, 400: {'uni': 0.053119550234104085, 'nor': 0.03725028390570345, 'beta1': 0.053295404906414934, 'beta2': 0.0782294183344644, 'beta4': 0.04183281867666566}, 300: {'uni': 0.061196404682106964, 'nor': 0.04292324729747321, 'beta1': 0.06136906566660827, 'beta2': 0.08744970320312462, 'beta4': 0.04824159064240345}, 200: {'uni': 0.0746784511345509, 'nor': 0.0524733341649114, 'beta1': 0.07510973684586475, 'beta2': 0.10260712327402122, 'beta4': 0.058942065335903404}, 150: {'uni': 0.08595093737016697, 'nor': 0.060424202583133746, 'beta1': 0.08641030234814334, 'beta2': 0.1148837044228368, 'beta4': 0.0679067944916304}, 100: {'uni': 0.10443555935757931, 'nor': 0.07374329417580833, 'beta1': 0.10551157755974006, 'beta2': 0.13294004606451998, 'beta4': 0.08265330043672003}, 75: {'uni': 0.11993235153506276, 'nor': 0.08480408445268339, 'beta1': 0.12138149971982604, 'beta2': 0.14821067875308103, 'beta4': 0.09487982606384139}, 50: {'uni': 0.1450901598179003, 'nor': 0.10314539464936745, 'beta1': 0.14745197306443125, 'beta2': 0.17411692213927954, 'beta4': 0.11517539906859259}, 30: {'uni': 0.18368281401813502, 'nor': 0.1321090658183411, 'beta1': 0.1875463935108379, 'beta2': 0.21006490447672693, 'beta4': 0.14663588943386274}, 20: {'uni': 0.2196807646682773, 'nor': 0.15994694395320508, 'beta1': 0.22522106948161613, 'beta2': 0.24235899456781695, 'beta4': 0.17573119318593766}, 10: {'uni': 0.2888943190995493, 'nor': 0.220722689927199, 'beta1': 0.2985481150360235, 'beta2': 0.3045137581383749, 'beta4': 0.236985210651535}}, 0.25: {1000: {'uni': 0.032062416809360894, 'nor': 0.0227866671462571, 'beta1': 0.03208834216728629, 'beta2': 0.05337049741834132, 'beta4': 0.025475357813055488}, 750: {'uni': 0.03701423511603763, 'nor': 0.026225229844276166, 'beta1': 0.03703256957864909, 'beta2': 0.057813715669675636, 'beta4': 0.02936248102422831}, 500: {'uni': 0.045227717679089396, 'nor': 0.0320485047106529, 'beta1': 0.04519714698473515, 'beta2': 0.06831356769816821, 'beta4': 0.03593644546272762}, 400: {'uni': 0.050450659079979754, 'nor': 0.03581784094010593, 'beta1': 0.05056637414823473, 'beta2': 0.0729182038087659, 'beta4': 0.04001889562676658}, 300: {'uni': 0.058161445018157565, 'nor': 0.041252983698886025, 'beta1': 0.058325688269647125, 'beta2': 0.08170482185096284, 'beta4': 0.04612705504436812}, 200: {'uni': 0.07094962986364317, 'nor': 0.05046048885276999, 'beta1': 0.0712213019748647, 'beta2': 0.09581725770034533, 'beta4': 0.0563670463913345}, 150: {'uni': 0.0815744257595088, 'nor': 0.058060489761412676, 'beta1': 0.08204932927986253, 'beta2': 0.1075479659950831, 'beta4': 0.06500871809976655}, 100: {'uni': 0.09912785547497138, 'nor': 0.0707907611619234, 'beta1': 0.10021469580117251, 'beta2': 0.12475954060183503, 'beta4': 0.0790298213954928}, 75: {'uni': 0.11388087855996165, 'nor': 0.08144708523365077, 'beta1': 0.1151935997969889, 'beta2': 0.13944968782072553, 'beta4': 0.09073471227314939}, 50: {'uni': 0.13765260055314554, 'nor': 0.0991006689972383, 'beta1': 0.13998309637363815, 'beta2': 0.16393144318454161, 'beta4': 0.11023561371839477}, 30: {'uni': 0.1741856459150477, 'nor': 0.1269186751139828, 'beta1': 0.1778768200120303, 'beta2': 0.19832202672268084, 'beta4': 0.14017916545551046}, 20: {'uni': 0.20839509742333207, 'nor': 0.1535088033354377, 'beta1': 0.21387705197529588, 'beta2': 0.22870691603776427, 'beta4': 0.16824942099586182}, 10: {'uni': 0.2740727774470333, 'nor': 0.21222634033868049, 'beta1': 0.2828793884551896, 'beta2': 0.288383430493807, 'beta4': 0.22670497011739216}}, 0.3: {1000: {'uni': 0.03057612825774314, 'nor': 0.02199386622109878, 'beta1': 0.03061262686465055, 'beta2': 0.049703953698298386, 'beta4': 0.02447722233427918}, 750: {'uni': 0.03533838333580652, 'nor': 0.02530417208682001, 'beta1': 0.03537355380273649, 'beta2': 0.05399871759330599, 'beta4': 0.02823270309239162}, 500: {'uni': 0.043123689527982734, 'nor': 0.030927801548839978, 'beta1': 0.043123330457107534, 'beta2': 0.06396221956203696, 'beta4': 0.034528974097892545}, 400: {'uni': 0.04814799667805744, 'nor': 0.03456908247933843, 'beta1': 0.04823146494173067, 'beta2': 0.06837351075097187, 'beta4': 0.038486897300680556}, 300: {'uni': 0.05550906419590629, 'nor': 0.03978480548326124, 'beta1': 0.05571141547789926, 'beta2': 0.07663630270628857, 'beta4': 0.04434408116637903}, 200: {'uni': 0.06762156145960091, 'nor': 0.048648082377034274, 'beta1': 0.06798995743435188, 'beta2': 0.0901597857532756, 'beta4': 0.05417087708582158}, 150: {'uni': 0.0777889938150631, 'nor': 0.055992681950055134, 'beta1': 0.078310929702266, 'beta2': 0.10131183123822018, 'beta4': 0.062417414108562386}, 100: {'uni': 0.09459233371131393, 'nor': 0.06828184758918193, 'beta1': 0.09551945542738993, 'beta2': 0.1178069154885687, 'beta4': 0.07593328084768572}, 75: {'uni': 0.10866796055687228, 'nor': 0.07853952378167028, 'beta1': 0.10982303249195069, 'beta2': 0.13190968528845182, 'beta4': 0.08730445455818964}, 50: {'uni': 0.13131745651785992, 'nor': 0.09562198442675823, 'beta1': 0.1335175652395422, 'beta2': 0.15495495520954616, 'beta4': 0.10586806539719948}, 30: {'uni': 0.16622024765958232, 'nor': 0.1224700829191776, 'beta1': 0.16965623137726848, 'beta2': 0.18803738711333812, 'beta4': 0.13470969723802004}, 20: {'uni': 0.19877030362889103, 'nor': 0.14799815211895767, 'beta1': 0.20344160260647876, 'beta2': 0.21717215473139662, 'beta4': 0.161706399244382}, 10: {'uni': 0.26145583014921425, 'nor': 0.2046385546777918, 'beta1': 0.2695783330780789, 'beta2': 0.2744402713994778, 'beta4': 0.21759542548906985}}}  # skipcq: FLK-E231, FLK-E501
 
@@ -267,13 +250,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # List of the critical values of the durbin watson test
         self.crit_val_dw = {0.01: {1000: 1.855, 750: 1.833, 500: 1.797, 400: 1.773, 300: 1.739, 200: 1.684, 150: 1.637, 100: 1.562, 75: 1.501, 50: 1.403, 30: 1.264, 20: 1.147, 10: 1.001},  # skipcq: FLK-E501
                             0.05: {1000: 1.898, 750: 1.883, 500: 1.857, 400: 1.841, 300: 1.817, 200: 1.779, 150: 1.747, 100: 1.694, 75: 1.652, 50: 1.585, 30: 1.489, 20: 1.411, 10: 1.320}}  # skipcq: FLK-E501
-
-        self.ignore_list = ignore_list
-        if self.ignore_list is None:
-            self.ignore_list = []
-        self.constraint_list = constraint_list
-        if self.constraint_list is None:
-            self.constraint_list = []
 
         if self.dw_alpha not in self.crit_val_dw:
             pos_vals = list(self.crit_val_dw.keys())
@@ -382,32 +358,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values) + 500
 
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
-
         # Loads the persistence
-        self.persistence_id = persistence_id
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
@@ -453,10 +404,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         event_index = self.event_type_detector.current_index
         if event_index == -1:
             return False
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
 
         self.log_total += 1
 
@@ -466,7 +417,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             if ignore_path in parser_match.get_match_dictionary().keys():
                 return False
 
-        if self.path_list is None or len(self.path_list) == 0:
+        if self.target_path_list is None or len(self.target_path_list) == 0:
             constraint_path_flag = False
             for constraint_path in self.constraint_list:
                 if parser_match.get_match_dictionary().get(constraint_path) is not None:
@@ -497,9 +448,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.bt_results[event_index] = [[] for i in range(self.length[event_index])]
 
             # Adds the variable indices to the variable_path_num-list if the target_path_list is not empty
-            if self.path_list is not None:
+            if self.target_path_list is not None:
                 for var_index in range(self.length[event_index]):
-                    if self.event_type_detector.variable_key_list[event_index][var_index] in self.path_list:
+                    if self.event_type_detector.variable_key_list[event_index][var_index] in self.target_path_list:
                         self.variable_path_num[event_index].append(var_index)
             if self.num_events < event_index + 1:
                 self.num_events = event_index + 1
@@ -554,9 +505,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Updates the lists for each eventType individually
         for event_index in range(self.num_events):
             # Adds the variable indices to the variable_path_num-list if the target_path_list is not empty
-            if self.path_list is not None:
+            if self.target_path_list is not None:
                 for var_index in range(self.length[event_index]):
-                    if self.event_type_detector.variable_key_list[event_index][var_index] in self.path_list:
+                    if self.event_type_detector.variable_key_list[event_index][var_index] in self.target_path_list:
                         self.variable_path_num[event_index].append(var_index)
 
             # Initializes the lists for the discrete distribution, or continuous distribution
@@ -573,7 +524,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """Process the log line. Extracts and appends the values of the log line to the values-list."""
         # Return if no variable is tracked in the VTD
         if len(self.event_type_detector.variable_key_list[event_index]) == 0 or (
-                self.path_list is not None and self.variable_path_num[event_index] == []):
+                self.target_path_list is not None and self.variable_path_num[event_index] == []):
             return
 
         # Initial detection of variable types
@@ -581,7 +532,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             # Test all variables
 
             logging.getLogger(DEBUG_LOG_NAME).debug('%s started initial detection of var types.', self.__class__.__name__)
-            if self.path_list is None:
+            if self.target_path_list is None:
                 for var_index in range(self.length[event_index]):
                     tmp_var_type = self.detect_var_type(event_index, var_index)
 
@@ -659,13 +610,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
             logging.getLogger(DEBUG_LOG_NAME).debug('%s started update phase of var types.', self.__class__.__name__)
             # Check if the updates of the variable types should be stopped
-            if self.auto_include_flag and (not isinstance(self.num_stop_update, bool)) and (
+            if self.learn_mode and (not isinstance(self.num_stop_update, bool)) and (
                     self.event_type_detector.total_records >= self.num_stop_update):
-                self.auto_include_flag = False
+                self.learn_mode = False
 
             # Get the index_list for the variables which should be updated
             index_list = None
-            if self.path_list is None:
+            if self.target_path_list is None:
                 index_list = range(self.length[event_index])
             else:
                 index_list = self.variable_path_num[event_index]
@@ -911,7 +862,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.print(tmp_string, log_atom, affected_paths, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
 
                 # Update the var_type_history_list_reference
-                if self.auto_include_flag and (not isinstance(self.num_var_type_hist_ref, bool)) and (
+                if self.learn_mode and (not isinstance(self.num_var_type_hist_ref, bool)) and (
                         not isinstance(self.num_update_var_type_hist_ref, bool)) and len(
                         self.var_type_history_list_reference) >= event_index + 1 and \
                         self.var_type_history_list_reference[event_index] != [] and (((
@@ -1285,7 +1236,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if first_distr and (sum(self.bt_results[event_index][var_index]) >= self.s_gof_bt_min_success):
                     return
 
-                if not self.auto_include_flag:
+                if not self.learn_mode:
                     # Do not update variable type
                     self.bt_results[event_index][var_index] = [1] * self.num_s_gof_bt
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
@@ -1332,7 +1283,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.event_type_detector.values[event_index][var_index][-self.num_update:]) >\
                     self.range_threshold * (self.var_type[event_index][var_index][2] - self.var_type[event_index][var_index][1]):
                 # Do not update variable type
-                if not self.auto_include_flag:
+                if not self.learn_mode:
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                     self.var_type_history_list[event_index][var_index][0][-1] = 1
                     return
@@ -1347,7 +1298,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.event_type_detector.values[event_index][var_index][-self.num_update:]):
                 self.var_type[event_index][var_index][3] = 1
             # Reinitialize the range limits if no value was outside of the range in the last num_reinit_range update steps
-            elif self.auto_include_flag and self.num_reinit_range != 0 and\
+            elif self.learn_mode and self.num_reinit_range != 0 and\
                     self.var_type[event_index][var_index][3] % self.num_reinit_range == 0:
                 self.var_type[event_index][var_index] = self.calculate_value_range(
                     self.event_type_detector.values[event_index][var_index][-self.num_update:])
@@ -1361,7 +1312,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if self.event_type_detector.values[event_index][var_index][j - 1] >\
                         self.event_type_detector.values[event_index][var_index][j]:
                     # Do not update variable type
-                    if not self.auto_include_flag:
+                    if not self.learn_mode:
                         self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                         self.var_type_history_list[event_index][var_index][0][-1] = 1
                         return
@@ -1377,7 +1328,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 # Search for a not ascending sequence in the values
                 if self.event_type_detector.values[event_index][var_index][j - 1] <\
                         self.event_type_detector.values[event_index][var_index][j]:
-                    if not self.auto_include_flag:
+                    if not self.learn_mode:
                         # Do not update variable type
                         self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                         self.var_type_history_list[event_index][var_index][0][-1] = 1
@@ -1397,7 +1348,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if len(set(new_values + self.var_type[event_index][var_index][1])) >= (
                         self.num_update + self.var_type[event_index][var_index][3]) * (1 - self.sim_thres):
                     # Do not update variable type
-                    if not self.auto_include_flag:
+                    if not self.learn_mode:
                         self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                         self.var_type_history_list[event_index][var_index][0][-1] = 1
                         return
@@ -1408,7 +1359,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     return
 
                 # Do not update variable type
-                if not self.auto_include_flag:
+                if not self.learn_mode:
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                     self.var_type_history_list[event_index][var_index][2][1][-1] = 1
                     return
@@ -1450,7 +1401,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.bt_results[event_index][var_index][0]) < self.d_bt_min_success):
 
                 # Do not update variable type
-                if not self.auto_include_flag:
+                if not self.learn_mode:
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                     self.bt_results[event_index][var_index][0] = [1] * self.num_d_bt
                     self.var_type_history_list[event_index][var_index][0][-1] = 1
@@ -1462,7 +1413,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 return
 
             # Update the probabilities of the discrete values
-            if self.auto_include_flag and self.bt_results[event_index][var_index][0][-1]:
+            if self.learn_mode and self.bt_results[event_index][var_index][0][-1]:
                 # List for the number of appearance of the values
                 values_app = [0 for x in range(len(self.var_type[event_index][var_index][1]))]
                 for val in new_values:
@@ -1506,7 +1457,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 return
 
             # Do not update variable type
-            if not self.auto_include_flag:
+            if not self.learn_mode:
                 self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                 self.var_type_history_list[event_index][var_index][0][-1] = 1
                 return
@@ -1538,7 +1489,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         elif self.var_type[event_index][var_index][0] == 'unq':
             # Check if the new values are not unique
             if len(set(self.event_type_detector.values[event_index][var_index][-self.num_update:])) != self.num_update:
-                if not self.auto_include_flag:
+                if not self.learn_mode:
                     # Do not update variable type
                     self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                     self.var_type_history_list[event_index][var_index][0][-1] = 1
@@ -1553,7 +1504,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 if j in self.event_type_detector.values[event_index][var_index][
                         -self.num_update_unq - self.num_update:-self.num_update]:
                     # Do not update variable type
-                    if not self.auto_include_flag:
+                    if not self.learn_mode:
                         self.print_reject_var_type(event_index, self.var_type[event_index][var_index], var_index, log_atom)
                         self.var_type_history_list[event_index][var_index][0][-1] = 1
                         return
@@ -1566,7 +1517,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Update for var type others
         elif self.var_type[event_index][var_index][0] == 'others':
             # Do not update variable type
-            if not self.auto_include_flag:
+            if not self.learn_mode:
                 return
 
             # Check if it has passed enough time, to check if the values have a new var_type
@@ -2009,7 +1960,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
             # Append the first entries to the history list
             # Test only the variables with paths in the target_path_list
-            if self.path_list is None:
+            if self.target_path_list is None:
                 index_list = range(self.length[event_index])
             # Test all variables
             else:
@@ -2201,7 +2152,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         tmp_string = tmp_string.lstrip('  ')
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-        if self.output_log_line:
+        if self.output_logline:
             sorted_log_lines = [tmp_string + original_log_line_prefix + data]
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
@@ -2234,7 +2185,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             data = repr(log_atom.raw_data)
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-        if self.output_log_line:
+        if self.output_logline:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
                 tmp_str += '  ' + x + os.linesep
@@ -2274,7 +2225,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             data = repr(log_atom.raw_data)
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-        if self.output_log_line:
+        if self.output_logline:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
                 tmp_str += '  ' + x + os.linesep
@@ -2315,7 +2266,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             data = repr(log_atom.raw_data)
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-        if self.output_log_line:
+        if self.output_logline:
             tmp_str = ''
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
                 tmp_str += '  ' + x + os.linesep

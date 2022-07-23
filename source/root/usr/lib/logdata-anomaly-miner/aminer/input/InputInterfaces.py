@@ -94,7 +94,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             alpha_chisquare_test=None, max_dist_rule_distr=None, used_presel_meth=None, intersect_presel_meth=None,
             percentage_random_cors=None, match_disc_vals_sim_tresh=None, exclude_due_distr_lower_limit=None,
             match_disc_distr_threshold=None, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=None,
-            validate_cor_distinct_thres=None,
+            validate_cor_distinct_thres=None, used_gof_test=None, gof_alpha=None, s_gof_alpha=None, s_gof_bt_alpha=None, d_alpha=None,
+            d_bt_alpha=None, div_thres=None, sim_thres=None, indicator_thres=None, num_update_unq=None, num_s_gof_values=None,
+            num_s_gof_bt=None, num_d_bt=None, num_pause_discrete=None, num_pause_others=None, test_gof_int=None,
+            silence_output_without_confidence=None, silence_output_except_indicator=None, num_var_type_hist_ref=None,
+            num_update_var_type_hist_ref=None, num_var_type_considered_ind=None, num_stat_stop_update=None,
+            num_updates_until_var_reduction=None, var_reduction_thres=None, num_skipped_ind_for_weights=None, num_ind_for_weights=None,
+            used_multinomial_test=None, use_empiric_distr=None, used_range_test=None, range_alpha=None, range_threshold=None,
+            num_reinit_range=None, range_limits_factor=None, dw_alpha=None, save_statistics=None,
     ):
         """
         Initialize the parameters of analysis components.
@@ -107,7 +114,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                considered for value range generation.
         @param persistence_id name of persistence file.
         @param learn_mode specifies whether new values should be learned.
-        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
         @param constraint_list list of paths that have to be present in the log atom to be analyzed.
@@ -264,6 +270,56 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param validate_cor_distinct_thres threshold for the validation method distinct_distr. The threshold states which value the variance
                of the distributions have to surpass to be considered real correlations. The lower the value the less likely that the
                correlations are being rejected.
+        @param used_gof_test states the used test statistic for the continuous data type. Implemented are the 'KS' and 'CM' tests.
+        @param gof_alpha significance niveau for p-value for the distribution test of the initialization. Recomended values are the
+               implemented values of crit_val_ini_ks and crit_val_upd_ks or _cm.
+        @param s_gof_alpha significance niveau for p-value for the sliding KS-test in the update step. Recommended values are the
+               implemented values of crit_val_upd_ks.
+        @param s_gof_bt_alpha significance niveau for the binomial test of the test results of the s_gof-test.
+        @param d_alpha significance niveau for the binomialtest of the single discrete variables. If used_multinomial_test == 'Approx' then
+               faster runtime for values in the p list of bt_min_succ_data.
+        @param d_bt_alpha significance niveau for the binomialtest of the test results of the discrete tests.
+        @param div_thres threshold for diversity of the values of a variable (the higher the more values have to be distinct to be
+               considered to be continuous distributed).
+        @param sim_thres threshold for similarity of the values of a variable (the higher the more values have to be common to be considered
+               discrete).
+        @param indicator_thres threshold for the variable indicators to be used in the event indicator.
+        @param num_update_unq number of values for which the values of type unq is unique (the last num_update + num_update_unq values are
+               unique).
+        @param num_s_gof_values number of values which are tested in the s_gof-test. The value has to be <= num_init, >= num_update.
+               Recommended values are the implemented values of crit_val_upd_ks.
+        @param num_s_gof_bt number of tested s_gof-Tests for the binomialtest of the testresults of the s_gof tests.
+        @param num_d_bt number of tested discrete samples for the binomial test of the test results of the discrete tests.
+        @param num_pause_discrete number of paused updates, before the discrete var type is adapted.
+        @param num_pause_others number of paused update runs, before trying to find a new var_type.
+        @param test_gof_int states if integer number should be tested for the continuous variable type.
+        @param silence_output_without_confidence silences the all messages without a confidence-entry.
+        @param silence_output_except_indicator silences the all messages which are not related with the calculated indicator.
+        @param num_var_type_hist_ref states how long the reference for the var_type_hist_ref is. The reference is used in the evaluation.
+        @param num_update_var_type_hist_ref number of update steps before the var_type_hist_ref is being updated.
+        @param num_var_type_considered_ind this attribute states how many variable types of the history are used as the recent history in
+               the calculation of the indicator. False if no output of the indicator should be generated.
+        @param num_stat_stop_update number of static values of a variable, to stop tracking the variable type and read in the ETD.
+               False if not wanted.
+        @param num_updates_until_var_reduction number of update steps until the variables are tested if they are suitable for an indicator.
+               If not suitable, they are removed from the tracking of ETD (reduce checked variables). Equals 0 if disabled.
+        @param var_reduction_thres threshold for the reduction of variable types. The most likely none others var type must have a higher
+               relative appearance for the variable to be further checked.
+        @param num_skipped_ind_for_weights number of the skipped indicators for the calculation of the indicator weights.
+        @param num_ind_for_weights number of indicators used in the calculation of the indicator weights.
+        @param used_multinomial_test states the used multinomial test. Allowed values are 'MT', 'Approx' and 'Chi', where 'MT' means
+               original MT, 'Approx' is the approximation with single BTs and 'Chi' is the Chi-square test.
+        @param use_empiric_distr states if empiric distributions of the variables should be used if no continuous distribution is detected.
+        @param used_range_test states the used method of range estimation. Allowed values are 'MeanSD', 'EmpiricQuantiles' and 'MinMax'.
+               Where 'MeanSD' means the estimation through mean and standard deviation, 'EmpiricQuantiles' estimation through the empirical
+               quantiles and 'MinMax' the estimation through minimum and maximum.
+        @param range_alpha significance niveau for the range variable type.
+        @param range_threshold maximal proportional deviation from the range before the variable type is rejected.
+        @param num_reinit_range number of update steps until the range variable type is reinitialized. Set to zero if not desired.
+        @param range_limits_factor factor for the limits of the range variable type.
+        @param dw_alpha significance niveau of the durbin watson test to test serial correlation. If the test fails the type range is
+               assigned to the variable instead of continuous.
+        @param save_statistics used to track the indicators and changed variable types.
         """
         self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:]:  # skip self parameter
