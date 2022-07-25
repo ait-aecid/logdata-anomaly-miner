@@ -725,9 +725,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                     path_list=item['paths'], id_path_list=item['id_path_list'], allow_missing_id=item['allow_missing_id'],
                     allowed_id_tuples=item['allowed_id_tuples'], min_num_vals=item['min_num_vals'], max_num_vals=item['max_num_vals'],
-                    save_values=item['save_values'], track_time_for_tsa=item['track_time_for_tsa'],
-                    waiting_time_for_tsa=item['waiting_time_for_tsa'],
-                    num_sections_waiting_time_for_tsa=item['num_sections_waiting_time_for_tsa'])
+                    save_values=item['save_values'])
             elif item['type'].name == 'VariableTypeDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -806,6 +804,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
+                    waiting_time=item['waiting_time'],
+                    num_sections_waiting_time=item['num_sections_waiting_time'],
                     path_list=item['paths'], acf_pause_interval_percentage=item['acf_pause_interval_percentage'],
                     acf_auto_pause_interval=item['acf_auto_pause_interval'],
                     acf_auto_pause_interval_num_min=item['acf_auto_pause_interval_num_min'],

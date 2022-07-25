@@ -172,9 +172,6 @@
                     'min_num_vals': {'type': 'integer', 'min': 1},
                     'max_num_vals': {'type': 'integer', 'min': 1, 'bigger_than_or_equal': ['min_num_vals', 1000]},
                     'save_values': {'type': 'boolean'},
-                    'track_time_for_tsa': {'type': 'boolean'},
-                    'waiting_time_for_tsa': {'type': 'integer', 'min': 1},
-                    'num_sections_waiting_time_for_tsa': {'type': 'integer', 'min': 1},
                     'learn_mode': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
@@ -610,6 +607,8 @@
                     'type': {'type': 'string', 'allowed': ['TSAArimaDetector'], 'required': True},
                     'event_type_detector': {'type': 'string', 'required': True, 'empty': False},
                     'persistence_id': {'type': 'string', 'empty': False},
+                    'waiting_time': {'type': 'integer', 'min': 1},
+                    'num_sections_waiting_time': {'type': 'integer', 'min': 1},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_logline': {'type': 'boolean'},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
