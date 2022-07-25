@@ -458,7 +458,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
             # Check if enough values have been stored to initialize the arima_model
             if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
-                message = 'Initializing the TSA for the event %s' % self.event_type_detector.get_event_type(event_index)  # skipcq: PYL-C0209
+                message = 'Initializing the TSA for the event %s' % self.event_type_detector.get_event_type(event_index)  # skipcq: PYL-C0209, FLK-E501
                 affected_path = self.event_type_detector.variable_key_list[event_index]
                 self.print(message, log_atom, affected_path)
 
@@ -536,7 +536,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 # Discard or update the model, for the next step
                 if self.auto_include_flag and sum(self.result_list[event_index][-self.num_results_bt:]) < self.bt_min_suc:
-                    message = 'Discard the TSA model for the event %s' % self.event_type_detector.get_event_type(event_index)  # skipcq: PYL-C0209
+                    message = 'Discard the TSA model for the event %s' % self.event_type_detector.get_event_type(event_index)  # skipcq: PYL-C0209, FLK-E501
                     affected_path = self.event_type_detector.variable_key_list[event_index]
                     self.print(message, log_atom, affected_path)
 
@@ -634,4 +634,4 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {}}
         for listener in self.anomaly_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)  # skipcq: PYL-C0209
+            listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)  # skipcq: PYL-C0209, FLK-E501

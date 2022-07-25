@@ -79,7 +79,7 @@ def load_yaml(config_file):
         filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
         filter_config_errors(filtered_errors, 'EventHandlers', v.errors, event_handler_validation_schema)
 
-        raise ValueError("Config-Error: %s" % filtered_errors)
+        raise ValueError("Config-Error: %s" % filtered_errors)  # skipcq: PYL-C0209
 
     v = NormalisationValidator(normalisation_schema)
     if v.validate(yaml_data, normalisation_schema):
@@ -150,7 +150,7 @@ def build_parsing_model(data=None):
 
     for item in data['Parser']:
         if item['id'] in parser_model_dict:
-            raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
+            raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])  # skipcq: PYL-C0209
         if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
             start = item
         if item['type'].is_model:
@@ -159,7 +159,7 @@ def build_parsing_model(data=None):
                     for i, value in enumerate(item["args"]):
                         if (isinstance(value, str) and value == "WHITESPACE") or (isinstance(value, bytes) and value == b"WHITESPACE"):
                             from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-                            sp = "sp%d" % ws_count
+                            sp = "sp%d" % ws_count  # skipcq: PYL-C0209
                             item["args"][i] = FixedDataModelElement(sp, b' ')
                             ws_count += 1
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
@@ -176,7 +176,7 @@ def build_parsing_model(data=None):
             if item['type'].name == 'ElementValueBranchModelElement':
                 value_model = parser_model_dict.get(item['args'][0].decode())
                 if value_model is None:
-                    msg = 'The parser model %s does not exist!' % item['args'][0].decode()
+                    msg = 'The parser model %s does not exist!' % item['args'][0].decode()  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 branch_model_dict = {}
@@ -184,7 +184,7 @@ def build_parsing_model(data=None):
                     key = i['id']
                     model = i['model']
                     if parser_model_dict.get(model) is None:
-                        msg = 'The parser model %s does not exist!' % key
+                        msg = 'The parser model %s does not exist!' % key  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     branch_model_dict[key] = parser_model_dict.get(model)
@@ -209,7 +209,7 @@ def build_parsing_model(data=None):
             elif item['type'].name == 'RepeatedElementDataModelElement':
                 model = item['args'][0].decode()
                 if parser_model_dict.get(model) is None:
-                    msg = 'The parser model %s does not exist!' % model
+                    msg = 'The parser model %s does not exist!' % model  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 item['args'][0] = parser_model_dict.get(model)
@@ -230,7 +230,7 @@ def build_parsing_model(data=None):
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
                 if not isinstance(item['args'], list):
-                    msg = '"args" has to be a list when using the %s. Currently args is defined as %s' % (
+                    msg = '"args" has to be a list when using the %s. Currently args is defined as %s' % (  # skipcq: PYL-C0209
                         item['type'].name, repr(item['args']))
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
@@ -239,7 +239,7 @@ def build_parsing_model(data=None):
                         child = child.decode()
                     if isinstance(child, str):
                         if parser_model_dict.get(child) is None:
-                            msg = 'The parser model %s does not exist!' % child
+                            msg = 'The parser model %s does not exist!' % child  # skipcq: PYL-C0209
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         children.append(parser_model_dict.get(child))
@@ -249,7 +249,7 @@ def build_parsing_model(data=None):
             elif item['type'].name == 'OptionalMatchModelElement':
                 optional_element = parser_model_dict.get(item['args'].decode())
                 if optional_element is None:
-                    msg = 'The parser model %s does not exist!' % item['args'].decode()
+                    msg = 'The parser model %s does not exist!' % item['args'].decode()  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
@@ -375,7 +375,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             if item['suppress']:
                 if comp_name is None:
                     raise ValueError(
-                        'Config-Error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
+                        'Config-Error: id must be specified for the analysis component %s to enable suppression.' % item['type'])  # skipcq: PYL-C0209, FLK-E501
                 suppress_detector_list.append(comp_name)
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
@@ -385,7 +385,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
                     if atom_handler[1] is not None:
                         if analysis_context.get_component_by_name(atom_handler[1]) is None:
-                            msg = 'The atom handler %s does not exist!' % atom_handler[1]
+                            msg = 'The atom handler %s does not exist!' % atom_handler[1]  # skipcq: PYL-C0209
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         atom_handler[1] = analysis_context.get_component_by_name(atom_handler[1])
@@ -393,7 +393,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 default_parsed_atom_handler = item['default_parsed_atom_handler']
                 if default_parsed_atom_handler is not None:
                     if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
-                        msg = 'The atom handler %s does not exist!' % default_parsed_atom_handler
+                        msg = 'The atom handler %s does not exist!' % default_parsed_atom_handler  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
@@ -402,14 +402,14 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 parsed_atom_handler_dict = {}
                 for atom_handler in item['parsed_atom_handler_dict']:
                     if analysis_context.get_component_by_name(atom_handler) is None:
-                        msg = 'The atom handler %s does not exist!' % atom_handler
+                        msg = 'The atom handler %s does not exist!' % atom_handler  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     parsed_atom_handler_dict[atom_handler] = analysis_context.get_component_by_name(atom_handler)
                 default_parsed_atom_handler = item['default_parsed_atom_handler']
                 if default_parsed_atom_handler is not None:
                     if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
-                        msg = 'The atom handler %s does not exist!' % default_parsed_atom_handler
+                        msg = 'The atom handler %s does not exist!' % default_parsed_atom_handler  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
@@ -496,7 +496,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     allow_missing_values_flag=item['allow_missing_values'], output_log_line=item['output_logline'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
-                    msg = 'The %s must have an id!' % item['type'].name
+                    msg = 'The %s must have an id!' % item['type'].name  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 analysis_dict[comp_name] = func(item['lower_limit'], item['bin_size'], item['bin_count'], item['outlier_bins_flag'])
@@ -875,7 +875,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
                 if item['id'] in event_handler_id_list:
-                    raise ValueError('Config-Error: The id "%s" occurred multiple times in EventHandlers!' % item['id'])
+                    raise ValueError('Config-Error: The id "%s" occurred multiple times in EventHandlers!' % item['id'])  # skipcq: PYL-C0209, FLK-E501
                 event_handler_id_list.append(item['id'])
                 func = item['type'].func
                 ctx = None
@@ -888,7 +888,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                             stream = open(item['output_file_path'], mode)
                             ctx = func(analysis_context, stream)
                         except OSError as e:
-                            msg = 'Error occured when opening stream to output_file_path %s. Error: %s' % (item['output_file_path'], e)
+                            msg = 'Error occured when opening stream to output_file_path %s. Error: %s' % (item['output_file_path'], e)  # skipcq: PYL-C0209, FLK-E501
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             print(msg, file=sys.stderr)
                     else:
@@ -903,7 +903,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     if os.access(item['cfgfile'], os.R_OK):
                         config.read(item['cfgfile'])
                     else:
-                        msg = "%s does not exist or is not readable" % item['cfgfile']
+                        msg = "%s does not exist or is not readable" % item['cfgfile']  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     options = dict(config.items("DEFAULT"))
@@ -975,7 +975,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
                         raise ValueError(msg)
                     key_parser_dict[key] = value
                 elif parser_model_dict.get(val) is None:
-                    msg = 'The parser model %s does not exist!' % val
+                    msg = 'The parser model %s does not exist!' % val  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 else:
@@ -983,7 +983,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
         elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "NULL_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
-            msg = 'The parser model %s does not exist!' % value
+            msg = 'The parser model %s does not exist!' % value  # skipcq: PYL-C0209
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         else:
