@@ -362,7 +362,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             else:
                 comp_name = item['id']
                 if analysis_context.get_component_by_name(comp_name) is not None:
-                    raise ValueError('Config-Error: The id "%s" occurred multiple times in Analysis!' % comp_name)
+                    raise ValueError('Config-Error: The id "%s" occurred multiple times in Analysis!' % comp_name)  # skipcq: PYL-C0209
             if 'learn_mode' in item:
                 learn = item['learn_mode']
             else:
@@ -503,7 +503,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 continue
             elif item['type'].name == 'ModuloTimeBinDefinition':
                 if comp_name is None:
-                    msg = 'The %s must have an id!' % item['type'].name
+                    msg = 'The %s must have an id!' % item['type'].name  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 analysis_dict[comp_name] = func(item['modulo_value'], item['time_unit'], item['lower_limit'], item['bin_size'],
@@ -517,7 +517,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     if histogram_def[1] not in analysis_dict:
-                        msg = '%s first must be defined before used.' % histogram_def[1]
+                        msg = '%s first must be defined before used.' % histogram_def[1]  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     histogram_defs.append([histogram_def[0], analysis_dict[histogram_def[1]]])
@@ -526,7 +526,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     output_log_line=item['output_logline'])
             elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
-                    msg = '%s first must be defined before used.' % item['bin_definition']
+                    msg = '%s first must be defined before used.' % item['bin_definition']  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
@@ -563,7 +563,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     auto_include_flag=learn, output_log_line=item['output_logline'])
             elif 'MatchAction' in item['type'].name:
                 if comp_name is None:
-                    msg = 'The %s must have an id!' % item['type'].name
+                    msg = 'The %s must have an id!' % item['type'].name  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 if item['type'].name == 'EventGenerationMatchAction':
@@ -587,13 +587,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 continue
             elif 'MatchRule' in item['type'].name:
                 if comp_name is None:
-                    msg = 'The %s must have an id!' % item['type'].name
+                    msg = 'The %s must have an id!' % item['type'].name  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 match_action = None
                 if item['match_action'] is not None:
                     if item['match_action'] not in match_action_dict:
-                        msg = 'The match action %s does not exist!' % item['match_action']
+                        msg = 'The match action %s does not exist!' % item['match_action']  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     match_action = match_action_dict[item['match_action']]
@@ -601,7 +601,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     sub_rules = []
                     for sub_rule in item['sub_rules']:
                         if sub_rule not in match_rules_dict:
-                            msg = 'The sub match rule %s does not exist!' % sub_rule
+                            msg = 'The sub match rule %s does not exist!' % sub_rule  # skipcq: PYL-C0209
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         sub_rules.append(match_rules_dict[sub_rule])
@@ -610,14 +610,14 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     rule_lookup_dict = {}
                     for key, rule in item['rule_lookup_dict'].items():
                         if rule not in match_rules_dict:
-                            msg = 'The match rule %s does not exist!' % rule
+                            msg = 'The match rule %s does not exist!' % rule  # skipcq: PYL-C0209
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         rule_lookup_dict[ast.literal_eval(key)] = match_rules_dict[rule]
                     tmp_analyser = func(item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
-                        msg = 'The match rule %s does not exist!' % item['sub_rule']
+                        msg = 'The match rule %s does not exist!' % item['sub_rule']  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     sub_rule = match_rules_dict[item['sub_rule']]
@@ -682,7 +682,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     artefact_a_rules = []
                     for rule in item['artefact_a_rules']:
                         if rule not in correlation_rules:
-                            msg = 'The correlation rule %s does not exist!' % rule
+                            msg = 'The correlation rule %s does not exist!' % rule  # skipcq: PYL-C0209
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         artefact_a_rules.append(correlation_rules[rule])
@@ -690,7 +690,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     artefact_b_rules = []
                     for rule in item['artefact_b_rules']:
                         if rule not in correlation_rules:
-                            msg = 'The correlation rule %s does not exist!' % rule
+                            msg = 'The correlation rule %s does not exist!' % rule  # skipcq: PYL-C0209
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         artefact_b_rules.append(correlation_rules[rule])
@@ -701,7 +701,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 ruleset = []
                 for rule in item['ruleset']:
                     if rule not in match_rules_dict:
-                        msg = 'The match rule %s does not exist!' % rule
+                        msg = 'The match rule %s does not exist!' % rule  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     ruleset.append(match_rules_dict[rule])
@@ -714,7 +714,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 allowlist_rules = []
                 for rule in item['allowlist_rules']:
                     if rule not in match_rules_dict:
-                        msg = 'The match rule %s does not exist!' % rule
+                        msg = 'The match rule %s does not exist!' % rule  # skipcq: PYL-C0209
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     allowlist_rules.append(match_rules_dict[rule])
@@ -729,7 +729,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'VariableTypeDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
@@ -755,7 +755,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
@@ -786,7 +786,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'PathArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
@@ -799,7 +799,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'TSAArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']  # skipcq: PYL-C0209
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(

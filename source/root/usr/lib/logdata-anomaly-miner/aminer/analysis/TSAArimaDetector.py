@@ -355,7 +355,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != 'Analysis.%s' % self.__class__.__name__:  # skipcq: PYL-C0209
             raise Exception('Event not from this source')
         raise Exception('No allowlisting for algorithm malfunction or configuration errors')
 
@@ -405,8 +405,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     highest_peak_index = np.argmax(corrfit[min_lag:])
                     if corrfit[min_lag + highest_peak_index] > self.acf_threshold:
                         time_step_list.append((highest_peak_index + min_lag) / self.num_division_time_step *
-                                              self.waiting_time /
-                                              self.num_sections_waiting_time)
+                                              self.waiting_time / self.num_sections_waiting_time)
                     else:
                         time_step_list.append(-1)
 
@@ -426,7 +425,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 time_step_list[index] = -1
 
         # Print a message of the length of the time steps
-        message = 'Calculated the periods for the single event types in seconds: %s' % [
+        message = 'Calculated the periods for the single event types in seconds: %s' % [  # skipcq: PYL-C0209
                 time_step * self.num_division_time_step if time_step != -1 else 'None' for time_step in time_step_list]
         affected_path = []
         self.print(message, log_atom, affected_path)
@@ -459,7 +458,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
             # Check if enough values have been stored to initialize the arima_model
             if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
-                message = 'Initializing the TSA for the event %s' % self.event_type_detector.get_event_type(event_index)
+                message = 'Initializing the TSA for the event %s' % self.event_type_detector.get_event_type(event_index)  # skipcq: PYL-C0209
                 affected_path = self.event_type_detector.variable_key_list[event_index]
                 self.print(message, log_atom, affected_path)
 
@@ -520,7 +519,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     # Test if count is in boundaries
                     if count < lower_limit or count > upper_limit:
-                        message = 'Event: %s, Lower: %s, Count: %s, Upper: %s' % (
+                        message = 'Event: %s, Lower: %s, Count: %s, Upper: %s' % (  # skipcq: PYL-C0209
                                 self.event_type_detector.get_event_type(event_index), lower_limit, count, upper_limit)
                         affected_path = self.event_type_detector.variable_key_list[event_index]
                         if count < lower_limit:
@@ -537,7 +536,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 # Discard or update the model, for the next step
                 if self.auto_include_flag and sum(self.result_list[event_index][-self.num_results_bt:]) < self.bt_min_suc:
-                    message = 'Discard the TSA model for the event %s' % self.event_type_detector.get_event_type(event_index)
+                    message = 'Discard the TSA model for the event %s' % self.event_type_detector.get_event_type(event_index)  # skipcq: PYL-C0209
                     affected_path = self.event_type_detector.variable_key_list[event_index]
                     self.print(message, log_atom, affected_path)
 
@@ -571,7 +570,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 # Test if count_sum is in boundaries
                 if count_sum < lower_limit or count_sum > upper_limit:
-                    message = 'Event: %s, Lower: %s, Count: %s, Upper: %s' % (
+                    message = 'Event: %s, Lower: %s, Count: %s, Upper: %s' % (  # skipcq: PYL-C0209
                             self.event_type_detector.get_event_type(event_index), lower_limit, count_sum, upper_limit)
                     affected_path = self.event_type_detector.variable_key_list[event_index]
                     confidence = 1 - min(count_sum / lower_limit, upper_limit / count_sum)
@@ -635,4 +634,4 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {}}
         for listener in self.anomaly_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)  # skipcq: PYL-C0209
