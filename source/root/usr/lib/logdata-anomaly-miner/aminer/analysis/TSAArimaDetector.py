@@ -309,8 +309,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                                          self.time_trigger_list[1][-k]] - self.num_eventlines_ref[
                                                          self.time_trigger_list[1][-k]], current_time, log_atom)
                                 self.time_trigger_list[0][-k] += self.time_trigger_list[2][-k]
-                                self.num_eventlines_ref[self.time_trigger_list[1][-k]] = self.event_type_detector.num_eventlines[self.time_trigger_list[
-                                    1][-k]]
+                                self.num_eventlines_ref[self.time_trigger_list[1][-k]] = self.event_type_detector.num_eventlines[
+                                    self.time_trigger_list[1][-k]]
 
                 # Trigger for an reoccuring time step
                 else:
@@ -320,8 +320,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                                  self.time_trigger_list[1][indices[i]]]-self.num_eventlines_ref[
                                                  self.time_trigger_list[1][indices[i]]], current_time, log_atom)
                         self.time_trigger_list[0][indices[i]] += self.time_trigger_list[2][indices[i]]
-                        self.num_eventlines_ref[self.time_trigger_list[1][indices[i]]] = self.event_type_detector.num_eventlines[self.time_trigger_list[
-                            1][indices[i]]]
+                        self.num_eventlines_ref[self.time_trigger_list[1][indices[i]]] = self.event_type_detector.num_eventlines[
+                            self.time_trigger_list[1][indices[i]]]
 
         return True
 
@@ -338,34 +338,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         return delta
 
     def do_persist(self):
-        import matplotlib # !!!
-        matplotlib.use('pdf')
-        import matplotlib.pyplot as plt
-        import matplotlib.dates as mdates
-        import datetime as dt
-
-        for event_index in range(len(self.time_history)):
-            t = [dt.datetime.fromtimestamp(z) for z in self.time_history[event_index]]
-            plt.figure(figsize=(8, 4.5))
-            plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
-            plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
-
-            plt.plot(t, self.prediction_history[event_index][0], 'red')
-            plt.plot(t, self.prediction_history[event_index][2], 'red')
-            plt.plot(t, self.prediction_history[event_index][1], 'blue')
-            
-            for i in range(len(self.prediction_history[event_index][0])):
-                if self.prediction_history[event_index][0][i] != self.prediction_history[event_index][2][i] and (
-                        self.prediction_history[event_index][0][i] > self.prediction_history[event_index][1][i] or
-                        self.prediction_history[event_index][1][i] > self.prediction_history[event_index][2][i]):
-                    plt.plot([t[i]], [self.prediction_history[event_index][1][i]], 'or', fillstyle='none', ms=8.0)
-
-            plt.gcf().autofmt_xdate()
-
-            plt.savefig('/tmp/TSAoutput_'+str(self.event_type_detector.id_path_list_tuples[event_index]), dpi=600)
-                # Or str(event_index) if id_path_list == None/[]
-            plt.close()
-
         """Immediately write persistence data to storage."""
         persistence_data = [self.time_window_history,
                             self.prediction_history,
@@ -478,11 +450,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         # Initialize the arima_model if needed
         if self.auto_include_flag and self.arima_models[event_index] is None:
-
-            self.prediction_history[event_index][0].append(0) # !!!
-            self.prediction_history[event_index][1].append(count)
-            self.prediction_history[event_index][2].append(0)
-            self.time_history[event_index].append(current_time)
 
             # Add the new count to the history and shorten it, if necessary
             self.time_window_history[event_index].append(count)
