@@ -930,8 +930,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                         ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=False)
                 if item['score']:
                     from aminer.events.ScoringEventHandler import ScoringEventHandler
-                    ctx = ScoringEventHandler([ctx], analysis_context, analyzed_field=item['analyzed_field'],
-                                              confidence_field=item['confidence_field'], weights=item['weights'])
+                    ctx = ScoringEventHandler([ctx], analysis_context, weights=item['weights'])
                 anomaly_event_handlers.append(ctx)
             return event_handler_id_list
         raise KeyError()

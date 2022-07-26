@@ -21,8 +21,6 @@
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
                     'score': {'type': 'boolean'},
-                    'analyzed_field': {'type': 'string', 'required': False, 'empty': False},
-                    'confidence_field': {'type': 'string', 'required': False, 'empty': False},
                     'weights': {'type': 'dict', 'required': False},
                     'topic': {'type': 'string', 'required': False},
                     'url': {'type': 'string', 'empty': False},
@@ -33,8 +31,6 @@
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
                     'score': {'type': 'boolean'},
-                    'analyzed_field': {'type': 'string', 'required': False, 'empty': False},
-                    'confidence_field': {'type': 'string', 'required': False, 'empty': False},
                     'weights': {'type': 'dict', 'required': False},
                     'topic': {'type': 'string', 'required': True, 'empty': False},
                     'cfgfile': {'type': 'string', 'empty': False},
@@ -47,8 +43,6 @@
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
                     'score': {'type': 'boolean'},
-                    'analyzed_field': {'type': 'string', 'required': False, 'empty': False},
-                    'confidence_field': {'type': 'string', 'required': False, 'empty': False},
                     'weights': {'type': 'dict', 'required': False},
                     'output_file_path': {'type': 'string', 'empty': False}
                 },
@@ -58,8 +52,6 @@
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
                     'score': {'type': 'boolean'},
-                    'analyzed_field': {'type': 'string', 'required': False, 'empty': False},
-                    'confidence_field': {'type': 'string', 'required': False, 'empty': False},
                     'weights': {'type': 'dict', 'required': False},
                     'instance_name': {'type': 'string', 'default': 'aminer', 'empty': False}
                 }

@@ -18,8 +18,6 @@
                 'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}},
                 'output_file_path': {'type': 'string'},
                 'pretty': {'type': 'boolean', 'default': True},
-                'analyzed_field': {'type': 'string', 'default': 'IdValues'},
-                'confidence_field': {'type': 'string', 'default': 'Scoring'},
                 'weights': {'type': 'dict', 'default': {}}
             }
         }

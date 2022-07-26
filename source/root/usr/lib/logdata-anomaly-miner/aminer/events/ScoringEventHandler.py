@@ -21,40 +21,59 @@ from aminer import AminerConfig
 class ScoringEventHandler(EventHandlerInterface):
     """This class implements an event record listener, that will convert event data to JSON format."""
 
-    def __init__(self, event_handlers, analysis_context, analyzed_field, confidence_field, weights):
+    def __init__(self, event_handlers, analysis_context, weights):
+        """Initialize the ScoringEventHandler component."""
         self.analysis_context = analysis_context
         self.event_handlers = event_handlers
-        self.analyzed_field = analyzed_field
-        self.confidence_field = confidence_field
         self.weights = weights
-        self.analyzed_field = self.analyzed_field.split('/')
-        self.confidence_field = self.confidence_field.split('/')
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
+        # Initialize path_valid variable that states if the path to the analysis field is valid
         path_valid = True
-        event_data_analysis = event_data
-        for path in self.analyzed_field:
-            if path in event_data_analysis:
-                event_data_analysis = event_data_analysis[path]
-            else:
-                path_valid = False
-                break
 
+        # Get the path to the analysis and output fields from the event_source or set the paths to empty lists if not
+        if (callable(getattr(event_source.__class__, 'get_weight_analysis_field_path', None)) and
+            callable(getattr(event_source.__class__, 'get_weight_output_field_path', None))):
+            analysis_field_path = event_source.get_weight_analysis_field_path()
+            output_field_path = event_source.get_weight_output_field_path()
+        else:
+            analysis_field_path = []
+            output_field_path = []
+
+        # Check if the analysis field path is not empty and get the analyis list or set path_valid to False
+        if analysis_field_path == []:
+            path_valid = False
+        else:
+            analyis_list = event_data
+            # Traverse the path of the analysis_field_path in event_data
+            for path in analysis_field_path:
+                if path in analyis_list:
+                    # Go a step in the event_data
+                    analyis_list = analyis_list[path]
+                else:
+                    # Set path_valid to False and stop if the path does not match the structure of event_data
+                    path_valid = False
+                    break
+
+        # Calculate and add the confidence to the output if the path is valid
         if path_valid:
             event_data_confidence = event_data
-            for path in self.confidence_field[:-1]:
-                if not isinstance(event_data_confidence, dict) or path not in event_data_confidence:
-                    if not isinstance(event_data_confidence, dict):
-                        event_data_confidence[path + '_original'] = event_data_confidence[path]
+            # Traverse the path of the output_field_path in event_data
+            for path in output_field_path[:-1]:
+                # Create a new dictionary if the path does not exist
+                if path not in event_data_confidence:
                     event_data_confidence[path] = {}
+                # Go a step in the event_data
                 event_data_confidence = event_data_confidence[path]
-            if self.confidence_field[-1] in event_data_confidence:
-                event_data_confidence[self.confidence_field[-1] + '_original'] = event_data_confidence[self.confidence_field[-1]]
 
-            confidence_absolut = sum([self.weights[val] if val in self.weights else 0.5 for val in event_data_analysis])
-            event_data_confidence[self.confidence_field[-1]] = {'confidence_absolut': confidence_absolut, 'confidence_percentile': confidence_absolut / len(event_data_analysis)}
+            # Calculate the absolute confidence
+            confidence_absolut = sum([self.weights[val] if val in self.weights else 0.5 for val in analyis_list])
+            # Add the the absolute and mean confidence to the message
+            event_data_confidence[output_field_path[-1]] = {'confidence_absolut': confidence_absolut,
+                                                            'confidence_mean': confidence_absolut / len(analyis_list)}
 
+        # Send the message to the following event handlers
         for listener in self.event_handlers:
             if hasattr(event_source, "output_event_handlers") and event_source.output_event_handlers is not None \
                     and listener not in event_source.output_event_handlers:
@@ -62,5 +81,3 @@ class ScoringEventHandler(EventHandlerInterface):
                 event_source = copy.copy(event_source)
                 event_source.output_event_handlers.append(listener)
             listener.receive_event(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source)
-
-

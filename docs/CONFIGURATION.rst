@@ -2422,6 +2422,8 @@ All EventHandler must have the following parameters and may have additional spec
 * **type**: must be an existing Analysis component (required)
 * **json**: A boolean value that enables that the output is formatted in json (default: False)
 * **pretty**: A boolean value that specifies whether json output should be in a single line (False) or pretty printed (True) (default: True)
+* **score**: A boolean value that enables that a confidence is added to the output of certain detectors (default: False)
+* **weights**: A dictionary that specifies the weights of values for the scoring. The keys are the strings of the analyzed list and the corresponding values are the assigned weights. Strings that are not present in this dictionary have the weight 0.5 (default: {})
 
 
 StreamPrinterEventHandler
