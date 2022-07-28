@@ -17,7 +17,7 @@ Parser:
           args:
               - host_name_model
 Input:
-        timestamp_paths: "/accesslog/time"
+        timestamp_path_list: "/accesslog/time"
 
 Analysis:
         - type: NewMatchPathValueDetector

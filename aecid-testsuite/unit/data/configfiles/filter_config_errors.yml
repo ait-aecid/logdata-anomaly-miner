@@ -23,7 +23,7 @@ Parser:
 
 Input:
         multi_source: False
-        timestamp_paths: "/model/accesslog/time"
+        timestamp_path_list: "/model/accesslog/time"
 
 Analysis:
         - type: ParserCount

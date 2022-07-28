@@ -133,11 +133,11 @@ def build_analysis_pipeline(analysis_context):
     event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
     # do not check UnparsedAtomHandler
     for index, analysis_component in enumerate(atom_filter.subhandler_list[1:]):
-        if analysis_component[0].anomaly_event_handlers is not None:
+        if analysis_component[0].output_event_handlers is not None:
             event_handlers = []
-            for i in analysis_component[0].anomaly_event_handlers:
+            for i in analysis_component[0].output_event_handlers:
                 event_handlers.append(anomaly_event_handlers[event_handler_id_list.index(i)])
-            atom_filter.subhandler_list[index+1][0].anomaly_event_handlers = event_handlers
+            atom_filter.subhandler_list[index+1][0].output_event_handlers = event_handlers
 
 
 def build_parsing_model(data=None):
@@ -296,9 +296,9 @@ def build_input_pipeline(analysis_context, parsing_model):
     anomaly_event_handlers = []
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
-    timestamp_paths = yaml_data['Input']['timestamp_paths']
-    if isinstance(timestamp_paths, str):
-        timestamp_paths = [timestamp_paths]
+    timestamp_path_list = yaml_data['Input']['timestamp_path_list']
+    if isinstance(timestamp_path_list, str):
+        timestamp_path_list = [timestamp_path_list]
     sync_wait_time = yaml_data['Input']['sync_wait_time']
     eol_sep = yaml_data['Input']['eol_sep'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
         replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
@@ -317,7 +317,7 @@ def build_input_pipeline(analysis_context, parsing_model):
         else:
             atom_handler_list = [atom_filter]
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+        parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_path_list=timestamp_path_list, eol_sep=eol_sep,
         json_format=json_format)
     return anomaly_event_handlers, atom_filter
 
@@ -837,8 +837,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 continue
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, learn_mode=learn)
-            if item['anomaly_event_handlers'] is not None:
-                tmp_analyser.anomaly_event_handlers = item['anomaly_event_handlers']
+            if item['output_event_handlers'] is not None:
+                tmp_analyser.anomaly_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser, stop_when_handled_flag=stop_when_handled_flag)
     add_default_analysis_components(
@@ -860,7 +860,7 @@ def add_default_analysis_components(analysis_context, anomaly_event_handlers, at
             learn = True
         from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
         nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=learn)
-        nmpd.anomaly_event_handlers = None
+        nmpd.output_event_handlers = None
         analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
         atom_filter.add_handler(nmpd)
     return has_new_match_path_handler, has_unparsed_handler

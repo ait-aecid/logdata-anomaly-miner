@@ -431,7 +431,7 @@ logdata-anomaly-miner (0.0.5) xenial; urgency=low
     from aminer.input import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory=SimpleByteStreamLineAtomizerFactory(
         parsing_model, parsed_atom_handlers, unparsed_atom_handlers,
-        anomaly_event_handlers, default_timestamp_paths=['/model/syslog/time'])
+        anomaly_event_handlers, default_timestamp_path_list=['/model/syslog/time'])
 
     * SimpleUnparsedAtomHandler was moved from "aminer.events"
       to "aminer.input".

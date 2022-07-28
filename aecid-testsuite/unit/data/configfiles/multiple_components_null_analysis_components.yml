@@ -114,7 +114,7 @@ Parser:
                   - sq6
 
 Input:
-        timestamp_paths: "/accesslog/time"
+        timestamp_path_list: "/accesslog/time"
 
 Analysis: null
 

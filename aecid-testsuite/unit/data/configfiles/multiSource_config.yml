@@ -19,7 +19,7 @@ Parser:
 
 Input:
         multi_source: True # optional
-        timestamp_paths: "/model/accesslog/time"
+        timestamp_path_list: "/model/accesslog/time"
 
 Analysis:
         - type: NewMatchPathValueDetector

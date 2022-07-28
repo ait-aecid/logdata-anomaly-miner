@@ -469,7 +469,7 @@ Defines the number of logfiles saved after rotation of "Log.RemoteControlLogFile
 Input
 -----
 
-timestamp_paths
+timestamp_path_list
 ~~~~~~~~~~~~~~~
 
 * Type: string or list of strings
@@ -479,11 +479,11 @@ Parser paths to DateTimeModelElements to set timestamp of log events.
 
 .. code-block:: yaml
 
-   timestamp_paths: '/model/time'
+   timestamp_path_list: '/model/time'
 
 .. code-block:: yaml
 
-   timestamp_paths:
+   timestamp_path_list:
       - '/parser/model/time'
       - '/parser/model/type/execve/time'
       - '/parser/model/type/proctitle/time'

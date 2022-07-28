@@ -18,7 +18,7 @@ Parser:
            - data
 
 Input:
-        timestamp_paths: None
+        timestamp_path_list: None
 
 EventHandlers:
         - id: stpe

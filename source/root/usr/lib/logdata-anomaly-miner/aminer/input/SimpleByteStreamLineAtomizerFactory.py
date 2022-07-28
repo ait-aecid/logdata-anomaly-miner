@@ -23,19 +23,19 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
     """
 
     def __init__(
-            self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_paths=None, eol_sep=b'\n', json_format=False):
+            self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_path_list=None, eol_sep=b'\n', json_format=False):
         """
         Create the factory to forward data and events to the given lists for each newly created atomizer.
-        @param default_timestamp_paths if not empty list, the value of this timestamp field is extracted from parsed atoms and stored
+        @param default_timestamp_path_list if not empty list, the value of this timestamp field is extracted from parsed atoms and stored
         as default timestamp for that atom.
         """
         self.parsing_model = parsing_model
         self.atom_handler_list = atom_handler_list
         self.event_handler_list = event_handler_list
-        if default_timestamp_paths is None:
-            self.default_timestamp_paths = []
+        if default_timestamp_path_list is None:
+            self.default_timestamp_path_list = []
         else:
-            self.default_timestamp_paths = default_timestamp_paths
+            self.default_timestamp_path_list = default_timestamp_path_list
         self.eol_sep = eol_sep
         self.json_format = json_format
 
@@ -46,4 +46,4 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         @return a StreamAtomizer object
         """
         return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16,
-                                      self.default_timestamp_paths, self.eol_sep, self.json_format)
+                                      self.default_timestamp_path_list, self.eol_sep, self.json_format)

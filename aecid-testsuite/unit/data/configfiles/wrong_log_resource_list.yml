@@ -19,7 +19,7 @@ Parser:
 
 Input:
         multi_source: False # optional
-        timestamp_paths: "/model/accesslog/time"
+        timestamp_path_list: "/model/accesslog/time"
 
 EventHandlers:
         - id: stpe

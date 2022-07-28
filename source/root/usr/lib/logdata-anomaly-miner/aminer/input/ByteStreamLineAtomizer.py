@@ -45,7 +45,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
     COUNTER = 0
 
-    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths, eol_sep=b'\n',
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_path_list, eol_sep=b'\n',
                  json_format=False):
         """
         Create the atomizer.
@@ -57,7 +57,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.atom_handler_list = atom_handler_list
         self.event_handler_list = event_handler_list
         self.max_line_length = max_line_length
-        self.default_timestamp_paths = default_timestamp_paths
+        self.default_timestamp_path_list = default_timestamp_path_list
         if not isinstance(eol_sep, bytes):
             msg = '%s eol_sep parameter must be of type bytes!' % self.__class__.__name__
             print(msg, file=sys.stderr)
@@ -156,7 +156,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 match_element = self.parsing_model.get_match_element('', match_context)
                 if (match_element is not None) and not match_context.match_data:
                     log_atom.parser_match = ParserMatch(match_element)
-                    for default_timestamp_path in self.default_timestamp_paths:
+                    for default_timestamp_path in self.default_timestamp_path_list:
                         ts_match = log_atom.parser_match.get_match_dictionary().get(default_timestamp_path, None)
                         if ts_match is not None:
                             log_atom.set_timestamp(ts_match.match_object)

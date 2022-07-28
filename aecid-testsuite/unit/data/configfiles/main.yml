@@ -26,7 +26,7 @@ Parser:
             - apacheModel
 
 Input:
-        timestamp_paths: [""]
+        timestamp_path_list: [""]
 
 EventHandlers:
         - id: stpe
