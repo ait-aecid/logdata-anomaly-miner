@@ -15,8 +15,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import abc
 import locale
 import logging
-from datetime import timezone
-from typing import Union
 from aminer.AminerConfig import DEBUG_LOG_NAME
 
 SIGN_TYPE_NONE = "none"
@@ -36,7 +34,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
     """This is the superinterface of all model elements."""
 
     def __init__(
-            self, element_id: str, date_format=None, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=None,
+            self, element_id, date_format=None, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=None,
             value_sign_type=None, value_pad_type=None, exponent_type=None
     ):
         """

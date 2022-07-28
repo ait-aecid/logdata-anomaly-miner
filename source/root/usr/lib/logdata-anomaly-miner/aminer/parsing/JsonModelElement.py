@@ -15,7 +15,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import json
 import warnings
 import logging
-from typing import List, Union
+from typing import List, Union, Any
 from json import JSONDecodeError
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.MatchContext import MatchContext
@@ -365,7 +365,7 @@ class JsonModelElement(ModelElementInterface):
         """Flatten a list of lists using this method recursively."""
         if not isinstance(lst, list):
             return None
-        res = []
+        res: List[Any] = []
         for val in lst:
             if isinstance(val, list):
                 res += self.flatten_list(val)
