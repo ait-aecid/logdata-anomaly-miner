@@ -40,7 +40,7 @@ class NewMatchPathDetectorTest(TestBase):
         """
         description = "Test1NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                       output_log_line=False)
+                                                       output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
@@ -73,7 +73,7 @@ class NewMatchPathDetectorTest(TestBase):
         """
         description = "Test2NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-                                                       output_log_line=False)
+                                                       output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
 
@@ -102,7 +102,7 @@ class NewMatchPathDetectorTest(TestBase):
         """The persisting and reading of permitted log lines should be checked with this test."""
         description = "Test3NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-                                                       output_log_line=False)
+                                                       output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
@@ -115,7 +115,7 @@ class NewMatchPathDetectorTest(TestBase):
         self.reset_output_stream()
 
         otherNewMatchPathDetector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                         output_log_line=False)
+                                                         output_logline=False)
         otherLogAtomFixedDME = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, otherNewMatchPathDetector)
 
         self.assertTrue(otherNewMatchPathDetector.receive_atom(otherLogAtomFixedDME))
@@ -127,7 +127,7 @@ class NewMatchPathDetectorTest(TestBase):
         The return of the correct class is to be checked in this test case.
         """
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-                                                       output_log_line=False)
+                                                       output_logline=False)
         self.assertEqual(new_match_path_detector.get_time_trigger_class(), 1)
 
     # skipcq: PYL-W0105
@@ -164,7 +164,7 @@ class NewMatchPathDetectorTest(TestBase):
         """This test case checks whether an exception is thrown when entering an event of another class."""
         description = "Test8NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-                                                       output_log_line=False)
+                                                       output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
@@ -179,7 +179,7 @@ class NewMatchPathDetectorTest(TestBase):
         """The NewMatchPathDetector can not handle allowlisting data and therefore an exception is expected."""
         description = "Test9NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-                                                       output_log_line=False)
+                                                       output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
@@ -191,7 +191,7 @@ class NewMatchPathDetectorTest(TestBase):
         """This test case checks in which cases an event is triggered and compares with expected results."""
         description = "Test10NewMatchPathDetector"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', True,
-                                                       output_log_line=False)
+                                                       output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
         log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)

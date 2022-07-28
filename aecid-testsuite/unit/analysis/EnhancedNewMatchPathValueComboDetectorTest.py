@@ -45,7 +45,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         """
         description = "Test1EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
-            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
+            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, False, output_logline=False)
         self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = round(time.time(), 3)
@@ -70,7 +70,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.reset_output_stream()
 
         enhanced_new_match_path_value_combo_detector2 = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
-            'second/seq2/d1', 'second/seq2/s2'], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
+            'second/seq2/d1', 'second/seq2/s2'], [self.stream_printer_event_handler], 'Default', False, False, output_logline=False)
 
         self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector2, description + "2")
         log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(), ParserMatch(self.match_element_sequence_me2), t,
@@ -90,7 +90,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         """
         description = "Test2EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
-            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
+            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_logline=False)
         self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = round(time.time(), 3)
@@ -113,7 +113,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.reset_output_stream()
 
         enhanced_new_match_path_value_combo_detector2 = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
-            'second/seq2/d1', 'second/seq2/s2'], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
+            'second/seq2/d1', 'second/seq2/s2'], [self.stream_printer_event_handler], 'Default', False, False, output_logline=False)
 
         self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector2, description + "2")
         log_atom_sequence_me2 = LogAtom(self.match_element_sequence_me2.get_match_string(), ParserMatch(self.match_element_sequence_me2), t,
@@ -130,7 +130,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         """The persisting and reading of permitted log lines should be checked with this test."""
         description = "Test3EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
-            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
+            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_logline=False)
         self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = round(time.time(), 3)
@@ -145,7 +145,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.reset_output_stream()
 
         other_enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
-            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, False, output_log_line=False)
+            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, False, output_logline=False)
         self.analysis_context.register_component(other_enhanced_new_match_path_value_combo_detector, description + "2")
         other_log_atom_sequence_me = LogAtom(self.match_element_sequence_me.get_match_string(), ParserMatch(self.match_element_sequence_me),
                                              t + 2, other_enhanced_new_match_path_value_combo_detector)
@@ -170,7 +170,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         """This test case checks in which cases an event is triggered and compares with expected results."""
         description = "Test4EnhancedNewMatchPathValueComboDetector"
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [
-            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_log_line=False)
+            self.first_seq_s1, self.first_seq_d1], [self.stream_printer_event_handler], 'Default', False, True, output_logline=False)
         self.analysis_context.register_component(enhanced_new_match_path_value_combo_detector, description)
 
         t = time.time()
@@ -192,7 +192,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
     def test5save_metadata(self):
         """This test case checks the correctness of the metadata information."""
         enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ['first/f1/s1'], [
-            self.stream_printer_event_handler], 'Default', False, True, None, output_log_line=False)
+            self.stream_printer_event_handler], 'Default', False, True, None, output_logline=False)
         t = 1
         log_atom_sequence_me = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_sequence_me), t,
                                        enhanced_new_match_path_value_combo_detector)

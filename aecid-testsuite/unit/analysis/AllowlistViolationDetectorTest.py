@@ -24,7 +24,7 @@ class AllowlistViolationDetectorTest(TestBase):
 
         t = time.time()
         allowlist_violation_detector = AllowlistViolationDetector(self.aminer_config, [path_exists_match_rule, path_exists_match_rule2], [
-            self.stream_printer_event_handler], output_log_line=False)
+            self.stream_printer_event_handler], output_logline=False)
         self.analysis_context.register_component(allowlist_violation_detector, description)
 
         fixed_dme = FixedDataModelElement('s1', self.fixed_string)

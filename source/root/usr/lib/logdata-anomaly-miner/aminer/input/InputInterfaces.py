@@ -62,47 +62,45 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for receiving log atoms."""
 
-    log_success = 0
-    log_total = 0
-    output_event_handlers = None
-
-    def __init__(
-            self, mutable_default_args=None, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None,
-            id_path_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None,
-            constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None,
-            parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, target_path=None, parsed_atom_handler_dict=None,
-            allow_missing_values_flag=None, tuple_transformation_function=None, prob_thresh=None, skip_repetitions=None,
-            max_hypotheses=None, hypothesis_max_delta_time=None, generation_probability=None, generation_factor=None, max_observations=None,
-            p0=None, alpha=None, candidates_size=None, hypotheses_eval_delta_time=None, delta_time_to_discard_hypothesis=None,
-            check_rules_flag=None, window_size=None, num_windows=None, confidence_factor=None, empty_window_warnings=None,
-            early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None, seq_len=None, allow_missing_id=None,
-            timeout=None, allowed_id_tuples=None, min_num_vals=None, max_num_vals=None, save_values=None, track_time_for_tsa=None,
-            waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None, histogram_definitions=None, report_interval=None,
-            reset_after_report_flag=None, bin_definition=None, target_value_list=None, timestamp_path=None, min_bin_elements=None,
-            min_bin_time=None, debug_mode=None, stream=None, separator=None, missing_value_string=None, num_log_lines_solidify_matrix=None,
-            time_output_threshold=None, anomaly_threshold=None, default_interval=None, realert_interval=None, combine_values=None,
-            min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None, event_type_detector=None, num_init=None,
-            force_period_length=None, set_period_length=None, alpha_bt=None, num_results_bt=None, num_min_time_history=None,
-            num_max_time_history=None, num_periods_tsa_ini=None, time_period_length=None, max_time_diff=None, num_reduce_time_list=None,
-            min_anomaly_score=None, min_variance=None, parallel_check_count=None, record_count_before_event=None, use_path_match=None,
-            use_value_match=None, min_rule_attributes=None, max_rule_attributes=None, ruleset=None, exit_on_error_flag=None,
-            acf_pause_interval_percentage=None, acf_auto_pause_interval=None, acf_auto_pause_interval_num_min=None,
-            build_sum_over_values=None, num_division_time_step=None, acf_threshold=None, round_time_interval_threshold=None,
-            min_log_lines_per_time_step=None, num_update=None, disc_div_thres=None, num_steps_create_new_rules=None,
-            num_upd_until_validation=None, num_end_learning_phase=None, check_cor_thres=None, check_cor_prob_thres=None,
-            check_cor_num_thres=None, min_values_cors_thres=None, new_vals_alarm_thres=None, num_bt=None, used_homogeneity_test=None,
-            alpha_chisquare_test=None, max_dist_rule_distr=None, used_presel_meth=None, intersect_presel_meth=None,
-            percentage_random_cors=None, match_disc_vals_sim_tresh=None, exclude_due_distr_lower_limit=None,
-            match_disc_distr_threshold=None, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=None,
-            validate_cor_distinct_thres=None, used_gof_test=None, gof_alpha=None, s_gof_alpha=None, s_gof_bt_alpha=None, d_alpha=None,
-            d_bt_alpha=None, div_thres=None, sim_thres=None, indicator_thres=None, num_update_unq=None, num_s_gof_values=None,
-            num_s_gof_bt=None, num_d_bt=None, num_pause_discrete=None, num_pause_others=None, test_gof_int=None,
-            silence_output_without_confidence=None, silence_output_except_indicator=None, num_var_type_hist_ref=None,
-            num_update_var_type_hist_ref=None, num_var_type_considered_ind=None, num_stat_stop_update=None,
-            num_updates_until_var_reduction=None, var_reduction_thres=None, num_skipped_ind_for_weights=None, num_ind_for_weights=None,
-            used_multinomial_test=None, use_empiric_distr=None, used_range_test=None, range_alpha=None, range_threshold=None,
-            num_reinit_range=None, range_limits_factor=None, dw_alpha=None, save_statistics=None,
-    ):
+    # def __init__(
+    #         self, mutable_default_args=None, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None,
+    #         id_path_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None,
+    #         constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None,
+    #         parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, target_path=None, parsed_atom_handler_dict=None,
+    #         allow_missing_values_flag=None, tuple_transformation_function=None, prob_thresh=None, skip_repetitions=None,
+    #         max_hypotheses=None, hypothesis_max_delta_time=None, generation_probability=None, generation_factor=None, max_observations=None,
+    #         p0=None, alpha=None, candidates_size=None, hypotheses_eval_delta_time=None, delta_time_to_discard_hypothesis=None,
+    #         check_rules_flag=None, window_size=None, num_windows=None, confidence_factor=None, empty_window_warnings=None,
+    #         early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None, seq_len=None, allow_missing_id=None,
+    #         timeout=None, allowed_id_tuples=None, min_num_vals=None, max_num_vals=None, save_values=None, track_time_for_tsa=None,
+    #         waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None, histogram_definitions=None, report_interval=None,
+    #         reset_after_report_flag=None, bin_definition=None, target_value_list=None, timestamp_path=None, min_bin_elements=None,
+    #         min_bin_time=None, debug_mode=None, stream=None, separator=None, missing_value_string=None, num_log_lines_solidify_matrix=None,
+    #         time_output_threshold=None, anomaly_threshold=None, default_interval=None, realert_interval=None, combine_values=None,
+    #         min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None, event_type_detector=None, num_init=None,
+    #         force_period_length=None, set_period_length=None, alpha_bt=None, num_results_bt=None, num_min_time_history=None,
+    #         num_max_time_history=None, num_periods_tsa_ini=None, time_period_length=None, max_time_diff=None, num_reduce_time_list=None,
+    #         min_anomaly_score=None, min_variance=None, parallel_check_count=None, record_count_before_event=None, use_path_match=None,
+    #         use_value_match=None, min_rule_attributes=None, max_rule_attributes=None, ruleset=None, exit_on_error_flag=None,
+    #         acf_pause_interval_percentage=None, acf_auto_pause_interval=None, acf_auto_pause_interval_num_min=None,
+    #         build_sum_over_values=None, num_division_time_step=None, acf_threshold=None, round_time_interval_threshold=None,
+    #         min_log_lines_per_time_step=None, num_update=None, disc_div_thres=None, num_steps_create_new_rules=None,
+    #         num_upd_until_validation=None, num_end_learning_phase=None, check_cor_thres=None, check_cor_prob_thres=None,
+    #         check_cor_num_thres=None, min_values_cors_thres=None, new_vals_alarm_thres=None, num_bt=None, used_homogeneity_test=None,
+    #         alpha_chisquare_test=None, max_dist_rule_distr=None, used_presel_meth=None, intersect_presel_meth=None,
+    #         percentage_random_cors=None, match_disc_vals_sim_tresh=None, exclude_due_distr_lower_limit=None,
+    #         match_disc_distr_threshold=None, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=None,
+    #         validate_cor_distinct_thres=None, used_gof_test=None, gof_alpha=None, s_gof_alpha=None, s_gof_bt_alpha=None, d_alpha=None,
+    #         d_bt_alpha=None, div_thres=None, sim_thres=None, indicator_thres=None, num_update_unq=None, num_s_gof_values=None,
+    #         num_s_gof_bt=None, num_d_bt=None, num_pause_discrete=None, num_pause_others=None, test_gof_int=None,
+    #         silence_output_without_confidence=None, silence_output_except_indicator=None, num_var_type_hist_ref=None,
+    #         num_update_var_type_hist_ref=None, num_var_type_considered_ind=None, num_stat_stop_update=None,
+    #         num_updates_until_var_reduction=None, var_reduction_thres=None, num_skipped_ind_for_weights=None, num_ind_for_weights=None,
+    #         used_multinomial_test=None, use_empiric_distr=None, used_range_test=None, range_alpha=None, range_threshold=None,
+    #         num_reinit_range=None, range_limits_factor=None, dw_alpha=None, save_statistics=None
+    # ):
+    def __init__(self, mutable_default_args=None, learn_mode=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 stop_when_handled_flag=None, **kwargs):
         """
         Initialize the parameters of analysis components.
         @param mutable_default_args a list of arguments which contain mutable values and should be set to their default value indicated by
@@ -271,14 +269,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                of the distributions have to surpass to be considered real correlations. The lower the value the less likely that the
                correlations are being rejected.
         @param used_gof_test states the used test statistic for the continuous data type. Implemented are the 'KS' and 'CM' tests.
-        @param gof_alpha significance niveau for p-value for the distribution test of the initialization. Recomended values are the
+        @param gof_alpha significance niveau for p-value for the distribution test of the initialization. Recommended values are the
                implemented values of crit_val_ini_ks and crit_val_upd_ks or _cm.
         @param s_gof_alpha significance niveau for p-value for the sliding KS-test in the update step. Recommended values are the
                implemented values of crit_val_upd_ks.
         @param s_gof_bt_alpha significance niveau for the binomial test of the test results of the s_gof-test.
-        @param d_alpha significance niveau for the binomialtest of the single discrete variables. If used_multinomial_test == 'Approx' then
+        @param d_alpha significance niveau for the binomial test of the single discrete variables. If used_multinomial_test == 'Approx' then
                faster runtime for values in the p list of bt_min_succ_data.
-        @param d_bt_alpha significance niveau for the binomialtest of the test results of the discrete tests.
+        @param d_bt_alpha significance niveau for the binomial test of the test results of the discrete tests.
         @param div_thres threshold for diversity of the values of a variable (the higher the more values have to be distinct to be
                considered to be continuous distributed).
         @param sim_thres threshold for similarity of the values of a variable (the higher the more values have to be common to be considered
@@ -288,7 +286,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                unique).
         @param num_s_gof_values number of values which are tested in the s_gof-test. The value has to be <= num_init, >= num_update.
                Recommended values are the implemented values of crit_val_upd_ks.
-        @param num_s_gof_bt number of tested s_gof-Tests for the binomialtest of the testresults of the s_gof tests.
+        @param num_s_gof_bt number of tested s_gof-Tests for the binomial test of the test results of the s_gof tests.
         @param num_d_bt number of tested discrete samples for the binomial test of the test results of the discrete tests.
         @param num_pause_discrete number of paused updates, before the discrete var type is adapted.
         @param num_pause_others number of paused update runs, before trying to find a new var_type.
@@ -321,10 +319,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                assigned to the variable instead of continuous.
         @param save_statistics used to track the indicators and changed variable types.
         """
+        self.log_success = 0
+        self.log_total = 0
         self.persistence_id = None  # persistence_id is always needed.
-        for argument, value in list(locals().items())[1:]:  # skip self parameter
+        for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:
                 setattr(self, argument, value)
+        for argument, value in kwargs.items():  # skip self parameter and kwargs
+            setattr(self, argument, value)
 
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
             msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
@@ -356,7 +358,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
         if mutable_default_args is not None:
             for argument in mutable_default_args:
-                if hasattr(self, argument):
+                if hasattr(self, argument) and getattr(self, argument) is not None:
                     continue
                 if argument.endswith("list"):
                     setattr(self, argument, [])
@@ -373,14 +375,13 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 msg = "Only subclasses of AtomHandlerInterface allowed in subhandler_list."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
-            self.subhandler_list = [None] * len(self.subhandler_list)
             for handler_pos, handler_element in enumerate(self.subhandler_list):
                 self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
         if hasattr(self, "allowed_id_tuples"):
-            if allowed_id_tuples is None:
+            if kwargs["allowed_id_tuples"] is None:
                 self.allowed_id_tuples = []
             else:
-                self.allowed_id_tuples = [tuple(tuple_list) for tuple_list in allowed_id_tuples]
+                self.allowed_id_tuples = [tuple(tuple_list) for tuple_list in kwargs["allowed_id_tuples"]]
 
         if hasattr(self, "confidence_factor") and not 0 <= self.confidence_factor <= 1:
             logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')

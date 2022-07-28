@@ -41,7 +41,7 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
         @param value_pad_type defines the padding values which can prefix the numerical value. With PAD_TYPE_NONE no padding is allowed,
                PAD_TYPE_ZERO allows zeros before the value and PAD_TYPE_BLANK allows spaces before the value.
         """
-        super().__init__(element_id, value_sign_type, value_pad_type)
+        super().__init__(element_id, value_sign_type=value_sign_type, value_pad_type=value_pad_type)
 
         if value_sign_type not in (DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL,
                                    DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY):

@@ -29,7 +29,7 @@ class TimestampsUnsortedDetectorTest(TestBase):
         t = time()
         log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, new_match_path_detector)
         timestamp_unsorted_detector = TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], False,
-                                                                 output_log_line=False)
+                                                                 output_logline=False)
         self.analysis_context.register_component(timestamp_unsorted_detector, description + "2")
         self.assertTrue(timestamp_unsorted_detector.receive_atom(log_atom))
         self.assertEqual(self.output_stream.getvalue(), '')
@@ -54,7 +54,7 @@ class TimestampsUnsortedDetectorTest(TestBase):
         t = time()
         log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, new_match_path_detector)
         timestamp_unsorted_detector = TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], True,
-                                                                 output_log_line=False)
+                                                                 output_logline=False)
         self.analysis_context.register_component(timestamp_unsorted_detector, description + "2")
         self.assertTrue(timestamp_unsorted_detector.receive_atom(log_atom))
         self.assertEqual(self.output_stream.getvalue(), '')
@@ -81,7 +81,7 @@ class TimestampsUnsortedDetectorTest(TestBase):
         t = time()
         log_atom = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, new_match_path_detector)
         timestamp_unsorted_detector = TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], False,
-                                                                 output_log_line=False)
+                                                                 output_logline=False)
         self.analysis_context.register_component(timestamp_unsorted_detector, description + "2")
         self.assertTrue(timestamp_unsorted_detector.receive_atom(log_atom))
         self.assertEqual(self.output_stream.getvalue(), '')

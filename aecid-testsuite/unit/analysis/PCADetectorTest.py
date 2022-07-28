@@ -27,7 +27,7 @@ class PCADetectorTest(TestBase):
 
         # Initialize detector for analyzing values in one path in time windows of 10 seconds
         test_handler = TestHandler()
-        pca_detector = PCADetector(self.aminer_config, ['/value'], [test_handler], 10, 2, 0.9, 3, 'Default', True, output_log_line=False)
+        pca_detector = PCADetector(self.aminer_config, ['/value'], [test_handler], 10, 2, 0.9, 3, 'Default', True, output_logline=False)
         self.analysis_context.register_component(pca_detector, description)
 
         # Prepare log atoms that represent different amounts of values a, b over time

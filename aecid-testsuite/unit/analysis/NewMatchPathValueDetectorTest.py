@@ -41,7 +41,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         """
         description = "Test1NewMatchPathValueDetector"
         new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
-            self.stream_printer_event_handler], 'Default', False, output_log_line=False)
+            self.stream_printer_event_handler], 'Default', False, output_logline=False)
         self.analysis_context.register_component(new_match_path_value_detector, description)
 
         t = time()
@@ -61,7 +61,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         self.reset_output_stream()
 
         new_match_path_value_detector2 = NewMatchPathValueDetector(self.aminer_config, ['second/f2/d1'], [
-            self.stream_printer_event_handler], 'Default', False, output_log_line=False)
+            self.stream_printer_event_handler], 'Default', False, output_logline=False)
         self.analysis_context.register_component(new_match_path_value_detector2, description + "2")
         log_atom_sequence_me2 = LogAtom(b'25537', ParserMatch(self.match_element_first_match_me2), t, new_match_path_value_detector2)
 
@@ -78,7 +78,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         """
         description = "Test2NewMatchPathValueDetector"
         new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
-            self.stream_printer_event_handler], 'Default', True, output_log_line=False)
+            self.stream_printer_event_handler], 'Default', True, output_logline=False)
         self.analysis_context.register_component(new_match_path_value_detector, description)
 
         t = time()
@@ -96,7 +96,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         self.reset_output_stream()
 
         new_match_path_value_detector2 = NewMatchPathValueDetector(self.aminer_config, ['second/f2/d1'], [
-            self.stream_printer_event_handler], 'Default', False, output_log_line=False)
+            self.stream_printer_event_handler], 'Default', False, output_logline=False)
         self.analysis_context.register_component(new_match_path_value_detector2, description + "2")
         log_atom_sequence_me2 = LogAtom(b'25537', ParserMatch(self.match_element_first_match_me2), t, new_match_path_value_detector2)
 
@@ -110,7 +110,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         """The persisting and reading of permitted log lines should be checked with this test."""
         description = "Test3NewMatchPathValueDetector"
         new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
-            self.stream_printer_event_handler], 'Default', True, output_log_line=False)
+            self.stream_printer_event_handler], 'Default', True, output_logline=False)
         self.analysis_context.register_component(new_match_path_value_detector, description)
 
         t = time()
@@ -124,7 +124,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         self.reset_output_stream()
 
         other_new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
-            self.stream_printer_event_handler], 'Default', True, output_log_line=False)
+            self.stream_printer_event_handler], 'Default', True, output_logline=False)
         self.analysis_context.register_component(new_match_path_value_detector, description + "2")
         other_log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_first_match_me), t,
                                            other_new_match_path_value_detector)
@@ -136,7 +136,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         """Test the allowlist_event method."""
         description = "Test4NewMatchPathValueDetector"
         new_match_path_value_detector = NewMatchPathValueDetector(self.aminer_config, [self.first_f1_s1], [
-            self.stream_printer_event_handler], 'Default', True, output_log_line=False)
+            self.stream_printer_event_handler], 'Default', True, output_logline=False)
         self.analysis_context.register_component(new_match_path_value_detector, description)
         self.assertEqual(set(), new_match_path_value_detector.known_values_set)
 

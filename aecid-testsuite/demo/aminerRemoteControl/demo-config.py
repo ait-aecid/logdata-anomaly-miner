@@ -269,7 +269,7 @@ def build_analysis_pipeline(analysis_context):
     new_match_id_value_combo_detector = NewMatchIdValueComboDetector(
         analysis_context.aminer_config, ['/model/type/path/name', '/model/type/syscall/syscall'], anomaly_event_handlers,
         id_path_list=['/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, learn_mode=True,
-        allow_missing_values_flag=True, output_log_line=True)
+        allow_missing_values_flag=True, output_logline=True)
     analysis_context.register_component(new_match_id_value_combo_detector, component_name="NewMatchIdValueComboDetector")
     atom_filters.add_handler(new_match_id_value_combo_detector)
 
@@ -289,12 +289,12 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
     time_correlation_detector = TimeCorrelationDetector(
         analysis_context.aminer_config, anomaly_event_handlers, 2, min_rule_attributes=1, max_rule_attributes=5,
-        record_count_before_event=70000, output_log_line=True)
+        record_count_before_event=70000, output_logline=True)
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filters.add_handler(time_correlation_detector)
 
     from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
-    cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1, artefact_match_parameters=[
+    cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, artefact_match_parameters=[
         ('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
     a_class_selector = EventClassSelector('Announcement', [cron_job_announcement], None)
     b_class_selector = EventClassSelector('Execution', None, [cron_job_announcement])

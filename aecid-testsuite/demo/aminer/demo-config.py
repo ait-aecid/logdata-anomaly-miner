@@ -291,7 +291,7 @@ def build_analysis_pipeline(analysis_context):
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
     allowlist_violation_detector = AllowlistViolationDetector(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
-                                                              output_log_line=True)
+                                                              output_logline=True)
     analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
     atom_filter.add_handler(allowlist_violation_detector)
 
@@ -307,7 +307,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.VariableTypeDetector import VariableTypeDetector
     vtd = VariableTypeDetector(analysis_context.aminer_config, anomaly_event_handlers, etd, silence_output_except_indicator=False,
-                               output_log_line=False, ignore_list=["/model/RandomTime"])
+                               output_logline=False, ignore_list=["/model/RandomTime"])
     analysis_context.register_component(vtd, component_name="VariableTypeDetector")
     atom_filter.add_handler(vtd)
 
@@ -337,13 +337,13 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.MatchFilter import MatchFilter
     match_filter = MatchFilter(analysis_context.aminer_config, ['/model/Random'], anomaly_event_handlers, target_value_list=[
-        1, 10, 100], output_log_line=True)
+        1, 10, 100], output_logline=True)
     analysis_context.register_component(match_filter, component_name="MatchFilter")
     atom_filter.add_handler(match_filter)
 
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
     new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True,
-                                                   output_log_line=True)
+                                                   output_logline=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filter.add_handler(new_match_path_detector)
 
@@ -361,7 +361,7 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
     enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(analysis_context.aminer_config, [
         '/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, auto_include_flag=True,
-        tuple_transformation_function=tuple_transformation_function, output_log_line=True)
+        tuple_transformation_function=tuple_transformation_function, output_logline=True)
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
     atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
 
@@ -387,7 +387,7 @@ def build_analysis_pipeline(analysis_context):
         ])
     ]
     time_allowlist_violation_detector = AllowlistViolationDetector(
-        analysis_context.aminer_config, time_allowlist_rules, anomaly_event_handlers, output_log_line=True)
+        analysis_context.aminer_config, time_allowlist_rules, anomaly_event_handlers, output_logline=True)
     analysis_context.register_component(time_allowlist_violation_detector, component_name="TimeAllowlist")
     atom_filter.add_handler(time_allowlist_violation_detector)
 
@@ -397,18 +397,18 @@ def build_analysis_pipeline(analysis_context):
     linear_numeric_bin_definition = LinearNumericBinDefinition(50, 5, 20, True)
     histogram_analysis = HistogramAnalysis(analysis_context.aminer_config, [
         ('/model/RandomTime/Random', modulo_time_bin_definition), ('/model/Random', linear_numeric_bin_definition)], 10,
-        anomaly_event_handlers, output_log_line=True)
+        anomaly_event_handlers, output_logline=True)
     analysis_context.register_component(histogram_analysis, component_name="HistogramAnalysis")
     atom_filter.add_handler(histogram_analysis)
 
     path_dependent_histogram_analysis = PathDependentHistogramAnalysis(
-        analysis_context.aminer_config, '/model/RandomTime', modulo_time_bin_definition, 10, anomaly_event_handlers, output_log_line=True)
+        analysis_context.aminer_config, '/model/RandomTime', modulo_time_bin_definition, 10, anomaly_event_handlers, output_logline=True)
     analysis_context.register_component(path_dependent_histogram_analysis, component_name="PathDependentHistogramAnalysis")
     atom_filter.add_handler(path_dependent_histogram_analysis)
 
     from aminer.analysis.MatchValueAverageChangeDetector import MatchValueAverageChangeDetector
     match_value_average_change_detector = MatchValueAverageChangeDetector(
-        analysis_context.aminer_config, anomaly_event_handlers, None, ['/model/Random'], 100, 10, output_log_line=True)
+        analysis_context.aminer_config, anomaly_event_handlers, None, ['/model/Random'], 100, 10, output_logline=True)
     analysis_context.register_component(match_value_average_change_detector, component_name="MatchValueAverageChange")
     atom_filter.add_handler(match_value_average_change_detector)
 
@@ -422,7 +422,7 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
         analysis_context.aminer_config, ['/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers,
-        output_log_line=True, auto_include_flag=True)
+        output_logline=True, auto_include_flag=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
@@ -430,27 +430,27 @@ def build_analysis_pipeline(analysis_context):
     new_match_id_value_combo_detector = NewMatchIdValueComboDetector(
         analysis_context.aminer_config, ['/model/type/path/name', '/model/type/syscall/syscall'], anomaly_event_handlers,
         id_path_list=['/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, auto_include_flag=True,
-        allow_missing_values_flag=True, output_log_line=True)
+        allow_missing_values_flag=True, output_logline=True)
     analysis_context.register_component(new_match_id_value_combo_detector, component_name="NewMatchIdValueComboDetector")
     atom_filter.add_handler(new_match_id_value_combo_detector)
 
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, [
-        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, auto_include_flag=True, output_log_line=True)
+        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, auto_include_flag=True, output_logline=True)
     analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
     atom_filter.add_handler(new_match_path_value_detector)
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
         analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=True, default_interval=2,
-        realert_interval=5, output_log_line=True)
+        realert_interval=5, output_logline=True)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)
 
     from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
     time_correlation_detector = TimeCorrelationDetector(
         analysis_context.aminer_config, anomaly_event_handlers, 2, min_rule_attributes=1, max_rule_attributes=5,
-        record_count_before_event=10000, output_log_line=True)
+        record_count_before_event=10000, output_logline=True)
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filter.add_handler(time_correlation_detector)
 
@@ -464,6 +464,6 @@ def build_analysis_pipeline(analysis_context):
              Rules.PathExistsMatchRule('/model/CronExecution/Job', b_class_selector)]
 
     time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers,
-                                                                           output_log_line=True)
+                                                                           output_logline=True)
     analysis_context.register_component(time_correlation_violation_detector, component_name="TimeCorrelationViolationDetector")
     atom_filter.add_handler(time_correlation_violation_detector)

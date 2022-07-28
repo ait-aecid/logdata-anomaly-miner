@@ -55,7 +55,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             msg = 'Target labels cannot be used without specifying target paths.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if self.target_path_list is not None and self.target_label_list is not None and len(self.target_path_list) != len(
+        if self.target_path_list is not None and len(self.target_path_list) != len(
                 self.target_label_list):
             msg = 'Every path must have a target label if target labels are used.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -121,7 +121,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             output_string = output_string[:-1]
             event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                           'ToTime': datetime.datetime.utcnow().timestamp()}
-            for listener in self.report_event_handlers:
+            for listener in self.anomaly_event_handlers:
                 listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
         else:
             for k in self.count_dict:
@@ -133,7 +133,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     total_processed_lines_str: c[total_processed_lines_str]}}
                 event_data = {'StatusInfo': status_info, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                               'ToTime': datetime.datetime.utcnow().timestamp()}
-                for listener in self.report_event_handlers:
+                for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
         for k in self.count_dict:
             self.count_dict[k][current_processed_lines_str] = 0

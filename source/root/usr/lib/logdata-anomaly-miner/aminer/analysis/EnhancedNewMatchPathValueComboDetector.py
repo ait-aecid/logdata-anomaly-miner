@@ -55,11 +55,12 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         self.known_values_dict = {}
+        self.tuple_transformation_function = tuple_transformation_function
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode,
-            tuple_transformation_function=tuple_transformation_function, output_logline=output_logline,
-            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time)
+            output_logline=output_logline, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time)
         self.date_string = "%Y-%m-%d %H:%M:%S"
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []

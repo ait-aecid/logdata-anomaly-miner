@@ -49,7 +49,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
                EXP_TYPE_OPTIONAL allows exponential values and with EXP_TYPE_MANDATORY every value must contain exponential values.
         """
 
-        super().__init__(element_id, value_sign_type, value_pad_type, exponent_type)
+        super().__init__(element_id, value_sign_type=value_sign_type, value_pad_type=value_pad_type, exponent_type=exponent_type)
 
         if value_sign_type not in (DecimalFloatValueModelElement.SIGN_TYPE_NONE, DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL,
                                    DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY):

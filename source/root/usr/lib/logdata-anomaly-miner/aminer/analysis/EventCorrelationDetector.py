@@ -285,7 +285,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                         str(rule.trigger_event), str(rule.implied_event), str(rule.min_eval_true),
                                         str(rule.max_observations), str(sum(rule.rule_observations)),
                                         str(len(rule.rule_observations)))
-                        if self.output_log_line:
+                        if self.output_logline:
                             sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + data]
                         else:
                             sorted_log_lines = [tmp_string + data]
@@ -342,7 +342,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                             str(rule.implied_event), str(rule.trigger_event), str(rule.min_eval_true),
                                             str(rule.max_observations), str(sum(rule.rule_observations)),
                                             str(len(rule.rule_observations)))
-                            if self.output_log_line:
+                            if self.output_logline:
                                 sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + data]
                             else:
                                 sorted_log_lines = [tmp_string + data]

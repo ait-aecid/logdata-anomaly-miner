@@ -36,9 +36,8 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
     """This is the superinterface of all model elements."""
 
     def __init__(
-            self, element_id: str, date_format: bytes = None, time_zone: timezone = None, text_locale: Union[str, tuple] = None,
-            start_year: int = None, max_time_jump_seconds: int = None, value_sign_type: str = None, value_pad_type: str = None,
-            exponent_type: str = None
+            self, element_id: str, date_format=None, time_zone=None, text_locale=None, start_year=None, max_time_jump_seconds=None,
+            value_sign_type=None, value_pad_type=None, exponent_type=None
     ):
         """
         Initialize the ModelElement.
@@ -99,7 +98,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
-        if hasattr(self, "text_locale"):
+        if hasattr(self, "text_locale") and self.text_locale is not None:
             if not isinstance(text_locale, str) and not isinstance(text_locale, tuple):
                 msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)

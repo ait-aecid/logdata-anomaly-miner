@@ -1290,7 +1290,7 @@ This detector generates anomalies for new characters in parsed elements and exte
 * **id_path_list** list of strings that specify group identifiers for which alphabets should be learned (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean).
 * **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
 * **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1340,7 +1340,7 @@ This detector monitors and learns occurrence probabilities of character pairs in
 * **skip_repetitions** boolean that determines whether only distinct values are used for character pair counting. This counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run (boolean, defaults to False).
 * **persistence_id** name of persistency document (string, defaults to "Default").
 * **learn_mode** when set to True, the detector will extend the table of character pair frequencies based on new values (boolean).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
 
@@ -1868,7 +1868,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **time_period_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
 * **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly (integer, defaults to 360).
@@ -2076,7 +2076,7 @@ This detector generates ranges for numeric values, detects values outside of the
 * **id_path_list** list of strings that specify group identifiers for which numeric ranges should be learned (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean).
 * **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
 * **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).

@@ -600,7 +600,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para><replaceable>Value</replaceable>: &apos;String&apos;</para>
             <para><replaceable>Example</replaceable>: aminerremotecontrol --exec 
             &quot;change_config_property(analysis_context,&apos;LogPrefix&apos;,&apos;Original log line: &apos;)&quot;</para>
-            <para>Most analysis components implement the output_log_line-property, which is True by default.
+            <para>Most analysis components implement the output_logline-property, which is True by default.
               Define a prefix to the original captured log lines. This defaults to &apos;&apos;.</para>
           </listitem>
         </varlistentry>

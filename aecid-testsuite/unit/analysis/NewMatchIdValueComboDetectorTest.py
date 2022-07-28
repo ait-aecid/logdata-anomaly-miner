@@ -124,7 +124,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            auto_include_flag=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
 
         for i, log_atom in enumerate(log_atoms):
@@ -161,7 +161,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            auto_include_flag=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
 
         for i, log_atom in enumerate(log_atoms):
@@ -199,7 +199,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
 
         for i, log_atom in enumerate(log_atoms):
@@ -237,7 +237,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
 
         for i, log_atom in enumerate(log_atoms):
@@ -255,7 +255,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [])
         event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
@@ -280,7 +280,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [])
         event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
