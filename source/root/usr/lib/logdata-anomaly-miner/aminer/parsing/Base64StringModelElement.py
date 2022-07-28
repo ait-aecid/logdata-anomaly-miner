@@ -24,31 +24,18 @@ class Base64StringModelElement(ModelElementInterface):
     """This class just tries to strip off as many base64 bytes as possible from a given data string."""
 
     def __init__(self, element_id: str):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
+        """
+        Initialize the ModelElement.
+        @param element_id an identifier for the ModelElement which is shown in the path.
+        """
+        super().__init__(element_id)
         self.regex = re.compile(b"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?")
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
-        """
-        Get all possible child model elements of this element.
-        @return None as no children are allowed.
-        """
-        return None
 
     def get_match_element(self, path: str, match_context):
         """
-        Find the maximum number of bytes forming a integer number according to the parameters specified.
+        Find the maximum number of bytes forming an integer number according to the parameters specified.
+        @param path to be printed in the MatchElement.
+        @param match_context the match_context to be analyzed.
         @return a match when at least one byte being a digit was found.
         """
         match = self.regex.match(match_context.match_data)

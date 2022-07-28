@@ -17,7 +17,7 @@ import sys
 import time
 import logging
 import locale
-from typing import Union, List, Set, Optional
+from typing import Union, List, Set
 from datetime import timezone, datetime
 
 from aminer.AminerConfig import DEBUG_LOG_NAME
@@ -80,99 +80,49 @@ class DateTimeModelElement(ModelElementInterface):
                  start_year: int = None, max_time_jump_seconds: int = 86400):
         """
         Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
+        @param element_id an identifier for the ModelElement which is shown in the path.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
-        available formats. Supported format specifiers are:
-            * %b: month name in current locale
-            * %d: day in month, can be space or zero padded when followed by separator or at end of string.
-            * %f: fraction of seconds (the digits after the the ".")
-            * %H: hours from 00 to 23
-            * %M: minutes
-            * %m: two digit month number
-            * %S: seconds
-            * %s: seconds since the epoch (1970-01-01)
-            * %Y: 4 digit year number
-            * %z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.
-        Common formats are:
-            * "%b %d %H:%M:%S" e.g. for "Nov 19 05:08:43"
-            * "%d.%m.%YT%H:%M:%S" e.g. for "07.02.2019T11:40:00"
-            * "%d.%m.%Y %H:%M:%S.%f" e.g. for "07.02.2019 11:40:00.123456"
-            * "%d.%m.%Y %H:%M:%S%z" e.g. for "07.02.2019 11:40:00+0000" or "07.02.2019 11:40:00 UTC"
-            * "%d.%m.%Y" e.g. for "07.02.2019"
-            * "%H:%M:%S" e.g. for "11:40:23"
+               available formats. Supported format specifiers are:
+                 * %b: month name in current locale
+                 * %d: day in month, can be space or zero padded when followed by separator or at end of string.
+                 * %f: fraction of seconds (the digits after the the ".")
+                 * %H: hours from 00 to 23
+                 * %M: minutes
+                 * %m: two digit month number
+                 * %S: seconds
+                 * %s: seconds since the epoch (1970-01-01)
+                 * %Y: 4 digit year number
+                 * %z: detect and parse timezone strings like UTC, CET, +0001, etc. automatically.
+               Common formats are:
+                 * "%b %d %H:%M:%S" e.g. for "Nov 19 05:08:43"
+                 * "%d.%m.%YT%H:%M:%S" e.g. for "07.02.2019T11:40:00"
+                 * "%d.%m.%Y %H:%M:%S.%f" e.g. for "07.02.2019 11:40:00.123456"
+                 * "%d.%m.%Y %H:%M:%S%z" e.g. for "07.02.2019 11:40:00+0000" or "07.02.2019 11:40:00 UTC"
+                 * "%d.%m.%Y" e.g. for "07.02.2019"
+                 * "%H:%M:%S" e.g. for "11:40:23"
         @param time_zone the timezone for parsing the values or UTC when None.
         @param text_locale the locale to use for parsing the day, month names or None to use the default locale. The locale must be a tuple
-        of (locale, encoding) or a string.
+               of (locale, encoding) or a string.
         @param start_year when parsing date records without any year information, assume this is the year of the first value parsed.
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
-        of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
-        within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
+               of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
+               within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
         """
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-        self.time_zone = time_zone
+        self.text_locale = text_locale
+        super().__init__(element_id, date_format, time_zone, text_locale, start_year, max_time_jump_seconds)
         if time_zone is None:
             self.time_zone = timezone.utc
-        self.text_locale = text_locale
-        if text_locale is not None:
-            if not isinstance(text_locale, str) and not isinstance(text_locale, tuple):
-                msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if isinstance(text_locale, tuple) and len(text_locale) != 2:
-                msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
-            try:
-                old_locale = locale.getdefaultlocale()
-                if old_locale != text_locale:
-                    locale.setlocale(locale.LC_ALL, text_locale)
-                    logging.getLogger(DEBUG_LOG_NAME).info("Changed time locale from %s to %s.", text_locale, "".join(text_locale))
-            except locale.Error:
-                msg = "text_locale %s is not installed!" % text_locale
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise locale.Error(msg)
-        # Make sure that dateFormat is valid and extract the relevant parts from it.
+        # Make sure that date_format is valid and extract the relevant parts from it.
         self.format_has_year_flag = False
         self.format_has_tz_specifier = False
         self.date_format_parts: Union[List[Union[bytes, tuple]]] = []
-        self.date_format = date_format
-        if not isinstance(date_format, bytes):
-            msg = "date_format has to be of the type bytes."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(date_format) <= 1:
-            msg = "At least one date_format specifier must be defined."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
         self.scan_date_format(date_format)
 
-        if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):
-            msg = "start_year has to be of the type integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if (not self.format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
         elif start_year is None:  # this is needed so start_year is at any point an integer. (instead of being None)
             self.start_year = 0
-        else:
-            self.start_year = start_year
 
-        if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
-            msg = "max_time_jump_seconds has to be of the type integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if max_time_jump_seconds <= 0:
-            msg = "max_time_jump_seconds must not be lower than 1 second."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.max_time_jump_seconds = max_time_jump_seconds
         self.last_parsed_seconds = 0
         self.epoch_start_time = datetime.fromtimestamp(0, self.time_zone)
 
@@ -247,23 +197,14 @@ class DateTimeModelElement(ModelElementInterface):
             raise ValueError(msg)
         self.date_format_parts = date_format_parts
 
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
-        """
-        Get all possible child model elements of this element.
-        @return None as no children are allowed.
-        """
-        return None
-
     def get_match_element(self, path: str, match_context):
         """
         Try to find a match on given data for this model element and all its children.
-        When a match is found, the matchContext is updated accordingly.
-        @return None when there is no match, MatchElement otherwise. The matchObject returned is a tuple containing the datetime
-        object and the seconds since 1970
+        When a match is found, the match_context is updated accordingly.
+        @param path to be printed in the MatchElement.
+        @param match_context the match_context to be analyzed.
+        @return None when there is no match, MatchElement otherwise. The match_object returned is a tuple containing the datetime
+                object and the seconds since 1970.
         """
         parse_pos = 0
         # Year, month, day, hour, minute, second, fraction, gmt-seconds:
@@ -482,9 +423,9 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     This class defines a model element to parse date or datetime values from log sources.
     The date or datetime can contain timestamps encoded in different locales or on machines, where host/service locale does not match data
     locale(s).
-    CAVEAT: Unlike other model elements, this element is not completely stateless! As parsing of semiqualified date values without any
+    CAVEAT: Unlike other model elements, this element is not completely stateless! As parsing of semi qualified date values without any
     year information may produce wrong results, e.g. wrong year or 1 day off due to incorrect leap year handling, this object
-    will keep track of the most recent timestamp parsed and will use it to regain information about the year in semiqualified
+    will keep track of the most recent timestamp parsed and will use it to regain information about the year in semi qualified
     date values. Still this element will not complain when parsed timestamp values are not strictly sorted, this should be done
     by filtering modules later on. The sorting requirements here are only, that each new timestamp value may not be more than
     2 days before and 1 month after the most recent one observer.
@@ -499,45 +440,30 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     def __init__(self, element_id: str, date_formats: list, start_year: int = None, max_time_jump_seconds: int = 86400):
         """
         Create a new MultiLocaleDateTimeModelElement object.
+        @param element_id an identifier for the ModelElement which is shown in the path.
         @param date_formats this parameter is a list of tuples, each tuple containing information about one date format to support.
-        The tuple structure is (format_string, format_timezone, format_locale). The format_string may contain the same elements as supported
-        by strptime from datetime.datetime. The format_locale defines the locale for the string content, e.g. de_DE for german,
-        but also the data IO encoding, e.g. ISO-8859-1. The locale information has to be available, e.g. using "locale-gen" on
-        Debian systems. The format_timezone can be used to define the timezone of the timestamp parsed. When None, UTC is used.
-        The timezone support may only be sufficient for very simple usecases, e.g. all data from one source configured to create
-        timestamps in that timezone.
-        @param start_year when given, parsing will use this year value for semiqualified timestamps to add correct year information.
-        This is especially relevant for historic datasets as otherwise leap year handling may fail. The startYear parameter will
-        only take effect when the first timestamp to be parsed by this object is also semiqualified. Otherwise the year information
-        is extracted from this record. When empty and first parsing invocation involves a semiqualified date, the current year
-        in UTC timezone is used.
+               The tuple structure is (format_string, format_timezone, format_locale). The format_string may contain the same elements as
+               supported by strptime from datetime.datetime. The format_locale defines the locale for the string content, e.g. de_DE for
+               german, but also the data IO encoding, e.g. ISO-8859-1. The locale information has to be available, e.g. using "locale-gen"
+               on Debian systems. The format_timezone can be used to define the timezone of the timestamp parsed. When None, UTC is used.
+               The timezone support may only be sufficient for very simple use-cases, e.g. all data from one source configured to create
+               timestamps in that timezone.
+        @param start_year when given, parsing will use this year value for semi qualified timestamps to add correct year information.
+               This is especially relevant for historic datasets as otherwise leap year handling may fail. The startYear parameter will
+               only take effect when the first timestamp to be parsed by this object is also semi qualified. Otherwise, the year information
+               is extracted from this record. When empty and first parsing invocation involves a semi qualified date, the current year
+               in UTC timezone is used.
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
-        of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
-        within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
+               of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
+               within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
         """
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
+        # excluded date_formats from here, because it is not used by any other ModelElement, and it also needs to be extracted first.
+        self.max_time_jump_seconds = max_time_jump_seconds
+        super().__init__(element_id, start_year, max_time_jump_seconds)
         if len(date_formats) == 0:
             msg = "At least one date_format must be specified."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-
-        if max_time_jump_seconds is not None and not isinstance(max_time_jump_seconds, int) or isinstance(max_time_jump_seconds, bool):
-            msg = "max_time_jump_seconds has to be of the type integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if max_time_jump_seconds <= 0:
-            msg = "max_time_jump_seconds must not be lower than 1 second."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.max_time_jump_seconds = max_time_jump_seconds
 
         format_has_year_flag = False
         default_locale = locale.getdefaultlocale()
@@ -574,35 +500,20 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         if locale.getlocale() != default_locale:
             locale.resetlocale()
 
-        if start_year is not None and not isinstance(start_year, int) or isinstance(start_year, bool):
-            msg = "start_year has to be of the type integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if (not format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year
         elif start_year is None:   # this is needed so start_year is at any point an integer. (instead of being None)
             self.start_year = 0
-        else:
-            self.start_year = start_year
         self.last_parsed_seconds = 0
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
-        """
-        Get all possible child model elements of this element.
-        @return empty list as there are no children of this element.
-        """
-        return None
 
     def get_match_element(self, path: str, match_context):
         """
         Check if the data to match within the content is suitable to be parsed by any of the supplied date formats.
+        @param path to be printed in the MatchElement.
+        @param match_context the match_context to be analyzed.
         @return On match return a match_object containing a tuple of the datetime object and the seconds since 1970. When not matching,
-        None is returned. When the timestamp data parsed would be far off from the last ones parsed, so that correction may
-        not be applied correctly, then the method will also return None.
+                None is returned. When the timestamp data parsed would be far off from the last ones parsed, so that correction may
+                not be applied correctly, then the method will also return None.
         """
         for i, date_time_model_element in enumerate(self.date_time_model_elements):
             locale.setlocale(locale.LC_ALL, date_time_model_element.text_locale)
