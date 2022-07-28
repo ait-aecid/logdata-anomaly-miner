@@ -38,12 +38,12 @@ class EventCorrelationDetectorTest(TestBase):
         """In this test case perfect examples are used to learn and evaluate rules. The default parameters are used."""
         description = 'test1eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, learn_mode=True)
         self.analysis_context.register_component(ecd, description)
         self.run_ecd_test(ecd, self.perfect_data_diff5[:12000])
 
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '2')
         self.run_ecd_test(ecd, self.perfect_data_diff1[:12000])
 
@@ -55,22 +55,22 @@ class EventCorrelationDetectorTest(TestBase):
         """
         description = 'test2eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
-                                       generation_probability=0.5, generation_factor=0.5, auto_include_flag=True)
+                                       generation_probability=0.5, generation_factor=0.5, learn_mode=True)
         self.analysis_context.register_component(ecd, description)
         self.run_ecd_test(ecd, self.perfect_data_diff5[:30000])
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
-                                       generation_probability=0.5, generation_factor=0.5, auto_include_flag=True)
+                                       generation_probability=0.5, generation_factor=0.5, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '2')
         self.run_ecd_test(ecd, self.perfect_data_diff1[:30000])
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
-                                       generation_probability=0.3, generation_factor=0.3, auto_include_flag=True)
+                                       generation_probability=0.3, generation_factor=0.3, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '3')
         self.run_ecd_test(ecd, self.perfect_data_diff5[:100000])
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
-                                       generation_probability=0.3, generation_factor=0.3, auto_include_flag=True)
+                                       generation_probability=0.3, generation_factor=0.3, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '4')
         self.run_ecd_test(ecd, self.perfect_data_diff1[:100000])
 
@@ -78,12 +78,12 @@ class EventCorrelationDetectorTest(TestBase):
         """In this test case examples with errors are used, but still should be learned. The same parameters like in test1 are used."""
         description = 'test3eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, learn_mode=True)
         self.analysis_context.register_component(ecd, description)
         self.run_ecd_test(ecd, self.errored_data_diff5[:12000])
 
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '2')
         self.run_ecd_test(ecd, self.errored_data_diff1[:12000])
 
@@ -94,22 +94,22 @@ class EventCorrelationDetectorTest(TestBase):
         """
         description = 'test4eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
-                                       generation_probability=0.7, generation_factor=0.99, auto_include_flag=True)
+                                       generation_probability=0.7, generation_factor=0.99, learn_mode=True)
         self.analysis_context.register_component(ecd, description)
         self.run_ecd_test(ecd, self.errored_data_diff5_low_error_rate[:25000])
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
-                                       generation_probability=0.7, generation_factor=0.99, auto_include_flag=True)
+                                       generation_probability=0.7, generation_factor=0.99, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '2')
         self.run_ecd_test(ecd, self.errored_data_diff1_low_error_rate[:25000])
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
-                                       generation_probability=0.5, generation_factor=0.95, auto_include_flag=True)
+                                       generation_probability=0.5, generation_factor=0.95, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '3')
         self.run_ecd_test(ecd, self.errored_data_diff5_low_error_rate[:40000])
 
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True,
-                                       generation_probability=0.5, generation_factor=0.95, auto_include_flag=True)
+                                       generation_probability=0.5, generation_factor=0.95, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '4')
         self.run_ecd_test(ecd, self.errored_data_diff1_low_error_rate[:40000])
 
@@ -120,22 +120,22 @@ class EventCorrelationDetectorTest(TestBase):
         """
         description = 'test5eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01, learn_mode=True)
         self.analysis_context.register_component(ecd, description)
         self.run_ecd_test(ecd, self.perfect_data_diff5[:20000])
 
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '2')
         self.run_ecd_test(ecd, self.errored_data_diff5_low_error_rate[:40000])
 
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '3')
         self.run_ecd_test(ecd, self.perfect_data_diff1[:20000])
 
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=1.0, alpha=0.01, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '4')
         self.run_ecd_test(ecd, self.errored_data_diff1_low_error_rate[:40000])
 
@@ -146,22 +146,22 @@ class EventCorrelationDetectorTest(TestBase):
         """
         description = 'test6eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, learn_mode=True)
         self.analysis_context.register_component(ecd, description)
         self.run_ecd_test(ecd, self.perfect_data_diff5[:10000])
 
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '2')
         self.run_ecd_test(ecd, self.errored_data_diff5[:10000])
 
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '3')
         self.run_ecd_test(ecd, self.perfect_data_diff1[:10000])
 
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, learn_mode=True)
         self.analysis_context.register_component(ecd, description + '4')
         self.run_ecd_test(ecd, self.errored_data_diff1[:10000])
 
@@ -169,7 +169,7 @@ class EventCorrelationDetectorTest(TestBase):
         """Test the allowlisting of paths."""
         description = 'test7eventCorrelationDetectorTest'
         ecd = EventCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, auto_include_flag=True)
+            self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, p0=0.7, alpha=0.1, learn_mode=True)
         self.analysis_context.register_component(ecd, description)
         self.assertEqual([], ecd.constraint_list)
 

@@ -226,7 +226,7 @@ class NewMatchPathDetectorTest(TestBase):
     # '''
     # An attempt is made to use a non-Boolean expression for the autoIncludeFlag. Requires type check (not yet implemented).
     # '''
-    # def test12_fuzzing_auto_include_flag(self):
+    # def test12_fuzzing_learn_mode(self):
     #   self.assertRaises(ArgumentTypeError, NewMatchPathDetector, self.aminer_config,
     #     [self.stream_printer_event_handler], 'Default', None)
     #   self.assertRaises(ArgumentTypeError, NewMatchPathDetector, self.aminer_config,

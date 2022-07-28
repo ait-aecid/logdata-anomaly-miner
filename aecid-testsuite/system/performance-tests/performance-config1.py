@@ -198,7 +198,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(allowlist_violation_detector)
 
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filter.add_handler(new_match_path_detector)
 
@@ -215,7 +215,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
     enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        '/model/DailyCron/UName', '/model/DailyCron/Job Number'], anomaly_event_handlers, auto_include_flag=True,
+        '/model/DailyCron/UName', '/model/DailyCron/Job Number'], anomaly_event_handlers, learn_mode=True,
         tuple_transformation_function=tuple_transformation_function)
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
     atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
@@ -250,19 +250,19 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        '/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers, auto_include_flag=True)
+        '/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, [
-        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, auto_include_flag=True)
+        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
     atom_filter.add_handler(new_match_path_value_detector)
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=True, default_interval=2,
+        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, learn_mode=True, default_interval=2,
         realert_interval=5)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)

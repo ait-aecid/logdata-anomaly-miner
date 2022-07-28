@@ -4,7 +4,7 @@ logdata-anomaly-miner (2.5.1) unstable; urgency=low
   * Fixed index out of range if matches are empty in JsonModelElement array.
   * EFD: Fixed problem that appears with empty windows
   * EFD: Enabled immediate detection without training, if both limits are set
-  * EFD: Fixed bug related to auto_include_flag
+  * EFD: Fixed bug related to learn_mode
   * Remove spaces in aminer logo
   * ParserCounter: Fixed do_timer
   * Fixed code to allow the usage of AtomFilterMatchAction in yaml configs
@@ -227,7 +227,7 @@ logdata-anomaly-miner (2.1.0) unstable; urgency=low
   * Extended demo-config
   * Renamed whitelist to allowlist
   * Added warnings for non-existent resources
-  * Changed default of auto_include_flag to false
+  * Changed default of learn_mode to false
   Bugfixes:
   * Fixed some exit() in forks
   * Fixed debian files

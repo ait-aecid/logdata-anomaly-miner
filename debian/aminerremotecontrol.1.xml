@@ -274,7 +274,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             old value of the <replaceable>component_name.attribute</replaceable></para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec 
             &quot;change_attribute_of_registered_analysis_component(analysis_context,
-            &apos;NewMatchPath&apos;,&apos;auto_include_flag&apos;, False)&quot;</para>
+            &apos;NewMatchPath&apos;,&apos;learn_mode&apos;, False)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -303,7 +303,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             it with the <replaceable>component_name</replaceable>.</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec 
            &quot;add_handler_to_atom_filter_and_register_analysis_component(analysis_context,&apos;AtomFilter&apos;,
-           NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, auto_include_flag=True),&apos;NewMatchPathDet&apos;)&quot;</para>
+           NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True),&apos;NewMatchPathDet&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -329,7 +329,7 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
             <para>Prints the <replaceable>attribute</replaceable> of the component 
             with the <replaceable>component_name</replaceable>.</para>
             <para><replaceable>example</replaceable>: aminerremotecontrol --exec 
-            &quot;print_attribute_of_registered_analysis_component(analysis_context,&apos;NewMatchPath&apos;,&apos;auto_include_flag&apos;)&quot;</para>
+            &quot;print_attribute_of_registered_analysis_component(analysis_context,&apos;NewMatchPath&apos;,&apos;learn_mode&apos;)&quot;</para>
           </listitem>
         </varlistentry>
         <varlistentry>

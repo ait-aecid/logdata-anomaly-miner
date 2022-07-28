@@ -62,43 +62,6 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for receiving log atoms."""
 
-    # def __init__(
-    #         self, mutable_default_args=None, aminer_config=None, anomaly_event_handlers=None, learn_mode=None, persistence_id=None,
-    #         id_path_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, output_logline=None, target_path_list=None,
-    #         constraint_list=None, ignore_list=None, allowlist_rules=None, subhandler_list=None, stop_when_handled_flag=None,
-    #         parsed_atom_handler_lookup_list=None, default_parsed_atom_handler=None, target_path=None, parsed_atom_handler_dict=None,
-    #         allow_missing_values_flag=None, tuple_transformation_function=None, prob_thresh=None, skip_repetitions=None,
-    #         max_hypotheses=None, hypothesis_max_delta_time=None, generation_probability=None, generation_factor=None, max_observations=None,
-    #         p0=None, alpha=None, candidates_size=None, hypotheses_eval_delta_time=None, delta_time_to_discard_hypothesis=None,
-    #         check_rules_flag=None, window_size=None, num_windows=None, confidence_factor=None, empty_window_warnings=None,
-    #         early_exceeding_anomaly_output=None, set_lower_limit=None, set_upper_limit=None, seq_len=None, allow_missing_id=None,
-    #         timeout=None, allowed_id_tuples=None, min_num_vals=None, max_num_vals=None, save_values=None, track_time_for_tsa=None,
-    #         waiting_time_for_tsa=None, num_sections_waiting_time_for_tsa=None, histogram_definitions=None, report_interval=None,
-    #         reset_after_report_flag=None, bin_definition=None, target_value_list=None, timestamp_path=None, min_bin_elements=None,
-    #         min_bin_time=None, debug_mode=None, stream=None, separator=None, missing_value_string=None, num_log_lines_solidify_matrix=None,
-    #         time_output_threshold=None, anomaly_threshold=None, default_interval=None, realert_interval=None, combine_values=None,
-    #         min_allowed_time_diff=None, target_label_list=None, split_reports_flag=None, event_type_detector=None, num_init=None,
-    #         force_period_length=None, set_period_length=None, alpha_bt=None, num_results_bt=None, num_min_time_history=None,
-    #         num_max_time_history=None, num_periods_tsa_ini=None, time_period_length=None, max_time_diff=None, num_reduce_time_list=None,
-    #         min_anomaly_score=None, min_variance=None, parallel_check_count=None, record_count_before_event=None, use_path_match=None,
-    #         use_value_match=None, min_rule_attributes=None, max_rule_attributes=None, ruleset=None, exit_on_error_flag=None,
-    #         acf_pause_interval_percentage=None, acf_auto_pause_interval=None, acf_auto_pause_interval_num_min=None,
-    #         build_sum_over_values=None, num_division_time_step=None, acf_threshold=None, round_time_interval_threshold=None,
-    #         min_log_lines_per_time_step=None, num_update=None, disc_div_thres=None, num_steps_create_new_rules=None,
-    #         num_upd_until_validation=None, num_end_learning_phase=None, check_cor_thres=None, check_cor_prob_thres=None,
-    #         check_cor_num_thres=None, min_values_cors_thres=None, new_vals_alarm_thres=None, num_bt=None, used_homogeneity_test=None,
-    #         alpha_chisquare_test=None, max_dist_rule_distr=None, used_presel_meth=None, intersect_presel_meth=None,
-    #         percentage_random_cors=None, match_disc_vals_sim_tresh=None, exclude_due_distr_lower_limit=None,
-    #         match_disc_distr_threshold=None, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=None,
-    #         validate_cor_distinct_thres=None, used_gof_test=None, gof_alpha=None, s_gof_alpha=None, s_gof_bt_alpha=None, d_alpha=None,
-    #         d_bt_alpha=None, div_thres=None, sim_thres=None, indicator_thres=None, num_update_unq=None, num_s_gof_values=None,
-    #         num_s_gof_bt=None, num_d_bt=None, num_pause_discrete=None, num_pause_others=None, test_gof_int=None,
-    #         silence_output_without_confidence=None, silence_output_except_indicator=None, num_var_type_hist_ref=None,
-    #         num_update_var_type_hist_ref=None, num_var_type_considered_ind=None, num_stat_stop_update=None,
-    #         num_updates_until_var_reduction=None, var_reduction_thres=None, num_skipped_ind_for_weights=None, num_ind_for_weights=None,
-    #         used_multinomial_test=None, use_empiric_distr=None, used_range_test=None, range_alpha=None, range_threshold=None,
-    #         num_reinit_range=None, range_limits_factor=None, dw_alpha=None, save_statistics=None
-    # ):
     def __init__(self, mutable_default_args=None, learn_mode=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
                  stop_when_handled_flag=None, **kwargs):
         """
@@ -319,6 +282,38 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                assigned to the variable instead of continuous.
         @param save_statistics used to track the indicators and changed variable types.
         """
+        allowed_kwargs = [
+            "mutable_default_args", "aminer_config", "anomaly_event_handlers", "learn_mode", "persistence_id", "id_path_list",
+            "stop_learning_time", "stop_learning_no_anomaly_time", "output_logline", "target_path_list", "constraint_list", "ignore_list",
+            "allowlist_rules", "subhandler_list", "stop_when_handled_flag", "parsed_atom_handler_lookup_list",
+            "default_parsed_atom_handler", "target_path", "parsed_atom_handler_dict", "allow_missing_values_flag",
+            "tuple_transformation_function", "prob_thresh", "skip_repetitions", "max_hypotheses", "hypothesis_max_delta_time",
+            "generation_probability", "generation_factor", "max_observations", "p0", "alpha", "candidates_size",
+            "hypotheses_eval_delta_time", "delta_time_to_discard_hypothesis", "check_rules_flag", "window_size", "num_windows",
+            "confidence_factor", "empty_window_warnings", "early_exceeding_anomaly_output", "set_lower_limit", "set_upper_limit", "seq_len",
+            "allow_missing_id", "timeout", "allowed_id_tuples", "min_num_vals", "max_num_vals", "save_values", "track_time_for_tsa",
+            "waiting_time_for_tsa", "num_sections_waiting_time_for_tsa", "histogram_definitions", "report_interval",
+            "reset_after_report_flag", "bin_definition", "target_value_list", "timestamp_path", "min_bin_elements", "min_bin_time",
+            "debug_mode", "stream", "separator", "missing_value_string", "num_log_lines_solidify_matrix", "time_output_threshold",
+            "anomaly_threshold", "default_interval", "realert_interval", "combine_values", "min_allowed_time_diff", "target_label_list",
+            "split_reports_flag", "event_type_detector", "num_init", "force_period_length", "set_period_length", "alpha_bt",
+            "num_results_bt", "num_min_time_history", "num_max_time_history", "num_periods_tsa_ini", "time_period_length", "max_time_diff",
+            "num_reduce_time_list", "min_anomaly_score", "min_variance", "parallel_check_count", "record_count_before_event",
+            "use_path_match", "use_value_match", "min_rule_attributes", "max_rule_attributes", "ruleset", "exit_on_error_flag",
+            "acf_pause_interval_percentage", "acf_auto_pause_interval", "acf_auto_pause_interval_num_min", "build_sum_over_values",
+            "num_division_time_step", "acf_threshold", "round_time_interval_threshold", "min_log_lines_per_time_step", "num_update",
+            "disc_div_thres", "num_steps_create_new_rules", "num_upd_until_validation", "num_end_learning_phase", "check_cor_thres",
+            "check_cor_prob_thres", "check_cor_num_thres", "min_values_cors_thres", "new_vals_alarm_thres", "num_bt",
+            "used_homogeneity_test", "alpha_chisquare_test", "max_dist_rule_distr", "used_presel_meth", "intersect_presel_meth",
+            "percentage_random_cors", "match_disc_vals_sim_tresh", "exclude_due_distr_lower_limit", "match_disc_distr_threshold",
+            "used_cor_meth", "used_validate_cor_meth", "validate_cor_cover_vals_thres", "validate_cor_distinct_thres", "used_gof_test",
+            "gof_alpha", "s_gof_alpha", "s_gof_bt_alpha", "d_alpha", "d_bt_alpha", "div_thres", "sim_thres", "indicator_thres",
+            "num_update_unq", "num_s_gof_values", "num_s_gof_bt", "num_d_bt", "num_pause_discrete", "num_pause_others", "test_gof_int",
+            "silence_output_without_confidence", "silence_output_except_indicator", "num_var_type_hist_ref", "num_update_var_type_hist_ref",
+            "num_var_type_considered_ind", "num_stat_stop_update", "num_updates_until_var_reduction", "var_reduction_thres",
+            "num_skipped_ind_for_weights", "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr", "used_range_test",
+            "range_alpha", "range_threshold", "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics"
+        ]
         self.log_success = 0
         self.log_total = 0
         self.persistence_id = None  # persistence_id is always needed.
@@ -326,6 +321,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             if value is not None:
                 setattr(self, argument, value)
         for argument, value in kwargs.items():  # skip self parameter and kwargs
+            if argument not in allowed_kwargs:
+                msg = f"Argument {argument} is unknown. Consider changing it or adding it to the allowed_kwargs list."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
             setattr(self, argument, value)
 
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
