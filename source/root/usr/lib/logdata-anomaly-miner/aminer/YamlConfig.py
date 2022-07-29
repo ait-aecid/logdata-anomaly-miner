@@ -151,7 +151,7 @@ def build_parsing_model(data=None):
     for item in data['Parser']:
         if item['id'] in parser_model_dict:
             raise ValueError(f'Config-Error: The id "{item["id"]}" occurred multiple times in Parser!')
-        if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
+        if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement' and item['type'].name != 'JsonStringModelElement':
             start = item
         if item['type'].is_model:
             if 'args' in item:
@@ -264,6 +264,13 @@ def build_parsing_model(data=None):
                 else:
                     parser_model_dict[item['id']] = item['type'].func(
                         item['name'], key_parser_dict, item['optional_key_prefix'], item['nullable_key_prefix'], item['allow_all_fields'])
+            elif item['type'].name == 'JsonStringModelElement':
+                key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
+                
+                if 'start' in item and item['start'] is True:
+                    start = item['type'].func(item['name'], key_parser_dict, item['strict'])
+                else:
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict)
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
@@ -277,7 +284,7 @@ def build_parsing_model(data=None):
                 while callable(parser_model_dict[item['id']]):
                     parser_model_dict[item['id']] = parser_model_dict[item['id']]()
 
-    if start.__class__.__name__ == 'JsonModelElement':
+    if start.__class__.__name__ == 'JsonModelElement' or start.__class__.__name__ == 'JsonStringModelElement':
         parsing_model = start
     else:
         parsing_model = parser_model_dict[start['id']]
