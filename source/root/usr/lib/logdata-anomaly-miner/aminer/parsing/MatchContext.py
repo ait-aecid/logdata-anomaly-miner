@@ -98,7 +98,7 @@ class DebugMatchContext(MatchContext):
 
     def get_shortest_unmatched_data(self):
         """
-        Get shortest match_data found while updating the internal state.
+        Get the shortest match_data found while updating the internal state.
         This is useful to find out where the parsing process has terminated.
         """
         return self.shortest_unmatched_data

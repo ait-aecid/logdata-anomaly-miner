@@ -11,9 +11,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
-import re
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer import AminerConfig
@@ -23,35 +20,12 @@ class HexStringModelElement(ModelElementInterface):
     """This class just tries to strip off as many hex bytes as possible from a given data string."""
 
     def __init__(self, element_id: str, upper_case: bool = False):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-        if not isinstance(upper_case, bool):
-            msg = "upper_case has to be of the type bool."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if upper_case:
-            self.hex_regex = re.compile(rb"[0-9A-F]+")
-        else:
-            self.hex_regex = re.compile(rb"[0-9a-f]+")
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
         """
-        Get all possible child model elements of this element.
-        @return None as there are no children of this element.
+        Initialize the ModelElement.
+        @param element_id an identifier for the ModelElement which is shown in the path.
+        @param upper_case if True, the letters of the hex alphabet are uppercase, otherwise they are lowercase.
         """
-        return None
+        super().__init__(element_id, upper_case=upper_case)
 
     def get_match_element(self, path: str, match_context):
         """

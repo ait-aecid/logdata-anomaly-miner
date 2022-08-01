@@ -24,21 +24,12 @@ class OptionalMatchModelElement(ModelElementInterface):
     """
 
     def __init__(self, element_id: str, optional_element: ModelElementInterface):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-        if not isinstance(optional_element, ModelElementInterface):
-            msg = "optional_element has to be of the type ModelElementInterface."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        self.optional_element = optional_element
+        """
+        Initialize the ModelElement.
+        @param element_id an identifier for the ModelElement which is shown in the path.
+        @param optional_element the element to be optionally matched.
+        """
+        super().__init__(element_id, optional_element=optional_element)
         self.empty_match_element = MatchElement("%s/%s" % ("None", self.element_id), b"", None, None)
 
     def get_id(self):

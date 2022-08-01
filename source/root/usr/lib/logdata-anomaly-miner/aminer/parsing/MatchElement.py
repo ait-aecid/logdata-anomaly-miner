@@ -82,8 +82,8 @@ class MatchElement:
         """
         Annotate a given match element showing the match path elements and the parsed values.
         @param indent_str if None, all elements are separated just with a single space, no matter how deep the nesting level
-        of those elements is. If not None, all elements are put into an own line, that is prefixed by the given indent_str and
-        indenting is increased by two spaces for each level.
+               of those elements is. If not None, all elements are put into an own line, that is prefixed by the given indent_str and
+               indenting is increased by two spaces for each level.
         """
         next_indent = None
         if not isinstance(indent_str, str) and indent_str is not None:

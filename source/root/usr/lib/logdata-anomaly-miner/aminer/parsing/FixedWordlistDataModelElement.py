@@ -12,8 +12,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import logging
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -30,50 +28,9 @@ class FixedWordlistDataModelElement(ModelElementInterface):
         """
         Create the model element.
         @param wordlist the list of words to search for. If it does not fulfill the sorting criteria mentioned in the class documentation,
-        an Exception will be raised.
+               an Exception will be raised.
         """
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-        if not isinstance(wordlist, list):
-            msg = "wordlist has to be of the type list."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(wordlist) < 1:
-            msg = "wordlist must have at least one element."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        for word in wordlist:
-            if not isinstance(word, bytes):
-                msg = "words from the wordlist must be of the type bytes."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-
-        for test_pos, ref_word in enumerate(wordlist):
-            for test_word in wordlist[test_pos + 1:]:
-                if test_word.startswith(ref_word):
-                    msg = "Word %s would be shadowed by word %s at lower position" % (repr(test_word), repr(ref_word))
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise ValueError(msg)
-        self.wordlist = wordlist
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
-        """
-        Get all possible child model elements of this element.
-        @return None as there are no children of this element.
-        """
-        return None
+        super().__init__(element_id, wordlist=wordlist)
 
     def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""

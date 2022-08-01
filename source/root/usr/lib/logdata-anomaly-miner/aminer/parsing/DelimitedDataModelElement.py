@@ -14,62 +14,21 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
-from aminer.AminerConfig import DEBUG_LOG_NAME
 import re
-import logging
 
 
 class DelimitedDataModelElement(ModelElementInterface):
     """Find a string delimited by given non-escaped delimiter string, possibly a match of zero byte length."""
 
     def __init__(self, element_id: str, delimiter: bytes, escape: bytes = None, consume_delimiter: bool = False):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-        if not isinstance(delimiter, bytes):
-            msg = "delimiter has to be of the type bytes."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(delimiter) < 1:
-            msg = "delimiter must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.delimiter = delimiter
-
-        if escape is not None:
-            if not isinstance(escape, bytes):
-                msg = "escape has to be of the type bytes."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if len(escape) < 1:
-                msg = "escape must not be empty."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
-        self.escape = escape
-        if not isinstance(consume_delimiter, bool):
-            msg = "consume_delimiter has to be of the type bool."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        self.consume_delimiter = consume_delimiter
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    # skipcq: PYL-R0201
-    def get_child_elements(self):
         """
-        Get all possible child model elements of this element.
-        @return None as there are no children of this element.
+        Initialize the ModelElement.
+        @param element_id an identifier for the ModelElement which is shown in the path.
+        @param delimiter a non-escaped delimiter string to search for.
+        @param escape a character to escape in the string.
+        @param consume_delimiter True if the delimiter character should also be consumed.
         """
-        return None
+        super().__init__(element_id, delimiter=delimiter, escape=escape, consume_delimiter=consume_delimiter)
 
     def get_match_element(self, path: str, match_context):
         """

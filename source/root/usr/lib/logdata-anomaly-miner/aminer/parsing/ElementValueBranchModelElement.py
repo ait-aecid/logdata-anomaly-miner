@@ -15,10 +15,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from typing import Union
-import logging
 
 
 class ElementValueBranchModelElement(ModelElementInterface):
@@ -28,71 +26,17 @@ class ElementValueBranchModelElement(ModelElementInterface):
                  default_branch: Union[str, int] = None):
         """
         Create the branch model element.
+        @param element_id an identifier for the ModelElement which is shown in the path.
+        @param value_model the ModelElement which has to match the data.
         @param value_path the relative path to the target value from the value_model element on. When the path does not resolve
-        to a value, this model element will not match. A path value of None indicates, that the match element of the value_model
-        should be used directly.
+               to a value, this model element will not match. A path value of None indicates, that the match element of the value_model
+               should be used directly.
         @param branch_model_dict a dictionary to select a branch for the value identified by valuePath.
         @param default_branch when lookup in branch_model_dict fails, use this as default branch or fail when None.
         """
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-        if not isinstance(value_model, ModelElementInterface):
-            msg = "value_model has to be of the type ModelElementInterface."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        self.value_model = value_model
-
-        if value_path is not None:
-            if not isinstance(value_path, str):
-                msg = "value_path has to be of the type string or None."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if len(value_path) < 1:
-                msg = "value_path must not be empty."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
         self.value_path = value_path
-
-        if not isinstance(branch_model_dict, dict):
-            msg = "branch_model_dict has to be of the type dict."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        for val in branch_model_dict.values():
-            if not isinstance(val, ModelElementInterface):
-                msg = "all branch_model_dict values have to be of the type ModelElementInterface."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-        self.branch_model_dict = branch_model_dict
-
-        if default_branch is not None and not isinstance(default_branch, ModelElementInterface):
-            msg = "default_branch has to be of the type string or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        self.default_branch = default_branch
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):
-        """
-        Get all possible child model elements of this element.
-        If this element implements a branching model element, then not all child element IDs will be found in matches produced by
-        get_match_element.
-        @return a list with all children
-        """
-        all_children = [self.value_model] + list(self.branch_model_dict.values())
-        if self.default_branch is not None:
-            all_children.append(self.default_branch)
-        return all_children
+        super().__init__(
+            element_id, value_model=value_model, value_path=value_path, branch_model_dict=branch_model_dict, default_branch=default_branch)
 
     def get_match_element(self, path: str, match_context):
         """

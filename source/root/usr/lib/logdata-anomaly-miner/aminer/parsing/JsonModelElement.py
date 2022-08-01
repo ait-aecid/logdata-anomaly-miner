@@ -59,96 +59,17 @@ class JsonModelElement(ModelElementInterface):
         Initialize the JsonModelElement.
         @param element_id: The ID of the element.
         @param key_parser_dict: A dictionary of all keys with the according parsers. If a key should be optional, the associated parser must
-            start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL". To allow only empty arrays
-            - [] - use "key": "EMPTY_ARRAY". To allow only empty objects - {} - use "key": "EMPTY_OBJECT".
-            To allow only empty strings - "" - use "key": "EMPTY_STRING". To allow all keys in an object for a parser use "ALLOW_ALL_KEYS":
-            parser. To allow only null values use "key": "NULL_OBJECT".
+               start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL". To allow only empty
+               arrays - [] - use "key": "EMPTY_ARRAY". To allow only empty objects - {} - use "key": "EMPTY_OBJECT".
+               To allow only empty strings - "" - use "key": "EMPTY_STRING". To allow all keys in an object for a parser use
+               "ALLOW_ALL_KEYS": parser. To allow only null values use "key": "NULL_OBJECT".
         @param optional_key_prefix: If some key starts with the optional_key_prefix it will be considered optional.
         @param nullable_key_prefix: The value of this key may be null instead of any expected value.
         @param allow_all_fields: Unknown fields are skipped without parsing with any parsing model.
         """
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-        if not isinstance(key_parser_dict, dict):
-            msg = "key_parser_dict has to be of the type dict."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        self.children: List[dict] = []
-        self.find_children_in_dict(key_parser_dict, self.children)
-        self.key_parser_dict = key_parser_dict
-
-        if not isinstance(optional_key_prefix, str):
-            msg = "optional_key_prefix has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(optional_key_prefix) < 1:
-            msg = "optional_key_prefix must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.optional_key_prefix = optional_key_prefix
-
-        if not isinstance(nullable_key_prefix, str):
-            msg = "nullable_key_prefix has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(nullable_key_prefix) < 1:
-            msg = "nullable_key_prefix must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.nullable_key_prefix = nullable_key_prefix
-
-        if self.optional_key_prefix == self.nullable_key_prefix:
-            msg = "optional_key_prefix must not be the same as nullable_key_prefix!"
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-
-        if not isinstance(allow_all_fields, bool):
-            msg = "allow_all_fields has to be of the type bool."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        self.allow_all_fields = allow_all_fields
+        super().__init__(element_id, key_parser_dict=key_parser_dict, optional_key_prefix=optional_key_prefix,
+                         nullable_key_prefix=nullable_key_prefix, allow_all_fields=allow_all_fields)
         self.dec_escapes = False
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):
-        """Return all model elements of the sequence."""
-        return self.children
-
-    def find_children_in_dict(self, dictionary: dict, children: list):
-        """Find all children and append them to the children list."""
-        for value in dictionary.values():
-            if isinstance(value, ModelElementInterface):
-                children.append(value)
-            elif isinstance(value, list):
-                if len(value) == 0:
-                    msg = "lists in key_parser_dict must have at least one entry."
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise ValueError(msg)
-
-                value_list: List[dict] = []
-                for v in value:
-                    if isinstance(v, dict):
-                        self.find_children_in_dict(v, value_list)
-                    else:
-                        value_list.append(v)
-                children.append(value_list)
-            elif isinstance(value, dict):
-                self.find_children_in_dict(value, children)
-            elif value not in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "EMPTY_STRING", "ALLOW_ALL_KEYS", "NULL_OBJECT"):
-                msg = "wrong type found in key_parser_dict."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
 
     def is_escaped_unicode(self, text: str):  # skipcq: PYL-R0201
         """Check if the text contains only ascii characters."""
