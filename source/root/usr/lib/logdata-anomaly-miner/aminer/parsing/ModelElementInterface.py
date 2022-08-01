@@ -93,13 +93,16 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
         @param nullable_key_prefix: The value of this key may be null instead of any expected value.
         @param allow_all_fields: Unknown fields are skipped without parsing with any parsing model.
         @param optional_element the element to be optionally matched.
+        @param repeated_element the MatchElement to be repeated in the data.
+        @param min_repeat the minimum number of repeated matches of the repeated_element.
+        @param max_repeat the maximum number of repeated matches of the repeated_element.
         """
 
         allowed_kwargs = [
             "date_format", "time_zone", "text_locale", "start_year", "max_time_jump_seconds", "value_sign_type", "value_pad_type",
             "exponent_type", "delimiter", "escape", "consume_delimiter", "value_model", "value_path", "branch_model_dict", "default_branch",
             "children", "fixed_data", "wordlist", "ipv6", "key_parser_dict", "optional_key_prefix", "nullable_key_prefix",
-            "allow_all_fields", "optional_element"
+            "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat"
         ]
         for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:
@@ -362,6 +365,42 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 msg = "optional_element has to be of the type ModelElementInterface."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
+
+        if hasattr(self, "repeated_element"):
+            if not isinstance(self.repeated_element, ModelElementInterface):
+                msg = "repeated_element has to be of the type ModelElementInterface."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+
+        if hasattr(self, "min_repeat"):
+            if not isinstance(self.min_repeat, int) or isinstance(self.min_repeat, bool):
+                msg = "min_repeat has to be of the type integer."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if self.min_repeat < 0:
+                msg = "min_repeat has to be >= 0."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+
+        if hasattr(self, "max_repeat"):
+            if not isinstance(self.max_repeat, int) or isinstance(self.max_repeat, bool):
+                msg = "max_repeat has to be of the type integer."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if self.max_repeat < 1 or self.min_repeat > self.max_repeat:
+                msg = "max_repeat has to be >= 1 and max_repeat has to be bigger than min_repeat."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+
+        if hasattr(self, "alphabet"):
+            if not isinstance(self.alphabet, bytes):
+                msg = "alphabet has to be of the type bytes."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(self.alphabet) < 1:
+                msg = "alphabet must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
 
     @abc.abstractmethod
     def get_match_element(self, path, match_context):

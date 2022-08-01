@@ -10,8 +10,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -20,49 +18,14 @@ class RepeatedElementDataModelElement(ModelElementInterface):
     """Objects of this class match on repeats of a given element."""
 
     def __init__(self, element_id: str, repeated_element: ModelElementInterface, min_repeat: int = 1, max_repeat: int = 0x100000):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-        if not isinstance(repeated_element, ModelElementInterface):
-            msg = "repeated_element has to be of the type ModelElementInterface."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        self.repeated_element = repeated_element
-
-        if not isinstance(min_repeat, int) or isinstance(min_repeat, bool):
-            msg = "min_repeat has to be of the type integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if min_repeat < 0:
-            msg = "min_repeat has to be >= 0."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.min_repeat = min_repeat
-
-        if not isinstance(max_repeat, int) or isinstance(max_repeat, bool):
-            msg = "max_repeat has to be of the type integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if max_repeat < 1 or min_repeat > max_repeat:
-            msg = "max_repeat has to be >= 1 and max_repeat has to be bigger than min_repeat."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.max_repeat = max_repeat
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):
-        """Return a list of all children model elements."""
-        return [self.repeated_element]
+        """
+        Initialize the ModelElement.
+        @param element_id an identifier for the ModelElement which is shown in the path.
+        @param repeated_element the MatchElement to be repeated in the data.
+        @param min_repeat the minimum number of repeated matches of the repeated_element.
+        @param max_repeat the maximum number of repeated matches of the repeated_element.
+        """
+        super().__init__(element_id, repeated_element=repeated_element, min_repeat=min_repeat, max_repeat=max_repeat)
 
     def get_match_element(self, path, match_context):
         """Find a suitable number of repeats."""

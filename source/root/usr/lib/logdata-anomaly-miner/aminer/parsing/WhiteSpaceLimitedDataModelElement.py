@@ -21,26 +21,11 @@ class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
     """This class defines a model element that represents a variable amount of characters delimited by a white space."""
 
     def __init__(self, element_id: str):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
         """
-        Get all possible child model elements of this element.
-        @return None as there are no children of this element.
+        Initialize the ModelElement.
+        @param element_id an identifier for the ModelElement which is shown in the path.
         """
-        return None
+        super().__init__(element_id)
 
     def get_match_element(self, path: str, match_context):
         """
