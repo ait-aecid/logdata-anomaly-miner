@@ -204,7 +204,7 @@ class DummyFixedDataModelElement(ModelElementInterface):
         """
         return None
 
-    def get_match_element(self, target_path: str, match_context):
+    def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         if not match_context.match_data.startswith(self.data):
             return None
