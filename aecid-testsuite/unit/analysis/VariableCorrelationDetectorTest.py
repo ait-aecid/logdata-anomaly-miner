@@ -338,6 +338,7 @@ class VariableCorrelationDetectorTest(TestBase):
         values_set = list(set(values1 + values2))
         pos_var_val = deepcopy(vcd.pos_var_val)
         # all child elements should contain data from values1 and values2.
+        print(pos_var_val)
         index = pos_var_val[0].index(values_set)
         del pos_var_val[0][index]
         # no other element should contain the united set of values1 and values2.

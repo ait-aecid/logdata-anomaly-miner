@@ -87,21 +87,21 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.values = persistence_data[2]
             self.longest_path = persistence_data[3]
             self.check_variables = persistence_data[4]
-            self.num_eventlines = persistence_data[5]
+            self.num_event_lines = persistence_data[5]
             self.id_path_list_tuples = [tuple(tuple_list) for tuple_list in persistence_data[6]]
 
             self.num_events = len(self.found_keys)
 
     def receive_atom(self, log_atom):
-        """Receives an parsed atom and keeps track of the event types and the values of the variables of them."""
+        """Receives a parsed atom and keeps track of the event types and the values of the variables of them."""
         self.log_total += 1
         valid_log_atom = False
-        if self.path_list:
-            for path in self.path_list:
+        if self.target_path_list:
+            for path in self.target_path_list:
                 if path in log_atom.parser_match.get_match_dictionary().keys():
                     valid_log_atom = True
                     break
-        if self.path_list and not valid_log_atom:
+        if self.target_path_list and not valid_log_atom:
             self.current_index = -1
             return False
         self.total_records += 1
@@ -158,7 +158,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         'MatchElement') or (log_atom.parser_match.get_match_dictionary()[self.variable_key_list[
                         current_index][var_index]].match_object is None):
                     del self.variable_key_list[current_index][var_index]
-                elif (self.path_list is not None) and self.variable_key_list[current_index][var_index] not in self.path_list:
+                elif (self.target_path_list is not None) and self.variable_key_list[current_index][var_index] not in self.target_path_list:
                     del self.variable_key_list[current_index][var_index]
 
             # Initialize the empty lists for the values and initialize the check_variables list for the variables
@@ -172,7 +172,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 self.longest_path.append('')
                 # Number of forward slashes in the longest path
                 tmp_int = 0
-                if self.path_list is None:
+                if self.target_path_list is None:
                     for var_key in self.variable_key_list[current_index]:
                         if var_key is not None:
                             count = var_key.count('/')
@@ -180,8 +180,9 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                 self.longest_path[current_index] = var_key
                                 tmp_int = count
                 else:
-                    found_keys_list = list(self.found_keys[current_index])
-                    for found_key in found_keys_list:
+                    for found_key in list(self.found_keys[current_index]):
+                        if found_key is None:
+                            found_key = ""
                         count = found_key.count('/')
                         if count > tmp_int or (count == tmp_int and len(self.longest_path[current_index]) < len(found_key)):
                             self.longest_path[current_index] = found_key
@@ -218,7 +219,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         tmp_list.append(self.values)
         tmp_list.append(self.longest_path)
         tmp_list.append(self.check_variables)
-        tmp_list.append(self.num_eventlines)
+        tmp_list.append(self.num_event_lines)
         tmp_list.append(self.id_path_list_tuples)
         PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
 
@@ -232,7 +233,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def init_values(self, current_index):
         """Initialize the variable_key_list and the list for the values."""
-        # Initializes the target_value_list
+        # Initializes the value list
         if not self.values:
             self.values = [[[] for _ in range(len(self.variable_key_list[current_index]))]]
         else:
@@ -271,7 +272,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     self.values[current_index][var_index].append(log_atom.parser_match.get_match_dictionary()[var_key].match_string)
 
-        # Reduce the numbers of entries in the target_value_list
+        # Reduce the numbers of entries in the value list
         if len(self.variable_key_list[current_index]) > 0 and len([i for i in self.check_variables[current_index] if i]) > 0 and \
                 len(self.values[current_index][self.check_variables[current_index].index(True)]) > self.max_num_vals:
             for var_index in range(len(self.variable_key_list[current_index])):  # skipcq: PTC-W0060

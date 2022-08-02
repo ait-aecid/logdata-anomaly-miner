@@ -137,8 +137,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if self.percentage_random_cors <= 0. or self.percentage_random_cors >= 1.:
             raise ValueError('The Random preselection method makes no sense if percentage_random_cors = %f. If the percentage_random_cors'
                              ' is >= 1.0 better use no preselection method for that case.')
-        self.used_cor_meth = used_cor_meth
-        if self.used_cor_meth is None or used_cor_meth == []:
+        if self.used_cor_meth is None or self.used_cor_meth == []:
             self.used_cor_meth = ['Rel', 'WRel']
         for cor_meth in self.used_cor_meth:
             if cor_meth not in ['Rel', 'WRel']:

@@ -116,7 +116,7 @@ class EventTypeDetectorTest(TestBase):
         target_path_list is set to a static list of paths and variable_key_list should not be used.
         """
         event_type_detector = EventTypeDetector(
-            self.aminer_config, [self.stream_printer_event_handler], path_list=['parser/type/path/nametype'])
+            self.aminer_config, [self.stream_printer_event_handler], target_path_list=['parser/type/path/nametype'])
         results = [True, False, True, False, True, False, True, True, False, False, True, True, False, True, False, True, False, True,
                    False, False, True]
         log_atoms = []

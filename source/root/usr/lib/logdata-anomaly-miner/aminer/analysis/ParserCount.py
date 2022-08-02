@@ -45,8 +45,9 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # avoid "defined outside init" issue
         self.log_success, self.log_total = [None]*2
         super().__init__(
-            aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
-            report_interval=report_interval, target_label_list=target_label_list, split_reports_flag=split_reports_flag
+            mutable_default_args=["target_path_list"], aminer_config=aminer_config, target_path_list=target_path_list,
+            anomaly_event_handlers=anomaly_event_handlers, report_interval=report_interval, target_label_list=target_label_list,
+            split_reports_flag=split_reports_flag
         )
         self.count_dict = {}
         self.next_report_time = None
@@ -55,13 +56,10 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             msg = 'Target labels cannot be used without specifying target paths.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if self.target_path_list is not None and len(self.target_path_list) != len(
-                self.target_label_list):
+        if self.target_label_list is not None and len(self.target_path_list) != len(self.target_label_list):
             msg = 'Every path must have a target label if target labels are used.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if self.target_path_list is None:
-            self.target_path_list = []
 
         for target_path in self.target_path_list:
             if self.target_label_list:

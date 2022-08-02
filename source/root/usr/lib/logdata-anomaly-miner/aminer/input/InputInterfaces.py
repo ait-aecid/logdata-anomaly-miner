@@ -254,6 +254,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param num_pause_discrete number of paused updates, before the discrete var type is adapted.
         @param num_pause_others number of paused update runs, before trying to find a new var_type.
         @param test_gof_int states if integer number should be tested for the continuous variable type.
+        @param num_stop_update stops updating the found variable types after num_stop_update processed lines. If False the updating of lines
+               will not be stopped.
         @param silence_output_without_confidence silences the all messages without a confidence-entry.
         @param silence_output_except_indicator silences the all messages which are not related with the calculated indicator.
         @param num_var_type_hist_ref states how long the reference for the var_type_hist_ref is. The reference is used in the evaluation.
@@ -309,10 +311,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "used_cor_meth", "used_validate_cor_meth", "validate_cor_cover_vals_thres", "validate_cor_distinct_thres", "used_gof_test",
             "gof_alpha", "s_gof_alpha", "s_gof_bt_alpha", "d_alpha", "d_bt_alpha", "div_thres", "sim_thres", "indicator_thres",
             "num_update_unq", "num_s_gof_values", "num_s_gof_bt", "num_d_bt", "num_pause_discrete", "num_pause_others", "test_gof_int",
-            "silence_output_without_confidence", "silence_output_except_indicator", "num_var_type_hist_ref", "num_update_var_type_hist_ref",
-            "num_var_type_considered_ind", "num_stat_stop_update", "num_updates_until_var_reduction", "var_reduction_thres",
-            "num_skipped_ind_for_weights", "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr", "used_range_test",
-            "range_alpha", "range_threshold", "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics"
+            "num_stop_update", "silence_output_without_confidence", "silence_output_except_indicator", "num_var_type_hist_ref",
+            "num_update_var_type_hist_ref", "num_var_type_considered_ind", "num_stat_stop_update", "num_updates_until_var_reduction",
+            "var_reduction_thres", "num_skipped_ind_for_weights", "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr",
+            "used_range_test", "range_alpha", "range_threshold", "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics"
         ]
         self.log_success = 0
         self.log_total = 0
@@ -377,10 +379,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             for handler_pos, handler_element in enumerate(self.subhandler_list):
                 self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
         if hasattr(self, "allowed_id_tuples"):
-            if kwargs["allowed_id_tuples"] is None:
+            if self.allowed_id_tuples is None:
                 self.allowed_id_tuples = []
             else:
-                self.allowed_id_tuples = [tuple(tuple_list) for tuple_list in kwargs["allowed_id_tuples"]]
+                self.allowed_id_tuples = [tuple(tuple_list) for tuple_list in self.allowed_id_tuples]
 
         if hasattr(self, "confidence_factor") and not 0 <= self.confidence_factor <= 1:
             logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
