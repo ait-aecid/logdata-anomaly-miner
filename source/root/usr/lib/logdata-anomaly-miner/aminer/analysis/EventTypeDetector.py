@@ -13,7 +13,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import time
-import copy
 import logging
 
 from aminer import AminerConfig
@@ -30,8 +29,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', target_path_list=None, id_path_list=None,
-                 allow_missing_id=False, allowed_id_tuples=None, min_num_vals=1000, max_num_vals=1500, save_values=True,
-                 track_time_for_tsa=False, waiting_time_for_tsa=1000, num_sections_waiting_time_for_tsa=100):
+                 allow_missing_id=False, allowed_id_tuples=None, min_num_vals=1000, max_num_vals=1500, save_values=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -46,9 +44,6 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param min_num_vals number of the values which the list of stored logline values is being reduced to.
         @param max_num_vals the maximum list size of the stored logline values before being reduced to the last min_num_values.
         @param save_values if false the values of the log atom are not saved for further analysis. This disables values and check_variables.
-        @param track_time_for_tsa if true time windows are tracked for time series analysis (necessary for the TSAArimaDetector).
-        @param waiting_time_for_tsa time in seconds before the time windows tracking is initialized.
-        @param num_sections_waiting_time_for_tsa the number used to initialize the TSAArimaDetector with calculate_time_steps.
         """
         # avoid "defined outside init" issue
         self.next_persist_time, self.log_success, self.log_total = [None]*3
@@ -56,8 +51,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             mutable_default_args=["id_path_list", "target_path_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id, target_path_list=target_path_list,
             id_path_list=id_path_list, allow_missing_id=allow_missing_id, allowed_id_tuples=allowed_id_tuples, min_num_vals=min_num_vals,
-            max_num_vals=max_num_vals, save_values=save_values, track_time_for_tsa=track_time_for_tsa,
-            waiting_time_for_tsa=waiting_time_for_tsa, num_sections_waiting_time_for_tsa=num_sections_waiting_time_for_tsa
+            max_num_vals=max_num_vals, save_values=save_values
         )
 
         self.num_events = 0
@@ -93,131 +87,14 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.values = persistence_data[2]
             self.longest_path = persistence_data[3]
             self.check_variables = persistence_data[4]
-            self.num_event_lines = persistence_data[5]
-            self.etd_time_trigger = persistence_data[6]
-            self.num_event_lines_tsa_ref = persistence_data[7]
-            self.id_path_list_tuples = [tuple(tuple_list) for tuple_list in persistence_data[8]]
+            self.num_eventlines = persistence_data[5]
+            self.id_path_list_tuples = [tuple(tuple_list) for tuple_list in persistence_data[6]]
 
             self.num_events = len(self.found_keys)
-        else:
-            if self.track_time_for_tsa:
-                self.etd_time_trigger[0].append(-1)
-                self.etd_time_trigger[1].append(-1)
-                self.etd_time_trigger[2].append(-1)
 
     def receive_atom(self, log_atom):
         """Receives an parsed atom and keeps track of the event types and the values of the variables of them."""
         self.log_total += 1
-        # Get the current time
-        if self.track_time_for_tsa:
-            if log_atom.atom_time is not None:
-                current_time = log_atom.atom_time
-            else:
-                current_time = time.time()
-
-        # Check if TSA should be initialized
-        if self.track_time_for_tsa and -1 in self.etd_time_trigger[0] and 'TSAArimaDetector' in [module.__class__.__name__ for module in
-                                                                                                 self.following_modules]:
-            for i, val in enumerate(self.etd_time_trigger[0]):
-                if val == -1:
-                    for j in range(self.num_sections_waiting_time_for_tsa-1):
-                        self.etd_time_trigger[0].append(current_time + self.waiting_time_for_tsa * (j + 1) / (
-                                self.num_sections_waiting_time_for_tsa))
-                        self.etd_time_trigger[1].append(-1)
-                        self.etd_time_trigger[2].append(-1)
-                    self.etd_time_trigger[0][i] = current_time + self.waiting_time_for_tsa
-                    break
-
-        # Check if a trigger has been triggered
-        if self.track_time_for_tsa and len(self.etd_time_trigger[0]) > 0 and any(current_time >= x for x in self.etd_time_trigger[0]):
-            # Get the indices of the triggered events
-            indices = [i for i, time_trigger in enumerate(self.etd_time_trigger[0]) if current_time >= time_trigger]
-
-            # Execute the triggered functions of the TSA
-            for i in range(len(indices)-1, -1, -1):
-                # Checks if trigger is part of the initialisation
-                if self.etd_time_trigger[1][indices[i]] == -1 and self.etd_time_trigger[2][indices[i]] == -1:
-
-                    # Save the number of occurred event types for the initialization of the TSA
-                    if self.num_event_lines_tsa_ref == [] or len(
-                            self.num_event_lines_tsa_ref[0]) < self.num_sections_waiting_time_for_tsa-1:
-
-                        # Initialize the lists of self.num_event_lines_tsa_ref if not already initialized
-                        if not self.num_event_lines_tsa_ref:
-                            self.num_event_lines_tsa_ref = [[num] for num in self.num_event_lines]
-                        else:
-                            # Expand the lists of self.num_event_lines_tsa_ref
-                            for j in range(len(self.num_event_lines_tsa_ref), len(self.num_event_lines)):  # skipcq: PTC-W0060
-                                self.num_event_lines_tsa_ref.append([0] * len(self.num_event_lines_tsa_ref[0]))
-                            # Add the current number of event lines
-                            for j, val in enumerate(self.num_event_lines):
-                                self.num_event_lines_tsa_ref[j].append(val - sum(self.num_event_lines_tsa_ref[j]))
-
-                        # Delete the initialization trigger
-                        del self.etd_time_trigger[0][indices[i]]
-                        del self.etd_time_trigger[1][indices[i]]
-                        del self.etd_time_trigger[2][indices[i]]
-
-                    # Initialize the trigger for the time steps
-                    else:
-                        # Initialize the lists of self.num_event_lines_tsa_ref if not already initialized
-                        if not self.num_event_lines_tsa_ref:
-                            self.num_event_lines_tsa_ref = [[num] for num in self.num_event_lines]
-                        else:
-                            # Expand the lists of self.num_event_lines_tsa_ref
-                            for j in range(len(self.num_event_lines_tsa_ref), len(self.num_event_lines)):  # skipcq: PTC-W0060
-                                self.num_event_lines_tsa_ref.append([0] * len(self.num_event_lines_tsa_ref[0]))
-                            # Add the current number of event lines
-                            for j, val in enumerate(self.num_event_lines):
-                                self.num_event_lines_tsa_ref[j].append(val - sum(self.num_event_lines_tsa_ref[j]))
-
-                        # skipcq: PTC-W0063
-                        # Get the time step lengths
-                        time_list = self.following_modules[next(
-                            j for j in range(len(self.following_modules)) if self.following_modules[j].__class__.__name__ ==
-                            'TSAArimaDetector')].calculate_time_steps(self.num_event_lines_tsa_ref, log_atom)
-                        self.num_event_lines_tsa_ref = copy.copy(self.num_event_lines)
-
-                        num_added_trigger = 0
-
-                        # Add the new triggers
-                        for j, val in enumerate(time_list):
-                            if val != -1:
-                                num_added_trigger += 1
-                                self.etd_time_trigger[0].append(self.etd_time_trigger[0][indices[i]] + val)
-                                self.etd_time_trigger[1].append(j)
-                                self.etd_time_trigger[2].append(val)
-                        # Delete the initialization trigger
-                        del self.etd_time_trigger[0][indices[i]]
-                        del self.etd_time_trigger[1][indices[i]]
-                        del self.etd_time_trigger[2][indices[i]]
-
-                        # Run the update function for all trigger, which would already have been triggered
-                        for k in range(1, num_added_trigger+1):
-                            while current_time >= self.etd_time_trigger[0][-k]:
-                                # skipcq: PTC-W0063
-                                self.following_modules[next(
-                                    j for j in range(len(self.following_modules)) if self.following_modules[j].__class__.__name__ ==
-                                    'TSAArimaDetector')].test_num_appearance(self.etd_time_trigger[1][-k], self.num_event_lines[
-                                                                     self.etd_time_trigger[1][-k]] - self.num_event_lines_tsa_ref[
-                                                                     self.etd_time_trigger[1][-k]], current_time, log_atom)
-                                self.etd_time_trigger[0][-k] += self.etd_time_trigger[2][-k]
-                                self.num_event_lines_tsa_ref[self.etd_time_trigger[1][-k]] = self.num_event_lines[self.etd_time_trigger[
-                                    1][-k]]
-
-                # Trigger for a reoccurring time step
-                else:
-                    while current_time >= self.etd_time_trigger[0][indices[i]]:
-                        # skipcq: PTC-W0063
-                        self.following_modules[next(
-                            j for j in range(len(self.following_modules)) if self.following_modules[j].__class__.__name__ ==
-                            'TSAArimaDetector')].test_num_appearance(self.etd_time_trigger[1][indices[i]], self.num_event_lines[
-                                                             self.etd_time_trigger[1][indices[i]]]-self.num_event_lines_tsa_ref[
-                                                             self.etd_time_trigger[1][indices[i]]], current_time, log_atom)
-                        self.etd_time_trigger[0][indices[i]] += self.etd_time_trigger[2][indices[i]]
-                        self.num_event_lines_tsa_ref[self.etd_time_trigger[1][indices[i]]] = self.num_event_lines[self.etd_time_trigger[
-                            1][indices[i]]]
-
         valid_log_atom = False
         if self.path_list:
             for path in self.path_list:
@@ -341,9 +218,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         tmp_list.append(self.values)
         tmp_list.append(self.longest_path)
         tmp_list.append(self.check_variables)
-        tmp_list.append(self.num_event_lines)
-        tmp_list.append(self.etd_time_trigger)
-        tmp_list.append(self.num_event_lines_tsa_ref)
+        tmp_list.append(self.num_eventlines)
         tmp_list.append(self.id_path_list_tuples)
         PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
 
