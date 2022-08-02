@@ -155,10 +155,11 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                     raise locale.Error(msg)
 
         if hasattr(self, "start_year"):
-            if not isinstance(self.start_year, int) or isinstance(self.start_year, bool):
-                msg = "start_year has to be of the type integer."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+            if self.start_year is not None:
+                if not isinstance(self.start_year, int) or isinstance(self.start_year, bool):
+                    msg = "start_year has to be of the type integer."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
 
         if hasattr(self, "max_time_jump_seconds"):
             if not isinstance(self.max_time_jump_seconds, int) or isinstance(self.max_time_jump_seconds, bool):
@@ -212,14 +213,15 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
 
         if hasattr(self, "escape"):
-            if not isinstance(self.escape, bytes):
-                msg = "escape has to be of the type bytes."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if len(self.escape) < 1:
-                msg = "escape must not be empty."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
+            if self.escape is not None:
+                if not isinstance(self.escape, bytes):
+                    msg = "escape has to be of the type bytes."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
+                if len(self.escape) < 1:
+                    msg = "escape must not be empty."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
         if hasattr(self, "consume_delimiter"):
             if not isinstance(self.consume_delimiter, bool):
                 msg = "consume_delimiter has to be of the type bool."
