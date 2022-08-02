@@ -185,7 +185,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             elif self.value_sign_type == SIGN_TYPE_MANDATORY:
                 self.start_characters = set(b"+-")
             else:
-                msg = "Invalid value_sign_type %s" % self.value_sign_type
+                msg = "Invalid value_sign_type %s" % type(self.value_sign_type)
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
@@ -202,13 +202,13 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             elif self.value_pad_type == PAD_TYPE_BLANK:
                 self.pad_characters = b" "
             else:
-                msg = "Invalid value_pad_type %s" % self.value_pad_type
+                msg = "Invalid value_pad_type %s" % type(self.value_pad_type)
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
         if hasattr(self, "exponent_type"):
             if not isinstance(self.exponent_type, str):
-                msg = "exponent_type must be of type string. Current type: %s" % self.exponent_type
+                msg = "exponent_type must be of type string. Current type: %s" % type(self.exponent_type)
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             if self.exponent_type not in [EXP_TYPE_NONE, EXP_TYPE_OPTIONAL, EXP_TYPE_MANDATORY]:
