@@ -175,7 +175,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
 
         if hasattr(self, "value_sign_type"):
             if not isinstance(self.value_sign_type, str):
-                msg = "value_sign_type must be of type string. Current type: %s" % self.value_sign_type
+                msg = "value_sign_type must be of type string. Current type: %s" % type(self.value_sign_type)
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             if self.value_sign_type == SIGN_TYPE_NONE:
@@ -185,14 +185,14 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             elif self.value_sign_type == SIGN_TYPE_MANDATORY:
                 self.start_characters = set(b"+-")
             else:
-                msg = "Invalid value_sign_type %s" % type(self.value_sign_type)
+                msg = "Invalid value_sign_type %s" % self.value_sign_type
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
         if hasattr(self, "value_pad_type"):
             self.pad_characters = b""
             if not isinstance(self.value_pad_type, str):
-                msg = "value_pad_type must be of type string. Current type: %s" % self.value_pad_type
+                msg = "value_pad_type must be of type string. Current type: %s" % type(self.value_pad_type)
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             if self.value_pad_type == PAD_TYPE_NONE:
@@ -202,7 +202,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             elif self.value_pad_type == PAD_TYPE_BLANK:
                 self.pad_characters = b" "
             else:
-                msg = "Invalid value_pad_type %s" % type(self.value_pad_type)
+                msg = "Invalid value_pad_type %s" % self.value_pad_type
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
