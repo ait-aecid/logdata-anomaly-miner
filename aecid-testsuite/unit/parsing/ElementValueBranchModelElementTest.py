@@ -21,19 +21,7 @@ class ElementValueBranchModelElementTest(TestBase):
     data_me = DummyFixedDataModelElement(value_path, data_fixed_string)
     children = [value_model, path_me, data_me]
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        element_value_branch_me = ElementValueBranchModelElement(
-            self.id_, self.value_model, None, {"path: ": self.path_me, "data: ": self.data_me})
-        self.assertEqual(element_value_branch_me.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        element_value_branch_me = ElementValueBranchModelElement(
-            self.id_, self.value_model, None, {"path: ": self.path_me, "data: ": self.data_me})
-        self.assertEqual(element_value_branch_me.get_child_elements(), self.children)
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
         element_value_branch_me = ElementValueBranchModelElement(
             self.id_, self.value_model, None, {"path: ": self.path_me, "data: ": self.data_me})
@@ -51,7 +39,7 @@ class ElementValueBranchModelElementTest(TestBase):
             MatchElement("path/value_branch/branch/data", self.data_path, self.data_path, None),
             MatchElement("path/value_branch/value_model", self.data_fixed_string, self.data_fixed_string, None)])
 
-    def test4get_match_element_no_match(self):
+    def test2get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         element_value_branch_me = ElementValueBranchModelElement(
             self.id_, self.value_model, None, {"path: ": self.path_me, "data: ": self.data_me})
@@ -80,7 +68,7 @@ class ElementValueBranchModelElementTest(TestBase):
         match_element = element_value_branch_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5element_id_input_validation(self):
+    def test3element_id_input_validation(self):
         """Check if element_id is validated."""
         branch_model_dict = {"path: ": self.path_me, "data: ": self.data_me}
         self.assertRaises(ValueError, ElementValueBranchModelElement, "", self.value_model, None, branch_model_dict)
@@ -95,7 +83,7 @@ class ElementValueBranchModelElementTest(TestBase):
         self.assertRaises(TypeError, ElementValueBranchModelElement, (), self.value_model, None, branch_model_dict)
         self.assertRaises(TypeError, ElementValueBranchModelElement, set(), self.value_model, None, branch_model_dict)
 
-    def test6value_model_input_validation(self):
+    def test4value_model_input_validation(self):
         """Check if value_model is validated."""
         branch_model_dict = {"path: ": self.path_me, "data: ": self.data_me}
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, "path", None, branch_model_dict)
@@ -111,7 +99,7 @@ class ElementValueBranchModelElementTest(TestBase):
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, (), None, branch_model_dict)
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, set(), None, branch_model_dict)
 
-    def test7value_path_input_validation(self):
+    def test5value_path_input_validation(self):
         """Check if value_path is validated."""
         branch_model_dict = {"path: ": self.path_me, "data: ": self.data_me}
         self.assertRaises(ValueError, ElementValueBranchModelElement, self.id_, self.value_model, "", branch_model_dict)
@@ -125,7 +113,7 @@ class ElementValueBranchModelElementTest(TestBase):
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, (), branch_model_dict)
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, set(), branch_model_dict)
 
-    def test8branch_model_dict_input_validation(self):
+    def test6branch_model_dict_input_validation(self):
         """Check if value_path is validated."""
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, "path")
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, None)
@@ -140,7 +128,7 @@ class ElementValueBranchModelElementTest(TestBase):
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, ())
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, set())
 
-    def test9default_branch_input_validation(self):
+    def test7default_branch_input_validation(self):
         """Check if value_path is validated."""
         branch_model_dict = {"path: ": self.path_me, "data: ": self.data_me}
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict, "path")
@@ -154,7 +142,7 @@ class ElementValueBranchModelElementTest(TestBase):
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict, ())
         self.assertRaises(TypeError, ElementValueBranchModelElement, self.id_, self.value_model, None, branch_model_dict, set())
 
-    def test10get_match_element_match_context_input_validation(self):
+    def test8get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = ElementValueBranchModelElement(self.id_, self.value_model, None, {"path: ": self.path_me, "data: ": self.data_me})
         data = b"abcdefghijklmnopqrstuvwxyz.!?"

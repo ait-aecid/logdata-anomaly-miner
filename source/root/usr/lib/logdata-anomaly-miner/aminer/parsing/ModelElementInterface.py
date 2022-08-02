@@ -96,13 +96,15 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
         @param repeated_element the MatchElement to be repeated in the data.
         @param min_repeat the minimum number of repeated matches of the repeated_element.
         @param max_repeat the maximum number of repeated matches of the repeated_element.
+        @param upper_case if True, the letters of the hex alphabet are uppercase, otherwise they are lowercase.
+        @param alphabet the allowed letters to match data.
         """
 
         allowed_kwargs = [
             "date_format", "time_zone", "text_locale", "start_year", "max_time_jump_seconds", "value_sign_type", "value_pad_type",
             "exponent_type", "delimiter", "escape", "consume_delimiter", "value_model", "value_path", "branch_model_dict", "default_branch",
             "children", "fixed_data", "wordlist", "ipv6", "key_parser_dict", "optional_key_prefix", "nullable_key_prefix",
-            "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat"
+            "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat", "upper_case", "alphabet"
         ]
         for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:
@@ -182,6 +184,10 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 self.start_characters = set(b"-0123456789")
             elif self.value_sign_type == SIGN_TYPE_MANDATORY:
                 self.start_characters = set(b"+-")
+            else:
+                msg = "Invalid value_sign_type %s" % self.value_sign_type
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
 
         if hasattr(self, "value_pad_type"):
             self.pad_characters = b""
@@ -195,8 +201,16 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 self.pad_characters = b"0"
             elif self.value_pad_type == PAD_TYPE_BLANK:
                 self.pad_characters = b" "
+            else:
+                msg = "Invalid value_pad_type %s" % self.value_pad_type
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
 
         if hasattr(self, "exponent_type"):
+            if not isinstance(self.exponent_type, str):
+                msg = "exponent_type must be of type string. Current type: %s" % self.exponent_type
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
             if self.exponent_type not in [EXP_TYPE_NONE, EXP_TYPE_OPTIONAL, EXP_TYPE_MANDATORY]:
                 msg = "Invalid exponent_type %s" % self.exponent_type
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -235,14 +249,15 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 raise TypeError(msg)
 
         if hasattr(self, "value_path"):
-            if not isinstance(self.value_path, str):
-                msg = "value_path has to be of the type string or None."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if len(self.value_path) < 1:
-                msg = "value_path must not be empty."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
+            if self.value_path is not None:
+                if not isinstance(self.value_path, str):
+                    msg = "value_path has to be of the type string or None."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
+                if len(self.value_path) < 1:
+                    msg = "value_path must not be empty."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
 
         if hasattr(self, "branch_model_dict"):
             if not isinstance(self.branch_model_dict, dict):
@@ -256,7 +271,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                     raise TypeError(msg)
 
         if hasattr(self, "default_branch"):
-            if not isinstance(self.default_branch, ModelElementInterface):
+            if self.default_branch is not None and not isinstance(self.default_branch, ModelElementInterface):
                 msg = "default_branch has to be of the type string or None."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)

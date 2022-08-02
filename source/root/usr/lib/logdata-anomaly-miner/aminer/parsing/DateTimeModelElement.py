@@ -458,9 +458,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
                within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
         """
-        # excluded date_formats from here, because it is not used by any other ModelElement, and it also needs to be extracted first.
-        self.max_time_jump_seconds = max_time_jump_seconds
-        super().__init__(element_id, start_year, max_time_jump_seconds)
+        super().__init__(element_id, start_year=start_year, max_time_jump_seconds=max_time_jump_seconds)
         if len(date_formats) == 0:
             msg = "At least one date_format must be specified."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)

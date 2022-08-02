@@ -11,17 +11,7 @@ class IpAddressDataModelElementTest(TestBase):
     id_ = "ip"
     path = "path"
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        ip_addr_dme = IpAddressDataModelElement(self.id_)
-        self.assertEqual(ip_addr_dme.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        ip_addr_dme = IpAddressDataModelElement(self.id_)
-        self.assertEqual(ip_addr_dme.get_child_elements(), None)
-
-    def test3get_match_element_valid_ipv4_match(self):
+    def test1get_match_element_valid_ipv4_match(self):
         """
         This test case checks the functionality by parsing a real IP-addresses.
         The boundary values for IP-addresses is 0.0.0.0 - 255.255.255.255
@@ -52,7 +42,7 @@ class IpAddressDataModelElementTest(TestBase):
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 3232235675, None)
 
-    def test4get_match_element_no_match_ipv4(self):
+    def test2get_match_element_no_match_ipv4(self):
         """
         Test if wrong formats are determined and boundary values are checked.
         Also check if hexadecimal ip addresses are not parsed as these are not allowed.
@@ -74,7 +64,7 @@ class IpAddressDataModelElementTest(TestBase):
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5get_match_element_valid_ipv6_match(self):
+    def test3get_match_element_valid_ipv6_match(self):
         """
         This test case checks the functionality by parsing a real IP-addresses.
         The numerical representation of the ip address was calculated with the help of https://www.ipaddressguide.com/ipv6-to-decimal.
@@ -133,7 +123,7 @@ class IpAddressDataModelElementTest(TestBase):
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, number, None)
 
-    def test6get_match_element_no_match_ipv6(self):
+    def test4get_match_element_no_match_ipv6(self):
         """Test if wrong formats are determined and boundary values are checked."""
         ip_addr_dme = IpAddressDataModelElement(self.id_, True)
         # IPv4 dotted quad at the end
@@ -172,7 +162,7 @@ class IpAddressDataModelElementTest(TestBase):
         match_element = ip_addr_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test7element_id_input_validation(self):
+    def test5element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, IpAddressDataModelElement, "")  # empty element_id
         self.assertRaises(TypeError, IpAddressDataModelElement, None)  # None element_id
@@ -186,7 +176,7 @@ class IpAddressDataModelElementTest(TestBase):
         self.assertRaises(TypeError, IpAddressDataModelElement, ())  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, IpAddressDataModelElement, set())  # empty set element_id is not allowed
 
-    def test8ipv6_input_validation(self):
+    def test6ipv6_input_validation(self):
         """Check if ipv6 is validated."""
         self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, "path")  # string ipv6
         self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, None)  # None ipv6
@@ -199,7 +189,7 @@ class IpAddressDataModelElementTest(TestBase):
         self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, ())  # empty tuple ipv6 is not allowed
         self.assertRaises(TypeError, IpAddressDataModelElement, self.id_, set())  # empty set ipv6 is not allowed
 
-    def test9get_match_element_match_context_input_validation(self):
+    def test7get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = IpAddressDataModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
@@ -219,7 +209,7 @@ class IpAddressDataModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
-    def test10performance(self):  # skipcq: PYL-R0201
+    def test8performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation."""
         import_setup = """
 import copy

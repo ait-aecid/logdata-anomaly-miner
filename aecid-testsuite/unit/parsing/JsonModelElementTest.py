@@ -113,22 +113,7 @@ class JsonModelElementTest(TestBase):
     }}
     key_parser_dict_array_of_arrays = {"a": [[DummyFixedDataModelElement("abc", b"abc")]]}
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        json_me = JsonModelElement(self.id_, self.key_parser_dict)
-        self.assertEqual(json_me.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        k = self.key_parser_dict
-        json_me = JsonModelElement(self.id_, self.key_parser_dict)
-        self.assertEqual(json_me.get_child_elements(), [
-            k["menu"]["id"], k["menu"]["value"], [
-                k["menu"]["popup"]["menuitem"][0]["value"], k["menu"]["popup"]["menuitem"][0]["onclick"],
-                k["menu"]["popup"]["menuitem"][0]["optional_key_clickable"], k["menu"]["popup"]["menuitem"][1]["value"],
-                k["menu"]["popup"]["menuitem"][1]["onclick"], k["menu"]["popup"]["menuitem"][1]["clickable"]]])
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict)
         data = self.single_line_json
@@ -215,7 +200,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-    def test4get_match_element_with_optional_key(self):
+    def test2get_match_element_with_optional_key(self):
         """Validate optional keys with the optional_key_prefix."""
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict)
         data = self.single_line_with_optional_key_json
@@ -253,7 +238,7 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5get_match_element_with_allow_all(self):
+    def test3get_match_element_with_allow_all(self):
         """Test a simplified key_parser_dict with ALLOW_ALL."""
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_allow_all)
         data = self.single_line_json
@@ -283,7 +268,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-    def test6get_match_element_with_nullable_values(self):
+    def test4get_match_element_with_nullable_values(self):
         """Test if nullable values are working as intended."""
         # test functionality with objects
         key_parser_dict = {"+a": DummyFixedDataModelElement("a", b"a")}
@@ -435,7 +420,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data_empty, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-    def test7get_match_element_null_value(self):
+    def test5get_match_element_null_value(self):
         """Test if null keys and values can be used."""
         key_parser_dict = {
             "works": DummyFirstMatchModelElement("id", [
@@ -474,7 +459,7 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test8get_match_element_with_umlaut(self):
+    def test6get_match_element_with_umlaut(self):
         """Test if ä ö ü are used correctly."""
         key_parser_dict = {"works": DummyFixedDataModelElement("abc", "a ä ü ö z".encode("utf-8"))}
         data = """{
@@ -489,7 +474,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-    def test9get_match_element_same_value_as_key(self):
+    def test7get_match_element_same_value_as_key(self):
         """Test if object with the same key-value pairs are parsed correctly."""
         key_parser_dict = {"abc": DummyFirstMatchModelElement("first", [
             DummyFixedDataModelElement("abc", b"abc"), DummyFixedDataModelElement("abc", b"ab"), DummyFixedDataModelElement("abc", b"bc"),
@@ -554,7 +539,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-    def test10get_match_element_empty_array_empty_object_null(self):
+    def test8get_match_element_empty_array_empty_object_null(self):
         """Test if the keywords EMPTY_ARRAY, EMPTY_OBJECT, EMPTY_STRING,  and None NULL_OBJECT work properly."""
         key_parser_dict = {"menu": {
             "id": "EMPTY_OBJECT",
@@ -635,7 +620,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-    def test11get_match_element_float_exponents(self):
+    def test9get_match_element_float_exponents(self):
         """
         Parse float values with exponents.
         The principle of only testing dummy classes can not be applied here, as the functionality between the JsonModelElement and
@@ -704,7 +689,7 @@ class JsonModelElementTest(TestBase):
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
-    def test12get_match_element_allow_all_fields(self):
+    def test10get_match_element_allow_all_fields(self):
         """Parse matching substring from MatchContext using the allow_all_fields parameter."""
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_allow_all_fields, allow_all_fields=True)
         data = self.single_line_json
@@ -721,7 +706,7 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test13get_match_element_no_match(self):
+    def test11get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict)
         # missing key
@@ -791,7 +776,7 @@ class JsonModelElementTest(TestBase):
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test14element_id_input_validation(self):
+    def test12element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, JsonModelElement, "", self.key_parser_dict)  # empty element_id
         self.assertRaises(TypeError, JsonModelElement, None, self.key_parser_dict)  # None element_id
@@ -805,7 +790,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, (), self.key_parser_dict)  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, JsonModelElement, set(), self.key_parser_dict)  # empty set element_id is not allowed
 
-    def test15key_parser_dict_input_validation(self):
+    def test13key_parser_dict_input_validation(self):
         """Check if key_parser_dict is validated."""
         self.assertRaises(TypeError, JsonModelElement, self.id_, "path")  # string key_parser_dict
         self.assertRaises(TypeError, JsonModelElement, self.id_, None)  # None key_parser_dict
@@ -824,7 +809,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, ())  # empty tuple key_parser_dict is not allowed
         self.assertRaises(TypeError, JsonModelElement, self.id_, set())  # empty set key_parser_dict is not allowed
 
-    def test16optional_key_prefix_input_validation(self):
+    def test14optional_key_prefix_input_validation(self):
         """Check if optional_key_prefix is validated."""
         self.assertRaises(ValueError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix="")
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix=None)
@@ -838,7 +823,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix=())
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix=set())
 
-    def test17nullable_key_prefix_input_validation(self):
+    def test15nullable_key_prefix_input_validation(self):
         """Check if optional_key_prefix is validated."""
         self.assertRaises(ValueError, JsonModelElement, self.id_, self.key_parser_dict, nullable_key_prefix="")
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, nullable_key_prefix=None)
@@ -852,7 +837,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, nullable_key_prefix=())
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, nullable_key_prefix=set())
 
-    def test18allow_all_fields_input_validation(self):
+    def test16allow_all_fields_input_validation(self):
         """Check if allow_all_fields is validated."""
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields="")
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=None)
@@ -865,7 +850,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=())
         self.assertRaises(TypeError, JsonModelElement, self.id_, self.key_parser_dict, allow_all_fields=set())
 
-    def test19get_match_element_match_context_input_validation(self):
+    def test17get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = JsonModelElement(self.id_, self.key_parser_dict)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
@@ -885,7 +870,7 @@ class JsonModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
-    def test20same_optional_key_and_nullable_key_prefix(self):
+    def test18same_optional_key_and_nullable_key_prefix(self):
         """Test if an exception is thrown if the optional_key_prefix is the same as the nullable_key_prefix."""
         self.assertRaises(ValueError, JsonModelElement, self.id_, self.key_parser_dict, optional_key_prefix="+", nullable_key_prefix="+")
 

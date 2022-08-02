@@ -70,6 +70,28 @@ class JsonModelElement(ModelElementInterface):
         super().__init__(element_id, key_parser_dict=key_parser_dict, optional_key_prefix=optional_key_prefix,
                          nullable_key_prefix=nullable_key_prefix, allow_all_fields=allow_all_fields)
         self.dec_escapes = False
+        self.validate_key_parser_dict(key_parser_dict)
+
+    def validate_key_parser_dict(self, dictionary: dict):
+        """Validate the key_parser_dict."""
+        for value in dictionary.values():
+            if isinstance(value, ModelElementInterface):
+                continue
+            elif isinstance(value, list):
+                if len(value) == 0:
+                    msg = "lists in key_parser_dict must have at least one entry."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+
+                for v in value:
+                    if isinstance(v, dict):
+                        self.validate_key_parser_dict(v)
+            elif isinstance(value, dict):
+                self.validate_key_parser_dict(value)
+            elif value not in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "EMPTY_STRING", "ALLOW_ALL_KEYS", "NULL_OBJECT"):
+                msg = "wrong type found in key_parser_dict."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
 
     def is_escaped_unicode(self, text: str):  # skipcq: PYL-R0201
         """Check if the text contains only ascii characters."""

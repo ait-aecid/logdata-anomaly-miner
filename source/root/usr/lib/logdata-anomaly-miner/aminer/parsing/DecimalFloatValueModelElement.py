@@ -50,23 +50,6 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         """
 
         super().__init__(element_id, value_sign_type=value_sign_type, value_pad_type=value_pad_type, exponent_type=exponent_type)
-
-        if value_sign_type not in (DecimalFloatValueModelElement.SIGN_TYPE_NONE, DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL,
-                                   DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY):
-            msg = "Invalid value_sign_type %s" % value_sign_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-
-        if value_pad_type not in (DecimalFloatValueModelElement.PAD_TYPE_NONE, DecimalFloatValueModelElement.PAD_TYPE_ZERO,
-                                  DecimalFloatValueModelElement.PAD_TYPE_BLANK):
-            msg = "Invalid value_pad_type %s" % value_pad_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-
-        if not isinstance(exponent_type, str):
-            msg = "exponent_type must be of type string. Current type: %s" % value_sign_type
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         self.digits = set(b"0123456789")
 
     def get_match_element(self, path: str, match_context):

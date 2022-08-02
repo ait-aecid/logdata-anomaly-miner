@@ -11,17 +11,7 @@ class AnyByteDataModelElementTest(TestBase):
     id_ = "any"
     path = "path"
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        any_dme = AnyByteDataModelElement(self.id_)
-        self.assertEqual(any_dme.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        any_dme = AnyByteDataModelElement(self.id_)
-        self.assertEqual(any_dme.get_child_elements(), None)
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
         match_context = DummyMatchContext(data)
@@ -29,7 +19,7 @@ class AnyByteDataModelElementTest(TestBase):
         match_element = any_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, data, data, None)
 
-    def test4get_match_element_no_match(self):
+    def test2get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         data = b""
         match_context = DummyMatchContext(data)
@@ -37,7 +27,7 @@ class AnyByteDataModelElementTest(TestBase):
         match_element = any_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5element_id_input_validation(self):
+    def test3element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, AnyByteDataModelElement, "")  # empty element_id
         self.assertRaises(TypeError, AnyByteDataModelElement, None)  # None element_id
@@ -51,7 +41,7 @@ class AnyByteDataModelElementTest(TestBase):
         self.assertRaises(TypeError, AnyByteDataModelElement, ())  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, AnyByteDataModelElement, set())  # empty set element_id is not allowed
 
-    def test6get_match_element_match_context_input_validation(self):
+    def test4get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = AnyByteDataModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
