@@ -24,7 +24,7 @@ from aminer.util import PersistenceUtil
 
 
 class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
-    """This class keeps track of the found eventtypes and the values of each variable."""
+    """This class keeps track of the found event types and the values of each variable."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
