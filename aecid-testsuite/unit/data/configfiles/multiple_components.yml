@@ -142,12 +142,12 @@ Analysis:
           outlier_bins_flag: True
         - type: HistogramAnalysis
           id: HistogramAnalysis
-          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          histogram_definitions: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
           report_interval: 10
           output_logline: True
         - type: PathDependentHistogramAnalysis
           id: PathDependentHistogramAnalysis
-          path: "/model/RandomTime"
+          target_path: "/model/RandomTime"
           bin_definition: "modulo_time_bin_definition"
           report_interval: 10
           output_logline: True
@@ -159,7 +159,7 @@ Analysis:
         - type: MatchFilter
           id: MatchFilter
           target_path_list: ["/model/Random"]
-          value_list: [1, 10, 100]
+          target_value_list: [1, 10, 100]
           output_logline: True
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChangeDetector
@@ -178,13 +178,13 @@ Analysis:
           id: NewMatchPathDetector
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
-          path: "/model/LoginDetails/PastTime/Time/Minutes"
+          target_path: "/model/LoginDetails/PastTime/Time/Minutes"
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
-          path: "/model/LoginDetails"
+          target_path: "/model/LoginDetails"
         - type: ValueMatchRule
           id: value_match_rule
-          path: "/model/LoginDetails/Username"
+          target_path: "/model/LoginDetails/Username"
           value: "root"
         - type: NegationMatchRule
           id: negation_match_rule1
@@ -205,7 +205,6 @@ Analysis:
           rule_id: correlation_rule
           min_time_delta: 5
           max_time_delta: 6
-          max_artefacts_a_for_single_b: 1
           artefact_match_parameters: [["/model/CronAnnouncement/JobNumber", "/model/CronExecution/JobNumber"]]
         - type: EventClassSelector
           action_id: a_class_selector
@@ -215,11 +214,11 @@ Analysis:
           artefact_b_rules: ["correlation_rule"]
         - type: PathExistsMatchRule
           id: path_exists_match_rule3
-          path: "/model/CronAnnouncement/Run"
+          target_path: "/model/CronAnnouncement/Run"
           match_action: "a_class_selector"
         - type: PathExistsMatchRule
           id: path_exists_match_rule4
-          path: "/model/CronExecution/Job"
+          target_path: "/model/CronExecution/Job"
           match_action: "b_class_selector"
         - type: TimeCorrelationViolationDetector
           id: TimeCorrelationViolationDetector

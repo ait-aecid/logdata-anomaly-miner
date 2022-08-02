@@ -485,8 +485,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            correlation_rule = CorrelationRule('Correlation', 0, chance, max_artefacts_a_for_single_b=1,
-                                               artefact_match_parameters=[('/integer/d0', '/integer/d1')])
+            correlation_rule = CorrelationRule('Correlation', 0, chance, artefact_match_parameters=[('/integer/d0', '/integer/d1')])
             a_class_selector = EventClassSelector('Selector1', [correlation_rule], None)
             b_class_selector = EventClassSelector('Selector2', None, [correlation_rule])
             rules = [Rules.PathExistsMatchRule('/integer/d0', a_class_selector), Rules.PathExistsMatchRule('/integer/d1', b_class_selector)]

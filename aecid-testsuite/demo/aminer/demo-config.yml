@@ -831,16 +831,16 @@ Analysis:
           id: TimestampsUnsortedDetector
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
-          path: "/model/LoginDetails/PastTime/Time/Minutes"
+          target_path: "/model/LoginDetails/PastTime/Time/Minutes"
         - type: DebugMatchRule
           id: debug_match_rule
           debug_mode: True
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
-          path: "/model/LoginDetails"
+          target_path: "/model/LoginDetails"
         - type: ValueMatchRule
           id: value_match_rule
-          path: "/model/LoginDetails/Username"
+          target_path: "/model/LoginDetails/Username"
           value: "root"
         - type: NegationMatchRule
           id: negation_match_rule1
@@ -913,7 +913,7 @@ Analysis:
           id: MatchFilter
           target_path_list:
             - "/model/Random"
-          value_list:
+          target_value_list:
             - 1
             - 10
             - 100
@@ -926,13 +926,13 @@ Analysis:
           learn_mode: True
         - type: ModuloTimeMatchRule
           id: "mt"
-          path: null
+          target_path: null
           seconds_modulo: 3
           lower_limit: 0
           upper_limit: 3
         - type: ValueDependentModuloTimeMatchRule
           id: "vdmt"
-          path: null
+          target_path: null
           seconds_modulo: 3
           target_path_list:
             - "/model/ECD/g"
@@ -972,15 +972,15 @@ Analysis:
           event_message: "Private IP address occurred!"
         - type: IPv4InRFC1918MatchRule
           id: "ipv4_in_rfc1918_match_rule"
-          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          target_path: "/model/ParsingME/se2/IpAddressDataModelElement"
           match_action: "ip_match_action"
         - type: DebugHistoryMatchRule
           id: "debug_history_match_rule"
           debug_mode: True
         - type: ValueListMatchRule
           id: "value_list_match_rule"
-          path: "/model/ParsingME/se2/IpAddressDataModelElement"
-          value_list:
+          target_path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          target_value_list:
             - 134744072
             - 134743044
         - type: NegationMatchRule
@@ -988,7 +988,7 @@ Analysis:
           sub_rule: "value_list_match_rule"
         - type: ValueRangeMatchRule
           id: "value_range_match_rule"
-          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          target_path: "/model/ParsingME/se2/IpAddressDataModelElement"
           lower_limit: 167772160
           upper_limit: 184549375
         - type: NegationMatchRule
@@ -996,7 +996,7 @@ Analysis:
           sub_rule: "value_range_match_rule"
         - type: StringRegexMatchRule
           id: "string_regex_match_rule"
-          path: "/model/type/syscall/success"
+          target_path: "/model/type/syscall/success"
           regex: "^no$"
         - type: NegationMatchRule
           id: "negation_string_regex"
@@ -1034,11 +1034,11 @@ Analysis:
           outlier_bins_flag: True
         - type: HistogramAnalysis
           id: HistogramAnalysis
-          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          histogram_definitions: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
           report_interval: 10
         - type: PathDependentHistogramAnalysis
           id: PathDependentHistogramAnalysis
-          path: "/model/RandomTime"
+          target_path: "/model/RandomTime"
           bin_definition: "modulo_time_bin_definition"
           report_interval: 10
         - type: MatchValueAverageChangeDetector
@@ -1072,7 +1072,7 @@ Analysis:
             - "/model/type/path/id"
             - "/model/type/syscall/id"
           min_allowed_time_diff: 5
-          allow_missing_values: True
+          allow_missing_values_flag: True
           learn_mode: True
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
@@ -1097,7 +1097,6 @@ Analysis:
           rule_id: correlation_rule
           min_time_delta: 5
           max_time_delta: 6
-          max_artefacts_a_for_single_b: 1
           artefact_match_parameters: [["/model/CronAnnouncement/JobNumber", "/model/CronExecution/JobNumber"]]
         - type: EventClassSelector
           action_id: a_class_selector
@@ -1109,11 +1108,11 @@ Analysis:
             - correlation_rule
         - type: PathExistsMatchRule
           id: path_exists_match_rule3
-          path: "/model/CronAnnouncement/Run"
+          target_path: "/model/CronAnnouncement/Run"
           match_action: a_class_selector
         - type: PathExistsMatchRule
           id: path_exists_match_rule4
-          path: "/model/CronExecution/Job"
+          target_path: "/model/CronExecution/Job"
           match_action: b_class_selector
         - type: TimeCorrelationViolationDetector
           id: TimeCorrelationViolationDetector

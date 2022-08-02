@@ -1259,11 +1259,11 @@ This module defines a detector for log atoms not matching any allowlisted rule.
      Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
-          path: "/model/LoginDetails/PastTime/Time/Minutes"
+          target_path: "/model/LoginDetails/PastTime/Time/Minutes"
 
         - type: ValueMatchRule
           id: value_match_rule
-          path: "/model/LoginDetails/Username"
+          target_path: "/model/LoginDetails/Username"
           value: "root"
 
         - type: OrMatchRule
@@ -1300,7 +1300,7 @@ This detector generates anomalies for new characters in parsed elements and exte
 
      Analysis:
         - type: 'CharsetDetector'
-          paths:
+          target_path_list:
             - '/parser/value'
           learn_mode: True
 
@@ -1323,7 +1323,7 @@ In addition to detecting new value combination (see NewMatchPathValueComboDetect
      Analysis:
         - type: EnhancedNewMatchPathValueComboDetector
           id: EnhancedNewValueCombo
-          paths:
+          target_path_list:
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
           tuple_transformation_function: "demo"
@@ -1348,7 +1348,7 @@ This detector monitors and learns occurrence probabilities of character pairs in
 
      Analysis:
         - type: 'EntropyDetector'
-          paths:
+          target_path_list:
             - '/parser/value'
           prob_thresh: 0.05
           default_freqs: false
@@ -1443,7 +1443,7 @@ This module defines an detector for event and value sequences. The concept is ba
         - type: EventSequenceDetector
           id: EventSequenceDetector
           seq_len: 4
-          paths:
+          target_path_list:
             - '/model/type/syscall/syscall'
           id_path_list:
             - '/model/type/syscall/id'
@@ -1495,7 +1495,7 @@ or by creating own subclasses from "HistogramAnalysis.BinDefinition".
     is useful for analysis of periodic activities.
 
 
-* **histogram_defs**: list of tuples. First element of the tuple contains the target property path to analyze. The second element contains the id of a bin_definition(LinearNumericBinDefinition or ModuloTimeBinDefinition). List(strings) **Required**
+* **histogram_definitions**: list of tuples. First element of the tuple contains the target property path to analyze. The second element contains the id of a bin_definition(LinearNumericBinDefinition or ModuloTimeBinDefinition). List(strings) **Required**
 * **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1) **Required**
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
 * **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
@@ -1515,7 +1515,7 @@ or by creating own subclasses from "HistogramAnalysis.BinDefinition".
 
         - type: HistogramAnalysis
           id: HistogramAnalysis
-          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          histogram_definitions: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
           report_interval: 10
 
 .. _PathDependentHistogramAnalysis:
@@ -1560,7 +1560,7 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
 
         - type: PathDependentHistogramAnalysis
           id: PathDependentHistogramAnalysis
-          path: "/model/RandomTime"
+          target_path: "/model/RandomTime"
           bin_definition: "modulo_time_bin_definition"
           report_interval: 10
 
@@ -1637,9 +1637,9 @@ This component creates events for specified paths and values.
      Analysis:
         - type: MatchFilter
           id: MatchFilter
-          paths:
+          target_path_list:
             - "/model/Random"
-          value_list:
+          target_value_list:
             - 1
             - 10
             - 100
@@ -1666,7 +1666,7 @@ This detector calculates the average of a given list of values to monitor. Repor
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChange
           timestamp_path: None
-          paths:
+          target_path_list:
             - "/model/Random"
           min_bin_elements: 100
           min_bin_time: 10
@@ -1690,7 +1690,7 @@ This component extracts values from a given match and writes them to a stream. T
         - type: MatchValueStreamWriter
           id: MatchValueStreamWriter
           stream: "sys.stdout"
-          paths:
+          target_path_list:
             - "/model/Sensors/CPUTemp"
             - "/model/Sensors/CPUWorkload"
             - "/model/Sensors/DTM"
@@ -1716,7 +1716,7 @@ This module defines an detector for minimal transition times between states (e.g
      Analysis:
         - type: MinimalTransitionTimeDetector
           id: MinimalTransitionTimeDetector
-          paths:
+          target_path_list:
             - '/model/type/syscall/syscall'
           id_path_list:
             - '/model/type/syscall/id'
@@ -1748,7 +1748,7 @@ alerting time when currently in error state. When in normal (alerting) state, th
      Analysis:
         - type: MissingMatchPathValueDetector
           id: MissingMatch
-          paths:
+          target_path_list:
             - "/model/DiskReport/Space"
           check_interval: 2
           realert_interval: 5
@@ -1780,14 +1780,14 @@ This detector works similar to the NewMatchPathValueComboDetector, but allows to
      Analysis:
         - type: NewMatchIdValueComboDetector
           id: NewMatchIdValueComboDetector
-          paths:
+          target_path_list:
             - "/model/type/path/name"
             - "/model/type/syscall/syscall"
           id_path_list:
             - "/model/type/path/id"
             - "/model/type/syscall/id"
           min_allowed_time_diff: 5
-          allow_missing_values: True
+          allow_missing_values_flag: True
           learn_mode: True
 
 NewMatchPathValueComboDetector
@@ -1808,7 +1808,7 @@ This module defines a detector for new value combinations in multiple parser pat
      Analysis:
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueCombo
-          paths:
+          target_path_list:
             - "/model/IPAddresses/Username"
             - "/model/IPAddresses/IP"
           learn_mode: True
@@ -1830,7 +1830,7 @@ This module defines a detector for new values in a parser path.
      Analysis:
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
-          paths:
+          target_path_list:
             - "/model/DailyCron/JobNumber"
             - "/model/IPAddresses/Username"
           learn_mode: True
@@ -1852,7 +1852,7 @@ This component counts occurring combinations of values and periodically sends th
      Analysis:
         - type: ParserCount
           id: ParserCount
-          paths:
+          target_path_list:
             - "/model/type/syscall/syscall"
           report_interval: 10
 
@@ -1876,7 +1876,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
      Analysis:
         - type: PathValueTimeIntervalDetector
           id: PathValueTimeIntervalDetector
-          paths:
+          target_path_list:
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
           time_period_length: 86400
@@ -1905,7 +1905,7 @@ This class creates events if event or value occurrence counts are outliers in PC
      Analysis:
         - type: PCADetector
           id: PCADetector
-          paths:
+          target_path_list:
             - "/model/username"
             - "/model/service"
           windows_size: 60
@@ -1993,7 +1993,7 @@ This detector uses a tsa-arima model to analyze the values of the chosen paths.
         - type: 'PathArimaDetector'
           id: PTSA
           event_type_detector: ETD
-          paths: ["/model/model/val1", "/model/model/val2"]
+          target_path_list: ["/model/model/val1", "/model/model/val2"]
           num_init: 20
           force_period_length: True
           set_period_length: 15
@@ -2031,11 +2031,11 @@ This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose
      Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule3
-          path: "/model/CronAnnouncement/Run"
+          target_path: "/model/CronAnnouncement/Run"
           match_action: a_class_selector
         - type: PathExistsMatchRule
           id: path_exists_match_rule4
-          path: "/model/CronExecution/Job"
+          target_path: "/model/CronExecution/Job"
           match_action: b_class_selector
         - type: TimeCorrelationViolationDetector
           id: TimeCorrelationViolationDetector
@@ -2084,7 +2084,7 @@ This detector generates ranges for numeric values, detects values outside of the
 
      Analysis:
         - type: 'ValueRangeDetector'
-          paths:
+          target_path_list:
             - '/parser/value'
           id_path_list:
             - '/parser/id'
@@ -2296,10 +2296,10 @@ Match elements of this component return true when the given path was found in th
      Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
-          path: "/model/LoginDetails/PastTime/Time/Minutes"
+          target_path: "/model/LoginDetails/PastTime/Time/Minutes"
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
-          path: "/model/LoginDetails"
+          target_path: "/model/LoginDetails"
 
 
 ValueMatchRule
@@ -2312,7 +2312,7 @@ Match elements of this component return true when the given path exists and has 
      Analysis:
         - type: ValueMatchRule
           id: value_match_rule
-          path: "/model/LoginDetails/Username"
+          target_path: "/model/LoginDetails/Username"
           value: "root"
 
 ValueListMatchRule
@@ -2397,7 +2397,7 @@ When `delete_components` is used, all components from the `subhandler_list` are 
      Analysis:
         - type: NewMatchPathValueDetector
           id: NewMatchPathValueDetector1
-          paths:
+          target_path_list:
             - "/model/second"
 
         - type: AtomFilterMatchAction

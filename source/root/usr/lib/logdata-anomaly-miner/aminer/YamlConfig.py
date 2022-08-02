@@ -420,7 +420,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, learn_mode=learn,
-                                    persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
+                                    persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values_flag'],
                                     output_logline=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, learn_mode=learn,
@@ -491,7 +491,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers,
                                     id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
                                     learn_mode=learn, persistence_id=item['persistence_id'],
-                                    allow_missing_values_flag=item['allow_missing_values'], output_logline=item['output_logline'])
+                                    allow_missing_values_flag=item['allow_missing_values_flag'], output_logline=item['output_logline'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
                     msg = f'The {item["type"].name} must have an id!'
@@ -536,7 +536,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 if item['tuple_transformation_function'] == 'demo':
                     tuple_transformation_function = tuple_transformation_function_demo_print_every_10th_value
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers,
-                                    persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
+                                    persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values_flag'],
                                     learn_mode=learn, tuple_transformation_function=tuple_transformation_function,
                                     output_logline=item['output_logline'])
                 # skipcq: PYL-W0603
@@ -666,7 +666,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 artefact_match_parameters = []
                 for match_parameters in item['artefact_match_parameters']:
                     artefact_match_parameters.append(tuple(i for i in match_parameters))
-                tmp_analyser = func(item['rule_id'], item['min_time_delta'], item['max_time_delta'], item['max_artefacts_a_for_single_b'],
+                tmp_analyser = func(item['rule_id'], item['min_time_delta'], item['max_time_delta'],
                                     artefact_match_parameters=artefact_match_parameters)
                 correlation_rules[item['rule_id']] = tmp_analyser
                 continue
@@ -779,7 +779,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                     target_path_list=item['target_path_list'], ignore_list=item['ignore_list'],
-                    allow_missing_values_flag=item['allow_missing_values'],
+                    allow_missing_values_flag=item['allow_missing_values_flag'],
                     output_logline=item['output_logline'], time_period_length=item['time_period_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], learn_mode=learn)
             elif item['type'].name == 'PathArimaDetector':
@@ -835,7 +835,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             else:
                 tmp_analyser = func(analysis_context.aminer_config, item['target_path_list'], anomaly_event_handlers, learn_mode=learn)
             if item['output_event_handlers'] is not None:
-                tmp_analyser.anomaly_event_handlers = item['output_event_handlers']
+                tmp_analyser.output_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
             atom_filter.add_handler(tmp_analyser, stop_when_handled_flag=stop_when_handled_flag)
     add_default_analysis_components(

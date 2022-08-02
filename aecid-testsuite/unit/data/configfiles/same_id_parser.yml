@@ -30,11 +30,11 @@ Analysis:
           learn_mode: True
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: False
-          allow_missing_values: False # optional default: False
+          allow_missing_values_flag: False # optional default: False
 
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector2
-          paths: ["/model/accesslog/request","/model/accesslog/status"]
+          target_path_list: ["/model/accesslog/request","/model/accesslog/status"]
           learn_mode: True
 
 EventHandlers:

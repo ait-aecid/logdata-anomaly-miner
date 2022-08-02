@@ -344,18 +344,18 @@ class ValueMatchRule(MatchRule):
 
 
 class ValueListMatchRule(MatchRule):
-    """Match elements of this class return true when the given target_path exists and has exactly one of the values included in the value list."""
+    """Match elements of this class return true when the given path exists and has exactly one of the values included in the value list."""
 
-    def __init__(self, target_path, value_list, match_action=None):
+    def __init__(self, target_path, target_value_list, match_action=None):
         self.target_path = target_path
-        self.value_list = value_list
+        self.target_value_list = target_value_list
         self.match_action = match_action
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
         test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path)
-        if (test_value is not None) and (test_value.match_object in self.value_list):
+        if (test_value is not None) and (test_value.match_object in self.target_value_list):
             if self.match_action is not None:
                 self.match_action.match_action(log_atom)
             self.log_success += 1
@@ -363,7 +363,7 @@ class ValueListMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'value(%s) in %s' % (' '.join([str(value) for value in self.value_list]), self.target_path)
+        return 'value(%s) in %s' % (' '.join([str(value) for value in self.target_value_list]), self.target_path)
 
 
 class ValueRangeMatchRule(MatchRule):

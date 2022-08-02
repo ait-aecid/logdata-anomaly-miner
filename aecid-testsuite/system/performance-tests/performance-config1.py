@@ -275,9 +275,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(time_correlation_detector)
 
     from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
-    cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1,
-                                            artefact_match_parameters=[
-                                                ('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
+    cron_job_announcement = CorrelationRule(
+        'CronJobAnnouncement', 5, 6, artefact_match_parameters=[('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
     a_class_selector = EventClassSelector('Announcement', [cron_job_announcement], None)
     b_class_selector = EventClassSelector('Execution', None, [cron_job_announcement])
     rules = [Rules.PathExistsMatchRule('/model/CronAnnouncement/Run', a_class_selector),

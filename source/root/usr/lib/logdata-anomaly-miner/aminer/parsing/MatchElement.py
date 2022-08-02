@@ -23,7 +23,7 @@ class MatchElement:
     def __init__(self, path: Union[str, None], match_string: bytes, match_object: Any, children: Union[List["MatchElement"], None]):
         """
         Initialize the MatchElement.
-        @param path when None, this element is anonymous. Hence it cannot be added to the result data and cannot have children.
+        @param path when None, this element is anonymous. Hence, it cannot be added to the result data and cannot have children.
         @param match_string the part of the input bytes string covered by the given match.
         @param match_object the matchString converted to an object for matchers detecting more complex data types, e.g., integer
         numbers or IP addresses.

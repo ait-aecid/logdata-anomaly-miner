@@ -33,7 +33,7 @@ Analysis:
           target_path_list: ["first/seq/s1","first/seq/d1"]
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: False
-          allow_missing_values: False # optional default: False
+          allow_missing_values_flag: False # optional default: False
           suppress: False
         - type: VerboseUnparsedAtomHandler
           id: VerboseUnparsedAtomHandler

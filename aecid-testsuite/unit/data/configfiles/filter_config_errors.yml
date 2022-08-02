@@ -28,18 +28,18 @@ Input:
 Analysis:
         - type: ParserCount
           id: ParserCount
-          paths: ["/model/accesslog/status"]
+          target_path_list: ["/model/accesslog/status"]
           report_interval: 10
           reset_after_report_flag: False # this attribute does not exist
           learn_mode: True # this attribute does not exist
 
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector1
-          paths: ["/model/accesslog/request","/model/accesslog/method"]
+          target_path_list: ["/model/accesslog/request","/model/accesslog/method"]
           learn_mode: True
           persistence_id: 'accesslog_request'
           output_logline: False
-          allow_missing_values: False
+          allow_missing_values_flag: False
 
 EventHandlers:
         - id: stpe

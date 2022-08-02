@@ -47,7 +47,7 @@ def get_model():
             """Get the children of this element (none)."""
             return None
 
-        def get_match_element(self, path: str, match_context):
+        def get_match_element(self, target_path: str, match_context):
             """
             Find the maximum number of bytes belonging to an exec argument.
             @return a match when at least two bytes were found including the delimiters.
