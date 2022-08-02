@@ -82,12 +82,13 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector,
             acf_pause_interval_percentage=acf_pause_interval_percentage, acf_auto_pause_interval=acf_auto_pause_interval,
             acf_auto_pause_interval_num_min=acf_auto_pause_interval_num_min, build_sum_over_values=build_sum_over_values,
-            num_periods_tsa_ini=num_periods_tsa_ini, alpha=alpha, num_min_time_history=num_min_time_history,
-            num_max_time_history=num_max_time_history, num_results_bt=num_results_bt, alpha_bt=alpha_bt, acf_threshold=acf_threshold,
-            round_time_interval_threshold=round_time_interval_threshold, force_period_length=force_period_length,
-            set_period_length=set_period_length, min_log_lines_per_time_step=min_log_lines_per_time_step, persistence_id=persistence_id,
-            target_path_list=target_path_list, ignore_list=ignore_list, output_logline=output_logline, learn_mode=learn_mode,
-            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            num_periods_tsa_ini=num_periods_tsa_ini, num_division_time_step=num_division_time_step, alpha=alpha,
+            num_min_time_history=num_min_time_history, num_max_time_history=num_max_time_history, num_results_bt=num_results_bt,
+            alpha_bt=alpha_bt, acf_threshold=acf_threshold, round_time_interval_threshold=round_time_interval_threshold,
+            force_period_length=force_period_length, set_period_length=set_period_length,
+            min_log_lines_per_time_step=min_log_lines_per_time_step, persistence_id=persistence_id, target_path_list=target_path_list,
+            ignore_list=ignore_list, output_logline=output_logline, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
 
         # Add the TSAArimaDetector-module to the list of the modules, which use the event_type_detector.

@@ -737,7 +737,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['target_path_list'], gof_alpha=item['gof_alpha'], s_gof_alpha=item['s_gof_alpha'],
+                    target_path_list=item['target_path_list'], gof_alpha=item['gof_alpha'], s_gof_alpha=item['s_gof_alpha'],
                     s_gof_bt_alpha=item['s_gof_bt_alpha'], d_alpha=item['d_alpha'], d_bt_alpha=item['d_bt_alpha'],
                     div_thres=item['div_thres'], sim_thres=item['sim_thres'], indicator_thres=item['indicator_thres'],
                     num_init=item['num_init'], num_update=item['num_update'], num_update_unq=item['num_update_unq'],
@@ -807,7 +807,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['target_path_list'], acf_pause_interval_percentage=item['acf_pause_interval_percentage'],
+                    target_path_list=item['target_path_list'], acf_pause_interval_percentage=item['acf_pause_interval_percentage'],
                     acf_auto_pause_interval=item['acf_auto_pause_interval'],
                     acf_auto_pause_interval_num_min=item['acf_auto_pause_interval_num_min'],
                     build_sum_over_values=item['build_sum_over_values'], num_periods_tsa_ini=item['num_periods_tsa_ini'],
@@ -821,7 +821,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'MinimalTransitionTimeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                    learn_mode=learn, output_logline=item['output_logline'], path_list=item['target_path_list'],
+                    learn_mode=learn, output_logline=item['output_logline'], target_path_list=item['target_path_list'],
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
                     num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
                     time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
