@@ -468,7 +468,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                     clone_set.remove(mapped_path)
                 # skipcq: FLK-E722
                 except:
-                    if mapped_path != target_path:
+                    if mapped_path != path:
                         missing_paths.add(mapped_path)
             if not missing_paths:
                 # Everything OK, just add the value to the mapping.

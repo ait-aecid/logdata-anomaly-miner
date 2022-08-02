@@ -235,7 +235,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             modulo_time_bin_definition = ModuloTimeBinDefinition(86400, 86400 / number_of_paths, 0, 1, number_of_paths, False)
             histogram_data = HistogramData('match/crontab', modulo_time_bin_definition)
             histogram_analysis = HistogramAnalysis(
-                self.aminer_config, [(histogram_data.target_path, modulo_time_bin_definition)], amplifier * self.waiting_time,
+                self.aminer_config, [(histogram_data.property_path, modulo_time_bin_definition)], amplifier * self.waiting_time,
                 [self.stream_printer_event_handler], False, 'Default')
 
             i = 0
@@ -976,7 +976,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
             else:
                 number_of_paths = 1000000
-            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=path_list)
 
             seconds = time.time()
             i = 0
@@ -1035,9 +1035,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
             else:
                 number_of_paths = 1000000
-            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=path_list)
             variable_type_detector = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], event_type_detector,
-                                                          path_list=path_list)
+                                                          target_path_list=path_list)
             seconds = time.time()
             i = 0
             measured_time = 0
@@ -1096,7 +1096,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
             else:
                 number_of_paths = 1000000
-            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=path_list)
             variable_correlation_detector = VariableCorrelationDetector(
                 self.aminer_config, [self.stream_printer_event_handler], event_type_detector)
             seconds = time.time()
