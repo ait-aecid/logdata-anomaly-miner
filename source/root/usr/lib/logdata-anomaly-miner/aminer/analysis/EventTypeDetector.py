@@ -48,7 +48,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # avoid "defined outside init" issue
         self.next_persist_time, self.log_success, self.log_total = [None]*3
         super().__init__(
-            mutable_default_args=["id_path_list", "target_path_list"], aminer_config=aminer_config,
+            mutable_default_args=["id_path_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id, target_path_list=target_path_list,
             id_path_list=id_path_list, allow_missing_id=allow_missing_id, allowed_id_tuples=allowed_id_tuples, min_num_vals=min_num_vals,
             max_num_vals=max_num_vals, save_values=save_values

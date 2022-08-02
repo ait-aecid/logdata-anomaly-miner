@@ -114,7 +114,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
+            mutable_default_args=["ignore_list", "constraint_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector, persistence_id=persistence_id,
             target_path_list=target_path_list, used_gof_test=used_gof_test, gof_alpha=gof_alpha, s_gof_alpha=s_gof_alpha,
             s_gof_bt_alpha=s_gof_bt_alpha, d_alpha=d_alpha, d_bt_alpha=d_bt_alpha, div_thres=div_thres, sim_thres=sim_thres,

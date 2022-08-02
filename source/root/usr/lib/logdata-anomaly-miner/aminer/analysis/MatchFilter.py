@@ -33,8 +33,8 @@ class MatchFilter(AtomHandlerInterface):
         # avoid "defined outside init" issue
         self.next_persist_time, self.log_success, self.log_total = [None]*3
         super().__init__(
-            mutable_default_args=["target_value_list"], aminer_config=aminer_config, target_path_list=target_path_list,
-            anomaly_event_handlers=anomaly_event_handlers, target_value_list=target_value_list, output_logline=output_logline
+            aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
+            target_value_list=target_value_list, output_logline=output_logline
         )
         self.persistence_id = 'Not persisted'
 
