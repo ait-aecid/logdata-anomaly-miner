@@ -55,11 +55,11 @@ Input:
 Analysis:
         - type: NewMatchPathValueDetector
           id: NewMatchPathValueDetector
-          paths: ["/accesslog/status"]
+          target_path_list: ["/accesslog/status"]
           learn_mode: True
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector
-          paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
+          target_path_list: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
           learn_mode: False
 
 EventHandlers:

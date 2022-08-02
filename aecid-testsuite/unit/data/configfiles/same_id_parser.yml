@@ -26,7 +26,7 @@ Input:
 Analysis:
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector1
-          paths: ["/model/accesslog/request","/model/accesslog/method"]
+          target_path_list: ["/model/accesslog/request","/model/accesslog/method"]
           learn_mode: True
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: False

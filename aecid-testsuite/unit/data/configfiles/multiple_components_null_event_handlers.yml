@@ -122,10 +122,10 @@ Analysis:
           id: TimestampsUnsortedDetector
         - type: NewMatchPathValueDetector
           id: NewMatchPathValueDetector
-          paths: ["/accesslog/status"]
+          target_path_list: ["/accesslog/status"]
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector
-          paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
+          target_path_list: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50
@@ -153,25 +153,25 @@ Analysis:
           output_logline: True
         - type: EnhancedNewMatchPathValueComboDetector
           id: EnhancedNewMatchPathValueComboDetector
-          paths: ["/model/DailyCron/UName", "/model/DailyCron/JobNumber"]
+          target_path_list: ["/model/DailyCron/UName", "/model/DailyCron/JobNumber"]
           tuple_transformation_function: demo
           output_logline: True
         - type: MatchFilter
           id: MatchFilter
-          paths: ["/model/Random"]
+          target_path_list: ["/model/Random"]
           value_list: [1, 10, 100]
           output_logline: True
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChangeDetector
           timestamp_path: None
-          paths: ["/model/Random"]
+          target_path_list: ["/model/Random"]
           min_bin_elements: 100
           min_bin_time: 10
           output_logline: True
         - type: MatchValueStreamWriter
           id: MatchValueStreamWriter
           stream: "sys.stdout"
-          paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
+          target_path_list: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
           separator: ";"
           missing_value_string: ""
         - type: PathExistsMatchRule
