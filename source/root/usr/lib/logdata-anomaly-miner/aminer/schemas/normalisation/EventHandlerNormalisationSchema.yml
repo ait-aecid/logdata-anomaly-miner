@@ -18,7 +18,9 @@
                 'options': {'type': 'dict', 'schema': {'id': {'type': 'string'}, 'type': {'type': ['string', 'list', 'integer']}}},
                 'output_file_path': {'type': 'string'},
                 'pretty': {'type': 'boolean', 'default': True},
-                'weights': {'type': 'dict', 'default': {}}
+                'weights': {'type': 'dict', 'default': {}},
+                'auto_weights': {'type': 'boolean', 'default': False},
+                'auto_weights_history_length': {'type': 'integer', 'default': 1000, 'min': 1}
             }
         }
     }

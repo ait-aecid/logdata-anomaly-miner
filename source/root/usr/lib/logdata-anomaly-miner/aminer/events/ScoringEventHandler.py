@@ -21,11 +21,17 @@ from aminer import AminerConfig
 class ScoringEventHandler(EventHandlerInterface):
     """This class implements an event record listener, that will convert event data to JSON format."""
 
-    def __init__(self, event_handlers, analysis_context, weights):
+    def __init__(self, event_handlers, analysis_context, weights, auto_weights, auto_weights_history_length):
         """Initialize the ScoringEventHandler component."""
         self.analysis_context = analysis_context
         self.event_handlers = event_handlers
         self.weights = weights
+        self.auto_weights = auto_weights
+        self.auto_weights_history_length = auto_weights_history_length
+
+        if self.auto_weights:
+            self.history_list = [[] for _ in range(self.auto_weights_history_length)]
+            self.history_list_index = 0
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
@@ -68,10 +74,17 @@ class ScoringEventHandler(EventHandlerInterface):
                 event_data_confidence = event_data_confidence[path]
 
             # Calculate the absolute confidence
-            confidence_absolut = sum([self.weights[val] if val in self.weights else 0.5 for val in analyis_list])
+            confidence_absolut = sum([self.get_weight(val) for val in analyis_list])
             # Add the the absolute and mean confidence to the message
             event_data_confidence[output_field_path[-1]] = {'confidence_absolut': confidence_absolut,
                                                             'confidence_mean': confidence_absolut / len(analyis_list)}
+
+            # Update the history list and increase the count index
+            if self.auto_weights:
+                self.history_list[self.history_list_index] = analyis_list
+                self.history_list_index += 1
+                if self.history_list_index >= self.auto_weights_history_length:
+                    self.history_list_index %= self.auto_weights_history_length
 
         # Send the message to the following event handlers
         for listener in self.event_handlers:
@@ -81,3 +94,14 @@ class ScoringEventHandler(EventHandlerInterface):
                 event_source = copy.copy(event_source)
                 event_source.output_event_handlers.append(listener)
             listener.receive_event(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source)
+
+    def get_weight(self, value):
+        """Return the weight of the value parameter."""
+        if value in self.weights:
+            # Return the specified weight if the value is in the weight list
+            return self.weights[value]
+        elif not self.auto_weights:
+            # Return 0.5 if the value is not in the weigth list and the weights are not automatically calculated
+            return 0.5
+        # Else calculate the weight through 10 / (10 + number of value appearances)
+        return 10 / (10 + sum([value in value_list for value_list in self.history_list]))

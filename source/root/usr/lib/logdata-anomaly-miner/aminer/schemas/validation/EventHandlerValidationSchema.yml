@@ -21,7 +21,9 @@
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
                     'score': {'type': 'boolean'},
-                    'weights': {'type': 'dict', 'required': False},
+                    'weights': {'type': 'dict'},
+                    'auto_weights': {'type': 'boolean'},
+                    'auto_weights_history_length': {'type': 'integer', 'default': 1000, 'min': 1},
                     'topic': {'type': 'string', 'required': False},
                     'url': {'type': 'string', 'empty': False},
                 },
@@ -31,7 +33,9 @@
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
                     'score': {'type': 'boolean'},
-                    'weights': {'type': 'dict', 'required': False},
+                    'weights': {'type': 'dict'},
+                    'auto_weights': {'type': 'boolean'},
+                    'auto_weights_history_length': {'type': 'integer', 'default': 1000, 'min': 1},
                     'topic': {'type': 'string', 'required': True, 'empty': False},
                     'cfgfile': {'type': 'string', 'empty': False},
                     'options': {'type': 'dict', 'schema': {
@@ -43,7 +47,9 @@
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
                     'score': {'type': 'boolean'},
-                    'weights': {'type': 'dict', 'required': False},
+                    'weights': {'type': 'dict'},
+                    'auto_weights': {'type': 'boolean'},
+                    'auto_weights_history_length': {'type': 'integer', 'default': 1000, 'min': 1},
                     'output_file_path': {'type': 'string', 'empty': False}
                 },
                 {
@@ -52,7 +58,9 @@
                     'json': {'type': 'boolean'},
                     'pretty': {'type': 'boolean'},
                     'score': {'type': 'boolean'},
-                    'weights': {'type': 'dict', 'required': False},
+                    'weights': {'type': 'dict'},
+                    'auto_weights': {'type': 'boolean'},
+                    'auto_weights_history_length': {'type': 'integer', 'default': 1000, 'min': 1},
                     'instance_name': {'type': 'string', 'default': 'aminer', 'empty': False}
                 }
             ]
