@@ -30,15 +30,17 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, num_windows=50,
-                 confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False, set_lower_limit=None,
-                 set_upper_limit=None, persistence_id='Default', auto_include_flag=False, output_log_line=True, ignore_list=None,
-                 constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, scoring_path_list=None, window_size=600,
+                 num_windows=50, confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False,
+                 set_lower_limit=None, set_upper_limit=None, persistence_id='Default', auto_include_flag=False, output_log_line=True,
+                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
         occurrences. When no paths are specified, the events given by the full path list are analyzed.
+        @param scoring_path_list parser paths of values to be analyzed by following event handlers like the ScoringEventHandler.
+        Multiple paths mean that values are analyzed by their combined occurrences.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
         @param num_windows the number of previous time windows considered for expected frequency estimation.
@@ -59,6 +61,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
         """
         self.target_path_list = target_path_list
+        self.scoring_path_list = scoring_path_list
+        if self.scoring_path_list is None:
+            self.scoring_path_list = []
         self.anomaly_event_handlers = anomaly_event_handlers
         self.auto_include_flag = auto_include_flag
         self.output_log_line = output_log_line
@@ -83,6 +88,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.set_upper_limit = set_upper_limit
         self.next_check_time = None
         self.counts = {}
+        self.scoring_value_list = {}
         self.ranges = {}
         self.exceeded_range_frequency = {}
         self.log_total = 0
@@ -124,6 +130,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 freqs = entry[1]
                 # In case that num_windows differ, only take as many as possible
                 self.counts[tuple(log_event)] = freqs[max(0, len(freqs) - num_windows - 1):] + [0]
+                if self.scoring_path_list is not None:
+                    self.scoring_value_list[tuple(log_event)] = []
             logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
@@ -233,6 +241,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                       'ConfidenceFactor': self.confidence_factor,
                                       'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-1]) /
                                       max(occurrences_mean, self.counts[log_ev][-1])}
+                    # In case that scoring_path_list is set, give their values to the event handlers for further analysis.
+                    if len(self.scoring_path_list) > 0:
+                        frequency_info['IdValues'] = self.scoring_value_list[log_ev]
                     event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency anomaly detected', sorted_log_lines,
@@ -279,6 +290,22 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency exceeds range for the first time',
                                            sorted_log_lines, event_data, log_atom, self)
+
+        # Get the id list if the scoring_path_list is set and save it for the anomaly message
+        if len(self.scoring_path_list) > 0:
+            id_list = [None for _ in range(len(self.scoring_path_list))]
+            for index, id_path in enumerate(self.scoring_path_list):
+                id_match = log_atom.parser_match.get_match_dictionary().get(id_path)
+                if id_match is not None:
+                    if isinstance(id_match.match_object, bytes):
+                        id_list[index] = id_match.match_object.decode(AminerConfig.ENCODING)
+                    else:
+                        id_list[index] = id_match.match_object
+            if log_event in self.counts:
+                self.scoring_value_list[log_event].append(id_list)
+            else:
+                self.scoring_value_list[log_event] = [id_list]
+
         # Increase count for observed events
         if log_event in self.counts:
             self.counts[log_event][-1] += 1
@@ -286,17 +313,20 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             self.counts[log_event] = [1]
         self.log_success += 1
 
-    def reset_counter(self, event_type):
+    def reset_counter(self, log_event):
         """Create count index for new time window"""
         if self.auto_include_flag is True:
-            if len(self.counts[event_type]) <= self.num_windows + 1:
-                self.counts[event_type].append(0)
+            if len(self.counts[log_event]) <= self.num_windows + 1:
+                self.counts[log_event].append(0)
             else:
-                self.counts[event_type] = self.counts[event_type][1:] + [0]
+                self.counts[log_event] = self.counts[log_event][1:] + [0]
             if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                 self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
         else:
-            self.counts[event_type][-1] = 0
+            self.counts[log_event][-1] = 0
+        # Reset scoring_value_list
+        if len(self.scoring_path_list) > 0:
+            self.scoring_value_list[log_event] = []
 
     def calculate_range(self, log_event):
         """Calculate the corresponding range to log_event."""
@@ -451,3 +481,15 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_success = 0
         self.log_total = 0
         self.log_windows = 0
+
+    def get_weight_analysis_field_path(self):
+        """Return the path to the list in the output of the detector which is weighted by the ScoringEventHandler."""
+        if self.scoring_path_list:
+            return ['FrequencyData', 'IdValues']
+        return []
+
+    def get_weight_output_field_path(self):
+        """Return the path where the ScoringEventHandler adds the scorings in the output of the detector."""
+        if self.scoring_path_list:
+            return ['FrequencyData', 'Scoring']
+        return []

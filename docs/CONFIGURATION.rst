@@ -1399,6 +1399,7 @@ EventFrequencyDetector
 This module defines an detector for event and value frequency deviations.
 
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **scoring_path_list** parser paths of values to be analyzed by following event handlers like the ScoringEventHandler. Multiple paths mean that values are analyzed by their combined occurrences.
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **window_size** the length of the time window for counting in seconds (float, defaults to 600).
 * **num_windows** the number of previous time windows considered for expected frequency estimation (integer, defaults to 50).

@@ -44,6 +44,8 @@
                 'ignore_list': {
                     'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'id_path_list': {'type': 'list', 'default': []},
+                'scoring_path_list': {
+                    'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'prob_thresh': {'type': 'float', 'default': 0.05},
                 'default_freqs': {'type': 'boolean', 'default': False},
                 'skip_repetitions': {'type': 'boolean', 'default': False},
