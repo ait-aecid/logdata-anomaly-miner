@@ -11,11 +11,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import json
-import time
-
 from aminer.events.EventInterfaces import EventHandlerInterface
-from aminer import AminerConfig
 
 
 class ScoringEventHandler(EventHandlerInterface):
@@ -40,7 +36,7 @@ class ScoringEventHandler(EventHandlerInterface):
 
         # Get the path to the analysis and output fields from the event_source or set the paths to empty lists if not
         if (callable(getattr(event_source.__class__, 'get_weight_analysis_field_path', None)) and
-            callable(getattr(event_source.__class__, 'get_weight_output_field_path', None))):
+                callable(getattr(event_source.__class__, 'get_weight_output_field_path', None))):
             analysis_field_path = event_source.get_weight_analysis_field_path()
             output_field_path = event_source.get_weight_output_field_path()
         else:
@@ -100,7 +96,7 @@ class ScoringEventHandler(EventHandlerInterface):
         if value in self.weights:
             # Return the specified weight if the value is in the weight list
             return self.weights[value]
-        elif not self.auto_weights:
+        if not self.auto_weights:
             # Return 0.5 if the value is not in the weigth list and the weights are not automatically calculated
             return 0.5
         # Else calculate the weight through 10 / (10 + number of value appearances)
