@@ -17,7 +17,7 @@ from aminer.events.EventInterfaces import EventHandlerInterface
 class ScoringEventHandler(EventHandlerInterface):
     """This class implements an event record listener, that will convert event data to JSON format."""
 
-    def __init__(self, event_handlers, analysis_context, weights={}, auto_weights=False, auto_weights_history_length=1000):
+    def __init__(self, event_handlers, analysis_context, weights=None, auto_weights=False, auto_weights_history_length=1000):
         """
         Initialize the ScoringEventHandler component.
         @param weights dictionary of the A dictionary that specifies the weights of values for the scoring. The keys are the strings of the
@@ -102,7 +102,7 @@ class ScoringEventHandler(EventHandlerInterface):
 
     def get_weight(self, value):
         """Return the weight of the value parameter."""
-        if value in self.weights:
+        if self.weights is not None and value in self.weights:
             # Return the specified weight if the value is in the weight list
             return self.weights[value]
         if not self.auto_weights:
