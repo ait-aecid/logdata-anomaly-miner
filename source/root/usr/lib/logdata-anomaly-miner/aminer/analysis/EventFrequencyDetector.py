@@ -293,18 +293,19 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
         # Get the id list if the scoring_path_list is set and save it for the anomaly message
         if len(self.scoring_path_list) > 0:
-            id_list = [None for _ in range(len(self.scoring_path_list))]
-            for index, id_path in enumerate(self.scoring_path_list):
-                id_match = log_atom.parser_match.get_match_dictionary().get(id_path)
-                if id_match is not None:
-                    if isinstance(id_match.match_object, bytes):
-                        id_list[index] = id_match.match_object.decode(AminerConfig.ENCODING)
+            for scoring_path in self.scoring_path_list:
+                scoring_match = log_atom.parser_match.get_match_dictionary().get(scoring_path)
+                if scoring_match is not None:
+                    # Get the value of the current path
+                    if isinstance(scoring_match.match_object, bytes):
+                        scoring_value = scoring_match.match_object.decode(AminerConfig.ENCODING)
                     else:
-                        id_list[index] = id_match.match_object
-            if log_event in self.counts:
-                self.scoring_value_list[log_event].append(id_list)
-            else:
-                self.scoring_value_list[log_event] = [id_list]
+                        scoring_value = scoring_match.match_object
+                    # Save the value in the list
+                    if log_event in self.counts:
+                        self.scoring_value_list[log_event].append(scoring_value)
+                    else:
+                        self.scoring_value_list[log_event] = [scoring_value]
 
         # Increase count for observed events
         if log_event in self.counts:
