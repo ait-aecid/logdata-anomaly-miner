@@ -49,4 +49,4 @@ class DelimitedDataModelElement(ModelElementInterface):
             return None
         match_data = data[:match_len + len(self.delimiter) * (self.consume_delimiter is True)]
         match_context.update(match_data)
-        return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)
+        return MatchElement(f"{path}/{self.element_id}", match_data, match_data, None)

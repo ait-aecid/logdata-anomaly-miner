@@ -45,13 +45,13 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
 
         if value_sign_type not in (DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.SIGN_TYPE_OPTIONAL,
                                    DecimalIntegerValueModelElement.SIGN_TYPE_MANDATORY):
-            msg = "Invalid value_sign_type %s" % value_sign_type
+            msg = f"Invalid value_sign_type {value_sign_type}"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
 
         if value_pad_type not in (DecimalIntegerValueModelElement.PAD_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_ZERO,
                                   DecimalIntegerValueModelElement.PAD_TYPE_BLANK):
-            msg = "Invalid value_pad_type %s" % value_pad_type
+            msg = f"Invalid value_pad_type {value_pad_type}"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.digits = set(b"0123456789")
@@ -98,4 +98,4 @@ class DecimalIntegerValueModelElement(ModelElementInterface):
         except ValueError:
             return None
         match_context.update(match_string)
-        return MatchElement("%s/%s" % (path, self.element_id), match_string, match_value, None)
+        return MatchElement(f"{path}/{self.element_id}", match_string, match_value, None)

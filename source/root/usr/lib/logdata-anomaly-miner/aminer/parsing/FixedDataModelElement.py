@@ -35,4 +35,4 @@ class FixedDataModelElement(ModelElementInterface):
         if not match_context.match_data.startswith(self.fixed_data):
             return None
         match_context.update(self.fixed_data)
-        return MatchElement("%s/%s" % (path, self.element_id), self.fixed_data, self.fixed_data, None)
+        return MatchElement(f"{path}/{self.element_id}", self.fixed_data, self.fixed_data, None)

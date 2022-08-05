@@ -59,7 +59,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.max_line_length = max_line_length
         self.default_timestamp_path_list = default_timestamp_path_list
         if not isinstance(eol_sep, bytes):
-            msg = '%s eol_sep parameter must be of type bytes!' % self.__class__.__name__
+            msg = f'{self.__class__.__name__} eol_sep parameter must be of type bytes!'
             print(msg, file=sys.stderr)
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             sys.exit(-1)
@@ -175,7 +175,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         """Dispatch the data using the appropriate handlers. Also clean or set lastUnconsumed fields depending on outcome of dispatching."""
         type(self).COUNTER = type(self).COUNTER + 1
         if self.COUNTER % 1000 == 0 and self.COUNTER != 0:
-            logging.getLogger(DEBUG_LOG_NAME).info('%d log atoms were processed totally.', self.COUNTER)
+            logging.getLogger(DEBUG_LOG_NAME).info(f'{self.COUNTER} log atoms were processed totally.')
         was_consumed_flag = False
         if not self.atom_handler_list:
             was_consumed_flag = True
@@ -195,4 +195,4 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         if self.event_handler_list is None:
             return
         for handler in self.event_handler_list:
-            handler.receive_event('Input.%s' % self.__class__.__name__, message, [line_data], None, None, self)
+            handler.receive_event(f'Input.{self.__class__.__name__}', message, [line_data], None, None, self)

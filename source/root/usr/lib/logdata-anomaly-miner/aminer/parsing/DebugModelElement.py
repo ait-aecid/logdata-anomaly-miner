@@ -43,7 +43,7 @@ class DebugModelElement(ModelElementInterface):
         @param match_context the match_context to be analyzed.
         @return Always return a match.
         """
-        msg = 'DebugModelElement path = "%s/%s", unmatched = "%s"' % (path, self.element_id, repr(match_context.match_data))
+        msg = f'DebugModelElement path = "{path}/{self.element_id}", unmatched = "{repr(match_context.match_data)}"'
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
-        return MatchElement('%s/%s' % (path, self.element_id), b"", b"", None)
+        return MatchElement(f"{path}/{self.element_id}", b"", b"", None)

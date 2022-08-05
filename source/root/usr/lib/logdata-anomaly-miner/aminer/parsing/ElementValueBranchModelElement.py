@@ -45,7 +45,7 @@ class ElementValueBranchModelElement(ModelElementInterface):
         @param match_context an instance of MatchContext class holding the data context to match against.
         @return the matchElement or None if the test model did not match, no branch was selected or the branch did not match.
         """
-        current_path = "%s/%s" % (path, self.element_id)
+        current_path = f"{path}/{self.element_id}"
         start_data = match_context.match_data
         model_match = self.value_model.get_match_element(current_path, match_context)
         if model_match is None:

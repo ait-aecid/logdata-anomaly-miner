@@ -65,7 +65,7 @@ class IpAddressDataModelElement(ModelElementInterface):
             return None
         match_string = data[:match_len]
         match_context.update(match_string)
-        return MatchElement("%s/%s" % (path, self.element_id), match_string, extracted_address, None)
+        return MatchElement(f"{path}/{self.element_id}", match_string, extracted_address, None)
 
 
 def extract_ipv4_address(data: bytes, match_len: int):

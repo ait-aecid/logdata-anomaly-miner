@@ -28,4 +28,4 @@ class AnyByteDataModelElement(ModelElementInterface):
         if not match_data:
             return None
         match_context.update(match_data)
-        return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)
+        return MatchElement(f"{path}/{self.element_id}", match_data, match_data, None)

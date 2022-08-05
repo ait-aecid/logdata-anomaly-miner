@@ -350,7 +350,7 @@ class JsonModelElement(ModelElementInterface):
                     data = str(data).encode()
                 if isinstance(val, dict):  # skipcq: PYL-R1723
                     matches += self.parse_json_dict(
-                        val, match_array[j], "%s/%s" % (current_path, split_key), match_context)
+                        val, match_array[j], f"{current_path}/{split_key}", match_context)
                     if matches[-1] is None:
                         if len(value) - 1 == k:
                             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
@@ -456,8 +456,8 @@ class JsonModelElement(ModelElementInterface):
             if match_element is not None and len(match_element.match_string) != len(data) and (
                     not isinstance(match_element.match_object, bytes) or len(match_element.match_object) != len(data)):
                 logging.getLogger(DEBUG_LOG_NAME).debug(
-                    debug_log_prefix + "Data length not matching! match_string: %d, data: %d, data: %s" % (
-                        len(match_element.match_string), len(data), data.decode()))
+                    debug_log_prefix + f"Data length not matching! match_string: {len(match_element.match_string)}, data: {len(data)},"
+                                       f" data: {data.decode()}")
                 match_element = None
             index = max([match_context.match_data.replace(b"\\", b"").find(split_key.encode()),
                          match_context.match_data.find(split_key.encode()), match_context.match_data.decode().find(split_key)])

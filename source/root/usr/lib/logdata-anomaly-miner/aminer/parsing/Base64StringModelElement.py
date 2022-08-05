@@ -49,4 +49,4 @@ class Base64StringModelElement(ModelElementInterface):
             match_value.decode(AminerConfig.ENCODING)
         except UnicodeDecodeError:
             match_value = match_string
-        return MatchElement("%s/%s" % (path, self.element_id), match_string, match_value, None)
+        return MatchElement(f"{path}/{self.element_id}", match_string, match_value, None)

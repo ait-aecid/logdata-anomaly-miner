@@ -27,7 +27,7 @@ class FirstMatchModelElement(ModelElementInterface):
 
     def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
-        current_path = "%s/%s" % (path, self.element_id)
+        current_path = f"{path}/{self.element_id}"
 
         match_data = match_context.match_data
         for child_element in self.children:

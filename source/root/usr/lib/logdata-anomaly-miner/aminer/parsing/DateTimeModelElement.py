@@ -176,7 +176,7 @@ class DateTimeModelElement(ModelElementInterface):
                     scan_pos = next_param_pos
                     continue
                 else:
-                    msg = "Unknown dateformat specifier %s" % repr(param_type_code)
+                    msg = f"Unknown dateformat specifier {repr(param_type_code)}"
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
             if isinstance(new_element, bytes):
@@ -186,14 +186,14 @@ class DateTimeModelElement(ModelElementInterface):
                     date_format_parts.append(new_element)
             else:
                 if new_element[0] in date_format_type_set:
-                    msg = "Multiple format specifiers for type %d" % new_element[0]
+                    msg = f"Multiple format specifiers for type {new_element[0]}"
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 date_format_type_set.add(new_element[0])
                 date_format_parts.append(new_element)
             scan_pos = next_param_pos
         if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
-            msg = "Cannot use %s (seconds since epoch) with other non-second format types"
+            msg = f"Cannot use %s (seconds since epoch) with other non-second format types"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.date_format_parts = date_format_parts
@@ -318,9 +318,9 @@ class DateTimeModelElement(ModelElementInterface):
                             parsed_date_time = next_year_date_time
                             total_seconds = next_year_total_seconds
                             self.last_parsed_seconds = total_seconds
-                            msg = "DateTimeModelElement unqualified timestamp year wraparound detected from %s to %s" % (
-                                datetime.fromtimestamp(self.last_parsed_seconds, self.time_zone).isoformat(),
-                                parsed_date_time.isoformat())
+                            msg = f"DateTimeModelElement unqualified timestamp year wraparound detected from " \
+                                  f"{datetime.fromtimestamp(self.last_parsed_seconds, self.time_zone).isoformat()} to " \
+                                  f"{parsed_date_time.isoformat()}"
                             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                             print("WARNING: " + msg, file=sys.stderr)
                         else:
@@ -336,8 +336,8 @@ class DateTimeModelElement(ModelElementInterface):
                                 self.last_parsed_seconds = total_seconds
                             else:
                                 # None of both seems correct, just report that.
-                                msg = "DateTimeModelElement time inconsistencies parsing %s, expecting value around %d. " \
-                                      "Check your settings!" % (repr(date_str), self.last_parsed_seconds)
+                                msg = f"DateTimeModelElement time inconsistencies parsing {repr(date_str)}, expecting value around " \
+                                      f"{self.last_parsed_seconds}. Check your settings!"
                                 logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                                 print("WARNING: " + msg, file=sys.stderr)
 
@@ -411,7 +411,7 @@ class DateTimeModelElement(ModelElementInterface):
                 # the offset must be subtracted, because the timestamp should always be UTC.
                 total_seconds -= tz_specifier_offset
         match_context.update(date_str)
-        return MatchElement("%s/%s" % (path, self.element_id), date_str, total_seconds, None)
+        return MatchElement(f"{path}/{self.element_id}", date_str, total_seconds, None)
 
     @staticmethod
     def parse_fraction(value_str: bytes):
@@ -483,8 +483,8 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
                 raise ValueError(msg)
             for date_time_model_element in self.date_time_model_elements:
                 if date_format.startswith(date_time_model_element.date_format):
-                    msg = "Invalid order of date_formats. %s starts with %s. More specific datetimes would be skipped." % (
-                        date_format.decode(), date_time_model_element.date_format.decode())
+                    msg = f"Invalid order of date_formats. {date_format.decode()} starts with " \
+                          f"{date_time_model_element.date_format.decode()}. More specific datetimes would be skipped."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
             self.date_time_model_elements.append(DateTimeModelElement(

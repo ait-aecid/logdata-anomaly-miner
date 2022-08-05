@@ -116,4 +116,4 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         else:
             match_value = float(match_string)
         match_context.update(match_string)
-        return MatchElement("%s/%s" % (path, self.element_id), match_string, match_value, None)
+        return MatchElement(f"{path}/{self.element_id}", match_string, match_value, None)

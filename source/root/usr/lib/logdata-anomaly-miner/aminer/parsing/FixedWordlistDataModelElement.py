@@ -47,4 +47,4 @@ class FixedWordlistDataModelElement(ModelElementInterface):
             return None
 
         match_context.update(match_data)
-        return MatchElement("%s/%s" % (path, self.element_id), match_data, word_pos, None)
+        return MatchElement(f"{path}/{self.element_id}", match_data, word_pos, None)
