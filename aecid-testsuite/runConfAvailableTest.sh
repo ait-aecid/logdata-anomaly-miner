@@ -46,7 +46,7 @@ EventHandlers:
           type: StreamPrinterEventHandler
 
 Input:
-        paths: ["/accesslog/time"]
+        timestamp_paths: ["/accesslog/time"]
 EOL
 
     BN=`basename "$filename" .py`
