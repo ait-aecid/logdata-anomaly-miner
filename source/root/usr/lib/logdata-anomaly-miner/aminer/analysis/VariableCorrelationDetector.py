@@ -613,8 +613,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     elif i_val in self.rel_list[event_index][pos_var_cor_index][0] and j_val not in self.rel_list[event_index][
                             pos_var_cor_index][0][i_val]:
                         if not self.generate_rules[event_index] or i_val not in new_i_vals:
-                            # skipcq: PYL-C0209
                             sorted_log_lines.append(
+                                # skipcq: PYL-C0209
                                 'New value occurred in correlation of the paths %s = %s -> %s = old value: %s / New appeared value: %s' % (
                                     self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                         pos_var_cor_val[0]]], repr(i_val),
@@ -642,8 +642,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     elif j_val in self.rel_list[event_index][pos_var_cor_index][1] and i_val not in self.rel_list[event_index][
                             pos_var_cor_index][1][j_val]:
                         if not self.generate_rules[event_index] or j_val not in new_j_vals:
-                            # skipcq: PYL-C0209
                             sorted_log_lines.append(
+                                # skipcq: PYL-C0209
                                 'New value occurred in correlation of the paths %s = %s -> %s = old value: %s / New appeared value: %s' % (
                                     self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                         pos_var_cor_val[1]]], repr(j_val),
@@ -1059,8 +1059,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                     pos_var_cor_index][0][i_val]):
                                 if len(current_appearance_list[pos_var_cor_index][0][i_val]) / len(self.w_rel_list[event_index][
                                         pos_var_cor_index][0][i_val]) >= self.new_vals_alarm_thres:
-                                    # skipcq: PYL-C0209
                                     sorted_log_lines.append(
+                                        # skipcq: PYL-C0209
                                         'Alarm: New value occurred in correlation of the paths %s = %s -> %s =' % (
                                                 self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                                     pos_var_cor_val[0]]], repr(i_val),

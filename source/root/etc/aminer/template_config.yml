@@ -129,7 +129,7 @@ Analysis:
           learn_mode: true
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: false
-          allow_missing_values_flag: false # optional default: false
+          allow_missing_values: false # optional default: false
 
         - type: "NewMatchPathValueComboDetector"
           paths: ["/model/accesslog/request","/model/accesslog/status"]

@@ -63,7 +63,7 @@ def get_model():
 
             match_data = data[:match_len]
             match_context.update(match_data)
-            return MatchElement("%s/%s" % (target_path, self.element_id), match_data, match_value, None)
+            return MatchElement(f"{target_path}/{self.element_id}", match_data, match_value, None)
 
     pam_status_word_list = FixedWordlistDataModelElement("status", [b"failed", b"success"])
 

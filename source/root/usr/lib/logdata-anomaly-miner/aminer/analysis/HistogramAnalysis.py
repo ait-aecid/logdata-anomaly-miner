@@ -568,7 +568,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 d['BinDefinition'] = bin_definition
             d['PropertyPath'] = data_item.target_path
             # skipcq: PYL-C0209
-            report_str += os.linesep + f'Path values "%s":' % '", "'.join(histogram_mapping[0])
+            report_str += os.linesep + 'Path values "%s":' % '", "'.join(histogram_mapping[0])
             if isinstance(histogram_mapping[2].match_element.match_string, bytes):
                 histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode(
                     AminerConfig.ENCODING)
