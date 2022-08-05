@@ -41,7 +41,7 @@ class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
                 self.latest_timestamp_seen = log_atom.get_timestamp()
 
         result = False
-        for handler, stop_when_handled_flag in self.subhandler_list:
+        for handler, _ in self.subhandler_list:
             handler_result = handler.receive_atom(log_atom)
             if handler_result is True:
                 result = True

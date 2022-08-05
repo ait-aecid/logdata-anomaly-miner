@@ -18,13 +18,6 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 class AnyByteDataModelElement(ModelElementInterface):
     """This class matches any byte but at least one. Thus, a match will always span the complete data from beginning to end."""
 
-    def __init__(self, element_id: str):
-        """
-        Initialize the ModelElement.
-        @param element_id an identifier for the ModelElement which is shown in the path.
-        """
-        super().__init__(element_id)
-
     def get_match_element(self, path: str, match_context):
         """
         Just return a match including all data from the context.

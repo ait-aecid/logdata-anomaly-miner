@@ -99,7 +99,6 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
         @param upper_case if True, the letters of the hex alphabet are uppercase, otherwise they are lowercase.
         @param alphabet the allowed letters to match data.
         """
-
         allowed_kwargs = [
             "date_format", "time_zone", "text_locale", "start_year", "max_time_jump_seconds", "value_sign_type", "value_pad_type",
             "exponent_type", "delimiter", "escape", "consume_delimiter", "value_model", "value_path", "branch_model_dict", "default_branch",
@@ -135,33 +134,30 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
-        if hasattr(self, "text_locale"):
-            if self.text_locale is not None:
-                if not isinstance(self.text_locale, str) and not isinstance(self.text_locale, tuple):
-                    msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise TypeError(msg)
-                if isinstance(self.text_locale, tuple) and len(self.text_locale) != 2:
-                    msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise ValueError(msg)
-                try:
-                    old_locale = locale.getdefaultlocale()
-                    if old_locale != self.text_locale:
-                        locale.setlocale(locale.LC_ALL, self.text_locale)
-                        logging.getLogger(DEBUG_LOG_NAME).info(
-                            "Changed time locale from %s to %s.", self.text_locale, "".join(self.text_locale))
-                except locale.Error:
-                    msg = "text_locale %s is not installed!" % self.text_locale
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise locale.Error(msg)
+        if hasattr(self, "text_locale") and self.text_locale is not None:
+            if not isinstance(self.text_locale, str) and not isinstance(self.text_locale, tuple):
+                msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if isinstance(self.text_locale, tuple) and len(self.text_locale) != 2:
+                msg = "text_locale has to be of the type string or of the type tuple and have the length 2. (locale, encoding)"
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+            try:
+                old_locale = locale.getdefaultlocale()
+                if old_locale != self.text_locale:
+                    locale.setlocale(locale.LC_ALL, self.text_locale)
+                    logging.getLogger(DEBUG_LOG_NAME).info(f"Changed time locale from {self.text_locale} to {''.join(self.text_locale)}.")
+            except locale.Error:
+                msg = f"text_locale {self.text_locale} is not installed!"
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise locale.Error(msg)
 
-        if hasattr(self, "start_year"):
-            if self.start_year is not None:
-                if not isinstance(self.start_year, int) or isinstance(self.start_year, bool):
-                    msg = "start_year has to be of the type integer."
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise TypeError(msg)
+        if hasattr(self, "start_year") and self.start_year is not None:
+            if not isinstance(self.start_year, int) or isinstance(self.start_year, bool):
+                msg = "start_year has to be of the type integer."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
 
         if hasattr(self, "max_time_jump_seconds"):
             if not isinstance(self.max_time_jump_seconds, int) or isinstance(self.max_time_jump_seconds, bool):
@@ -175,7 +171,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
 
         if hasattr(self, "value_sign_type"):
             if not isinstance(self.value_sign_type, str):
-                msg = "value_sign_type must be of type string. Current type: %s" % type(self.value_sign_type)
+                msg = f"value_sign_type must be of type string. Current type: {type(self.value_sign_type)}"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             if self.value_sign_type == SIGN_TYPE_NONE:
@@ -185,14 +181,14 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             elif self.value_sign_type == SIGN_TYPE_MANDATORY:
                 self.start_characters = set(b"+-")
             else:
-                msg = "Invalid value_sign_type %s" % self.value_sign_type
+                msg = f"Invalid value_sign_type {self.value_sign_type}"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
         if hasattr(self, "value_pad_type"):
             self.pad_characters = b""
             if not isinstance(self.value_pad_type, str):
-                msg = "value_pad_type must be of type string. Current type: %s" % type(self.value_pad_type)
+                msg = f"value_pad_type must be of type string. Current type: {type(self.value_pad_type)}"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             if self.value_pad_type == PAD_TYPE_NONE:
@@ -202,17 +198,17 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             elif self.value_pad_type == PAD_TYPE_BLANK:
                 self.pad_characters = b" "
             else:
-                msg = "Invalid value_pad_type %s" % self.value_pad_type
+                msg = f"Invalid value_pad_type {self.value_pad_type}"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
         if hasattr(self, "exponent_type"):
             if not isinstance(self.exponent_type, str):
-                msg = "exponent_type must be of type string. Current type: %s" % type(self.exponent_type)
+                msg = f"exponent_type must be of type string. Current type: {type(self.exponent_type)}"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             if self.exponent_type not in [EXP_TYPE_NONE, EXP_TYPE_OPTIONAL, EXP_TYPE_MANDATORY]:
-                msg = "Invalid exponent_type %s" % self.exponent_type
+                msg = f"Invalid exponent_type {self.exponent_type}"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
@@ -226,38 +222,34 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
-        if hasattr(self, "escape"):
-            if self.escape is not None:
-                if not isinstance(self.escape, bytes):
-                    msg = "escape has to be of the type bytes."
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise TypeError(msg)
-                if len(self.escape) < 1:
-                    msg = "escape must not be empty."
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise ValueError(msg)
-        if hasattr(self, "consume_delimiter"):
-            if not isinstance(self.consume_delimiter, bool):
-                msg = "consume_delimiter has to be of the type bool."
+        if hasattr(self, "escape") and self.escape is not None:
+            if not isinstance(self.escape, bytes):
+                msg = "escape has to be of the type bytes."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
+            if len(self.escape) < 1:
+                msg = "escape must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+        if hasattr(self, "consume_delimiter") and not isinstance(self.consume_delimiter, bool):
+            msg = "consume_delimiter has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
-        if hasattr(self, "value_model"):
-            if not isinstance(self.value_model, ModelElementInterface):
-                msg = "value_model has to be of the type ModelElementInterface."
+        if hasattr(self, "value_model") and not isinstance(self.value_model, ModelElementInterface):
+            msg = "value_model has to be of the type ModelElementInterface."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        if hasattr(self, "value_path") and self.value_path is not None:
+            if not isinstance(self.value_path, str):
+                msg = "value_path has to be of the type string or None."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
-
-        if hasattr(self, "value_path"):
-            if self.value_path is not None:
-                if not isinstance(self.value_path, str):
-                    msg = "value_path has to be of the type string or None."
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise TypeError(msg)
-                if len(self.value_path) < 1:
-                    msg = "value_path must not be empty."
-                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                    raise ValueError(msg)
+            if len(self.value_path) < 1:
+                msg = "value_path must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
 
         if hasattr(self, "branch_model_dict"):
             if not isinstance(self.branch_model_dict, dict):
@@ -270,11 +262,11 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
 
-        if hasattr(self, "default_branch"):
-            if self.default_branch is not None and not isinstance(self.default_branch, ModelElementInterface):
-                msg = "default_branch has to be of the type string or None."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "default_branch") and self.default_branch is not None and not isinstance(
+                self.default_branch, ModelElementInterface):
+            msg = "default_branch has to be of the type string or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
         if hasattr(self, "children"):
             if not isinstance(self.children, list):
@@ -319,7 +311,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             for test_pos, ref_word in enumerate(self.wordlist):
                 for test_word in self.wordlist[test_pos + 1:]:
                     if test_word.startswith(ref_word):
-                        msg = "Word %s would be shadowed by word %s at lower position" % (repr(test_word), repr(ref_word))
+                        msg = f"Word {repr(test_word)} would be shadowed by word {repr(ref_word)} at lower position"
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
 
@@ -333,17 +325,15 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             else:
                 self.hex_regex = re.compile(rb"[0-9a-f]+")
 
-        if hasattr(self, "ipv6"):
-            if not isinstance(self.ipv6, bool):
-                msg = "ipv6 has to be of the type bool."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "ipv6") and not isinstance(self.ipv6, bool):
+            msg = "ipv6 has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
-        if hasattr(self, "key_parser_dict"):
-            if not isinstance(self.key_parser_dict, dict):
-                msg = "key_parser_dict has to be of the type dict."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "key_parser_dict") and not isinstance(self.key_parser_dict, dict):
+            msg = "key_parser_dict has to be of the type dict."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
         if hasattr(self, "optional_key_prefix"):
             if not isinstance(self.optional_key_prefix, str):
@@ -365,29 +355,26 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
-        if hasattr(self, "optional_key_prefix") and hasattr(self, "nullable_key_prefix"):
-            if self.optional_key_prefix == self.nullable_key_prefix:
-                msg = "optional_key_prefix must not be the same as nullable_key_prefix!"
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
+        if hasattr(self, "optional_key_prefix") and hasattr(self, "nullable_key_prefix") and\
+                self.optional_key_prefix == self.nullable_key_prefix:
+            msg = "optional_key_prefix must not be the same as nullable_key_prefix!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
 
-        if hasattr(self, "allow_all_fields"):
-            if not isinstance(self.allow_all_fields, bool):
-                msg = "allow_all_fields has to be of the type bool."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "allow_all_fields") and not isinstance(self.allow_all_fields, bool):
+            msg = "allow_all_fields has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
-        if hasattr(self, "optional_element"):
-            if not isinstance(self.optional_element, ModelElementInterface):
-                msg = "optional_element has to be of the type ModelElementInterface."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "optional_element") and not isinstance(self.optional_element, ModelElementInterface):
+            msg = "optional_element has to be of the type ModelElementInterface."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
-        if hasattr(self, "repeated_element"):
-            if not isinstance(self.repeated_element, ModelElementInterface):
-                msg = "repeated_element has to be of the type ModelElementInterface."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "repeated_element") and not isinstance(self.repeated_element, ModelElementInterface):
+            msg = "repeated_element has to be of the type ModelElementInterface."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
         if hasattr(self, "min_repeat"):
             if not isinstance(self.min_repeat, int) or isinstance(self.min_repeat, bool):

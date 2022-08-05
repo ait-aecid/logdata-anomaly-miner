@@ -11,21 +11,12 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
     """This class defines a model element that represents a variable amount of characters delimited by a white space."""
-
-    def __init__(self, element_id: str):
-        """
-        Initialize the ModelElement.
-        @param element_id an identifier for the ModelElement which is shown in the path.
-        """
-        super().__init__(element_id)
 
     def get_match_element(self, path: str, match_context):
         """
@@ -43,4 +34,4 @@ class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
             return None
         match_data = data[:match_len]
         match_context.update(match_data)
-        return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)
+        return MatchElement(f"{path}/{self.element_id}", match_data, match_data, None)

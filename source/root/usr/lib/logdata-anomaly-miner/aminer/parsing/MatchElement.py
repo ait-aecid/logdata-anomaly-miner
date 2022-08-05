@@ -98,9 +98,9 @@ class MatchElement:
         except UnicodeError:
             data = repr(self.match_object)
         if indent_str is None:
-            result = "%s: %s" % (self.path, data)
+            result = f"{self.path}: {data}"
         else:
-            result = "%s%s: %s" % (indent_str, self.path, data)
+            result = f"{indent_str}{self.path}: {data}"
             next_indent = indent_str + "  "
         if self.children is not None:
             for child_match in self.children:
@@ -135,4 +135,4 @@ class MatchElement:
         except UnicodeError:
             match_string = repr(self.match_string)
             match_object = repr(self.match_object)
-        return "MatchElement: path = %s, string = %s, object = %s, children = %d" % (self.path, match_string, match_object, num_children)
+        return f"MatchElement: path = {self.path}, string = {match_string}, object = {match_object}, children = {num_children}"

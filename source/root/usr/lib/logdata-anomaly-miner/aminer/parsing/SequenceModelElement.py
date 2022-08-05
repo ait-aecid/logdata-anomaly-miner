@@ -11,9 +11,7 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
 from typing import List
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -37,7 +35,7 @@ class SequenceModelElement(ModelElementInterface):
         @param match_context an instance of MatchContext class holding the data context to match against.
         @return the matchElement or None if model did not match.
         """
-        current_path = "%s/%s" % (path, self.element_id)
+        current_path = f"{path}/{self.element_id}"
         start_data = match_context.match_data
         matches = []
         for child_element in self.children:

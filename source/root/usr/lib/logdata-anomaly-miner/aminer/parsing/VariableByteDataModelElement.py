@@ -11,8 +11,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -44,4 +42,4 @@ class VariableByteDataModelElement(ModelElementInterface):
             return None
         match_data = data[:match_len]
         match_context.update(match_data)
-        return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)
+        return MatchElement(f"{path}/{self.element_id}", match_data, match_data, None)

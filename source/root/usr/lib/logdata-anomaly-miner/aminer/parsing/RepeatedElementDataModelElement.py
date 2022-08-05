@@ -29,13 +29,13 @@ class RepeatedElementDataModelElement(ModelElementInterface):
 
     def get_match_element(self, path, match_context):
         """Find a suitable number of repeats."""
-        current_path = "%s/%s" % (path, self.element_id)
+        current_path = f"{path}/{self.element_id}"
 
         start_data = match_context.match_data
         matches = []
         match_count = 0
         while match_count != self.max_repeat + 1:
-            child_match = self.repeated_element.get_match_element("%s/%s" % (current_path, match_count), match_context)
+            child_match = self.repeated_element.get_match_element(f"{current_path}/{match_count}", match_context)
             if child_match is None:
                 break
             matches += [child_match]

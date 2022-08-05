@@ -66,6 +66,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
+        # skipcq: PYL-W0511
         # ToDo: an exception should be thrown instead of this check.
         if num_windows < 3:
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning('num_windows must be >= 3!')

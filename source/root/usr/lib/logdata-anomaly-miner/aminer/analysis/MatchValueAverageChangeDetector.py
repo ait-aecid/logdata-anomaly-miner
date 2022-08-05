@@ -71,7 +71,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                     values = val[1]
                 index = 0
                 for p, _ in self.stat_data:
-                    if p == target_path:
+                    if p == path:
                         break
                     index += 1
                 for value in values:

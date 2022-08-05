@@ -71,9 +71,9 @@ class DebugMatchContext(MatchContext):
             self.last_match_data = self.match_data
             if self.debug_info != "":
                 self.debug_info += "  "
-            self.debug_info += 'Starting match update on "%s"\n' % match_data
+            self.debug_info += f'Starting match update on "{match_data}"\n'
         if not self.match_data.startswith(match_string):
-            self.debug_info += '  Current data %s does not start with "%s"\n' % (match_data, m_string)
+            self.debug_info += f'  Current data {match_data} does not start with "{m_string}"\n'
             msg = "Illegal state"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
@@ -81,7 +81,7 @@ class DebugMatchContext(MatchContext):
         self.last_match_data = self.match_data
         if (self.shortest_unmatched_data is None) or (len(self.match_data) < len(self.shortest_unmatched_data)):
             self.shortest_unmatched_data = self.match_data
-        self.debug_info += '  Removed: "%s", remaining %d bytes\n' % (m_string, len(self.match_data))
+        self.debug_info += f'  Removed: "{m_string}", remaining {len(self.match_data)} bytes\n'
 
     def get_debug_info(self):
         """Get the current debugging information and reset it."""
@@ -93,7 +93,7 @@ class DebugMatchContext(MatchContext):
             data = self.shortest_unmatched_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(self.shortest_unmatched_data)
-        result += '  Shortest unmatched data: "%s"\n' % data
+        result += f'  Shortest unmatched data: "{data}"\n'
         return result
 
     def get_shortest_unmatched_data(self):

@@ -332,7 +332,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             for event_index, data in enumerate(counts):
                 if (self.target_path_list != [] and all(path not in self.event_type_detector.found_keys[
                     event_index] for path in self.target_path_list)) or (self.ignore_list != [] and any(
-                    ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path in self.ignore_list)):
+                        ignore_path in self.event_type_detector.found_keys[event_index] for ignore_path in self.ignore_list)):
                     time_step_list.append(-1)
                 else:
                     # Apply the autocorrection function to the data of the single event types.

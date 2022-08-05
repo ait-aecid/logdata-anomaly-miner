@@ -43,10 +43,10 @@ def format_float(val):
         if "." in val:
             pos_point = val.find(".")
         if len(val) - val.find(sign) <= 2:
-            result = format(float(val), "1.%dE" % (val.find(exp) - pos_point))[:-2]
-            result += format(float(val), "1.%dE" % (val.find(exp) - pos_point))[-1]
+            result = format(float(val), f"1.{val.find(exp) - pos_point}E")[:-2]
+            result += format(float(val), f"1.{val.find(exp) - pos_point}E")[-1]
             return result
-        return format(float(val), "1.%dE" % (val.find(exp) - pos_point))
+        return format(float(val), f"1.{val.find(exp) - pos_point}E")
     return float(val)
 
 
@@ -77,7 +77,7 @@ class JsonModelElement(ModelElementInterface):
         for value in dictionary.values():
             if isinstance(value, ModelElementInterface):
                 continue
-            elif isinstance(value, list):
+            if isinstance(value, list):
                 if len(value) == 0:
                     msg = "lists in key_parser_dict must have at least one entry."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -131,7 +131,7 @@ class JsonModelElement(ModelElementInterface):
         @param match_context an instance of MatchContext class holding the data context to match against.
         @return the matchElement or None if model did not match.
         """
-        current_path = "%s/%s" % (path, self.element_id)
+        current_path = f"{path}/{self.element_id}"
         old_match_data = match_context.match_data
         matches: Union[List[Union[MatchElement, None]]] = []
         try:
@@ -217,7 +217,7 @@ class JsonModelElement(ModelElementInterface):
                     match_context.update(match_context.match_data[:index + len(data)])
                     return matches
 
-                matches += self.parse_json_dict(value, json_match_data[split_key], "%s/%s" % (current_path, split_key), match_context)
+                matches += self.parse_json_dict(value, json_match_data[split_key], f"{current_path}/{split_key}", match_context)
                 if json_match_data[split_key] == {}:
                     index = match_context.match_data.find(split_key.encode())
                     index = match_context.match_data.find(b"}", index)
@@ -257,19 +257,20 @@ class JsonModelElement(ModelElementInterface):
                     matches.append(None)
             else:
                 if key != split_key and split_key not in json_match_data:
-                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Optional Key %s not found in json_match_data" % key)
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + f"Optional Key {key} not found in json_match_data")
                     continue
                 if split_key not in json_match_data:
                     logging.getLogger(DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + "Key %s not found in json_match_data. RETURN [NONE] 4" % split_key)
+                        debug_log_prefix + f"Key {split_key} not found in json_match_data. RETURN [NONE] 4")
                     return [None]
                 match_element, index, data = self.parse_json_object(json_dict, json_match_data, key, split_key, current_path, match_context)
                 matches.append(match_element)
                 if index == -1 and match_element is None:
+                    backslash = b"\\"
                     logging.getLogger(DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + "Necessary element did not match! Key: %s, MatchElement: %s, Data: %s, IsFloat %s, Index: %d, "
-                                           "MatchContext: %s" % (key, match_element, data.decode(), isinstance(json_match_data[
-                                            split_key], float), index, match_context.match_data.replace(b"\\", b"").decode()))
+                        debug_log_prefix + f"Necessary element did not match! Key: {key}, MatchElement: {match_element}, Data: "
+                                           f"{data.decode()}, IsFloat {isinstance(json_match_data[split_key], float)}, Index: {index}, "
+                                           f"MatchContext: {match_context.match_data.replace(backslash, b'').decode()}")
                     return matches
                 match_context.update(match_context.match_data[:index + len(data)])
         missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and x != "ALLOW_ALL_KEYS" and

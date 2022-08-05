@@ -11,8 +11,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -30,7 +28,7 @@ class OptionalMatchModelElement(ModelElementInterface):
         @param optional_element the element to be optionally matched.
         """
         super().__init__(element_id, optional_element=optional_element)
-        self.empty_match_element = MatchElement("%s/%s" % ("None", self.element_id), b"", None, None)
+        self.empty_match_element = MatchElement(f"None/{self.element_id}", b"", None, None)
 
     def get_id(self):
         """Get the element ID."""
@@ -42,7 +40,7 @@ class OptionalMatchModelElement(ModelElementInterface):
 
     def get_match_element(self, path: str, match_context):
         """@return the embedded child match or an empty match."""
-        current_path = "%s/%s" % (path, self.element_id)
+        current_path = f"{path}/{self.element_id}"
 
         start_data = match_context.match_data
         match = self.optional_element.get_match_element(current_path, match_context)

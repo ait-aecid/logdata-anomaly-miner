@@ -11,9 +11,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-import logging
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 from aminer.parsing.MatchElement import MatchElement
 
@@ -48,7 +45,6 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         @param exponent_type defines the allowed types of exponential values. With EXP_TYPE_NONE no exponential values are allowed,
                EXP_TYPE_OPTIONAL allows exponential values and with EXP_TYPE_MANDATORY every value must contain exponential values.
         """
-
         super().__init__(element_id, value_sign_type=value_sign_type, value_pad_type=value_pad_type, exponent_type=exponent_type)
         self.digits = set(b"0123456789")
 

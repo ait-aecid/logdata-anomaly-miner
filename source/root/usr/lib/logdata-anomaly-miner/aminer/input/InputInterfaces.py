@@ -61,6 +61,7 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
 
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for receiving log atoms."""
+
     output_event_handlers = None
 
     def __init__(self, mutable_default_args=None, learn_mode=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
@@ -369,7 +370,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 elif argument.endswith("set"):
                     setattr(self, argument, set())
                 elif argument.endswith("tuple"):
-                    setattr(self, argument, tuple())
+                    setattr(self, argument, ())
 
         if hasattr(self, "subhandler_list"):
             if (not isinstance(self.subhandler_list, list)) or \
