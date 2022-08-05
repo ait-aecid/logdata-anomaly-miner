@@ -406,8 +406,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         @param component_name the name of the component which is printed in the log line.
         """
         if AminerConfig.STAT_LEVEL > 0:
-            logging.getLogger(STAT_LOG_NAME).info("'%s' processed %d out of %d log atoms successfully in the last 60"
-                                                  " minutes.", component_name, self.log_success, self.log_total)
+            logging.getLogger(STAT_LOG_NAME).info(
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in the last 60 minutes.")
         self.log_success = 0
         self.log_total = 0
 

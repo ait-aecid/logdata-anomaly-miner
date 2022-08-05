@@ -193,7 +193,7 @@ class DateTimeModelElement(ModelElementInterface):
                 date_format_parts.append(new_element)
             scan_pos = next_param_pos
         if (7 in date_format_type_set) and (not date_format_type_set.isdisjoint(set(range(0, 6)))):
-            msg = f"Cannot use %s (seconds since epoch) with other non-second format types"
+            msg = "Cannot use %s (seconds since epoch) with other non-second format types"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         self.date_format_parts = date_format_parts

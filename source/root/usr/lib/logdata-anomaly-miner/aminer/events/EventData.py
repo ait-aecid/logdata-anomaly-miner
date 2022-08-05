@@ -39,7 +39,7 @@ class EventData:
         self.event_source = event_source
         self.analysis_context = analysis_context
         if analysis_context is not None:
-            self.description = '"%s"' % analysis_context.get_name_by_component(event_source)
+            self.description = f'"{analysis_context.get_name_by_component(event_source)}"'
         else:
             self.description = ""
         if log_atom is None:
@@ -55,11 +55,11 @@ class EventData:
                 if self.log_atom.get_timestamp() is None:
                     import time
                     self.log_atom.set_timestamp(time.time())
-                message += "%s " % datetime.fromtimestamp(self.log_atom.get_timestamp()).strftime("%Y-%m-%d %H:%M:%S")
-                message += "%s\n" % self.event_message
-                message += "%s: %s (%d lines)\n" % (self.event_source.__class__.__name__, self.description, len(self.sorted_log_lines))
+                message += f"{datetime.fromtimestamp(self.log_atom.get_timestamp()).strftime('%Y-%m-%d %H:%M:%S')} "
+                message += f"{self.event_message}\n"
+                message += f"{self.event_source.__class__.__name__}: {self.description} ({len(self.sorted_log_lines)} lines)\n"
             else:
-                message += "%s (%d lines)\n" % (self.event_message, len(self.sorted_log_lines))
+                message += f"{self.event_message} ({len(self.sorted_log_lines)} lines)\n"
         else:
             indent = ""
         for line in self.sorted_log_lines:

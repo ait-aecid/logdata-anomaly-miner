@@ -35,7 +35,7 @@ class SyslogWriterEventHandler(EventHandlerInterface):
         """
         self.analysis_context = analysis_context
         self.instanceName = instance_name
-        syslog.openlog('%s[%d]' % (self.instanceName, os.getpid()), syslog.LOG_INFO, syslog.LOG_DAEMON)
+        syslog.openlog(f'{self.instanceName}[{os.getpid()}]', syslog.LOG_INFO, syslog.LOG_DAEMON)
         syslog.syslog(syslog.LOG_INFO, 'Syslog logger initialized')
         self.buffer_stream = io.StringIO()
         self.event_writer = StreamPrinterEventHandler(analysis_context, self.buffer_stream)
@@ -72,9 +72,9 @@ class SyslogWriterEventHandler(EventHandlerInterface):
             while data_line:
                 message = None
                 if serial == 0:
-                    message = '[%d] %s' % (current_event_id, data_line[:800])
+                    message = f'[{current_event_id}] {data_line[:800]}'
                 else:
-                    message = '[%d-%d] %s' % (current_event_id, serial, data_line[:800])
+                    message = f'[{current_event_id}-{serial}] {data_line[:800]}'
                 data_line = data_line[800:]
                 syslog.syslog(syslog.LOG_INFO, message)
                 serial += 1

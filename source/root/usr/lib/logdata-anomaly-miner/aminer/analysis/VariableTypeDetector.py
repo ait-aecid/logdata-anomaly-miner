@@ -258,8 +258,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for val in self.crit_val_dw[1:]:
                 if abs(self.dw_alpha - val) < abs(self.dw_alpha - nearest):
                     nearest = val
-            msg = 'Changed the parameter dw_alpha of the VTD from %s to %s to use the pregenerated critical values for the dw-test' % (
-                    self.dw_alpha, nearest)
+            msg = f'Changed the parameter dw_alpha of the VTD from {self.dw_alpha} to {nearest} to use the pregenerated critical values ' \
+                  f'for the dw-test'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.dw_alpha = nearest
@@ -271,8 +271,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for val in pos_vals[1:]:
                 if abs(num_init - val) < abs(num_init - nearest):
                     nearest = val
-            msg = 'Changed the parameter num_init of the VTD from %s to %s to use the pregenerated critical values for the dw-test' % (
-                    num_init, nearest)
+            msg = f'Changed the parameter num_init of the VTD from {num_init} to {nearest} to use the pregenerated critical values for ' \
+                  f'the dw-test'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.num_init = nearest
@@ -289,8 +289,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for val in pos_vals[1:]:
                 if abs(self.gof_alpha - val) < abs(self.gof_alpha - nearest):
                     nearest = val
-            msg = 'Changed the parameter gof_alpha of the VTD from %s to %s to use the pregenerated critical values for the gof-tests' % (
-                    self.gof_alpha, nearest)
+            msg = f'Changed the parameter gof_alpha of the VTD from {self.gof_alpha} to {nearest} to use the pregenerated critical ' \
+                  f'values for the gof-tests'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.gof_alpha = nearest
@@ -310,8 +310,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for val in pos_vals[1:]:
                 if abs(num_init - val) < abs(num_init - nearest):
                     nearest = val
-            msg = 'Changed the parameter num_init of the VTD from %s to %s to use the pregenerated critical values for the gof-tests' % (
-                    num_init, nearest)
+            msg = f'Changed the parameter num_init of the VTD from {num_init} to {nearest} to use the pregenerated critical values for' \
+                  f' the gof-tests'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.num_init = nearest
@@ -329,8 +329,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             for val in pos_vals[1:]:
                 if abs(num_s_gof_values - val) < abs(num_s_gof_values - nearest):
                     nearest = val
-            msg = 'Changed the parameter num_s_gof_values of the VTD from %s to %s to use pregenerated critical values for the gof-test' % (
-                    num_s_gof_values, nearest)
+            msg = f'Changed the parameter num_s_gof_values of the VTD from {num_s_gof_values} to {nearest} to use pregenerated ' \
+                  f'critical values for the gof-test'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.num_s_gof_values = nearest
@@ -344,16 +344,17 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Test if the ETD saves enough values
         if self.event_type_detector.min_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values):
-            msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to use pregenerated critical values for the VTDs gof-test' %\
-                    (self.event_type_detector.min_num_vals, max(self.num_init, self.num_update, num_s_gof_values))
+            msg = f'Changed the parameter min_num_vals of the ETD from {self.event_type_detector.min_num_vals} to ' \
+                  f'{max(self.num_init, self.num_update, num_s_gof_values)} to use pregenerated critical values for the VTDs gof-test'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values)
 
         # Test if the ETD saves enough values
         if self.event_type_detector.max_num_vals < max(self.num_init, self.num_update, self.num_s_gof_values) + 500:
-            msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to use pregenerated critical values for the VTDs gof-test' %\
-                    (self.event_type_detector.max_num_vals, max(self.num_init, self.num_update, self.num_s_gof_values) + 500)
+            msg = f'Changed the parameter max_num_vals of the ETD from {self.event_type_detector.max_num_vals} to ' \
+                  f'{max(self.num_init, self.num_update, self.num_s_gof_values) + 500} to use pregenerated critical values for the VTDs' \
+                  f' gof-test'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = max(self.num_init, self.num_update, self.num_s_gof_values) + 500
@@ -366,7 +367,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Imports the persistence
         if persistence_data is not None:
             self.load_persistence_data(persistence_data)
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
         # Generate the modifiers for the estimation of the minimum and maximum for the uniform distribution
         self.min_mod_ini_uni = 1 / (self.num_init + 1)
@@ -482,7 +483,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.save_statistics:
             PersistenceUtil.store_json(self.statistics_file_name, [
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def load_persistence_data(self, persistence_data):
         """Extract the persistence data and appends various lists to create a consistent state."""
@@ -531,7 +532,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.event_type_detector.num_event_lines[event_index] == self.num_init and self.var_type[event_index][0] == []:
             # Test all variables
 
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s started initial detection of var types.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} started initial detection of var types.')
             if self.target_path_list is None:
                 for var_index in range(self.length[event_index]):
                     tmp_var_type = self.detect_var_type(event_index, var_index)
@@ -608,7 +609,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         elif self.event_type_detector.num_event_lines[event_index] > self.num_init and (
                 self.event_type_detector.num_event_lines[event_index] - self.num_init) % self.num_update == 0:
 
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s started update phase of var types.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} started update phase of var types.')
             # Check if the updates of the variable types should be stopped
             if self.learn_mode and (not isinstance(self.num_stop_update, bool)) and (
                     self.event_type_detector.total_records >= self.num_stop_update):
@@ -722,8 +723,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             self.var_type_history_list_reference[event_index][var_index] = []
                         affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                         self.print(
-                            'Stopped tracking the variable of event type %s with Path:\n%s\nbecause of irregular variable types.' %
-                            (self.event_type_detector.get_event_type(event_index), affected_path), log_atom, affected_path,
+                            f'Stopped tracking the variable of event type {self.event_type_detector.get_event_type(event_index)} with '
+                            f'Path:\n{affected_path}\nbecause of irregular variable types.', log_atom, affected_path,
                             confidence=1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085)
                         # 1 / (1 + np.exp(-4 / tmp_max)) / 0.9820137900379085 is the scaled sigmoidfunction.
                         # 1 / (1 + np.exp(-4)) = 0.9820137900379085
@@ -855,9 +856,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         affected_paths = [self.event_type_detector.variable_key_list[event_index][var_index] for var_index in
                                           indices_failed_tests]
                         if self.var_type_history_list:
-                            tmp_string += 'Event %s: ' % (self.event_type_detector.get_event_type(event_index))
-                            tmp_string += 'Indicator of a change in system behaviour: %s. Paths to the corresponding variables: %s' % (
-                                np.arctan(2 * indicator) / np.pi * 2, affected_paths)
+                            tmp_string += f'Event {self.event_type_detector.get_event_type(event_index)}: '
+                            tmp_string += f'Indicator of a change in system behaviour: {np.arctan(2 * indicator) / np.pi * 2}. Paths to' \
+                                          f' the corresponding variables: {affected_paths}'
 
                         self.print(tmp_string, log_atom, affected_paths, np.arctan(2 * indicator) / np.pi * 2, indicator=True)
 
@@ -1451,8 +1452,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         self.var_type_history_list_reference[event_index][var_index] = []
 
                     affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
-                    self.print('Stopped tracking the variable of event type %s with Path:\n%s\nbecause of its static values.' % (
-                               self.event_type_detector.get_event_type(event_index), affected_path), log_atom, affected_path,
+                    self.print(f'Stopped tracking the variable of event type {self.event_type_detector.get_event_type(event_index)} with'
+                               f' Path:\n{affected_path}\nbecause of its static values.', log_atom, affected_path,
                                confidence=1 - 1 / self.num_stat_stop_update)
                 return
 
@@ -2120,9 +2121,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         Calculate the minimal number of successes for the BT with significance alpha.
         p_list is a list of probabilities of successes and num_bt is the number of observed tests.
         """
-        if 'num_bt = %s, alpha = %s' % (num_bt, alpha) in self.bt_min_succ_data:
+        if f'num_bt = {num_bt}, alpha = {alpha}' in self.bt_min_succ_data:
             # Here the min_successes are not being generated, but instead the right Indices are searched for in the bt_min_succ_data-list
-            return np.searchsorted(self.bt_min_succ_data['num_bt = %s, alpha = %s' % (num_bt, alpha)], p_list, side='left', sorter=None)
+            return np.searchsorted(self.bt_min_succ_data[f'num_bt = {num_bt}, alpha = {alpha}'], p_list, side='left', sorter=None)
 
         # Calculate the min_successes normally for each value one by one
         tmp_list = []
@@ -2139,15 +2140,14 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
-        message = 'Initial detection of variable types of event %s:' % self.event_type_detector.get_event_type(event_index)
+        message = f'Initial detection of variable types of event {self.event_type_detector.get_event_type(event_index)}:'
         tmp_string = ''
         type_info = {}
 
         for var_index in range(self.length[event_index]):
             if self.var_type[event_index][var_index]:
-                tmp_string += "  Path '%s': %s\n" % (
-                    self.event_type_detector.variable_key_list[event_index][var_index],
-                    get_vt_string(self.var_type[event_index][var_index]))
+                tmp_string += f"  Path '{self.event_type_detector.variable_key_list[event_index][var_index]}': " \
+                              f"{get_vt_string(self.var_type[event_index][var_index])}\n"
                 type_info[self.event_type_detector.variable_key_list[event_index][var_index]] = self.var_type[event_index][var_index]
         tmp_string = tmp_string.lstrip('  ')
 
@@ -2167,8 +2167,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': type_info}
         for listener in self.anomaly_event_handlers:
-            listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)
 
     def print_changed_var_type(self, event_index, vt_old, vt_new, var_index, log_atom, confidence=None):
         """Print the changed variable types."""
@@ -2197,7 +2196,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 '  ' + self.event_type_detector.variable_key_list[event_index][var_index] + os.linesep + data]
             analysis_component = {'AffectedLogAtomPaths': [self.event_type_detector.variable_key_list[event_index][var_index]]}
 
-        if self.event_type_detector.id_path_list != []:
+        if self.event_type_detector.id_path_list:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_event_lines[event_index]},
                           'IDpaths': self.event_type_detector.id_path_list,
@@ -2209,11 +2208,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         vt_new_string = get_vt_string(vt_new)
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__,
-                "Variable type of path '%s' of event %s changed from %s to %s after the %s-th analysed line" % (
-                    self.event_type_detector.variable_key_list[event_index][var_index],
-                    self.event_type_detector.get_event_type(event_index), vt_old_string, vt_new_string,
-                    self.event_type_detector.num_event_lines[event_index]), sorted_log_lines, event_data, log_atom, self)
+                f'Analysis.{self.__class__.__name__}',
+                f"Variable type of path '{self.event_type_detector.variable_key_list[event_index][var_index]}' of event "
+                f"{self.event_type_detector.get_event_type(event_index)} changed from { vt_old_string} to {vt_new_string} after the "
+                f"{self.event_type_detector.num_event_lines[event_index]}-th analysed line", sorted_log_lines, event_data, log_atom, self)
 
     def print_reject_var_type(self, event_index, vt, var_index, log_atom):
         """Print the changed variable types."""
@@ -2247,11 +2245,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                           'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_event_lines[event_index]}}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
-                'Analysis.%s' % self.__class__.__name__,
-                "Variable type of path '%s' of event %s would reject the type '%s' after the %s-th analysed line" % (
-                    self.event_type_detector.variable_key_list[event_index][var_index],
-                    self.event_type_detector.get_event_type(event_index), vt[0], self.event_type_detector.num_event_lines[
-                        event_index]), sorted_log_lines, event_data, log_atom, self)
+                f'Analysis.{self.__class__.__name__}',
+                f"Variable type of path '{self.event_type_detector.variable_key_list[event_index][var_index]}' of event "
+                f"{self.event_type_detector.get_event_type(event_index)} would reject the type '{vt[0]}' after the "
+                f"{self.event_type_detector.num_event_lines[event_index]}-th analysed line", sorted_log_lines, event_data, log_atom, self)
 
     def print(self, message, log_atom, affected_path, confidence=None, indicator=None):
         """Print the message."""
@@ -2290,7 +2287,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {'Confidence': confidence, 'Indicator': indicator}}
         for listener in self.anomaly_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)
 
     def log_statistics(self, component_name):
         """
@@ -2299,13 +2296,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new variable types and updated %d variable types "
-                "in the last 60 minutes.", component_name, self.log_success, self.log_total, self.log_new_learned, self.log_updated)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_new_learned} new variable types and updated {self.log_updated} variable types in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new variable types and updated %d variable types "
-                "in the last 60 minutes. Following new variable types were learned: %s", component_name, self.log_success, self.log_total,
-                self.log_new_learned, self.log_updated, self.log_new_learned_values)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_new_learned} new variable types and updated {self.log_updated} variable types in the last 60 minutes. "
+                f"Following new variable types were learned: {self.log_new_learned_values}")
         self.log_success = 0
         self.log_total = 0
         self.log_new_learned = 0
@@ -2337,38 +2334,38 @@ def consists_of_ints(list_in):
 def get_vt_string(vt):
     """Return a string which states the variable type with selected parameters."""
     if vt[0] == 'stat':
-        return_string = '%s %s' % (vt[0], vt[1])
+        return_string = f'{vt[0]} {vt[1]}'
     elif vt[0] == 'd':
         return_string = vt[0] + ' ['
         for i, val in enumerate(vt[2]):
             if val >= 0.1:
-                return_string += '"%s"(%s%%), ' % (str(vt[1][i]), str(int(val*100+0.5)))
+                return_string += f'"{str(vt[1][i])}"({str(int(val*100+0.5))}%%), '
         if any(val < 0.1 for _, val in enumerate(vt[2])):
             return_string += '...]'
         else:
             return_string = return_string[:-2]
             return_string += ']'
     elif vt[0] in ('asc', 'desc'):
-        return_string = '%s [%s]' % (vt[0], vt[1])
+        return_string = f'{vt[0]} [{vt[1]}]'
     elif vt[0] == 'unq':
         return_string = vt[0]
     elif vt[0] == 'others':
         return_string = vt[0]
     elif vt[0] == 'range':
-        return_string = '%s [min: %s, max: %s]' % (vt[0], vt[1], vt[2])
+        return_string = f'{vt[0]} [min: {vt[1]}, max: {vt[2]}]'
     elif vt[0] == 'uni':
-        return_string = '%s [min: %s, max: %s]' % (vt[0], vt[1], vt[2])
+        return_string = f'{vt[0]} [min: {vt[1]}, max: {vt[2]}]'
     elif vt[0] == 'nor':
-        return_string = '%s [EV: %s, SD: %s]' % (vt[0], vt[1], vt[2])
+        return_string = f'{vt[0]} [EV: {vt[1]}, SD: {vt[2]}]'
     elif vt[0] == 'spec':
-        return_string = '%s%s [EV: %s, SD: %s]' % (vt[0], vt[5], vt[1], vt[2])
+        return_string = f'{vt[0]}{vt[5]} [EV: {vt[1]}, SD: {vt[2]}]'
     elif vt[0] == 'beta':
         if vt[5] == 1:
-            return_string = '%s%s [min: %s, max: %s]' % (vt[0], vt[5], vt[3], vt[4])
+            return_string = f'{vt[0]}{vt[5]} [min: {vt[3]}, max: {vt[4]}]'
         else:
-            return_string = '%s%s [EV: %s, SD: %s]' % (vt[0], vt[5], vt[1], vt[2])
+            return_string = f'{vt[0]}{vt[5]} [EV: {vt[1]}, SD: {vt[2]}]'
     elif vt[0] == 'betam':
-        return_string = '%s [min: %s, max: %s, proportion: %s]' % (vt[0], vt[3], vt[4], vt[5])
+        return_string = f'{vt[0]} [min: {vt[3]}, max: {vt[4]}, proportion: {vt[5]}]'
     else:
         return_string = vt[0]
     return return_string

@@ -159,9 +159,9 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         """Really send out the message."""
         if self.events_collected == 0:
             return
-        subject_text = '%s Collected Events' % self.subject_prefix
+        subject_text = f'{self.subject_prefix} Collected Events'
         if self.last_alert_time != 0:
-            subject_text += ' in the last %d seconds' % (trigger_time - self.last_alert_time)
+            subject_text += f' in the last {trigger_time - self.last_alert_time} seconds'
         message = _message_str % (self.sender_address, self.recipient_address, subject_text, self.current_message)
         try:
             # timeout explicitly needs to be set None, because in python version < 3.7 socket.settimeout() sets the socket type
@@ -176,4 +176,4 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.events_collected = 0
         self.current_message = ''
         self.next_alert_time = 0
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent notification.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent notification.')

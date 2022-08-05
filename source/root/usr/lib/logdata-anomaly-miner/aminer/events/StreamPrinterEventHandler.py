@@ -53,7 +53,7 @@ class StreamPrinterEventHandler(EventHandlerInterface):
         if component_name in self.analysis_context.suppress_detector_list:
             return
         event_data_obj = EventData(event_type, event_message, sorted_loglines, event_data, log_atom, event_source, self.analysis_context)
-        message = '%s\n' % event_data_obj.receive_event_string()
+        message = f'{event_data_obj.receive_event_string()}\n'
         if hasattr(self.stream, 'buffer'):
             self.stream.buffer.write(message.encode())
         else:
