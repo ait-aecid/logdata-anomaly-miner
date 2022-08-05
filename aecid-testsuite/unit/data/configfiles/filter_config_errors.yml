@@ -39,7 +39,7 @@ Analysis:
           learn_mode: True
           persistence_id: 'accesslog_request'
           output_logline: False
-          allow_missing_values_flag: False
+          allow_missing_values: False
 
 EventHandlers:
         - id: stpe

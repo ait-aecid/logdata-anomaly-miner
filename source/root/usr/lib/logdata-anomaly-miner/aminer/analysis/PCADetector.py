@@ -150,8 +150,8 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                                           'AffectedValueCounts': affected_counts, 'AnomalyScore': anomaly_score[0]}
                     event_data = {'AnalysisComponent': analysis_component}
                     for listener in self.anomaly_event_handlers:
-                        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'PCA anomaly detected',
-                                               sorted_log_lines, event_data, log_atom, self)
+                        listener.receive_event(f'Analysis.{self.__class__.__name__}', 'PCA anomaly detected', sorted_log_lines, event_data,
+                                               log_atom, self)
             self.log_windows += 1
 
             # Add new values to matrix in learn mode
@@ -329,7 +329,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -339,7 +339,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
-        return 'Allowlisted path %s.' % event_data
+        return f'Allowlisted path {event_data}.'
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """
@@ -347,7 +347,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -357,7 +357,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)
-        return 'Blocklisted path %s.' % event_data
+        return f'Blocklisted path {event_data}.'
 
     def log_statistics(self, component_name):
         """
@@ -366,12 +366,12 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
+                f"time windows in the last 60 minutes.")
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
+                f"time windows in the last 60 minutes.")
         self.log_success = 0
         self.log_total = 0
         self.log_windows = 0

@@ -122,7 +122,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             additional_information = {'AffectedLogAtomValues': [str(repr(val))[2:-1] for val in id_tuple],
                                       'NewTime': log_atom.atom_time % self.time_period_length}
 
-            msg = 'First time (%s) detected for [' % (log_atom.atom_time % self.time_period_length)
+            msg = f'First time ({log_atom.atom_time % self.time_period_length}) detected for ['
             for match_value in id_tuple:
                 msg += str(repr(match_value))[1:] + ', '
             msg = msg[:-2] + ']'
@@ -141,8 +141,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                                               'PreviousAppearedTimes': [float(val) for val in self.appeared_time_list[id_tuple]],
                                               'NewTime': log_atom.atom_time % self.time_period_length}
 
-                    msg = 'New time (%s) out of range of previously observed times %s detected for [' % (
-                            log_atom.atom_time % self.time_period_length, self.appeared_time_list[id_tuple])
+                    msg = f'New time ({log_atom.atom_time % self.time_period_length}) out of range of previously observed times ' \
+                          f'{self.appeared_time_list[id_tuple]} detected for ['
                     for match_value in id_tuple:
                         msg += str(repr(match_value))[1:] + ', '
                     msg = msg[:-2] + ']'
@@ -220,7 +220,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         for id_tuple, counter in self.counter_reduce_time_intervals.items():
             persist_data[1].append((id_tuple, counter))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
@@ -230,7 +230,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.appeared_time_list[tuple(id_tuple)] = time_list
             for id_tuple, counter in persistence_data[1]:
                 self.counter_reduce_time_intervals[tuple(id_tuple)] = counter
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def print_persistence_event(self, event_type, event_data):
         """
@@ -238,7 +238,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about the persistence.
         @throws Exception when the output for the event_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -263,12 +263,12 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             values_list = list(values_set)
             values_list.sort()
 
-            string = 'Time intervals are tracked for the following path values: %s' % values_list
+            string = f'Time intervals are tracked for the following path values: {values_list}'
         elif len(event_data) == 1:
             id_tuple = event_data[0]
             # Check if the path value is tracked
             if id_tuple not in self.appeared_time_list:
-                return 'Persistence includes no information for %s.' % id_tuple
+                return f'Persistence includes no information for {id_tuple}.'
 
             # Calculate the current time intervals
             time_intervals = [[max(0, t - self.max_time_diff), min(self.time_period_length, t + self.max_time_diff)] for t in
@@ -290,8 +290,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 time_intervals = time_intervals[:index] + time_intervals[index + 1:]
 
             # Set output string
-            string = 'The list of appeared times is %s and the resulting time intervals are %s for path value %s' % (
-                        self.appeared_time_list[id_tuple], time_intervals, id_tuple)
+            string = f'The list of appeared times is {self.appeared_time_list[id_tuple]} and the resulting time intervals are ' \
+                     f'{time_intervals} for path value {id_tuple}'
 
         return string
 
@@ -301,7 +301,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about the addition to the persistency.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -321,14 +321,14 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         msg = ''
         if id_tuple not in self.appeared_time_list:
             # Print message if combination of values is new
-            msg = 'First time (%s) added for %s' % (new_time % self.time_period_length, id_tuple)
+            msg = f'First time ({new_time % self.time_period_length}) added for {id_tuple}'
 
             self.appeared_time_list[id_tuple] = [new_time % self.time_period_length]
             self.counter_reduce_time_intervals[id_tuple] = 0
         else:
             # Print a message if the new time is added to the list of observed times
-            msg = 'New time (%s) added to the range of previously observed times %s for %s' % (
-                    new_time % self.time_period_length, self.appeared_time_list[id_tuple], id_tuple)
+            msg = f'New time ({new_time % self.time_period_length}) added to the range of previously observed times ' \
+                  f'{self.appeared_time_list[id_tuple]} for {id_tuple}'
 
             # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
             self.insert_and_reduce_time_intervals(id_tuple, new_time % self.time_period_length)
@@ -341,7 +341,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about the addition to the persistence.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -361,11 +361,11 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         msg = ''
         if id_tuple not in self.appeared_time_list:
             # Print message if combination of values is new
-            msg = '%s has previously not appeared' % id_tuple
+            msg = f'{id_tuple} has previously not appeared'
         elif not any(abs(new_time - val) < 0.5 for val in self.appeared_time_list[id_tuple]):
             # Print a message if the new time does not appear the list of observed times
-            msg = 'Time (%s) does not appear in the previously observed times %s for %s' % (
-                    new_time % self.time_period_length, self.appeared_time_list[id_tuple], id_tuple)
+            msg = f'Time ({new_time % self.time_period_length}) does not appear in the previously observed times ' \
+                  f'{self.appeared_time_list[id_tuple]} for {id_tuple}'
         else:
             # Remove the old time from the time list.
             for index in reversed(range(len(self.appeared_time_list[id_tuple]))):
@@ -374,8 +374,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                             self.appeared_time_list[id_tuple][index + 1:]
 
             # Print a message if the new time is added to the list of observed times
-            msg = 'Time (%s) was removed from the range of previously observed times %s for %s' % (
-                    new_time % self.time_period_length, self.appeared_time_list[id_tuple], id_tuple)
+            msg = f'Time ({new_time % self.time_period_length}) was removed from the range of previously observed times ' \
+                  f'{self.appeared_time_list[id_tuple]} for {id_tuple}'
 
         return msg
 
@@ -407,4 +407,4 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
         event_data = {'AnalysisComponent': analysis_component}
         for listener in self.anomaly_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)

@@ -83,16 +83,16 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         # Test if the ETD saves enough values
         if self.event_type_detector.min_num_vals < self.num_periods_tsa_ini * int(self.num_init/2):
-            msg = 'Changed the parameter min_num_vals of the ETD from %s to %s to properly use the PathArimaDetector' % (
-                    self.event_type_detector.min_num_vals, self.num_periods_tsa_ini * int(self.num_init/2))
+            msg = f'Changed the parameter min_num_vals of the ETD from {self.event_type_detector.min_num_vals} to ' \
+                  f'{self.num_periods_tsa_ini * int(self.num_init/2)} to properly use the PathArimaDetector'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.min_num_vals = self.num_periods_tsa_ini * int(self.num_init/2)
 
         # Test if the ETD saves enough values
         if self.event_type_detector.max_num_vals < self.num_periods_tsa_ini * int(self.num_init/2) + 500:
-            msg = 'Changed the parameter max_num_vals of the ETD from %s to %s to use pregenerated critical values for the gof-test' % (
-                    self.event_type_detector.max_num_vals, self.num_periods_tsa_ini * int(self.num_init/2) + 500)
+            msg = f'Changed the parameter max_num_vals of the ETD from {self.event_type_detector.max_num_vals} to ' \
+                  f'{self.num_periods_tsa_ini * int(self.num_init/2) + 500} to use pregenerated critical values for the gof-test'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             self.event_type_detector.max_num_vals = self.num_periods_tsa_ini * int(self.num_init/2) + 500
@@ -132,7 +132,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         persistence_data = [self.target_path_index_list, self.period_length_list, self.prediction_history]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
@@ -212,8 +212,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         self.period_length_list[event_index][target_path_index] = int(highest_peak_index + min_lag)
 
         # Print a message of the length of the time steps
-        message = 'Calculated the periods for the event %s: %s' % (
-                self.event_type_detector.get_event_type(event_index), self.period_length_list[event_index])
+        message = f'Calculated the periods for the event {self.event_type_detector.get_event_type(event_index)}: ' \
+                  f'{self.period_length_list[event_index]}'
         affected_path = self.event_type_detector.variable_key_list[event_index]
         self.print(message, log_atom, affected_path)
 
@@ -264,6 +264,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     self.result_list[event_index] = self.result_list[event_index][:count_index] +\
                             self.result_list[event_index][count_index + 1:]
 
+            # skipcq: PYL-C0209
             message = 'Disabled the TSA for the target paths %s of event %s' % (
                     [self.event_type_detector.variable_key_list[event_index][count_index] for count_index in delete_indices],
                     self.event_type_detector.get_event_type(event_index))
@@ -284,9 +285,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Check if enough values have been stored to initialize the arima_model
                     if len(self.event_type_detector.values[event_index][var_index]) >= self.num_periods_tsa_ini *\
                             self.period_length_list[event_index][count_index]:
-                        message = 'Initializing the TSA for the event %s and targetpath %s' % (
-                                self.event_type_detector.get_event_type(event_index),
-                                self.event_type_detector.variable_key_list[event_index][count_index])
+                        message = f'Initializing the TSA for the event {self.event_type_detector.get_event_type(event_index)} and ' \
+                                  f'targetpath {self.event_type_detector.variable_key_list[event_index][count_index]}'
                         affected_path = self.event_type_detector.variable_key_list[event_index][count_index]
                         self.print(message, log_atom, affected_path)
 
@@ -325,9 +325,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     # Test if count is in boundaries
                     if count < lower_limit or count > upper_limit:
-                        message = 'Event: %s, Path: %s, Lower: %s, Count: %s, Upper: %s' % (
-                                self.event_type_detector.get_event_type(event_index),
-                                self.event_type_detector.variable_key_list[event_index][var_index], lower_limit, count, upper_limit)
+                        message = f'Event: {self.event_type_detector.get_event_type(event_index)}, Path: ' \
+                                  f'{self.event_type_detector.variable_key_list[event_index][var_index]}, Lower: {lower_limit}, Count: ' \
+                                  f'{count}, Upper: {upper_limit}'
                         affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                         if count < lower_limit:
                             confidence = (lower_limit - count) / (upper_limit - count)
@@ -354,9 +354,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         n=self.num_periods_tsa_ini * self.period_length_list[event_index][count_index],
                         p=(1-self.alpha), alternative='greater') < self.alpha_bt):
 
-                    message = 'Discard the TSA model for the event %s and path %s' % (
-                            self.event_type_detector.get_event_type(event_index),
-                            self.event_type_detector.variable_key_list[event_index][var_index])
+                    message = f'Discard the TSA model for the event {self.event_type_detector.get_event_type(event_index)} and path ' \
+                              f'{self.event_type_detector.variable_key_list[event_index][var_index]}'
                     affected_path = self.event_type_detector.variable_key_list[event_index][var_index]
                     self.print(message, log_atom, affected_path)
 
@@ -425,4 +424,4 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if confidence is not None:
             event_data['TypeInfo']['Confidence'] = confidence
         for listener in self.anomaly_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, message, sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)

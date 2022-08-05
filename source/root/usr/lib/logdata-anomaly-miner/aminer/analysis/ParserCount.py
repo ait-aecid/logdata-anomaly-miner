@@ -120,7 +120,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                           'ToTime': datetime.datetime.utcnow().timestamp()}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Count report', [output_string], event_data, None, self)
         else:
             for k in self.count_dict:
                 output_string = 'Parsed paths in the last ' + str(self.report_interval) + ' seconds:\n'
@@ -132,7 +132,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 event_data = {'StatusInfo': status_info, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                               'ToTime': datetime.datetime.utcnow().timestamp()}
                 for listener in self.anomaly_event_handlers:
-                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
+                    listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Count report', [output_string], event_data, None, self)
         for k in self.count_dict:
             self.count_dict[k][current_processed_lines_str] = 0
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent report.')
