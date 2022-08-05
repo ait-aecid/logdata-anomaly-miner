@@ -913,7 +913,7 @@ Analysis:
           id: MatchFilter
           paths:
             - "/model/Random"
-          target_value_list:
+          value_list:
             - 1
             - 10
             - 100
@@ -980,7 +980,7 @@ Analysis:
         - type: ValueListMatchRule
           id: "value_list_match_rule"
           path: "/model/ParsingME/se2/IpAddressDataModelElement"
-          target_value_list:
+          value_list:
             - 134744072
             - 134743044
         - type: NegationMatchRule

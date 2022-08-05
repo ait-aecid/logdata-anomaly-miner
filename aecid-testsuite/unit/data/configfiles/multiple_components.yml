@@ -159,7 +159,7 @@ Analysis:
         - type: MatchFilter
           id: MatchFilter
           paths: ["/model/Random"]
-          target_value_list: [1, 10, 100]
+          value_list: [1, 10, 100]
           output_logline: True
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChangeDetector

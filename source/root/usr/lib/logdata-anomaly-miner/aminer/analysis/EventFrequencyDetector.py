@@ -86,7 +86,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 freqs = entry[1]
                 # In case that num_windows differ, only take as many as possible
                 self.counts[tuple(log_event)] = freqs[max(0, len(freqs) - num_windows - 1):] + [0]
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -157,7 +157,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     analysis_component = {'AffectedLogAtomPaths': self.target_path_list}
                     event_data = {'AnalysisComponent': analysis_component}
                     for listener in self.anomaly_event_handlers:
-                        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No log events received in time window',
+                        listener.receive_event(f'Analysis.{self.__class__.__name__}', 'No log events received in time window',
                                                [''], event_data, log_atom, self)
             for log_ev in self.counts:
                 # Check if ranges should be initialised
@@ -197,7 +197,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                       max(occurrences_mean, self.counts[log_ev][-1])}
                     event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                     for listener in self.anomaly_event_handlers:
-                        listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency anomaly detected', sorted_log_lines,
+                        listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Frequency anomaly detected', sorted_log_lines,
                                                event_data, log_atom, self)
                     # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
                     self.exceeded_range_frequency[log_ev] = False
@@ -239,7 +239,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                   'ConfidenceFactor': self.confidence_factor}
                 event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                 for listener in self.anomaly_event_handlers:
-                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Frequency exceeds range for the first time',
+                    listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Frequency exceeds range for the first time',
                                            sorted_log_lines, event_data, log_atom, self)
         # Increase count for observed events
         if log_event in self.counts:
@@ -304,7 +304,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             # Skip last count as the time window may not be complete yet and count thus too low
             persist_data.append((log_ev, freqs[:-1]))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def print_persistency_event(self, event_type, event_data):
         """
@@ -312,7 +312,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         @return a message with information about the persistency.
         @throws Exception when the output for the event_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -337,7 +337,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             values_list = list(values_set)
             values_list.sort()
 
-            string = 'Event frequency is tracked for the following path values: %s' % values_list
+            string = f'Event frequency is tracked for the following path values: {values_list}'
         elif len(event_data) == 1:
             # Print the current count, the frequency interval and the time when the counter resets
             if event_data[0] in self.ranges and self.ranges[event_data[0]] is None and len(self.counts[event_data[0]]) > 1:
@@ -347,17 +347,15 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             if event_data[0] in self.counts and self.ranges[event_data[0]] is not None:
                 if self.counts[event_data[0]][-1] < self.ranges[event_data[0]][0] or\
                         self.counts[event_data[0]][-1] > self.ranges[event_data[0]][1]:
-                    string = 'The current count %s is outside the frequency interval [%s, %s] for %s. '\
-                            'The count will reset at %s (unix time stamp)' % (
-                                self.counts[event_data[0]][-1], self.ranges[event_data[0]][0], self.ranges[event_data[0]][1],
-                                event_data[0], self.next_check_time)
+                    string = f'The current count {self.counts[event_data[0]][-1]} is outside the frequency interval [' \
+                             f'{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. The count will ' \
+                             f'reset at {self.next_check_time} (unix time stamp)'
                 else:
-                    string = 'The current count %s is in the frequency interval [%s, %s] for %s. '\
-                            'The count will reset at %s (unix time stamp)' % (
-                                self.counts[event_data[0]][-1], self.ranges[event_data[0]][0], self.ranges[event_data[0]][1],
-                                event_data[0], self.next_check_time)
+                    string = f'The current count {self.counts[event_data[0]][-1]} is in the frequency interval [' \
+                             f'{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. The count will ' \
+                             f'reset at {self.next_check_time} (unix time stamp)'
             else:
-                string = 'Persistency includes no information for %s.' % event_data[0]
+                string = f'Persistence includes no information for {event_data[0]}.'
 
         return string
 
@@ -367,7 +365,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -377,7 +375,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
-        return 'Allowlisted path %s.' % event_data
+        return f'Allowlisted path {event_data}.'
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """
@@ -385,7 +383,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -395,7 +393,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)
-        return 'Blocklisted path %s.' % event_data
+        return f'Blocklisted path {event_data}.'
 
     def log_statistics(self, component_name):
         """
@@ -404,12 +402,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
+                f"time windows in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
+                f"time windows in the last 60 minutes.")
         self.log_success = 0
         self.log_total = 0
         self.log_windows = 0
