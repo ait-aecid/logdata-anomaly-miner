@@ -1072,7 +1072,7 @@ Analysis:
             - "/model/type/path/id"
             - "/model/type/syscall/id"
           min_allowed_time_diff: 5
-          allow_missing_values_flag: True
+          allow_missing_values: True
           learn_mode: True
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue

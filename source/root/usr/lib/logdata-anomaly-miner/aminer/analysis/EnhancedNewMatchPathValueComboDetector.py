@@ -73,7 +73,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             # the first lists to tuples to allow hash operation needed by set.
             for value_tuple, extra_data in persistence_data:
                 self.known_values_dict[tuple(value_tuple)] = extra_data
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
         """
@@ -142,7 +142,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             for listener in self.anomaly_event_handlers:
                 sorted_log_lines = [str(self.known_values_dict) + os.linesep + original_log_line_prefix + data]
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
             if self.learn_mode and self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                 self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
@@ -167,7 +167,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         for dict_record in self.known_values_dict.items():
             persistence_data.append(dict_record)
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -175,7 +175,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -185,7 +185,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             raise Exception(msg)
         current_timestamp = event_data[0]
         self.known_values_dict[event_data[1]] = [current_timestamp, current_timestamp, 1]
-        return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)
+        return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data}."
 
     def log_statistics(self, component_name):
         """
@@ -194,13 +194,13 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_learned_path_value_combos)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned_path_value_combos} new value combinations in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes. Following new value combinations were learned: %s", component_name, self.log_success, self.log_total,
-                self.log_learned_path_value_combos, self.log_new_learned_values)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned_path_value_combos} new value combinations in the last 60 minutes. Following new value combinations "
+                f"were learned: {self.log_new_learned_values}")
         self.log_success = 0
         self.log_total = 0
         self.log_learned_path_value_combos = 0
