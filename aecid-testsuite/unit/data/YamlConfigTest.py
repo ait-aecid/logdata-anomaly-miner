@@ -325,7 +325,7 @@ class YamlConfigTest(TestBase):
         # test with MultiSource: True. Expects a SimpleByteStreamLineAtomizerFactory with a SimpleMultisourceAtomSync.
         self.assertTrue(isinstance(context.atomizer_factory, SimpleByteStreamLineAtomizerFactory))
         self.assertTrue(isinstance(context.atomizer_factory.atom_handler_list[0], SimpleMultisourceAtomSync))
-        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, [aminer_config.yaml_data['Input']['timestamp_path_list']])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, [aminer_config.yaml_data['Input']['timestamp_paths']])
 
         # test with MultiSource: False. Expects a SimpleByteStreamLineAtomizerFactory with a AtomFilters.SubhandlerFilter.
         aminer_config.yaml_data['Input']['multi_source'] = False
@@ -333,7 +333,7 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
         self.assertTrue(isinstance(context.atomizer_factory, SimpleByteStreamLineAtomizerFactory))
         self.assertTrue(isinstance(context.atomizer_factory.atom_handler_list[0], SubhandlerFilter))
-        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, [aminer_config.yaml_data['Input']['timestamp_path_list']])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, [aminer_config.yaml_data['Input']['timestamp_paths']])
 
     def test16_parsermodeltype_parameter_for_another_parsermodel_type(self):
         """This test checks if all ModelElements with child elements are working properly."""

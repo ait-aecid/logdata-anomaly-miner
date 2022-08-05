@@ -831,16 +831,16 @@ Analysis:
           id: TimestampsUnsortedDetector
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
-          target_path: "/model/LoginDetails/PastTime/Time/Minutes"
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
         - type: DebugMatchRule
           id: debug_match_rule
           debug_mode: True
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
-          target_path: "/model/LoginDetails"
+          path: "/model/LoginDetails"
         - type: ValueMatchRule
           id: value_match_rule
-          target_path: "/model/LoginDetails/Username"
+          path: "/model/LoginDetails/Username"
           value: "root"
         - type: NegationMatchRule
           id: negation_match_rule1
@@ -926,13 +926,13 @@ Analysis:
           learn_mode: True
         - type: ModuloTimeMatchRule
           id: "mt"
-          target_path: null
+          path: null
           seconds_modulo: 3
           lower_limit: 0
           upper_limit: 3
         - type: ValueDependentModuloTimeMatchRule
           id: "vdmt"
-          target_path: null
+          path: null
           seconds_modulo: 3
           paths:
             - "/model/ECD/g"
@@ -972,14 +972,14 @@ Analysis:
           event_message: "Private IP address occurred!"
         - type: IPv4InRFC1918MatchRule
           id: "ipv4_in_rfc1918_match_rule"
-          target_path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
           match_action: "ip_match_action"
         - type: DebugHistoryMatchRule
           id: "debug_history_match_rule"
           debug_mode: True
         - type: ValueListMatchRule
           id: "value_list_match_rule"
-          target_path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
           target_value_list:
             - 134744072
             - 134743044
@@ -988,7 +988,7 @@ Analysis:
           sub_rule: "value_list_match_rule"
         - type: ValueRangeMatchRule
           id: "value_range_match_rule"
-          target_path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
           lower_limit: 167772160
           upper_limit: 184549375
         - type: NegationMatchRule
@@ -996,7 +996,7 @@ Analysis:
           sub_rule: "value_range_match_rule"
         - type: StringRegexMatchRule
           id: "string_regex_match_rule"
-          target_path: "/model/type/syscall/success"
+          path: "/model/type/syscall/success"
           regex: "^no$"
         - type: NegationMatchRule
           id: "negation_string_regex"
@@ -1038,7 +1038,7 @@ Analysis:
           report_interval: 10
         - type: PathDependentHistogramAnalysis
           id: PathDependentHistogramAnalysis
-          target_path: "/model/RandomTime"
+          path: "/model/RandomTime"
           bin_definition: "modulo_time_bin_definition"
           report_interval: 10
         - type: MatchValueAverageChangeDetector
@@ -1108,11 +1108,11 @@ Analysis:
             - correlation_rule
         - type: PathExistsMatchRule
           id: path_exists_match_rule3
-          target_path: "/model/CronAnnouncement/Run"
+          path: "/model/CronAnnouncement/Run"
           match_action: a_class_selector
         - type: PathExistsMatchRule
           id: path_exists_match_rule4
-          target_path: "/model/CronExecution/Job"
+          path: "/model/CronExecution/Job"
           match_action: b_class_selector
         - type: TimeCorrelationViolationDetector
           id: TimeCorrelationViolationDetector
