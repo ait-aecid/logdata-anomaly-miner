@@ -75,7 +75,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             # Combinations are stored as list of dictionaries
             for record in persistence_data:
                 self.known_values.append(record)
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
         PersistenceUtil.add_persistable_component(self)
 
         self.id_dict_current = {}
@@ -187,7 +187,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             else:
                 sorted_log_lines = [repr(id_dict_entry) + os.linesep + original_log_line_prefix + data]
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
 
     def do_timer(self, trigger_time):
@@ -205,7 +205,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.known_values)
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -213,7 +213,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -223,7 +223,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             raise Exception(msg)
         if event_data not in self.known_values:
             self.known_values.append(event_data)
-        return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)
+        return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data}."
 
     def log_statistics(self, component_name):
         """
@@ -232,13 +232,13 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_learned_path_value_combos)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned_path_value_combos} new value combinations in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes. Following new value combinations were learned: %s", component_name, self.log_success, self.log_total,
-                self.log_learned_path_value_combos, self.log_new_learned_values)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned_path_value_combos} new value combinations in the last 60 minutes. Following new value combinations "
+                f"were learned: {self.log_new_learned_values}")
         self.log_success = 0
         self.log_total = 0
         self.log_learned_path_value_combos = 0

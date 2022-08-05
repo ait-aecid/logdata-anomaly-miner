@@ -143,7 +143,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.{self.__class__.__name__}':
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -162,11 +162,11 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned_path_values} new value combinations in the last 60 minutes.")
+                f"{self.log_learned_path_values} new values in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned_path_values} new value combinations in the last 60 minutes. Following new value combinations were"
+                f"{self.log_learned_path_values} new values in the last 60 minutes. Following new value combinations were"
                 f" learned: {self.log_new_learned_values}")
         self.log_success = 0
         self.log_total = 0
