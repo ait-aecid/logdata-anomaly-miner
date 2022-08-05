@@ -394,7 +394,7 @@ class ValueRangeMatchRule(MatchRule):
 
 
 class StringRegexMatchRule(MatchRule):
-    """Elements of this class return true when the given target_path exists and the string repr of the value matches the regular expression."""
+    """Elements of this class return true when the given path exists and the string repr of the value matches the regular expression."""
 
     def __init__(self, target_path, match_regex, match_action=None):
         self.target_path = target_path
@@ -464,11 +464,12 @@ class ModuloTimeMatchRule(MatchRule):
 class ValueDependentModuloTimeMatchRule(MatchRule):
     """
     Match elements of this class return true when the following conditions are met.
-    The given target_path exists, denotes a datetime object and the seconds since 1970 rom that date modulo the given value are included in a
+    The given path exists, denotes a datetime object and the seconds since 1970 rom that date modulo the given value are included in a
     [lower, upper] range selected by values from the match.
     """
 
-    def __init__(self, target_path, seconds_modulo, target_path_list, limit_lookup_dict, default_limit=None, match_action=None, tzinfo=None):
+    def __init__(
+            self, target_path, seconds_modulo, target_path_list, limit_lookup_dict, default_limit=None, match_action=None, tzinfo=None):
         """
         @param target_path the target_path to the datetime object to use to evaluate the modulo time rules on.
         When None, the default timestamp associated with the match is used.
@@ -525,7 +526,7 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
 
 class IPv4InRFC1918MatchRule(MatchRule):
     """
-    Match elements of this class return true when the target_path matches and contains a valid IPv4 address from the RFC1918 private IP ranges.
+    Match elements of this class return true when the path matches and contains a valid IPv4 address from the RFC1918 private IP ranges.
     This could also be done by distinct range match elements, but as this kind of matching is common, have an own element for it.
     """
 

@@ -204,7 +204,8 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                                 list(self.last_value[id_tuple]), list(event_value), list(id_tuple),
                                 self.time_matrix[event_value_1][event_value_2], log_atom.atom_time - self.last_time[id_tuple])
                         confidence = 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2]
-                        self.print(message, log_atom, self.target_path_list, confidence=confidence, additional_information=additional_information)
+                        self.print(
+                            message, log_atom, self.target_path_list, confidence=confidence, additional_information=additional_information)
 
                     if self.learn_mode:
                         self.time_matrix[event_value_1][event_value_2] = log_atom.atom_time - self.last_time[id_tuple]

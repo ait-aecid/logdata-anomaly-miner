@@ -1,6 +1,5 @@
 """This module contains functions and classes to create the parsing model."""
 
-import logging
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
@@ -18,7 +17,6 @@ from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
-from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
 def get_model():

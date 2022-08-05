@@ -805,10 +805,10 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         # Multiply the single values of the indicator with their corresponding weights
                         # Number of the log line which corresponds to the first indicator, which is taken into account
                         first_line_num = self.event_type_detector.num_event_lines[event_index] - self.num_update * \
-                                         self.num_var_type_considered_ind * (self.num_ind_for_weights + self.num_skipped_ind_for_weights)
+                            self.num_var_type_considered_ind * (self.num_ind_for_weights + self.num_skipped_ind_for_weights)
                         # Number of the log line which corresponds to the last indicator, which is taken into account
                         last_line_num = self.event_type_detector.num_event_lines[event_index] - self.num_update * \
-                                        self.num_var_type_considered_ind * self.num_skipped_ind_for_weights
+                            self.num_var_type_considered_ind * self.num_skipped_ind_for_weights
 
                         for var_index in indices_failed_tests:
                             lower_ind = False  # Index of the lower limit of the considered values of the failed_indicator list
@@ -866,8 +866,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         not isinstance(self.num_update_var_type_hist_ref, bool)) and len(
                         self.var_type_history_list_reference) >= event_index + 1 and \
                         self.var_type_history_list_reference[event_index] != [] and (((
-                                                                                              self.event_type_detector.num_event_lines[event_index] - self.num_init) / self.num_update
-                                                                                      - self.num_var_type_hist_ref) % self.num_update_var_type_hist_ref == 0):
+                            self.event_type_detector.num_event_lines[event_index] - self.num_init) / self.num_update -
+                                self.num_var_type_hist_ref) % self.num_update_var_type_hist_ref == 0):
 
                     for var_index, var_val in enumerate(self.var_type_history_list[event_index]):
                         self.var_type_history_list_reference[event_index][var_index] = []

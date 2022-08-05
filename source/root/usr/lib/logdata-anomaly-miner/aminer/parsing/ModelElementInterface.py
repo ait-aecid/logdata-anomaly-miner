@@ -153,11 +153,11 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise locale.Error(msg)
 
-        if hasattr(self, "start_year") and self.start_year is not None:
-            if not isinstance(self.start_year, int) or isinstance(self.start_year, bool):
-                msg = "start_year has to be of the type integer."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "start_year") and self.start_year is not None and (not isinstance(self.start_year, int) or isinstance(
+                self.start_year, bool)):
+            msg = "start_year has to be of the type integer."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
         if hasattr(self, "max_time_jump_seconds"):
             if not isinstance(self.max_time_jump_seconds, int) or isinstance(self.max_time_jump_seconds, bool):
