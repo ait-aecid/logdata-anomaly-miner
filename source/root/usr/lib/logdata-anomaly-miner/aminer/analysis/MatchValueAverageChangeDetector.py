@@ -119,10 +119,10 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                     a['Old'] = old
                     d['AnalysisData'] = a
                     if analysis_summary == '':
-                        analysis_summary += '"%s": %s' % (path, analysis_data[0])
+                        analysis_summary += f'"{path}": {analysis_data[0]}'
                     else:
                         analysis_summary += os.linesep
-                        analysis_summary += '  "%s": %s' % (path, analysis_data[0])
+                        analysis_summary += f'  "{path}": {analysis_data[0]}'
                     anomaly_scores.append(d)
             analysis_component = {'AffectedLogAtomPaths': list(value_dict),
                                   'AnomalyScores': anomaly_scores,
@@ -135,7 +135,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             res = [''] * stat_data[2][0]
             res[0] = analysis_summary
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Statistical data report', res, event_data, log_atom, self)
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Statistical data report', res, event_data, log_atom, self)
         self.log_success += 1
 
     def do_timer(self, trigger_time):
@@ -153,7 +153,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.stat_data)
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def update(self, stat_data, timestamp_value, value):
         """
@@ -187,7 +187,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         Perform the analysis and progress from the last bin to the next one.
         @return None when statistical data was as expected and debugging is disabled.
         """
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s performs analysis.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} performs analysis.')
         current_bin = stat_data[3]
         current_average = current_bin[1] / current_bin[0]
         current_variance = (current_bin[2] - (current_bin[1] * current_bin[1]) / current_bin[0]) / (current_bin[0] - 1)
@@ -199,7 +199,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             stat_data[2] = (current_bin[0], current_bin[1], current_bin[2], current_average, current_variance,)
             stat_data[3] = (0, 0.0, 0.0)
             if self.debug_mode:
-                return 'Initial: n = %d, avg = %s, var = %s' % (current_bin[0], current_average + stat_data[1], current_variance)
+                return f'Initial: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}'
         else:
             total_n = old_bin[0] + current_bin[0]
             total_sum = old_bin[1] + current_bin[1]
@@ -210,8 +210,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             stat_data[3] = (0, 0.0, 0.0)
 
             if (current_variance > 2 * old_bin[4]) or (abs(current_average - old_bin[3]) > old_bin[4]) or self.debug_mode:
-                res = ['Change: new: n = %d, avg = %s, var = %s; old: n = %d, avg = %s, var = %s' % (
-                    current_bin[0], current_average + stat_data[1], current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]),
-                    current_bin[0], current_average + stat_data[1], current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]]
+                res = [f'Change: new: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}; old: n = '
+                       f'{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = { old_bin[4]}', current_bin[0],
+                       current_average + stat_data[1], current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]]
                 return res
         return None

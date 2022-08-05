@@ -137,14 +137,14 @@ class LinearNumericBinDefinition(BinDefinition):
             return self.bin_names
         self.bin_names = []
         if self.outlier_bins_flag:
-            self.bin_names.append('...-%s]' % self.lower_limit)
+            self.bin_names.append(f'...-{self.lower_limit}]')
         start = self.lower_limit
         for bin_pos in range(1, self.bin_count + 1):
             end = self.lower_limit + bin_pos * self.bin_size
-            self.bin_names.append('[%s-%s]' % (start, end))
+            self.bin_names.append(f'[{start}-{end}]')
             start = end
         if self.outlier_bins_flag:
-            self.bin_names.append('[%s-...' % start)
+            self.bin_names.append(f'[{start}-...')
         return self.bin_names
 
     def get_bin(self, value):
@@ -250,7 +250,7 @@ class HistogramData:
 
     def to_string(self, indent):
         """Get a string representation of this histogram."""
-        result = '%sProperty "%s" (%d elements):' % (indent, self.property_path, self.total_elements)
+        result = f'{indent}Property "{self.property_path}" ({self.total_elements} elements):'
         f_elements = float(self.total_elements)
         base_element = self.binned_elements if self.has_outlier_bins_flag else self.total_elements
         for bin_pos, count in enumerate(self.bin_data):
@@ -258,8 +258,10 @@ class HistogramData:
                 continue
             p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count)
             if p_value is None:
+                # skipcq: PYL-C0209
                 result += '\n%s* %s: %d (ratio = %.2e)' % (indent, self.bin_names[bin_pos], count, float(count) / f_elements)
             else:
+                # skipcq: PYL-C0209
                 result += '\n%s* %s: %d (ratio = %.2e, p = %.2e)' % \
                           (indent, self.bin_names[bin_pos], count, float(count) / f_elements, p_value)
         return result
@@ -339,14 +341,14 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def send_report(self, log_atom, timestamp):
         """Send a report to the event handlers."""
         report_str = 'Histogram report '
         if self.last_report_time is not None:
-            report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
-        report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
+            report_str += f'from {datetime.fromtimestamp(self.last_report_time).strftime(date_string)} '
+        report_str += f'till {datetime.fromtimestamp(timestamp).strftime(date_string)}'
         affected_log_atom_paths = []
         analysis_component = {'AffectedLogAtomPaths': affected_log_atom_paths}
         for histogramData in self.histogram_data:
@@ -386,14 +388,14 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if len(res) > 0:
             res[0] = report_str
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Histogram report', res, event_data, log_atom, self)
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Histogram report', res, event_data, log_atom, self)
         if self.reset_after_report_flag:
             for data_item in self.histogram_data:
                 data_item.reset()
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent report.')
 
 
 class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -528,14 +530,14 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def send_report(self, log_atom, timestamp):
         """Send report to event handlers."""
         report_str = 'Path histogram report '
         if self.last_report_time is not None:
-            report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
-        report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
+            report_str += f'from {datetime.fromtimestamp(self.last_report_time).strftime(date_string)} '
+        report_str += f'till {datetime.fromtimestamp(timestamp).strftime(date_string)}'
         all_path_set = set(self.histogram_data.keys())
         analysis_component = {'AffectedLogAtomPaths': list(all_path_set)}
         res = []
@@ -565,15 +567,16 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                     bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
                 d['BinDefinition'] = bin_definition
             d['PropertyPath'] = data_item.target_path
-            report_str += os.linesep + 'Path values "%s":' % '", "'.join(histogram_mapping[0])
+            # skipcq: PYL-C0209
+            report_str += os.linesep + f'Path values "%s":' % '", "'.join(histogram_mapping[0])
             if isinstance(histogram_mapping[2].match_element.match_string, bytes):
                 histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode(
                     AminerConfig.ENCODING)
-            report_str += os.linesep + 'Example: %s' % histogram_mapping[2].match_element.match_string
+            report_str += os.linesep + f'Example: {histogram_mapping[2].match_element.match_string}'
             if len(res) < histogram_mapping[1].total_elements:
                 res = [''] * histogram_mapping[1].total_elements
             for line in histogram_mapping[1].to_string('  ').split('\n'):
-                report_str += os.linesep + '%s' % line
+                report_str += os.linesep + f'{line}'
             if len(res) > 0:
                 res[0] = report_str
             all_path_set.discard(path)
@@ -587,8 +590,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         if self.reset_after_report_flag:
             histogram_mapping[1].reset()
         for listener in self.anomaly_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Histogram report', res, event_data, log_atom, self)
+            listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Histogram report', res, event_data, log_atom, self)
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent report.')

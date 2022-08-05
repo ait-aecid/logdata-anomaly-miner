@@ -67,6 +67,6 @@ class MatchFilter(AtomHandlerInterface):
             sorted_log_lines = [original_log_line_prefix + data]
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Log Atom Filtered',
-                                       sorted_log_lines, event_data, log_atom, self)
+                listener.receive_event(
+                    f'Analysis.{self.__class__.__name__}', 'Log Atom Filtered', sorted_log_lines, event_data, log_atom, self)
             self.log_success += 1

@@ -305,7 +305,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
                 f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned_values} new values in the last 60 minutes.)
+                f"{self.log_learned_values} new values in the last 60 minutes.)")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
                 f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
