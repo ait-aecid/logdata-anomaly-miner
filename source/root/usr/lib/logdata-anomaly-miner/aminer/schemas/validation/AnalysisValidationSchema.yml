@@ -329,7 +329,7 @@
                     'type': {'type': 'string', 'allowed': ['ParserCount'], 'required': True},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'report_interval': {'type': 'integer', 'min': 1},
-                    'target_label_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'labels': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'split_reports_flag': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}

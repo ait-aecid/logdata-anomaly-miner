@@ -147,7 +147,7 @@ Analysis:
           output_logline: True
         - type: PathDependentHistogramAnalysis
           id: PathDependentHistogramAnalysis
-          target_path: "/model/RandomTime"
+          path: "/model/RandomTime"
           bin_definition: "modulo_time_bin_definition"
           report_interval: 10
           output_logline: True
@@ -178,13 +178,13 @@ Analysis:
           id: NewMatchPathDetector
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
-          target_path: "/model/LoginDetails/PastTime/Time/Minutes"
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
-          target_path: "/model/LoginDetails"
+          path: "/model/LoginDetails"
         - type: ValueMatchRule
           id: value_match_rule
-          target_path: "/model/LoginDetails/Username"
+          path: "/model/LoginDetails/Username"
           value: "root"
         - type: NegationMatchRule
           id: negation_match_rule1
@@ -214,11 +214,11 @@ Analysis:
           artefact_b_rules: ["correlation_rule"]
         - type: PathExistsMatchRule
           id: path_exists_match_rule3
-          target_path: "/model/CronAnnouncement/Run"
+          path: "/model/CronAnnouncement/Run"
           match_action: "a_class_selector"
         - type: PathExistsMatchRule
           id: path_exists_match_rule4
-          target_path: "/model/CronExecution/Job"
+          path: "/model/CronExecution/Job"
           match_action: "b_class_selector"
         - type: TimeCorrelationViolationDetector
           id: TimeCorrelationViolationDetector
