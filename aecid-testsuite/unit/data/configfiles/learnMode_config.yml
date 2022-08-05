@@ -17,16 +17,16 @@ Parser:
           args:
               - host_name_model
 Input:
-        timestamp_path_list: "/accesslog/time"
+        timestamp_paths: "/accesslog/time"
 
 Analysis:
         - type: NewMatchPathValueDetector
           id: NewMatchPathValueDetector
-          target_path_list: ["/accesslog/status"]
+          paths: ["/accesslog/status"]
           learn_mode: True
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector
-          target_path_list: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
+          paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
           learn_mode: False
 
 EventHandlers:

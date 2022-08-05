@@ -114,7 +114,7 @@ Parser:
                   - sq6
 
 Input:
-        timestamp_path_list: ["/accesslog/time"]
+        timestamp_paths: ["/accesslog/time"]
         adjust_timestamps: True
 
 Analysis:
@@ -122,10 +122,10 @@ Analysis:
           id: TimestampsUnsortedDetector
         - type: NewMatchPathValueDetector
           id: NewMatchPathValueDetector
-          target_path_list: ["/accesslog/status"]
+          paths: ["/accesslog/status"]
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector
-          target_path_list: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
+          paths: ["/accesslog/method","/accesslog/request","/accesslog/useragent"]
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50
@@ -153,25 +153,25 @@ Analysis:
           output_logline: True
         - type: EnhancedNewMatchPathValueComboDetector
           id: EnhancedNewMatchPathValueComboDetector
-          target_path_list: ["/model/DailyCron/UName", "/model/DailyCron/JobNumber"]
+          paths: ["/model/DailyCron/UName", "/model/DailyCron/JobNumber"]
           tuple_transformation_function: demo
           output_logline: True
         - type: MatchFilter
           id: MatchFilter
-          target_path_list: ["/model/Random"]
+          paths: ["/model/Random"]
           target_value_list: [1, 10, 100]
           output_logline: True
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChangeDetector
           timestamp_path: None
-          target_path_list: ["/model/Random"]
+          paths: ["/model/Random"]
           min_bin_elements: 100
           min_bin_time: 10
           output_logline: True
         - type: MatchValueStreamWriter
           id: MatchValueStreamWriter
           stream: "sys.stdout"
-          target_path_list: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
+          paths: ["/model/Sensors/CPUTemp", "/model/Sensors/CPUWorkload", "/model/Sensors/DTM"]
           separator: ";"
           missing_value_string: ""
         - type: NewMatchPathDetector

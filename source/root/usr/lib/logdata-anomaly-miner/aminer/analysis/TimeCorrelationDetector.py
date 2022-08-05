@@ -71,7 +71,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
             self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
         else:
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -82,8 +82,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             timestamp = time.time()
         if timestamp < self.last_timestamp:
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__,
-                                       'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp),
+                listener.receive_event(f'Analysis.{self.__class__.__name__}',
+                                       f'Logdata not sorted: last {self.last_timestamp}, current {timestamp}',
                                        [log_atom.parser_match.match_element.annotate_match('')], event_data, log_atom, self)
             return
         self.last_timestamp = timestamp
@@ -137,9 +137,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
             event_data['AnalysisComponent'] = analysis_component
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Correlation report', result, event_data, log_atom, self)
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Correlation report', result, event_data, log_atom, self)
             self.reset_statistics()
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s ran analysis.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} ran analysis.', )
         self.log_success += 1
 
     def rule_to_dict(self, rule):
@@ -174,7 +174,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""
@@ -245,25 +245,31 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         result = ''
         for feature in self.feature_list:
             trigger_count = feature.trigger_count
-            result += '%s (%d) e = %d:' % (feature.rule, feature.index, trigger_count)
+            result += f'{feature.rule} ({feature.index}) e = {trigger_count}:'
             stat_pos = (self.parallel_check_count * feature.index) << 1
             for feature_pos in range(len(self.feature_list)):  # skipcq: PTC-W0060
                 event_count = self.event_count_table[stat_pos]
                 ratio = '-'
                 if trigger_count != 0:
+                    # skipcq: PYL-C0209
                     ratio = '%.2e' % (float(event_count) / trigger_count)
                 delta = '-'
                 if event_count != 0:
+                    # skipcq: PYL-C0209
                     delta = '%.2e' % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
+                # skipcq: PYL-C0209
                 result += '\n  %d: {c = %#6d r = %s dt = %s' % (feature_pos, event_count, ratio, delta)
                 stat_pos += 1
                 event_count = self.event_count_table[stat_pos]
                 ratio = '-'
                 if trigger_count != 0:
+                    # skipcq: PYL-C0209
                     ratio = '%.2e' % (float(event_count) / trigger_count)
                 delta = '-'
                 if event_count != 0:
+                    # skipcq: PYL-C0209
                     delta = '%.2e' % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
+                # skipcq: PYL-C0209
                 result += ' c = %#6d r = %s dt = %s}' % (event_count, ratio, delta)
                 stat_pos += 1
             result += '\n'

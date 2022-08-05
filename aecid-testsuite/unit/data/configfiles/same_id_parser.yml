@@ -21,12 +21,12 @@ Parser:
 
 Input:
         multi_source: False # optional
-        timestamp_path_list: "/model/accesslog/time"
+        timestamp_paths: "/model/accesslog/time"
 
 Analysis:
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector1
-          target_path_list: ["/model/accesslog/request","/model/accesslog/method"]
+          paths: ["/model/accesslog/request","/model/accesslog/method"]
           learn_mode: True
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: False
@@ -34,7 +34,7 @@ Analysis:
 
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueComboDetector2
-          target_path_list: ["/model/accesslog/request","/model/accesslog/status"]
+          paths: ["/model/accesslog/request","/model/accesslog/status"]
           learn_mode: True
 
 EventHandlers:

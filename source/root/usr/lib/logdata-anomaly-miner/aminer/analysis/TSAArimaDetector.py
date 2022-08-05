@@ -301,7 +301,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                             self.num_eventlines_ref]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def allowlist_event(self, event_type, sorted_log_lines, event_data, allowlisting_data):  # skipcq: PYL-W0613
         """

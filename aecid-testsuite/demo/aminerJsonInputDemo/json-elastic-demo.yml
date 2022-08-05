@@ -196,7 +196,7 @@ Parser:
                    version: version
 
 Input:
-        timestamp_path_list: None
+        timestamp_paths: None
         json_format: True
 
 EventHandlers:

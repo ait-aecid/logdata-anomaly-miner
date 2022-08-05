@@ -141,7 +141,7 @@ Parser:
            _empty_object: EMPTY_OBJECT
 
 Input:
-        timestamp_path_list: None
+        timestamp_paths: None
         json_format: True
 
 EventHandlers:

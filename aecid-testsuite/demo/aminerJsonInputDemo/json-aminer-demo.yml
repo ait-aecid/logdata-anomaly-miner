@@ -141,7 +141,7 @@ Parser:
              LogLinesCount: log_lines_count
 
 Input:
-        timestamp_path_list: None
+        timestamp_paths: None
         json_format: True
 
 EventHandlers:

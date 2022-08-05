@@ -88,8 +88,8 @@ class MatchRule(metaclass=abc.ABCMeta):
     def log_statistics(self, rule_id):
         """Log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
         if AminerConfig.STAT_LEVEL > 0:
-            logging.getLogger(STAT_LOG_NAME).info("Rule '%s' processed %d out of %d log atoms successfully in the last 60"
-                                                  " minutes.", rule_id, self.log_success, self.log_total)
+            logging.getLogger(STAT_LOG_NAME).info(f"Rule '{rule_id}' processed {self.log_success} out of {self.log_total} log atoms"
+                                                  f" successfully in the last 60 minutes.")
         self.log_success = 0
         self.log_total = 0
         if hasattr(self, 'sub_rules'):
@@ -286,7 +286,7 @@ class NegationMatchRule(MatchRule):
         return True
 
     def __str__(self):
-        return 'not %s' % self.sub_rule
+        return f'not {self.sub_rule}'
 
 
 class PathExistsMatchRule(MatchRule):
@@ -307,7 +307,7 @@ class PathExistsMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'hasPath(%s)' % self.target_path
+        return f'hasPath({self.target_path})'
 
 
 class ValueMatchRule(MatchRule):
@@ -340,7 +340,7 @@ class ValueMatchRule(MatchRule):
     def __str__(self):
         if isinstance(self.value, bytes):
             self.value = self.value.decode()
-        return 'value(%s)==%s' % (self.target_path, self.value)
+        return f'value({self.target_path})=={self.value}'
 
 
 class ValueListMatchRule(MatchRule):
@@ -363,7 +363,7 @@ class ValueListMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'value(%s) in %s' % (' '.join([str(value) for value in self.target_value_list]), self.target_path)
+        return f"value({' '.join([str(value) for value in self.target_value_list])}) in {self.target_path}"
 
 
 class ValueRangeMatchRule(MatchRule):
@@ -390,7 +390,7 @@ class ValueRangeMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'value(%s) inrange (%s, %s)' % (self.target_path, self.lower_limit, self.upper_limit)
+        return f'value({self.target_path}) inrange ({self.lower_limit}, {self.upper_limit})'
 
 
 class StringRegexMatchRule(MatchRule):
@@ -414,7 +414,7 @@ class StringRegexMatchRule(MatchRule):
         return True
 
     def __str__(self):
-        return 'string(%s) =regex= %s' % (self.target_path, self.match_regex.pattern)
+        return f'string({self.target_path}) =regex= {self.match_regex.pattern}'
 
 
 class ModuloTimeMatchRule(MatchRule):
@@ -549,7 +549,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return 'hasPath(%s)' % self.target_path
+        return f'hasPath({self.target_path})'
 
 
 class DebugMatchRule(MatchRule):
@@ -566,7 +566,7 @@ class DebugMatchRule(MatchRule):
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
         self.log_total += 1
-        print('Rules.DebugMatchRule: triggered while handling "%s"' % repr(log_atom.parser_match.match_element.match_string),
+        print(f'Rules.DebugMatchRule: triggered while handling "{repr(log_atom.parser_match.match_element.match_string)}"',
               file=sys.stderr)
         if self.match_action is not None:
             self.match_action.match_action(log_atom)
@@ -574,7 +574,7 @@ class DebugMatchRule(MatchRule):
         return self.debug_match_result
 
     def __str__(self):
-        return '%s' % self.debug_match_result
+        return f'{self.debug_match_result}'
 
 
 class DebugHistoryMatchRule(MatchRule):

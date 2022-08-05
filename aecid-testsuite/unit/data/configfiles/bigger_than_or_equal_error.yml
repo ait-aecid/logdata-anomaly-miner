@@ -15,7 +15,7 @@ Parser:
 
 Input:
         multi_source: False # optional
-        timestamp_path_list: "/model/accesslog/time"
+        timestamp_paths: "/model/accesslog/time"
 
 Analysis:
         - type: EventTypeDetector

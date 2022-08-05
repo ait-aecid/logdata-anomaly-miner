@@ -115,24 +115,24 @@ Parser:
 
 Input:
         multi_source: False # optional
-        timestamp_path_list: "/model/accesslog/time"
+        timestamp_paths: "/model/accesslog/time"
 
 Analysis:
         - type: "NewMatchPathValueDetector"
-          target_path_list: ["/model/accesslog/status"]
+          paths: ["/model/accesslog/status"]
           persistence_id: 'accesslog_status' # optional default: Default
           output_logline: false
           learn_mode: true
 
         - type: "NewMatchPathValueComboDetector"
-          target_path_list: ["/model/accesslog/request","/model/accesslog/method"]
+          paths: ["/model/accesslog/request","/model/accesslog/method"]
           learn_mode: true
           persistence_id: 'accesslog_request' # optional default: Default
           output_logline: false
           allow_missing_values_flag: false # optional default: false
 
         - type: "NewMatchPathValueComboDetector"
-          target_path_list: ["/model/accesslog/request","/model/accesslog/status"]
+          paths: ["/model/accesslog/request","/model/accesslog/status"]
           learn_mode: true
 
 EventHandlers:

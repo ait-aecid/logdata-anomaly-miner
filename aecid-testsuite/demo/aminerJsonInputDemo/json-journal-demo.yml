@@ -941,7 +941,7 @@ Parser:
            optional_key__SYSTEMD_SESSION: optional_key__SYSTEMD_SESSION
 
 Input:
-        timestamp_path_list: None
+        timestamp_paths: None
         json_format: True
 
 EventHandlers:

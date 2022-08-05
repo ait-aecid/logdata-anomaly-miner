@@ -17,7 +17,7 @@ Parser:
           args:
             - host_name_model
 Input:
-        timestamp_path_list: "/accesslog/time"
+        timestamp_paths: "/accesslog/time"
 
 EventHandlers:
         - id: stpe
