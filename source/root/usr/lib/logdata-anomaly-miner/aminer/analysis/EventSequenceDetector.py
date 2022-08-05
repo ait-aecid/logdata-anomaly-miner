@@ -84,7 +84,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 for sequence_elem in sequence:
                     sequence_elem_tuple.append(tuple(sequence_elem))
                 self.sequences.add(tuple(sequence_elem_tuple))
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -207,7 +207,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 analysis_component['AffectedIdValues'] = list(id_tuple)
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New sequence detected', sorted_log_lines, event_data,
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New sequence detected', sorted_log_lines, event_data,
                                        log_atom, self)
         self.log_success += 1
 
@@ -226,7 +226,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.sequences))
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -234,7 +234,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -244,7 +244,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
-        return 'Allowlisted path %s.' % event_data
+        return f'Allowlisted path {event_data}.'
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """
@@ -252,7 +252,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -262,7 +262,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)
-        return 'Blocklisted path %s.' % event_data
+        return f'Blocklisted path {event_data}.'
 
     def log_statistics(self, component_name):
         """
@@ -271,13 +271,13 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new sequences in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_learned)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned} new sequences in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new sequences in the last 60"
-                " minutes. Following new sequences were learned: %s", component_name, self.log_success, self.log_total,
-                self.log_learned, str(self.log_learned_sequences))
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned} new sequences in the last 60 minutes. Following new sequences were learned: "
+                f"{str(self.log_learned_sequences)}")
         self.log_success = 0
         self.log_total = 0
         self.log_learned = 0

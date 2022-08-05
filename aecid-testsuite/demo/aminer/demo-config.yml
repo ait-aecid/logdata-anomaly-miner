@@ -1034,7 +1034,7 @@ Analysis:
           outlier_bins_flag: True
         - type: HistogramAnalysis
           id: HistogramAnalysis
-          histogram_definitions: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
           report_interval: 10
         - type: PathDependentHistogramAnalysis
           id: PathDependentHistogramAnalysis
