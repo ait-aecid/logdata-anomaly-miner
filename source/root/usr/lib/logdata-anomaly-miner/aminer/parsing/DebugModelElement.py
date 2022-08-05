@@ -33,7 +33,7 @@ class DebugModelElement(ModelElementInterface):
         """
         super().__init__(element_id)
         # To avoid having those elements hidden in production configuration, write a line every time the class is instantiated.
-        msg = "DebugModelElement %s added" % element_id
+        msg = f"DebugModelElement {element_id} added"
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
 
