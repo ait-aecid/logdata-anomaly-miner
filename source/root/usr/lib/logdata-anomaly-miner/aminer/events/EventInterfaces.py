@@ -54,10 +54,12 @@ class EventSourceInterface(metaclass=abc.ABCMeta):
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
 
-    def get_weight_analysis_field_path(self):
+    @staticmethod
+    def get_weight_analysis_field_path():
         """Return the path to the list in the output of the detector which is weighted by the ScoringEventHandler."""
         return []
 
-    def get_weight_output_field_path(self):
+    @staticmethod
+    def get_weight_output_field_path():
         """Return the path where the ScoringEventHandler adds the scorings in the output of the detector."""
         return []
