@@ -457,9 +457,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
-                                    persistence_id=item['persistence_id'], window_size=item['window_size'],
-                                    num_windows=item['num_windows'], confidence_factor=item['confidence_factor'],
-                                    empty_window_warnings=item['empty_window_warnings'],
+                                    scoring_path_list=item['scoring_path_list'], persistence_id=item['persistence_id'],
+                                    window_size=item['window_size'], num_windows=item['num_windows'],
+                                    confidence_factor=item['confidence_factor'], empty_window_warnings=item['empty_window_warnings'],
                                     early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'],
                                     set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
                                     learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
@@ -926,6 +926,10 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                         ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=True)
                     else:
                         ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=False)
+                if item['score']:
+                    from aminer.events.ScoringEventHandler import ScoringEventHandler
+                    ctx = ScoringEventHandler([ctx], analysis_context, weights=item['weights'], auto_weights=item['auto_weights'],
+                                              auto_weights_history_length=item['auto_weights_history_length'])
                 anomaly_event_handlers.append(ctx)
             return event_handler_id_list
         raise KeyError()

@@ -1399,6 +1399,7 @@ EventFrequencyDetector
 This module defines an detector for event and value frequency deviations.
 
 * **target_path_list** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **scoring_path_list** parser paths of values to be analyzed by following event handlers like the ScoringEventHandler. Multiple paths mean that values are analyzed by their combined occurrences.
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **window_size** the length of the time window for counting in seconds (float, defaults to 600).
 * **num_windows** the number of previous time windows considered for expected frequency estimation (integer, defaults to 50).
@@ -2420,6 +2421,10 @@ All EventHandler must have the following parameters and may have additional spec
 * **type**: must be an existing Analysis component (required)
 * **json**: A boolean value that enables that the output is formatted in json (default: False)
 * **pretty**: A boolean value that specifies whether json output should be in a single line (False) or pretty printed (True) (default: True)
+* **score**: A boolean value that enables that a confidence is added to the output of certain detectors (default: False)
+* **weights**: A dictionary that specifies the weights of values for the scoring. The keys are the strings of the analyzed list and the corresponding values are the assigned weights. Strings that are not present in this dictionary have the weight 0.5 if not automatically weighted (default: None)
+* **auto_weights**: A boolean value that states if the weights should be automatically calculated through the formula 10 / (10 + number of value appearances) (default: False)
+* **auto_weights_history_length**: A integer value that specifies the number of values that are considered in the calculation of the weights (default: 1000)
 
 
 StreamPrinterEventHandler
