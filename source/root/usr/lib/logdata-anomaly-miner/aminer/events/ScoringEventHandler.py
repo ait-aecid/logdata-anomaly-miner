@@ -1,4 +1,8 @@
-"""This module defines an event handler that converts an event to JSON.
+"""
+This module defines an event handler that adds a confidence score to the anomaly output.
+The score is calculated through analysis of a list of strings defined in the detector through the function get_weight_analysis_field_path
+and weights the single strings based on the weights dictionary.
+The weights can optionally be automatically calculated.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -11,22 +15,24 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import copy
+
 from aminer.events.EventInterfaces import EventHandlerInterface
 
 
 class ScoringEventHandler(EventHandlerInterface):
-    """This class implements an event record listener, that will convert event data to JSON format."""
+    """This class implements an event record listener, that will add a confidence score to the anomaly output."""
 
     def __init__(self, event_handlers, analysis_context, weights=None, auto_weights=False, auto_weights_history_length=1000):
         """
         Initialize the ScoringEventHandler component.
-        @param weights dictionary of the A dictionary that specifies the weights of values for the scoring. The keys are the strings of the
-        analyzed list and the corresponding values are the assigned weights. Strings that are not present in this dictionary have the weight
-        0.5 if not automatically weighted
+        @param weights A dictionary that specifies the weights of values for the scoring. The keys are the strings of the analyzed list and
+        the corresponding values are the assigned weights. Strings that are not present in this dictionary have the weight 0.5 if not
+        automatically weighted.
         @param auto_weights boolean value that states if the weights should be automatically calculated through the formula
-        10 / (10 + number of value appearances)
+        10 / (10 + number of value appearances).
         @param auto_weights_history_length integer value that specifies the number of values that are considered in the calculation of the
-        weights
+        weights.
         """
         self.analysis_context = analysis_context
         self.event_handlers = event_handlers
@@ -43,14 +49,9 @@ class ScoringEventHandler(EventHandlerInterface):
         # Initialize path_valid variable that states if the path to the analysis field is valid
         path_valid = True
 
-        # Get the path to the analysis and output fields from the event_source or set the paths to empty lists if not
-        if (callable(getattr(event_source.__class__, 'get_weight_analysis_field_path', None)) and
-                callable(getattr(event_source.__class__, 'get_weight_output_field_path', None))):
-            analysis_field_path = event_source.get_weight_analysis_field_path()
-            output_field_path = event_source.get_weight_output_field_path()
-        else:
-            analysis_field_path = []
-            output_field_path = []
+        # Get the path to the analysis and output fields from the event_source
+        analysis_field_path = event_source.get_weight_analysis_field_path()
+        output_field_path = event_source.get_weight_output_field_path()
 
         # Check if the analysis field path is not empty and get the analyis list or set path_valid to False
         if analysis_field_path == []:
@@ -95,7 +96,6 @@ class ScoringEventHandler(EventHandlerInterface):
         for listener in self.event_handlers:
             if hasattr(event_source, "output_event_handlers") and event_source.output_event_handlers is not None \
                     and listener not in event_source.output_event_handlers:
-                import copy
                 event_source = copy.copy(event_source)
                 event_source.output_event_handlers.append(listener)
             listener.receive_event(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source)
