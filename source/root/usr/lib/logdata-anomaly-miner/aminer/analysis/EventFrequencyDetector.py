@@ -130,7 +130,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 freqs = entry[1]
                 # In case that num_windows differ, only take as many as possible
                 self.counts[tuple(log_event)] = freqs[max(0, len(freqs) - num_windows - 1):] + [0]
-                if self.scoring_path_list is not None:
+                if len(self.scoring_path_list) > 0:
                     self.scoring_value_list[tuple(log_event)] = []
             logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
