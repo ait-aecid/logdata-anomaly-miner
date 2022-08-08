@@ -116,6 +116,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                unused.
         @param delta_time_to_discard_hypothesis time span required for old hypotheses to be discarded.
         @param check_rules_flag specifies whether existing rules are evaluated.
+        @param scoring_path_list parser paths of values to be analyzed by following event handlers like the ScoringEventHandler.
+               Multiple paths mean that values are analyzed by their combined occurrences.
         @param window_size the length of the time window for counting in seconds.
         @param num_windows the number of previous time windows considered for expected frequency estimation.
         @param confidence_factor defines range of tolerable deviation of measured frequency from expected frequency according to
@@ -293,15 +295,15 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "default_parsed_atom_handler", "target_path", "parsed_atom_handler_dict", "allow_missing_values_flag",
             "tuple_transformation_function", "prob_thresh", "skip_repetitions", "max_hypotheses", "hypothesis_max_delta_time",
             "generation_probability", "generation_factor", "max_observations", "p0", "alpha", "candidates_size",
-            "hypotheses_eval_delta_time", "delta_time_to_discard_hypothesis", "check_rules_flag", "window_size", "num_windows",
-            "confidence_factor", "empty_window_warnings", "early_exceeding_anomaly_output", "set_lower_limit", "set_upper_limit", "seq_len",
-            "allow_missing_id", "timeout", "allowed_id_tuples", "min_num_vals", "max_num_vals", "save_values", "track_time_for_tsa",
-            "waiting_time", "num_sections_waiting_time", "histogram_definitions", "report_interval", "reset_after_report_flag",
-            "bin_definition", "target_value_list", "timestamp_path", "min_bin_elements", "min_bin_time", "debug_mode", "stream",
-            "separator", "missing_value_string", "num_log_lines_solidify_matrix", "time_output_threshold", "anomaly_threshold",
-            "default_interval", "realert_interval", "combine_values", "min_allowed_time_diff", "target_label_list", "split_reports_flag",
-            "event_type_detector", "num_init", "force_period_length", "set_period_length", "alpha_bt", "num_results_bt",
-            "num_min_time_history", "num_max_time_history", "num_periods_tsa_ini", "time_period_length", "max_time_diff",
+            "hypotheses_eval_delta_time", "delta_time_to_discard_hypothesis", "check_rules_flag", "window_size", "scoring_path_list",
+            "num_windows", "confidence_factor", "empty_window_warnings", "early_exceeding_anomaly_output", "set_lower_limit",
+            "set_upper_limit", "seq_len", "allow_missing_id", "timeout", "allowed_id_tuples", "min_num_vals", "max_num_vals", "save_values",
+            "track_time_for_tsa", "waiting_time", "num_sections_waiting_time", "histogram_definitions", "report_interval",
+            "reset_after_report_flag", "bin_definition", "target_value_list", "timestamp_path", "min_bin_elements", "min_bin_time",
+            "debug_mode", "stream", "separator", "missing_value_string", "num_log_lines_solidify_matrix", "time_output_threshold",
+            "anomaly_threshold", "default_interval", "realert_interval", "combine_values", "min_allowed_time_diff", "target_label_list",
+            "split_reports_flag", "event_type_detector", "num_init", "force_period_length", "set_period_length", "alpha_bt",
+            "num_results_bt", "num_min_time_history", "num_max_time_history", "num_periods_tsa_ini", "time_period_length", "max_time_diff",
             "num_reduce_time_list", "min_anomaly_score", "min_variance", "parallel_check_count", "record_count_before_event",
             "use_path_match", "use_value_match", "min_rule_attributes", "max_rule_attributes", "ruleset", "exit_on_error_flag",
             "acf_pause_interval_percentage", "acf_auto_pause_interval", "acf_auto_pause_interval_num_min", "build_sum_over_values",
