@@ -32,7 +32,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, scoring_path_list=None, window_size=600,
                  num_windows=50, confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False,
-                 set_lower_limit=None, set_upper_limit=None, persistence_id='Default', auto_include_flag=False, output_log_line=True,
+                 set_lower_limit=None, set_upper_limit=None, persistence_id='Default', learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -64,11 +64,11 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
             mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
-            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, scoring_path_list=scoring_path_list, window_size=window_size,
-            num_windows=num_windows, confidence_factor=confidence_factor, empty_window_warnings=empty_window_warnings,
-            early_exceeding_anomaly_output=early_exceeding_anomaly_output, set_lower_limit=set_lower_limit, set_upper_limit=set_upper_limit,
-            persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list,
-            constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, scoring_path_list=scoring_path_list,
+            window_size=window_size,  num_windows=num_windows, confidence_factor=confidence_factor,
+            empty_window_warnings=empty_window_warnings, early_exceeding_anomaly_output=early_exceeding_anomaly_output,
+            set_lower_limit=set_lower_limit, set_upper_limit=set_upper_limit, persistence_id=persistence_id, learn_mode=learn_mode,
+            output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
         self.next_check_time = None
