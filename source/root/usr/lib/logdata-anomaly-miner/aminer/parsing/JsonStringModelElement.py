@@ -93,7 +93,7 @@ class JsonAccessObject:
 class JsonStringModelElement(ModelElementInterface):
     """This class matches any byte but at least one. Thus a match will always span the complete data from beginning to end."""
 
-    def __init__(self, element_id: str, key_parser_dict: dict, strict_mode: bool):
+    def __init__(self, element_id: str, key_parser_dict: dict, strict_mode: bool = False):
         self.children = []
 
         

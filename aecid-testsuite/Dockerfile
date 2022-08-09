@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install -y \
     mailutils \
     sudo \
     curl \
+    vim \
     postfix \
     openjdk-11-jre \
     locales \
@@ -121,6 +122,9 @@ RUN chown aminer.aminer -R /home/aminer \
 ADD scripts/testingwrapper.sh /testingwrapper.sh
 ADD source /home/aminer/source
 ADD docs /home/aminer/docs
+
+RUN pip3 install orjson
+RUN PACK=$(find /usr/local/lib/ -name orjson.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 USER aminer
 WORKDIR /home/aminer/aecid-testsuite

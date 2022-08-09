@@ -270,7 +270,7 @@ def build_parsing_model(data=None):
                 if 'start' in item and item['start'] is True:
                     start = item['type'].func(item['name'], key_parser_dict, item['strict'])
                 else:
-                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict)
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['strict'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
