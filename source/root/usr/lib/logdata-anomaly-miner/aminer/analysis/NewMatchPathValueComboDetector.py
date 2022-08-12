@@ -33,57 +33,34 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
-                 auto_include_flag=False, output_log_line=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 learn_mode=False, output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
-        @param target_path_list the list of values to extract from each match to create the value combination to be checked.
-        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the pathes from target_path_list
+        @param aminer_config configuration from analysis_context.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param persistence_id name of persistence file.
+        @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
         does not refer to an existing parsed data object.
-        @param auto_include_flag when set to True, this detector will report a new value only the first time before including it
+        @param learn_mode when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.target_path_list = target_path_list
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.allow_missing_values_flag = allow_missing_values_flag
-        self.auto_include_flag = auto_include_flag
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.persistence_id = persistence_id
-
-        self.log_success = 0
-        self.log_total = 0
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        super().__init__(
+            aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
+            persistence_id=persistence_id, allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode,
+            output_logline=output_logline, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
 
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
-
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-            KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.known_values_set = set()
         self.load_persistence_data()
         PersistenceUtil.add_persistable_component(self)
@@ -94,7 +71,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         if persistence_data is not None:
             # Set and tuples were stored as list of lists. Transform the inner lists to tuples to allow hash operation needed by set.
             self.known_values_set = {tuple(record) for record in persistence_data}
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
         """
@@ -103,10 +80,10 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         values were new or not.
         """
         self.log_total += 1
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
         match_dict = log_atom.parser_match.get_match_dictionary()
         match_value_list = []
         for target_path in self.target_path_list:
@@ -131,7 +108,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
                 match_value = match_value.decode(AminerConfig.ENCODING)
             affected_log_atom_values.append(str(match_value))
         if match_value_tuple not in self.known_values_set:
-            if self.auto_include_flag:
+            if self.learn_mode:
                 self.known_values_set.add(match_value_tuple)
                 self.log_learned_path_value_combos += 1
                 self.log_new_learned_values.append(match_value_tuple)
@@ -147,7 +124,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + data]
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New value combination(s) detected', sorted_log_lines,
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
         self.log_success += 1
         return True
@@ -167,7 +144,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -175,7 +152,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -184,15 +161,15 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.known_values_set.add(event_data)
-        return 'Allowlisted path(es) %s with %s.' % (', '.join(self.target_path_list), event_data)
+        return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data}."
 
     def add_to_persistency_event(self, event_type, event_data):
         """
-        Add or overwrite the information of event_data to the persistency of component_name.
-        @return a message with information about the addition to the persistency.
+        Add or overwrite the information of event_data to the persistence of component_name.
+        @return a message with information about the addition to the persistence.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -219,7 +196,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
             self.known_values_set.add(match_value_tuple)
             self.log_learned_path_value_combos += 1
             self.log_new_learned_values.append(match_value_tuple)
-        return 'Added values [%s] of paths [%s] to the persistency.' % (', '.join(event_data), ', '.join(self.target_path_list))
+        return f"Added values [{', '.join(event_data)}] of paths [{', '.join(self.target_path_list)}] to the persistence."
 
     def log_statistics(self, component_name):
         """
@@ -228,13 +205,13 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_learned_path_value_combos)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned_path_value_combos} new value combinations in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new value combinations in the last 60"
-                " minutes. Following new value combinations were learned: %s", component_name, self.log_success, self.log_total,
-                self.log_learned_path_value_combos, self.log_new_learned_values)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned_path_value_combos} new value combinations in the last 60 minutes. Following new value combinations "
+                f"were learned: {self.log_new_learned_values}")
         self.log_success = 0
         self.log_total = 0
         self.log_learned_path_value_combos = 0

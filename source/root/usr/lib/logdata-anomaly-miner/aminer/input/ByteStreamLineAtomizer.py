@@ -45,7 +45,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
     COUNTER = 0
 
-    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_paths, eol_sep=b'\n',
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_path_list, eol_sep=b'\n',
                  json_format=False):
         """
         Create the atomizer.
@@ -57,9 +57,9 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.atom_handler_list = atom_handler_list
         self.event_handler_list = event_handler_list
         self.max_line_length = max_line_length
-        self.default_timestamp_paths = default_timestamp_paths
+        self.default_timestamp_path_list = default_timestamp_path_list
         if not isinstance(eol_sep, bytes):
-            msg = '%s eol_sep parameter must be of type bytes!' % self.__class__.__name__
+            msg = f'{self.__class__.__name__} eol_sep parameter must be of type bytes!'
             print(msg, file=sys.stderr)
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             sys.exit(-1)
@@ -156,7 +156,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 match_element = self.parsing_model.get_match_element('', match_context)
                 if (match_element is not None) and not match_context.match_data:
                     log_atom.parser_match = ParserMatch(match_element)
-                    for default_timestamp_path in self.default_timestamp_paths:
+                    for default_timestamp_path in self.default_timestamp_path_list:
                         ts_match = log_atom.parser_match.get_match_dictionary().get(default_timestamp_path, None)
                         if ts_match is not None:
                             log_atom.set_timestamp(ts_match.match_object)
@@ -175,7 +175,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         """Dispatch the data using the appropriate handlers. Also clean or set lastUnconsumed fields depending on outcome of dispatching."""
         type(self).COUNTER = type(self).COUNTER + 1
         if self.COUNTER % 1000 == 0 and self.COUNTER != 0:
-            logging.getLogger(DEBUG_LOG_NAME).info('%d log atoms were processed totally.', self.COUNTER)
+            logging.getLogger(DEBUG_LOG_NAME).info(f'{self.COUNTER} log atoms were processed totally.')
         was_consumed_flag = False
         if not self.atom_handler_list:
             was_consumed_flag = True
@@ -195,4 +195,4 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         if self.event_handler_list is None:
             return
         for handler in self.event_handler_list:
-            handler.receive_event('Input.%s' % self.__class__.__name__, message, [line_data], None, None, self)
+            handler.receive_event(f'Input.{self.__class__.__name__}', message, [line_data], None, None, self)

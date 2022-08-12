@@ -35,7 +35,7 @@ a report every week:
       aminer_config,
       [('/model/line/time', moduloTimeBinDefinition)],
       3600*24*7,  # Reporting interval (weekly)
-      report_event_handlers,        # Send report to those handlers
+      anomaly_event_handlers,        # Send report to those handlers
       reset_after_report_flag=True)  # Zero counters after sending of report
   # Send the appropriate input feed to the component
   atomFilter.addHandler(histogramAnalysis)
@@ -132,20 +132,19 @@ class LinearNumericBinDefinition(BinDefinition):
 
     def get_bin_names(self):
         """Get the names of the bins for reporting, including the outlier bins if any."""
-        # Cache the names here so that multiple histograms using same
-        # BinDefinition do not use separate copies of the strings.
+        # Cache the names here so that multiple histograms using same BinDefinition do not use separate copies of the strings.
         if self.bin_names is not None:
             return self.bin_names
         self.bin_names = []
         if self.outlier_bins_flag:
-            self.bin_names.append('...-%s]' % self.lower_limit)
+            self.bin_names.append(f'...-{self.lower_limit}]')
         start = self.lower_limit
         for bin_pos in range(1, self.bin_count + 1):
             end = self.lower_limit + bin_pos * self.bin_size
-            self.bin_names.append('[%s-%s]' % (start, end))
+            self.bin_names.append(f'[{start}-{end}]')
             start = end
         if self.outlier_bins_flag:
-            self.bin_names.append('[%s-...' % start)
+            self.bin_names.append(f'[{start}-...')
         return self.bin_names
 
     def get_bin(self, value):
@@ -239,7 +238,7 @@ class HistogramData:
 
     def clone(self):
         """
-        Clone this object so that calls to addValue do not influence the old object any more.
+        Clone this object so that calls to add_value do not influence the old object anymore.
         This behavior is a mixture of shallow and deep copy.
         """
         histogram_data = HistogramData(self.property_path, self.bin_definition)
@@ -251,7 +250,7 @@ class HistogramData:
 
     def to_string(self, indent):
         """Get a string representation of this histogram."""
-        result = '%sProperty "%s" (%d elements):' % (indent, self.property_path, self.total_elements)
+        result = f'{indent}Property "{self.property_path}" ({self.total_elements} elements):'
         f_elements = float(self.total_elements)
         base_element = self.binned_elements if self.has_outlier_bins_flag else self.total_elements
         for bin_pos, count in enumerate(self.bin_data):
@@ -259,8 +258,10 @@ class HistogramData:
                 continue
             p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count)
             if p_value is None:
+                # skipcq: PYL-C0209
                 result += '\n%s* %s: %d (ratio = %.2e)' % (indent, self.bin_names[bin_pos], count, float(count) / f_elements)
             else:
+                # skipcq: PYL-C0209
                 result += '\n%s* %s: %d (ratio = %.2e, p = %.2e)' % \
                           (indent, self.bin_names[bin_pos], count, float(count) / f_elements, p_value)
         return result
@@ -271,27 +272,31 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, histogram_defs, report_interval, report_event_handlers, reset_after_report_flag=True,
-                 persistence_id='Default', output_log_line=True):
+    def __init__(self, aminer_config, histogram_definitions, report_interval, anomaly_event_handlers, reset_after_report_flag=True,
+                 persistence_id='Default', output_logline=True):
         """
         Initialize the analysis component.
-        @param histogram_defs is a list of tuples containing the target property path to analyze and the BinDefinition to apply for
-        binning.
-        @param report_interval delay in seconds between creation of two reports. The parameter is applied to the parsed record data
-        time, not the system time. Hence reports can be delayed when no data is received.
+        @param aminer_config configuration from analysis_context.
+        @param histogram_definitions a list of tuples containing the target property path to analyze and the BinDefinition to apply.
+        @param report_interval delay in seconds before re-reporting. The parameter is applied to the parsed record data time, not the system
+               time. Hence, reports can be delayed when no data is received.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param reset_after_report_flag reset the histogram data after reporting.
+        @param persistence_id name of persistence file.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
+        self.next_persist_time, self.log_success, self.log_total = [None]*3
+        super().__init__(
+            aminer_config=aminer_config, histogram_definitions=histogram_definitions, report_interval=report_interval,
+            anomaly_event_handlers=anomaly_event_handlers, reset_after_report_flag=reset_after_report_flag, persistence_id=persistence_id,
+            output_logline=output_logline
+        )
+
         self.last_report_time = None
         self.next_report_time = 0.0
         self.histogram_data = []
-        for (path, bin_definition) in histogram_defs:
+        for (path, bin_definition) in histogram_definitions:
             self.histogram_data.append(HistogramData(path, bin_definition))
-        self.report_interval = report_interval
-        self.report_event_handlers = report_event_handlers
-        self.reset_after_report_flag = reset_after_report_flag
-        self.persistence_id = persistence_id
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -336,14 +341,14 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def send_report(self, log_atom, timestamp):
         """Send a report to the event handlers."""
         report_str = 'Histogram report '
         if self.last_report_time is not None:
-            report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
-        report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
+            report_str += f'from {datetime.fromtimestamp(self.last_report_time).strftime(date_string)} '
+        report_str += f'till {datetime.fromtimestamp(timestamp).strftime(date_string)}'
         affected_log_atom_paths = []
         analysis_component = {'AffectedLogAtomPaths': affected_log_atom_paths}
         for histogramData in self.histogram_data:
@@ -361,7 +366,7 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
             d['BinnedElements'] = data_item.binned_elements
             d['HasOutlierBinsFlag'] = data_item.has_outlier_bins_flag
             d['Bins'] = bins
-            if self.output_log_line:
+            if self.output_logline:
                 bin_definition = {
                   'Type': str(data_item.bin_definition.__class__.__name__),
                   'LowerLimit': data_item.bin_definition.lower_limit, 'BinSize': data_item.bin_definition.bin_size,
@@ -382,15 +387,15 @@ class HistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
         event_data = {'AnalysisComponent': analysis_component}
         if len(res) > 0:
             res[0] = report_str
-            for listener in self.report_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Histogram report', res, event_data, log_atom, self)
+            for listener in self.anomaly_event_handlers:
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Histogram report', res, event_data, log_atom, self)
         if self.reset_after_report_flag:
             for data_item in self.histogram_data:
                 data_item.reset()
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent report.')
 
 
 class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -403,25 +408,32 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, property_path, bin_definition, report_interval, report_event_handlers, reset_after_report_flag=True,
-                 persistence_id='Default', output_log_line=True):
+    def __init__(self, aminer_config, target_path, bin_definition, report_interval, anomaly_event_handlers, reset_after_report_flag=True,
+                 persistence_id='Default', output_logline=True):
         """
         Initialize the analysis component.
-        @param report_interval delay in seconds between creation of two reports. The parameter is applied to the parsed record data
-        time, not the system time. Hence reports can be delayed when no data is received.
+        @param aminer_config configuration from analysis_context.
+        @param target_path the path to be analyzed in the parser match of the log atom.
+        @param bin_definition the bin definition (LinearNumericBinDefinition, ModuloTimeBinDefinition) to be used.
+        @param report_interval delay in seconds before re-reporting. The parameter is applied to the parsed record data time, not the system
+               time. Hence, reports can be delayed when no data is received.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param reset_after_report_flag reset the histogram data after reporting.
+        @param persistence_id name of persistence file.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
+        # avoid "defined outside init" issue
+        self.next_persist_time, self.log_success, self.log_total = [None]*3
+        super().__init__(
+            aminer_config=aminer_config, target_path=target_path, bin_definition=bin_definition, report_interval=report_interval,
+            anomaly_event_handlers=anomaly_event_handlers, reset_after_report_flag=reset_after_report_flag, persistence_id=persistence_id,
+            output_logline=output_logline
+        )
+
         self.last_report_time = None
         self.next_report_time = 0.0
-        self.property_path = property_path
         self.bin_definition = bin_definition
         self.histogram_data = {}
-        self.report_interval = report_interval
-        self.report_event_handlers = report_event_handlers
-        self.reset_after_report_flag = reset_after_report_flag
-        self.persistence_id = persistence_id
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -435,7 +447,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
         """Receive a log atom from a source."""
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
-        match = match_dict.get(self.property_path, None)
+        match = match_dict.get(self.target_path, None)
         if match is None:
             return
         match_value = match.match_object
@@ -449,9 +461,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             if histogram_mapping is None:
                 unmapped_path.append(path)
                 continue
-            # So the path is already mapped to one histogram. See if all paths
-            # to the given histogram are still in all_path_set. If not, a split
-            # within the mapping is needed.
+            # So the path is already mapped to one histogram. See if all paths to the given histogram are still in all_path_set. If not,
+            # a split  within the mapping is needed.
             clone_set = all_path_set.copy()
             mapped_path = None
             for mapped_path in histogram_mapping[0]:
@@ -467,7 +478,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 match_value = match.match_object
                 if isinstance(match.match_object, bytes):
                     match.match_object = match.match_object.decode(AminerConfig.ENCODING)
-                histogram_mapping[1].property_path = mapped_path
+                histogram_mapping[1].target_path = mapped_path
                 histogram_mapping[1].add_value(match_value)
                 histogram_mapping[2] = log_atom.parser_match
             else:
@@ -476,7 +487,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 new_histogram = histogram_mapping[1].clone()
                 match = match_dict.get(mapped_path, None)
                 match_value = match.match_object
-                histogram_mapping[1].property_path = mapped_path
+                histogram_mapping[1].target_path = mapped_path
                 new_histogram.add_value(match_value)
                 new_path_set = histogram_mapping[0] - missing_paths
                 new_histogram_mapping = [new_path_set, new_histogram, log_atom.parser_match]
@@ -486,7 +497,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                 missing_paths = set()
 
         if unmapped_path:
-            histogram = HistogramData(self.property_path, self.bin_definition)
+            histogram = HistogramData(self.target_path, self.bin_definition)
             histogram.add_value(match_value)
             new_record = [set(unmapped_path), histogram, log_atom.parser_match]
             for path in unmapped_path:
@@ -519,14 +530,14 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def send_report(self, log_atom, timestamp):
         """Send report to event handlers."""
         report_str = 'Path histogram report '
         if self.last_report_time is not None:
-            report_str += 'from %s ' % datetime.fromtimestamp(self.last_report_time).strftime(date_string)
-        report_str += 'till %s' % datetime.fromtimestamp(timestamp).strftime(date_string)
+            report_str += f'from {datetime.fromtimestamp(self.last_report_time).strftime(date_string)} '
+        report_str += f'till {datetime.fromtimestamp(timestamp).strftime(date_string)}'
         all_path_set = set(self.histogram_data.keys())
         analysis_component = {'AffectedLogAtomPaths': list(all_path_set)}
         res = []
@@ -545,7 +556,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
             d['BinnedElements'] = data_item.binned_elements
             d['HasOutlierBinsFlag'] = data_item.has_outlier_bins_flag
             d['Bins'] = bins
-            if self.output_log_line:
+            if self.output_logline:
                 bin_definition = {
                   'Type': str(data_item.bin_definition.__class__.__name__),
                   'LowerLimit': data_item.bin_definition.lower_limit, 'BinSize': data_item.bin_definition.bin_size,
@@ -555,16 +566,17 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
                     bin_definition['ModuloValue'] = data_item.bin_definition.modulo_value
                     bin_definition['TimeUnit'] = data_item.bin_definition.time_unit
                 d['BinDefinition'] = bin_definition
-            d['PropertyPath'] = data_item.property_path
+            d['PropertyPath'] = data_item.target_path
+            # skipcq: PYL-C0209
             report_str += os.linesep + 'Path values "%s":' % '", "'.join(histogram_mapping[0])
             if isinstance(histogram_mapping[2].match_element.match_string, bytes):
                 histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode(
                     AminerConfig.ENCODING)
-            report_str += os.linesep + 'Example: %s' % histogram_mapping[2].match_element.match_string
+            report_str += os.linesep + f'Example: {histogram_mapping[2].match_element.match_string}'
             if len(res) < histogram_mapping[1].total_elements:
                 res = [''] * histogram_mapping[1].total_elements
             for line in histogram_mapping[1].to_string('  ').split('\n'):
-                report_str += os.linesep + '%s' % line
+                report_str += os.linesep + f'{line}'
             if len(res) > 0:
                 res[0] = report_str
             all_path_set.discard(path)
@@ -577,9 +589,9 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface, TimeTriggeredComponen
 
         if self.reset_after_report_flag:
             histogram_mapping[1].reset()
-        for listener in self.report_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Histogram report', res, event_data, log_atom, self)
+        for listener in self.anomaly_event_handlers:
+            listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Histogram report', res, event_data, log_atom, self)
 
         self.last_report_time = timestamp
         self.next_report_time = timestamp + self.report_interval
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent report.')

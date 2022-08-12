@@ -98,7 +98,7 @@ class EventTypeDetectorTest(TestBase):
     def test1receive_atoms_with_default_values(self):
         """
         In this test case multiple log_atoms are received with default values of the EventTypeDetector.
-        path_list is empty and all paths are learned dynamically in variable_key_list.
+        target_path_list is empty and all paths are learned dynamically in variable_key_list.
         """
         event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         log_atoms = []
@@ -113,10 +113,10 @@ class EventTypeDetectorTest(TestBase):
     def test2receive_atoms_with_defined_path_list(self):
         """
         In this test case multiple log_atoms are received with default values of the EventTypeDetector.
-        path_list is set to a static list of paths and variable_key_list should not be used.
+        target_path_list is set to a static list of paths and variable_key_list should not be used.
         """
         event_type_detector = EventTypeDetector(
-            self.aminer_config, [self.stream_printer_event_handler], path_list=['parser/type/path/nametype'])
+            self.aminer_config, [self.stream_printer_event_handler], target_path_list=['parser/type/path/nametype'])
         results = [True, False, True, False, True, False, True, True, False, False, True, True, False, True, False, True, False, True,
                    False, False, True]
         log_atoms = []
@@ -125,12 +125,12 @@ class EventTypeDetectorTest(TestBase):
             log_atoms.append(
                 LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
         for i, log_atom in enumerate(log_atoms):
-            old_vals = (event_type_detector.num_events, event_type_detector.num_eventlines,
+            old_vals = (event_type_detector.num_events, event_type_detector.num_event_lines,
                         event_type_detector.total_records, event_type_detector.longest_path)
             self.assertEqual(event_type_detector.receive_atom(log_atom), not results[i], i)
             if results[i]:
                 self.assertEqual(old_vals, (
-                    event_type_detector.num_events, event_type_detector.num_eventlines,
+                    event_type_detector.num_events, event_type_detector.num_event_lines,
                     event_type_detector.total_records, event_type_detector.longest_path))
 
     def test3append_values_float(self):
@@ -204,7 +204,7 @@ class EventTypeDetectorTest(TestBase):
         self.assertEqual(event_type_detector.values, event_type_detector_loaded.values)
         self.assertEqual(event_type_detector.longest_path, event_type_detector_loaded.longest_path)
         self.assertEqual(event_type_detector.check_variables, event_type_detector_loaded.check_variables)
-        self.assertEqual(event_type_detector.num_eventlines, event_type_detector_loaded.num_eventlines)
+        self.assertEqual(event_type_detector.num_event_lines, event_type_detector_loaded.num_event_lines)
 
 
 if __name__ == "__main__":

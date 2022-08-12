@@ -12,17 +12,7 @@ class FixedDataModelElementTest(TestBase):
     id_ = "fixed"
     path = "path"
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        fixed_dme = FixedDataModelElement(self.id_, self.data)
-        self.assertEqual(fixed_dme.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        fixed_dme = FixedDataModelElement(self.id_, self.data)
-        self.assertEqual(fixed_dme.get_child_elements(), None)
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with the fixed string."""
         fixed_string = b"fixed data."
         fixed_dme = FixedDataModelElement(self.id_, fixed_string)
@@ -30,7 +20,7 @@ class FixedDataModelElementTest(TestBase):
         match_element = fixed_dme.get_match_element(self.path, match_context)
         self.compare_match_results(self.data, match_element, match_context, self.id_, self.path, fixed_string, fixed_string, None)
 
-    def test4get_match_element_no_match(self):
+    def test2get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         no_match_string = b"Hello World."
         match_context = DummyMatchContext(self.data)
@@ -38,7 +28,7 @@ class FixedDataModelElementTest(TestBase):
         match_element = fixed_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(self.data, match_element, match_context)
 
-    def test5element_id_input_validation(self):
+    def test3element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, FixedDataModelElement, "", self.data)  # empty element_id
         self.assertRaises(TypeError, FixedDataModelElement, None, self.data)  # None element_id
@@ -52,7 +42,7 @@ class FixedDataModelElementTest(TestBase):
         self.assertRaises(TypeError, FixedDataModelElement, (), self.data)  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, FixedDataModelElement, set(), self.data)  # empty set element_id is not allowed
 
-    def test6fixed_data_input_validation(self):
+    def test4fixed_data_input_validation(self):
         """Check if fixed_data is validated."""
         self.assertRaises(ValueError, FixedDataModelElement, self.id_, b"")  # empty fixed_string
         self.assertRaises(TypeError, FixedDataModelElement, self.id_, None)  # None fixed_string
@@ -66,7 +56,7 @@ class FixedDataModelElementTest(TestBase):
         self.assertRaises(TypeError, FixedDataModelElement, self.id_, ())  # empty tuple fixed_string is not allowed
         self.assertRaises(TypeError, FixedDataModelElement, self.id_, set())  # empty set fixed_string is not allowed
 
-    def test7get_match_element_match_context_input_validation(self):
+    def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = FixedDataModelElement(self.id_, self.data)
         data = self.data

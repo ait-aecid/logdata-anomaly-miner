@@ -11,17 +11,7 @@ class DecimalFloatValueModelElementTest(TestBase):
     id_ = "float"
     path = "path"
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        decimal_float_me = DecimalFloatValueModelElement(self.id_)
-        self.assertEqual(decimal_float_me.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        decimal_float_me = DecimalFloatValueModelElement(self.id_)
-        self.assertEqual(decimal_float_me.get_child_elements(), None)
-
-    def test3get_match_element_default_values(self):
+    def test1get_match_element_default_values(self):
         """Test valid float values with default values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(
             self.id_, DecimalFloatValueModelElement.SIGN_TYPE_NONE, DecimalFloatValueModelElement.PAD_TYPE_NONE,
@@ -62,7 +52,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
 
-    def test4get_match_element_default_values_no_match(self):
+    def test2get_match_element_default_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(
             self.id_, DecimalFloatValueModelElement.SIGN_TYPE_NONE, DecimalFloatValueModelElement.PAD_TYPE_NONE,
@@ -130,7 +120,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5get_match_element_optional_zero_values(self):
+    def test3get_match_element_optional_zero_values(self):
         """Test valid float values with "optional" or "zero" values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(
             self.id_, DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL, DecimalFloatValueModelElement.PAD_TYPE_ZERO,
@@ -213,7 +203,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
 
-    def test6get_match_element_optional_zero_values_no_match(self):
+    def test4get_match_element_optional_zero_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(
             self.id_, DecimalFloatValueModelElement.SIGN_TYPE_OPTIONAL, DecimalFloatValueModelElement.PAD_TYPE_ZERO,
@@ -249,7 +239,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test7get_match_element_mandatory_blank_values(self):
+    def test5get_match_element_mandatory_blank_values(self):
         """Test valid float values with "mandatory" or "blank" values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(
             self.id_, DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY, DecimalFloatValueModelElement.PAD_TYPE_BLANK,
@@ -320,7 +310,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, 0, None)
 
-    def test8get_match_element_mandatory_blank_values_no_match(self):
+    def test6get_match_element_mandatory_blank_values_no_match(self):
         """Test not matching values with default values of value_sign_type, value_pad_type and exponent_type."""
         decimal_float_value_me = DecimalFloatValueModelElement(
             self.id_, DecimalFloatValueModelElement.SIGN_TYPE_MANDATORY, DecimalFloatValueModelElement.PAD_TYPE_BLANK,
@@ -391,7 +381,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         match_element = decimal_float_value_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test9element_id_input_validation(self):
+    def test7element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, DecimalFloatValueModelElement, "")  # empty element_id
         self.assertRaises(TypeError, DecimalFloatValueModelElement, None)  # None element_id
@@ -405,7 +395,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.assertRaises(TypeError, DecimalFloatValueModelElement, ())  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, DecimalFloatValueModelElement, set())  # empty set element_id is not allowed
 
-    def test10value_sign_type_input_validation(self):
+    def test8value_sign_type_input_validation(self):
         """Check if value_sign_type is validated."""
         DecimalFloatValueModelElement(self.id_, value_sign_type="none")
         DecimalFloatValueModelElement(self.id_, value_sign_type="optional")
@@ -423,7 +413,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=())
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_sign_type=set())
 
-    def test11value_pad_type_input_validation(self):
+    def test9value_pad_type_input_validation(self):
         """Check if value_pad_type is validated."""
         DecimalFloatValueModelElement(self.id_, value_pad_type="none")
         DecimalFloatValueModelElement(self.id_, value_pad_type="zero")
@@ -441,7 +431,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=())
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, value_pad_type=set())
 
-    def test12exponent_type_input_validation(self):
+    def test10exponent_type_input_validation(self):
         """Check if exponent_type is validated."""
         DecimalFloatValueModelElement(self.id_, exponent_type="none")
         DecimalFloatValueModelElement(self.id_, exponent_type="optional")
@@ -459,7 +449,7 @@ class DecimalFloatValueModelElementTest(TestBase):
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=())
         self.assertRaises(TypeError, DecimalFloatValueModelElement, self.id_, exponent_type=set())
 
-    def test13get_match_element_match_context_input_validation(self):
+    def test11get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = DecimalFloatValueModelElement(self.id_)
         data = b"123.22"

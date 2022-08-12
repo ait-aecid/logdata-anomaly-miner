@@ -386,8 +386,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['ValueListMatchRule'], 'required': True},
                     'path': {'type': 'string', 'required': True, 'empty': False},
-                    'value_list': {
-                        'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'required': True},
+                    'value_list': {'type': 'list', 'schema': {'type': ['boolean', 'float', 'integer', 'string']}, 'required': True},
                     'match_action': {'type': 'string', 'nullable': True, 'empty': False}
                 },
                 {
@@ -460,7 +459,6 @@
                     'rule_id': {'type': 'string', 'required': True, 'empty': False},
                     'min_time_delta': {'type': 'integer', 'required': True, 'min': 1},
                     'max_time_delta': {'type': 'integer', 'required': True, 'min': 1, 'bigger_than_or_equal': ['min_time_delta', None]},
-                    'max_artefacts_a_for_single_b': {'type': 'integer', 'min': 1},
                     'artefact_match_parameters': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                                                   'nullable': True}
                 },
@@ -577,7 +575,7 @@
                     'time_period_length': {'type': 'integer', 'min': 1},
                     'max_time_diff': {'type': 'integer', 'min': 1},
                     'num_reduce_time_list': {'type': 'integer', 'min': 1},
-                    'allow_missing_values_flag': {'type': 'boolean'},
+                    'allow_missing_values': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'learn_mode': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},

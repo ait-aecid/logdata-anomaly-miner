@@ -25,7 +25,7 @@ class ParserCountTest(TestBase):
     match_element_seq = seq.get_match_element('fixed', match_context_seq)
 
     def test1log_atom_not_in_path_list(self):
-        """This unittest checks if no action happens, when no path in the match_dictionary matches a target_path."""
+        """This unittest checks if no action happens, when no path in the match_dictionary matches a path."""
         parser_count = ParserCount(self.aminer_config, ['fixed/seq', 'fixed/seq/m1', 'fixed/seq/m2'], [self.stream_printer_event_handler])
         t = time.time()
         log_atom = LogAtom(self.fixed_dme_m3.fixed_data, ParserMatch(self.match_element_m3), t, parser_count)

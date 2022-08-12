@@ -11,17 +11,7 @@ class Base64StringModelElementTest(TestBase):
     id_ = "base64"
     path = "path"
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        base64_dme = Base64StringModelElement(self.id_)
-        self.assertEqual(base64_dme.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        base64_dme = Base64StringModelElement(self.id_)
-        self.assertEqual(base64_dme.get_child_elements(), None)
-
-    def test3get_match_element_valid_match_string_with_padding(self):
+    def test1get_match_element_valid_match_string_with_padding(self):
         """Parse matching substring with padding from MatchContext and check if the MatchContext was updated with all base64 data."""
         string = b"This is some string to be encoded."
         base64_string = b"VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=="
@@ -30,7 +20,7 @@ class Base64StringModelElementTest(TestBase):
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
-    def test4get_match_element_valid_match_string_with_one_byte_padding(self):
+    def test2get_match_element_valid_match_string_with_one_byte_padding(self):
         """Parse matching substring with padding from MatchContext and check if the MatchContext was updated with all base64 data."""
         string = b"This is some encoded strin"
         base64_string = b"VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4="
@@ -39,7 +29,7 @@ class Base64StringModelElementTest(TestBase):
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
-    def test5get_match_element_valid_match_string_without_padding(self):
+    def test3get_match_element_valid_match_string_without_padding(self):
         """Parse matching substring without padding from MatchContext and check if the MatchContext was updated with all base64 data."""
         string = b"This is some string to be encoded without the padding character =."
         base64_string = b"VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkIHdpdGhvdXQgdGhlIHBhZGRpbmcgY2hhcmFjdGVyID0u"
@@ -48,7 +38,7 @@ class Base64StringModelElementTest(TestBase):
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
-    def test6get_match_element_valid_match_string_without_exact_length(self):
+    def test4get_match_element_valid_match_string_without_exact_length(self):
         """Parse matching substring without exact length (divisible by 4) and check if the MatchContext was updated with all base64 data."""
         string = b"This is some encoded strin"
         base64_string = b"VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4"
@@ -58,7 +48,7 @@ class Base64StringModelElementTest(TestBase):
         self.compare_match_results(
             base64_string, match_element, match_context, self.id_, self.path, base64_string[:-(len(base64_string) % 4)], string[:-2], None)
 
-    def test7get_match_element_valid_match_string_with_partial_length(self):
+    def test5get_match_element_valid_match_string_with_partial_length(self):
         """Parse matching substring out of the MatchContext and check if the MatchContext was updated with all base64 data."""
         string = b"This is some encoded strin"
         base64_string = b"VGhpcyBpcyBzb21lIGVuY29kZWQgc3RyaW4="
@@ -68,7 +58,7 @@ class Base64StringModelElementTest(TestBase):
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, base64_string, string, None)
 
-    def test8get_match_element_no_match(self):
+    def test6get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         base64_dme = Base64StringModelElement(self.id_)
         data = b"!Hello World"
@@ -81,7 +71,7 @@ class Base64StringModelElementTest(TestBase):
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test9get_match_element_unicode_exception(self):
+    def test7get_match_element_unicode_exception(self):
         """Parse a Base64 string which can not be decoded as UTF-8, so it has to be returned base64 encoded."""
         # ² encoded with ISO-8859-1
         base64_string = b"sg=="
@@ -90,7 +80,7 @@ class Base64StringModelElementTest(TestBase):
         match_element = base64_dme.get_match_element(self.path, match_context)
         self.compare_match_results(base64_string, match_element, match_context, self.id_, self.path, base64_string, base64_string, None)
 
-    def test10element_id_input_validation(self):
+    def test8element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, Base64StringModelElement, "")  # empty element_id
         self.assertRaises(TypeError, Base64StringModelElement, None)  # None element_id
@@ -104,7 +94,7 @@ class Base64StringModelElementTest(TestBase):
         self.assertRaises(TypeError, Base64StringModelElement, ())  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, Base64StringModelElement, set())  # empty set element_id is not allowed
 
-    def test11get_match_element_match_context_input_validation(self):
+    def test9get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = Base64StringModelElement(self.id_)
         data = b"VGhpcyBpcyBzb21lIHN0cmluZyB0byBiZSBlbmNvZGVkLg=="
@@ -124,7 +114,7 @@ class Base64StringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
-    def test12performance(self):  # skipcq: PYL-R0201
+    def test10performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation. Comment this test out in normal cases."""
         import_setup = """
 import copy

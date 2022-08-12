@@ -1,6 +1,5 @@
 """This module contains functions and classes to create the parsing model."""
 
-import logging
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
@@ -18,7 +17,6 @@ from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
 from aminer.parsing.WhiteSpaceLimitedDataModelElement import WhiteSpaceLimitedDataModelElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
-from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
 def get_model():
@@ -27,27 +25,7 @@ def get_model():
     class ExecArgumentDataModelElement(ModelElementInterface):
         """This is a helper class for parsing the (encoded) exec argument strings found within audit logs."""
 
-        def __init__(self, element_id: str):
-            if not isinstance(element_id, str):
-                msg = "element_id has to be of the type string."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if len(element_id) < 1:
-                msg = "element_id must not be empty."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
-            self.element_id = element_id
-
-        def get_id(self):
-            """Get the element ID."""
-            return self.element_id
-
-        @staticmethod
-        def get_child_elements():  # skipcq: PYL-W0221
-            """Get the children of this element (none)."""
-            return None
-
-        def get_match_element(self, path: str, match_context):
+        def get_match_element(self, target_path: str, match_context):
             """
             Find the maximum number of bytes belonging to an exec argument.
             @return a match when at least two bytes were found including the delimiters.
@@ -85,7 +63,7 @@ def get_model():
 
             match_data = data[:match_len]
             match_context.update(match_data)
-            return MatchElement("%s/%s" % (path, self.element_id), match_data, match_value, None)
+            return MatchElement(f"{target_path}/{self.element_id}", match_data, match_value, None)
 
     pam_status_word_list = FixedWordlistDataModelElement("status", [b"failed", b"success"])
 

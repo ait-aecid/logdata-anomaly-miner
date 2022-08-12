@@ -32,92 +32,51 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, scoring_path_list=None, window_size=600,
                  num_windows=50, confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False,
-                 set_lower_limit=None, set_upper_limit=None, persistence_id='Default', auto_include_flag=False, output_log_line=True,
+                 set_lower_limit=None, set_upper_limit=None, persistence_id='Default', learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
-        occurrences. When no paths are specified, the events given by the full path list are analyzed.
+               occurrences. When no paths are specified, the events given by the full path list are analyzed.
         @param scoring_path_list parser paths of values to be analyzed by following event handlers like the ScoringEventHandler.
-        Multiple paths mean that values are analyzed by their combined occurrences.
+               Multiple paths mean that values are analyzed by their combined occurrences.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
         @param num_windows the number of previous time windows considered for expected frequency estimation.
         @param confidence_factor defines range of tolerable deviation of measured frequency from expected frequency according to
-        occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3*sigma deviation. confidence_factor
-        must be in range [0, 1].
+               occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3*sigma deviation. confidence_factor
+               must be in range [0, 1].
         @param empty_window_warnings whether anomalies should be generated for too small window sizes.
-        @param early_exceeding_anomaly_output states if a anomaly should be raised the first time the appearance count exceedes the range.
+        @param early_exceeding_anomaly_output states if an anomaly should be raised the first time the appearance count exceeds the range.
         @param set_lower_limit sets the lower limit of the frequency test to the specified value.
         @param set_upper_limit sets the upper limit of the frequency test to the specified value.
         @param persistence_id name of persistence document.
-        @param auto_include_flag specifies whether new frequency measurements override ground truth frequencies.
-        @param output_log_line specifies whether the full parsed log atom should be provided in the output.
-        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
-        omitted. The default value is [] as None is not iterable.
+        @param learn_mode specifies whether new frequency measurements override ground truth frequencies.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
+               The default value is [] as None is not iterable.
         @param constraint_list list of paths that have to be present in the log atom to be analyzed.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.target_path_list = target_path_list
-        self.scoring_path_list = scoring_path_list
-        if self.scoring_path_list is None:
-            self.scoring_path_list = []
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.auto_include_flag = auto_include_flag
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.persistence_id = persistence_id
-        self.constraint_list = constraint_list
-        if self.constraint_list is None:
-            self.constraint_list = []
-        self.ignore_list = ignore_list
-        if self.ignore_list is None:
-            self.ignore_list = []
-        self.window_size = window_size
-        self.num_windows = num_windows
-        if not 0 <= confidence_factor <= 1:
-            logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
-            confidence_factor = 1
-        self.confidence_factor = confidence_factor
-        self.empty_window_warnings = empty_window_warnings
-        self.early_exceeding_anomaly_output = early_exceeding_anomaly_output
-        self.set_lower_limit = set_lower_limit
-        self.set_upper_limit = set_upper_limit
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        super().__init__(
+            mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
+            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, scoring_path_list=scoring_path_list,
+            window_size=window_size,  num_windows=num_windows, confidence_factor=confidence_factor,
+            empty_window_warnings=empty_window_warnings, early_exceeding_anomaly_output=early_exceeding_anomaly_output,
+            set_lower_limit=set_lower_limit, set_upper_limit=set_upper_limit, persistence_id=persistence_id, learn_mode=learn_mode,
+            output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
         self.next_check_time = None
         self.counts = {}
         self.scoring_value_list = {}
         self.ranges = {}
         self.exceeded_range_frequency = {}
-        self.log_total = 0
-        self.log_success = 0
         self.log_windows = 0
-
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -132,17 +91,17 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.counts[tuple(log_event)] = freqs[max(0, len(freqs) - num_windows - 1):] + [0]
                 if len(self.scoring_path_list) > 0:
                     self.scoring_value_list[tuple(log_event)] = []
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         parser_match = log_atom.parser_match
         self.log_total += 1
 
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
 
         # Skip paths from ignore list.
         for ignore_path in self.ignore_list:
@@ -160,7 +119,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 return
             log_event = tuple(parser_match.get_match_dictionary().keys())
         else:
-            # Event is defined by value combos in paths
+            # Event is defined by value combos in target_path_list
             values = []
             all_values_none = True
             for path in self.target_path_list:
@@ -225,7 +184,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                         data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                     except UnicodeError:
                         data = repr(log_atom.raw_data)
-                    if self.output_log_line:
+                    if self.output_logline:
                         original_log_line_prefix = self.aminer_config.config_properties.get(
                             CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                         sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
@@ -272,7 +231,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                 except UnicodeError:
                     data = repr(log_atom.raw_data)
-                if self.output_log_line:
+                if self.output_logline:
                     original_log_line_prefix = self.aminer_config.config_properties.get(
                         CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
                     sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
@@ -316,7 +275,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def reset_counter(self, log_event):
         """Create count index for new time window"""
-        if self.auto_include_flag is True:
+        if self.learn_mode is True:
             if len(self.counts[log_event]) <= self.num_windows + 1:
                 self.counts[log_event].append(0)
             else:
@@ -373,7 +332,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             # Skip last count as the time window may not be complete yet and count thus too low
             persist_data.append((log_ev, freqs[:-1]))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def print_persistency_event(self, event_type, event_data):
         """
@@ -417,12 +376,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if self.counts[event_data[0]][-1] < self.ranges[event_data[0]][0] or\
                         self.counts[event_data[0]][-1] > self.ranges[event_data[0]][1]:
                     string = f'The current count {self.counts[event_data[0]][-1]} is outside the frequency interval ['\
-                            f'{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. '\
-                            f'The count will reset at {self.next_check_time} (unix time stamp)'
+                             f'{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. '\
+                             f'The count will reset at {self.next_check_time} (unix time stamp)'
                 else:
                     string = f'The current count {self.counts[event_data[0]][-1]} is in the frequency interval ['\
-                            f'{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. '\
-                            f'The count will reset at {self.next_check_time} (unix time stamp)'
+                             f'{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. '\
+                             f'The count will reset at {self.next_check_time} (unix time stamp)'
             else:
                 string = f'Persistency includes no information for {event_data[0]}.'
 
@@ -471,12 +430,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
+                f"time windows in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_windows)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
+                f"time windows in the last 60 minutes.")
         self.log_success = 0
         self.log_total = 0
         self.log_windows = 0

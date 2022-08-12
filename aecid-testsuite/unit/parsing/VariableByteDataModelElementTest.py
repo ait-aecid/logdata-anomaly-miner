@@ -12,17 +12,7 @@ class VariableByteDataModelElementTest(TestBase):
     path = "path"
     alphabet = b"abcdefghijklmnopqrstuvwxyz "
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        variable_byte_dme = VariableByteDataModelElement(self.id_, self.alphabet)
-        self.assertEqual(variable_byte_dme.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        variable_byte_dme = VariableByteDataModelElement(self.id_, self.alphabet)
-        self.assertEqual(variable_byte_dme.get_child_elements(), None)
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
         data = b"abcdefghijklm nopqrstuvwxyz.!?"
         value = b"abcdefghijklm nopqrstuvwxyz"
@@ -31,7 +21,7 @@ class VariableByteDataModelElementTest(TestBase):
         match_element = variable_byte_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
 
-    def test4get_match_element_no_match(self):
+    def test2get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         data = b""
         match_context = DummyMatchContext(data)
@@ -45,7 +35,7 @@ class VariableByteDataModelElementTest(TestBase):
         match_element = variable_byte_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5element_id_input_validation(self):
+    def test3element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, VariableByteDataModelElement, "", self.alphabet)
         self.assertRaises(TypeError, VariableByteDataModelElement, None, self.alphabet)
@@ -59,7 +49,7 @@ class VariableByteDataModelElementTest(TestBase):
         self.assertRaises(TypeError, VariableByteDataModelElement, (), self.alphabet)
         self.assertRaises(TypeError, VariableByteDataModelElement, set(), self.alphabet)
 
-    def test6alphabet_input_validation(self):
+    def test4alphabet_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(TypeError, VariableByteDataModelElement, self.id_, "string")
         self.assertRaises(TypeError, VariableByteDataModelElement, self.id_, None)
@@ -73,7 +63,7 @@ class VariableByteDataModelElementTest(TestBase):
         self.assertRaises(TypeError, VariableByteDataModelElement, self.id_, ())
         self.assertRaises(TypeError, VariableByteDataModelElement, self.id_, set())
 
-    def test6get_match_element_match_context_input_validation(self):
+    def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = VariableByteDataModelElement(self.id_, self.alphabet)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"

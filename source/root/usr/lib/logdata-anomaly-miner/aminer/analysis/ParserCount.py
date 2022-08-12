@@ -30,27 +30,36 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, target_path_list, report_event_handlers, report_interval=60, target_label_list=None,
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, report_interval=60, target_label_list=None,
                  split_reports_flag=False):
-        """Initialize the ParserCount component."""
-        self.aminer_config = aminer_config
-        self.target_path_list = target_path_list
-        self.target_label_list = target_label_list
-        self.report_interval = report_interval
-        self.report_event_handlers = report_event_handlers
-        self.split_reports_flag = split_reports_flag
+        """
+        Initialize the ParserCount component.
+        @param aminer_config configuration from analysis_context.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param report_interval delay in seconds before reporting.
+        @param target_label_list a list of labels for the target_path_list. This list must have the same size as target_path_list.
+        @param split_reports_flag if true every path produces an own report, otherwise one report for all paths is produced.
+        """
+        # avoid "defined outside init" issue
+        self.log_success, self.log_total = [None]*2
+        super().__init__(
+            mutable_default_args=["target_path_list"], aminer_config=aminer_config, target_path_list=target_path_list,
+            anomaly_event_handlers=anomaly_event_handlers, report_interval=report_interval, target_label_list=target_label_list,
+            split_reports_flag=split_reports_flag
+        )
         self.count_dict = {}
         self.next_report_time = None
-        if (target_path_list is None or target_path_list == []) and (target_label_list is not None and target_label_list != []):
+        if (self.target_path_list is None or self.target_path_list == []) and (
+                self.target_label_list is not None and self.target_label_list != []):
             msg = 'Target labels cannot be used without specifying target paths.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if target_path_list is not None and target_label_list is not None and len(target_path_list) != len(target_label_list):
+        if self.target_label_list is not None and len(self.target_path_list) != len(self.target_label_list):
             msg = 'Every path must have a target label if target labels are used.'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if self.target_path_list is None:
-            self.target_path_list = []
 
         for target_path in self.target_path_list:
             if self.target_label_list:
@@ -110,8 +119,8 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
             output_string = output_string[:-1]
             event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                           'ToTime': datetime.datetime.utcnow().timestamp()}
-            for listener in self.report_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
+            for listener in self.anomaly_event_handlers:
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Count report', [output_string], event_data, None, self)
         else:
             for k in self.count_dict:
                 output_string = 'Parsed paths in the last ' + str(self.report_interval) + ' seconds:\n'
@@ -122,8 +131,8 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     total_processed_lines_str: c[total_processed_lines_str]}}
                 event_data = {'StatusInfo': status_info, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
                               'ToTime': datetime.datetime.utcnow().timestamp()}
-                for listener in self.report_event_handlers:
-                    listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Count report', [output_string], event_data, None, self)
+                for listener in self.anomaly_event_handlers:
+                    listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Count report', [output_string], event_data, None, self)
         for k in self.count_dict:
             self.count_dict[k][current_processed_lines_str] = 0
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent report.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent report.')

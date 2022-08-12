@@ -107,12 +107,12 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
 
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filter.add_handler(new_match_path_detector)
 
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(
-        analysis_context.aminer_config, ['/AnyByteDataModelElement'], anomaly_event_handlers, auto_include_flag=True)
+        analysis_context.aminer_config, ['/AnyByteDataModelElement'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
     atom_filter.add_handler(new_match_path_value_detector)

@@ -24,22 +24,19 @@ class AllowlistViolationDetector(AtomHandlerInterface):
     more than once, the allowlist rules may have match actions attached that set off an alarm by themselves.
     """
 
-    def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_log_line=True):
+    def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_logline=True):
         """
         Initialize the detector.
-        @param allowlist_rules list of rules executed in same way as inside Rules.OrMatchRule.
+        @param allowlist_rules list of rules executed until the first rule matches.
         """
-        self.allowlist_rules = allowlist_rules
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.persistence_id = None
+        super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, output_logline=output_logline,
+                         allowlist_rules=allowlist_rules)
 
     def receive_atom(self, log_atom):
         """
-        Receive on parsed atom and the information about the parser match.
+        Receive a parsed atom and the information about the parser match.
         @param log_atom atom with parsed data to check
-        @return True when log_atom is allowlisted, False otherwise.
+        @return a boolean value if the log atom matches one of the rules.
         """
         self.log_total += 1
         event_data = {}
@@ -56,7 +53,7 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         sorted_log_lines = [original_log_line_prefix + data]
         event_data['AnalysisComponent'] = analysis_component
         for listener in self.anomaly_event_handlers:
-            listener.receive_event('Analysis.%s' % self.__class__.__name__, 'No allowlisting for current atom', sorted_log_lines,
+            listener.receive_event(f'Analysis.{self.__class__.__name__}', 'No allowlisting for current atom', sorted_log_lines,
                                    event_data, log_atom, self)
         return False
 

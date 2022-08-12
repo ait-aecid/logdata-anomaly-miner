@@ -52,6 +52,10 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
     CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE = 'MailAlerting.MaxEventsPerMessage'
 
     def __init__(self, analysis_context):
+        """
+        Initialize the event handler.
+        @param analysis_context used to get the aminer config and the config_properties.
+        """
         self.analysis_context = analysis_context
         aminer_config = analysis_context.aminer_config
         # @see https://emailregex.com/
@@ -87,8 +91,19 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.current_alert_gap = self.min_alert_gap
         self.current_message = ''
 
-    def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
-        """Receive information about a detected event."""
+    def receive_event(self, event_type, event_message, sorted_loglines, event_data, log_atom, event_source):
+        """
+        Receive information about a detected event.
+        @param event_type is a string with the event type class this event belongs to. This information can be used to interpret
+               type-specific event_data objects. Together with the eventMessage and sorted_loglines, this can be used to create generic log
+               messages.
+        @param event_message the first output line of the event.
+        @param sorted_loglines sorted list of log lines that were considered when generating the event, as far as available to the time
+               of the event. The list has to contain at least one line.
+        @param event_data type-specific event data object, should not be used unless listener really knows about the event_type.
+        @param log_atom the log atom which produced the event.
+        @param event_source reference to detector generating the event.
+        """
         if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
                 event_source.output_event_handlers:
             return
@@ -108,7 +123,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             if self.events_collected == 0:
                 self.event_collection_start_time = current_time
             self.events_collected += 1
-            event_data_obj = EventData(event_type, event_message, sorted_log_lines, event_data, log_atom, event_source,
+            event_data_obj = EventData(event_type, event_message, sorted_loglines, event_data, log_atom, event_source,
                                        self.analysis_context)
             self.current_message += event_data_obj.receive_event_string()
 
@@ -144,9 +159,9 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         """Really send out the message."""
         if self.events_collected == 0:
             return
-        subject_text = '%s Collected Events' % self.subject_prefix
+        subject_text = f'{self.subject_prefix} Collected Events'
         if self.last_alert_time != 0:
-            subject_text += ' in the last %d seconds' % (trigger_time - self.last_alert_time)
+            subject_text += f' in the last {trigger_time - self.last_alert_time} seconds'
         message = _message_str % (self.sender_address, self.recipient_address, subject_text, self.current_message)
         try:
             # timeout explicitly needs to be set None, because in python version < 3.7 socket.settimeout() sets the socket type
@@ -161,4 +176,4 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.events_collected = 0
         self.current_message = ''
         self.next_alert_time = 0
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s sent notification.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent notification.')

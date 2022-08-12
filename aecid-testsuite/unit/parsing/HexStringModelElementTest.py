@@ -11,17 +11,7 @@ class HexStringModelElementTest(TestBase):
     id_ = "hex"
     path = "path"
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        hex_me = HexStringModelElement(self.id_)
-        self.assertEqual(hex_me.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        hex_me = HexStringModelElement(self.id_)
-        self.assertEqual(hex_me.get_child_elements(), None)
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Try all values and check if the desired results are produced."""
         allowed_chars = [b"0", b"1", b"2", b"3", b"4", b"5", b"6", b"7", b"8", b"9", b"a", b"b", b"c", b"d", b"e", b"f"]
         char1 = b"\x00"
@@ -74,7 +64,7 @@ class HexStringModelElementTest(TestBase):
             else:
                 char1 = bytes(chr(ord(char1) + 1), "utf-8")
 
-    def test4get_match_element_no_match(self):
+    def test2get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         data = b""
         match_context = DummyMatchContext(data)
@@ -82,7 +72,7 @@ class HexStringModelElementTest(TestBase):
         match_element = hex_me.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5element_id_input_validation(self):
+    def test3element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, HexStringModelElement, "")  # empty element_id
         self.assertRaises(TypeError, HexStringModelElement, None)  # None element_id
@@ -96,7 +86,7 @@ class HexStringModelElementTest(TestBase):
         self.assertRaises(TypeError, HexStringModelElement, ())  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, HexStringModelElement, set())  # empty set element_id is not allowed
 
-    def test6upper_case_input_validation(self):
+    def test4upper_case_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(TypeError, HexStringModelElement, self.id_, "path")  # string upper_case
         self.assertRaises(TypeError, HexStringModelElement, self.id_, None)  # None upper_case
@@ -109,7 +99,7 @@ class HexStringModelElementTest(TestBase):
         self.assertRaises(TypeError, HexStringModelElement, self.id_, ())  # empty tuple upper_case is not allowed
         self.assertRaises(TypeError, HexStringModelElement, self.id_, set())  # empty set upper_case is not allowed
 
-    def test7get_match_element_match_context_input_validation(self):
+    def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = HexStringModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"
@@ -129,7 +119,7 @@ class HexStringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
-    def test12performance(self):  # skipcq: PYL-R0201
+    def test6performance(self):  # skipcq: PYL-R0201
         """Test the performance of the implementation. Comment this test out in normal cases."""
         import_setup = """
 import copy

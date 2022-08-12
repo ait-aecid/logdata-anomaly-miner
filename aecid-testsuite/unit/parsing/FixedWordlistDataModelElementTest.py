@@ -12,17 +12,7 @@ class FixedWordlistDataModelElementTest(TestBase):
     path = "path"
     wordlist = [b"wordlist", b"word"]
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        fixed_wordlist_dme = FixedWordlistDataModelElement(self.id_, self.wordlist)
-        self.assertEqual(fixed_wordlist_dme.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        fixed_wordlist_dme = FixedWordlistDataModelElement(self.id_, self.wordlist)
-        self.assertEqual(fixed_wordlist_dme.get_child_elements(), None)
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
         data = b"wordlist, word"
         index = 0
@@ -40,7 +30,7 @@ class FixedWordlistDataModelElementTest(TestBase):
         match_element = fixed_wordlist_dme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, index, None)
 
-    def test4get_match_element_no_match(self):
+    def test2get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         data = b"string wordlist"
         match_context = DummyMatchContext(data)
@@ -66,7 +56,7 @@ class FixedWordlistDataModelElementTest(TestBase):
         match_element = fixed_wordlist_dme.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test5element_id_input_validation(self):
+    def test3element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, FixedWordlistDataModelElement, "", self.wordlist)  # empty element_id
         self.assertRaises(TypeError, FixedWordlistDataModelElement, None, self.wordlist)  # None element_id
@@ -80,7 +70,7 @@ class FixedWordlistDataModelElementTest(TestBase):
         self.assertRaises(TypeError, FixedWordlistDataModelElement, (), self.wordlist)  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, FixedWordlistDataModelElement, set(), self.wordlist)  # empty set element_id is not allowed
 
-    def test6wordlist_input_validation(self):
+    def test4wordlist_input_validation(self):
         """Check if wordlist is validated."""
         self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, "path")  # string wordlist
         self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, None)  # None wordlist
@@ -96,7 +86,7 @@ class FixedWordlistDataModelElementTest(TestBase):
         self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, ())  # empty tuple wordlist is not allowed
         self.assertRaises(TypeError, FixedWordlistDataModelElement, self.id_, set())  # empty set wordlist is not allowed
 
-    def test7get_match_element_match_context_input_validation(self):
+    def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = FixedWordlistDataModelElement(self.id_, self.wordlist)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"

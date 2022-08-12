@@ -23,6 +23,12 @@ class ZmqEventHandler(EventHandlerInterface):
     """This class implements an event record listener, that will forward Json-objects to a ZeroMQ queue."""
 
     def __init__(self, analysis_context, topic=None, url="ipc:///tmp/aminer"):
+        """
+        Initialize the event handler.
+        @param analysis_context the analysis context used to get the component.
+        @param topic the topic used in the Zero Message Queue.
+        @param url the internal inter process communication channel.
+        """
         self.analysis_context = analysis_context
         self.url = url
         self.topic = topic
@@ -31,8 +37,20 @@ class ZmqEventHandler(EventHandlerInterface):
         self.zmq_imported = False
         logging.getLogger(DEBUG_LOG_NAME).info("ZmqEventHandler initialized")
 
-    def receive_event(self, _event_type, _event_message, _sorted_log_lines, event_data, _log_atom, event_source):
-        """Receive information about a detected event in json format."""
+    def receive_event(self, _event_type, _event_message, _sorted_loglines, event_data, _log_atom, event_source):
+        """
+        Receive information about a detected event in json format.
+        Receive information about a detected event in json format.
+        @param _event_type is a string with the event type class this event belongs to. This information can be used to interpret
+               type-specific event_data objects. Together with the eventMessage and sorted_loglines, this can be used to create generic log
+               messages.
+        @param _event_message the first output line of the event.
+        @param _sorted_loglines sorted list of log lines that were considered when generating the event, as far as available to the time
+               of the event. The list has to contain at least one line.
+        @param event_data type-specific event data object, should not be used unless listener really knows about the event_type.
+        @param _log_atom the log atom which produced the event.
+        @param event_source reference to detector generating the event.
+        """
         if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
                 event_source.output_event_handlers:
             return True
@@ -44,7 +62,7 @@ class ZmqEventHandler(EventHandlerInterface):
                 self.context = zmq.Context()
                 self.producer = self.context.socket(zmq.PUB)
                 self.producer.bind(self.url)
-                logging.getLogger(DEBUG_LOG_NAME).info("Created socket on %s", self.url)
+                logging.getLogger(DEBUG_LOG_NAME).info(f"Created socket on {self.url}")
                 self.zmq_imported = True
             except ImportError:
                 msg = 'ZeroMQ module not found.'

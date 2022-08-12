@@ -23,7 +23,7 @@ class MatchElement:
     def __init__(self, path: Union[str, None], match_string: bytes, match_object: Any, children: Union[List["MatchElement"], None]):
         """
         Initialize the MatchElement.
-        @param path when None, this element is anonymous. Hence it cannot be added to the result data and cannot have children.
+        @param path when None, this element is anonymous. Hence, it cannot be added to the result data and cannot have children.
         @param match_string the part of the input bytes string covered by the given match.
         @param match_object the matchString converted to an object for matchers detecting more complex data types, e.g., integer
         numbers or IP addresses.
@@ -82,8 +82,8 @@ class MatchElement:
         """
         Annotate a given match element showing the match path elements and the parsed values.
         @param indent_str if None, all elements are separated just with a single space, no matter how deep the nesting level
-        of those elements is. If not None, all elements are put into an own line, that is prefixed by the given indent_str and
-        indenting is increased by two spaces for each level.
+               of those elements is. If not None, all elements are put into an own line, that is prefixed by the given indent_str and
+               indenting is increased by two spaces for each level.
         """
         next_indent = None
         if not isinstance(indent_str, str) and indent_str is not None:
@@ -98,9 +98,9 @@ class MatchElement:
         except UnicodeError:
             data = repr(self.match_object)
         if indent_str is None:
-            result = "%s: %s" % (self.path, data)
+            result = f"{self.path}: {data}"
         else:
-            result = "%s%s: %s" % (indent_str, self.path, data)
+            result = f"{indent_str}{self.path}: {data}"
             next_indent = indent_str + "  "
         if self.children is not None:
             for child_match in self.children:
@@ -135,4 +135,4 @@ class MatchElement:
         except UnicodeError:
             match_string = repr(self.match_string)
             match_object = repr(self.match_object)
-        return "MatchElement: path = %s, string = %s, object = %s, children = %d" % (self.path, match_string, match_object, num_children)
+        return f"MatchElement: path = {self.path}, string = {match_string}, object = {match_object}, children = {num_children}"

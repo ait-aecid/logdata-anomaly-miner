@@ -12,7 +12,7 @@ from unit.TestBase import TestBase
 class KafkaEventHandlerTest(TestBase):
     """Unittests for the KafkaEventHandler."""
 
-    output_log_line = True
+    output_logline = True
     kafka_topic = 'test_topic'
     kafka_group = 'test_group'
     consumer = None

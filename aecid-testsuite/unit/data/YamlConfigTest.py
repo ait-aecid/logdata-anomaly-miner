@@ -114,7 +114,7 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[1], SyslogWriterEventHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[2], DefaultMailNotificationEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[1], FixedDataModelElement))
@@ -255,7 +255,7 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], JsonConverterHandler))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0].json_event_handlers[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
 
@@ -272,16 +272,16 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
         self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
 
         # specific learn_mode arguments should be preferred.
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertTrue(context.registered_components[1][0].auto_include_flag)
-        self.assertTrue(context.registered_components[2][0].auto_include_flag)
-        self.assertFalse(context.registered_components[3][0].auto_include_flag)
+        self.assertTrue(context.registered_components[1][0].learn_mode)
+        self.assertTrue(context.registered_components[2][0].learn_mode)
+        self.assertFalse(context.registered_components[3][0].learn_mode)
 
         # unset specific learn_mode parameters and set LearnMode True.
         for component in aminer_config.yaml_data['Analysis']:
@@ -289,16 +289,16 @@ class YamlConfigTest(TestBase):
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
-            if hasattr(context.registered_components[key][0], 'auto_include_flag'):
-                self.assertTrue(context.registered_components[key][0].auto_include_flag)
+            if hasattr(context.registered_components[key][0], 'learn_mode'):
+                self.assertTrue(context.registered_components[key][0].learn_mode)
 
         # unset specific learn_mode parameters and set LearnMode False.
         aminer_config.yaml_data['LearnMode'] = False
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
         for key in context.registered_components:
-            if hasattr(context.registered_components[key][0], 'auto_include_flag'):
-                self.assertFalse(context.registered_components[key][0].auto_include_flag)
+            if hasattr(context.registered_components[key][0], 'learn_mode'):
+                self.assertFalse(context.registered_components[key][0].learn_mode)
 
         # unset LearnMode config property. An Error should be raised.
         del aminer_config.yaml_data['LearnMode']
@@ -318,14 +318,14 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
         self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/model/accesslog/time'])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, ['/model/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
 
         # test with MultiSource: True. Expects a SimpleByteStreamLineAtomizerFactory with a SimpleMultisourceAtomSync.
         self.assertTrue(isinstance(context.atomizer_factory, SimpleByteStreamLineAtomizerFactory))
         self.assertTrue(isinstance(context.atomizer_factory.atom_handler_list[0], SimpleMultisourceAtomSync))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, [aminer_config.yaml_data['Input']['timestamp_paths']])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, [aminer_config.yaml_data['Input']['timestamp_paths']])
 
         # test with MultiSource: False. Expects a SimpleByteStreamLineAtomizerFactory with a AtomFilters.SubhandlerFilter.
         aminer_config.yaml_data['Input']['multi_source'] = False
@@ -333,7 +333,7 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
         self.assertTrue(isinstance(context.atomizer_factory, SimpleByteStreamLineAtomizerFactory))
         self.assertTrue(isinstance(context.atomizer_factory.atom_handler_list[0], SubhandlerFilter))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, [aminer_config.yaml_data['Input']['timestamp_paths']])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, [aminer_config.yaml_data['Input']['timestamp_paths']])
 
     def test16_parsermodeltype_parameter_for_another_parsermodel_type(self):
         """This test checks if all ModelElements with child elements are working properly."""
@@ -348,7 +348,7 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.registered_components[2][0], NewMatchPathValueDetector))
         self.assertTrue(isinstance(context.registered_components[3][0], NewMatchPathValueComboDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/model/accesslog/time'])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, ['/model/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, FirstMatchModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0].children[0], FixedDataModelElement))
@@ -451,7 +451,7 @@ class YamlConfigTest(TestBase):
             self.assertEqual(type(yml_registered_components_by_name[name]), type(py_registered_components_by_name[name]))
         self.assertEqual(len(yml_context.real_time_triggered_components), len(py_context.real_time_triggered_components))
         # the atom_handler_list is not equal as the python version uses a SimpleMonotonicTimestampAdjust.
-        self.assertEqual(yml_context.atomizer_factory.default_timestamp_paths, py_context.atomizer_factory.default_timestamp_paths)
+        self.assertEqual(yml_context.atomizer_factory.default_timestamp_path_list, py_context.atomizer_factory.default_timestamp_path_list)
         self.assertEqual(type(yml_context.atomizer_factory.event_handler_list), type(py_context.atomizer_factory.event_handler_list))
 
     def test18_etd_order(self):
@@ -511,7 +511,7 @@ class YamlConfigTest(TestBase):
         context.aminer_config.yaml_data['Analysis'][2]['suppress'] = False
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         default_nmpd = context.registered_components[3][0]
-        default_nmpd.output_log_line = False
+        default_nmpd.output_logline = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
             datetime.fromtimestamp(t).strftime(datetime_format_string), default_nmpd.__class__.__name__, 'DefaultNewMatchPathDetector', 1,
@@ -523,7 +523,7 @@ class YamlConfigTest(TestBase):
         context.build_analysis_pipeline()
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         default_nmpd = context.registered_components[3][0]
-        default_nmpd.output_log_line = False
+        default_nmpd.output_logline = False
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), "")
         self.reset_output_stream()
@@ -685,7 +685,7 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
         self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, [""])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, [""])
         self.assertTrue(isinstance(pm, FirstMatchModelElement))
 
         # Sub1
@@ -732,7 +732,7 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))
         self.assertTrue(isinstance(context.registered_components[1][0], NewMatchPathDetector))
         self.assertTrue(isinstance(context.atomizer_factory.event_handler_list[0], StreamPrinterEventHandler))
-        self.assertEqual(context.atomizer_factory.default_timestamp_paths, ['/accesslog/time'])
+        self.assertEqual(context.atomizer_factory.default_timestamp_path_list, ['/accesslog/time'])
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model, SequenceModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[0], VariableByteDataModelElement))
         self.assertTrue(isinstance(context.atomizer_factory.parsing_model.children[1], FixedDataModelElement))

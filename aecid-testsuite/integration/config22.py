@@ -123,7 +123,7 @@ def build_analysis_pipeline(analysis_context):
     # based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_paths=['model/DiskUpgrade/Date'])
+        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_path_list=['model/DiskUpgrade/Date'])
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
@@ -132,13 +132,13 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(simple_unparsed_atom_handler, component_name="UnparsedHandler")
 
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewPath")
     atom_filter.add_handler(new_match_path_detector)
 
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        '/model/HomePath/Username', '/model/HomePath/Path'], anomaly_event_handlers, auto_include_flag=True)
+        '/model/HomePath/Username', '/model/HomePath/Path'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 

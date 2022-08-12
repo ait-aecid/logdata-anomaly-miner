@@ -274,26 +274,26 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', False)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', False)")
-expected="$PREFIX\"'NewMatchPathValueComboDetector.auto_include_flag' changed from False to False successfully.\""
+echo "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'learn_mode', False)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'learn_mode', False)")
+expected="$PREFIX\"'NewMatchPathValueComboDetector.learn_mode' changed from False to False successfully.\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
-	echo "$ERROR changes the 'auto_include_flag' of the 'NewMatchPathValueComboDetector' to False."
+	echo "$ERROR changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' to False."
 	echo "$stdout"
 	echo "Expected: $expected"
 	echo
 	exit_code=1
 fi
 
-echo "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', 'True')" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'auto_include_flag', 'True')")
-expected="$PREFIX\"FAILURE: property 'NewMatchPathValueComboDetector.auto_include_flag' must be of type <class 'bool'>!\""
+echo "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'learn_mode', 'True')" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "change_attribute_of_registered_analysis_component(analysis_context, 'NewMatchPathValueComboDetector',  'learn_mode', 'True')")
+expected="$PREFIX\"FAILURE: property 'NewMatchPathValueComboDetector.learn_mode' must be of type <class 'bool'>!\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
-	echo "$ERROR changes the 'auto_include_flag' of the 'NewMatchPathValueComboDetector' wrong Type."
+	echo "$ERROR changes the 'learn_mode' of the 'NewMatchPathValueComboDetector' wrong Type."
 	echo "$stdout"
 	echo "Expected: $expected"
 	echo
@@ -326,8 +326,8 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, auto_include_flag=True), 'NewMatchPathDet')" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, auto_include_flag=True), 'NewMatchPathDet')")
+echo "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True), 'NewMatchPathDet')" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True), 'NewMatchPathDet')")
 expected="$PREFIX\"Component 'NewMatchPathDet' added to 'AtomFilter' successfully.\""
 expected_list="${expected_list}${expected}
 "

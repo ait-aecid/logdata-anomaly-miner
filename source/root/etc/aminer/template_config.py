@@ -58,34 +58,34 @@ def build_analysis_pipeline(analysis_context):
     # based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths='/model/accesslog/time')
+        parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_path_list='/model/accesslog/time')
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
     atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
 
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn_mode)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=learn_mode)
     analysis_context.register_component(new_match_path_detector, component_name=None)
     atom_filter.add_handler(new_match_path_detector)
 
     # Check if status-code changed
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(
-        analysis_context.aminer_config, ["/model/accesslog/status"], anomaly_event_handlers, auto_include_flag=learn_mode)
+        analysis_context.aminer_config, ["/model/accesslog/status"], anomaly_event_handlers, learn_mode=learn_mode)
     analysis_context.register_component(new_match_path_value_detector, component_name=None)
     atom_filter.add_handler(new_match_path_value_detector)
 
     # Check if HTTP-Method for a HTTP-Request has changed
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        "/model/accesslog/request", "/model/accesslog/method"], anomaly_event_handlers, auto_include_flag=learn_mode)
+        "/model/accesslog/request", "/model/accesslog/method"], anomaly_event_handlers, learn_mode=learn_mode)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name=None)
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
     # Check if HTTP-Statuscode for a HTTP-Request has changed
     new_match_path_value_combo_detector2 = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        "/model/accesslog/request", "/model/accesslog/status"], anomaly_event_handlers, auto_include_flag=learn_mode)
+        "/model/accesslog/request", "/model/accesslog/status"], anomaly_event_handlers, learn_mode=learn_mode)
     analysis_context.register_component(new_match_path_value_combo_detector2, component_name=None)
     atom_filter.add_handler(new_match_path_value_combo_detector2)
 

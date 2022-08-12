@@ -96,8 +96,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             FixedDataModelElement('exit_string', b' exit='), DecimalIntegerValueModelElement('exit'),
             AnyByteDataModelElement('remainding_data')])])
 
-    def test1receive_match_in_time_with_auto_include_flag(self):
-        """This test case checks if log_atoms are accepted as expected with the auto_include_flag=True."""
+    def test1receive_match_in_time_with_learn_mode(self):
+        """This test case checks if log_atoms are accepted as expected with the learn_mode=True."""
         description = 'test1newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, True, True, True, True, True, True, False, False,
                                        False, True, False, True, False]
@@ -124,7 +124,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            learn_mode=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
 
         for i, log_atom in enumerate(log_atoms):
@@ -134,8 +134,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.assertEqual(new_match_id_value_combo_detector.id_dict_old, id_dict_old_results[i])
             self.reset_output_stream()
 
-    def test2receive_match_after_max_allowed_time_diff_with_auto_include_flag(self):
-        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the auto_include_flag=True."""
+    def test2receive_match_after_max_allowed_time_diff_with_learn_mode(self):
+        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the learn_mode=True."""
         description = 'test2newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, True, True, True, True, True, True, False, False,
                                        False, True, False, True, False]
@@ -161,7 +161,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            learn_mode=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
 
         for i, log_atom in enumerate(log_atoms):
@@ -171,8 +171,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.assertEqual(new_match_id_value_combo_detector.id_dict_old, id_dict_old_results[i])
             self.reset_output_stream()
 
-    def test3receive_match_in_time_without_auto_include_flag(self):
-        """This test case checks if log_atoms are accepted as expected with the auto_include_flag=False."""
+    def test3receive_match_in_time_without_learn_mode(self):
+        """This test case checks if log_atoms are accepted as expected with the learn_mode=False."""
         description = 'test3newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, False, True, False, True, True, True, False,
                                        False, False, True, False, True, False]
@@ -199,7 +199,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
 
         for i, log_atom in enumerate(log_atoms):
@@ -210,8 +210,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.assertEqual(new_match_id_value_combo_detector.known_values, [])
             self.reset_output_stream()
 
-    def test4receive_match_after_max_allowed_time_diff_without_auto_include_flag(self):
-        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the auto_include_flag=False."""
+    def test4receive_match_after_max_allowed_time_diff_without_learn_mode(self):
+        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the learn_mode=False."""
         description = 'test4newMatchIdValueComboDetectorTest'
         output_stream_empty_results = [True, False, True, False, True, False, True, True, False, True, False, True, True, True, False,
                                        False, False, True, False, True, False]
@@ -237,7 +237,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
 
         for i, log_atom in enumerate(log_atoms):
@@ -249,13 +249,13 @@ class NewMatchIdValueComboDetectorTest(TestBase):
             self.reset_output_stream()
 
     def test5allowlist_unknown_target_path(self):
-        """This test case checks if a unknown target path can be added to the known_values with the allowlist_event method."""
+        """This test case checks if an unknown target path can be added to the known_values with the allowlist_event method."""
         description = 'test5newMatchIdValueComboDetectorTest'
         min_allowed_time_diff = 5
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [])
         event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
@@ -280,7 +280,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
             'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
             id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+            learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
         self.analysis_context.register_component(new_match_id_value_combo_detector, description)
         self.assertEqual(new_match_id_value_combo_detector.known_values, [])
         event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}

@@ -40,64 +40,59 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, paths=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
+    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
-                 auto_include_flag=True, ignore_list=None, persistence_id='Default', output_log_line=True, constraint_list=None,
+                 learn_mode=True, ignore_list=None, persistence_id='Default', output_logline=True, constraint_list=None,
                  stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
+               considered for value range generation.
         @param max_hypotheses maximum amount of hypotheses and rules hold in memory.
         @param hypothesis_max_delta_time time span of events considered for hypothesis generation.
         @param generation_probability probability in [0, 1] that currently processed log line is considered for hypothesis with each of the
-        candidates.
+               candidates.
         @param generation_factor likelihood in [0, 1] that currently processed log line is added to the set of candidates for hypothesis
-        generation.
+               generation.
         @param max_observations maximum amount of evaluations before hypothesis is transformed into a rule or discarded or rule is
-        evaluated.
+               evaluated.
         @param p0 expected value for hypothesis evaluation distribution.
         @param alpha confidence value for hypothesis evaluation.
         @param candidates_size maximum number of stored candidates used for hypothesis generation.
         @param hypotheses_eval_delta_time duration between hypothesis evaluation phases that remove old hypotheses that are likely to remain
-        unused.
+               unused.
         @param delta_time_to_discard_hypothesis time span required for old hypotheses to be discarded.
         @param check_rules_flag specifies whether existing rules are evaluated.
-        @param auto_include_flag specifies whether new hypotheses are generated.
-        @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are
-        omitted. The default value is [] as None is not iterable.
-        @param persistence_id name of persistence document.
-        @param stop_learning_time switch the auto_include_flag to False after the time.
-        @param stop_learning_no_anomaly_time switch the auto_include_flag to False after no anomaly was detected for that time.
+        @param learn_mode specifies whether new hypotheses are generated.
+        @param ignore_list list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted.
+               The default value is [] as None is not iterable.
+        @param persistence_id name of persistence file.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.paths = paths
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        super().__init__(
+            mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
+            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, max_hypotheses=max_hypotheses,
+            hypothesis_max_delta_time=hypothesis_max_delta_time, generation_probability=generation_probability,
+            generation_factor=generation_factor, max_observations=max_observations, p0=p0, alpha=alpha, candidates_size=candidates_size,
+            hypotheses_eval_delta_time=hypotheses_eval_delta_time, delta_time_to_discard_hypothesis=delta_time_to_discard_hypothesis,
+            check_rules_flag=check_rules_flag, learn_mode=learn_mode, ignore_list=ignore_list, persistence_id=persistence_id,
+            output_logline=output_logline, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
         self.last_unhandled_match = None
         self.total_records = 0
-        self.max_hypotheses = max_hypotheses
-        self.hypothesis_max_delta_time = hypothesis_max_delta_time
-        self.generation_probability = generation_probability
-        self.generation_factor = generation_factor
-        self.max_observations = max_observations
-        self.p0 = p0
-        self.alpha = alpha
-        self.candidates_size = candidates_size
         self.forward_hypotheses = {}
         self.back_hypotheses = {}
         self.forward_hypotheses_inv = {}
         self.back_hypotheses_inv = {}
-        self.hypotheses_eval_delta_time = hypotheses_eval_delta_time
         self.last_hypotheses_eval_timestamp = -1.0
-        self.delta_time_to_discard_hypothesis = delta_time_to_discard_hypothesis
-        self.check_rules_flag = check_rules_flag
-        self.auto_include_flag = auto_include_flag
-        self.ignore_list = ignore_list
-        if self.ignore_list is None:
-            self.ignore_list = []
-        self.constraint_list = constraint_list
-        if self.constraint_list is None:
-            self.constraint_list = []
         self.forward_rule_queue = deque([])
         self.back_rule_queue = deque([])
         self.forward_hypotheses_queue = deque([])
@@ -116,37 +111,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         # Compute the initial minimum amount of positive evaluations for hypotheses to become rules.
         # For rules, this value can be different and will be computed based on the sample observations.
         self.min_eval_true = self.get_min_eval_true(self.max_observations, self.p0, self.alpha)
-
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.output_log_line = output_log_line
-
-        if auto_include_flag is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
-            msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if stop_learning_time is not None and stop_learning_no_anomaly_time is not None:
-            msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-
-        self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
-        self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
-
-        self.log_success = 0
-        self.log_total = 0
         self.log_forward_rules_learned = 0
         self.log_back_rules_learned = 0
         self.log_new_forward_rules = []
@@ -184,7 +148,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         self.forward_rules_inv[implied_event].append(rule)
                     else:
                         self.forward_rules_inv[implied_event] = [rule]
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
@@ -218,10 +182,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         if log_atom.get_timestamp() is None:
             log_atom.atom_time = time.time()
 
-        if self.auto_include_flag is True and self.stop_learning_timestamp is not None and \
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
-            self.auto_include_flag = False
+            self.learn_mode = False
 
         parser_match = log_atom.parser_match
         self.total_records += 1
@@ -230,7 +194,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary():
                 return
-        if self.paths is None or len(self.paths) == 0:
+        if self.target_path_list is None or len(self.target_path_list) == 0:
             # Event is defined by the full path of log atom.
             constraint_path_flag = False
             for constraint_path in self.constraint_list:
@@ -241,10 +205,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 return
             log_event = tuple(parser_match.get_match_dictionary())
         else:
-            # Event is defined by value combos in paths
+            # Event is defined by value combos in target_path_list
             values = []
             all_values_none = True
-            for path in self.paths:
+            for path in self.target_path_list:
                 match = parser_match.get_match_dictionary().get(path)
                 if match is None:
                     continue
@@ -317,11 +281,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             data = repr(log_atom.raw_data)
                         original_log_line_prefix = self.aminer_config.config_properties.get(
                             CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                        tmp_string = 'Rule: %s -> %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
-                                        str(rule.trigger_event), str(rule.implied_event), str(rule.min_eval_true),
-                                        str(rule.max_observations), str(sum(rule.rule_observations)),
-                                        str(len(rule.rule_observations)))
-                        if self.output_log_line:
+                        tmp_string = f'Rule: {str(rule.trigger_event)} -> {str(rule.implied_event)}\n  Expected: ' \
+                                     f'{str(rule.min_eval_true)}/{str(rule.max_observations)}\n  Observed: ' \
+                                     f'{str(sum(rule.rule_observations))}/{str(len(rule.rule_observations))}'
+                        if self.output_logline:
                             sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + data]
                         else:
                             sorted_log_lines = [tmp_string + data]
@@ -334,9 +297,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 trigger_event = self.sample_events[rule.trigger_event]
                             listener.receive_event(
                                 'analysis.EventCorrelationDetector',
-                                'Correlation rule violated! Event %s is missing, but should follow event %s' % (
-                                    repr(implied_event), repr(trigger_event)),
-                                sorted_log_lines,
+                                f'Correlation rule violated! Event {repr(implied_event)} is missing, but should follow event '
+                                f'{repr(trigger_event)}', sorted_log_lines,
                                 {'RuleInfo': {'Rule': str(rule.trigger_event) + '->' + str(rule.implied_event),
                                               'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
                                               'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}},
@@ -374,11 +336,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 data = repr(log_atom.raw_data)
                             original_log_line_prefix = self.aminer_config.config_properties.get(
                                 CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                            tmp_string = 'Rule: %s <- %s\n  Expected: %s/%s\n  Observed: %s/%s' % (
-                                            str(rule.implied_event), str(rule.trigger_event), str(rule.min_eval_true),
-                                            str(rule.max_observations), str(sum(rule.rule_observations)),
-                                            str(len(rule.rule_observations)))
-                            if self.output_log_line:
+                            tmp_string = f'Rule: {str(rule.implied_event)} <- {str(rule.trigger_event)}\n  Expected: ' \
+                                         f'{str(rule.min_eval_true)}/{str(rule.max_observations)}\n  Observed: ' \
+                                         f'{str(sum(rule.rule_observations))}/{str(len(rule.rule_observations))}'
+                            if self.output_logline:
                                 sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + data]
                             else:
                                 sorted_log_lines = [tmp_string + data]
@@ -391,9 +352,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                     trigger_event = self.sample_events[rule.trigger_event]
                                 listener.receive_event(
                                     'analysis.EventCorrelationDetector',
-                                    'Correlation rule violated! Event %s is missing, but should precede event %s' % (
-                                        repr(implied_event), repr(trigger_event)),
-                                    sorted_log_lines,
+                                    f'Correlation rule violated! Event {repr(implied_event)} is missing, but should precede event '
+                                    f'{repr(trigger_event)}', sorted_log_lines,
                                     {'RuleInfo': {'Rule': str(rule.implied_event) + '<-' + str(rule.trigger_event),
                                                   'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
                                                   'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}},
@@ -416,7 +376,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     continue
                 break
 
-        if self.auto_include_flag:
+        if self.learn_mode:
             # Generate new hypotheses and rules.
 
             # Keep track of event occurrences, relevant for removing old hypotheses.
@@ -740,7 +700,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 known_path_set.add(
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def log_statistics(self, component_name):
         """
@@ -749,14 +709,15 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last 60 "
-                "minutes.", component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_forward_rules_learned} new forward rules and {self.log_back_rules_learned} new back rules in the last 60 "
+                f"minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new forward rules and %d new back rules in the last "
-                "60 minutes. Following new forward rules were learned: %d. Following new back rules were learned: %d", component_name,
-                self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned,
-                self.log_forward_rules_learned, self.log_back_rules_learned)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and"
+                f" learned {self.log_forward_rules_learned} new forward rules and {self.log_back_rules_learned} new back rules in the last "
+                f"60 minutes. Following new forward rules were learned: {self.log_forward_rules_learned}. Following new back rules were"
+                f" learned: {self.log_back_rules_learned}")
         self.log_success = 0
         self.log_total = 0
         self.log_forward_rules_learned = 0
@@ -770,7 +731,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -780,7 +741,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
-        return 'Allowlisted path %s.' % event_data
+        return f'Allowlisted path {event_data}.'
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """
@@ -788,7 +749,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -798,7 +759,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)
-        return 'Blocklisted path %s.' % event_data
+        return f'Blocklisted path {event_data}.'
 
 
 class Implication:
