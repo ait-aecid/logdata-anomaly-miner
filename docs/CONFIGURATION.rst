@@ -1310,7 +1310,7 @@ EnhancedNewMatchPathValueComboDetector
 In addition to detecting new value combination (see NewMatchPathValueComboDetector), this detector also stores combo occurrence times and amounts, and allows to execute functions on tuples that need to be defined in the python code first.
 
 * **paths**: the list of values to extract from each match to create the value combination to be checked (required, list of strings).
-* **allow_missing_values**: when set to True, the detector will also use matches, where one of the pathes from paths does not refer to an existing parsed data object (boolean, defaults to False).
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths from target_path_list does not refer to an existing parsed data object (boolean, defaults to False).
 * **tuple_transformation_function**: when not None, this function will be invoked on each extracted value combination list to transform it. It may modify the list directly or create a new one to return it (string, defaults to None).
 * **learn_mode**: when set to True, this detector will report a new value only the first time before including it in the known values set automatically (boolean).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
@@ -1704,7 +1704,7 @@ This module defines an detector for minimal transition times between states (e.g
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, **required**).
 * **id_path_list** parser paths where id values can be stored in all relevant log event types (list of strings, **required**).
 * **ignore_list** parser paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, default: []).
-* **allow_missing_id** when set to True, the detector will also use matches, where one of the pathes from paths does not refer to an existing parsed data object (boolean, default: False).
+* **allow_missing_id** when set to True, the detector will also use matches, where one of the paths from target_path_list does not refer to an existing parsed data object (boolean, default: False).
 * **num_log_lines_solidify_matrix** number of processed log lines after which the matrix is solidified. This process is periodically repeated (integer, default: 10000).
 * **time_output_threshold** threshold for the tested minimal transition time which has to be exceeded to be tested (float, default: 0).
 * **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float, default: 0.05).
@@ -1730,7 +1730,7 @@ MissingMatchPathValueDetector
 
 This component creates events when an expected value is not seen within a given timespan.
 For example because the service was deactivated or logging disabled unexpectedly. This is complementary to the function provided by
-NewMatchPathValueDetector. For each unique value extracted by paths, a tracking record is added to expected_values_dict.
+NewMatchPathValueDetector. For each unique value extracted by target_path_list, a tracking record is added to expected_values_dict.
 It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
 alerting time when currently in error state. When in normal (alerting) state, the value is zero.
 
@@ -1860,11 +1860,11 @@ This component counts occurring combinations of values and periodically sends th
 PathValueTimeIntervalDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This detector analyzes the time intervals of the appearance of log_atoms. It sends a report if log_atoms appear at times outside of the intervals. The considered time intervals depend on the combination of values in the paths of paths.
+This detector analyzes the time intervals of the appearance of log_atoms. It sends a report if log_atoms appear at times outside of the intervals. The considered time intervals depend on the combination of values in the target_paths of target_path_list.
 
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **allow_missing_values** when set to True, the detector will also use matches, where one of the pathes from paths does not refer to an existing parsed data object (boolean, defaults to True).
+* **allow_missing_values** when set to True, the detector will also use matches, where one of the paths from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
 * **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
