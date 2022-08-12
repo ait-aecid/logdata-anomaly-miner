@@ -469,7 +469,7 @@ Defines the number of logfiles saved after rotation of "Log.RemoteControlLogFile
 Input
 -----
 
-timestamp_path_list
+timestamp_paths
 ~~~~~~~~~~~~~~~
 
 * Type: string or list of strings
@@ -479,11 +479,11 @@ Parser paths to DateTimeModelElements to set timestamp of log events.
 
 .. code-block:: yaml
 
-   timestamp_path_list: '/model/time'
+   timestamp_paths: '/model/time'
 
 .. code-block:: yaml
 
-   timestamp_path_list:
+   timestamp_paths:
       - '/parser/model/time'
       - '/parser/model/type/execve/time'
       - '/parser/model/type/proctitle/time'
@@ -1259,11 +1259,11 @@ This module defines a detector for log atoms not matching any allowlisted rule.
      Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
-          target_path: "/model/LoginDetails/PastTime/Time/Minutes"
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
 
         - type: ValueMatchRule
           id: value_match_rule
-          target_path: "/model/LoginDetails/Username"
+          path: "/model/LoginDetails/Username"
           value: "root"
 
         - type: OrMatchRule
@@ -1286,7 +1286,7 @@ CharsetDetector
 
 This detector generates anomalies for new characters in parsed elements and extends the allowed alphabet when learning is active.
 
-* **target_path_list** parser paths of values to be analyzed; multiple paths mean that all values occurring in these paths are considered for character detection (required, list of strings).
+* **paths** parser paths of values to be analyzed; multiple paths mean that all values occurring in these paths are considered for character detection (required, list of strings).
 * **id_path_list** list of strings that specify group identifiers for which alphabets should be learned (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
@@ -1300,7 +1300,7 @@ This detector generates anomalies for new characters in parsed elements and exte
 
      Analysis:
         - type: 'CharsetDetector'
-          target_path_list:
+          paths:
             - '/parser/value'
           learn_mode: True
 
@@ -1309,8 +1309,8 @@ EnhancedNewMatchPathValueComboDetector
 
 In addition to detecting new value combination (see NewMatchPathValueComboDetector), this detector also stores combo occurrence times and amounts, and allows to execute functions on tuples that need to be defined in the python code first.
 
-* **target_path_list**: the list of values to extract from each match to create the value combination to be checked (required, list of strings).
-* **allow_missing_values**: when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to False).
+* **paths**: the list of values to extract from each match to create the value combination to be checked (required, list of strings).
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the pathes from paths does not refer to an existing parsed data object (boolean, defaults to False).
 * **tuple_transformation_function**: when not None, this function will be invoked on each extracted value combination list to transform it. It may modify the list directly or create a new one to return it (string, defaults to None).
 * **learn_mode**: when set to True, this detector will report a new value only the first time before including it in the known values set automatically (boolean).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
@@ -1323,7 +1323,7 @@ In addition to detecting new value combination (see NewMatchPathValueComboDetect
      Analysis:
         - type: EnhancedNewMatchPathValueComboDetector
           id: EnhancedNewValueCombo
-          target_path_list:
+          paths:
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
           tuple_transformation_function: "demo"
@@ -1334,7 +1334,7 @@ EntropyDetector
 
 This detector monitors and learns occurrence probabilities of character pairs in values. Many unlikely character pairs in values suggest that they are randomly generated or not fitting the learned character patterns.
 
-* **target_path_list** parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are considered as if they occur in the same field (required, list of strings).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are considered as if they occur in the same field (required, list of strings).
 * **prob_thresh** limit for the average probability of character pairs for which anomalies are reported (float, defaults to 0.05).
 * **default_probs** initializes the probabilities with default values from https://github.com/markbaggett/freq (boolean, defaults to False).
 * **skip_repetitions** boolean that determines whether only distinct values are used for character pair counting. This counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run (boolean, defaults to False).
@@ -1348,7 +1348,7 @@ This detector monitors and learns occurrence probabilities of character pairs in
 
      Analysis:
         - type: 'EntropyDetector'
-          target_path_list:
+          paths:
             - '/parser/value'
           prob_thresh: 0.05
           default_freqs: false
@@ -1364,7 +1364,7 @@ This module defines an evaluator and generator for event rules. The overall idea
 3. Observe for a long time (max_observations) whether the hypothesis holds.
 4. If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis.
 
-* **target_path_list**: a list of paths where values or value combinations used for correlation occur. If this parameter is not set, correlation is done on event types instead (list of strings, defaults to empty list).
+* **paths**: a list of paths where values or value combinations used for correlation occur. If this parameter is not set, correlation is done on event types instead (list of strings, defaults to empty list).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
 * **max_hypotheses** maximum amount of hypotheses and rules hold in memory (integer, defaults to 1000).
 * **hypothesis_max_delta_time** time span in seconds of events considered for hypothesis generation (float, defaults to 5.0).
@@ -1398,7 +1398,7 @@ EventFrequencyDetector
 
 This module defines an detector for event and value frequency deviations.
 
-* **target_path_list** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **scoring_path_list** parser paths of values to be analyzed by following event handlers like the ScoringEventHandler. Multiple paths mean that values are analyzed by their combined occurrences.
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **window_size** the length of the time window for counting in seconds (float, defaults to 600).
@@ -1427,7 +1427,7 @@ EventSequenceDetector
 
 This module defines an detector for event and value sequences. The concept is based on STIDE which was first published by Forrest et al.
 
-* **target_path_list** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **id_path_list** one or more paths that specify the trace of the sequence detection, i.e., incorrect sequences that are generated by interleaved events can be avoided when event sequence identifiers are available (list of strings, defaults to empty list).
 * **seq_len** the length of the sequences to be learned (larger lengths increase precision, but may overfit the data). (integer, defaults to 3).
@@ -1444,7 +1444,7 @@ This module defines an detector for event and value sequences. The concept is ba
         - type: EventSequenceDetector
           id: EventSequenceDetector
           seq_len: 4
-          target_path_list:
+          paths:
             - '/model/type/syscall/syscall'
           id_path_list:
             - '/model/type/syscall/id'
@@ -1454,7 +1454,7 @@ EventTypeDetector
 
 This component serves as a basis for the VariableTypeDetector, VariableCorrelationDetector, TSAArimaDetector and PathArimaDetector. It saves a list of the values to the single paths and tracks the time for the TSAArimaDetector.
 
-* **target_path_list** parser paths of values to be analyzed (list of strings, defaults to empty list).
+* **paths** parser paths of values to be analyzed (list of strings, defaults to empty list).
 * **id_path_list** one or more paths that specify the trace of the sequence detection, i.e., incorrect sequences that are generated by interleaved events can be avoided when event sequence identifiers are available (list of strings, defaults to empty list).
 * **allow_missing_id** specifies whether log atoms without id path should be omitted (boolean, defaults to False. only if id path is set).
 * **allowed_id_tuples** list of the allowed id tuples. Log atoms with id tuples not in this list are not analyzed, when this list is not empty.
@@ -1496,7 +1496,7 @@ or by creating own subclasses from "HistogramAnalysis.BinDefinition".
     is useful for analysis of periodic activities.
 
 
-* **histogram_definitions**: list of tuples. First element of the tuple contains the target property path to analyze. The second element contains the id of a bin_definition(LinearNumericBinDefinition or ModuloTimeBinDefinition). List(strings) **Required**
+* **histogram_defs**: list of tuples. First element of the tuple contains the target property path to analyze. The second element contains the id of a bin_definition(LinearNumericBinDefinition or ModuloTimeBinDefinition). List(strings) **Required**
 * **report_interval**: Report_interval delay in seconds between creaton of two reports. The parameter is applied to the parsed record data time, not the system time. Hence reports can be delayed when no data is received. Integer(min: 1) **Required**
 * **reset_after_report_flag**: Zero counters after the report was sent. Boolean(Default: true)
 * **persistence_id'**: the name of the file where the learned models are stored. String(Default: 'Default')
@@ -1516,7 +1516,7 @@ or by creating own subclasses from "HistogramAnalysis.BinDefinition".
 
         - type: HistogramAnalysis
           id: HistogramAnalysis
-          histogram_definitions: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
           report_interval: 10
 
 .. _PathDependentHistogramAnalysis:
@@ -1561,7 +1561,7 @@ HistogramAnalysis.HistogramAnalysis, see documentation there.
 
         - type: PathDependentHistogramAnalysis
           id: PathDependentHistogramAnalysis
-          target_path: "/model/RandomTime"
+          path: "/model/RandomTime"
           bin_definition: "modulo_time_bin_definition"
           report_interval: 10
 
@@ -1627,8 +1627,8 @@ MatchFilter
 
 This component creates events for specified paths and values.
 
-* **target_path_list**: List of paths defined as strings(Required)
-* **target_value_list**: List of values(Required)
+* **paths**: List of paths defined as strings(Required)
+* **value_list**: List of values(Required)
 * **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
 * **output_event_handlers**: List of strings with id's of the event_handlers
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True.
@@ -1638,9 +1638,9 @@ This component creates events for specified paths and values.
      Analysis:
         - type: MatchFilter
           id: MatchFilter
-          target_path_list:
+          paths:
             - "/model/Random"
-          target_value_list:
+          value_list:
             - 1
             - 10
             - 100
@@ -1652,7 +1652,7 @@ MatchValueAverageChangeDetector
 This detector calculates the average of a given list of values to monitor. Reports are generated if the average of the latest diverges significantly from the values observed before.
 
 * **timestamp_path**: Use this path value for timestamp based bins. String (**required**)
-* **target_path_list**: List of match paths to analyze in this detector. List of strings( **required**)
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
 * **min_bin_elements**: Evaluate the latest bin only after at least that number of elements was added to it. Integer, min: 1 (**required**)
 * **min_bin_time**: Evaluate the latest bin only when the first element is received after min_bin_time has elapsed. Integer, min: 1 (**required**)
 * **debug_mode**: Enables debug output. Boolean(Default: False)
@@ -1667,7 +1667,7 @@ This detector calculates the average of a given list of values to monitor. Repor
         - type: MatchValueAverageChangeDetector
           id: MatchValueAverageChange
           timestamp_path: None
-          target_path_list:
+          paths:
             - "/model/Random"
           min_bin_elements: 100
           min_bin_time: 10
@@ -1679,7 +1679,7 @@ MatchValueStreamWriter
 This component extracts values from a given match and writes them to a stream. This can be used to forward these values to another program (when stream is a wrapped network socket) or to a file for further analysis. A stream is used instead of a file descriptor to increase performance. To flush it from time to time, add the writer object also to the time trigger list.
 
 * **stream**: Stream to write the value of the match to. Possible values: 'sys.stdout' or 'sys.stderr' ( **required**)
-* **target_path_list**: List of match paths to analyze in this detector. List of strings( **required**)
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
 * **separator**: Use this string as a seperator for the output. String ( **required**)
 * **missing_value_string**: Write this string if the value is missing. ( **required**)
 * **output_event_handlers**: List of strings with id's of the event_handlers
@@ -1691,7 +1691,7 @@ This component extracts values from a given match and writes them to a stream. T
         - type: MatchValueStreamWriter
           id: MatchValueStreamWriter
           stream: "sys.stdout"
-          target_path_list:
+          paths:
             - "/model/Sensors/CPUTemp"
             - "/model/Sensors/CPUWorkload"
             - "/model/Sensors/DTM"
@@ -1701,10 +1701,10 @@ MinimalTransitionTimeDetector
 
 This module defines an detector for minimal transition times between states (e.g. value combinations of stated paths).
 
-* **target_path_list** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, **required**).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, **required**).
 * **id_path_list** parser paths where id values can be stored in all relevant log event types (list of strings, **required**).
 * **ignore_list** parser paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, default: []).
-* **allow_missing_id** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, default: False).
+* **allow_missing_id** when set to True, the detector will also use matches, where one of the pathes from paths does not refer to an existing parsed data object (boolean, default: False).
 * **num_log_lines_solidify_matrix** number of processed log lines after which the matrix is solidified. This process is periodically repeated (integer, default: 10000).
 * **time_output_threshold** threshold for the tested minimal transition time which has to be exceeded to be tested (float, default: 0).
 * **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float, default: 0.05).
@@ -1717,7 +1717,7 @@ This module defines an detector for minimal transition times between states (e.g
      Analysis:
         - type: MinimalTransitionTimeDetector
           id: MinimalTransitionTimeDetector
-          target_path_list:
+          paths:
             - '/model/type/syscall/syscall'
           id_path_list:
             - '/model/type/syscall/id'
@@ -1730,12 +1730,12 @@ MissingMatchPathValueDetector
 
 This component creates events when an expected value is not seen within a given timespan.
 For example because the service was deactivated or logging disabled unexpectedly. This is complementary to the function provided by
-NewMatchPathValueDetector. For each unique value extracted by target_path_list, a tracking record is added to expected_values_dict.
+NewMatchPathValueDetector. For each unique value extracted by paths, a tracking record is added to expected_values_dict.
 It stores three numbers: the timestamp the extracted value was last seen, the maximum allowed gap between observations and the next
 alerting time when currently in error state. When in normal (alerting) state, the value is zero.
 
 
-* **target_path_list**: List of match paths to analyze in this detector. List of strings( **required**)
+* **paths**: List of match paths to analyze in this detector. List of strings( **required**)
 * **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
 * **check_interval**: This integer(seconds) defines the interval in which pre-set or learned values need to appear. Integer min:1 (Default: 3600)
 * **realert_interval**: This integer(seconds) defines the interval in which the AMiner should alert us about missing token values. Integer min: 1 (Default: 3600)
@@ -1749,7 +1749,7 @@ alerting time when currently in error state. When in normal (alerting) state, th
      Analysis:
         - type: MissingMatchPathValueDetector
           id: MissingMatch
-          target_path_list:
+          paths:
             - "/model/DiskReport/Space"
           check_interval: 2
           realert_interval: 5
@@ -1764,7 +1764,7 @@ NewMatchIdValueComboDetector
 
 This detector works similar to the NewMatchPathValueComboDetector, but allows to generate combos across multiple log events that are connected by a common value, e.g., trace ID.
 
-* **target_path_list** parser paths of values to be analyzed (required, list of strings).
+* **paths** parser paths of values to be analyzed (required, list of strings).
 * **id_path_list** one or more paths that specify trace information, i.e., an identifier that specifies which log events belong together (required, list of strings, defaults to empty list).
 * **min_allowed_time_diff** the minimum amount of time in seconds after the first appearance of a log atom with a specific id that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo is 2*min_allowed_time_diff (required, float, defaults to 5.0).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
@@ -1781,14 +1781,14 @@ This detector works similar to the NewMatchPathValueComboDetector, but allows to
      Analysis:
         - type: NewMatchIdValueComboDetector
           id: NewMatchIdValueComboDetector
-          target_path_list:
+          paths:
             - "/model/type/path/name"
             - "/model/type/syscall/syscall"
           id_path_list:
             - "/model/type/path/id"
             - "/model/type/syscall/id"
           min_allowed_time_diff: 5
-          allow_missing_values_flag: True
+          allow_missing_values: True
           learn_mode: True
 
 NewMatchPathValueComboDetector
@@ -1796,7 +1796,7 @@ NewMatchPathValueComboDetector
 
 This module defines a detector for new value combinations in multiple parser paths.
 
-* **target_path_list** parser paths of values to be analyzed (required, list of strings).
+* **paths** parser paths of values to be analyzed (required, list of strings).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
@@ -1809,7 +1809,7 @@ This module defines a detector for new value combinations in multiple parser pat
      Analysis:
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueCombo
-          target_path_list:
+          paths:
             - "/model/IPAddresses/Username"
             - "/model/IPAddresses/IP"
           learn_mode: True
@@ -1819,7 +1819,7 @@ NewMatchPathValueDetector
 
 This module defines a detector for new values in a parser path.
 
-* **target_path_list** parser paths of values to be analyzed. Multiple paths mean that values from all specified paths are mixed together (required, list of strings).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values from all specified paths are mixed together (required, list of strings).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
@@ -1831,7 +1831,7 @@ This module defines a detector for new values in a parser path.
      Analysis:
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
-          target_path_list:
+          paths:
             - "/model/DailyCron/JobNumber"
             - "/model/IPAddresses/Username"
           learn_mode: True
@@ -1841,9 +1841,9 @@ ParserCount
 
 This component counts occurring combinations of values and periodically sends the results as a report.
 
-* **target_path_list** parser paths of values to be analyzed (list of strings, defaults to empty list).
+* **paths** parser paths of values to be analyzed (list of strings, defaults to empty list).
 * **report_interval** time interval in seconds in which the reports are sent (integer, defaults to 10).
-* **target_label_list** list of strings that are added to the report for each path in paths parameter (must be the same length as paths list). (list of strings, defaults to empty list)
+* **labels** list of strings that are added to the report for each path in paths parameter (must be the same length as paths list). (list of strings, defaults to empty list)
 * **split_reports_flag** boolean flag to send report for each path in paths parameter separately when set to True (boolean, defaults to False).
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1853,18 +1853,18 @@ This component counts occurring combinations of values and periodically sends th
      Analysis:
         - type: ParserCount
           id: ParserCount
-          target_path_list:
+          paths:
             - "/model/type/syscall/syscall"
           report_interval: 10
 
 PathValueTimeIntervalDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This detector analyzes the time intervals of the appearance of log_atoms. It sends a report if log_atoms appear at times outside of the intervals. The considered time intervals depend on the combination of values in the target_paths of target_path_list.
+This detector analyzes the time intervals of the appearance of log_atoms. It sends a report if log_atoms appear at times outside of the intervals. The considered time intervals depend on the combination of values in the paths of paths.
 
-* **target_path_list** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
+* **allow_missing_values** when set to True, the detector will also use matches, where one of the pathes from paths does not refer to an existing parsed data object (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
 * **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
@@ -1877,7 +1877,7 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
      Analysis:
         - type: PathValueTimeIntervalDetector
           id: PathValueTimeIntervalDetector
-          target_path_list:
+          paths:
             - "/model/DailyCron/UName"
             - "/model/DailyCron/JobNumber"
           time_period_length: 86400
@@ -1889,7 +1889,7 @@ PCADetector
 
 This class creates events if event or value occurrence counts are outliers in PCA space.
 
-* **target_path_list** parser paths of values to be analyzed. Multiple paths mean that values are analyzed as separate dimensions. When no paths are specified, the events given by the full path list are analyzed (list of strings).
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed as separate dimensions. When no paths are specified, the events given by the full path list are analyzed (list of strings).
 * **window_size** the length of the time window for counting in seconds (float, defaults to 600 seconds).
 * **min_anomaly_score** the minimum computed outlier score for reporting anomalies. Scores are scaled by training data, i.e., reasonable minimum scores are > 1 to detect outliers with respect to currently trained PCA matrix (float, defaults to 1.1).
 * **min_variance** the minimum variance covered by the principal components (float in range [0, 1], defaults to 0.98).
@@ -1906,7 +1906,7 @@ This class creates events if event or value occurrence counts are outliers in PC
      Analysis:
         - type: PCADetector
           id: PCADetector
-          target_path_list:
+          paths:
             - "/model/username"
             - "/model/service"
           windows_size: 60
@@ -1920,7 +1920,7 @@ TSAArimaDetector
 
 This detector uses a tsa-arima model to track appearance frequencies of event lines.
 
-* **target_path_list** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
+* **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
 * **event_type_detector** used to track the number of event lines in the time windows (string).
 * **waiting_time_for_tsa** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
 * **num_sections_waiting_time_for_tsa** number of sections of the initialization window (integer, defaults to 10).
@@ -1970,7 +1970,7 @@ PathArimaDetector
 
 This detector uses a tsa-arima model to analyze the values of the chosen paths.
 
-* **target_path_list** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
 * **event_type_detector** used to track the number of events in the time windows.
 * **persistence_id** name of persistency document.
 * **output_logline** specifies whether the full parsed log atom should be provided in the output.
@@ -1994,7 +1994,7 @@ This detector uses a tsa-arima model to analyze the values of the chosen paths.
         - type: 'PathArimaDetector'
           id: PTSA
           event_type_detector: ETD
-          target_path_list: ["/model/model/val1", "/model/model/val2"]
+          paths: ["/model/model/val1", "/model/model/val2"]
           num_init: 20
           force_period_length: True
           set_period_length: 15
@@ -2032,11 +2032,11 @@ This is used to implement checks as depicted in http://dx.doi.org/10.1016/j.cose
      Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule3
-          target_path: "/model/CronAnnouncement/Run"
+          path: "/model/CronAnnouncement/Run"
           match_action: a_class_selector
         - type: PathExistsMatchRule
           id: path_exists_match_rule4
-          target_path: "/model/CronExecution/Job"
+          path: "/model/CronExecution/Job"
           match_action: b_class_selector
         - type: TimeCorrelationViolationDetector
           id: TimeCorrelationViolationDetector
@@ -2071,7 +2071,7 @@ ValueRangeDetector
 
 This detector generates ranges for numeric values, detects values outside of these ranges, and automatically extends ranges when learning is active.
 
-* **target_path_list** parser paths of values to be analyzed; multiple paths mean that all values occurring in these paths are considered for value range generation (required, list of strings).
+* **paths** parser paths of values to be analyzed; multiple paths mean that all values occurring in these paths are considered for value range generation (required, list of strings).
 * **id_path_list** list of strings that specify group identifiers for which numeric ranges should be learned (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
@@ -2085,7 +2085,7 @@ This detector generates ranges for numeric values, detects values outside of the
 
      Analysis:
         - type: 'ValueRangeDetector'
-          target_path_list:
+          paths:
             - '/parser/value'
           id_path_list:
             - '/parser/id'
@@ -2147,7 +2147,7 @@ VariableTypeDetector
 
 This detector analyses each variable of the event_types by assigning them the implemented variable types.
 
-* **target_path_list** List of paths, which variables are being tested for a type. All other paths will not get a type assigned.
+* **paths** List of paths, which variables are being tested for a type. All other paths will not get a type assigned.
 * **learn_mode** states, if found variable types are updated when a test fails.
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
 * **event_type_detector** event_type_detector. Used to get the event numbers and values of the variables, etc.
@@ -2297,10 +2297,10 @@ Match elements of this component return true when the given path was found in th
      Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
-          target_path: "/model/LoginDetails/PastTime/Time/Minutes"
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
-          target_path: "/model/LoginDetails"
+          path: "/model/LoginDetails"
 
 
 ValueMatchRule
@@ -2313,7 +2313,7 @@ Match elements of this component return true when the given path exists and has 
      Analysis:
         - type: ValueMatchRule
           id: value_match_rule
-          target_path: "/model/LoginDetails/Username"
+          path: "/model/LoginDetails/Username"
           value: "root"
 
 ValueListMatchRule
@@ -2398,7 +2398,7 @@ When `delete_components` is used, all components from the `subhandler_list` are 
      Analysis:
         - type: NewMatchPathValueDetector
           id: NewMatchPathValueDetector1
-          target_path_list:
+          paths:
             - "/model/second"
 
         - type: AtomFilterMatchAction
