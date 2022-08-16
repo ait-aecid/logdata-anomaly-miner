@@ -1126,6 +1126,58 @@ This model defines a json-formatted log line. This model is usually used as a st
                - _index: _index
                  _type: _type
 
+JsonStringModelElement
+~~~~~~~~~~~~~~~~~~~~~~
+
+This model parses json-strings very quickly and robust.
+
+* **key_parser_dict**: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
+
+* **strict**: If strict is set to true all keys must be defined. The parser will fail if the logdata has a json-key that is not defined in the **key_parser_dict**
+
+.. code-block:: yaml
+
+     Parser:
+       - id: _scroll_id
+         type: Base64StringModelElement
+         name: '_scroll_id'
+
+       - id: took
+         type: DecimalIntegerValueModelElement
+         name: 'took'
+
+       - id: value
+         type: DecimalIntegerValueModelElement
+         name: 'value'
+
+       - id: _index
+         type: DateTimeModelElement
+         name: '_index'
+         date_format: 'aminer-statusinfo-%Y.%m.%d'
+
+       - id: _type
+         type: FixedDataModelElement
+         name: '_type'
+         args: '_doc'
+
+       - id: json
+         start: True
+         type: JsonModelElement
+         name: 'model'
+         strict: true
+         key_parser_dict:
+           _scroll_id: _scroll_id
+           took: took
+           hits:
+             total:
+               value: value
+             hits:
+               - _index: _index
+                 _type: _type
+
+
+.. note:: This parser does not work with multiline json-logs
+
 OptionalMatchModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
