@@ -117,8 +117,8 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 c = self.count_dict[k]
                 output_string += '\t' + str(k) + ': ' + str(c) + '\n'
             output_string = output_string[:-1]
-            event_data = {'StatusInfo': self.count_dict, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
-                          'ToTime': datetime.datetime.utcnow().timestamp()}
+            event_data = {'StatusInfo': self.count_dict, 'FromTime': time.time() - self.report_interval,
+                          'ToTime': time.time()}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Count report', [output_string], event_data, None, self)
         else:
@@ -129,8 +129,8 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 status_info = {k: {
                     current_processed_lines_str: c[current_processed_lines_str],
                     total_processed_lines_str: c[total_processed_lines_str]}}
-                event_data = {'StatusInfo': status_info, 'FromTime': datetime.datetime.utcnow().timestamp() - self.report_interval,
-                              'ToTime': datetime.datetime.utcnow().timestamp()}
+                event_data = {'StatusInfo': status_info, 'FromTime': time.time() - self.report_interval,
+                              'ToTime': time.time()}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Count report', [output_string], event_data, None, self)
         for k in self.count_dict:
