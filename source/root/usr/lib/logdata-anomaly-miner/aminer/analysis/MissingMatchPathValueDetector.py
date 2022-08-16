@@ -115,16 +115,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         for i, target_path in enumerate(target_paths):
             value = value_list[i]
             detector_info = self.expected_values_dict.get(value)
-            if detector_info is not None:
-                # Just update the last seen value and switch from non-reporting error state to normal state.
-                detector_info[0] = timestamp
-                if detector_info[2] != 0:
-                    if timestamp >= detector_info[2]:
-                        detector_info[2] = 0
-                    # Delta of this detector might be lower than the default maximum recheck time.
-                    self.next_check_timestamp = min(self.next_check_timestamp, timestamp + detector_info[1])
-
-            elif self.learn_mode:
+            if detector_info is None and self.learn_mode:
                 self.expected_values_dict[value] = [timestamp, self.default_interval, 0, target_path]
                 self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
                 self.log_learned_values += 1
@@ -133,6 +124,18 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
 
         self.check_timeouts(timestamp, log_atom)
+
+        for i, target_path in enumerate(target_paths):
+            value = value_list[i]
+            detector_info = self.expected_values_dict.get(value)
+            if detector_info is not None:
+                # Just update the last seen value and switch from non-reporting error state to normal state.
+                detector_info[0] = timestamp
+                if detector_info[2] != 0:
+                    if timestamp >= detector_info[2]:
+                        detector_info[2] = 0
+                    # Delta of this detector might be lower than the default maximum recheck time.
+                    self.next_check_timestamp = min(self.next_check_timestamp, timestamp + detector_info[1])
         self.log_success += 1
         return True
 
@@ -157,7 +160,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 else:
                     affected_log_atom_values = match.match_object
                 value_list.append(str(affected_log_atom_values))
-            path_list.append(target_path)
+                path_list.append(target_path)
         if self.combine_values:
             value_list = str(value_list)
             path_list = str(path_list)
@@ -196,7 +199,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 # Workaround:
                 # also check for long gaps between same tokens where the last_seen_timestamp gets updated
                 # on the arrival of tokens following a longer gap
-                elif self.last_seen_timestamp > old_last_seen_timestamp + detector_info[1]:
+                elif self.last_seen_timestamp - detector_info[0] > detector_info[1]:
                     value_overdue_time = self.last_seen_timestamp - old_last_seen_timestamp - detector_info[1]
                     missing_value_list.append([detector_info[3], value, value_overdue_time, detector_info[1]])
                     # Set the next alerting time.
@@ -236,7 +239,11 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     e['OverdueTime'] = str(overdue_time)
                     e['Interval'] = str(interval)
                     affected_log_atom_values.append(e)
-                analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
+                affected_log_atom_paths = []
+                for path in log_atom.parser_match.get_match_dictionary().keys():
+                    if path in self.target_path_list:
+                        affected_log_atom_paths.append(path)
+                analysis_component = {'AffectedLogAtomPaths': affected_log_atom_paths,
                                       'AffectedLogAtomValues': affected_log_atom_values}
                 event_data = {'AnalysisComponent': analysis_component}
                 for listener in self.anomaly_event_handlers:
