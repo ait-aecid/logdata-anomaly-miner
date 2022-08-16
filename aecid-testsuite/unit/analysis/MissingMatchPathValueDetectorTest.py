@@ -118,6 +118,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         other_missing_match_path_value_detector = MissingMatchPathValueDetector(self.aminer_config, [match_element_fixed_dme.get_path()], [
             self.stream_printer_event_handler], 'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(other_missing_match_path_value_detector, description + "2")
+        other_missing_match_path_value_detector.last_seen_timestamp = t + past_time
         other_missing_match_path_value_detector.set_check_value(other_missing_match_path_value_detector.get_channel_key(
             log_atom_fixed_dme)[1], self.__default_interval - past_time, [match_element_fixed_dme.get_path()])
 
@@ -271,6 +272,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
             match_element_fixed_dme.get_path(), match_element_decimal_integer_value_me.get_path()], [self.stream_printer_event_handler],
             'Default', True, self.__default_interval, self.__realert_interval)
         self.analysis_context.register_component(other_missing_match_path_list_value_detector, description + "2")
+        other_missing_match_path_list_value_detector.last_seen_timestamp = t + past_time
         other_missing_match_path_list_value_detector.set_check_value(other_missing_match_path_list_value_detector.get_channel_key(
             log_atom_fixed_dme)[1], self.__default_interval - past_time, match_element_fixed_dme.get_path())
 
@@ -395,7 +397,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         # exactly one overdue should be found
         msg = "2021-03-12 21:30:51 Interval too large between values\nMissingMatchPathValueDetector: \"Test12MissingMatchPathValue" \
               "Detector11\" (1 lines)\n  ['match/first/seq11', 'match/first/seq11/host1', 'match/first/seq11/service1']: \"['host1 " \
-              "service1', 'host1 ', 'service1']\" overdue 12.0s (interval 480)\n\n"
+              "service1', 'host1 ', 'service1']\" overdue 12s (interval 480)\n\n"
         self.assertEqual(msg, self.output_stream.getvalue())
 
 

@@ -77,7 +77,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             for key in persistence_data:
                 value = persistence_data[key]
                 if self.target_path_list is not None:  # skipcq: PTC-W0048
-                    if value[3] != self.target_path_list:
+                    if (value[3] not in self.target_path_list and not self.combine_values) or (
+                            value[3] != str(self.target_path_list) and self.combine_values):
                         continue
                 elif self.target_path_list is not None and value[3] not in self.target_path_list:
                     continue
