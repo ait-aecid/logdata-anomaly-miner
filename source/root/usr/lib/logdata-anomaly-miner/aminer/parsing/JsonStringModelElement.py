@@ -141,6 +141,7 @@ class JsonStringModelElement(ModelElementInterface):
                 jdictjao = JsonAccessObject(jdict)
                 if len(jdictjao.collection) != len(self.jao.collection):
                     logging.getLogger(DEBUG_LOG_NAME).debug("json-subparser-error: strict mode enabled and fields detected that do not exist in parser-config")
+                    return None
                 try:
                     for (k,v) in self.jao.collection.items():
                         child_match = v['value'].get_match_element(current_path, MatchContext(str(jdictjao.collection[k]['value']).encode('utf-8')))
