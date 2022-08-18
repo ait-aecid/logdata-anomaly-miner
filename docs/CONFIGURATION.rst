@@ -2495,3 +2495,20 @@ The KafkaEventHandler writes it's output to a `Kafka Message-Queue <https://kafk
         topic: 'aminer'
         cfgfile: '/etc/aminer/kafka-client.conf'
         type: 'KafkaEventHandler'
+
+ZmqEventHandler
+~~~~~~~~~~~~~~~
+
+The ZmqEventHandler writes it's output to a `Zero Message-Queue <https://zeromq.org/>`_
+
+* **topic**: String property with the topic-name for the message queue. If topic is not defined, the this handler will send messages without any topic.
+* **url**: String property with the url for the zmq-listener. If no url is defined this handler will use 'ipc:///tmp/aminer'. A comprehensive list of all possible "endpoints" can be found at http://api.zeromq.org/master:zmq-bind
+
+.. code-block:: yaml
+
+  EventHandlers:
+  # output to zeromq using the topic 'aminer'
+      - id: "zmqe"
+        type: 'ZmqEventHandler'
+        topic: 'aminer'
+        url: 'tcp://*:5555' # tcp-port 5555 on all interfaces
