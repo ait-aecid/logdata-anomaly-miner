@@ -144,7 +144,11 @@ class JsonStringModelElement(ModelElementInterface):
                     return None
                 try:
                     for (k,v) in self.jao.collection.items():
-                        child_match = v['value'].get_match_element(current_path, MatchContext(str(jdictjao.collection[k]['value']).encode('utf-8')))
+                        """empty string if value is null"""
+                        parse_line = b""
+                        if jdictjao.collection[k]['value'] is not None:
+                            parse_line = str(jdictjao.collection[k]['value']).encode('utf-8')
+                        child_match = v['value'].get_match_element(current_path, MatchContext(parse_line))
                         if child_match is None:
                             logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: %s -> %s", k, str(jdictjao.collection[k]['value']))
                             return None
@@ -160,7 +164,11 @@ class JsonStringModelElement(ModelElementInterface):
                             tmp = tmp[level]
                     except KeyError:
                         logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser:: %s not found", k)
-                    child_match = v['value'].get_match_element(current_path, MatchContext(str(tmp).encode('utf-8')))
+                    parse_line = b""
+                    """empty string if value is null"""
+                    if tmp is not None:
+                        parse_line = str(tmp).encode('utf-8')
+                    child_match = v['value'].get_match_element(current_path, MatchContext(parse_line))
                     if child_match is None:
                         logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: %s -> %s", k, tmp)
                         return None
