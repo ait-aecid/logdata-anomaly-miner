@@ -1135,6 +1135,8 @@ This model parses json-strings very quickly and robust.
 
 * **strict**: If strict is set to true all keys must be defined. The parser will fail if the logdata has a json-key that is not defined in the **key_parser_dict**
 
+* **ignore_null**: This parameter controlls how to handle "null"-values. If set to True it will simply ignore keys with null-values. If set to False it will pass an empty string to the subparser. Default is **True**
+
 .. code-block:: yaml
 
      Parser:
