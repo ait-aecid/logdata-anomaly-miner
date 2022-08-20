@@ -34,7 +34,7 @@ class JsonStringModelElementTest(TestBase):
         self.assertEqual(b"foobar", match_element.children[1].get_match_object())
 
     def test3strict_mode(self):
-        """Parses a json-file and compares if the configured ModelElements are parsed properly"""
+        """Parses a json-file and compares if the configured ModelElements are parsed properly with strict_mode"""
         host = DummyFixedDataModelElement("host", b"www.google.com")
         user = DummyFixedDataModelElement("user", b"foobar")
         path = DummyFixedDataModelElement("path", b"/index.html")
