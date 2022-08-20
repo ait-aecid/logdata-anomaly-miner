@@ -93,11 +93,11 @@ class JsonAccessObject:
 class JsonStringModelElement(ModelElementInterface):
     """This class matches any byte but at least one. Thus a match will always span the complete data from beginning to end."""
 
-    def __init__(self, element_id: str, key_parser_dict: dict, strict_mode: bool = False):
+    def __init__(self, element_id: str, key_parser_dict: dict, strict_mode: bool = False, ignore_null: bool = True):
         self.children = []
 
-        
         self.strict_mode = strict_mode
+        self.ignore_null = ignore_null
         if not isinstance(key_parser_dict, dict):
             msg = "key_parser_dict has to be of the type dict."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -148,6 +148,10 @@ class JsonStringModelElement(ModelElementInterface):
                         parse_line = b""
                         if jdictjao.collection[k]['value'] is not None:
                             parse_line = str(jdictjao.collection[k]['value']).encode('utf-8')
+                        else:
+                            if self.ignore_null:
+                                logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement: ignore null at %s", k)
+                                continue
                         child_match = v['value'].get_match_element(current_path, MatchContext(parse_line))
                         if child_match is None:
                             logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: %s -> %s", k, str(jdictjao.collection[k]['value']))
@@ -163,11 +167,15 @@ class JsonStringModelElement(ModelElementInterface):
                         for level in v['levels']:
                             tmp = tmp[level]
                     except KeyError:
-                        logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser:: %s not found", k)
+                        logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser: %s not found", k)
                     parse_line = b""
                     """empty string if value is null"""
                     if tmp is not None:
                         parse_line = str(tmp).encode('utf-8')
+                    else:
+                        if self.ignore_null:
+                            logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement: ignore null at %s", k)
+                            continue
                     child_match = v['value'].get_match_element(current_path, MatchContext(parse_line))
                     if child_match is None:
                         logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: %s -> %s", k, tmp)
