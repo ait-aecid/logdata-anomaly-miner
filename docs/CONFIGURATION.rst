@@ -1140,43 +1140,30 @@ This model parses json-strings very quickly and robust.
 .. code-block:: yaml
 
      Parser:
-       - id: _scroll_id
-         type: Base64StringModelElement
-         name: '_scroll_id'
+        - id: agent
+          type: VariableByteDataModelElement
+          name: 'agent'
+          args: ' !"#$%&*=+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]()^_`abcdefghijklmnopqrstuvwxyz{|}~'
+  
+        - id: timestamp_model
+          type: DateTimeModelElement
+          name: 'timestamp'
+          date_format: '%Y-%m-%dT%H:%M:%S+00:00'
 
-       - id: took
-         type: DecimalIntegerValueModelElement
-         name: 'took'
+        - id: optional_model
+          type: OptionalMatchModelElement
+          name: 'opt'
+          args: timestamp_model
 
-       - id: value
-         type: DecimalIntegerValueModelElement
-         name: 'value'
-
-       - id: _index
-         type: DateTimeModelElement
-         name: '_index'
-         date_format: 'aminer-statusinfo-%Y.%m.%d'
-
-       - id: _type
-         type: FixedDataModelElement
-         name: '_type'
-         args: '_doc'
-
-       - id: json
-         start: True
-         type: JsonModelElement
-         name: 'model'
-         strict: true
-         key_parser_dict:
-           _scroll_id: _scroll_id
-           took: took
-           hits:
-             total:
-               value: value
-             hits:
-               - _index: _index
-                 _type: _type
-
+        - id: 'START'
+          start: True
+          type: JsonStringModelElement
+          name: accesslog
+          strict: True
+          ignore_null: False
+          key_parser_dict:
+            "time": optional_model
+            "agent": agent
 
 .. note:: This parser does not work with multiline json-logs
 
