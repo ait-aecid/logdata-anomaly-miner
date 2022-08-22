@@ -419,7 +419,6 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
 
-
     @abc.abstractmethod
     def get_match_element(self, path, match_context):
         """

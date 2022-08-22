@@ -49,7 +49,6 @@ class JsonAccessObject:
         subentry['value'] = value
         self.collection[index] = subentry
 
-
     def flatten(self, d: dict, islist=-1):
         if islist > -1:
             for k in d:
@@ -148,7 +147,8 @@ class JsonStringModelElement(ModelElementInterface):
             if self.strict_mode:
                 jdictjao = JsonAccessObject(jdict)
                 if len(jdictjao.collection) != len(self.jao.collection):
-                    logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: strict mode enabled and fields detected that do not exist in parser-config")
+                    msg = "JsonStringModelElement-subparser-error: strict mode enabled and fields detected that do not exist in parser-config"
+                    logging.getLogger(DEBUG_LOG_NAME).debug(msg)
                     return None
                 try:
                     for (k, v) in self.jao.collection.items():
@@ -162,11 +162,13 @@ class JsonStringModelElement(ModelElementInterface):
                                 continue
                         child_match = v['value'].get_match_element(current_path, MatchContext(parse_line))
                         if child_match is None:
-                            logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: %s -> %s", k, str(jdictjao.collection[k]['value']))
+                            msg = "JsonStringModelElement-subparser-error: %s -> %s"
+                            logging.getLogger(DEBUG_LOG_NAME).debug(msg, k, str(jdictjao.collection[k]['value']))
                             return None
                         matches += [child_match]
                 except KeyError:
-                    logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: field \"%s\" not found but strict-enabled", k)
+                    msg = "JsonStringModelElement-subparser-error: field \"%s\" not found but strict-enabled"
+                    logging.getLogger(DEBUG_LOG_NAME).debug(msg, k)
                     return None
             else:
                 for (k, v) in self.jao.collection.items():
@@ -190,7 +192,8 @@ class JsonStringModelElement(ModelElementInterface):
                         return None
                     matches += [child_match]
         except orjson.JSONDecodeError as exception:
-            logging.getLogger(DEBUG_LOG_NAME).error("JsonStringModelElement %s: %s", exception.msg, match_context.match_data.decode('utf-8'))
+            logging.getLogger(DEBUG_LOG_NAME).error("JsonStringModelElement %s: %s",
+                              exception.msg, match_context.match_data.decode('utf-8'))
             return None
 
         match_data = match_context.match_data
