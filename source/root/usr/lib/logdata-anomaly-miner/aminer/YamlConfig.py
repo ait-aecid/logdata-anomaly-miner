@@ -266,7 +266,7 @@ def build_parsing_model(data=None):
                         item['name'], key_parser_dict, item['optional_key_prefix'], item['nullable_key_prefix'], item['allow_all_fields'])
             elif item['type'].name == 'JsonStringModelElement':
                 key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
-                
+
                 if 'start' in item and item['start'] is True:
                     start = item['type'].func(item['name'], key_parser_dict, item['strict'], item['ignore_null'])
                 else:

@@ -36,6 +36,7 @@ class JsonAccessObject:
         self.flatten(d)
 
     def join_levels(self):
+        """joins levels using a specific delimiter"""
         ret = ""
         for i in self.levels:
             if not i.startswith("[") and len(ret) != 0:
@@ -44,12 +45,14 @@ class JsonAccessObject:
         return ret
 
     def create_collection_entry(self, index: str, levels: deque, value):
+        """adds entry to the collection"""
         subentry = {}
         subentry['levels'] = levels.copy()
         subentry['value'] = value
         self.collection[index] = subentry
 
     def flatten(self, d: dict, islist=-1):
+        """recursive function for flattening a dictionary"""
         if islist > -1:
             for k in d:
                 if isinstance(k, dict):
@@ -123,6 +126,7 @@ class JsonStringModelElement(ModelElementInterface):
                          ignore_null=ignore_null)
 
     def fill_children(self):
+        """creates list of children from config-json"""
         for entry in self.jao.collection.values():
             self.children.append(entry['value'])
 
