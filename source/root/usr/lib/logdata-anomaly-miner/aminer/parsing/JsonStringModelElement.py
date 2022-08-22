@@ -28,10 +28,10 @@ the format: collection[flattened-key]{levels[],value}
 """
 class JsonAccessObject:
     def __init__(self, d: dict):
-       self.levels = deque()
-       self.delimiter = '.'
-       self.collection = {}
-       self.flatten(d)
+        self.levels = deque()
+        self.delimiter = '.'
+        self.collection = {}
+        self.flatten(d)
 
     def join_levels(self):
         ret = ""
@@ -70,10 +70,10 @@ class JsonAccessObject:
                     if len(self.levels) != 0:
                         self.levels.pop()
                 elif isinstance(v,list):
-                   self.levels.append(k)
-                   self.flatten(v,0)
-                   if len(self.levels) != 0:
-                       self.levels.pop()
+                    self.levels.append(k)
+                    self.flatten(v,0)
+                    if len(self.levels) != 0:
+                        self.levels.pop()
                 else:
                     if len(self.levels) == 0:
 #                        print("%s : %s" % (k,v))
