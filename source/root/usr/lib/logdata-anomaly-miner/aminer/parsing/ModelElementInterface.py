@@ -420,7 +420,6 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             raise TypeError(msg)
 
 
-
     @abc.abstractmethod
     def get_match_element(self, path, match_context):
         """

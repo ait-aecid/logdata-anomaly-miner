@@ -20,6 +20,7 @@ from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
+
 """
 The JsonAccessObject transforms a dictionary. It takes a dictionary "d" and
 flattens the dictionary to: key.another_key.somelist[0].foo = bar
@@ -93,7 +94,6 @@ class JsonAccessObject:
                             print("%s : %s" % (self.join_levels(), v))
                         self.create_collection_entry(self.join_levels(), self.levels, v)
                         self.levels.pop()
-
 
 
 class JsonStringModelElement(ModelElementInterface):
