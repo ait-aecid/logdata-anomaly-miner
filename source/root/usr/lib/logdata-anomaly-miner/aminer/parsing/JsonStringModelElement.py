@@ -21,13 +21,13 @@ from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
-"""
-The JsonAccessObject transforms a dictionary. It takes a dictionary "d" and
-flattens the dictionary to: key.another_key.somelist[0].foo = bar
-During the flatten()-process, it will create a self.collection dictionary with
-the format: collection[flattened-key]{levels[],value}
-"""
 class JsonAccessObject:
+    """
+    The JsonAccessObject transforms a dictionary. It takes a dictionary "d" and
+    flattens the dictionary to: key.another_key.somelist[0].foo = bar
+    During the flatten()-process, it will create a self.collection dictionary with
+    the format: collection[flattened-key]{levels[],value}
+    """
     def __init__(self, d: dict):
         self.debug = False
         self.levels = deque()
@@ -65,8 +65,8 @@ class JsonAccessObject:
                     self.flatten(k, list)
                 else:
                     if self.debug:
-                        print("%s[%d]: %s" % (self.join_levels(), islist, k))
-                    self.create_collection_entry("%s[%d]" % (self.join_levels(), islist), self.levels, k)
+                        print(f"{ self.join_levels() }[{ islist }]: { k }")
+                    self.create_collection_entry("f{ self.join_levels() }[{ islist }]", self.levels, k)
                     islist = islist + 1
         else:
             for (k, v) in d.items():
@@ -83,17 +83,17 @@ class JsonAccessObject:
                 else:
                     if len(self.levels) == 0:
                         if self.debug:
-                            print("%s : %s" % (k, v))
+                            print(f"{ k } : { v }")
                         self.create_collection_entry(k, deque([k]), v)
                     else:
                         if islist > -1:
                             # skipcq: FLK-E228
-                            self.levels.append(k+"[%d]"%islist)
+                            self.levels.append(f"{k}[{ islist}]")
                             islist = islist+1
                         else:
                             self.levels.append(k)
                         if self.debug:
-                            print("%s : %s" % (self.join_levels(), v))
+                            print(f"{ self.join_levels() } : { v }")
                         self.create_collection_entry(self.join_levels(), self.levels, v)
                         self.levels.pop()
 
@@ -143,7 +143,7 @@ class JsonStringModelElement(ModelElementInterface):
 
     def get_match_element(self, path: str, match_context):
         """Just return a match including all data from the context."""
-        current_path = "%s/%s" % (path, self.element_id)
+        current_path = f"{ path }/ { self.element_id }"
         logging.getLogger(DEBUG_LOG_NAME).info("JsonStringModelElement %s/%s", path, match_context.match_data.decode('utf-8'))
         matches = []
         try:
