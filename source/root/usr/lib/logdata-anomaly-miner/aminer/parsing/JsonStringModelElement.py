@@ -28,11 +28,11 @@ the format: collection[flattened-key]{levels[],value}
 """
 class JsonAccessObject:
     def __init__(self, d: dict):
+        self.debug = False
         self.levels = deque()
         self.delimiter = '.'
         self.collection = {}
         self.flatten(d)
-        self.debug = False
 
     def join_levels(self):
         ret = ""

@@ -284,7 +284,7 @@ def build_parsing_model(data=None):
                 while callable(parser_model_dict[item['id']]):
                     parser_model_dict[item['id']] = parser_model_dict[item['id']]()
 
-    if start.__class__.__name__ == 'JsonModelElement' or start.__class__.__name__ == 'JsonStringModelElement':
+    if start.__class__.__name__ in ['JsonModelElement', 'JsonStringModelElement']:
         parsing_model = start
     else:
         parsing_model = parser_model_dict[start['id']]
