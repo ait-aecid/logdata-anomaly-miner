@@ -198,8 +198,8 @@ class JsonStringModelElement(ModelElementInterface):
                         return None
                     matches += [child_match]
         except orjson.JSONDecodeError as exception:
-            logging.getLogger(DEBUG_LOG_NAME).error("JsonStringModelElement %s: %s",
-                                exception.msg, match_context.match_data.decode('utf-8'))
+            msg = f"JsonStringModelElement { exception.msg }: { match_context.match_data.decode('utf-8') }"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
             return None
 
         match_data = match_context.match_data
