@@ -32,6 +32,7 @@ class JsonAccessObject:
         self.delimiter = '.'
         self.collection = {}
         self.flatten(d)
+        self.debug = False
 
     def join_levels(self):
         ret = ""
@@ -59,7 +60,8 @@ class JsonAccessObject:
                 elif isinstance(k, list):
                     self.flatten(k, list)
                 else:
-#                    print("%s[%d]: %s" % (self.join_levels(),islist,k))
+                    if self.debug:
+                        print("%s[%d]: %s" % (self.join_levels(),islist,k))
                     self.create_collection_entry("%s[%d]" % (self.join_levels(), islist), self.levels, k)
                     islist = islist + 1
         else:
@@ -76,7 +78,8 @@ class JsonAccessObject:
                         self.levels.pop()
                 else:
                     if len(self.levels) == 0:
-#                        print("%s : %s" % (k,v))
+                        if self.debug:
+                            print("%s : %s" % (k,v))
                         self.create_collection_entry(k, deque([k]), v)
                     else:
                         if islist > -1:
@@ -84,7 +87,8 @@ class JsonAccessObject:
                             islist = islist+1
                         else:
                             self.levels.append(k)
-#                        print("%s : %s" % (self.join_levels(),v))
+                        if self.debug:
+                            print("%s : %s" % (self.join_levels(),v))
                         self.create_collection_entry(self.join_levels(), self.levels, v)
                         self.levels.pop()
 
