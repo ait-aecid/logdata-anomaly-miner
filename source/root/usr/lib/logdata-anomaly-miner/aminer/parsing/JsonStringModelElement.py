@@ -28,6 +28,7 @@ class JsonAccessObject:
     During the flatten()-process, it will create a self.collection dictionary with
     the format: collection[flattened-key]{levels[],value}
     """
+
     def __init__(self, d: dict):
         self.debug = False
         self.levels = deque()
@@ -57,7 +58,7 @@ class JsonAccessObject:
             for k in d:
                 if isinstance(k, dict):
                     # skipcq: FLK-E228
-                    self.levels.append("[%d]"%islist)
+                    self.levels.append(f"[{islist}]")
                     islist = islist+1
                     self.flatten(k)
                     self.levels.pop()
@@ -151,7 +152,8 @@ class JsonStringModelElement(ModelElementInterface):
             if self.strict_mode:
                 jdictjao = JsonAccessObject(jdict)
                 if len(jdictjao.collection) != len(self.jao.collection):
-                    msg = "JsonStringModelElement-subparser-error: strict mode enabled and fields detected that do not exist in parser-config"
+                    msg = "JsonStringModelElement-subparser-error: "
+                    msg += "strict mode enabled and fields detected that do not exist in parser-config"
                     logging.getLogger(DEBUG_LOG_NAME).debug(msg)
                     return None
                 try:
@@ -197,7 +199,7 @@ class JsonStringModelElement(ModelElementInterface):
                     matches += [child_match]
         except orjson.JSONDecodeError as exception:
             logging.getLogger(DEBUG_LOG_NAME).error("JsonStringModelElement %s: %s",
-                              exception.msg, match_context.match_data.decode('utf-8'))
+                                exception.msg, match_context.match_data.decode('utf-8'))
             return None
 
         match_data = match_context.match_data
