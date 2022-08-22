@@ -151,7 +151,7 @@ def build_parsing_model(data=None):
     for item in data['Parser']:
         if item['id'] in parser_model_dict:
             raise ValueError(f'Config-Error: The id "{item["id"]}" occurred multiple times in Parser!')
-        if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement' and item['type'].name != 'JsonStringModelElement':
+        if 'start' in item and item['start'] is True and item['type'].name not in [ 'JsonModelElement', 'JsonStringModelElement']:
             start = item
         if item['type'].is_model:
             if 'args' in item:
