@@ -156,7 +156,7 @@ class JsonStringModelElement(ModelElementInterface):
                     return None
                 try:
                     for (k, v) in self.jao.collection.items():
-                        """empty string if value is null"""
+                        # empty string if value is null
                         parse_line = b""
                         if jdictjao.collection[k]['value'] is not None:
                             parse_line = str(jdictjao.collection[k]['value']).encode('utf-8')
@@ -183,7 +183,7 @@ class JsonStringModelElement(ModelElementInterface):
                     except KeyError:
                         logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser: %s not found", k)
                     parse_line = b""
-                    """empty string if value is null"""
+                    # empty string if value is null
                     if tmp is not None:
                         parse_line = str(tmp).encode('utf-8')
                     else:
