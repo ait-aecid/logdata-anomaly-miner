@@ -1,7 +1,7 @@
 import copy
 import unittest
 import json
-from aminer.parsing.JsonStringModelElement import JsonStringModelElement
+from aminer.parsing.JsonStringModelElement import JsonStringModelElement, JsonAccessObject
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
@@ -145,3 +145,49 @@ class JsonStringModelElementTest(TestBase):
         self.assertEqual(2, len(match_element.children))
         self.assertEqual(b"www.google.com", match_element.children[0].get_match_object())
         self.assertEqual(b"", match_element.children[1].get_match_object())
+
+
+class JsonAccessObjectTest(TestBase):
+    
+    def test1get_id(self):
+        """Parses a dictionary and see if everything is flattened properly"""
+        d = {'a': 'b', 'c': {'w': 'g', 'rata': 'mahatta', 'tic': {'tac': 'toe'}, 'brat': ['worst','wuast',{'key': ['wurst','fleisch'], 'food': 'veggie'},'blues'],'bist': 'narrisch'}, 'foo': 'bar'}
+        """
+        a: b
+        c.w: g
+        c.rata: mahatta
+        c.tic.tac: toe
+        c.brat[0]: worst
+        c.brat[1]: wuast
+        c.brat[2].key[0]: wurst
+        c.brat[2].key[1]: fleisch
+        c.brat[2].food: veggie
+        c.brat[3]: blues
+        foo: bar
+        """
+        jao =  JsonAccessObject(d)
+        self.assertTrue(jao.collection['a'])
+        self.assertTrue(jao.collection['c.w'])
+        self.assertTrue(jao.collection['c.rata'])
+        self.assertTrue(jao.collection['c.tic.tac'])
+        self.assertTrue(jao.collection['c.brat[0]'])
+        self.assertTrue(jao.collection['c.brat[1]'])
+        self.assertTrue(jao.collection['c.brat[2].key[0]'])
+        self.assertTrue(jao.collection['c.brat[2].key[1]'])
+        self.assertTrue(jao.collection['c.brat[2].food'])
+        self.assertTrue(jao.collection['c.brat[3]'])
+        self.assertTrue(jao.collection['c.bist'])
+        self.assertTrue(jao.collection['foo'])
+        self.assertEqual(12,len(jao.collection))
+        self.assertEqual("b",jao.collection["a"]["value"])
+        self.assertEqual("g",jao.collection["c.w"]["value"])
+        self.assertEqual("mahatta",jao.collection["c.rata"]["value"])
+        self.assertEqual("toe",jao.collection["c.tic.tac"]["value"])
+        self.assertEqual("worst",jao.collection["c.brat[0]"]["value"])
+        self.assertEqual("wuast",jao.collection["c.brat[1]"]["value"])
+        self.assertEqual("wurst",jao.collection["c.brat[2].key[0]"]["value"])
+        self.assertEqual("fleisch",jao.collection["c.brat[2].key[1]"]["value"])
+        self.assertEqual("veggie",jao.collection["c.brat[2].food"]["value"])
+        self.assertEqual("blues",jao.collection["c.brat[3]"]["value"])
+        self.assertEqual("bar",jao.collection["foo"]["value"])
+
