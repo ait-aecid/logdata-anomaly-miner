@@ -51,27 +51,27 @@ class JsonAccessObject:
     def flatten(self, d: dict, islist=-1):
         if islist > -1:
             for k in d:
-                if isinstance(k,dict):
+                if isinstance(k, dict):
                     self.levels.append("[%d]"%islist)
                     islist = islist+1
                     self.flatten(k)
                     self.levels.pop()
-                elif isinstance(k,list):
-                    self.flatten(k,list)
+                elif isinstance(k, list):
+                    self.flatten(k, list)
                 else:
 #                    print("%s[%d]: %s" % (self.join_levels(),islist,k))
-                    self.create_collection_entry("%s[%d]" % (self.join_levels(),islist), self.levels, k)
+                    self.create_collection_entry("%s[%d]" % (self.join_levels(), islist), self.levels, k)
                     islist = islist + 1
         else:
-            for (k,v) in d.items():
-                if isinstance(v,dict):
+            for (k, v) in d.items():
+                if isinstance(v, dict):
                     self.levels.append(k)
                     self.flatten(v)
                     if len(self.levels) != 0:
                         self.levels.pop()
-                elif isinstance(v,list):
+                elif isinstance(v, list):
                     self.levels.append(k)
-                    self.flatten(v,0)
+                    self.flatten(v, 0)
                     if len(self.levels) != 0:
                         self.levels.pop()
                 else:
@@ -135,7 +135,7 @@ class JsonStringModelElement(ModelElementInterface):
     def get_match_element(self, path: str, match_context):
         """Just return a match including all data from the context."""
         current_path = "%s/%s" % (path, self.element_id)
-        logging.getLogger(DEBUG_LOG_NAME).info("JsonStringModelElement %s/%s",path,match_context.match_data.decode('utf-8'))
+        logging.getLogger(DEBUG_LOG_NAME).info("JsonStringModelElement %s/%s", path, match_context.match_data.decode('utf-8'))
         matches = []
         try:
             jdict = orjson.loads(match_context.match_data)
@@ -145,7 +145,7 @@ class JsonStringModelElement(ModelElementInterface):
                     logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: strict mode enabled and fields detected that do not exist in parser-config")
                     return None
                 try:
-                    for (k,v) in self.jao.collection.items():
+                    for (k, v) in self.jao.collection.items():
                         """empty string if value is null"""
                         parse_line = b""
                         if jdictjao.collection[k]['value'] is not None:
@@ -163,7 +163,7 @@ class JsonStringModelElement(ModelElementInterface):
                     logging.getLogger(DEBUG_LOG_NAME).debug("JsonStringModelElement-subparser-error: field \"%s\" not found but strict-enabled", k)
                     return None
             else:
-                for (k,v) in self.jao.collection.items():
+                for (k, v) in self.jao.collection.items():
                     tmp = jdict.copy()
                     try:
                         for level in v['levels']:
@@ -184,7 +184,7 @@ class JsonStringModelElement(ModelElementInterface):
                         return None
                     matches += [child_match]
         except orjson.JSONDecodeError as exception:
-            logging.getLogger(DEBUG_LOG_NAME).error("JsonStringModelElement %s: %s",exception.msg,match_context.match_data.decode('utf-8'))
+            logging.getLogger(DEBUG_LOG_NAME).error("JsonStringModelElement %s: %s", exception.msg, match_context.match_data.decode('utf-8'))
             return None
 
         match_data = match_context.match_data
