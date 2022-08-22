@@ -98,6 +98,7 @@ class JsonStringModelElement(ModelElementInterface):
 
         self.strict_mode = strict_mode
         self.ignore_null = ignore_null
+
         if not isinstance(key_parser_dict, dict):
             msg = "key_parser_dict has to be of the type dict."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -113,7 +114,8 @@ class JsonStringModelElement(ModelElementInterface):
             raise ValueError(msg)
         self.element_id = element_id
         self.fill_children()
-
+        super().__init__(element_id, key_parser_dict=key_parser_dict, strict_mode=strict_mode,
+                         ignore_null=ignore_null)
 
     def fill_children(self):
         for entry in self.jao.collection.values():

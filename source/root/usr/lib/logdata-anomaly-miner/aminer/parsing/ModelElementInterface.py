@@ -98,12 +98,15 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
         @param max_repeat the maximum number of repeated matches of the repeated_element.
         @param upper_case if True, the letters of the hex alphabet are uppercase, otherwise they are lowercase.
         @param alphabet the allowed letters to match data.
+        @param strict_mode count of all json-keys must exactly match of defined json-key of the config-file
+        @param ignore_null ignore json-keys with values "null"
         """
         allowed_kwargs = [
             "date_format", "time_zone", "text_locale", "start_year", "max_time_jump_seconds", "value_sign_type", "value_pad_type",
             "exponent_type", "delimiter", "escape", "consume_delimiter", "value_model", "value_path", "branch_model_dict", "default_branch",
             "children", "fixed_data", "wordlist", "ipv6", "key_parser_dict", "optional_key_prefix", "nullable_key_prefix",
-            "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat", "upper_case", "alphabet"
+            "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat", "upper_case", "alphabet",
+            "strict_mode", "ignore_null"
         ]
         for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:
@@ -405,6 +408,20 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 msg = "alphabet must not be empty."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
+
+        if hasattr(self, "strict_mode"):
+            if not isinstance(self.strict_mode, bool):
+                msg = "strict_mode has to be of the type bool."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+
+        if hasattr(self, "ignore_null"):
+            if not isinstance(self.ignore_null, bool):
+                msg = "ignore_null has to be of the type bool."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+
+
 
     @abc.abstractmethod
     def get_match_element(self, path, match_context):

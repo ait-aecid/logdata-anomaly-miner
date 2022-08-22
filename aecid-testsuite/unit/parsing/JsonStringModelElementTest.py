@@ -17,7 +17,12 @@ class JsonStringModelElementTest(TestBase):
 
     def test1get_id(self):
         """Test if get_id works properly."""
-        json_me = JsonStringModelElement(self.id_, {}, self.strict, self.ignore_null)
+        host = DummyFixedDataModelElement("host", b"www.google.com")
+        user = DummyFixedDataModelElement("user", b"foobar")
+
+        key_parser_dict = { "host": host, "user": user }
+
+        json_me = JsonStringModelElement(self.id_, key_parser_dict, self.strict, self.ignore_null)
         self.assertEqual(json_me.get_id(), self.id_)
 
     def test2get_match_element_valid_match(self):
