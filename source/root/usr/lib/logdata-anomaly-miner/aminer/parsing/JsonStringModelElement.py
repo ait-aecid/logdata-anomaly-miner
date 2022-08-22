@@ -53,6 +53,7 @@ class JsonAccessObject:
         if islist > -1:
             for k in d:
                 if isinstance(k, dict):
+                    # skipcq: FLK-E228
                     self.levels.append("[%d]"%islist)
                     islist = islist+1
                     self.flatten(k)
@@ -83,6 +84,7 @@ class JsonAccessObject:
                         self.create_collection_entry(k, deque([k]), v)
                     else:
                         if islist > -1:
+                            # skipcq: FLK-E228
                             self.levels.append(k+"[%d]"%islist)
                             islist = islist+1
                         else:
