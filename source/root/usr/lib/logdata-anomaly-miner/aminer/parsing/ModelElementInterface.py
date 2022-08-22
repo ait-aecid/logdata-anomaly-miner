@@ -409,17 +409,15 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
 
-        if hasattr(self, "strict_mode"):
-            if not isinstance(self.strict_mode, bool):
-                msg = "strict_mode has to be of the type bool."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "strict_mode") and not isinstance(self.strict_mode, bool):
+            msg = "strict_mode has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
-        if hasattr(self, "ignore_null"):
-            if not isinstance(self.ignore_null, bool):
-                msg = "ignore_null has to be of the type bool."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "ignore_null") and not isinstance(self.ignore_null, bool):
+            msg = "ignore_null has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
 
 
