@@ -98,7 +98,8 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
         @param max_repeat the maximum number of repeated matches of the repeated_element.
         @param upper_case if True, the letters of the hex alphabet are uppercase, otherwise they are lowercase.
         @param alphabet the allowed letters to match data.
-        @param strict_mode count of all json-keys must exactly match of defined json-key of the config-file
+        @param strict_mode If strict is set to true all keys must be defined. The parser will fail if the logdata has a json-key that is
+               not defined in the key_parser_dict
         @param ignore_null ignore json-keys with values "null"
         """
         allowed_kwargs = [

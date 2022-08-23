@@ -1,5 +1,5 @@
 """
-This module defines a model element that matches any byte.
+This module defines a model element for parsing json strings
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -102,7 +102,7 @@ class JsonAccessObject:
 
 
 class JsonStringModelElement(ModelElementInterface):
-    """This class matches any byte but at least one. Thus a match will always span the complete data from beginning to end."""
+    """This class parses json-strings and matches the keys with a given key_parser_dict."""
 
     def __init__(self, element_id: str, key_parser_dict: dict, strict_mode: bool = False, ignore_null: bool = True):
         self.children: list = []
@@ -200,7 +200,7 @@ class JsonStringModelElement(ModelElementInterface):
                         return None
                     matches += [child_match]
         except orjson.JSONDecodeError as exception:
-            msg = f"JsonStringModelElement { exception.msg }: { match_context.match_data.decode('utf-8') }"
+            msg = f"JsonStringModelElement { exception }: { match_context.match_data.decode('utf-8') }"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             return None
 
