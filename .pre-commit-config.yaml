@@ -14,3 +14,8 @@ repos:
     hooks:
     -   id: mypy
         additional_dependencies: [pydantic]
+
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.4
+    hooks:
+    - id: flake8
