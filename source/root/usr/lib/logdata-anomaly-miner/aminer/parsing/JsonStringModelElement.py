@@ -68,7 +68,8 @@ class JsonAccessObject:
                 else:
                     if self.debug:
                         print(f"{ self.join_levels() }[{ islist }]: { k }")
-                    self.create_collection_entry("f{ self.join_levels() }[{ islist }]", self.levels, k)
+                    # skipcq: PYL-C0209
+                    self.create_collection_entry("%s[%d]" % (self.join_levels(), islist), self.levels, k)
                     islist = islist + 1
         else:
             for (k, v) in d.items():
