@@ -15,6 +15,7 @@ import logging
 import orjson
 from collections import deque
 
+from typing import Any
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
@@ -30,10 +31,10 @@ class JsonAccessObject:
     """
 
     def __init__(self, d: dict):
-        self.debug = False
-        self.levels = deque()
-        self.delimiter = '.'
-        self.collection = {}
+        self.debug: bool = False
+        self.levels: deque = deque()
+        self.delimiter: str = '.'
+        self.collection: dict = {}
         self.flatten(d)
 
     def join_levels(self):
@@ -52,7 +53,7 @@ class JsonAccessObject:
         subentry['value'] = value
         self.collection[index] = subentry
 
-    def flatten(self, d: dict, islist=-1):
+    def flatten(self, d: Any, islist=-1):
         """recursive function for flattening a dictionary"""
         if islist > -1:
             for k in d:
@@ -103,7 +104,7 @@ class JsonStringModelElement(ModelElementInterface):
     """This class matches any byte but at least one. Thus a match will always span the complete data from beginning to end."""
 
     def __init__(self, element_id: str, key_parser_dict: dict, strict_mode: bool = False, ignore_null: bool = True):
-        self.children = []
+        self.children: list = []
 
         self.strict_mode = strict_mode
         self.ignore_null = ignore_null
