@@ -151,7 +151,8 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 old_locale = locale.getdefaultlocale()
                 if old_locale != self.text_locale:
                     locale.setlocale(locale.LC_ALL, self.text_locale)
-                    logging.getLogger(DEBUG_LOG_NAME).info(f"Changed time locale from {self.text_locale} to {''.join(self.text_locale)}.")
+                    msg = f"Changed time locale from {self.text_locale} to {''.join(self.text_locale)}."
+                    logging.getLogger(DEBUG_LOG_NAME).info(msg)
             except locale.Error:
                 msg = f"text_locale {self.text_locale} is not installed!"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
