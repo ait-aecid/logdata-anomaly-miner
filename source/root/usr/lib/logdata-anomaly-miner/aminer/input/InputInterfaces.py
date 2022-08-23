@@ -318,7 +318,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_stop_update", "silence_output_without_confidence", "silence_output_except_indicator", "num_var_type_hist_ref",
             "num_update_var_type_hist_ref", "num_var_type_considered_ind", "num_stat_stop_update", "num_updates_until_var_reduction",
             "var_reduction_thres", "num_skipped_ind_for_weights", "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr",
-            "used_range_test", "range_alpha", "range_threshold", "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics"
+            "used_range_test", "range_alpha", "range_threshold", "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics",
+            "idf", "norm", "update_at_retrain"
         ]
         self.log_success = 0
         self.log_total = 0
