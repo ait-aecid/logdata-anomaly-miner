@@ -1,5 +1,5 @@
 """
-This module defines an detector for event and value frequency deviations.
+This module defines an detector for clustering event and value count vectors..
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -27,7 +27,7 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
-    """This class creates events when event or value frequencies change."""
+    """This class creates events when dissimilar event or value count vectors occur."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -50,7 +50,6 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @param add_normal when true, count vectors are also added to the model when they exceed the similarity threshold.
         @param check_empty_windows when true, empty count vectors are generated for time windows without event occurrences.
         @param persistence_id name of persistence document.
-        @param learn_mode specifies whether new frequency measurements override ground truth frequencies.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
                The default value is [] as None is not iterable.

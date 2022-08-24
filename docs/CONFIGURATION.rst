@@ -1393,10 +1393,45 @@ This module defines an evaluator and generator for event rules. The overall idea
           hypothesis_max_delta_time: 1.0
           learn_mode: True
 
+EventCountClusterDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This module defines a detector that clusters count vectors of event and value occurrences.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **window_size** the length of the time window for counting in seconds (float, defaults to 600).
+* **id_path_list** parser paths of values for which separate count vectors should be generated (list of strings, defaults to empty list).
+* **num_windows** the number of vectors stored in the models (integer, defaults to 50).
+* **confidence_factor** minimum similarity threshold in range [0, 1] for detection (float, defaults to 0.33).
+* **idf** when true, value counts are weighted higher when they occur with fewer id_paths (requires that id_path_list is set) (boolean, defaults to False).
+* **norm** when true, count vectors are normalized so that only relative occurrence frequencies matter for detection (boolean, defaults to False).
+* **add_normal** when true, count vectors are also added to the model when they exceed the similarity threshold (boolean, defaults to False).
+* **check_empty_windows** when true, empty count vectors are generated for time windows without event occurrences (boolean, defaults to False).
+* **persistence_id** name of persistence document (string, defaults to "Default").
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
+* **ignore_list list** of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
+* **stop_learning_time** switch the learn_mode to False after the time (float, defaults to None).
+* **stop_learning_no_anomaly_time** switch the learn_mode to False after no anomaly was detected for that time (float, defaults to None).
+
+.. code-block:: yaml
+
+     Analysis:
+        - id: "eccd"
+          type: "EventCountClusterDetector"
+          window_size: 10
+          idf: True
+          confidence_factor: 0.7
+          id_path_list:
+             - '/parser/idp'
+          paths:
+             - '/parser/val'
+
 EventFrequencyDetector
 ~~~~~~~~~~~~~~~~~~~~~~
 
-This module defines an detector for event and value frequency deviations.
+This module defines a detector for event and value frequency deviations.
 
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **scoring_path_list** parser paths of values to be analyzed by following event handlers like the ScoringEventHandler. Multiple paths mean that values are analyzed by their combined occurrences.
