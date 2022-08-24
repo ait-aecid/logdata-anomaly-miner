@@ -13,7 +13,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import time
 import os
 import logging
-import numpy as np
+import math
+import sys
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
@@ -31,7 +32,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, id_path_list=None,
-                 num_windows=50, confidence_factor=0.33, idf=False, norm=False, update_at_retrain=False, check_empty_windows=True,
+                 num_windows=50, confidence_factor=0.33, idf=False, norm=False, add_normal=False, check_empty_windows=True,
                  persistence_id='Default', learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
@@ -39,18 +40,15 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
                occurrences. When no paths are specified, the events given by the full path list are analyzed.
-        @param scoring_path_list parser paths of values to be analyzed by following event handlers like the ScoringEventHandler.
-               Multiple paths mean that values are analyzed by their combined occurrences.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
-        @param num_windows the number of previous time windows considered for expected frequency estimation.
-        @param confidence_factor defines range of tolerable deviation of measured frequency from expected frequency according to
-               occurrences_mean +- occurrences_std / self.confidence_factor. Default value is 0.33 = 3*sigma deviation. confidence_factor
-               must be in range [0, 1].
-        @param empty_window_warnings whether anomalies should be generated for too small window sizes.
-        @param early_exceeding_anomaly_output states if an anomaly should be raised the first time the appearance count exceeds the range.
-        @param set_lower_limit sets the lower limit of the frequency test to the specified value.
-        @param set_upper_limit sets the upper limit of the frequency test to the specified value.
+        @param id_path_list parser paths of values for which separate count vectors should be generated.
+        @param num_windows the number of vectors stored in the models.
+        @param confidence_factor minimum similarity threshold for detection
+        @param idf when true, value counts are weighted higher when they occur with fewer id_paths (requires that id_path_list is set).
+        @param norm when true, count vectors are normalized so that only relative occurrence frequencies matter for detection.
+        @param add_normal when true, count vectors are also added to the model when they exceed the similarity threshold.
+        @param check_empty_windows when true, empty count vectors are generated for time windows without event occurrences.
         @param persistence_id name of persistence document.
         @param learn_mode specifies whether new frequency measurements override ground truth frequencies.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
@@ -62,38 +60,51 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        #self.idf = idf
-        #self.norm = norm
-        #self.update_at_retrain = update_at_retrain
-        #self.check_empty_windows = check_empty_windows
         super().__init__(
             mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "id_path_list"],
             aminer_config=aminer_config,
-            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
+            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, id_path_list=id_path_list,
             window_size=window_size,  num_windows=num_windows, confidence_factor=confidence_factor,
             persistence_id=persistence_id, learn_mode=learn_mode,
             output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, idf=idf, norm=norm, update_at_retrain=update_at_retrain,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, idf=idf, norm=norm, add_normal=add_normal,
             check_empty_windows = check_empty_windows
         )
         self.next_check_time = {}
         self.counts = {}
         self.known_counts = {}
+        if self.idf and not self.id_path_list:
+            msg = f'Omitting IDF weighting as required id_path_list is not set.'
+            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
+            print('WARNING: ' + msg, file=sys.stderr)
+        self.idf_total = set()
+        self.idf_counts = {}
         self.log_windows = 0
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
 
-        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev>, [<freq1, freq2>]], [<ev>, [<freq1, freq2>]], ...]
+        # Persisted data contains known count vectors, i.e., [[[<id_1>, [[[<val_1>,1],[<val_2>,1]], [[<val_1>,2],[<val_3>,1]], ...]],
+        #                                                      [<id_2>,[[[<val_1>,1]]]]],
+        # 2) list of known id used for idf computation, i.e., [<id_1>,<id_2>],
+        # 3) list of id observed for each value, i.e., [[<val_1>,[<id_1>,<id_2>]],[<val_2>,[<id_1>]]]]
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
-            for entry in persistence_data:
-                log_event = entry[0]
-                freqs = entry[1]
-                # In case that num_windows differ, only take as many as possible
-                self.counts[tuple(log_event)] = freqs[max(0, len(freqs) - num_windows - 1):] + [0]
-                if len(self.scoring_path_list) > 0:
-                    self.scoring_value_list[tuple(log_event)] = []
+            for elem in persistence_data[0]:
+                window_list = []
+                for log_ev_elem_list in elem[1]:
+                    elem_dict = {}
+                    for log_ev_elem in log_ev_elem_list:
+                        elem_dict[tuple(log_ev_elem[0])] = int(log_ev_elem[1])
+                    window_list.append(elem_dict)
+                self.known_counts[tuple(elem[0])] = window_list
+            for elem in persistence_data[1]:
+                self.idf_total.add(tuple(elem))
+            for elem in persistence_data[2]:
+                id_elem_set = set()
+                for id_elem in elem[1]:
+                    id_elem_set.add(tuple(id_elem))
+                self.idf_counts[tuple(elem[0])] = id_elem_set
             logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
@@ -174,6 +185,14 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         if id_tuple not in self.known_counts:
             self.known_counts[id_tuple] = []
 
+        # Update statistics for idf computation
+        if self.idf and self.id_path_list:
+            self.idf_total.add(id_tuple)
+            if log_event in self.idf_counts:
+                self.idf_counts[log_event].add(id_tuple)
+            else:
+                self.idf_counts[log_event] = set([id_tuple])
+
         if id_tuple not in self.next_check_time:
             # First processed log atom, initialize next check time.
             self.next_check_time[id_tuple] = log_atom.atom_time + self.window_size
@@ -182,17 +201,15 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             # Log atom exceeded next check time; time window is complete.
             self.next_check_time[id_tuple] = self.next_check_time[id_tuple] + self.window_size
             self.log_windows += 1
-
             # Update next_check_time if a time window was skipped
             skipped_windows = 0
             if log_atom.atom_time >= self.next_check_time[id_tuple]:
                 skipped_windows = 1 + int((log_atom.atom_time - self.next_check_time[id_tuple]) / self.window_size)
-                self.next_check_time[id_tuple] = self.next_check_time + skipped_windows * self.window_size
+                self.next_check_time[id_tuple] = self.next_check_time[id_tuple] + skipped_windows * self.window_size
                 if self.check_empty_windows:
                     self.detect(log_atom, id_tuple, {}) # Empty count vector
-            print(self.counts)
-            result = self.detect(log_atom, id_tuple, self.counts[id_tuple])
-            # Reste counts vector
+            self.detect(log_atom, id_tuple, self.counts[id_tuple])
+            # Reset counts vector
             self.counts[id_tuple] = {}
         # Increase count for observed events
         if id_tuple in self.counts:
@@ -201,10 +218,11 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             else:
                 self.counts[id_tuple][log_event] = 1
         else:
-            self.counts[id_tuple] = {}
+            self.counts[id_tuple] = {log_event: 1}
         self.log_success += 1
 
     def add_to_model(self, id_tuple, count_vector):
+        """Adds a count vector to the model (a fifo list of count vectors)"""
         if count_vector in self.known_counts[id_tuple]:
             # Avoid that model has identical count vectors multiple times
             return
@@ -214,12 +232,14 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.known_counts[id_tuple].append(count_vector)
 
     def detect(self, log_atom, id_tuple, count_vector):
-        score = self.check(id_tuple, self.counts[id_tuple])
+        """Create anomaly event when anomaly score is too high."""
+        score = self.check(id_tuple, count_vector)
         if score == -1:
-            # Sample is normal, only add to known values when update_at_retrain is set
-            if self.learn_mode and self.update_at_retrain:
+            # Sample is normal, only add to known values when add_normal is set
+            if self.learn_mode and self.add_normal:
                 self.add_to_model(id_tuple, count_vector)
         else:
+            # Sample is anomalous, add to model when training and create event
             if self.learn_mode:
                 self.add_to_model(id_tuple, count_vector)
             try:
@@ -233,9 +253,10 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                                     data]
             else:
                 sorted_log_lines = [data]
-            print(count_vector)
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(count_vector.keys()),
                                   'AffectedLogAtomFrequencies': list(count_vector.values())}
+            if self.id_path_list is not None:
+                analysis_component['AffectedIdValues'] = list(id_tuple)
             count_info = {'ConfidenceFactor': self.confidence_factor,
                           'Confidence': score}
             event_data = {'AnalysisComponent': analysis_component, 'CountData': count_info}
@@ -244,17 +265,22 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                                        event_data, log_atom, self)
 
     def check(self, id_tuple, count_vector):
+        """Computes the manhattan metric for the count vector and each count vector present in the model."""
         min_score = 1
         for known_count in self.known_counts[id_tuple]:
+            # Iterate over all count vectors in the model
             manh = 0
             manh_max = 0
             for element in set(list(known_count.keys()) + list(count_vector.keys())):
+                # Iterate over each val that occurs in one of the vectors
                 idf_fact = 1
-                if self.idf:
-                    idf_fact = math.log10((1 + len(users)) / len(idf[action_element]))
+                if self.idf and self.id_path_list:
+                    # Compute idf (weight rare value higher than ones that occur with many id_values)
+                    idf_fact = math.log10((1 + len(self.idf_total)) / len(self.idf_counts[element]))
                 norm_sum_known = 1
                 norm_sum_count = 1
                 if self.norm:
+                    # Normalize vectors by dividing through sum
                     norm_sum_known = sum(known_count.values())
                     norm_sum_count = sum(count_vector.values())
                 if element not in known_count:
@@ -266,9 +292,13 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 else:
                     manh += abs(count_vector[element] * idf_fact / norm_sum_count - known_count[element] * idf_fact / norm_sum_known)
                     manh_max += max(count_vector[element] * idf_fact / norm_sum_count, known_count[element]* idf_fact / norm_sum_known)
-            score = manh / manh_max
+            score = 0
+            if manh_max != 0:
+                # manh_max is zero when both vectors are empty, in this case, score remains at default 0, and normalize in all other cases
+                score = manh / manh_max
             if score <= self.confidence_factor:
                 # Found similar vector; abort early to avoid spending time on more checks
+                # Return -1 since "true" score is unknown as not all vectors in the model were checked
                 return -1
             if min_score is None:
                 min_score = score
@@ -290,10 +320,23 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persist_data = []
-        for log_ev, freqs in self.counts.items():
-            # Skip last count as the time window may not be complete yet and count thus too low
-            persist_data.append((log_ev, freqs[:-1]))
+        print(self.known_counts)
+        known_counts_data = []
+        for id_tuple, vec_list in self.known_counts.items():
+            id_tuple_data = []
+            for vec_elem in vec_list:
+                window_data = []
+                for log_ev, freq in vec_elem.items():
+                    window_data.append((log_ev, freq))
+                id_tuple_data.append(window_data)
+            known_counts_data.append((id_tuple, id_tuple_data))
+        idf_total_data = []
+        idf_counts_data = []
+        if self.idf and self.id_path_list:
+            idf_total_data = list(self.idf_total)
+            for log_ev, id_list in self.idf_counts.items():
+                idf_counts_data.append((log_ev, id_list))
+        persist_data = [known_counts_data, idf_total_data, idf_counts_data]
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
         logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
