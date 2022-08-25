@@ -67,13 +67,13 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             persistence_id=persistence_id, learn_mode=learn_mode,
             output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, idf=idf, norm=norm, add_normal=add_normal,
-            check_empty_windows = check_empty_windows
+            check_empty_windows=check_empty_windows
         )
         self.next_check_time = {}
         self.counts = {}
         self.known_counts = {}
         if self.idf and not self.id_path_list:
-            msg = f'Omitting IDF weighting as required id_path_list is not set.'
+            msg = 'Omitting IDF weighting as required id_path_list is not set.'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
         self.idf_total = set()
@@ -104,7 +104,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 for id_elem in elem[1]:
                     id_elem_set.add(tuple(id_elem))
                 self.idf_counts[tuple(elem[0])] = id_elem_set
-            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -113,7 +113,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         # Skip paths from ignore list.
@@ -190,7 +190,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             if log_event in self.idf_counts:
                 self.idf_counts[log_event].add(id_tuple)
             else:
-                self.idf_counts[log_event] = set([id_tuple])
+                self.idf_counts[log_event] = set([id_tuple])  # skipcq: PTC-W0018
 
         if id_tuple not in self.next_check_time:
             # First processed log atom, initialize next check time.
@@ -206,7 +206,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 skipped_windows = 1 + int((log_atom.atom_time - self.next_check_time[id_tuple]) / self.window_size)
                 self.next_check_time[id_tuple] = self.next_check_time[id_tuple] + skipped_windows * self.window_size
                 if self.check_empty_windows:
-                    self.detect(log_atom, id_tuple, {}) # Empty count vector
+                    self.detect(log_atom, id_tuple, {})  # Empty count vector
             self.detect(log_atom, id_tuple, self.counts[id_tuple])
             # Reset counts vector
             self.counts[id_tuple] = {}
@@ -290,7 +290,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     manh_max += known_count[element] * idf_fact / norm_sum_known
                 else:
                     manh += abs(count_vector[element] * idf_fact / norm_sum_count - known_count[element] * idf_fact / norm_sum_known)
-                    manh_max += max(count_vector[element] * idf_fact / norm_sum_count, known_count[element]* idf_fact / norm_sum_known)
+                    manh_max += max(count_vector[element] * idf_fact / norm_sum_count, known_count[element] * idf_fact / norm_sum_known)
             score = 0
             if manh_max != 0:
                 # manh_max is zero when both vectors are empty, in this case, score remains at default 0, and normalize in all other cases
@@ -337,7 +337,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 idf_counts_data.append((log_ev, id_list))
         persist_data = [known_counts_data, idf_total_data, idf_counts_data]
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -382,12 +382,12 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
-                f"time windows in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully in %d "
+                "time windows in the last 60 minutes.", component_name, self.log_success, self.log_total, self.log_windows)
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
-                f"time windows in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully in %d "
+                "time windows in the last 60 minutes.", component_name, self.log_success, self.log_total, self.log_windows)
         self.log_success = 0
         self.log_total = 0
         self.log_windows = 0

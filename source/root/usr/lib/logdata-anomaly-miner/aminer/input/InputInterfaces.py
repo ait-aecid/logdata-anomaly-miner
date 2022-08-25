@@ -66,9 +66,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
     def __init__(self, mutable_default_args=None, learn_mode=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
                  stop_when_handled_flag=None, **kwargs):
-        """
-        Initialize the parameters of analysis components. See the classes of the analysis components for parameter descriptions.
-        """
+        """Initialize the parameters of analysis components. See the classes of the analysis components for parameter descriptions."""
         allowed_kwargs = [
             "mutable_default_args", "aminer_config", "anomaly_event_handlers", "learn_mode", "persistence_id", "id_path_list",
             "stop_learning_time", "stop_learning_no_anomaly_time", "output_logline", "target_path_list", "constraint_list", "ignore_list",
@@ -191,7 +189,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         """
         if AminerConfig.STAT_LEVEL > 0:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully in the last 60 minutes.", component_name, self.log_success, self.log_total)
         self.log_success = 0
         self.log_total = 0
 
