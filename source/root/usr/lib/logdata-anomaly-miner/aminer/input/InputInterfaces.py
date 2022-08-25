@@ -189,7 +189,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         """
         if AminerConfig.STAT_LEVEL > 0:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully in the last 60 minutes.", component_name, self.log_success, self.log_total)
+                "'%s' processed %d out of %d log atoms successfully in the last 60 minutes.", component_name, self.log_success,
+                self.log_total)
         self.log_success = 0
         self.log_total = 0
 
