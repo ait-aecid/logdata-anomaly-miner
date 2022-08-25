@@ -25,6 +25,8 @@
                 'key_parser_dict': {'type': 'dict'},
                 'optional_key_prefix': {'type': 'string', 'default': 'optional_key_'},
                 'nullable_key_prefix': {'type': 'string', 'default': '+'},
+                'strict': {'type': 'boolean', 'default': False},
+                'ignore_null': {'type': 'boolean', 'default': True},
                 'date_format': {'type': 'string', 'minlength': 2},
                 'text_locale': {'type': 'string', 'nullable': True, 'default': None},
                 'max_time_jump_seconds': {'type': 'integer', 'default': 86400},

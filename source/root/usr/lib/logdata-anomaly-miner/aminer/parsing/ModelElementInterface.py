@@ -98,12 +98,16 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
         @param max_repeat the maximum number of repeated matches of the repeated_element.
         @param upper_case if True, the letters of the hex alphabet are uppercase, otherwise they are lowercase.
         @param alphabet the allowed letters to match data.
+        @param strict_mode If strict is set to true all keys must be defined. The parser will fail if the logdata has a json-key that is
+               not defined in the key_parser_dict
+        @param ignore_null ignore json-keys with values "null"
         """
         allowed_kwargs = [
             "date_format", "time_zone", "text_locale", "start_year", "max_time_jump_seconds", "value_sign_type", "value_pad_type",
             "exponent_type", "delimiter", "escape", "consume_delimiter", "value_model", "value_path", "branch_model_dict", "default_branch",
             "children", "fixed_data", "wordlist", "ipv6", "key_parser_dict", "optional_key_prefix", "nullable_key_prefix",
-            "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat", "upper_case", "alphabet"
+            "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat", "upper_case", "alphabet",
+            "strict_mode", "ignore_null"
         ]
         for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:
@@ -147,7 +151,8 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 old_locale = locale.getdefaultlocale()
                 if old_locale != self.text_locale:
                     locale.setlocale(locale.LC_ALL, self.text_locale)
-                    logging.getLogger(DEBUG_LOG_NAME).info(f"Changed time locale from {self.text_locale} to {''.join(self.text_locale)}.")
+                    msg = f"Changed time locale from {self.text_locale} to {''.join(self.text_locale)}."
+                    logging.getLogger(DEBUG_LOG_NAME).info(msg)
             except locale.Error:
                 msg = f"text_locale {self.text_locale} is not installed!"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -405,6 +410,16 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 msg = "alphabet must not be empty."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
+
+        if hasattr(self, "strict_mode") and not isinstance(self.strict_mode, bool):
+            msg = "strict_mode has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        if hasattr(self, "ignore_null") and not isinstance(self.ignore_null, bool):
+            msg = "ignore_null has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     @abc.abstractmethod
     def get_match_element(self, path, match_context):
