@@ -22,7 +22,7 @@ repos:
       args: [--max-line-length=140]
 
 -   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: 1.7.0
+    rev: v1.7.0
     hooks:
     - id: autopep8
       args: [--max-line-length=140]
