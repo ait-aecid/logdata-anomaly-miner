@@ -608,7 +608,7 @@ class AnalysisChildRemoteControlHandler:
                     MatchValueStreamWriter, MissingMatchPathValueDetector, NewMatchIdValueComboDetector, NewMatchPathDetector,\
                     NewMatchPathValueComboDetector, NewMatchPathValueDetector, ParserCount, Rules, TimeCorrelationDetector,\
                     TimeCorrelationViolationDetector, TimestampCorrectionFilters, TimestampsUnsortedDetector, VariableTypeDetector,\
-                    AllowlistViolationDetector
+                    AllowlistViolationDetector, EventCountClusterDetector
                 exec_locals = {
                     'analysis_context': analysis_context, 'remote_control_data': json_request_data[1],
                     'print_current_config': methods.print_current_config, 'print_config_property': methods.print_config_property,
@@ -634,6 +634,7 @@ class AnalysisChildRemoteControlHandler:
                     'reopen_event_handler_streams': methods.reopen_event_handler_streams,
                     'EnhancedNewMatchPathValueComboDetector': EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
                     'EventCorrelationDetector': EventCorrelationDetector.EventCorrelationDetector,
+                    'EventCountClusterDetector': EventCountClusterDetector.EventCountClusterDetector,
                     'EventTypeDetector': EventTypeDetector.EventTypeDetector,
                     'EventFrequencyDetector': EventFrequencyDetector.EventFrequencyDetector,
                     'EventSequenceDetector': EventSequenceDetector.EventSequenceDetector,

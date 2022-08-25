@@ -471,6 +471,14 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
                                     learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
+            elif item['type'].name == 'EventCountClusterDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                                    persistence_id=item['persistence_id'], id_path_list=item['id_path_list'],
+                                    window_size=item['window_size'], num_windows=item['num_windows'],
+                                    confidence_factor=item['confidence_factor'], idf=item['idf'], norm=item['norm'],
+                                    add_normal=item['add_normal'], check_empty_windows=item['check_empty_windows'],
+                                    learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
                                     persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
