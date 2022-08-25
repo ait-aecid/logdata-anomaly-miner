@@ -1085,7 +1085,11 @@ This model defines a json-formatted log line. This model is usually used as a st
 
 * **key_parser_dict**: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
 
-* **optional_key_prefix**: a string that can be used as a prefix for keys that are optional in the json schema.
+* **optional_key_prefix**: a string that can be used as a prefix for keys that are optional in the json schema. Default: "optional_key_"
+
+* **nullable_key_prefix**: a string that can be used as a prefix for keys where null-values are allowed in the json schema. Default: "+"
+
+* **allow_all_fields**: defines if all keys can be optional. Default: False
 
 .. code-block:: yaml
 
@@ -1116,12 +1120,15 @@ This model defines a json-formatted log line. This model is usually used as a st
          start: True
          type: JsonModelElement
          name: 'model'
+         allow_all_fields: False
+         optional_key_prefix: "*"
+         nullable_key_prefix: "+"
          key_parser_dict:
            _scroll_id: _scroll_id
-           took: took
+           *took: took
            hits:
              total:
-               value: value
+               +value: value
              hits:
                - _index: _index
                  _type: _type
@@ -1129,7 +1136,7 @@ This model defines a json-formatted log line. This model is usually used as a st
 JsonStringModelElement
 ~~~~~~~~~~~~~~~~~~~~~~
 
-This model parses json-strings very quickly and robust.
+This model parses json-strings very quickly and robust. This parser generates verbose debug-logs when aminer was started with debug-level 2
 
 * **key_parser_dict**: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
 
@@ -1144,7 +1151,7 @@ This model parses json-strings very quickly and robust.
           type: VariableByteDataModelElement
           name: 'agent'
           args: ' !"#$%&*=+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]()^_`abcdefghijklmnopqrstuvwxyz{|}~'
-  
+
         - id: timestamp_model
           type: DateTimeModelElement
           name: 'timestamp'
@@ -1165,7 +1172,9 @@ This model parses json-strings very quickly and robust.
             "time": optional_model
             "agent": agent
 
-.. note:: This parser does not work with multiline json-logs
+.. warning::  This parser does not work with multiline json-logs
+
+.. note:: Use OptionalMatchModelElement to make the subparser optional with null-values
 
 OptionalMatchModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2217,6 +2226,33 @@ First, this detector finds a list of viable variables for each event type. Secon
           used_presel_meth: ['matchDiscDistr', 'excludeDueDistr']
           used_validate_cor_meth: ['distinctDistr', 'coverVals']
           used_cor_meth: ['WRel']
+
+VerboseUnparsedAtomHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Creates verbose output for unparsed events.
+
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'VerboseUnparsedAtomHandler'
+          id: vuah
+
+SimpleUnparsedAtomHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Creates basic output for unparsed events.
+
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'SimpleUnparsedAtomHandler'
+          id: vuah
+
 
 VariableTypeDetector
 ~~~~~~~~~~~~~~~~~~~~
