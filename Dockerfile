@@ -25,9 +25,8 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     supervisor \
-	python3 \
-	python3-pip \
-	python3-pip \
+    python3 \
+    python3-pip \
     python3-tz \
     python3-scipy \
     python3-pkg-resources \
@@ -92,6 +91,9 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
     && chmod 0755 /aminerwrapper.sh
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
+
+RUN pip3 install orjson
+RUN PACK=$(find /usr/local/lib/ -name orjson.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 
 # Prepare Supervisord

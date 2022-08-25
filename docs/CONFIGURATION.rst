@@ -1126,6 +1126,47 @@ This model defines a json-formatted log line. This model is usually used as a st
                - _index: _index
                  _type: _type
 
+JsonStringModelElement
+~~~~~~~~~~~~~~~~~~~~~~
+
+This model parses json-strings very quickly and robust.
+
+* **key_parser_dict**: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
+
+* **strict**: If strict is set to true all keys must be defined. The parser will fail if the logdata has a json-key that is not defined in the **key_parser_dict**
+
+* **ignore_null**: This parameter controlls how to handle "null"-values. If set to True it will simply ignore keys with null-values. If set to False it will pass an empty string to the subparser. Default is **True**
+
+.. code-block:: yaml
+
+     Parser:
+        - id: agent
+          type: VariableByteDataModelElement
+          name: 'agent'
+          args: ' !"#$%&*=+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]()^_`abcdefghijklmnopqrstuvwxyz{|}~'
+  
+        - id: timestamp_model
+          type: DateTimeModelElement
+          name: 'timestamp'
+          date_format: '%Y-%m-%dT%H:%M:%S+00:00'
+
+        - id: optional_model
+          type: OptionalMatchModelElement
+          name: 'opt'
+          args: timestamp_model
+
+        - id: 'START'
+          start: True
+          type: JsonStringModelElement
+          name: accesslog
+          strict: True
+          ignore_null: False
+          key_parser_dict:
+            "time": optional_model
+            "agent": agent
+
+.. note:: This parser does not work with multiline json-logs
+
 OptionalMatchModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

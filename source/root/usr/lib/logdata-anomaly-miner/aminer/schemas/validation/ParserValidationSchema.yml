@@ -11,7 +11,7 @@
                     'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'empty': False, 'forbidden': [
                         'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement',
-                        'DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement'],
+                        'DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement','JsonStringModelElement'],
                         'required': True},
                     'name': {'type': 'string', 'required': True, 'empty': False},
                     'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}}
@@ -81,6 +81,15 @@
                     'nullable_key_prefix': {'type': 'string'},
                     'allow_all_fields': {'type': 'boolean'}
                 },
+                {
+                    'id': {'type': 'string', 'required': True, 'empty': False},
+                    'start': {'type': 'boolean'},
+                    'type': {'type': 'string', 'allowed': ['JsonStringModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True, 'empty': False},
+                    'key_parser_dict': {'type': 'dict', 'required': True},
+                    'strict': {'type': 'boolean'},
+                    'ignore_null': {'type': 'boolean'}
+                }
             ]
         }
     }
