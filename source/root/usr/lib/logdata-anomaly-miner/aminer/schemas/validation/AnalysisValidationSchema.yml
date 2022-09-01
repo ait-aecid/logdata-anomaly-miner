@@ -642,7 +642,7 @@
                     'num_max_time_history': {'type': 'integer', 'min': 2},
                     'num_results_bt': {'type': 'integer', 'min': 1},
                     'alpha_bt': {'type': 'float', 'min': 0.000001, 'max': 1.0},
-                    'round_time_inteval_threshold': {'type': 'float', 'min': 0.000001, 'max': 1.0},
+                    'round_time_interval_threshold': {'type': 'float', 'min': 0.000001, 'max': 1.0},
                     'acf_threshold': {'type': 'float', 'min': 0.000001, 'max': 1.0},
                     'force_period_length': {'type': 'boolean'},
                     'set_period_length': {'type': 'integer', 'min': 1},

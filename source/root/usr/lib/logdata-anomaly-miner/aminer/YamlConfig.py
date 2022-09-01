@@ -826,7 +826,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_division_time_step=item['num_division_time_step'], alpha=item['alpha'],
                     num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
                     num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'], acf_threshold=item['acf_threshold'],
-                    round_time_inteval_threshold=item['round_time_interval_threshold'],
+                    round_time_interval_threshold=item['round_time_interval_threshold'],
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_logline=item['output_logline'],
                     ignore_list=item['ignore_list'], learn_mode=learn)

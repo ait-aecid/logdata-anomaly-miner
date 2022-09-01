@@ -529,7 +529,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
         # Initial detection of variable types
-        if self.event_type_detector.num_event_lines[event_index] == self.num_init and self.var_type[event_index][0] == []:
+        if self.event_type_detector.num_event_lines[event_index] >= self.num_init and \
+                self.event_type_detector.check_variables[event_index][0] and self.var_type[event_index][0] == []:
             # Test all variables
 
             logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} started initial detection of var types.')
@@ -2339,7 +2340,7 @@ def get_vt_string(vt):
         return_string = vt[0] + ' ['
         for i, val in enumerate(vt[2]):
             if val >= 0.1:
-                return_string += f'"{str(vt[1][i])}"({str(int(val*100+0.5))}%%), '
+                return_string += f'"{str(vt[1][i])}"({str(int(val*100+0.5))}%), '
         if any(val < 0.1 for _, val in enumerate(vt[2])):
             return_string += '...]'
         else:

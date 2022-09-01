@@ -173,6 +173,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.w_rel_num_ll_to_vals = []  # List of the number of lines in which the values of the first variable have appeared
         self.w_rel_ht_results = []  # List of the results of the homogeneity tests for the binomial test
         self.w_rel_confidences = []  # List for the confidences of the homogeneity tests
+        self.initialized = []  # List that states if the single event types have been initiailized at least once
         self.log_atom = None
 
         # Loads the persistence
@@ -212,13 +213,14 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if not constraint_path_flag and self.constraint_list != []:
             return False
         self.log_atom = log_atom
-        if self.event_type_detector.num_event_lines[event_index] == self.num_init:  # Initialisation Phase
+        if self.event_type_detector.num_event_lines[event_index] >= self.num_init and (
+                len(self.initialized) <= event_index or not self.initialized[event_index]):  # Initialisation Phase
             self.init_cor(event_index)  # Initialise the correlations
 
             if self.update_rules[event_index] and self.learn_mode:
                 self.validate_cor()  # Validate the correlations and removes the cors, which fail the requirements
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
             # Print the found correlations
             if 'Rel' in self.used_cor_meth:
@@ -282,6 +284,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.w_rel_num_ll_to_vals = persistence_data[7]
         self.w_rel_ht_results = persistence_data[8]
         self.w_rel_confidences = persistence_data[9]
+        self.initialized = [False for _ in self.pos_var_cor]
+        for event_index, indices in enumerate(self.discrete_indices):
+            if len(indices) > 0:
+                self.initialized[event_index] = True
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):  # skipcq: PYL-W0613
         """
@@ -303,6 +309,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 self.discrete_indices.append([])
                 self.update_rules.append(True)
                 self.generate_rules.append(True)
+                self.initialized.append(False)
+        self.initialized[event_index] = True
 
         # Initialise the indices to the assumed discrete variables
         if len(self.discrete_indices[event_index]) == 0:
@@ -490,6 +498,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 if (j_val in self.rel_list[event_index][pos_var_cor_index][1]) and (i_val in self.rel_list[event_index][
                         pos_var_cor_index][1][j_val]):
                     self.rel_list[event_index][pos_var_cor_index][1][j_val][i_val] += 1
+        print(self.rel_list[event_index])
 
     def init_cor_w_rel(self, event_index):
         """Initialize w_rel_list and runs init_single_cor_w_rel for the chosen indices."""
@@ -690,7 +699,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             del self.rel_list[event_index][pos_var_cor_index][1][j_val]
 
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
             else:
                 # Only update the possible correlations which have been initialized and print warnings
@@ -1175,7 +1184,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                         pos_var_cor_index][1][j_val][i_val]
 
                         if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                            self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                            self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
                     else:
                         # Print the rules, which failed the binomial test
