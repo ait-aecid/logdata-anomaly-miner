@@ -2297,13 +2297,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %s out of %s log atoms successfully and learned " % (component_name, self.log_success, self.log_total)
-                "%s new variable types and updated %s variable types in the last 60 minutes." % (self.log_new_learned, self.log_updated))
+                "'%s' processed %s out of %s log atoms successfully and learned %s new variable types and updated %s variable types in the "
+                "last 60 minutes." % (component_name, self.log_success, self.log_total, self.log_new_learned, self.log_updated))
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %s out of %s log atoms successfully and learned " % (component_name, self.log_success, self.log_total)
-                "%s new variable types and updated %s variable types in the last 60 minutes. " % (self.log_new_learned, self.log_updated)
-                "Following new variable types were learned: %s" % (self.log_new_learned_values))
+                "'%s' processed %s out of %s log atoms successfully and learned %s new variable types and updated %s variable types in the "
+                "last 60 minutes. Following new variable types were learned: %s" % (
+                    component_name, self.log_success, self.log_total, self.log_new_learned, self.log_updated, self.log_new_learned_values))
         self.log_success = 0
         self.log_total = 0
         self.log_new_learned = 0
