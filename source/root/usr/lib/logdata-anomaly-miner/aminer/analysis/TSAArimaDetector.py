@@ -299,7 +299,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                             self.num_event_lines_ref]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def allowlist_event(self, event_type, sorted_log_lines, event_data, allowlisting_data):  # skipcq: PYL-W0613
         """
@@ -382,7 +382,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """This function makes a one-step prediction and raises an alert if the count do not match the expected appearance"""
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s." % self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         # Append the list of time_window_history and arima_models if it is to short

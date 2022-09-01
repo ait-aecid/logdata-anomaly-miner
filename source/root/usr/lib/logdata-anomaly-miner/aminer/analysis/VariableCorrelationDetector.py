@@ -198,7 +198,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             return False
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s." % self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         parser_match = log_atom.parser_match
