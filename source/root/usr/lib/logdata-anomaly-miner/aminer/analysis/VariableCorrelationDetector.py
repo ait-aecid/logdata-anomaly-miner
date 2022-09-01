@@ -198,7 +198,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             return False
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s." % self.__class__.__name__)
             self.learn_mode = False
 
         parser_match = log_atom.parser_match
@@ -699,7 +699,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             del self.rel_list[event_index][pos_var_cor_index][1][j_val]
 
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = self.log_atom.atom_time + self.stop_learning_no_anomaly_time
 
             else:
                 # Only update the possible correlations which have been initialized and print warnings
@@ -1184,7 +1184,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                         pos_var_cor_index][1][j_val][i_val]
 
                         if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                            self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                            self.stop_learning_timestamp = self.log_atom.atom_time + self.stop_learning_no_anomaly_time
 
                     else:
                         # Print the rules, which failed the binomial test

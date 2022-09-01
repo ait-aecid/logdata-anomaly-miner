@@ -367,7 +367,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Imports the persistence
         if persistence_data is not None:
             self.load_persistence_data(persistence_data)
-            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.' % self.__class__.__name__)
 
         # Generate the modifiers for the estimation of the minimum and maximum for the uniform distribution
         self.min_mod_ini_uni = 1 / (self.num_init + 1)
@@ -407,7 +407,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return False
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s." % self.__class__.__name__)
             self.learn_mode = False
 
         self.log_total += 1
@@ -483,7 +483,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.save_statistics:
             PersistenceUtil.store_json(self.statistics_file_name, [
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.' % self.__class__.__name__)
 
     def load_persistence_data(self, persistence_data):
         """Extract the persistence data and appends various lists to create a consistent state."""
@@ -533,7 +533,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.event_type_detector.check_variables[event_index][0] and self.var_type[event_index][0] == []:
             # Test all variables
 
-            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} started initial detection of var types.')
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s started initial detection of var types.' % self.__class__.__name__)
             if self.target_path_list is None:
                 for var_index in range(self.length[event_index]):
                     tmp_var_type = self.detect_var_type(event_index, var_index)
@@ -610,7 +610,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         elif self.event_type_detector.num_event_lines[event_index] > self.num_init and (
                 self.event_type_detector.num_event_lines[event_index] - self.num_init) % self.num_update == 0:
 
-            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} started update phase of var types.')
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s started update phase of var types.' % self.__class__.__name__)
             # Check if the updates of the variable types should be stopped
             if self.learn_mode and (not isinstance(self.num_stop_update, bool)) and (
                     self.event_type_detector.total_records >= self.num_stop_update):
@@ -1439,7 +1439,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 return
 
         # Test and update for static variables
-        elif self.var_type[event_index][var_index][0] == 'stat':
+        if self.var_type[event_index][var_index][0] == 'stat':
             # Check if still static
             if all(new_values[i] == self.event_type_detector.values[event_index][var_index][0] for i in range(self.num_update)):
                 if self.var_type[event_index][var_index][2] and self.num_stat_stop_update is True and \
@@ -1488,7 +1488,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
         # Test and update for unique values
-        elif self.var_type[event_index][var_index][0] == 'unq':
+        if self.var_type[event_index][var_index][0] == 'unq':
             # Check if the new values are not unique
             if len(set(self.event_type_detector.values[event_index][var_index][-self.num_update:])) != self.num_update:
                 if not self.learn_mode:
@@ -2297,13 +2297,13 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_new_learned} new variable types and updated {self.log_updated} variable types in the last 60 minutes.")
+                "'%s' processed %s out of %s log atoms successfully and learned " % (component_name, self.log_success, self.log_total)
+                "%s new variable types and updated %s variable types in the last 60 minutes." % (self.log_new_learned, self.log_updated))
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_new_learned} new variable types and updated {self.log_updated} variable types in the last 60 minutes. "
-                f"Following new variable types were learned: {self.log_new_learned_values}")
+                "'%s' processed %s out of %s log atoms successfully and learned " % (component_name, self.log_success, self.log_total)
+                "%s new variable types and updated %s variable types in the last 60 minutes. " % (self.log_new_learned, self.log_updated)
+                "Following new variable types were learned: %s" % (self.log_new_learned_values))
         self.log_success = 0
         self.log_total = 0
         self.log_new_learned = 0
