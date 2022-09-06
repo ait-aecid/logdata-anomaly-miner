@@ -230,9 +230,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         for j, val in enumerate(self.event_type_detector.num_event_lines):
                             self.num_event_lines_ref[j].append(val-sum(self.num_event_lines_ref[j]))
 
-                        print(self.num_event_lines_ref)
-                        print([val[1:] for val in self.num_event_lines_ref])
-
                         # skipcq: PTC-W0063
                         # Get the time step lengths. The first entry of the num_event_lines_ref states the number of log lines before the
                         # initialization and is therefore excluded

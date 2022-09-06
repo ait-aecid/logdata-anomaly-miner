@@ -498,7 +498,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 if (j_val in self.rel_list[event_index][pos_var_cor_index][1]) and (i_val in self.rel_list[event_index][
                         pos_var_cor_index][1][j_val]):
                     self.rel_list[event_index][pos_var_cor_index][1][j_val][i_val] += 1
-        print(self.rel_list[event_index])
 
     def init_cor_w_rel(self, event_index):
         """Initialize w_rel_list and runs init_single_cor_w_rel for the chosen indices."""
