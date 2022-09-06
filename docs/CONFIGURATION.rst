@@ -2018,7 +2018,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 * **num_max_time_history** maximal number of values of the time_history (integer, defaults to 30).
 * **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model (integer, defaults to 15).
 * **alpha_bt** significance level for the bt test (float, defaults to 0.05).
-* **round_time_inteval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
+* **round_time_interval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
 * **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
@@ -2047,7 +2047,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
           num_results_bt: 30
           alpha_bt: 0.05
           num_max_time_history: 30000
-          round_time_inteval_threshold: 0.1
+          round_time_interval_threshold: 0.1
           acf_threshold: 0.02
 
 PathArimaDetector

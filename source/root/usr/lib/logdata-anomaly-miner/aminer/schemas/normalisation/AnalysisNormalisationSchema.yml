@@ -193,7 +193,7 @@
                 'num_min_time_history': {'type': 'integer', 'default': 20},
                 'num_max_time_history': {'type': 'integer', 'default': 30},
                 'num_results_bt': {'type': 'integer', 'default': 15},
-                'round_time_inteval_threshold': {'type': 'float', 'default': 0.02},
+                'round_time_interval_threshold': {'type': 'float', 'default': 0.02},
                 'acf_threshold': {'type': 'float', 'default': 0.2},
                 'acf_pause_interval_percentage': {'type': 'float', 'default': 0.2},
                 'acf_auto_pause_interval': {'type': 'boolean', 'default': True},
