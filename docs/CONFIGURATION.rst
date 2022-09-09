@@ -821,6 +821,9 @@ This element parses dates using a custom, timezone and locale-aware implementati
       of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
       within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
 
+  6. timestamp_scale:
+	  timestamp_scale scales the seconds in %s to get seconds (=1), milliseconds (=1000), microseconds (=1000000), etc.
+
 
 
 The following code simply adds a custom date_format:

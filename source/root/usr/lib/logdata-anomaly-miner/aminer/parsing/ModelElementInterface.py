@@ -64,6 +64,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
                of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
                within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
+        @param timestamp_scale scales the seconds in %s to get seconds (=1), milliseconds (=1000), microseconds (=1000000), etc.
         @param value_sign_type defines the possible start characters in the value. With the SIGN_TYPE_NONE only digits are allowed,
                with SIGN_TYPE_OPTIONAL digits and a minus sign are allowed and with SIGN_TYPE_MANDATORY the value must start with + or -.
         @param value_pad_type defines the padding values which can prefix the numerical value. With PAD_TYPE_NONE no padding is allowed,
@@ -107,7 +108,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             "exponent_type", "delimiter", "escape", "consume_delimiter", "value_model", "value_path", "branch_model_dict", "default_branch",
             "children", "fixed_data", "wordlist", "ipv6", "key_parser_dict", "optional_key_prefix", "nullable_key_prefix",
             "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat", "upper_case", "alphabet",
-            "strict_mode", "ignore_null"
+            "strict_mode", "ignore_null", "timestamp_scale"
         ]
         for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:

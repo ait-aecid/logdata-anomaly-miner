@@ -25,4 +25,4 @@ repos:
     rev: v1.7.0
     hooks:
     - id: autopep8
-      args: [--max-line-length=140]
+      args: [--max-line-length=140, --diff]

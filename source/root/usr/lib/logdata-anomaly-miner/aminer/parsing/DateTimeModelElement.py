@@ -77,7 +77,7 @@ class DateTimeModelElement(ModelElementInterface):
 
     # skipcq: PYL-W0613
     def __init__(self, element_id: str, date_format: bytes, time_zone: timezone = None, text_locale: Union[str, tuple] = None,
-                 start_year: int = None, max_time_jump_seconds: int = 86400):
+                 start_year: int = None, max_time_jump_seconds: int = 86400, timestamp_scale: int = 1):
         """
         Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
         @param element_id an identifier for the ModelElement which is shown in the path.
@@ -107,10 +107,11 @@ class DateTimeModelElement(ModelElementInterface):
         @param max_time_jump_seconds for detection of year wraps with date formats missing year information, also the current time
                of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
                within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
+        @param timestamp_scale scales the seconds in %s to get seconds (=1), milliseconds (=1000), microseconds (=1000000), etc.
         """
         self.text_locale = text_locale
         super().__init__(element_id, date_format=date_format, time_zone=time_zone, text_locale=text_locale, start_year=start_year,
-                         max_time_jump_seconds=max_time_jump_seconds)
+                         max_time_jump_seconds=max_time_jump_seconds, timestamp_scale=timestamp_scale)
         if time_zone is None:
             self.time_zone = timezone.utc
         # Make sure that date_format is valid and extract the relevant parts from it.
@@ -255,12 +256,12 @@ class DateTimeModelElement(ModelElementInterface):
             else:
                 try:
                     result[date_format_part[0]] = transform_function(next_data)
-                # skipcq: FLK-E722
-                except:
+                except ValueError:
                     # Parsing failed, most likely due to wrong format.
                     return None
 
         date_str = match_context.match_data[:parse_pos]
+        result[7] /= self.timestamp_scale
 
         # Now combine the values and build the final value.
         parsed_date_time = None
@@ -281,10 +282,8 @@ class DateTimeModelElement(ModelElementInterface):
                         result[1] = current_date.month
                     if result[2] == 0:
                         result[2] = current_date.day
-                parsed_date_time = datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds,
-                                            self.time_zone)
-            # skipcq: FLK-E722
-            except:
+                parsed_date_time = datetime(result[0], result[1], result[2], result[3], result[4], result[5], microseconds, self.time_zone)
+            except ValueError:
                 # The values did not form a valid datetime object, e.g. when the day of month is out of range. The rare case where dates
                 # without year are parsed and the last parsed timestamp was from the previous non-leap year but the current timestamp is it,
                 # is ignored. Values that sparse and without a year number are very likely to result in invalid data anyway.

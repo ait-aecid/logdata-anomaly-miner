@@ -116,6 +116,36 @@ class DateTimeModelElementTest(TestBase):
         self.assertEqual(match_element.match_string, b"11:40:23")
         self.assertEqual(match_context.match_string, b"11:40:23")
 
+        # %s
+        data = b"1662760597"
+        date = b"1662760597"
+        match_context = DummyMatchContext(data)
+        date_time_model_element = DateTimeModelElement(self.id_, b"%s", timezone.utc)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1662760597, None)
+        self.assertEqual(match_element.match_string, b"1662760597")
+        self.assertEqual(match_context.match_string, b"1662760597")
+
+        # %s with milliseconds
+        data = b"1662760597123"
+        date = b"1662760597123"
+        match_context = DummyMatchContext(data)
+        date_time_model_element = DateTimeModelElement(self.id_, b"%s", timezone.utc, timestamp_scale=1000)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1662760597.123, None)
+        self.assertEqual(match_element.match_string, b"1662760597123")
+        self.assertEqual(match_context.match_string, b"1662760597123")
+
+        # %s with microseconds
+        data = b"1662760597123456"
+        date = b"1662760597123456"
+        match_context = DummyMatchContext(data)
+        date_time_model_element = DateTimeModelElement(self.id_, b"%s", timezone.utc, timestamp_scale=1e6)
+        match_element = date_time_model_element.get_match_element(self.path, match_context)
+        self.compare_match_results(data, match_element, match_context, self.id_, self.path, date, 1662760597.123456, None)
+        self.assertEqual(match_element.match_string, b"1662760597123456")
+        self.assertEqual(match_context.match_string, b"1662760597123456")
+
     def test2wrong_date(self):
         """Test if wrong input data does not return a match."""
         # wrong day
