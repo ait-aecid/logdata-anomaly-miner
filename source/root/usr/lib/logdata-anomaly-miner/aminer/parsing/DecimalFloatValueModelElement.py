@@ -107,6 +107,8 @@ class DecimalFloatValueModelElement(ModelElementInterface):
             if match_len == exp_number_start:
                 # No exponent number found.
                 return None
+        elif self.exponent_type == DecimalFloatValueModelElement.EXP_TYPE_MANDATORY:
+            return None
 
         match_string = data[:match_len]
         if self.pad_characters == b" " and match_string[0] in b"+-":
