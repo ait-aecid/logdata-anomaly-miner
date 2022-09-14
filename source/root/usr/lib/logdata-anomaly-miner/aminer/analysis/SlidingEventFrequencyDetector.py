@@ -35,7 +35,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
                  set_upper_limit=None, local_maximum_threshold=0.2, persistence_id='Default', learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None):
         """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        Initialize the detector.
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
