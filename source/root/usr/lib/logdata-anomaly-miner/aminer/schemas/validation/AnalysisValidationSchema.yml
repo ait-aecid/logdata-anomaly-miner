@@ -199,6 +199,22 @@
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
+                    'type': {'type': 'string', 'allowed': ['SlidingEventFrequencyDetector'], 'required': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'scoring_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'window_size': {'type': ['integer', 'float'], 'min': 0.001},
+                    'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True},
+                    'local_maximum_threshold': {'type': 'float', 'min': 0.000001, 'max': 1.0},
+                    'persistence_id': {'type': 'string', 'empty': False},
+                    'learn_mode': {'type': 'boolean'},
+                    'output_logline': {'type': 'boolean'},
+                    'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'suppress': {'type': 'boolean'}
+                },
+                {
+                    'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['LinearNumericBinDefinition'], 'required': True},
                     'lower_limit': {'type': ['integer', 'float'], 'required': True},
                     'bin_size': {'type': 'integer', 'required': True, 'min': 1},
