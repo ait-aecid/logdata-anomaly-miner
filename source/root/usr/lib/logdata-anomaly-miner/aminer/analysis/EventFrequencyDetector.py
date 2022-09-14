@@ -1,5 +1,5 @@
 """
-This module defines an detector for event and value frequency deviations.
+This module defines a detector for event and value frequency deviations.
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -77,6 +77,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.ranges = {}
         self.exceeded_range_frequency = {}
         self.log_windows = 0
+        self.last_seen_log = {}
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -143,6 +144,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 return
             log_event = tuple(values)
 
+        # Store copy of last seen instance of raw log event to correctly show affected event type when anomaly occurs.
+        self.last_seen_log[log_event] = log_atom
+
         if self.next_check_time is None:
             # First processed log atom, initialize next check time.
             self.next_check_time = log_atom.atom_time + self.window_size
@@ -181,13 +185,13 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if self.counts[log_ev][-1] < self.ranges[log_ev][0] or self.counts[log_ev][-1] > self.ranges[log_ev][1]:
                     occurrences_mean = (self.ranges[log_ev][0] + self.ranges[log_ev][1]) / 2
                     try:
-                        data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+                        data = self.last_seen_log[log_ev].raw_data.decode(AminerConfig.ENCODING)
                     except UnicodeError:
-                        data = repr(log_atom.raw_data)
+                        data = repr(self.last_seen_log[log_ev].raw_data)
                     if self.output_logline:
                         original_log_line_prefix = self.aminer_config.config_properties.get(
                             CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                        sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
+                        sorted_log_lines = [self.last_seen_log[log_ev].parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
                                             data]
                     else:
                         sorted_log_lines = [data]
@@ -197,6 +201,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                           np.ceil(max(0, self.ranges[log_ev][0])),
                                           np.floor(self.ranges[log_ev][1])],
                                       'LogAtomValuesFrequency': self.counts[log_ev][-1],
+                                      'WindowSize': self.window_size,
                                       'ConfidenceFactor': self.confidence_factor,
                                       'Confidence': 1 - min(occurrences_mean, self.counts[log_ev][-1]) /
                                       max(occurrences_mean, self.counts[log_ev][-1])}
@@ -206,7 +211,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Frequency anomaly detected', sorted_log_lines,
-                                               event_data, log_atom, self)
+                                               event_data, self.last_seen_log[log_ev], self)
                     # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
                     self.exceeded_range_frequency[log_ev] = False
 
@@ -244,6 +249,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                       np.ceil(max(0, self.ranges[log_event][0])),
                                       np.floor(self.ranges[log_event][1])],
                                   'LogAtomValuesFrequency': self.counts[log_event][-1] + 1,
+                                  'WindowSize': self.window_size,
                                   'ConfidenceFactor': self.confidence_factor}
                 event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
                 for listener in self.anomaly_event_handlers:
