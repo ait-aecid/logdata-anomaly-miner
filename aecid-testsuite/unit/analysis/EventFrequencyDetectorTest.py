@@ -171,12 +171,13 @@ class EventFrequencyDetectorTest(TestBase):
                      'ExpectedLogAtomValuesFrequency': 3.0,
                      'ExpectedLogAtomValuesFrequencyRange': [1.0, 5.0],
                      'LogAtomValuesFrequency': 0,
-                     'ConfidenceFactor': 0.51, 'Confidence': 1.0
+                     'WindowSize': 10, 'ConfidenceFactor': 0.51, 'Confidence': 1.0
                      }}, {'AnalysisComponent': {'AffectedLogAtomPaths': ['/value'],
                           'AffectedLogAtomValues': ['b']}, 'FrequencyData':
                               {'ExpectedLogAtomValuesFrequency': 1.0,
                                'ExpectedLogAtomValuesFrequencyRange': [1.0, 1.0],
                                'LogAtomValuesFrequency': 2,
+                               'WindowSize': 10,
                                'ConfidenceFactor': 0.51,
                                'Confidence': 0.5}}])
         self.assertEqual(event_frequency_detector.counts, {('a',): [3, 0, 1], ('b',): [1, 2, 0]})
