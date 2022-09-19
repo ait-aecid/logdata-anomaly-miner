@@ -10,19 +10,15 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import time
 import os
 import logging
-import numpy as np
 from collections import deque
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
-    STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
@@ -225,7 +221,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
             listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data,
                                    self.max_frequency_log_atom[log_event], self)
 
-    # skipcq: PYL-R0201
+    # skipcq: PYL-R0201, PYL-W0613
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
         return False
@@ -252,10 +248,12 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in the last 60 minutes.")
+                "'%s' processed %s out of %s log atoms successfully in the last 60 minutes." % (
+                    component_name, self.log_success, self.log_total))
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in the last 60 minutes.")
+                "'%s' processed %s out of %s log atoms successfully in the last 60 minutes." % (
+                    component_name, self.log_success, self.log_total))
         self.log_success = 0
         self.log_total = 0
 
@@ -267,6 +265,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.scoring_value_list[log_event].popleft()
 
     def get_current_frequency(self, log_atom, log_event):
+        """Return current frequency of the current log event."""
         return len([None for timestamp in self.counts[log_event] if timestamp >= log_atom.atom_time - self.window_size])
 
     def get_weight_analysis_field_path(self):
