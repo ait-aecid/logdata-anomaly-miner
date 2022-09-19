@@ -248,12 +248,12 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %s out of %s log atoms successfully in the last 60 minutes." % (
-                    component_name, self.log_success, self.log_total))
+                "'%s' processed %s out of %s log atoms successfully in the last 60 minutes.", component_name, self.log_success,
+                self.log_total)
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %s out of %s log atoms successfully in the last 60 minutes." % (
-                    component_name, self.log_success, self.log_total))
+                "'%s' processed %s out of %s log atoms successfully in the last 60 minutes.", component_name, self.log_success,
+                self.log_total)
         self.log_success = 0
         self.log_total = 0
 
