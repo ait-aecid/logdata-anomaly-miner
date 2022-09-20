@@ -618,14 +618,16 @@ class YamlConfigTest(TestBase):
         try:
             aminer_config.load_yaml('unit/data/configfiles/filter_config_errors.yml')
         except ValueError as e:
-            msg = "Config-Error: {'AMinerGroup': ['unknown field'], 'Analysis': [{0: ['none or more than one rule validate', {'oneof " \
-                  "definition 27': [{'learn_mode': ['unknown field'], 'reset_after_report_flag': ['unknown field'], 'type': {'allowed': [" \
-                  "'ParserCount']}}]}]}], 'EventHandlers': [{1: ['none or more than one rule validate', {'oneof definition 4': [{" \
-                  "'output_file_path': ['unknown field'], 'type': {'allowed': ['SyslogWriterEventHandler']}}]}]}], 'Parser': [{0: ['none " \
-                  "or more than one rule validate', {'oneof definition 0': [{'args2': ['unknown field'], 'type': {'forbidden': [" \
-                  "'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement', " \
-                  "'DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement', 'JsonStringModelElement']}}]}]}]}"
-            self.assertEqual(msg, str(e))
+            reg = re.compile(
+                r"Config-Error: \{'AMinerGroup': \['unknown field'], 'Analysis': \[\{0: \['none or more than one rule validate', \{'oneof "
+                r"definition [0-9]+': \[\{'learn_mode': \['unknown field'], 'reset_after_report_flag': \['unknown field'], 'type': \{'"
+                r"allowed': \['ParserCount']}}]}]}], 'EventHandlers': \[\{1: \['none or more than one rule validate', \{'oneof definition "
+                r"[0-9]+': \[\{'output_file_path': \['unknown field'], 'type': \{'allowed': \['SyslogWriterEventHandler']}}]}]}], 'Parser':"
+                r" \[\{0: \['none or more than one rule validate', \{'oneof definition [0-9]+': \[\{'args2': \['unknown field'], 'type': \{"
+                r"'forbidden': \['ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement', '"
+                r"DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement',"
+                r" 'JsonStringModelElement']}}]}]}]}")
+            self.assertIsNotNone(reg.match(str(e)))
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/filter_config_errors.yml')
 
     def test27_same_id_analysis(self):
