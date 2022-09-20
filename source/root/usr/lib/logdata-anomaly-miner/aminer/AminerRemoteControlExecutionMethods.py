@@ -328,9 +328,9 @@ class AminerRemoteControlExecutionMethods:
         """
         if re.match("^(/[^/ ]*)+/?$", destination_file) is not None:
             msg = AminerConfig.save_config(analysis_context, destination_file)
-            self.REMOTE_CONTROL_RESPONSE = msg
         else:
             msg = f"Exception: {destination_file} is not a valid filename!"
+        self.REMOTE_CONTROL_RESPONSE = msg
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def persist_all(self):
