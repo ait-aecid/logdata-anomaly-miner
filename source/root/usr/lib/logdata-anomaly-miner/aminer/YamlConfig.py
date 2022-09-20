@@ -507,6 +507,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
                                     learn_mode=learn, persistence_id=item['persistence_id'],
                                     allow_missing_values_flag=item['allow_missing_values'], output_logline=item['output_logline'])
+            elif item['type'].name == 'SlidingEventFrequencyDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                                    scoring_path_list=item['scoring_path_list'], persistence_id=item['persistence_id'],
+                                    window_size=item['window_size'], set_upper_limit=item['set_upper_limit'],
+                                    local_maximum_threshold=item['local_maximum_threshold'], learn_mode=learn,
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
                     msg = f'The {item["type"].name} must have an id!'

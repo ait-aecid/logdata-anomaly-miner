@@ -2088,6 +2088,30 @@ This detector uses a tsa-arima model to analyze the values of the chosen paths.
           set_period_length: 15
           num_periods_tsa_ini: 10
 
+SlidingEventFrequencyDetector
+~~~~~~~~~~~~~~~~
+
+This module defines a detector for event and value frequency exceedances with a sliding window approach.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **scoring_path_list** parser paths of values to be analyzed by following event handlers like the ScoringEventHandler. Multiple paths mean that values are analyzed by their combined occurrences.
+* **window_size** the length of the time window for counting in seconds (float, defaults to 600).
+* **set_upper_limit** the length of the time window for counting in seconds.
+* **local_maximum_threshold** sets the threshold for the detection of local maxima in the frequency analysis. A local maximum occurrs if the last maximum of the anomaly is higher than local_maximum_threshold times the upper limit.
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: SlidingEventFrequencyDetector
+          id: SEFD
+          window_size: 3600
+          set_upper_limit: 10
+
 TimeCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~
 
