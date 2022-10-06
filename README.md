@@ -74,3 +74,6 @@ If you discover any security-related issues read the [SECURITY.md](/SECURITY.md)
 ## License
 
 [GPL-3.0](LICENSE)
+
+## Financial Support
+This project received financial support through the research projects CAIS, CIIS and CISA in course of the KIRAS security research program of the BMF/BML, the research project DECEPT in course of the ICT of the future program of the FFG, as well as the research projects ECOSSIAN and GUARD in course of the European research programs FP7 and Horizon 2020.
