@@ -90,6 +90,7 @@
                     'type': {'type': 'string', 'allowed': ['EventFrequencyDetector'], 'required': True},
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'scoring_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'unique_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'window_size': {'type': ['integer', 'float'], 'min': 0.001},
                     'num_windows': {'type': 'integer'},
                     'empty_window_warnings': {'type': 'boolean'},
