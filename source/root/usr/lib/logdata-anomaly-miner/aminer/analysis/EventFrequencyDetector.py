@@ -41,6 +41,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                occurrences. When no paths are specified, the events given by the full path list are analyzed.
         @param scoring_path_list parser paths of values to be analyzed by following event handlers like the ScoringEventHandler.
                Multiple paths mean that values are analyzed by their combined occurrences.
+        @param unique_path_list parser paths of values where only unique value occurrences should be counted for every value occurring
+               in target_path_list.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
         @param num_windows the number of previous time windows considered for expected frequency estimation.
@@ -145,6 +147,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 return
             log_event = tuple(values)
 
+        # Get values that occur in unique_path_list
         unique_path_value = None
         if self.unique_path_list is not None and len(self.unique_path_list) != 0:
             values = []
@@ -163,6 +166,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     else:
                         value = str(match.match_object)
                     values.append(value)
+            # Initialize unique values for current log event
             if log_event not in self.unique_values:
                 self.unique_values[log_event] = set()
             unique_path_value = tuple(values)
@@ -242,6 +246,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 for _ in range(skipped_windows + 1):
                     self.reset_counter(log_ev)
                 self.ranges[log_ev] = None
+            # Reset all stored unique values for every log event
             for log_ev in self.unique_values:
                 self.unique_values[log_ev] = set()
         elif self.early_exceeding_anomaly_output and log_event in self.counts and (len(self.counts[log_event]) >= 2 or (
@@ -300,6 +305,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         # Increase count for observed events
         if log_event in self.counts:
             if unique_path_value is not None:
+                # When unique path is set, only increase count when value has not been observed before
                 if unique_path_value not in self.unique_values[log_event]:
                     self.counts[log_event][-1] += 1
                     self.unique_values[log_event].add(unique_path_value)
