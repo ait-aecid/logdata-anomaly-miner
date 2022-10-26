@@ -1,0 +1,16 @@
+Integration test started..
+
+
+gzip: stdin: unexpected end of file
+tar: Unexpected EOF in archive
+tar: Unexpected EOF in archive
+tar: Error is not recoverable: exiting now
+Error: Could not find or load main class org.apache.zookeeper.server.quorum.QuorumPeerMain
+Caused by: java.lang.ClassNotFoundException: org.apache.zookeeper.server.quorum.QuorumPeerMain
+WARNING: file or socket '/tmp/syslog' does not exist (yet)!
+WARNING: file or socket '/tmp/auth.log' does not exist (yet)!
+Error: Could not find or load main class kafka.Kafka
+Caused by: java.lang.ClassNotFoundException: kafka.Kafka
+log4j:ERROR Failed to rename [/home/user/Documents/git_projects/logdata-anomaly-miner/aecid-testsuite/integration/kafka_2.13-2.8.1/bin/../logs/server.log] to [/home/user/Documents/git_projects/logdata-anomaly-miner/aecid-testsuite/integration/kafka_2.13-2.8.1/bin/../logs/server.log.2022-10-26-21].
+log4j:ERROR Failed to rename [/home/user/Documents/git_projects/logdata-anomaly-miner/aecid-testsuite/integration/kafka_2.13-2.8.1/bin/../logs/log-cleaner.log] to [/home/user/Documents/git_projects/logdata-anomaly-miner/aecid-testsuite/integration/kafka_2.13-2.8.1/bin/../logs/log-cleaner.log.2022-10-26-21].
+log4j:ERROR Failed to rename [/home/user/Documents/git_projects/logdata-anomaly-miner/aecid-testsuite/integration/kafka_2.13-2.8.1/bin/../logs/controller.log] to [/home/user/Documents/git_projects/logdata-anomaly-miner/aecid-testsuite/integration/kafka_2.13-2.8.1/bin/../logs/controller.log.2022-10-26-21].
