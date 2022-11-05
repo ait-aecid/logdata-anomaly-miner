@@ -11,8 +11,8 @@
                     'start': {'type': 'boolean'},
                     'type': {'type': 'string', 'empty': False, 'forbidden': [
                         'ElementValueBranchModelElement', 'DecimalIntegerValueModelElement', 'DecimalFloatValueModelElement',
-                        'DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement','JsonStringModelElement'],
-                        'required': True},
+                        'DateTimeModelElement', 'MultiLocaleDateTimeModelElement', 'DelimitedDataModelElement', 'JsonModelElement',
+                        'JsonStringModelElement'], 'required': True},
                     'name': {'type': 'string', 'required': True, 'empty': False},
                     'args': {'type': ['string', 'list'], 'schema': {'type': ['string', 'integer']}}
                 },

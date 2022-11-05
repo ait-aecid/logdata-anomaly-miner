@@ -45,26 +45,26 @@ def load_yaml(config_file):
             logging.getLogger(DEBUG_LOG_NAME).error(exception)
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         base_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         parser_normalisation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         analysis_normalisation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         event_handler_normalisation_schema = eval(sma.read())
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         parser_validation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         analysis_validation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         event_handler_validation_schema = eval(sma.read())
 
@@ -933,7 +933,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                             if key == "sasl_plain_username":
                                 continue
                             options[key] = int(val)
-                        except:  # skipcq: FLK-E722
+                        except ValueError:  # skipcq: FLK-E722
                             pass
                     ctx = func(analysis_context, item['topic'], options)
                 if item['type'].name == 'ZmqEventHandler':
