@@ -2,7 +2,8 @@ version = 1
 
 exclude_patterns = [
   "aecid-testsuite/**",
-  "source/root/etc/aminer/template_config.py"
+  "source/root/etc/aminer/template_config.py",
+  "source/root/etc/aminer/schemas/**"
 ]
 
 [[analyzers]]
