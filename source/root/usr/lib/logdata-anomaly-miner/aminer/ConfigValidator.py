@@ -184,7 +184,7 @@ class ConfigValidator(Validator):
         else:
             lower_value = self.document[key]
         if value < lower_value:
-            self._error(field, "%s(=%s) must be bigger than or equal with %s(=%s)." % (field, str(value), key, str(self.document[key])))
+            self._error(field, f"{field}(={str(value)}) must be bigger than or equal with {key}(={str(self.document[key])}).")
 
 
 class NormalisationValidator(ConfigValidator):
