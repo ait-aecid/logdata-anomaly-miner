@@ -2,6 +2,31 @@
 
 . ./testFunctions.sh
 
+##################################################################
+# Description of the test. Line numbers are also considering starting lines with ```, so they are incremented by one compared to the text itself.
+# 1.) Read the log lines between the 1st and 2nd ``` and save it to /var/log/apache2/access.log (LOG)
+# 2.) Read 1st ```python and 3rd ``` and replace the FrequencyDetector in ../source/root/usr/lib/logdata-anomaly-miner/aminer/analysis/FrequencyDetector.py (store backup and restore it after the test)
+# 3.) Check if the parameter definitions between 4th and 5th are the same as in ../source/root/usr/lib/logdata-anomaly-miner/aminer/schemas/normalisation/AnalysisNormalisationSchema.py
+#     (each line on its own)
+# 4.) Check if the FrequencyDetector parameters between 6th and 7th are the same as in ../source/root/usr/lib/logdata-anomaly-miner/aminer/schemas/validation/AnalysisValidationSchema.py
+# 5.) Check if the Code between 2nd ```python and 8th ``` is the same as in ../source/root/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py
+# 6.) Write the config to CFG_PATH from 1st ```yaml to 9th ``` and replace LogResourceList to LOG.
+# 7.) Read CMD from the second line between the 1st ```bash to 10th ``` and run it with sudo.
+# 8.) Compare the outputs with the ones between 11th and 12th ```.
+# 9.) Read line between 3rd ```python and 13th ``` and add it between 23rd and 24th line in the CFG_PATH
+# 10.) Remove lines 36-38 in the CFG_PATH and append the method between 4th ```python and 14th ``` + newline between.
+# 11.) Run CMD and check if the output is the same as the one between 15th and 16th ```.
+# 12.) Remove the previously added lines and add the lines between 5th ```python and 17th ```.
+# 13.) Run CMD and compare the output to the one between 18th and 19th ```.
+# 14.) Remove the previously added lines and add the lines between 6th ```python and 20th ```.
+# 15.) Run CMD and compare the output to the one between 21st and 22nd ```.
+# 16.) Remove the previously added lines and add the lines between 7th ```python and 23rd ```.
+# 17.) Run CMD and compare the output to the one between 1st ```json and 24th ```.
+# 18.) Replace the do_persist method with the lines between 8th ```python and 25th ``` and run CMD.
+# 19.) Run CMD in 1st ```bash and 26th ``` and compare it to the output in the second line.
+# 20.) Add lines between 9th ```python and 27th ```.
+##################################################################
+
 BRANCH=main
 
 if [ $# -gt 0 ]
