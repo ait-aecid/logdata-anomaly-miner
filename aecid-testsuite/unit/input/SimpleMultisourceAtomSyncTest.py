@@ -26,10 +26,10 @@ class SimpleMultisourceAtomSyncTest(TestBase):
 
         any_byte_data_model_element = AnyByteDataModelElement('a1')
         new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                        output_log_line=False)
+                                                        output_logline=False)
         self.analysis_context.register_component(new_match_path_detector1, description)
         new_match_path_detector2 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                        output_log_line=False)
+                                                        output_logline=False)
         self.analysis_context.register_component(new_match_path_detector2, description + "2")
 
         simple_multisource_atom_sync = SimpleMultisourceAtomSync([new_match_path_detector1, new_match_path_detector2], sync_wait_time)
@@ -62,7 +62,7 @@ class SimpleMultisourceAtomSyncTest(TestBase):
 
         any_byte_data_model_element = AnyByteDataModelElement('a1')
         new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                        output_log_line=False)
+                                                        output_logline=False)
         self.analysis_context.register_component(new_match_path_detector1, description)
         simple_multisource_atom_sync = SimpleMultisourceAtomSync([new_match_path_detector1], sync_wait_time)
         t = time()
@@ -83,10 +83,10 @@ class SimpleMultisourceAtomSyncTest(TestBase):
 
         any_byte_data_model_element = AnyByteDataModelElement('a1')
         new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                        output_log_line=False)
+                                                        output_logline=False)
         self.analysis_context.register_component(new_match_path_detector1, description)
         new_match_path_detector2 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                        output_log_line=False)
+                                                        output_logline=False)
         self.analysis_context.register_component(new_match_path_detector2, description + "2")
 
         simple_multisource_atom_sync = SimpleMultisourceAtomSync([new_match_path_detector1, new_match_path_detector2], sync_wait_time)
@@ -120,10 +120,10 @@ class SimpleMultisourceAtomSyncTest(TestBase):
 
         any_byte_data_model_element = AnyByteDataModelElement('a1')
         new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                        output_log_line=False)
+                                                        output_logline=False)
         self.analysis_context.register_component(new_match_path_detector1, description)
         new_match_path_detector2 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                        output_log_line=False)
+                                                        output_logline=False)
         self.analysis_context.register_component(new_match_path_detector2, description + "2")
 
         simple_multisource_atom_sync = SimpleMultisourceAtomSync([new_match_path_detector1], sync_wait_time)

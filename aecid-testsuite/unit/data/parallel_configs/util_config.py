@@ -112,20 +112,20 @@ def build_analysis_pipeline(analysis_context):
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_paths=[''])
+        parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_path_list=[''])
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
     atom_filter.add_handler(SimpleUnparsedAtomHandler(anomaly_event_handlers), stop_when_handled_flag=True)
 
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_detector, component_name=None)
     atom_filter.add_handler(new_match_path_detector)
 
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        '/model/Home Path/Username', '/model/Home Path/Path'], anomaly_event_handlers, auto_include_flag=True)
+        '/model/Home Path/Username', '/model/Home Path/Path'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name=None)
     atom_filter.add_handler(new_match_path_value_combo_detector)
 

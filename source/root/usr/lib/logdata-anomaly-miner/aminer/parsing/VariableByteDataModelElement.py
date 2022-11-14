@@ -11,8 +11,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
-from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ModelElementInterface import ModelElementInterface
 
@@ -21,36 +19,12 @@ class VariableByteDataModelElement(ModelElementInterface):
     """This class defines a model element  that takes any string that only contains characters of a given alphabet."""
 
     def __init__(self, element_id: str, alphabet: bytes):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
-
-        if not isinstance(alphabet, bytes):
-            msg = "alphabet has to be of the type bytes."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(alphabet) < 1:
-            msg = "alphabet must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.alphabet = set(alphabet)
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
         """
-        Get all possible child model elements of this element.
-        @return None as there are no children of this element.
+        Initialize the ModelElement.
+        @param element_id an identifier for the ModelElement which is shown in the path.
+        @param alphabet the allowed letters to match data.
         """
-        return None
+        super().__init__(element_id, alphabet=alphabet)
 
     def get_match_element(self, path, match_context):
         """
@@ -68,4 +42,4 @@ class VariableByteDataModelElement(ModelElementInterface):
             return None
         match_data = data[:match_len]
         match_context.update(match_data)
-        return MatchElement("%s/%s" % (path, self.element_id), match_data, match_data, None)
+        return MatchElement(f"{path}/{self.element_id}", match_data, match_data, None)

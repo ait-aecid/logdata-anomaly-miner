@@ -69,6 +69,11 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runHowToEntropyDetector)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	runJsonDemo)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
@@ -128,6 +133,7 @@ case "$1" in
     ./runHowToCreateYourOwnSequenceDetector.sh
     ./runHowToCreateYourOwnFrequencyDetector.sh
     ./runHowToMissingMatchPathValueDetector.sh
+    ./runHowToEntropyDetector.sh
     ./runCoverageTests.sh
     exit $?
 		;;
@@ -139,8 +145,8 @@ case "$1" in
 		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo "
 		echo "         runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest | runTryItOut "
 		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
-		echo "         runHowToMissingMatchPathValueDetector | runAminerEncodingDemo | runMypy | runConfAvailableTest"
-		echo "         runReleaseStringCheck ] <options>"
+		echo "         runHowToMissingMatchPathValueDetector | runHowToEntropyDetector | runAminerEncodingDemo | runMypy"
+		echo "         runConfAvailableTest | runReleaseStringCheck ] <options>"
 		exit 1
 		;;
         

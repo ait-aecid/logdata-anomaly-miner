@@ -31,17 +31,25 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', auto_include_flag=False, output_log_line=True):
-        """Initialize the detector. This will also trigger reading or creation of persistence storage location."""
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.auto_include_flag = auto_include_flag
-        self.output_log_line = output_log_line
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        self.persistence_id = persistence_id
-
-        self.log_success = 0
-        self.log_total = 0
+    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id='Default', learn_mode=False, output_logline=True,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None):
+        """
+        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        @param persistence_id name of persistence file.
+        @param learn_mode specifies whether new values should be learned.
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param stop_learning_time switch the learn_mode to False after the time.
+        @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
+        """
+        # avoid "defined outside init" issue
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        super().__init__(
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id,
+            learn_mode=learn_mode, output_logline=output_logline,  stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+        )
         self.log_learned_paths = 0
         self.log_new_learned_paths = []
 
@@ -52,31 +60,38 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             self.known_path_set = set()
         else:
             self.known_path_set = set(persistence_data)
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
         """
         Receive on parsed atom and the information about the parser match.
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match. Depending on this information, the caller
-        may decide if it makes sense passing the parsed atom also to other handlers.
+                may decide if it makes sense passing the parsed atom also to other handlers.
         """
         self.log_total += 1
         unknown_path_list = []
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            self.learn_mode = False
+
         for path in log_atom.parser_match.get_match_dictionary().keys():
             if path not in self.known_path_set:
                 unknown_path_list.append(path)
-                if self.auto_include_flag:
+                if self.learn_mode:
                     self.known_path_set.add(path)
                     self.log_learned_paths += 1
                     self.log_new_learned_paths.append(path)
+                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
         if unknown_path_list:
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
-            if self.output_log_line:
+            if self.output_logline:
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
                     unknown_path_list) + os.linesep + original_log_line_prefix + data]
             else:
@@ -84,7 +99,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             analysis_component = {'AffectedLogAtomPaths': list(unknown_path_list)}
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'New path(es) detected', sorted_log_lines, event_data,
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New path(es) detected', sorted_log_lines, event_data,
                                        log_atom, self)
         self.log_success += 1
         return True
@@ -104,7 +119,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.known_path_set))
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -112,7 +127,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != 'Analysis.%s' % self.__class__.__name__:
+        if event_type != f'Analysis.{self.__class__.__name__}':
             msg = 'Event not from this source'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
@@ -121,7 +136,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.known_path_set.add(event_data)
-        return 'Allowlisted path(es) %s in %s.' % (event_data, event_type)
+        return f'Allowlisted path(es) {event_data} in {event_type}.'
 
     def log_statistics(self, component_name):
         """
@@ -130,13 +145,13 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"
-                " minutes.", component_name, self.log_success, self.log_total, self.log_learned_paths)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned_paths} new paths in the last 60 minutes.")
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                "'%s' processed %d out of %d log atoms successfully and learned %d new paths in the last 60"
-                " minutes. Following new paths were learned: %s", component_name, self.log_success, self.log_total, self.log_learned_paths,
-                self.log_new_learned_paths)
+                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
+                f"{self.log_learned_paths} new paths in the last 60 minutes. Following new paths were learned: "
+                f"{self.log_new_learned_paths}")
         self.log_success = 0
         self.log_total = 0
         self.log_learned_paths = 0

@@ -142,7 +142,6 @@ def get_model():
                 "RuleId": VariableByteDataModelElement("id", filename_alphabet),
                 "MinTimeDelta": DecimalIntegerValueModelElement("min_time_delta"),
                 "MaxTimeDelta": DecimalIntegerValueModelElement("max_time_delta"),
-                "MaxArtefactsAForSingleB": DecimalIntegerValueModelElement("max_artefacts_a_for_single_b"),
                 "ArtefactMatchParameters": [
                     path
                 ],

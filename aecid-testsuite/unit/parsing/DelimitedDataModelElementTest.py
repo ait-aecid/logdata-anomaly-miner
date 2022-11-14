@@ -12,17 +12,7 @@ class DelimitedDataModelElementTest(TestBase):
     path = "path"
     delimiter = b","
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        delimited_data_me = DelimitedDataModelElement(self.id_, self.delimiter)
-        self.assertEqual(delimited_data_me.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        delimited_data_me = DelimitedDataModelElement(self.id_, self.delimiter)
-        self.assertEqual(delimited_data_me.get_child_elements(), None)
-
-    def test3get_match_element_single_char(self):
+    def test1get_match_element_single_char(self):
         """A single character is used as delimiter and not consumed (consume_delimiter=False)."""
         data = b"this is a match context.\n"
 
@@ -50,7 +40,7 @@ class DelimitedDataModelElementTest(TestBase):
         match_element = delimited_data_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
 
-    def test4get_match_element_single_char_no_match(self):
+    def test2get_match_element_single_char_no_match(self):
         """A single character is used as delimiter and not matched."""
         data = b"this is a match context.\n"
         for char in "bdfgjklpqruvwyz":
@@ -59,7 +49,7 @@ class DelimitedDataModelElementTest(TestBase):
             match_element = delimited_data_model_element.get_match_element(self.path, match_context)
             self.compare_no_match_results(data, match_element, match_context)
 
-    def test5delimiter_string(self):
+    def test3delimiter_string(self):
         """In this test case a whole string is searched for in the match_data and  it is not consumed (consume_delimiter=False)."""
         data = b"this is a match context.\n"
 
@@ -87,7 +77,7 @@ class DelimitedDataModelElementTest(TestBase):
         match_element = delimited_data_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
 
-    def test6delimiter_string_no_match(self):
+    def test4delimiter_string_no_match(self):
         """In this test case a whole string is searched for in the match_data with no match."""
         data = b"this is a match context.\n"
 
@@ -111,7 +101,7 @@ class DelimitedDataModelElementTest(TestBase):
         match_element = delimited_data_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test7special_characters_escape(self):
+    def test5special_characters_escape(self):
         """In this test case special character escaping is tested. The delimiter is not consumed (consume_delimiter=False)."""
         data = b'error: the command \\"python run.py\\" was not found" '
         value = b'error: the command \\"python run.py\\" was not found'
@@ -134,7 +124,7 @@ class DelimitedDataModelElementTest(TestBase):
         match_element = delimited_data_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
 
-    def test8special_characters_escape_no_match(self):
+    def test6special_characters_escape_no_match(self):
         """In this test case special character escaping is tested without matching."""
         data = b'error: the command \\"python run.py\\" was not found\\" '
         match_context = DummyMatchContext(data)
@@ -154,7 +144,7 @@ class DelimitedDataModelElementTest(TestBase):
         match_element = delimited_data_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test9consume_delimiter(self):
+    def test7consume_delimiter(self):
         """In this test case check if the consume_delimiter parameter is working properly."""
         data = b"this is a match context.\n"
 
@@ -206,7 +196,7 @@ class DelimitedDataModelElementTest(TestBase):
         match_element = delimited_data_model_element.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, None)
 
-    def test10consume_delimiter_no_match(self):
+    def test8consume_delimiter_no_match(self):
         """In this test case check if the consume_delimiter parameter is working properly and does not match data."""
         data = b"this is a match context.\n"
 
@@ -236,7 +226,7 @@ class DelimitedDataModelElementTest(TestBase):
         match_element = delimited_data_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)
 
-    def test11element_id_input_validation(self):
+    def test9element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, DelimitedDataModelElement, "", self.delimiter)  # empty element_id
         self.assertRaises(TypeError, DelimitedDataModelElement, None, self.delimiter)  # None element_id
@@ -250,7 +240,7 @@ class DelimitedDataModelElementTest(TestBase):
         self.assertRaises(TypeError, DelimitedDataModelElement, (), self.delimiter)  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, DelimitedDataModelElement, set(), self.delimiter)  # empty set element_id is not allowed
 
-    def test12escape_input_validation(self):
+    def test10escape_input_validation(self):
         """Check if escape is validated."""
         self.assertRaises(ValueError, DelimitedDataModelElement, self.id_, self.delimiter, escape=b"")  # empty escape
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape="\\")  # string escape is not allowed
@@ -263,7 +253,7 @@ class DelimitedDataModelElementTest(TestBase):
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=())  # empty tuple escape is not allowed
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, escape=set())  # empty set escape is not allowed
 
-    def test13consume_delimiter_input_validation(self):
+    def test11consume_delimiter_input_validation(self):
         """Check if consume_delimiter is validated."""
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=b"")
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter="\\")
@@ -275,7 +265,7 @@ class DelimitedDataModelElementTest(TestBase):
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=())
         self.assertRaises(TypeError, DelimitedDataModelElement, self.id_, self.delimiter, consume_delimiter=set())
 
-    def test14get_match_element_match_context_input_validation(self):
+    def test12get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = DelimitedDataModelElement(self.id_, self.delimiter)
         data = b"one, two, three"

@@ -58,13 +58,13 @@ class AtomFiltersTest(TestBase):
         self.reset_output_stream()
 
         new_match_path_detector.receive_atom(log_atom_fixed_dme)
-        resultFixedDME = self.output_stream.getvalue()
+        result_fixed_dme = self.output_stream.getvalue()
         self.reset_output_stream()
 
         other_new_match_path_detector.receive_atom(log_atom_fixed_dme)
         result_decimal_integer_value_me = self.output_stream.getvalue()
 
-        self.assertEqual(result, resultFixedDME + result_decimal_integer_value_me)
+        self.assertEqual(result, result_fixed_dme + result_decimal_integer_value_me)
 
     def test4match_path_filter_receive_atom_path_in_dictionary(self):
         """There is a path in the dictionary and the handler is not None. The default_parsed_atom_handler is None."""

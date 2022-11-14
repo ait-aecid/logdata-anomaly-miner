@@ -18,11 +18,14 @@ from aminer.parsing.MatchContext import DebugMatchContext
 
 
 class SimpleUnparsedAtomHandler(AtomHandlerInterface):
-    """Handlers of this class will just forward received unparsed atoms to the registered event handlers."""
+    """Handlers of this class will just forward the received unparsed atoms to the registered event handlers."""
 
-    def __init__(self, event_handlers):
-        self.event_handlers = event_handlers
-        self.persistence_id = None
+    def __init__(self, anomaly_event_handlers):
+        """
+        Initialise the Unparsed atom handler.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        """
+        super().__init__(anomaly_event_handlers=anomaly_event_handlers)
 
     def receive_atom(self, log_atom):
         """Receive an unparsed atom to create events for each."""
@@ -38,15 +41,19 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
     def send_event_to_handlers(self, data, log_atom):
         """Send the data to the event handlers."""
         event_data = {}
-        for listener in self.event_handlers:
+        for listener in self.anomaly_event_handlers:
             listener.receive_event('Input.UnparsedAtomHandler', 'Unparsed atom received', [data], event_data, log_atom, self)
 
 
 class VerboseUnparsedAtomHandler(SimpleUnparsedAtomHandler):
     """Handlers of this class will forward received unparsed atoms to the registered event handlers applying the DebugMatchContext."""
 
-    def __init__(self, event_handlers, parsing_model):
-        super().__init__(event_handlers)
+    def __init__(self, anomaly_event_handlers, parsing_model):
+        """
+        Initialise the Unparsed atom handler.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
+        """
+        super().__init__(anomaly_event_handlers)
         self.parsing_model = parsing_model
 
     def send_event_to_handlers(self, data, log_atom):
@@ -58,6 +65,6 @@ class VerboseUnparsedAtomHandler(SimpleUnparsedAtomHandler):
         for line in debug_info.split('\n'):
             debug_lines.append(line.strip())
         event_data = {'DebugLog': debug_lines}
-        for listener in self.event_handlers:
+        for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 'Input.VerboseUnparsedAtomHandler', 'Unparsed atom received', [debug_info + data], event_data, log_atom, self)

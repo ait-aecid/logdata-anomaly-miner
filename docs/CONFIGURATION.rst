@@ -821,6 +821,9 @@ This element parses dates using a custom, timezone and locale-aware implementati
       of values has to be tracked. This value defines the window within that the time may jump between two matches. When not
       within that window, the value is still parsed, corrected to the most likely value but does not change the detection year.
 
+  6. timestamp_scale:
+	  timestamp_scale scales the seconds in %s to get seconds (=1), milliseconds (=1000), microseconds (=1000000), etc.
+
 
 
 The following code simply adds a custom date_format:
@@ -1085,7 +1088,11 @@ This model defines a json-formatted log line. This model is usually used as a st
 
 * **key_parser_dict**: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
 
-* **optional_key_prefix**: a string that can be used as a prefix for keys that are optional in the json schema.
+* **optional_key_prefix**: a string that can be used as a prefix for keys that are optional in the json schema. Default: "optional_key_"
+
+* **nullable_key_prefix**: a string that can be used as a prefix for keys where null-values are allowed in the json schema. Default: "+"
+
+* **allow_all_fields**: defines if all keys can be optional. Default: False
 
 .. code-block:: yaml
 
@@ -1116,15 +1123,61 @@ This model defines a json-formatted log line. This model is usually used as a st
          start: True
          type: JsonModelElement
          name: 'model'
+         allow_all_fields: False
+         optional_key_prefix: "*"
+         nullable_key_prefix: "+"
          key_parser_dict:
            _scroll_id: _scroll_id
-           took: took
+           *took: took
            hits:
              total:
-               value: value
+               +value: value
              hits:
                - _index: _index
                  _type: _type
+
+JsonStringModelElement
+~~~~~~~~~~~~~~~~~~~~~~
+
+This model parses json-strings very quickly and robust. This parser generates verbose debug-logs when aminer was started with debug-level 2
+
+* **key_parser_dict**: a dictionary of keys as defined in the json-formatted logs and appropriate parser models as values
+
+* **strict**: If strict is set to true all keys must be defined. The parser will fail if the logdata has a json-key that is not defined in the **key_parser_dict**
+
+* **ignore_null**: This parameter controlls how to handle "null"-values. If set to True it will simply ignore keys with null-values. If set to False it will pass an empty string to the subparser. Default is **True**
+
+.. code-block:: yaml
+
+     Parser:
+        - id: agent
+          type: VariableByteDataModelElement
+          name: 'agent'
+          args: ' !"#$%&*=+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]()^_`abcdefghijklmnopqrstuvwxyz{|}~'
+
+        - id: timestamp_model
+          type: DateTimeModelElement
+          name: 'timestamp'
+          date_format: '%Y-%m-%dT%H:%M:%S+00:00'
+
+        - id: optional_model
+          type: OptionalMatchModelElement
+          name: 'opt'
+          args: timestamp_model
+
+        - id: 'START'
+          start: True
+          type: JsonStringModelElement
+          name: accesslog
+          strict: True
+          ignore_null: False
+          key_parser_dict:
+            "time": optional_model
+            "agent": agent
+
+.. warning::  This parser does not work with multiline json-logs
+
+.. note:: Use OptionalMatchModelElement to make the subparser optional with null-values
 
 OptionalMatchModelElement
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1290,7 +1343,7 @@ This detector generates anomalies for new characters in parsed elements and exte
 * **id_path_list** list of strings that specify group identifiers for which alphabets should be learned (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean).
 * **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
 * **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -1310,7 +1363,7 @@ EnhancedNewMatchPathValueComboDetector
 In addition to detecting new value combination (see NewMatchPathValueComboDetector), this detector also stores combo occurrence times and amounts, and allows to execute functions on tuples that need to be defined in the python code first.
 
 * **paths**: the list of values to extract from each match to create the value combination to be checked (required, list of strings).
-* **allow_missing_values**: when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to False).
+* **allow_missing_values**: when set to True, the detector will also use matches, where one of the paths from target_path_list does not refer to an existing parsed data object (boolean, defaults to False).
 * **tuple_transformation_function**: when not None, this function will be invoked on each extracted value combination list to transform it. It may modify the list directly or create a new one to return it (string, defaults to None).
 * **learn_mode**: when set to True, this detector will report a new value only the first time before including it in the known values set automatically (boolean).
 * **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
@@ -1340,7 +1393,7 @@ This detector monitors and learns occurrence probabilities of character pairs in
 * **skip_repetitions** boolean that determines whether only distinct values are used for character pair counting. This counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run (boolean, defaults to False).
 * **persistence_id** name of persistency document (string, defaults to "Default").
 * **learn_mode** when set to True, the detector will extend the table of character pair frequencies based on new values (boolean).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
 * **output_event_handlers**: a list of event handler identifiers that the detector should forward the anomalies to (list of strings, defaults to empty list).
 
@@ -1393,12 +1446,49 @@ This module defines an evaluator and generator for event rules. The overall idea
           hypothesis_max_delta_time: 1.0
           learn_mode: True
 
+EventCountClusterDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This module defines a detector that clusters count vectors of event and value occurrences.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **window_size** the length of the time window for counting in seconds (float, defaults to 600).
+* **id_path_list** parser paths of values for which separate count vectors should be generated (list of strings, defaults to empty list).
+* **num_windows** the number of vectors stored in the models (integer, defaults to 50).
+* **confidence_factor** minimum similarity threshold in range [0, 1] for detection (float, defaults to 0.33).
+* **idf** when true, value counts are weighted higher when they occur with fewer id_paths (requires that id_path_list is set) (boolean, defaults to False).
+* **norm** when true, count vectors are normalized so that only relative occurrence frequencies matter for detection (boolean, defaults to False).
+* **add_normal** when true, count vectors are also added to the model when they exceed the similarity threshold (boolean, defaults to False).
+* **check_empty_windows** when true, empty count vectors are generated for time windows without event occurrences (boolean, defaults to False).
+* **persistence_id** name of persistence document (string, defaults to "Default").
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
+* **ignore_list list** of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
+* **stop_learning_time** switch the learn_mode to False after the time (float, defaults to None).
+* **stop_learning_no_anomaly_time** switch the learn_mode to False after no anomaly was detected for that time (float, defaults to None).
+
+.. code-block:: yaml
+
+     Analysis:
+        - id: "eccd"
+          type: "EventCountClusterDetector"
+          window_size: 10
+          idf: True
+          confidence_factor: 0.7
+          id_path_list:
+             - '/parser/idp'
+          paths:
+             - '/parser/val'
+
 EventFrequencyDetector
 ~~~~~~~~~~~~~~~~~~~~~~
 
-This module defines an detector for event and value frequency deviations.
+This module defines a detector for event and value frequency deviations.
 
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **scoring_path_list** parser paths of values to be analyzed by following event handlers like the ScoringEventHandler. Multiple paths mean that values are analyzed by their combined occurrences.
+* **unique_path_list** parser paths of values where only unique value occurrences should be counted for every value occurring at paths.
 * **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
 * **window_size** the length of the time window for counting in seconds (float, defaults to 600).
 * **num_windows** the number of previous time windows considered for expected frequency estimation (integer, defaults to 50).
@@ -1455,25 +1545,22 @@ This component serves as a basis for the VariableTypeDetector, VariableCorrelati
 
 * **paths** parser paths of values to be analyzed (list of strings, defaults to empty list).
 * **id_path_list** one or more paths that specify the trace of the sequence detection, i.e., incorrect sequences that are generated by interleaved events can be avoided when event sequence identifiers are available (list of strings, defaults to empty list).
-* **allow_missing_id** specifies whether log atoms without id path should be omitted (only if id path is set).
+* **allow_missing_id** specifies whether log atoms without id path should be omitted (boolean, defaults to False. only if id path is set).
 * **allowed_id_tuples** list of the allowed id tuples. Log atoms with id tuples not in this list are not analyzed, when this list is not empty.
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **max_num_vals** maximum number of lines in the value list before it is reduced (integer, defaults to 1500).
 * **min_num_vals** number of the values which the list is being reduced to (integer, defaults to 1000).
 * **save_values** if False the values of the paths are not saved for further analysis. The values are not needed for the TSAArimaDetector (boolean, defaults to True).
-* **track_time_for_tsa** states if time windows should be tracked for the time series analysis (boolean, defaults to False).
-* **waiting_time_for_tsa** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
-* **num_sections_waiting_time_for_tsa** number of sections of the initialization window (integer, defaults to 10).
 
 .. code-block:: yaml
 
      Analysis:
         - type: 'EventTypeDetector'
           id: ETD
+          id_path_list:
+            - '/model/type/syscall/id'
+          allow_missing_id: True
           save_values: False
-          track_time_for_tsa: True
-          waiting_time_for_tsa: 1728000
-          num_sections_waiting_time_for_tsa: 1000
 
 .. _HistogramAnalysis:
 
@@ -1706,7 +1793,7 @@ This module defines an detector for minimal transition times between states (e.g
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, **required**).
 * **id_path_list** parser paths where id values can be stored in all relevant log event types (list of strings, **required**).
 * **ignore_list** parser paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, default: []).
-* **allow_missing_id** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, default: False).
+* **allow_missing_id** when set to True, the detector will also use matches, where one of the paths from target_path_list does not refer to an existing parsed data object (boolean, default: False).
 * **num_log_lines_solidify_matrix** number of processed log lines after which the matrix is solidified. This process is periodically repeated (integer, default: 10000).
 * **time_output_threshold** threshold for the tested minimal transition time which has to be exceeded to be tested (float, default: 0).
 * **anomaly_threshold** threshold for the confidence which must be exceeded to raise an anomaly (float, default: 0.05).
@@ -1866,9 +1953,9 @@ This detector analyzes the time intervals of the appearance of log_atoms. It sen
 
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **allow_missing_values_flag** when set to True, the detector will also use matches, where one of the pathes from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
+* **allow_missing_values** when set to True, the detector will also use matches, where one of the paths from target_path_list does not refer to an existing parsed data object (boolean, defaults to True).
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted (string of lists, defaults to empty list).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **time_period_length** length of the time window in seconds for which the appearances of log lines are identified with each other (integer, defaults to 86400).
 * **max_time_diff** maximal time difference in seconds for new times. If the difference of the new time to all previous times is greater than max_time_diff the new time is considered an anomaly (integer, defaults to 360).
@@ -1924,6 +2011,8 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 
 * **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
 * **event_type_detector** used to track the number of event lines in the time windows (string).
+* **waiting_time_for_tsa** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
+* **num_sections_waiting_time_for_tsa** number of sections of the initialization window (integer, defaults to 10).
 * **acf_pause_interval_percentage** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
 * **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
 * **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 20).
@@ -1933,7 +2022,7 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
 * **num_max_time_history** maximal number of values of the time_history (integer, defaults to 30).
 * **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model (integer, defaults to 15).
 * **alpha_bt** significance level for the bt test (float, defaults to 0.05).
-* **round_time_inteval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
+* **round_time_interval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
 * **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
@@ -1951,19 +2040,18 @@ This detector uses a tsa-arima model to track appearance frequencies of event li
         - type: 'EventTypeDetector'
           id: ETD
           save_values: False
-          track_time_for_tsa: True
-          waiting_time_for_tsa: 1728000
-          num_sections_waiting_time_for_tsa: 1000
 
         - type: 'TSAArimaDetector'
           id: TSA
           event_type_detector: ETD
+          waiting_time_for_tsa: 1728000
+          num_sections_waiting_time_for_tsa: 1000
           num_division_time_step: 10
           alpha: 0.05
           num_results_bt: 30
           alpha_bt: 0.05
           num_max_time_history: 30000
-          round_time_inteval_threshold: 0.1
+          round_time_interval_threshold: 0.1
           acf_threshold: 0.02
 
 PathArimaDetector
@@ -2000,6 +2088,30 @@ This detector uses a tsa-arima model to analyze the values of the chosen paths.
           force_period_length: True
           set_period_length: 15
           num_periods_tsa_ini: 10
+
+SlidingEventFrequencyDetector
+~~~~~~~~~~~~~~~~
+
+This module defines a detector for event and value frequency exceedances with a sliding window approach.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed (list of strings, defaults to empty list).
+* **scoring_path_list** parser paths of values to be analyzed by following event handlers like the ScoringEventHandler. Multiple paths mean that values are analyzed by their combined occurrences.
+* **window_size** the length of the time window for counting in seconds (float, defaults to 600).
+* **set_upper_limit** the length of the time window for counting in seconds.
+* **local_maximum_threshold** sets the threshold for the detection of local maxima in the frequency analysis. A local maximum occurrs if the last maximum of the anomaly is higher than local_maximum_threshold times the upper limit.
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
+* **constraint_list** list of paths that have to be present in the log atom to be analyzed (list of strings, defaults to empty list).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: SlidingEventFrequencyDetector
+          id: SEFD
+          window_size: 3600
+          set_upper_limit: 10
 
 TimeCorrelationDetector
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -2076,7 +2188,7 @@ This detector generates ranges for numeric values, detects values outside of the
 * **id_path_list** list of strings that specify group identifiers for which numeric ranges should be learned (list of strings, defaults to empty list).
 * **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
 * **learn_mode** specifies whether value ranges should be extended when values outside of ranges are observed (boolean).
-* **output_log_line** specifies whether the full parsed log atom should be provided in the output (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean).
 * **ignore_list**: a list of parser paths that are ignored for analysis by this detector (list of strings, defaults to empty list).
 * **constraint_list**: a list of parser paths that the detector will be constrained to, i.e., other branches of the parser tree are ignored (list of strings, defaults to empty list).
 * **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
@@ -2142,6 +2254,33 @@ First, this detector finds a list of viable variables for each event type. Secon
           used_presel_meth: ['matchDiscDistr', 'excludeDueDistr']
           used_validate_cor_meth: ['distinctDistr', 'coverVals']
           used_cor_meth: ['WRel']
+
+VerboseUnparsedAtomHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Creates verbose output for unparsed events.
+
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'VerboseUnparsedAtomHandler'
+          id: vuah
+
+SimpleUnparsedAtomHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Creates basic output for unparsed events.
+
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'SimpleUnparsedAtomHandler'
+          id: vuah
+
 
 VariableTypeDetector
 ~~~~~~~~~~~~~~~~~~~~
@@ -2422,6 +2561,10 @@ All EventHandler must have the following parameters and may have additional spec
 * **type**: must be an existing Analysis component (required)
 * **json**: A boolean value that enables that the output is formatted in json (default: False)
 * **pretty**: A boolean value that specifies whether json output should be in a single line (False) or pretty printed (True) (default: True)
+* **score**: A boolean value that enables that a confidence is added to the output of certain detectors (default: False)
+* **weights**: A dictionary that specifies the weights of values for the scoring. The keys are the strings of the analyzed list and the corresponding values are the assigned weights. Strings that are not present in this dictionary have the weight 0.5 if not automatically weighted (default: None)
+* **auto_weights**: A boolean value that states if the weights should be automatically calculated through the formula 10 / (10 + number of value appearances) (default: False)
+* **auto_weights_history_length**: A integer value that specifies the number of values that are considered in the calculation of the weights (default: 1000)
 
 
 StreamPrinterEventHandler
@@ -2492,3 +2635,20 @@ The KafkaEventHandler writes it's output to a `Kafka Message-Queue <https://kafk
         topic: 'aminer'
         cfgfile: '/etc/aminer/kafka-client.conf'
         type: 'KafkaEventHandler'
+
+ZmqEventHandler
+~~~~~~~~~~~~~~~
+
+The ZmqEventHandler writes its output to a `Zero Message-Queue <https://zeromq.org/>`_
+
+* **topic**: String property with the topic-name for the message queue. If topic is not defined, then this handler will send messages without any topic.
+* **url**: String property with the url for the zmq-listener. If no url is defined, this handler will use 'ipc:///tmp/aminer'. A comprehensive list of all possible "endpoints" can be found at http://api.zeromq.org/master:zmq-bind
+
+.. code-block:: yaml
+
+  EventHandlers:
+  # output to zeromq using the topic 'aminer'
+      - id: "zmqe"
+        type: 'ZmqEventHandler'
+        topic: 'aminer'
+        url: 'tcp://*:5555' # tcp-port 5555 on all interfaces

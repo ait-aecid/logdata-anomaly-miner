@@ -422,14 +422,15 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
             return
-        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector"]:
+        if component.__class__.__name__ not in ["EventFrequencyDetector", "MinimalTransitionTimeDetector",
+                                                "PathValueTimeIntervalDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
                 "FAILURE: component class '%s' does not support the print_persistency_event! Only the following classes support it: " \
-                "MinimalTransitionTimeDetector." \
+                "EventFrequencyDetector, MinimalTransitionTimeDetector and PathValueTimeIntervalDetector." \
                 % component.__class__.__name__
             return
         try:
-            msg = component.print_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.print_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -455,7 +456,7 @@ class AminerRemoteControlExecutionMethods:
                 % component.__class__.__name__
             return
         try:
-            msg = component.add_to_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.add_to_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -473,14 +474,14 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
             return
-        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector"]:
+        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector", "PathValueTimeIntervalDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
                 "FAILURE: component class '%s' does not support the remove_from_persistency_event! Only the following classes support it: "\
-                "MinimalTransitionTimeDetector." \
+                "MinimalTransitionTimeDetector and PathValueTimeIntervalDetector." \
                 % component.__class__.__name__
             return
         try:
-            msg = component.remove_from_persistency_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.remove_from_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -671,7 +672,7 @@ class AminerRemoteControlExecutionMethods:
 
     def reopen_event_handler_streams(self, analysis_context):
         """Reopen all StreamPrinterEventHandler streams for log rotation."""
-        analysis_context.close_event_handler_streams(reopen=True)
+        analysis_context.close_event_handler_streams(analysis_context.atomizer_factory.event_handler_list, reopen=True)
         msg = "Reopened all StreamPrinterEventHandler streams."
         self.REMOTE_CONTROL_RESPONSE = msg
         logging.getLogger(DEBUG_LOG_NAME).info(msg)

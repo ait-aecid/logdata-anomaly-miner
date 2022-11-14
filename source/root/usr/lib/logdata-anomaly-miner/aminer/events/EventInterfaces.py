@@ -25,17 +25,18 @@ class EventHandlerInterface(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
+    def receive_event(self, event_type, event_message, sorted_loglines, event_data, log_atom, event_source):
         """
         Receive information about a detected event.
         @param event_type is a string with the event type class this event belongs to. This information can be used to interpret
-        type-specific eventData objects. Together with the eventMessage and sortedLogLines, this can be used to create generic log messages.
+               type-specific event_data objects. Together with the eventMessage and sorted_loglines, this can be used to create generic log
+               messages.
         @param event_message the first output line of the event.
-        @param sorted_log_lines sorted list of log lines that were considered when generating the event, as far as available to the time
-        of the event. The list has to contain at least one line.
-        @param event_data type-specific event data object, should not be used unless listener really knows about the eventType.
-        @param log_atom the log_atom which produced the event.
-        @param event_source reference to detector generating the event
+        @param sorted_loglines sorted list of log lines that were considered when generating the event, as far as available to the time
+               of the event. The list has to contain at least one line.
+        @param event_data type-specific event data object, should not be used unless listener really knows about the event_type.
+        @param log_atom the log atom which produced the event.
+        @param event_source reference to detector generating the event.
         """
 
 
@@ -53,3 +54,13 @@ class EventSourceInterface(metaclass=abc.ABCMeta):
         @throws NotImplementedError if this source does not support allowlisting per se
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
+
+    @staticmethod
+    def get_weight_analysis_field_path():
+        """Return the path to the list in the output of the detector which is weighted by the ScoringEventHandler."""
+        return []
+
+    @staticmethod
+    def get_weight_output_field_path():
+        """Return the path where the ScoringEventHandler adds the scorings in the output of the detector."""
+        return []

@@ -11,7 +11,7 @@ fi
 
 sudo chown -R aminer:aminer /var/lib/aminer 2> /dev/null
 
-SRC_FILE=logdata-anomaly-miner.wiki/HowTo:-Create-your-own-SequenceDetector.md
+SRC_FILE=logdata-anomaly-miner.wiki/HowTo-Create-your-own-SequenceDetector.md
 VAL_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/validation/AnalysisValidationSchema.yml
 TMP_VAL_SCHEMA=/tmp/AnalysisValidationSchema.yml
 YML_CONFIG=/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py
@@ -49,7 +49,7 @@ sudo cp $YML_CONFIG $TMP_YML_CONFIG
 # add code to YamlConfig.py
 printf "            " > $TMP_SCHEMA
 awk '/^```python$/ && ++n == 2, /^```$/' < $SRC_FILE | sed '/^```/ d' >> $TMP_SCHEMA
-sudo sed -i "                    /num_sections_waiting_time_for_tsa=item/r $TMP_SCHEMA" $YML_CONFIG
+sudo sed -i "                    /max_rule_attributes=item/r $TMP_SCHEMA" $YML_CONFIG
 
 runAminerUntilEnd "sudo aminer --config $CFG_PATH -C" "" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "/dev/null"
 exit_code=$?

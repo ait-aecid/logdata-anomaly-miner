@@ -11,7 +11,7 @@ from unit.TestBase import TestBase
 class JsonConverterHandlerTest(TestBase):
     """Unittests for the JsonConverterHandler."""
 
-    output_log_line = True
+    output_logline = True
     match_context = MatchContext(b' pid=')
     fixed_dme = FixedDataModelElement('s1', b' pid=')
     match_element = fixed_dme.get_match_element("match", match_context)

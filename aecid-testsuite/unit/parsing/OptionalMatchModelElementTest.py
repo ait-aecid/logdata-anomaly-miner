@@ -13,18 +13,7 @@ class OptionalMatchModelElementTest(TestBase):
     fixed_id = "fixed"
     fixed_data = b"fixed data"
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        optional_match = OptionalMatchModelElement(self.id_, DummyFixedDataModelElement(self.fixed_id, self.fixed_data))
-        self.assertEqual(optional_match.get_id(), self.id_)
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        fixed_dme = DummyFixedDataModelElement(self.fixed_id, self.fixed_data)
-        optional_match = OptionalMatchModelElement(self.id_, fixed_dme)
-        self.assertEqual(optional_match.get_child_elements(), [fixed_dme])
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
         data = b"fixed data string."
         value = self.fixed_data
@@ -35,7 +24,7 @@ class OptionalMatchModelElementTest(TestBase):
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, value, [
             fixed_dme.get_match_element("%s/%s" % (self.path, self.id_), DummyMatchContext(data))])
 
-    def test4get_match_element_no_match(self):
+    def test2get_match_element_no_match(self):
         """Parse not matching substring from MatchContext and check if the MatchContext was not changed."""
         optional_match = OptionalMatchModelElement(self.id_, DummyFixedDataModelElement(self.fixed_id, self.fixed_data))
         data = b""
@@ -49,7 +38,7 @@ class OptionalMatchModelElementTest(TestBase):
         match_element = optional_match.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_, self.path, value, None, None)
 
-    def test5element_id_input_validation(self):
+    def test3element_id_input_validation(self):
         """Check if element_id is validated."""
         fixed_dme = DummyFixedDataModelElement(self.fixed_id, self.fixed_data)
         self.assertRaises(ValueError, OptionalMatchModelElement, "", fixed_dme)
@@ -64,7 +53,7 @@ class OptionalMatchModelElementTest(TestBase):
         self.assertRaises(TypeError, OptionalMatchModelElement, (), fixed_dme)
         self.assertRaises(TypeError, OptionalMatchModelElement, set(), fixed_dme)
 
-    def test6optional_element_input_validation(self):
+    def test4optional_element_input_validation(self):
         """Check if optional_element is validated."""
         self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, "fixed_dme")
         self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, None)
@@ -78,7 +67,7 @@ class OptionalMatchModelElementTest(TestBase):
         self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, ())
         self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, set())
 
-    def test7get_match_element_match_context_input_validation(self):
+    def test5get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = OptionalMatchModelElement(self.id_, DummyFixedDataModelElement(self.fixed_id, self.fixed_data))
         data = b"fixed data"

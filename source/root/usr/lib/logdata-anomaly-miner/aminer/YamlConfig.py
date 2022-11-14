@@ -79,7 +79,7 @@ def load_yaml(config_file):
         filter_config_errors(filtered_errors, 'Parser', v.errors, parser_validation_schema)
         filter_config_errors(filtered_errors, 'EventHandlers', v.errors, event_handler_validation_schema)
 
-        raise ValueError("Config-Error: %s" % filtered_errors)
+        raise ValueError(f'Config-Error: {filtered_errors}')
 
     v = NormalisationValidator(normalisation_schema)
     if v.validate(yaml_data, normalisation_schema):
@@ -140,16 +140,18 @@ def build_analysis_pipeline(analysis_context):
             atom_filter.subhandler_list[index+1][0].output_event_handlers = event_handlers
 
 
-def build_parsing_model():
+def build_parsing_model(data=None):
     """Build the parsing model."""
     parser_model_dict = {}
     start = None
     ws_count = 0
+    if data is None:
+        data = yaml_data
 
-    for item in yaml_data['Parser']:
+    for item in data['Parser']:
         if item['id'] in parser_model_dict:
-            raise ValueError('Config-Error: The id "%s" occurred multiple times in Parser!' % item['id'])
-        if 'start' in item and item['start'] is True and item['type'].name != 'JsonModelElement':
+            raise ValueError(f'Config-Error: The id "{item["id"]}" occurred multiple times in Parser!')
+        if 'start' in item and item['start'] is True and item['type'].name not in ['JsonModelElement', 'JsonStringModelElement']:
             start = item
         if item['type'].is_model:
             if 'args' in item:
@@ -157,7 +159,7 @@ def build_parsing_model():
                     for i, value in enumerate(item["args"]):
                         if (isinstance(value, str) and value == "WHITESPACE") or (isinstance(value, bytes) and value == b"WHITESPACE"):
                             from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-                            sp = "sp%d" % ws_count
+                            sp = f'sp{int(ws_count)}'
                             item["args"][i] = FixedDataModelElement(sp, b' ')
                             ws_count += 1
                     if item['type'].name not in ('DecimalFloatValueModelElement', 'DecimalIntegerValueModelElement'):
@@ -174,7 +176,7 @@ def build_parsing_model():
             if item['type'].name == 'ElementValueBranchModelElement':
                 value_model = parser_model_dict.get(item['args'][0].decode())
                 if value_model is None:
-                    msg = 'The parser model %s does not exist!' % item['args'][0].decode()
+                    msg = f'The parser model {item["args"][0].decode()} does not exist!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 branch_model_dict = {}
@@ -182,7 +184,7 @@ def build_parsing_model():
                     key = i['id']
                     model = i['model']
                     if parser_model_dict.get(model) is None:
-                        msg = 'The parser model %s does not exist!' % key
+                        msg = f'The parser model {key} does not exist!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     branch_model_dict[key] = parser_model_dict.get(model)
@@ -207,7 +209,7 @@ def build_parsing_model():
             elif item['type'].name == 'RepeatedElementDataModelElement':
                 model = item['args'][0].decode()
                 if parser_model_dict.get(model) is None:
-                    msg = 'The parser model %s does not exist!' % model
+                    msg = f'The parser model {model} does not exist!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 item['args'][0] = parser_model_dict.get(model)
@@ -228,8 +230,7 @@ def build_parsing_model():
             elif item['type'].name in ('FirstMatchModelElement', 'SequenceModelElement'):
                 children = []
                 if not isinstance(item['args'], list):
-                    msg = '"args" has to be a list when using the %s. Currently args is defined as %s' % (
-                        item['type'].name, repr(item['args']))
+                    msg = f'"args" has to be a list when using the {item["type"].name}. Currently args is defined as {repr(item["args"])}'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
                 for child in item['args']:
@@ -237,7 +238,7 @@ def build_parsing_model():
                         child = child.decode()
                     if isinstance(child, str):
                         if parser_model_dict.get(child) is None:
-                            msg = 'The parser model %s does not exist!' % child
+                            msg = f'The parser model {child} does not exist!'
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         children.append(parser_model_dict.get(child))
@@ -247,7 +248,7 @@ def build_parsing_model():
             elif item['type'].name == 'OptionalMatchModelElement':
                 optional_element = parser_model_dict.get(item['args'].decode())
                 if optional_element is None:
-                    msg = 'The parser model %s does not exist!' % item['args'].decode()
+                    msg = f'The parser model {item["args"].decode()} does not exist!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], optional_element)
@@ -263,15 +264,27 @@ def build_parsing_model():
                 else:
                     parser_model_dict[item['id']] = item['type'].func(
                         item['name'], key_parser_dict, item['optional_key_prefix'], item['nullable_key_prefix'], item['allow_all_fields'])
+            elif item['type'].name == 'JsonStringModelElement':
+                key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
+
+                if 'start' in item and item['start'] is True:
+                    start = item['type'].func(item['name'], key_parser_dict, item['strict'], item['ignore_null'])
+                else:
+                    parser_model_dict[item['id']] = item['type'].func(item['name'], key_parser_dict, item['strict'], item['ignore_null'])
             else:
                 if 'args' in item:
                     parser_model_dict[item['id']] = item['type'].func(item['name'], item['args'])
                 else:
                     parser_model_dict[item['id']] = item['type'].func(item['name'])
         else:
-            parser_model_dict[item['id']] = item['type'].func()
+            if callable(item['type']):
+                parser_model_dict[item['id']] = item['type'].func()
+            else:
+                parser_model_dict[item['id']] = item['type'].func
+                while callable(parser_model_dict[item['id']]):
+                    parser_model_dict[item['id']] = parser_model_dict[item['id']]()
 
-    if start.__class__.__name__ == 'JsonModelElement':
+    if start.__class__.__name__ in ['JsonModelElement', 'JsonStringModelElement']:
         parsing_model = start
     else:
         parsing_model = parser_model_dict[start['id']]
@@ -310,7 +323,7 @@ def build_input_pipeline(analysis_context, parsing_model):
         else:
             atom_handler_list = [atom_filter]
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_paths=timestamp_paths, eol_sep=eol_sep,
+        parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_path_list=timestamp_paths, eol_sep=eol_sep,
         json_format=json_format)
     return anomaly_event_handlers, atom_filter
 
@@ -355,7 +368,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             else:
                 comp_name = item['id']
                 if analysis_context.get_component_by_name(comp_name) is not None:
-                    raise ValueError('Config-Error: The id "%s" occurred multiple times in Analysis!' % comp_name)
+                    raise ValueError(f'Config-Error: The id "{comp_name}" occurred multiple times in Analysis!')
             if 'learn_mode' in item:
                 learn = item['learn_mode']
             else:
@@ -367,18 +380,17 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             func = item['type'].func
             if item['suppress']:
                 if comp_name is None:
-                    raise ValueError(
-                        'Config-Error: id must be specified for the analysis component %s to enable suppression.' % item['type'])
+                    raise ValueError(f'Config-Error: id must be specified for the analysis component {item["type"]} to enable suppression.')
                 suppress_detector_list.append(comp_name)
             if item['type'].name == 'NewMatchPathValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
-                                    persistence_id=item['persistence_id'], output_log_line=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
+                                    persistence_id=item['persistence_id'], output_logline=item['output_logline'])
             elif item['type'].name == 'MatchPathFilter':
                 parsed_atom_handler_lookup_list = []
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
                     if atom_handler[1] is not None:
                         if analysis_context.get_component_by_name(atom_handler[1]) is None:
-                            msg = 'The atom handler %s does not exist!' % atom_handler[1]
+                            msg = f'The atom handler {atom_handler[1]} does not exist!'
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         atom_handler[1] = analysis_context.get_component_by_name(atom_handler[1])
@@ -386,7 +398,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 default_parsed_atom_handler = item['default_parsed_atom_handler']
                 if default_parsed_atom_handler is not None:
                     if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
-                        msg = 'The atom handler %s does not exist!' % default_parsed_atom_handler
+                        msg = f'The atom handler {default_parsed_atom_handler} does not exist!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
@@ -395,14 +407,14 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 parsed_atom_handler_dict = {}
                 for atom_handler in item['parsed_atom_handler_dict']:
                     if analysis_context.get_component_by_name(atom_handler) is None:
-                        msg = 'The atom handler %s does not exist!' % atom_handler
+                        msg = f'The atom handler {atom_handler} does not exist!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     parsed_atom_handler_dict[atom_handler] = analysis_context.get_component_by_name(atom_handler)
                 default_parsed_atom_handler = item['default_parsed_atom_handler']
                 if default_parsed_atom_handler is not None:
                     if analysis_context.get_component_by_name(default_parsed_atom_handler) is None:
-                        msg = 'The atom handler %s does not exist!' % default_parsed_atom_handler
+                        msg = f'The atom handler {default_parsed_atom_handler} does not exist!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     default_parsed_atom_handler = analysis_context.get_component_by_name(default_parsed_atom_handler)
@@ -411,56 +423,67 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     min_anomaly_score=item['min_anomaly_score'], min_variance=item['min_variance'],
-                                    num_windows=item['num_windows'], auto_include_flag=learn, output_log_line=item['output_logline'],
+                                    num_windows=item['num_windows'], learn_mode=learn, output_logline=item['output_logline'],
                                     ignore_list=item['ignore_list'], constraint_list=item['constraint_list'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
-                                    realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
+                                    realert_interval=item['realert_interval'], combine_values=item['combine_values'],
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'MissingMatchPathListValueDetector':
-                tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, auto_include_flag=learn,
+                tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
-                                    realert_interval=item['realert_interval'], output_log_line=item['output_logline'])
+                                    realert_interval=item['realert_interval'], combine_values=item['combine_values'],
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'EventSequenceDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], seq_len=item['seq_len'],
-                                    auto_include_flag=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    learn_mode=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'ValueRangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
-                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], learn_mode=learn,
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'CharsetDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
-                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    target_path_list=item['paths'], persistence_id=item['persistence_id'], learn_mode=learn,
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'EntropyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     prob_thresh=item['prob_thresh'], default_freqs=item['default_freqs'],
                                     skip_repetitions=item['skip_repetitions'],
-                                    persistence_id=item['persistence_id'], auto_include_flag=learn,
-                                    output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    persistence_id=item['persistence_id'], learn_mode=learn,
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                                    scoring_path_list=item['scoring_path_list'], unique_path_list=item['unique_path_list'],
                                     persistence_id=item['persistence_id'], window_size=item['window_size'],
                                     num_windows=item['num_windows'], confidence_factor=item['confidence_factor'],
                                     empty_window_warnings=item['empty_window_warnings'],
                                     early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'],
                                     set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
-                                    auto_include_flag=learn, output_log_line=item['output_logline'], ignore_list=item['ignore_list'],
+                                    learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
+            elif item['type'].name == 'EventCountClusterDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                                    persistence_id=item['persistence_id'], id_path_list=item['id_path_list'],
+                                    window_size=item['window_size'], num_windows=item['num_windows'],
+                                    confidence_factor=item['confidence_factor'], idf=item['idf'], norm=item['norm'],
+                                    add_normal=item['add_normal'], check_empty_windows=item['check_empty_windows'],
+                                    learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
                                     persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
-                                    output_log_line=item['output_logline'], use_path_match=item['use_path_match'],
+                                    output_logline=item['output_logline'], use_path_match=item['use_path_match'],
                                     use_value_match=item['use_value_match'], min_rule_attributes=item['min_rule_attributes'],
                                     max_rule_attributes=item['max_rule_attributes'])
             elif item['type'].name == 'ParserCount':
@@ -473,75 +496,82 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     split_reports_flag=item['split_reports_flag'])
             elif item['type'].name == 'EventCorrelationDetector':
                 tmp_analyser = func(
-                    analysis_context.aminer_config, anomaly_event_handlers, paths=item['paths'], max_hypotheses=item['max_hypotheses'],
-                    hypothesis_max_delta_time=item['hypothesis_max_delta_time'], generation_probability=item['generation_probability'],
-                    generation_factor=item['generation_factor'], max_observations=item['max_observations'], p0=item['p0'],
-                    alpha=item['alpha'], candidates_size=item['candidates_size'],
+                    analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                    max_hypotheses=item['max_hypotheses'], hypothesis_max_delta_time=item['hypothesis_max_delta_time'],
+                    generation_probability=item['generation_probability'], generation_factor=item['generation_factor'],
+                    max_observations=item['max_observations'], p0=item['p0'], alpha=item['alpha'], candidates_size=item['candidates_size'],
                     hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'], constraint_list=item['constraint_list'],
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'], check_rules_flag=item['check_rules_flag'],
-                    auto_include_flag=learn, ignore_list=item['ignore_list'], persistence_id=item['persistence_id'])
+                    learn_mode=learn, ignore_list=item['ignore_list'], persistence_id=item['persistence_id'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
-                                    auto_include_flag=learn, persistence_id=item['persistence_id'],
-                                    allow_missing_values_flag=item['allow_missing_values'], output_log_line=item['output_logline'])
+                                    learn_mode=learn, persistence_id=item['persistence_id'],
+                                    allow_missing_values_flag=item['allow_missing_values'], output_logline=item['output_logline'])
+            elif item['type'].name == 'SlidingEventFrequencyDetector':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
+                                    scoring_path_list=item['scoring_path_list'], persistence_id=item['persistence_id'],
+                                    window_size=item['window_size'], set_upper_limit=item['set_upper_limit'],
+                                    local_maximum_threshold=item['local_maximum_threshold'], learn_mode=learn,
+                                    output_logline=item['output_logline'], ignore_list=item['ignore_list'],
+                                    constraint_list=item['constraint_list'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
-                    msg = 'The %s must have an id!' % item['type'].name
+                    msg = f'The {item["type"].name} must have an id!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 analysis_dict[comp_name] = func(item['lower_limit'], item['bin_size'], item['bin_count'], item['outlier_bins_flag'])
                 continue
             elif item['type'].name == 'ModuloTimeBinDefinition':
                 if comp_name is None:
-                    msg = 'The %s must have an id!' % item['type'].name
+                    msg = f'The {item["type"].name} must have an id!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 analysis_dict[comp_name] = func(item['modulo_value'], item['time_unit'], item['lower_limit'], item['bin_size'],
                                                 item['bin_count'], item['outlier_bins_flag'])
                 continue
             elif item['type'].name == 'HistogramAnalysis':
-                histogram_defs = []
-                for histogram_def in item['histogram_defs']:
-                    if len(histogram_def) != 2:
-                        msg = 'Every item of the histogram_defs must have an size of 2!'
+                histogram_definitions = []
+                for histogram_definition in item['histogram_defs']:
+                    if len(histogram_definition) != 2:
+                        msg = 'Every item of the histogram_definitions must have an size of 2!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    if histogram_def[1] not in analysis_dict:
-                        msg = '%s first must be defined before used.' % histogram_def[1]
+                    if histogram_definition[1] not in analysis_dict:
+                        msg = f'{histogram_definition[1]} first must be defined before used.'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    histogram_defs.append([histogram_def[0], analysis_dict[histogram_def[1]]])
-                tmp_analyser = func(analysis_context.aminer_config, histogram_defs, item['report_interval'], anomaly_event_handlers,
+                    histogram_definitions.append([histogram_definition[0], analysis_dict[histogram_definition[1]]])
+                tmp_analyser = func(analysis_context.aminer_config, histogram_definitions, item['report_interval'], anomaly_event_handlers,
                                     reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
-                    msg = '%s first must be defined before used.' % item['bin_definition']
+                    msg = f'{item["bin_definition"]} first must be defined before used.'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, item['path'], analysis_dict[item['bin_definition']], item['report_interval'],
                     anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
-                    output_log_line=item['output_logline'])
+                    output_logline=item['output_logline'])
             elif item['type'].name == 'EnhancedNewMatchPathValueComboDetector':
                 tuple_transformation_function = None
                 if item['tuple_transformation_function'] == 'demo':
                     tuple_transformation_function = tuple_transformation_function_demo_print_every_10th_value
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
-                                    auto_include_flag=learn, tuple_transformation_function=tuple_transformation_function,
-                                    output_log_line=item['output_logline'])
+                                    learn_mode=learn, tuple_transformation_function=tuple_transformation_function,
+                                    output_logline=item['output_logline'])
                 # skipcq: PYL-W0603
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'].name == 'MatchFilter':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
-                                    target_value_list=item['value_list'], output_log_line=item['output_logline'])
+                                    target_value_list=item['value_list'], output_logline=item['output_logline'])
             elif item['type'].name == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['timestamp_path'], item['paths'],
                                     item['min_bin_elements'], item['min_bin_time'], debug_mode=item['debug_mode'],
-                                    persistence_id=item['persistence_id'], output_log_line=item['output_logline'])
+                                    persistence_id=item['persistence_id'], output_logline=item['output_logline'])
             elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
@@ -551,10 +581,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").replace(b"\\\\", b"\\").replace(b"\\b", b"\b"))
             elif item['type'].name == 'NewMatchPathDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                                    auto_include_flag=learn, output_log_line=item['output_logline'])
+                                    learn_mode=learn, output_logline=item['output_logline'])
             elif 'MatchAction' in item['type'].name:
                 if comp_name is None:
-                    msg = 'The %s must have an id!' % item['type'].name
+                    msg = f'The {item["type"].name} must have an id!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 if item['type'].name == 'EventGenerationMatchAction':
@@ -578,13 +608,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 continue
             elif 'MatchRule' in item['type'].name:
                 if comp_name is None:
-                    msg = 'The %s must have an id!' % item['type'].name
+                    msg = f'The {item["type"].name} must have an id!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 match_action = None
                 if item['match_action'] is not None:
                     if item['match_action'] not in match_action_dict:
-                        msg = 'The match action %s does not exist!' % item['match_action']
+                        msg = f'The match action {item["match_action"]} does not exist!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     match_action = match_action_dict[item['match_action']]
@@ -592,7 +622,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     sub_rules = []
                     for sub_rule in item['sub_rules']:
                         if sub_rule not in match_rules_dict:
-                            msg = 'The sub match rule %s does not exist!' % sub_rule
+                            msg = f'The sub match rule {sub_rule} does not exist!'
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         sub_rules.append(match_rules_dict[sub_rule])
@@ -601,14 +631,15 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     rule_lookup_dict = {}
                     for key, rule in item['rule_lookup_dict'].items():
                         if rule not in match_rules_dict:
-                            msg = 'The match rule %s does not exist!' % rule
+                            msg = f'The match rule {rule} does not exist!'
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         rule_lookup_dict[ast.literal_eval(key)] = match_rules_dict[rule]
-                    tmp_analyser = func(item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
+                    tmp_analyser = func(
+                        item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
-                        msg = 'The match rule %s does not exist!' % item['sub_rule']
+                        msg = f'The match rule {item["sub_rule"]} does not exist!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     sub_rule = match_rules_dict[item['sub_rule']]
@@ -658,7 +689,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 artefact_match_parameters = []
                 for match_parameters in item['artefact_match_parameters']:
                     artefact_match_parameters.append(tuple(i for i in match_parameters))
-                tmp_analyser = func(item['rule_id'], item['min_time_delta'], item['max_time_delta'], item['max_artefacts_a_for_single_b'],
+                tmp_analyser = func(item['rule_id'], item['min_time_delta'], item['max_time_delta'],
                                     artefact_match_parameters=artefact_match_parameters)
                 correlation_rules[item['rule_id']] = tmp_analyser
                 continue
@@ -673,7 +704,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     artefact_a_rules = []
                     for rule in item['artefact_a_rules']:
                         if rule not in correlation_rules:
-                            msg = 'The correlation rule %s does not exist!' % rule
+                            msg = f'The correlation rule {rule} does not exist!'
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         artefact_a_rules.append(correlation_rules[rule])
@@ -681,7 +712,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     artefact_b_rules = []
                     for rule in item['artefact_b_rules']:
                         if rule not in correlation_rules:
-                            msg = 'The correlation rule %s does not exist!' % rule
+                            msg = f'The correlation rule {rule} does not exist!'
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             raise ValueError(msg)
                         artefact_b_rules.append(correlation_rules[rule])
@@ -692,42 +723,40 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 ruleset = []
                 for rule in item['ruleset']:
                     if rule not in match_rules_dict:
-                        msg = 'The match rule %s does not exist!' % rule
+                        msg = f'The match rule {rule} does not exist!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     ruleset.append(match_rules_dict[rule])
                 tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'TimestampsUnsortedDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, exit_on_error_flag=item['exit_on_error_flag'],
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'AllowlistViolationDetector':
                 allowlist_rules = []
                 for rule in item['allowlist_rules']:
                     if rule not in match_rules_dict:
-                        msg = 'The match rule %s does not exist!' % rule
+                        msg = f'The match rule {rule} does not exist!'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     allowlist_rules.append(match_rules_dict[rule])
                 tmp_analyser = func(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
-                                    output_log_line=item['output_logline'])
+                                    output_logline=item['output_logline'])
             elif item['type'].name == 'EventTypeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], id_path_list=item['id_path_list'], allow_missing_id=item['allow_missing_id'],
+                    target_path_list=item['paths'], id_path_list=item['id_path_list'], allow_missing_id=item['allow_missing_id'],
                     allowed_id_tuples=item['allowed_id_tuples'], min_num_vals=item['min_num_vals'], max_num_vals=item['max_num_vals'],
-                    save_values=item['save_values'], track_time_for_tsa=item['track_time_for_tsa'],
-                    waiting_time_for_tsa=item['waiting_time_for_tsa'],
-                    num_sections_waiting_time_for_tsa=item['num_sections_waiting_time_for_tsa'])
+                    save_values=item['save_values'])
             elif item['type'].name == 'VariableTypeDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    msg = f'The defined EventTypeDetector {item["event_type_detector"]} does not exist!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], gof_alpha=item['gof_alpha'], s_gof_alpha=item['s_gof_alpha'],
+                    target_path_list=item['paths'], gof_alpha=item['gof_alpha'], s_gof_alpha=item['s_gof_alpha'],
                     s_gof_bt_alpha=item['s_gof_bt_alpha'], d_alpha=item['d_alpha'], d_bt_alpha=item['d_bt_alpha'],
                     div_thres=item['div_thres'], sim_thres=item['sim_thres'], indicator_thres=item['indicator_thres'],
                     num_init=item['num_init'], num_update=item['num_update'], num_update_unq=item['num_update_unq'],
@@ -743,12 +772,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_ind_for_weights=item['num_ind_for_weights'], used_multinomial_test=item['used_multinomial_test'],
                     use_empiric_distr=item['use_empiric_distr'], used_range_test=item['used_range_test'], range_alpha=item['range_alpha'],
                     range_threshold=item['range_threshold'], range_limits_factor=item['range_limits_factor'],
-                    num_reinit_range=item['num_reinit_range'], dw_alpha=item['dw_alpha'], output_log_line=item['output_logline'],
-                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'], auto_include_flag=learn)
+                    num_reinit_range=item['num_reinit_range'], dw_alpha=item['dw_alpha'], output_logline=item['output_logline'],
+                    ignore_list=item['ignore_list'], constraint_list=item['constraint_list'], learn_mode=learn)
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    msg = f'The defined EventTypeDetector {item["event_type_detector"]} does not exist!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
@@ -768,23 +797,23 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     used_validate_cor_meth=item['used_validate_cor_meth'],
                     validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
                     validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'],
-                    constraint_list=item['constraint_list'], auto_include_flag=learn)
+                    constraint_list=item['constraint_list'], learn_mode=learn)
             elif item['type'].name == 'PathValueTimeIntervalDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                     target_path_list=item['paths'], ignore_list=item['ignore_list'],
                     allow_missing_values_flag=item['allow_missing_values'],
-                    output_log_line=item['output_logline'], time_period_length=item['time_period_length'],
-                    max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], auto_include_flag=learn)
+                    output_logline=item['output_logline'], time_period_length=item['time_period_length'],
+                    max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], learn_mode=learn)
             elif item['type'].name == 'PathArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    msg = f'The defined EventTypeDetector {item["event_type_detector"]} does not exist!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    target_path_list=item['paths'], output_log_line=item['output_logline'], auto_include_flag=learn,
+                    target_path_list=item['paths'], output_logline=item['output_logline'], learn_mode=learn,
                     num_init=item['num_init'], force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     alpha=item['alpha'], alpha_bt=item['alpha_bt'], num_results_bt=item['num_results_bt'],
                     num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
@@ -792,26 +821,27 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'TSAArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
-                    msg = 'The defined EventTypeDetector %s does not exist!' % item['event_type_detector']
+                    msg = f'The defined EventTypeDetector {item["event_type_detector"]} does not exist!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
-                    path_list=item['paths'], acf_pause_interval_percentage=item['acf_pause_interval_percentage'],
+                    waiting_time=item['waiting_time'], num_sections_waiting_time=item['num_sections_waiting_time'],
+                    target_path_list=item['paths'], acf_pause_interval_percentage=item['acf_pause_interval_percentage'],
                     acf_auto_pause_interval=item['acf_auto_pause_interval'],
                     acf_auto_pause_interval_num_min=item['acf_auto_pause_interval_num_min'],
                     build_sum_over_values=item['build_sum_over_values'], num_periods_tsa_ini=item['num_periods_tsa_ini'],
                     num_division_time_step=item['num_division_time_step'], alpha=item['alpha'],
                     num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
                     num_results_bt=item['num_results_bt'], alpha_bt=item['alpha_bt'], acf_threshold=item['acf_threshold'],
-                    round_time_inteval_threshold=item['round_time_inteval_threshold'],
+                    round_time_interval_threshold=item['round_time_interval_threshold'],
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
-                    min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_log_line=item['output_logline'],
-                    ignore_list=item['ignore_list'], auto_include_flag=learn)
+                    min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_logline=item['output_logline'],
+                    ignore_list=item['ignore_list'], learn_mode=learn)
             elif item['type'].name == 'MinimalTransitionTimeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                    auto_include_flag=learn, output_log_line=item['output_logline'], path_list=item['paths'],
+                    learn_mode=learn, output_logline=item['output_logline'], target_path_list=item['paths'],
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
                     num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
                     time_output_threshold=item['time_output_threshold'], anomaly_threshold=item['anomaly_threshold'])
@@ -826,7 +856,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 atom_filter.subhandler_list[0] = (tmp_analyser, stop_when_handled_flag)
                 continue
             else:
-                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, auto_include_flag=learn)
+                tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn)
             if item['output_event_handlers'] is not None:
                 tmp_analyser.output_event_handlers = item['output_event_handlers']
             analysis_context.register_component(tmp_analyser, component_name=comp_name)
@@ -849,7 +879,7 @@ def add_default_analysis_components(analysis_context, anomaly_event_handlers, at
         else:
             learn = True
         from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-        nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=learn)
+        nmpd = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=learn)
         nmpd.output_event_handlers = None
         analysis_context.register_component(nmpd, component_name='DefaultNewMatchPathDetector')
         atom_filter.add_handler(nmpd)
@@ -858,22 +888,28 @@ def add_default_analysis_components(analysis_context, anomaly_event_handlers, at
 
 def build_event_handlers(analysis_context, anomaly_event_handlers):
     """Build the event handlers."""
+    import os
+    import stat
+
     try:
         event_handler_id_list = []
         if 'EventHandlers' in yaml_data and yaml_data['EventHandlers'] is not None:
             for item in yaml_data['EventHandlers']:
                 if item['id'] in event_handler_id_list:
-                    raise ValueError('Config-Error: The id "%s" occurred multiple times in EventHandlers!' % item['id'])
+                    raise ValueError(f'Config-Error: The id "{item["id"]}" occurred multiple times in EventHandlers!')
                 event_handler_id_list.append(item['id'])
                 func = item['type'].func
                 ctx = None
                 if item['type'].name == 'StreamPrinterEventHandler':
                     if 'output_file_path' in item:
                         try:
-                            stream = open(item['output_file_path'], 'w+')
+                            mode = 'w+'
+                            if os.path.exists(item['output_file_path']) and stat.S_ISFIFO(os.stat(item['output_file_path']).st_mode):
+                                mode = 'w'
+                            stream = open(item['output_file_path'], mode)
                             ctx = func(analysis_context, stream)
                         except OSError as e:
-                            msg = 'Error occured when opening stream to output_file_path %s. Error: %s' % (item['output_file_path'], e)
+                            msg = f'Error occured when opening stream to output_file_path {item["output_file_path"]}. Error: {e}'
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                             print(msg, file=sys.stderr)
                     else:
@@ -884,12 +920,11 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                     ctx = func(analysis_context, item['instance_name'])
                 if item['type'].name == 'KafkaEventHandler':
                     import configparser
-                    import os
                     config = configparser.ConfigParser()
                     if os.access(item['cfgfile'], os.R_OK):
                         config.read(item['cfgfile'])
                     else:
-                        msg = "%s does not exist or is not readable" % item['cfgfile']
+                        msg = f'{item["cfgfile"]} does not exist or is not readable'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     options = dict(config.items("DEFAULT"))
@@ -901,14 +936,23 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                         except:  # skipcq: FLK-E722
                             pass
                     ctx = func(analysis_context, item['topic'], options)
+                if item['type'].name == 'ZmqEventHandler':
+                    # if topic is "None" zmq will send messages without using any topic
+                    if 'topic' not in item:
+                        item['topic'] = None
+                    ctx = func(analysis_context, item['topic'], item['url'])
                 if ctx is None:
                     ctx = func(analysis_context)
-                if item['json'] is True or item['type'].name == 'KafkaEventHandler':
+                if item['json'] is True or item['type'].name == 'KafkaEventHandler' or item['type'].name == 'ZmqEventHandler':
                     from aminer.events.JsonConverterHandler import JsonConverterHandler
                     if item['pretty'] is True:
                         ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=True)
                     else:
                         ctx = JsonConverterHandler([ctx], analysis_context, pretty_print=False)
+                if item['score']:
+                    from aminer.events.ScoringEventHandler import ScoringEventHandler
+                    ctx = ScoringEventHandler([ctx], analysis_context, weights=item['weights'], auto_weights=item['auto_weights'],
+                                              auto_weights_history_length=item['auto_weights_history_length'])
                 anomaly_event_handlers.append(ctx)
             return event_handler_id_list
         raise KeyError()
@@ -925,9 +969,9 @@ def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
     if extra_data is not None:
         mod = 10
         if (extra_data[2] + 1) % mod == 0:
-            enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = False
+            enhanced_new_match_path_value_combo_detector_reference.learn_mode = False
         else:
-            enhanced_new_match_path_value_combo_detector_reference.auto_include_flag = True
+            enhanced_new_match_path_value_combo_detector_reference.learn_mode = True
     return match_value_list
 
 
@@ -956,7 +1000,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
                         raise ValueError(msg)
                     key_parser_dict[key] = value
                 elif parser_model_dict.get(val) is None:
-                    msg = 'The parser model %s does not exist!' % val
+                    msg = f'The parser model {val} does not exist!'
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 else:
@@ -964,7 +1008,7 @@ def parse_json_yaml(json_dict, parser_model_dict):
         elif value in ("ALLOW_ALL", "EMPTY_ARRAY", "EMPTY_OBJECT", "NULL_OBJECT"):
             key_parser_dict[key] = value
         elif parser_model_dict.get(value) is None:
-            msg = 'The parser model %s does not exist!' % value
+            msg = f'The parser model {value} does not exist!'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         else:

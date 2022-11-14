@@ -22,8 +22,10 @@ class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
     """
 
     def __init__(self, subhandler_list, stop_when_handled_flag=False):
-        self.subhandler_list = subhandler_list
-        self.stop_when_handled_flag = stop_when_handled_flag
+        # avoid "defined outside init" issue
+        self.log_success, self.log_total = [None]*2
+        super().__init__(
+            mutable_default_args=["subhandler_list"], subhandler_list=subhandler_list, stop_when_handled_flag=stop_when_handled_flag)
         self.latest_timestamp_seen = 0
 
     def receive_atom(self, log_atom):
@@ -39,7 +41,7 @@ class SimpleMonotonicTimestampAdjust(AtomHandlerInterface):
                 self.latest_timestamp_seen = log_atom.get_timestamp()
 
         result = False
-        for handler in self.subhandler_list:
+        for handler, _ in self.subhandler_list:
             handler_result = handler.receive_atom(log_atom)
             if handler_result is True:
                 result = True

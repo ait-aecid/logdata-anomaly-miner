@@ -25,7 +25,7 @@ class TimestampCorrectionFiltersTest(TestBase):
         t = time()
 
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                       output_log_line=False)
+                                                       output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         simple_monotonic_timstamp_adjust = SimpleMonotonicTimestampAdjust([new_match_path_detector], False)
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, new_match_path_detector)

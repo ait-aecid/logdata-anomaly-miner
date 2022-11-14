@@ -49,7 +49,7 @@ class TimeCorrelationViolationDetectorTest(TestBase):
     def setUp(self):
         """Set up the rules for the TimeCorrelationViolationDetector."""
         TestBase.setUp(self)
-        self.correlation_rule = CorrelationRule('Correlation', 1, 1.2, max_artefacts_a_for_single_b=1, artefact_match_parameters=[
+        self.correlation_rule = CorrelationRule('Correlation', 1, 1.2, artefact_match_parameters=[
             ('/model/sequence1/Value2Value', '/model/sequence2/Value3Value')])
         self.a_class_selector = EventClassSelector('Selector1', [self.correlation_rule], None)
         self.b_class_selector = EventClassSelector('Selector2', None, [self.correlation_rule])

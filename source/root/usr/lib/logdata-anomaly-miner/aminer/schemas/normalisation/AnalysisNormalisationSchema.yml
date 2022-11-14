@@ -44,6 +44,10 @@
                 'ignore_list': {
                     'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'id_path_list': {'type': 'list', 'default': []},
+                'scoring_path_list': {
+                    'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                'unique_path_list': {
+                    'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'prob_thresh': {'type': 'float', 'default': 0.05},
                 'default_freqs': {'type': 'boolean', 'default': False},
                 'skip_repetitions': {'type': 'boolean', 'default': False},
@@ -55,6 +59,10 @@
                 'min_allowed_time_diff': {'type': 'float', 'default': 5.0},
                 'lower_limit': {'type': ['integer', 'float']},
                 'upper_limit': {'type': ['integer', 'float']},
+                'idf': {'type': 'boolean', 'default': False},
+                'norm': {'type': 'boolean', 'default': False},
+                'add_normal': {'type': 'boolean', 'default': False},
+                'check_empty_windows': {'type': 'boolean', 'default': False},
                 'bin_size': {'type': 'integer'},
                 'bin_count': {'type': 'integer'},
                 'outlier_bins_flag': {'type': 'boolean', 'default': False},
@@ -93,7 +101,6 @@
                 'rule_id': {'type': 'string'},
                 'min_time_delta': {'type': 'integer'},
                 'max_time_delta': {'type': 'integer'},
-                'max_artefacts_a_for_single_b': {'type': 'integer'},
                 'artefact_match_parameters': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}},
                                               'nullable': True, 'default': None},
                 'action_id': {'type': 'string'},
@@ -109,9 +116,8 @@
                 'min_num_vals': {'type': 'integer', 'default': 1000},
                 'max_num_vals': {'type': 'integer', 'default': 1500},
                 'save_values': {'type': 'boolean', 'default': True},
-                'track_time_for_tsa': {'type': 'boolean', 'default': False},
-                'waiting_time_for_tsa': {'type': 'integer', 'default': 300},
-                'num_sections_waiting_time_for_tsa': {'type': 'integer', 'default': 10},
+                'waiting_time': {'type': 'integer', 'default': 300},
+                'num_sections_waiting_time': {'type': 'integer', 'default': 10},
                 'event_type_detector': {'type': 'string'},
                 'used_gof_test': {'type': 'string', 'allowed': ['CM', 'KS'], 'default': 'CM'},
                 'gof_alpha': {'type': 'float', 'default': 0.05},
@@ -179,7 +185,6 @@
                     'coverVals', 'distinctDistr']}, 'nullable': True, 'default': None},
                 'validate_cor_cover_vals_thres': {'type': 'float', 'default': 0.7},
                 'validate_cor_distinct_thres': {'type': 'float', 'default': 0.05},
-                'allow_missing_values_flag': {'type': 'boolean'},
                 'time_period_length': {'type': 'integer', 'min': 1, 'required': True, 'default': 86400},
                 'max_time_diff': {'type': 'integer', 'min': 1, 'required': True, 'default': 360},
                 'num_reduce_time_list': {'type': 'integer', 'min': 1, 'required': True, 'default': 10},
@@ -190,7 +195,7 @@
                 'num_min_time_history': {'type': 'integer', 'default': 20},
                 'num_max_time_history': {'type': 'integer', 'default': 30},
                 'num_results_bt': {'type': 'integer', 'default': 15},
-                'round_time_inteval_threshold': {'type': 'float', 'default': 0.02},
+                'round_time_interval_threshold': {'type': 'float', 'default': 0.02},
                 'acf_threshold': {'type': 'float', 'default': 0.2},
                 'acf_pause_interval_percentage': {'type': 'float', 'default': 0.2},
                 'acf_auto_pause_interval': {'type': 'boolean', 'default': True},
@@ -208,6 +213,8 @@
                 'early_exceeding_anomaly_output': {'type': 'boolean', 'default': False},
                 'set_lower_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
                 'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
+                'local_maximum_threshold': {'type': 'float', 'default': 0.2},
+                'combine_values': {'type': 'boolean', 'nullable': True, 'default': True},
             }
         }
     }

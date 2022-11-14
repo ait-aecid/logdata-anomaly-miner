@@ -8,6 +8,8 @@ sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 sudo cp ./integration/offline_mode/data/* /tmp/
 
+exit_code=0
+
 #start aminer
 #if the aminer is stuck, Jenkins should fail it after a while.
 sudo aminer --config ./integration/offline_mode/offline_mode.yml --offline-mode --from-begin > /tmp/out.txt
@@ -128,3 +130,4 @@ fi
 sudo rm /tmp/file1.log
 sudo rm /tmp/file2.log
 
+exit $exit_code

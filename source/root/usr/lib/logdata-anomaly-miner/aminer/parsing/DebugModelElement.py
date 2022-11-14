@@ -22,39 +22,28 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 class DebugModelElement(ModelElementInterface):
     """
     This class defines a model element matching any data of length zero at any position.
-    Thus it can never fail to match and can be inserted at any position in the parsing tree, where matching itself does not alter parsing
+    Thus, it can never fail to match and can be inserted at any position in the parsing tree, where matching itself does not alter parsing
     flow (see e.g. FirstMatchModelElement). It will immediately write the current state of the match to stderr for inspection.
     """
 
     def __init__(self, element_id: str):
-        if not isinstance(element_id, str):
-            msg = "element_id has to be of the type string."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if len(element_id) < 1:
-            msg = "element_id must not be empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise ValueError(msg)
-        self.element_id = element_id
+        """
+        Initialize the ModelElement.
+        @param element_id an identifier for the ModelElement which is shown in the path.
+        """
+        super().__init__(element_id)
         # To avoid having those elements hidden in production configuration, write a line every time the class is instantiated.
-        msg = "DebugModelElement %s added" % element_id
+        msg = f"DebugModelElement {element_id} added"
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
-
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
-        """
-        Get all possible child model elements of this element.
-        @return empty list as there are no children of this element.
-        """
-        return None
 
     def get_match_element(self, path: str, match_context):
-        """@return Always return a match."""
-        msg = 'DebugModelElement path = "%s/%s", unmatched = "%s"' % (path, self.element_id, repr(match_context.match_data))
+        """
+        @param path to be printed in the MatchElement.
+        @param match_context the match_context to be analyzed.
+        @return Always return a match.
+        """
+        msg = f'DebugModelElement path = "{path}/{self.element_id}", unmatched = "{repr(match_context.match_data)}"'
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
         print(msg, file=sys.stderr)
-        return MatchElement('%s/%s' % (path, self.element_id), b"", b"", None)
+        return MatchElement(f"{path}/{self.element_id}", b"", b"", None)

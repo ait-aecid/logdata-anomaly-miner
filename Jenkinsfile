@@ -8,6 +8,12 @@ void setBuildStatus(String message, String state) {
     ]);
 }
 
+// execute this before anything else, including requesting any time on an agent
+if (currentBuild.getBuildCauses().toString().contains("BranchIndexingCause")) {
+  setBuildStatus("Build skipped due to trigger being Branch Indexing", currentBuild.getPreviousBuild().result);
+  return
+}
+
 def  ubuntu18image = false
 def  ubuntu20image = false
 def  debianbusterimage = false
@@ -272,6 +278,11 @@ pipeline {
                 stage("MissingMatchPathDetector") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToMissingMatchPathValueDetector development"
+                    }
+                }
+                stage("EntropyDetector") {
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runHowToEntropyDetector development"
                     }
                 }
             }

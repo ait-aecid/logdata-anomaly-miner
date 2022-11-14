@@ -13,27 +13,7 @@ class DebugModelElementTest(TestBase):
     id_ = "debug"
     path = "path"
 
-    def test1get_id(self):
-        """Test if get_id works properly."""
-        old_stderr = sys.stderr
-        output = StringIO()
-        sys.stderr = output
-        debug_me = DebugModelElement(self.id_)
-        self.assertEqual(debug_me.get_id(), self.id_)
-        self.assertEqual("DebugModelElement %s added\n" % self.id_, output.getvalue())
-        sys.stderr = old_stderr
-
-    def test2get_child_elements(self):
-        """Test if get_child_elements returns None."""
-        old_stderr = sys.stderr
-        output = StringIO()
-        sys.stderr = output
-        debug_me = DebugModelElement(self.id_)
-        self.assertEqual(debug_me.get_child_elements(), None)
-        self.assertEqual("DebugModelElement %s added\n" % self.id_, output.getvalue())
-        sys.stderr = old_stderr
-
-    def test3get_match_element_valid_match(self):
+    def test1get_match_element_valid_match(self):
         """Parse data and check if the MatchContext was not changed."""
         old_stderr = sys.stderr
         output = StringIO()
@@ -65,7 +45,7 @@ class DebugModelElementTest(TestBase):
 
         sys.stderr = old_stderr
 
-    def test4element_id_input_validation(self):
+    def test2element_id_input_validation(self):
         """Check if element_id is validated."""
         self.assertRaises(ValueError, DebugModelElement, "")  # empty element_id
         self.assertRaises(TypeError, DebugModelElement, None)  # None element_id
@@ -79,7 +59,7 @@ class DebugModelElementTest(TestBase):
         self.assertRaises(TypeError, DebugModelElement, ())  # empty tuple element_id is not allowed
         self.assertRaises(TypeError, DebugModelElement, set())  # empty set element_id is not allowed
 
-    def test5get_match_element_match_context_input_validation(self):
+    def test3get_match_element_match_context_input_validation(self):
         """Check if an exception is raised, when other classes than MatchContext are used in get_match_element."""
         model_element = DebugModelElement(self.id_)
         data = b"abcdefghijklmnopqrstuvwxyz.!?"

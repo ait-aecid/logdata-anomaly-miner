@@ -37,31 +37,31 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id='Default',
-                 record_count_before_event=10000, output_log_line=True, use_path_match=True, use_value_match=True,
+                 record_count_before_event=10000, output_logline=True, use_path_match=True, use_value_match=True,
                  min_rule_attributes=1, max_rule_attributes=5):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        @param aminer_config configuration from analysis_context.
+        @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param parallel_check_count number of rule detection checks to run in parallel.
+        @param persistence_id name of persistence file.
         @param record_count_before_event number of events used to calculate statistics (i.e., window size)
+        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param min_rule_attributes minimum number of attributes forming a rule
         @param max_rule_attributes maximum number of attributes forming a rule
-        @param use_path_match if true rules are build based on path existance
+        @param use_path_match if true rules are build based on path existence
         @param use_value_match if true rules are built based on actual values
         """
+        self.next_persist_time, self.log_success, self.log_total = [None]*3
+        super().__init__(
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, parallel_check_count=parallel_check_count,
+            persistence_id=persistence_id, record_count_before_event=record_count_before_event, output_logline=output_logline,
+            use_path_match=use_path_match, use_value_match=use_value_match, min_rule_attributes=min_rule_attributes,
+            max_rule_attributes=max_rule_attributes
+        )
         self.last_timestamp = 0.0
-        self.parallel_check_count = parallel_check_count
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.min_rule_attributes = min_rule_attributes
-        self.max_rule_attributes = max_rule_attributes
         self.last_unhandled_match = None
         self.total_records = 0
-        self.record_count_before_event = record_count_before_event
-        self.persistence_id = persistence_id
-        self.output_log_line = output_log_line
-        self.use_path_match = use_path_match
-        self.use_value_match = use_value_match
-        self.aminer_config = aminer_config
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -71,7 +71,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
             self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
         else:
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -82,8 +82,8 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             timestamp = time.time()
         if timestamp < self.last_timestamp:
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__,
-                                       'Logdata not sorted: last %s, current %s' % (self.last_timestamp, timestamp),
+                listener.receive_event(f'Analysis.{self.__class__.__name__}',
+                                       f'Logdata not sorted: last {self.last_timestamp}, current {timestamp}',
                                        [log_atom.parser_match.match_element.annotate_match('')], event_data, log_atom, self)
             return
         self.last_timestamp = timestamp
@@ -120,7 +120,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
             analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
                                   'AffectedLogAtomValues': [log_atom.raw_data.decode(AminerConfig.ENCODING)]}
-            if self.output_log_line:
+            if self.output_logline:
                 feature_list = []
                 for feature in self.feature_list:
                     tmp_list = {}
@@ -137,9 +137,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
             event_data['AnalysisComponent'] = analysis_component
             for listener in self.anomaly_event_handlers:
-                listener.receive_event('Analysis.%s' % self.__class__.__name__, 'Correlation report', result, event_data, log_atom, self)
+                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Correlation report', result, event_data, log_atom, self)
             self.reset_statistics()
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s ran analysis.', self.__class__.__name__)
+            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} ran analysis.', )
         self.log_success += 1
 
     def rule_to_dict(self, rule):
@@ -174,7 +174,7 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
 
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""
@@ -245,25 +245,31 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
         result = ''
         for feature in self.feature_list:
             trigger_count = feature.trigger_count
-            result += '%s (%d) e = %d:' % (feature.rule, feature.index, trigger_count)
+            result += f'{feature.rule} ({feature.index}) e = {trigger_count}:'
             stat_pos = (self.parallel_check_count * feature.index) << 1
             for feature_pos in range(len(self.feature_list)):  # skipcq: PTC-W0060
                 event_count = self.event_count_table[stat_pos]
                 ratio = '-'
                 if trigger_count != 0:
+                    # skipcq: PYL-C0209
                     ratio = '%.2e' % (float(event_count) / trigger_count)
                 delta = '-'
                 if event_count != 0:
+                    # skipcq: PYL-C0209
                     delta = '%.2e' % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
+                # skipcq: PYL-C0209
                 result += '\n  %d: {c = %#6d r = %s dt = %s' % (feature_pos, event_count, ratio, delta)
                 stat_pos += 1
                 event_count = self.event_count_table[stat_pos]
                 ratio = '-'
                 if trigger_count != 0:
+                    # skipcq: PYL-C0209
                     ratio = '%.2e' % (float(event_count) / trigger_count)
                 delta = '-'
                 if event_count != 0:
+                    # skipcq: PYL-C0209
                     delta = '%.2e' % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
+                # skipcq: PYL-C0209
                 result += ' c = %#6d r = %s dt = %s}' % (event_count, ratio, delta)
                 stat_pos += 1
             result += '\n'

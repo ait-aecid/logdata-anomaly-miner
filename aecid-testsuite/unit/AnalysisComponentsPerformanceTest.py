@@ -485,8 +485,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            correlation_rule = CorrelationRule('Correlation', 0, chance, max_artefacts_a_for_single_b=1,
-                                               artefact_match_parameters=[('/integer/d0', '/integer/d1')])
+            correlation_rule = CorrelationRule('Correlation', 0, chance, artefact_match_parameters=[('/integer/d0', '/integer/d1')])
             a_class_selector = EventClassSelector('Selector1', [correlation_rule], None)
             b_class_selector = EventClassSelector('Selector2', None, [correlation_rule])
             rules = [Rules.PathExistsMatchRule('/integer/d0', a_class_selector), Rules.PathExistsMatchRule('/integer/d1', b_class_selector)]
@@ -718,7 +717,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
                 'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
                 id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-                auto_include_flag=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_log_line=False)
+                learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
             t = time.time()
             measured_time = 0
             i = 0
@@ -737,7 +736,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
             new_match_id_value_combo_detector.__class__.__name__, avg, results,
             '%.2f seconds min_allowed_time_diff.' % min_allowed_time_diff)
 
-    def run_parser_count(self, set_target_path_list, report_after_number_of_elements):
+    def run_parser_count(self, set_path_list, report_after_number_of_elements):
         """Run the performance tests for ParserCount."""
         log_lines = [
             b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f '
@@ -819,7 +818,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            if set_target_path_list:
+            if set_path_list:
                 parser_count = ParserCount(self.aminer_config, ['parser/type/path/name', 'parser/type/syscall/syscall'], [
                     self.stream_printer_event_handler], report_after_number_of_elements)
             else:
@@ -840,7 +839,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             parser_count.__class__.__name__, avg, results,
-            'set_target_path_list: %s, report_after_number_of_elements: %d' % (set_target_path_list, report_after_number_of_elements))
+            'set_path_list: %s, report_after_number_of_elements: %d' % (set_path_list, report_after_number_of_elements))
 
     def run_event_correlation_detector(self, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                                        hypothesis_eval_delta_time, delta_time_to_discard_hypothesis):
@@ -877,9 +876,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             ecd.__class__.__name__, avg, results,
-            'auto_include_flag: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
+            'learn_mode: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
             'ates_size %d, hypothesis_eval_delta_time: %.2f, delta_time_to_discard_hypothesis: %.2f' % (
-                ecd.auto_include_flag, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
+                ecd.learn_mode, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
 
         # check_phase
@@ -887,7 +886,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = 0
         z = 0
         while z < self.iterations:
-            ecd.auto_include_flag = False
+            ecd.learn_mode = False
             t = time.time()
             measured_time = 0
             i = 0
@@ -903,9 +902,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             ecd.__class__.__name__, avg, results,
-            'auto_include_flag: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
+            'learn_mode: %s, generation: %.2f, diff: %.2f, p0: %.2f, alpha: %.2f, max_hypothesis: %d, max_observations: %d, candid'
             'ates_size %d, hypothesis_eval_delta_time: %.2f, delta_time_to_discard_hypothesis: %.2f' % (
-                ecd.auto_include_flag, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
+                ecd.learn_mode, generation, diff, p0, alpha, max_hypotheses, max_observations, candidates_size,
                 hypothesis_eval_delta_time, delta_time_to_discard_hypothesis))
 
     def run_match_filter(self, number_of_paths):
@@ -977,7 +976,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
             else:
                 number_of_paths = 1000000
-            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=path_list)
 
             seconds = time.time()
             i = 0
@@ -1036,9 +1035,9 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
             else:
                 number_of_paths = 1000000
-            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=path_list)
             variable_type_detector = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], event_type_detector,
-                                                          path_list=path_list)
+                                                          target_path_list=path_list)
             seconds = time.time()
             i = 0
             measured_time = 0
@@ -1097,7 +1096,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
                 path_list = ['/integer/d' + str(i) for i in range(number_of_paths)]
             else:
                 number_of_paths = 1000000
-            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], path_list=path_list)
+            event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=path_list)
             variable_correlation_detector = VariableCorrelationDetector(
                 self.aminer_config, [self.stream_printer_event_handler], event_type_detector)
             seconds = time.time()
@@ -1319,13 +1318,13 @@ class AnalysisComponentsPerformanceTest(TestBase):
 
     def test16parser_count(self):
         """Start performance tests for ParserCount."""
-        # use target_paths
+        # use path
         self.run_parser_count(True, 60)
         self.run_parser_count(True, 1000)
         self.run_parser_count(True, 10000)
         self.run_parser_count(True, 100000)
 
-        # use no target_paths
+        # use no path
         self.run_parser_count(False, 60)
         self.run_parser_count(False, 1000)
         self.run_parser_count(False, 10000)

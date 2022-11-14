@@ -257,7 +257,7 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(allowlist_violation_detector)
 
     from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, auto_include_flag=True)
+    new_match_path_detector = NewMatchPathDetector(analysis_context.aminer_config, anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_detector, component_name="NewMatchPath")
     atom_filter.add_handler(new_match_path_detector)
 
@@ -267,14 +267,14 @@ def build_analysis_pipeline(analysis_context):
         if extra_data is not None:
             mod = 10000
             if (extra_data[2] + 1) % mod == 0:
-                enhanced_new_match_path_value_combo_detector.auto_include_flag = False
+                enhanced_new_match_path_value_combo_detector.learn_mode = False
             else:
-                enhanced_new_match_path_value_combo_detector.auto_include_flag = True
+                enhanced_new_match_path_value_combo_detector.learn_mode = True
         return match_value_list
 
     from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
     enhanced_new_match_path_value_combo_detector = EnhancedNewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        '/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, auto_include_flag=True,
+        '/model/DailyCron/UName', '/model/DailyCron/JobNumber'], anomaly_event_handlers, learn_mode=True,
         tuple_transformation_function=tuple_transformation_function)
     analysis_context.register_component(enhanced_new_match_path_value_combo_detector, component_name="EnhancedNewValueCombo")
     atom_filter.add_handler(enhanced_new_match_path_value_combo_detector)
@@ -309,19 +309,19 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(analysis_context.aminer_config, [
-        '/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers, auto_include_flag=True)
+        '/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, [
-        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, auto_include_flag=True)
+        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
     atom_filter.add_handler(new_match_path_value_detector)
 
     from aminer.analysis.MissingMatchPathValueDetector import MissingMatchPathValueDetector
     missing_match_path_value_detector = MissingMatchPathValueDetector(
-        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, auto_include_flag=True, default_interval=2,
+        analysis_context.aminer_config, ['/model/DiskReport/Space'], anomaly_event_handlers, learn_mode=True, default_interval=2,
         realert_interval=5)
     analysis_context.register_component(missing_match_path_value_detector, component_name="MissingMatch")
     atom_filter.add_handler(missing_match_path_value_detector)
@@ -329,14 +329,13 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.TimeCorrelationDetector import TimeCorrelationDetector
     time_correlation_detector = TimeCorrelationDetector(
         analysis_context.aminer_config, anomaly_event_handlers, 2, min_rule_attributes=1, max_rule_attributes=5,
-        record_count_before_event=70000, output_log_line=True)
+        record_count_before_event=70000, output_logline=True)
     analysis_context.register_component(time_correlation_detector, component_name="TimeCorrelationDetector")
     atom_filter.add_handler(time_correlation_detector)
 
     from aminer.analysis.TimeCorrelationViolationDetector import TimeCorrelationViolationDetector, CorrelationRule, EventClassSelector
-    cron_job_announcement = CorrelationRule('CronJobAnnouncement', 5, 6, max_artefacts_a_for_single_b=1,
-                                            artefact_match_parameters=[
-                                                ('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
+    cron_job_announcement = CorrelationRule(
+        'CronJobAnnouncement', 5, 6, artefact_match_parameters=[('/model/CronAnnouncement/JobNumber', '/model/CronExecution/JobNumber')])
     a_class_selector = EventClassSelector('Announcement', [cron_job_announcement], None)
     b_class_selector = EventClassSelector('Execution', None, [cron_job_announcement])
     rules = [Rules.PathExistsMatchRule('/model/CronAnnouncement/Run', a_class_selector),
