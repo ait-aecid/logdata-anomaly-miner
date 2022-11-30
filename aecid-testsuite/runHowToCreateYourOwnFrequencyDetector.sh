@@ -35,13 +35,11 @@ BRANCH=$1
 fi
 
 sudo chown -R aminer:aminer /var/lib/aminer 2> /dev/null
-
 INPUT=logdata-anomaly-miner.wiki/HowTo-Create-your-own-FrequencyDetector.md
 VAL_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/validation/AnalysisValidationSchema.py
 TMP_VAL_SCHEMA=/tmp/AnalysisValidationSchema.py
 NOR_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/normalisation/AnalysisNormalisationSchema.py
 OUT=/tmp/out.txt
-
 
 YML_CONFIG=/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py
 TMP_YML_CONFIG=/tmp/YamlConfig.py
@@ -50,8 +48,6 @@ FREQ_DET=/usr/lib/logdata-anomaly-miner/aminer/analysis/FrequencyDetector.py
 TMP_FREQ_DET=/tmp/FrequencyDetector.py
 CFG_PATH=/etc/aminer/config.yml
 LOG=/tmp/access.log
-
-
 
 # extract the file from the development branch of the wiki project.
 git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git 2> /dev/null
