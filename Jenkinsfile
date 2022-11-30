@@ -8,26 +8,6 @@ void setBuildStatus(String message, String state) {
     ]);
 }
 
-boolean isBranchIndexingCause() {
-    def isBranchIndexing = false
-    if (!currentBuild.rawBuild) {
-      return true
-    }
-
-    currentBuild.rawBuild.getCauses().each { cause ->
-        if (cause instanceof jenkins.branch.BranchIndexingCause) {
-            isBranchIndexing = true
-        }
-    }
-    return isBranchIndexing
-}
-
-// execute this before anything else, including requesting any time on an agent
-if (isBranchIndexingCause() || currentBuild.getBuildCauses().toString().contains("BranchIndexingCause")) {
-  setBuildStatus("Build skipped due to trigger being Branch Indexing", currentBuild.getPreviousBuild().result);
-  return
-}
-
 def  ubuntu18image = false
 def  ubuntu20image = false
 def  debianbusterimage = false
