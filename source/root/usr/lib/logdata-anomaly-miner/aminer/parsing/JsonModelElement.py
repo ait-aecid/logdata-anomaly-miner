@@ -136,11 +136,15 @@ class JsonModelElement(ModelElementInterface):
         matches: Union[List[Union[MatchElement, None]]] = []
         try:
             index = 0
+            # There can be a valid case in which the text contains for example \x2d, \\x2d or \\\\x2d, which basically should be decoded
+            # into the unicode form.
             while index != -1:
-                index = match_context.match_data.find(rb"\x", index)
-                if index != -1 and index != match_context.match_data.find(b"\\x", index-1):
-                    match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
-                    break
+                index = match_context.match_data.find(rb"\x")
+                if index != -1:
+                    try:
+                        match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
+                    except UnicodeDecodeError:
+                        break
             index = 0
             while index != -1:
                 index = match_context.match_data.find(b"\\", index)
