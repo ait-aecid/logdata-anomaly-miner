@@ -8,7 +8,7 @@ OUT=/tmp/output
 SYSLOG=/tmp/syslog
 AUTH=/tmp/auth.log
 
-#<<'END'
+
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
 sudo mkdir /tmp/lib 2> /dev/null
 sudo mkdir /tmp/lib/aminer 2> /dev/null
@@ -33,6 +33,7 @@ if ! test -f "$CFG_PATH22"; then
 	exit 1
 fi
 
+#<<END
 # starting download to reduce wait time
 curl $KAFKA_URL --output kafka.tgz 2> /dev/null &
 DOWNLOAD_PID=$!
@@ -128,7 +129,7 @@ sleep 1
 COUNTER=0
 
 #start aminer
-sudo aminer --config $CFG_PATH22 -f > $OUT &
+sudo aminer -C --config $CFG_PATH22 -f > $OUT &
 PID=$!
 sleep 8
 
@@ -165,7 +166,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #ADD HERE
 
 #stop aminer
-sleep 3
+sleep 12
 sudo pkill -x aminer
 wait $PID
 sleep 3 # leave the kafka handler some time.

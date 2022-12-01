@@ -5,7 +5,7 @@
 ##################################################################
 # Description of the test. Line numbers are also considering starting lines with ```, so they are incremented by one compared to the text itself.
 # 1.) Extract the lines between 1st ```yaml and 3rd ``` and store it in CFG_PATH.
-# 2.) Replace LogResourceList path with LOG1 in CFG_PATH.
+# 2.) Replace LogResourceList path with LOG1 in CFG_PATH and the report interval of the ParserCount.
 # 3.) Parse the aminer CMD between 4th and 5th ```, replace the CFG_PATH and run it.
 # 4.) Compare the first two anomalies with the output between 6th and 7th ``` (without the timestamps)
 # 5.) Compare the last anomaly with the output between 8th and 9th ``` (without the timestamps)
@@ -45,6 +45,7 @@ awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee
 
 # replace LogResourceList (2.)
 sed "s?file:///home/ubuntu/entropy/entropy_train.log?file:///${LOG1}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
+sed "s?report_interval: 5?report_interval: 555555555?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
 
 # parse aminer CMD and run it (3.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE | sed '/^```/ d' > $OUT
@@ -114,6 +115,10 @@ cmp --silent $TMPFILE1 $TMPFILE2
 res=$?
 if [[ $res != 0 ]]; then
   echo "Failed Test in 5."
+  cat "$TMPFILE1"
+  echo
+  echo
+  cat "$TMPFILE2"
   exit_code=1
 fi
 exit_code=$((exit_code | res))
@@ -171,6 +176,9 @@ cmp --silent $TMPFILE1 $TMPFILE2
 res=$?
 if [[ $res != 0 ]]; then
   echo "Failed Test in 10."
+  cat $TMPFILE1
+  echo
+  cat $TMPFILE2
 fi
 exit_code=$((exit_code | res))
 

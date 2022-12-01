@@ -30,8 +30,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, scoring_path_list=None, window_size=600,
-                 num_windows=50, confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False,
+    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, scoring_path_list=None, unique_path_list=None,
+                 window_size=600, num_windows=50, confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False,
                  set_lower_limit=None, set_upper_limit=None, persistence_id='Default', learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
@@ -41,6 +41,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                occurrences. When no paths are specified, the events given by the full path list are analyzed.
         @param scoring_path_list parser paths of values to be analyzed by following event handlers like the ScoringEventHandler.
                Multiple paths mean that values are analyzed by their combined occurrences.
+        @param unique_path_list parser paths of values where only unique value occurrences should be counted for every value occurring
+               in target_path_list.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param window_size the length of the time window for counting in seconds.
         @param num_windows the number of previous time windows considered for expected frequency estimation.
@@ -65,7 +67,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         super().__init__(
             mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, scoring_path_list=scoring_path_list,
-            window_size=window_size,  num_windows=num_windows, confidence_factor=confidence_factor,
+            unique_path_list=unique_path_list, window_size=window_size, num_windows=num_windows, confidence_factor=confidence_factor,
             empty_window_warnings=empty_window_warnings, early_exceeding_anomaly_output=early_exceeding_anomaly_output,
             set_lower_limit=set_lower_limit, set_upper_limit=set_upper_limit, persistence_id=persistence_id, learn_mode=learn_mode,
             output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
@@ -74,6 +76,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.next_check_time = None
         self.counts = {}
         self.scoring_value_list = {}
+        self.unique_values = {}
         self.ranges = {}
         self.exceeded_range_frequency = {}
         self.log_windows = 0
@@ -143,6 +146,30 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             if all_values_none is True:
                 return
             log_event = tuple(values)
+
+        # Get values that occur in unique_path_list
+        unique_path_value = None
+        if self.unique_path_list is not None and len(self.unique_path_list) != 0:
+            values = []
+            for path in self.unique_path_list:
+                match = parser_match.get_match_dictionary().get(path)
+                if match is None:
+                    continue
+                matches = []
+                if isinstance(match, list):
+                    matches = match
+                else:
+                    matches.append(match)
+                for match in matches:
+                    if isinstance(match.match_object, bytes):
+                        value = match.match_object.decode(AminerConfig.ENCODING)
+                    else:
+                        value = str(match.match_object)
+                    values.append(value)
+            # Initialize unique values for current log event
+            if log_event not in self.unique_values:
+                self.unique_values[log_event] = set()
+            unique_path_value = tuple(values)
 
         # Store copy of last seen instance of raw log event to correctly show affected event type when anomaly occurs.
         self.last_seen_log[log_event] = log_atom
@@ -219,6 +246,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 for _ in range(skipped_windows + 1):
                     self.reset_counter(log_ev)
                 self.ranges[log_ev] = None
+            # Reset all stored unique values for every log event
+            for log_ev in self.unique_values:
+                self.unique_values[log_ev] = set()
         elif self.early_exceeding_anomaly_output and log_event in self.counts and (len(self.counts[log_event]) >= 2 or (
                 self.set_lower_limit is not None and self.set_upper_limit is not None)):
             # Check if the count exceeds the range and output a warning the first time the range exceeds it
@@ -229,7 +259,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             if self.ranges[log_event] is None:
                 self.ranges[log_event] = self.calculate_range(log_event)
             # Compare log event frequency of previous time windows and current time window
-            if self.counts[log_event][-1] + 1 > self.ranges[log_event][1] and not self.exceeded_range_frequency[log_event]:
+            if self.counts[log_event][-1] > self.ranges[log_event][1] and not self.exceeded_range_frequency[log_event]:
                 occurrences_mean = (self.ranges[log_event][0] + self.ranges[log_event][1]) / 2
                 self.exceeded_range_frequency[log_event] = True
                 try:
@@ -248,7 +278,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                   'ExpectedLogAtomValuesFrequencyRange': [
                                       np.ceil(max(0, self.ranges[log_event][0])),
                                       np.floor(self.ranges[log_event][1])],
-                                  'LogAtomValuesFrequency': self.counts[log_event][-1] + 1,
+                                  'LogAtomValuesFrequency': self.counts[log_event][-1],
                                   'WindowSize': self.window_size,
                                   'ConfidenceFactor': self.confidence_factor}
                 event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
@@ -274,7 +304,13 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
         # Increase count for observed events
         if log_event in self.counts:
-            self.counts[log_event][-1] += 1
+            if unique_path_value is not None:
+                # When unique path is set, only increase count when value has not been observed before
+                if unique_path_value not in self.unique_values[log_event]:
+                    self.counts[log_event][-1] += 1
+                    self.unique_values[log_event].add(unique_path_value)
+            else:
+                self.counts[log_event][-1] += 1
         else:
             self.counts[log_event] = [1]
         self.log_success += 1

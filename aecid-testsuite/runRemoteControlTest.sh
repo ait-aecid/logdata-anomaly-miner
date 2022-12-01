@@ -366,9 +366,9 @@ if [[ "$stdout" != "$expected" ]]; then
 fi
 sudo rm /tmp/config.py
 
-echo "save_current_config(analysis_context,'[dd/path/config.py')" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "save_current_config(analysis_context,'[dd/path/config.py')")
-expected="${PREFIX}\"${NOT_FOUND_WARNINGS}FAILURE: file '[dd/path/config.py' could not be found or opened!\""
+echo "save_current_config(analysis_context,'[/path/config.py')" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "save_current_config(analysis_context,'[/path/config.py')")
+expected="${PREFIX}'Exception: [/path/config.py is not a valid filename!'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then

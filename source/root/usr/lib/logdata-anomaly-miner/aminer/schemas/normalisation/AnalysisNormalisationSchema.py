@@ -46,6 +46,8 @@
                 'id_path_list': {'type': 'list', 'default': []},
                 'scoring_path_list': {
                     'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                'unique_path_list': {
+                    'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'prob_thresh': {'type': 'float', 'default': 0.05},
                 'default_freqs': {'type': 'boolean', 'default': False},
                 'skip_repetitions': {'type': 'boolean', 'default': False},
@@ -94,7 +96,7 @@
                 'regex': {'type': 'string'},
                 'seconds_modulo': {'type': 'integer'},
                 'limit_lookup_dict': {'type': 'dict', 'valuesrules': {'type': 'list', 'schema': {
-                    'type': [ 'integer', 'float' ], 'min': 0}}},
+                    'type': ['integer', 'float'], 'min': 0}}},
                 'default_limit': {'type': 'list', 'schema': {'type': 'integer'}, 'nullable': True, 'default': None},
                 'rule_id': {'type': 'string'},
                 'min_time_delta': {'type': 'integer'},
@@ -203,7 +205,7 @@
                 'anomaly_threshold': {'type': 'float', 'default': 0.05},
                 'num_periods_tsa_ini': {'type': 'integer', 'default': 20},
                 'allowed_id_tuples': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}}, 'nullable': True,
-                    'default': None},
+                                      'default': None},
                 'force_period_length': {'type': 'boolean', 'default': False},
                 'set_period_length': {'type': 'integer', 'default': 604800},
                 'min_log_lines_per_time_step': {'type': 'integer', 'default': 10},

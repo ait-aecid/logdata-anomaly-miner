@@ -51,11 +51,11 @@ class ParserModelType:
                             logging.getLogger(DEBUG_LOG_NAME).error(exception)
                             raise exception
 
-                    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.yml',
+                    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py',
                               'r') as sma:
                         # skipcq: PYL-W0123
                         parser_normalisation_schema = eval(sma.read())
-                    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.yml',
+                    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py',
                               'r') as sma:
                         # skipcq: PYL-W0123
                         parser_validation_schema = eval(sma.read())
@@ -184,7 +184,7 @@ class ConfigValidator(Validator):
         else:
             lower_value = self.document[key]
         if value < lower_value:
-            self._error(field, "%s(=%s) must be bigger than or equal with %s(=%s)." % (field, str(value), key, str(self.document[key])))
+            self._error(field, f"{field}(={str(value)}) must be bigger than or equal with {key}(={str(self.document[key])}).")
 
 
 class NormalisationValidator(ConfigValidator):

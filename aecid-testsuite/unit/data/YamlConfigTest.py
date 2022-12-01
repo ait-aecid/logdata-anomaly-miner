@@ -596,7 +596,7 @@ class YamlConfigTest(TestBase):
         spec.loader.exec_module(aminer_config)
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_email.yml')
 
-        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.yml', 'r') as sma:
+        with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.py', 'r') as sma:
             # skipcq: PYL-W0123
             base_schema = eval(sma.read())
         self.assertEqual(base_schema['MailAlerting.TargetAddress']['regex'], base_schema['MailAlerting.FromAddress']['regex'])

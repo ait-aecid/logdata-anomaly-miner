@@ -45,26 +45,26 @@ def load_yaml(config_file):
             logging.getLogger(DEBUG_LOG_NAME).error(exception)
             raise exception
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         base_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         parser_normalisation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         analysis_normalisation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         event_handler_normalisation_schema = eval(sma.read())
 
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         parser_validation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         analysis_validation_schema = eval(sma.read())
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.yml', 'r') as sma:
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
         # skipcq: PYL-W0123
         event_handler_validation_schema = eval(sma.read())
 
@@ -464,9 +464,10 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     constraint_list=item['constraint_list'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
-                                    scoring_path_list=item['scoring_path_list'], persistence_id=item['persistence_id'],
-                                    window_size=item['window_size'], num_windows=item['num_windows'],
-                                    confidence_factor=item['confidence_factor'], empty_window_warnings=item['empty_window_warnings'],
+                                    scoring_path_list=item['scoring_path_list'], unique_path_list=item['unique_path_list'],
+                                    persistence_id=item['persistence_id'], window_size=item['window_size'],
+                                    num_windows=item['num_windows'], confidence_factor=item['confidence_factor'],
+                                    empty_window_warnings=item['empty_window_warnings'],
                                     early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'],
                                     set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
                                     learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
@@ -932,7 +933,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                             if key == "sasl_plain_username":
                                 continue
                             options[key] = int(val)
-                        except:  # skipcq: FLK-E722
+                        except ValueError:  # skipcq: FLK-E722
                             pass
                     ctx = func(analysis_context, item['topic'], options)
                 if item['type'].name == 'ZmqEventHandler':
