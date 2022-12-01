@@ -233,6 +233,7 @@ OUT1=`cat $OUT`
 awk '/^```bash$/ && ++n == 2, /^```$/' < $INPUT | sed '/^```/ d' > $OUT
 IN1=$(sed -n '2p' < $OUT)
 compareStrings "$OUT1" "$IN1" "Failed Test in 19."
+exit_code=$((exit_code | $?))
 
 # 20.) Add lines between 9th ```python and 27th ```.
 CMD="sudo aminer -f"
