@@ -153,8 +153,8 @@
             'type': 'dict',
             'schema': {
                 'multi_source': {'type': 'boolean', 'required': False, 'default': False},
-                'timestamp_paths': { 'type': [ 'string', 'list'], 'empty': False},
-                'adjust_timestamps' : {'type': 'boolean', 'required': False, 'default': False},
+                'timestamp_paths': {'type': ['string', 'list'], 'empty': False},
+                'adjust_timestamps': {'type': 'boolean', 'required': False, 'default': False},
                 'sync_wait_time': {'type': 'integer', 'min': 1, 'default': 5},
                 'eol_sep': {'type': 'string', 'required': False, 'default': '\n', 'empty': False},
                 'json_format': {'type': 'boolean', 'required': False, 'default': False}

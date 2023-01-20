@@ -212,7 +212,7 @@ class AminerRemoteControlExecutionMethods:
             elif '.' in val:
                 try:
                     val = float(val)
-                except:  # skipcq: FLK-E722
+                except ValueError:  # skipcq: FLK-E722
                     pass
         self.REMOTE_CONTROL_RESPONSE = '"%s": %s' % (property_name, val)
 
@@ -326,7 +326,10 @@ class AminerRemoteControlExecutionMethods:
         @param analysis_context the analysis context of the aminer.
         @param destination_file the path to the file in which the config is saved.
         """
-        msg = AminerConfig.save_config(analysis_context, destination_file)
+        if re.match("^(/[^/ ]*)+/?$", destination_file) is not None:
+            msg = AminerConfig.save_config(analysis_context, destination_file)
+        else:
+            msg = f"Exception: {destination_file} is not a valid filename!"
         self.REMOTE_CONTROL_RESPONSE = msg
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
@@ -735,6 +738,6 @@ def _reformat_attr(attr):
     if not isinstance(attr, (list, dict, tuple, set)) and not rep.startswith('"') and not rep.isdecimal():
         try:
             float(rep)
-        except:  # skipcq: FLK-E722
+        except ValueError:  # skipcq: FLK-E722
             rep = '"%s"' % rep
     return rep
