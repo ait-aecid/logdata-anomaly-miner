@@ -1,3 +1,35 @@
+logdata-anomaly-miner (2.6.0) unstable; urgency=low
+  Bugfixes:
+  * fixed bug in JsonModelElement where the aminer gets stuck in an endless loop searching for \x.
+  * added input file path sanitization and fixed exception handling.
+  * fixed a test for the remote control save config method.
+  * fixed bug, that occured when starting one of the detectors VTD, VCD and TSA with an already existing persistency of the ETD, but not of the detectors.
+  * fixed the MissingMatchPathValueDetector by comparing the detector_info[0] instead of the old_last_seen_timestamp.
+  * ParserCount: Fixed timestamp in output
+  * implemented the output_logline parameter in the NewMatchPathValueDetector.
+  * fixed bug where the MissingMatchPathListValueDetector could not be used in yaml, because the ConfigValidator could not load the module.
+  * runHowToEntropyDetector had missing permissions on CFG_PATH in some lines.
+  * fixed bug with closing the streams.
+  Changes:
+  * renamed schemas to python files.
+  * enabled systemd autorestart
+  * improved documentation
+  * added SlidingEventFrequencyDetector
+  * added timestamp_scale parameter to the DateTimeModelElement.
+  * added unique path param for EFD
+  * added check so EXP_TYPE_MANDATORY is enforced.
+  * replace raw data output with last log of event type rather than end of time window
+  * added event count cluster detector 
+  * added experimental jsonstringparser
+  * improved parameter consistency
+  * added ScoringEventHandler
+  * EFD: Added the functionality to analze the scoring_path_list with the ScoringEventHandler
+  * ETD/TSA: Moved the initialization part of the TSA from the ETD to the TSA
+  * support for ZeroMQ-Eventhandler
+  * added support for named-pipes
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at> Fri,  20 Jan 2023 12:00:00 +0000
+
 logdata-anomaly-miner (2.5.1) unstable; urgency=low
   Bugfixes:
   * EFD: Fixed problem that appears with empty windows

@@ -1,3 +1,9 @@
+logdata-anomaly-miner (2.6.0-1) unstable; urgency=low
+
+  [ Markus Wurzenberger ]
+  * New upstream release V2.6.0, see
+    https://github.com/ait-aecid/logdata-anomaly-miner/releases/tag/V2.6.0
+
 logdata-anomaly-miner (2.5.1-1) unstable; urgency=low
 
   [ Markus Wurzenberger ]
