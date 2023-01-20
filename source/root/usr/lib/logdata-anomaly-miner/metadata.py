@@ -1,8 +1,8 @@
 __authors__ = ["Markus Wurzenberger", "Max Landauer", "Wolfgang Hotwagner", "Ernst Leierzopf", "Roman Fiedler", "Georg Hoeld",
                "Florian Skopik"]
 __contact__ = "aecid@ait.ac.at"
-__copyright__ = "Copyright 2022, AIT Austrian Institute of Technology GmbH"
-__date__ = "2022/05/09"
+__copyright__ = "Copyright 2023, AIT Austrian Institute of Technology GmbH"
+__date__ = "2023/01/20"
 __deprecated__ = False
 __email__ = "aecid@ait.ac.at"
 __website__ = "https://aecid.ait.ac.at"
