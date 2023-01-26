@@ -20,15 +20,17 @@
 # 14.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 8th ```yaml and 26th ```, run CMD and check if no
 # error is output by the aminer by comparing the output with the lines between 27th and 28th ```.
 # 15.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 10th ```yaml and 34th ```, run CMD and check if no error is output by the aminer.
-# 16.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 11th ```yaml and 43rd ```, run CMD and check if no error is output by the aminer.
-# 17.) Replace all Parser config lines in CFG_PATH with Parser config lines between 13th ```yaml and 53rd ```, run CMD and check if no error is output by the aminer.
-# 18.) Replace all Parser config lines in CFG_PATH with Parser config lines between 16th ```yaml and 60th ```, run CMD and check if no error is output by the aminer.
-# 19.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 17th ```yaml and 61st ```, run CMD and check if no error is output by the aminer.
-# 20.) Replace all Parser config lines in CFG_PATH with Parser config lines between 19th ```yaml and 69th ```, run CMD and check if no error is output by the aminer.
-# 21.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 20th ```yaml and 70th ```, run CMD and check if no error is output by the aminer.
-# 22.) Replace all Parser config lines in CFG_PATH with Parser config lines between 22nd ```yaml and 76th ```, run CMD and check if no error is output by the aminer.
-# 23.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 23rd ```yaml and 77th ```, run CMD and check if no error is output by the aminer.
-# 24.) Write the config between 25th ```yaml and 87th ``` to CFG_PATH, run CMD and check if no error is output by the aminer.
+# 16.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 11th ```yaml and 43th ```, run CMD and check if no error is output by the aminer.
+
+# 17.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 12th ```yaml and 48rd ```, run CMD and check if no error is output by the aminer.
+# 18.) Replace all Parser config lines in CFG_PATH with Parser config lines between 14th ```yaml and 58rd ```, run CMD and check if no error is output by the aminer.
+# 19.) Replace all Parser config lines in CFG_PATH with Parser config lines between 17th ```yaml and 65th ```, run CMD and check if no error is output by the aminer.
+# 20.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 18th ```yaml and 66st ```, run CMD and check if no error is output by the aminer.
+# 21.) Replace all Parser config lines in CFG_PATH with Parser config lines between 20th ```yaml and 74th ```, run CMD and check if no error is output by the aminer.
+# 22.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 21th ```yaml and 75th ```, run CMD and check if no error is output by the aminer.
+# 23.) Replace all Parser config lines in CFG_PATH with Parser config lines between 23nd ```yaml and 81th ```, run CMD and check if no error is output by the aminer.
+# 24.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 24rd ```yaml and 82th ```, run CMD and check if no error is output by the aminer.
+# 25.) Write the config between 26th ```yaml and 92th ``` to CFG_PATH, run CMD and check if no error is output by the aminer.
 ##################################################################
 
 BRANCH=main
@@ -197,12 +199,14 @@ testConfigError $OUT "Failed Test in 15."
 exit_code=$((exit_code | $?))
 
 # Replace the Analysis config and compare the output. (16.)
+ANALYSIS_PREFIX='Analysis:
+'
 CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 11, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
 echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
 echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
 echo "$CFG_INPUT" | sudo tee -a $CFG_PATH > /dev/null
-echo "$CFG_ANALYSIS" | sudo tee -a $CFG_PATH > /dev/null
+echo "$ANALYSIS_PREFIX$CFG_ANALYSIS" | sudo tee -a $CFG_PATH > /dev/null
 echo "$CFG_EVENT_HANDLERS" | sudo tee -a $CFG_PATH > /dev/null
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
@@ -213,8 +217,8 @@ fi
 testConfigError $OUT "Failed Test in 16."
 exit_code=$((exit_code | $?))
 
-# Replace the Parser config. (17.)
-CFG_PARSER=$(awk '/^```yaml$/ && ++n == 13, /^```$/' < $INPUT_FILE | sed '/^```/ d')
+# Replace the Analysis config and compare the output. (17.)
+CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 12, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
 echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
 echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
@@ -226,9 +230,12 @@ runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/Repositioning
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
+
+testConfigError $OUT "Failed Test in 17."
+exit_code=$((exit_code | $?))
 
 # Replace the Parser config. (18.)
-CFG_PARSER=$(awk '/^```yaml$/ && ++n == 16, /^```$/' < $INPUT_FILE | sed '/^```/ d')
+CFG_PARSER=$(awk '/^```yaml$/ && ++n == 14, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
 echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
 echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
@@ -241,8 +248,8 @@ if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
-# Replace the Analysis config. (19.)
-CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 17, /^```$/' < $INPUT_FILE | sed '/^```/ d')
+# Replace the Parser config. (19.)
+CFG_PARSER=$(awk '/^```yaml$/ && ++n == 17, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
 echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
 echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
@@ -255,8 +262,8 @@ if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
-# Replace the Parser config. (20.)
-CFG_PARSER=$(awk '/^```yaml$/ && ++n == 19, /^```$/' < $INPUT_FILE | sed '/^```/ d')
+# Replace the Analysis config. (20.)
+CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 18, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
 echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
 echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
@@ -269,8 +276,8 @@ if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
-# Replace the Analysis config. (21.)
-CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 20, /^```$/' < $INPUT_FILE | sed '/^```/ d')
+# Replace the Parser config. (21.)
+CFG_PARSER=$(awk '/^```yaml$/ && ++n == 20, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
 echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
 echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
@@ -283,8 +290,8 @@ if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
-# Replace the Parser config. (22.)
-CFG_PARSER=$(awk '/^```yaml$/ && ++n == 22, /^```$/' < $INPUT_FILE | sed '/^```/ d')
+# Replace the Analysis config. (22.)
+CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 21, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
 echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
 echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
@@ -297,8 +304,8 @@ if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
-# Replace the Analysis config. (23.)
-CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 23, /^```$/' < $INPUT_FILE | sed '/^```/ d')
+# Replace the Parser config. (23.)
+CFG_PARSER=$(awk '/^```yaml$/ && ++n == 23, /^```$/' < $INPUT_FILE | sed '/^```/ d')
 
 echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
 echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
@@ -311,15 +318,29 @@ if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
-# Run the final configuration. (24.)
-awk '/^```yaml$/ && ++n == 25, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
+# Replace the Analysis config. (24.)
+CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 24, /^```$/' < $INPUT_FILE | sed '/^```/ d')
+
+echo "$CFG_BEFORE" | sudo tee $CFG_PATH > /dev/null
+echo "$CFG_PARSER" | sudo tee -a $CFG_PATH > /dev/null
+echo "$CFG_INPUT" | sudo tee -a $CFG_PATH > /dev/null
+echo "$CFG_ANALYSIS" | sudo tee -a $CFG_PATH > /dev/null
+echo "$CFG_EVENT_HANDLERS" | sudo tee -a $CFG_PATH > /dev/null
 
 runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
-testConfigError $OUT "Failed Test in 24."
+# Run the final configuration. (25.)
+awk '/^```yaml$/ && ++n == 26, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
+
+runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
+if [[ $? != 0 ]]; then
+	exit_code=1
+fi
+
+testConfigError $OUT "Failed Test in 25."
 exit_code=$((exit_code | $?))
 
 rm $OUT
