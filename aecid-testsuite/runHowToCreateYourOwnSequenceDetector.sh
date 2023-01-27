@@ -126,11 +126,11 @@ CMD="${CMD#* }"
 $CMD 2> /dev/null
 
 # 8.) Read between 1st ```yaml and 9th ``` and store it in CFG_PATH.
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' > $CFG_PATH
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # 9.) Read CFG_PATH, replace the line with json: True and compare it with the 1st ```yaml in Getting-started-(tutorial).md.
-OUT1=$(sed -n '1,21p' < $CFG_PATH)
-CMD=$(sed -n '23p' < $CFG_PATH)
+OUT1=$(sudo cat $CFG_PATH | sed -n '1,21p')
+CMD=$(sudo cat $CFG_PATH | sed -n '23p')
 OUT1="$OUT1
 $CMD"
 awk '/^```yaml$/ && ++n == 1, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > $OUT
