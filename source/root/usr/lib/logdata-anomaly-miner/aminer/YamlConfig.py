@@ -99,6 +99,8 @@ def filter_config_errors(filtered_errors, key_name, errors, schema):
     oneof = schema[key_name]['schema']['oneof']
     if key_name in errors:
         for i, err in enumerate(errors[key_name]):
+            if isinstance(err, str):
+                err = {0: err}
             for key in err:
                 if 'none or more than one rule validate' in err[key]:
                     for cause in err[key]:
