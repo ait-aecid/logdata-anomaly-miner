@@ -33,19 +33,6 @@ git checkout $BRANCH > /dev/null 2>&1
 cd ..
 exit_code=0
 
-# DELETE THIS!"!! #####
-cp ../../logdata-anomaly-miner.wiki/Importing-logs-via-ElasticSearch-interface.md logdata-anomaly-miner.wiki/
-
-
-
-
-
-
-
-
-
-#####
-
 # write log data into file (1.)
 awk '/^```$/ && ++n == 3, /^```$/ && n++ == 4' < $INPUT | sed '/^```/ d' > $LOG
 sed -i '1d' $LOG
