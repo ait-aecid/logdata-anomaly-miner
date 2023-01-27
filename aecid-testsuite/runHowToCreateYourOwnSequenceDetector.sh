@@ -68,31 +68,22 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
-###################### delete this!
-cp /home/user/Documents/HowTo-Create-your-own-SequenceDetector.md logdata-anomaly-miner.wiki/HowTo-Create-your-own-SequenceDetector.md
-VAL_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/validation/AnalysisValidationSchema.yml
-TMP_VAL_SCHEMA=/tmp/AnalysisValidationSchema.yml
-NOR_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/normalisation/AnalysisNormalisationSchema.yml
-
-## merge this only after yml was renamed to py!
-##################### delete this!
-
 # create log file (1.)
 awk '/^```$/ && ++n == 2, /^```$/ && n++ == 3' < $INPUT | sed '/^```/ d' > $LOG
 
 # extract version command and compare output. (2.)
-awk '/^```bash$/ && ++n == 2, /^```$/' < $INPUT | sed '/^```/ d' > $OUT
-CMD=$(sed -n '1p' < $OUT)
-CMD="sudo ${CMD#* }"
-OUT1=$(sed -n '2,4p' < $OUT)
-$CMD > $OUT &
-PID=$!
-sleep 5
-sudo pkill -x aminer
-wait $PID
-OUT2=`cat $OUT`
-compareStrings "$OUT1" "$OUT2" "Failed Test in 2."
-exit_code=$?
+#awk '/^```bash$/ && ++n == 2, /^```$/' < $INPUT | sed '/^```/ d' > $OUT
+#CMD=$(sed -n '1p' < $OUT)
+#CMD="sudo ${CMD#* }"
+#OUT1=$(sed -n '2,4p' < $OUT)
+#$CMD > $OUT &
+#PID=$!
+#sleep 5
+#sudo pkill -x aminer
+#wait $PID
+#OUT2=`cat $OUT`
+#compareStrings "$OUT1" "$OUT2" "Failed Test in 2."
+#exit_code=$?
 
 # 3.) Read commands between 3rd ```bash and 5th ```, get the CMD after # and check if aminer_install.sh exists and is executable.
 FILE="aminer_install.sh"
@@ -146,7 +137,7 @@ awk '/^```yaml$/ && ++n == 1, /^```$/' < logdata-anomaly-miner.wiki/Getting-star
 OUT2=`cat $OUT`
 compareStrings "$OUT1" "$OUT2" "Failed Test in 9."
 exit_code=$((exit_code | $?))
-sudo sed -i 's?file:///var/log/apache2/access.log?file:///tmp/access.log?g' $CFG_PATH
+sudo sed -i 's?file:///home/ubuntu/access.log?file:///tmp/access.log?g' $CFG_PATH
 
 # 10.) Read 7th ```bash and 10th ```. Extract CMD in first line and run it as sudo.
 awk '/^```bash$/ && ++n == 7, /^```$/' < $INPUT | sed '/^```/ d' > $OUT

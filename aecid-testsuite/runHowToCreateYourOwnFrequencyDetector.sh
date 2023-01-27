@@ -58,16 +58,7 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
-###################### delete this!
-cp /home/user/Documents/HowTo-Create-your-own-FrequencyDetector.md logdata-anomaly-miner.wiki/HowTo-Create-your-own-FrequencyDetector.md
-VAL_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/validation/AnalysisValidationSchema.yml
-TMP_VAL_SCHEMA=/tmp/AnalysisValidationSchema.yml
-NOR_SCHEMA=/usr/lib/logdata-anomaly-miner/aminer/schemas/normalisation/AnalysisNormalisationSchema.yml
-
-## merge this only after yml was renamed to py!
-##################### delete this!
-
-
+cp /home/user/Documents/HowTo-Create-your-own-FrequencyDetector.md logdata-anomaly-miner.wiki/
 
 # create log file (1.)
 awk '/^```$/ && ++n == 1, /^```$/ && n++ == 2' < $INPUT | sed '/^```/ d' > $LOG
