@@ -58,7 +58,8 @@ RUN apt-get update && apt-get install -y \
     locales-all \
     rsyslog \
     git \
-    mypy
+    mypy \
+    wget
 
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     sed -i -e 's/# de_AT ISO-8859-1/de_AT ISO-8859-1/' /etc/locale.gen && \
@@ -66,7 +67,7 @@ RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     update-locale LANG=en_US.UTF-8
 
 ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en  
+ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 
@@ -104,7 +105,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
     && chown aminer.aminer -R /var/lib/aminer && chmod 0755 /etc/aminer
 
-RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE 
+RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 # Add config
 ADD source/root/etc/aminer /etc/aminer
