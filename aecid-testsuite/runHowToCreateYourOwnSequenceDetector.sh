@@ -134,6 +134,7 @@ CMD=$(sudo cat $CFG_PATH | sed -n '23p')
 OUT1="$OUT1
 $CMD"
 awk '/^```yaml$/ && ++n == 1, /^```$/' < logdata-anomaly-miner.wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' > $OUT
+sudo sed -i 's?file:///var/log/apache2/access.log?file:///home/ubuntu/access.log?g' $OUT
 OUT2=`cat $OUT`
 compareStrings "$OUT1" "$OUT2" "Failed Test in 9."
 exit_code=$((exit_code | $?))
@@ -177,7 +178,7 @@ OUT2=$(tail -n 5 < $CFG_PATH)
 echo "$OUT1
 
 $IN1
-$OUT2" > $CFG_PATH
+$OUT2" | sudo tee $CFG_PATH > /dev/null
 
 # 14.) Check if line between 15th and 16th ``` can be found in /usr/lib/logdata-anomaly-miner/aminer/schemas/normalisation/AnalysisNormalisationSchema.py
 awk '/^```$/ && ++n == 15, /^```$/ && n++ == 16' < $INPUT > $OUT
@@ -262,7 +263,7 @@ OUT2=$(tail -n 5 $CFG_PATH)
 echo "$OUT1
 
 $IN1
-$OUT2" > $CFG_PATH
+$OUT2" | sudo tee $CFG_PATH > /dev/null
 
 # 24.) Run aminer CMD and check if the output is the same as between 32nd and 33th ```.
 runAminerUntilEnd "$CMD" "" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
