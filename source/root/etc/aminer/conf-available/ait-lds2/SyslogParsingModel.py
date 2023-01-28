@@ -294,6 +294,102 @@ def get_model():
                 DelimitedDataModelElement("path", b'"'),
                 FixedDataModelElement("brack_str", b'"]')
                 ]),
+            SequenceModelElement("useradd", [
+                FixedDataModelElement("useradd_str", b" useradd["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FirstMatchModelElement("useradd", [
+                    SequenceModelElement("cmd", [
+                        FixedDataModelElement("add_str", b"add '"),
+                        DelimitedDataModelElement("user", b"'"),
+                        FixedDataModelElement("cmd_str", b"' to "),
+                        OptionalMatchModelElement("shadow", FixedDataModelElement("shadow", b"shadow ")),
+                        FixedDataModelElement("group_str", b"group '"),
+                        DelimitedDataModelElement("group", b"'"),
+                        FixedDataModelElement("quote_str", b"'")
+                    ]),
+                    SequenceModelElement("new_user", [
+                        FixedDataModelElement("new_user", b"new user: name="),
+                        DelimitedDataModelElement("user", b","),
+                        FixedDataModelElement("uid_str", b", UID="),
+                        DecimalIntegerValueModelElement("uid"),
+                        FixedDataModelElement("gid_str", b", GID="),
+                        DecimalIntegerValueModelElement("gid"),
+                        FixedDataModelElement("home_str", b", home="),
+                        DelimitedDataModelElement("home", b","),
+                        FixedDataModelElement("shell_str", b", shell="),
+                        VariableByteDataModelElement("shell", alphabet)
+                    ]),
+                    SequenceModelElement("new_group", [
+                        FixedDataModelElement("new_group", b"new group: name="),
+                        DelimitedDataModelElement("group", b","),
+                        FixedDataModelElement("gid_str", b", GID="),
+                        DecimalIntegerValueModelElement("gid")
+                    ])
+                ])
+            ]),
+            SequenceModelElement("groupadd", [
+                FixedDataModelElement("groupadd_str", b" groupadd["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FirstMatchModelElement("useradd", [
+                    SequenceModelElement("cmd", [
+                        FixedDataModelElement("add_str", b"group added to "),
+                        DelimitedDataModelElement("path", b":"),
+                        FixedDataModelElement("cmd_str", b": name="),
+                        FirstMatchModelElement("fm", [
+                            SequenceModelElement("gid", [
+                                DelimitedDataModelElement("group", b","),
+                                FixedDataModelElement("gid_str", b", GID="),
+                                DecimalIntegerValueModelElement("gid")
+                            ]),
+                            AnyByteDataModelElement("group")
+                        ])
+                    ]),
+                    SequenceModelElement("new_user", [
+                        FixedDataModelElement("new_user", b"new user: name="),
+                        DelimitedDataModelElement("user", b","),
+                        FixedDataModelElement("uid_str", b", UID="),
+                        DecimalIntegerValueModelElement("uid"),
+                        FixedDataModelElement("gid_str", b", GID="),
+                        DecimalIntegerValueModelElement("gid"),
+                        FixedDataModelElement("home_str", b", home="),
+                        DelimitedDataModelElement("home", b","),
+                        FixedDataModelElement("shell_str", b", shell="),
+                        VariableByteDataModelElement("shell", alphabet)
+                    ]),
+                    SequenceModelElement("new_group", [
+                        FixedDataModelElement("new_group", b"new group: name="),
+                        DelimitedDataModelElement("group", b","),
+                        FixedDataModelElement("gid_str", b", GID="),
+                        DecimalIntegerValueModelElement("gid")
+                    ])
+                ])
+            ]),
+            SequenceModelElement("chpasswd", [
+                FixedDataModelElement("chpasswd_str", b" chpasswd["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FixedDataModelElement("brack_str", b"pam_unix("),
+                DelimitedDataModelElement("name", b")"),
+                FixedDataModelElement("pw_changed", b"): password changed for "),
+                AnyByteDataModelElement("user")
+            ]),
+            SequenceModelElement("usermod", [
+                FixedDataModelElement("usermod_str", b" usermod["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FixedDataModelElement("change_str", b"change user '"),
+                DelimitedDataModelElement("user", b"'"),
+                FixedDataModelElement("pw_str", b"' password")
+            ]),
+            SequenceModelElement("chage", [
+                FixedDataModelElement("usermod_str", b" chage["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FixedDataModelElement("change_str", b"changed password expiry for "),
+                AnyByteDataModelElement("user")
+            ]),
             SequenceModelElement("cron", [
                 FixedDataModelElement("cron_str", b" CRON["),
                 DecimalIntegerValueModelElement("pid"),
@@ -383,18 +479,26 @@ def get_model():
                     SequenceModelElement("new", [
                         FixedDataModelElement("brack_str", b"pam_unix("),
                         DelimitedDataModelElement("name", b")"),
-                        FixedDataModelElement("session_str", b"): session "),
-                        FixedWordlistDataModelElement("status", [b"opened", b"closed"]),
-                        FixedDataModelElement("user_str", b" for user "),
-                        VariableByteDataModelElement("user", alphabet),
-                        OptionalMatchModelElement(
-                            "uid", SequenceModelElement("uid", [
-                                FixedDataModelElement("uid_str", b" by (uid="),
-                                DecimalIntegerValueModelElement("uid"),
-                                FixedDataModelElement("brack_str", b")")
-                                ])
-                            )
-                        ]),
+                        FirstMatchModelElement("message", [
+                            SequenceModelElement("session", [
+                                FixedDataModelElement("session_str", b"): session "),
+                                FixedWordlistDataModelElement("status", [b"opened", b"closed"]),
+                                FixedDataModelElement("user_str", b" for user "),
+                                VariableByteDataModelElement("user", alphabet),
+                                OptionalMatchModelElement(
+                                    "uid", SequenceModelElement("uid", [
+                                        FixedDataModelElement("uid_str", b" by (uid="),
+                                        DecimalIntegerValueModelElement("uid"),
+                                        FixedDataModelElement("brack_str", b")")
+                                    ])
+                                )
+                            ]),
+                            SequenceModelElement("session", [
+                                FixedDataModelElement("changed_pw", b"): password changed for "),
+                                AnyByteDataModelElement("group")
+                            ])
+                        ])
+                    ]),
                     SequenceModelElement("publickey", [
                         FixedDataModelElement("publickey_str", b"Accepted publickey for "),
                         DelimitedDataModelElement("user", b" "),
@@ -437,8 +541,8 @@ def get_model():
                         FixedDataModelElement("space", b" port "),
                         DecimalIntegerValueModelElement("port"),
                         ]),
-                    ]),
                 ]),
+            ]),
             SequenceModelElement("systemd2", [
                 FixedDataModelElement("systemd_str", b" su["),
                 DecimalIntegerValueModelElement("id"),
@@ -565,10 +669,15 @@ def get_model():
                         AnyByteDataModelElement("user"),
                         ]),
                     SequenceModelElement("removed", [
-                        FixedDataModelElement("new_str", b"Removed session "),
+                        FixedDataModelElement("removed_str", b"Removed session "),
                         DecimalIntegerValueModelElement("session"),
                         FixedDataModelElement("dot", b"."),
                         ]),
+                    SequenceModelElement("system_buttons", [
+                        FixedDataModelElement("watching", b"Watching system buttons on /dev/input/event"),
+                        AnyByteDataModelElement("event_type")
+                        ]),
+                    FixedDataModelElement("new_seat", b"New seat seat0.")
                 ])]),
             SequenceModelElement("grub", [
                 FixedDataModelElement("grub_str", b" grub-common["),
