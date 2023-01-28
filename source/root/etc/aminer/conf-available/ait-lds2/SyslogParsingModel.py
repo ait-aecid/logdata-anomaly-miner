@@ -11,6 +11,7 @@ from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+from aminer.parsing.HexStringModelElement import HexStringModelElement
 
 
 def get_model():
@@ -391,7 +392,7 @@ def get_model():
                 AnyByteDataModelElement("user")
             ]),
             SequenceModelElement("cron", [
-                FixedDataModelElement("cron_str", b" CRON["),
+                FixedWordlistDataModelElement("cron_str", [b" CRON[", b" cron["]),
                 DecimalIntegerValueModelElement("pid"),
                 FixedDataModelElement("brack_str1", b"]: "),
                 FirstMatchModelElement("cron", [
@@ -416,7 +417,13 @@ def get_model():
                                 FixedDataModelElement("brack_str", b")")
                                 ])
                             )
-                        ])
+                        ]),
+                    SequenceModelElement("pidfile", [
+                        FixedDataModelElement("str", b"(CRON) INFO (pidfile fd = "),
+                        DecimalIntegerValueModelElement("fd"),
+                        FixedDataModelElement("bracket", b")")
+                        ]),
+                    FixedDataModelElement("reboot_jobs", b"(CRON) INFO (Running @reboot jobs)")
                     ])
                 ]),
             SequenceModelElement("sudo", [
@@ -471,7 +478,33 @@ def get_model():
                         ])
                     )
                 ]),
-            SequenceModelElement("systemd2", [
+            SequenceModelElement("systemd-modules-load", [
+                FixedDataModelElement("systemd_str", b" systemd-modules-load["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FixedDataModelElement("inserted", b"Inserted module '"),
+                DelimitedDataModelElement("module", b"'"),
+                FixedDataModelElement("apo", b"'")
+            ]),
+            SequenceModelElement("systemd-networkd-wait-online", [
+                FixedDataModelElement("systemd_str", b" systemd-networkd-wait-online["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FixedWordlistDataModelElement("inserted", [b"managing", b"ignoring"]),
+                FixedDataModelElement("sp", b": "),
+                AnyByteDataModelElement("interface")
+            ]),
+            SequenceModelElement("systemd-fsck", [
+                FixedDataModelElement("systemd_str", b" systemd-fsck["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("systemd-udevd", [
+                FixedDataModelElement("systemd_str", b" systemd-udevd["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("sshd", [
                 FixedDataModelElement("systemd_str", b" sshd["),
                 DecimalIntegerValueModelElement("id"),
                 FixedDataModelElement("brack_str2", b"]: "),
@@ -543,7 +576,7 @@ def get_model():
                         ]),
                 ]),
             ]),
-            SequenceModelElement("systemd2", [
+            SequenceModelElement("su", [
                 FixedDataModelElement("systemd_str", b" su["),
                 DecimalIntegerValueModelElement("id"),
                 FixedDataModelElement("brack_str2", b"]: "),
@@ -721,6 +754,13 @@ def get_model():
                 FixedDataModelElement("brack_str1", b"]: "),
                 AnyByteDataModelElement("networkd_msg")
                 ]),
+            SequenceModelElement("networkd-dispatcher", [
+                FixedDataModelElement("networkd_str", b" networkd-dispatcher["),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FixedDataModelElement("no_valid_path", b"No valid path found for "),
+                AnyByteDataModelElement("interface")
+                ]),
             SequenceModelElement("motd", [
                 FixedDataModelElement("motd_str", b" 50-motd-news["),
                 DecimalIntegerValueModelElement("id"),
@@ -737,7 +777,7 @@ def get_model():
                 FixedDataModelElement("dhclient_str", b" dhclient["),
                 DecimalIntegerValueModelElement("id"),
                 FixedDataModelElement("brack_str1", b"]: "),
-                FirstMatchModelElement("dhclient", [
+                OptionalMatchModelElement("opt", FirstMatchModelElement("dhclient", [
                     SequenceModelElement("dhcprequest", [
                         FixedDataModelElement("dhcprequest_str", b"DHCPREQUEST of "),
                         IpAddressDataModelElement("src_ip"),
@@ -746,7 +786,12 @@ def get_model():
                         FixedDataModelElement("to_str", b" to "),
                         IpAddressDataModelElement("dst_ip"),
                         FixedDataModelElement("port_str", b" port "),
-                        DecimalIntegerValueModelElement("port")
+                        DecimalIntegerValueModelElement("port"),
+                        OptionalMatchModelElement("xid", SequenceModelElement("xid", [
+                            FixedDataModelElement("xid", b" (xid=0x"),
+                            HexStringModelElement("hex"),
+                            FixedDataModelElement("bracket", b")")
+                        ]))
                     ]),
                     SequenceModelElement("dhcpack", [
                         FixedDataModelElement("dhcpack_str", b"DHCPACK of "),
@@ -761,8 +806,65 @@ def get_model():
                         DecimalIntegerValueModelElement("seconds"),
                         FixedDataModelElement("seconds_str", b" seconds.")
                         ]),
-                    ]),
+                    AnyByteDataModelElement("skipped_msg")
+                    ])),
                 ]),
+            SequenceModelElement("apparmor", [
+                FixedDataModelElement("apparmor_str", b" apparmor["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("snapd-apparmor", [
+                FixedDataModelElement("snapd-apparmor_str", b" snapd-apparmor["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("snapd", [
+                FixedDataModelElement("snapd_str", b" snapd["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("cloud-init", [
+                FixedDataModelElement("cloud-init_str", b" cloud-init["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("irqbalance", [
+                FixedDataModelElement("irqbalance_str", b" /usr/sbin/irqbalance"),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("pollinate", [
+                FixedDataModelElement("pollinate_str", b" pollinate["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("lxcfs", [
+                FixedDataModelElement("lxcfs_str", b" lxcfs["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("accounts-daemon", [
+                FixedDataModelElement("accounts-daemon_str", b" accounts-daemon["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("ec2", [
+                FixedDataModelElement("ec2_str", b" ec2: "),
+                OptionalMatchModelElement("opt", AnyByteDataModelElement("msg"))]),
+            SequenceModelElement("dnsmasq", [
+                FixedDataModelElement("dnsmasq_str", b" dnsmasq["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("etc_maradns_mararc", [
+                FixedDataModelElement("etc_maradns_mararc_str", b" etc_maradns_mararc["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                OptionalMatchModelElement("opt", AnyByteDataModelElement("msg"))]),
+            SequenceModelElement("etc_maradns_mararc-zs", [
+                FixedDataModelElement("etc_maradns_mararc-zs_str", b" etc_maradns_mararc-zs["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                OptionalMatchModelElement("opt", AnyByteDataModelElement("msg"))]),
             ])
         ])
 
