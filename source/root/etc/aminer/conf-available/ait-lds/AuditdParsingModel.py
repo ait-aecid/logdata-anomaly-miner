@@ -7,6 +7,7 @@ from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
 
 
 def get_model():
@@ -35,6 +36,9 @@ def get_model():
             SequenceModelElement("comm", [
                 FixedDataModelElement("comm_str", b" comm="),
                 VariableByteDataModelElement("comm", alphabet)]),
+            SequenceModelElement("id", [
+                FixedDataModelElement("id_str", b" id="),
+                VariableByteDataModelElement("id", alphabet)]),
             SequenceModelElement("cmd", [
                 FixedDataModelElement("cmd_str", b" cmd="),
                 VariableByteDataModelElement("cmd", alphabet)])]),
@@ -278,6 +282,8 @@ def get_model():
                 FixedDataModelElement("msg1_str", b"USER_ACCT msg=")] + seq),
             SequenceModelElement("user_auth", [
                 FixedDataModelElement("msg1_str", b"USER_AUTH msg=")] + seq),
+            SequenceModelElement("user_login", [
+                FixedDataModelElement("msg1_str", b"USER_LOGIN msg=")] + seq),
             SequenceModelElement("cred_disp", [
                 FixedDataModelElement("msg1_str", b"CRED_DISP msg=")] + seq),
             SequenceModelElement("service_start", [
@@ -290,6 +296,28 @@ def get_model():
                 FixedDataModelElement("msg1_str", b"USER_CMD msg=")] + seq),
             SequenceModelElement("cred_acq", [
                 FixedDataModelElement("msg1_str", b"CRED_ACQ msg=")] + seq),
+            SequenceModelElement("avc", [
+                FixedDataModelElement("abc_str", b"AVC msg=audit("),
+                DateTimeModelElement("time", b"%s.%f"),
+                FixedDataModelElement("colon_str", b":"),
+                DecimalIntegerValueModelElement("id"),
+                FixedDataModelElement("apparmor_str", b"): apparmor=\""),
+                DelimitedDataModelElement("apparmor", b"\""),
+                FixedDataModelElement("operation_str", b"\" operation=\""),
+                DelimitedDataModelElement("operation", b"\""),
+                OptionalMatchModelElement(
+                    "opt", SequenceModelElement("seq", [
+                        FixedDataModelElement("info_str", b"\" info=\""),
+                        DelimitedDataModelElement("info", b"\"")])),
+                FixedDataModelElement("profile_str", b"\" profile=\""),
+                DelimitedDataModelElement("profile", b"\""),
+                FixedDataModelElement("name_str", b"\" name=\""),
+                DelimitedDataModelElement("name", b"\""),
+                FixedDataModelElement("pid_str", b"\" pid="),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("comm_str", b" comm=\""),
+                DelimitedDataModelElement("comm", b"\""),
+                FixedDataModelElement("quote", b"\"")]),
             SequenceModelElement("user_bprm_fcaps", [
                 FixedDataModelElement("msg1_str", b"BPRM_FCAPS msg=audit("),
                 DateTimeModelElement("time", b"%s.%f"),

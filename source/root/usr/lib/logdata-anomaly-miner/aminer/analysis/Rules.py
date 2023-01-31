@@ -403,7 +403,7 @@ class StringRegexMatchRule(MatchRule):
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
-        self. log_total += 1
+        self.log_total += 1
         # Use the class object as marker for nonexisting entries
         test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if (test_value is None) or (self.match_regex.match(test_value.match_string) is None):

@@ -64,7 +64,7 @@ def get_model():
         FirstMatchModelElement("service", [
             SequenceModelElement("dovecot", [
                 FixedDataModelElement("dovecot_str", b" dovecot: "),
-                FirstMatchModelElement("imap", [
+                FirstMatchModelElement("fm", [
                     SequenceModelElement("imap", [
                         FixedDataModelElement("imap_str", b"imap("),
                         DelimitedDataModelElement("user", b")"),
@@ -75,13 +75,13 @@ def get_model():
                                 DecimalIntegerValueModelElement("in"),
                                 FixedDataModelElement("out_str", b" out="),
                                 DecimalIntegerValueModelElement("out")
-                                ]),
+                            ]),
                             SequenceModelElement("err_mail", [
                                 FixedDataModelElement("mail_str", b"Error: Failed to autocreate mailbox INBOX: Internal error occurred. "
-                                                      b"Refer to server log for more information. ["),
+                                                                  b"Refer to server log for more information. ["),
                                 DelimitedDataModelElement("err_time", b"]"),
                                 FixedDataModelElement("brack", b"]")
-                                ]),
+                            ]),
                             SequenceModelElement("err_open", [
                                 FixedDataModelElement("err_str", b"Error: "),
                                 DelimitedDataModelElement("function_name", b"("),
@@ -113,17 +113,17 @@ def get_model():
                                         FixedDataModelElement("equal_str", b"="),
                                         DelimitedDataModelElement("val", b")"),
                                         FixedDataModelElement("brack_str6", b")")
-                                        ])
-                                    )
-                                ]),
+                                    ])
+                                )
+                            ]),
                             SequenceModelElement("err_mail", [
                                 FixedDataModelElement("mail_str", b"Failed to autocreate mailbox INBOX: Internal error occurred. "
-                                                      b"Refer to server log for more information. ["),
+                                                                  b"Refer to server log for more information. ["),
                                 DelimitedDataModelElement("err_time", b"]"),
                                 FixedDataModelElement("brack", b"]")
-                                ]),
                             ]),
                         ]),
+                    ]),
                     SequenceModelElement("imap_login", [
                         FixedDataModelElement("imap_login_str", b"imap-login: "),
                         FirstMatchModelElement("login", [
@@ -134,44 +134,71 @@ def get_model():
                                         FixedDataModelElement("auth_failed_str", b"(auth failed, "),
                                         DecimalIntegerValueModelElement("attempts"),
                                         FixedDataModelElement("attempts_str", b" attempts in "),
-                                        ]),
+                                    ]),
                                     FixedDataModelElement("no_auth_str", b"(no auth attempts in "),
                                     FixedDataModelElement("no_auth_str", b"(disconnected before auth was ready, waited "),
-                                    ]),
+                                ]),
                                 DecimalIntegerValueModelElement("duration"),
                                 FixedDataModelElement("secs_str", b" secs): "),
                                 user_info
-                                ]),
+                            ]),
                             SequenceModelElement("login", [
                                 FixedDataModelElement("login_str", b"Login: "),
                                 user_info
-                                ]),
+                            ]),
                             SequenceModelElement("anvil", [
                                 FixedDataModelElement("anvil_str", b"Error: anvil:"),
                                 AnyByteDataModelElement("anvil_msg")
-                                ]),
+                            ]),
                             SequenceModelElement("auth_responding", [
                                 FixedDataModelElement("auth_responding_str", b"Warning: Auth process not responding, "
-                                                      b"delayed sending initial response (greeting): "),
+                                                                             b"delayed sending initial response (greeting): "),
                                 user_info
-                                ]),
                             ]),
                         ]),
+                    ]),
                     SequenceModelElement("auth", [
                         FixedDataModelElement("auth_worker_str", b"auth: "),
                         AnyByteDataModelElement("message")
-                        ]),
+                    ]),
                     SequenceModelElement("auth_worker", [
                         FixedDataModelElement("auth_worker_str", b"auth-worker("),
                         DecimalIntegerValueModelElement("pid"),
                         FixedDataModelElement("brack", b"):"),
                         AnyByteDataModelElement("message")
-                        ]),
+                    ]),
                     SequenceModelElement("master", [
                         FixedDataModelElement("master_str", b"master: "),
                         AnyByteDataModelElement("message")
-                        ])
                     ]),
+                    SequenceModelElement("ssl_params", [
+                        FixedDataModelElement("ssl_params_str", b"ssl-params: "),
+                        AnyByteDataModelElement("message")
+                    ]),
+                    SequenceModelElement("log", [
+                        FixedDataModelElement("log_str", b"log: "),
+                        AnyByteDataModelElement("message")
+                    ]),
+                ])
+            ]),
+            SequenceModelElement("dovecot2", [
+                FixedDataModelElement("dovecot_str", b" dovecot["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("bracket", b"]: "),
+                FirstMatchModelElement("fm", [
+                    SequenceModelElement("warning", [
+                        FixedDataModelElement("log_str", b"Warning: "),
+                        AnyByteDataModelElement("message")
+                        ]),
+                    ])
+                ]),
+            SequenceModelElement("chfn", [
+                FixedDataModelElement("chfn_str", b" chfn["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FixedDataModelElement("change_user", b"changed user '"),
+                DelimitedDataModelElement("user", b"'"),
+                FixedDataModelElement("information_str", b"' information")
                 ]),
             SequenceModelElement("horde", [
                 FixedDataModelElement("horde_str", b" HORDE: "),
@@ -221,7 +248,9 @@ def get_model():
                                 FixedDataModelElement("sync_token_str", b"[getSyncToken] IMAP error reported by server."),
                                 ]),
                             SequenceModelElement("auth_failed", [
-                                FixedDataModelElement("auth_failed_str", b"[login] Authentication failed."),
+                                FixedDataModelElement("bracket", b"["),
+                                DelimitedDataModelElement("type", b"]"),
+                                FixedDataModelElement("auth_failed_str", b"] Authentication failed."),
                                 ]),
                             ]),
                         ]),
@@ -423,6 +452,25 @@ def get_model():
                         DecimalIntegerValueModelElement("fd"),
                         FixedDataModelElement("bracket", b")")
                         ]),
+                    FixedDataModelElement("str", b"(CRON) info (No MTA installed, discarding output)"),
+                    FixedDataModelElement("reboot_jobs", b"(CRON) INFO (Running @reboot jobs)")
+                    ])
+                ]),
+            SequenceModelElement("crontab", [
+                FixedDataModelElement("crontab_str", b" crontab["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FirstMatchModelElement("crontab", [
+                    SequenceModelElement("command", [
+                        FixedDataModelElement("bracket", b"("),
+                        DelimitedDataModelElement("user", b")"),
+                        FixedDataModelElement("bracket", b") "),
+                        FixedWordlistDataModelElement("command", [b"REPLACE", b"LIST"]),
+                        FixedDataModelElement("bracket", b" ("),
+                        DelimitedDataModelElement("user", b")"),
+                        FixedDataModelElement("bracket", b")")
+                        ]),
+                    FixedDataModelElement("str", b"(CRON) info (No MTA installed, discarding output)"),
                     FixedDataModelElement("reboot_jobs", b"(CRON) INFO (Running @reboot jobs)")
                     ])
                 ]),
@@ -574,8 +622,20 @@ def get_model():
                         FixedDataModelElement("space", b" port "),
                         DecimalIntegerValueModelElement("port"),
                         ]),
+                    SequenceModelElement("disconnected", [
+                        FixedDataModelElement("disconnected_str", b"Disconnected from "),
+                        OptionalMatchModelElement("user", SequenceModelElement("user", [
+                            FixedDataModelElement("user_str", b"user "),
+                            DelimitedDataModelElement("user", b" "),
+                            FixedDataModelElement("space", b" "),
+                            ])),
+                        IpAddressDataModelElement("ip"),
+                        FixedDataModelElement("space", b" port "),
+                        DecimalIntegerValueModelElement("port"),
+                        ]),
+                    FixedDataModelElement("timeout", b"Timeout, client not responding.")
+                    ])
                 ]),
-            ]),
             SequenceModelElement("su", [
                 FixedDataModelElement("systemd_str", b" su["),
                 DecimalIntegerValueModelElement("id"),
@@ -865,6 +925,72 @@ def get_model():
                 DecimalIntegerValueModelElement("pid"),
                 FixedDataModelElement("brack_str1", b"]: "),
                 OptionalMatchModelElement("opt", AnyByteDataModelElement("msg"))]),
+            SequenceModelElement("ifup", [
+                FixedDataModelElement("ifup_str", b" ifup["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("root", [
+                FixedDataModelElement("root_str", b" root: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("ntpd", [
+                FixedDataModelElement("ntpd_str", b" ntpd["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("ntp", [
+                FixedDataModelElement("ntp_str", b" ntp["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("exim4", [
+                FixedDataModelElement("exim4_str", b" exim4["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("mysqld_safe", [
+                FixedDataModelElement("mysqld_safe_str", b" mysqld_safe["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("mysqld", [
+                FixedDataModelElement("mysqld_str", b" mysqld["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("php7.0", [
+                FixedDataModelElement("php7.0_str", b" php7.0-"),
+                DelimitedDataModelElement("service", b":"),
+                FixedDataModelElement("colon", b": "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("libapache2-mod-php7.0", [
+                FixedDataModelElement("libapache2-mod-php7.0_str", b" libapache2-mod-php7.0: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("php", [
+                FixedDataModelElement("php_str", b" php-"),
+                DelimitedDataModelElement("service", b":"),
+                FixedDataModelElement("colon", b": "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("apache2_postinst", [
+                FixedDataModelElement("apache2_postinst_str", b" apache2.postinst: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("smbd", [
+                FixedDataModelElement("smbd_str", b" smbd["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                AnyByteDataModelElement("msg")]),
+            SequenceModelElement("apachectl", [
+                FixedDataModelElement("apachectl_str", b" apachectl["),
+                DecimalIntegerValueModelElement("pid"),
+                FixedDataModelElement("brack_str1", b"]: "),
+                FirstMatchModelElement("fm", [
+                    SequenceModelElement("ah00548", [
+                        FixedDataModelElement("ah00548",
+                                              b"AH00548: NameVirtualHost has no effect and will be removed in the next release "),
+                        AnyByteDataModelElement("cfg_path")
+                        ])
+                    ])
+                ])
             ])
         ])
 
