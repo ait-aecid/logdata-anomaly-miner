@@ -9,19 +9,7 @@ Copyright: 2016-2018, Roman Fiedler
            2019-2021, Wolfgang Hotwagner <wolfgang.hotwagner@ait.ac.at>
            2019-2021, Ernst Leierzopf <ernst.leierzopf.fl@ait.ac.at>
            2020-2021, Georg Hoeld <georg.hoeld@ait.ac.at>
-           2016-2021, AIT Austrian Institute of Technology GmbH <office@ait.ac.at>
-License: GPL-3.0+
-
-Files: debian/*
-Copyright: 2016-2018, Roman Fiedler
-           2018-2021, Markus Wurzenberger <markus.wurzenberger@ait.ac.at>
-           2018-2021, Max Landauer <max.landauer@ait.ac.at>
-           2019-2021, Wolfgang Hotwagner <wolfgang.hotwagner@ait.ac.at>
-           2019-2021, Ernst Leierzopf <ernst.leierzopf.fl@ait.ac.at>
-           2020-2021, Georg Hoeld <georg.hoeld@ait.ac.at>
-           2016-2021, AIT Austrian Institute of Technology GmbH <office@ait.ac.at>
-License: GPL-3.0+
-
+           2016-2023, AIT Austrian Institute of Technology GmbH <office@ait.ac.at>
 License: GPL-3.0+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
