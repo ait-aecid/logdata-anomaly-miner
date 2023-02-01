@@ -3,7 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Markus Wurzenberger <markus.wurzenberger@ait.ac.at>
 Build-Depends: debhelper-compat (= 13), dh-python, docbook-xsl, docbook-xml, python3, xsltproc
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
 Homepage: https://aecid.ait.ac.at/
 Vcs-Git: https://github.com/ait-aecid/logdata-anomaly-miner.git
 Vcs-Browser: https://github.com/ait-aecid/logdata-anomaly-miner
