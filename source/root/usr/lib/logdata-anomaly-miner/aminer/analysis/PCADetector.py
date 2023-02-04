@@ -109,7 +109,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.log_total += 1
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         # Skip paths from ignore list.
@@ -366,12 +366,12 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         """
         if STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
-                f"time windows in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60 minutes.",
+                component_name, self.log_success, self.log_total, self.log_windows)
         elif STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in {self.log_windows} "
-                f"time windows in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully in %d time windows in the last 60 minutes.",
+                component_name, self.log_success, self.log_total, self.log_windows)
         self.log_success = 0
         self.log_total = 0
         self.log_windows = 0

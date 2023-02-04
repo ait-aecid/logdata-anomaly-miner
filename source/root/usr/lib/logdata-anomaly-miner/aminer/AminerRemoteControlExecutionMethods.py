@@ -65,11 +65,11 @@ class AminerRemoteControlExecutionMethods:
             self.CONFIG_KEY_EVENT_COLLECT_TIME, self.CONFIG_KEY_ALERT_MIN_GAP, self.CONFIG_KEY_ALERT_MAX_GAP,
             self.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, self.CONFIG_KEY_MAIL_ALERT_GRACE_TIME]
         if not isinstance(analysis_context, AnalysisChild.AnalysisContext):
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the analysis_context must be of type %s." % AnalysisChild.AnalysisContext.__class__
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the analysis_context must be of type {AnalysisChild.AnalysisContext.__class__}."
             return
 
         if property_name not in self.INTEGER_CONFIG_PROPERTY_LIST + self.STRING_CONFIG_PROPERTY_LIST:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' does not exist in the current config!" % property_name
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the property '{property_name}' does not exist in the current config!"
             return
 
         if property_name in self.INTEGER_CONFIG_PROPERTY_LIST:
@@ -77,12 +77,12 @@ class AminerRemoteControlExecutionMethods:
         else:
             t = str
         if not isinstance(value, t):
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the value of the property '%s' must be of type %s!" % (property_name, t)
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the value of the property '{property_name}' must be of type {t}!"
             return
 
         if property_name in [KEY_PERSISTENCE_DIR, KEY_LOG_SOURCES_LIST]:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the property '%s' can only be changed at " \
-                                            "startup in the aminer root process!" % property_name
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the property '{property_name}' can only be changed at startup in the aminer root" \
+                                            f" process!"
             return
         if property_name == KEY_RESOURCES_MAX_MEMORY_USAGE:
             result = self.change_config_property_max_memory(analysis_context, value)
@@ -96,11 +96,10 @@ class AminerRemoteControlExecutionMethods:
         elif property_name == KEY_LOG_DEBUG_LEVEL:
             result = self.change_config_property_log_debug_level(analysis_context, value)
         else:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: property %s could not be changed. Please check the property_name " \
-                                            "again." % property_name
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: property {property_name} could not be changed. Please check the property_name again."
             return
         if result == 0:
-            msg = "'%s' changed to '%s' successfully." % (property_name, value)
+            msg = f"'{property_name}' changed to '{value}' successfully."
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
@@ -137,7 +136,7 @@ class AminerRemoteControlExecutionMethods:
             analysis_context.aminer_config.config_properties[KEY_LOG_STAT_LEVEL] = stat_level
             AminerConfig.STAT_LEVEL = stat_level
             return 0
-        self.REMOTE_CONTROL_RESPONSE += "FAILURE: STAT_LEVEL %d is not allowed. Allowed STAT_LEVEL values are 0, 1, 2." % stat_level
+        self.REMOTE_CONTROL_RESPONSE += f"FAILURE: STAT_LEVEL {stat_level} is not allowed. Allowed STAT_LEVEL values are 0, 1, 2."
         return 1
 
     def change_config_property_log_debug_level(self, analysis_context, debug_level):
@@ -153,7 +152,7 @@ class AminerRemoteControlExecutionMethods:
             else:
                 debug_logger.setLevel(logging.DEBUG)
             return 0
-        self.REMOTE_CONTROL_RESPONSE += "FAILURE: DEBUG_LEVEL %d is not allowed. Allowed DEBUG_LEVEL values are 0, 1, 2." % debug_level
+        self.REMOTE_CONTROL_RESPONSE += f"FAILURE: DEBUG_LEVEL {debug_level} is not allowed. Allowed DEBUG_LEVEL values are 0, 1, 2."
         return 1
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
@@ -167,11 +166,11 @@ class AminerRemoteControlExecutionMethods:
         attr = getattr(analysis_context.get_component_by_name(component_name), attribute)
         if type(attr) is type(value):
             setattr(analysis_context.get_component_by_name(component_name), attribute, value)
-            msg = "'%s.%s' changed from %s to %s successfully." % (component_name, attribute, repr(attr), value)
+            msg = f"'{component_name}.{attribute}' changed from {repr(attr)} to {value} successfully."
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         else:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: property '%s.%s' must be of type %s!" % (component_name, attribute, type(attr))
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: property '{component_name}.{attribute}' must be of type {type(attr)}!"
 
     def rename_registered_analysis_component(self, analysis_context, old_component_name, new_component_name):
         """
@@ -185,11 +184,11 @@ class AminerRemoteControlExecutionMethods:
         else:
             component = analysis_context.get_component_by_name(old_component_name)
             if component is None:
-                self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not exist." % old_component_name
+                self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the component '{old_component_name}' does not exist."
             else:
                 analysis_context.registered_components_by_name[old_component_name] = None
                 analysis_context.registered_components_by_name[new_component_name] = component
-                msg = "Component '%s' renamed to '%s' successfully." % (old_component_name, new_component_name)
+                msg = f"Component '{old_component_name}' renamed to '{new_component_name}' successfully."
                 self.REMOTE_CONTROL_RESPONSE += msg
                 logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
@@ -214,7 +213,7 @@ class AminerRemoteControlExecutionMethods:
                     val = float(val)
                 except ValueError:  # skipcq: FLK-E722
                     pass
-        self.REMOTE_CONTROL_RESPONSE = '"%s": %s' % (property_name, val)
+        self.REMOTE_CONTROL_RESPONSE = f'"{property_name}": {val}'
 
     def print_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute):
         """
@@ -227,7 +226,7 @@ class AminerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: the parameters 'component_name' and 'attribute' must be of type str."
             return
         if analysis_context.get_component_by_name(component_name) is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not exist." % component_name
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the component '{component_name}' does not exist."
             return
         if hasattr(analysis_context.get_component_by_name(component_name), attribute):
             attr = getattr(analysis_context.get_component_by_name(component_name), attribute, None)
@@ -236,30 +235,29 @@ class AminerRemoteControlExecutionMethods:
             if hasattr(attr, '__dict__') and self.isinstance_aminer_class(attr):
                 new_attr = self.get_all_vars(attr, '  ')
                 if isinstance(new_attr, str):
-                    new_attr = '"%s"' % new_attr
-                self.REMOTE_CONTROL_RESPONSE += '"%s.%s": %s' % (component_name, attribute, new_attr)
+                    new_attr = f'"{new_attr}"'
+                self.REMOTE_CONTROL_RESPONSE += f'"{component_name}.{attribute}": {new_attr}'
             elif isinstance(attr, list):
-                self.REMOTE_CONTROL_RESPONSE += '"%s.%s": [' % (component_name, attribute)
+                self.REMOTE_CONTROL_RESPONSE += f'"{component_name}.{attribute}": ['
                 for at in attr:
                     if hasattr(at, '__dict__') and self.isinstance_aminer_class(at):
                         new_attr = "\n[\n  " + at.__class__.__name__ + "  {\n" + self.get_all_vars(at, '  ') + "  }\n]"
                     else:
                         if isinstance(at, str):
-                            new_attr = '"%s"' % at
+                            new_attr = f'"{at}"'
                         else:
                             new_attr = str(at)
-                    self.REMOTE_CONTROL_RESPONSE += "%s, " % new_attr
+                    self.REMOTE_CONTROL_RESPONSE += f"{new_attr}, "
                 self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.rstrip(", ")
                 self.REMOTE_CONTROL_RESPONSE += "]"
             else:
                 if attr is None or isinstance(attr, (str, bool)):
-                    attr = '"%s"' % attr
-                self.REMOTE_CONTROL_RESPONSE += '"%s.%s": %s' % (component_name, attribute, attr)
+                    attr = f'"{attr}"'
+                self.REMOTE_CONTROL_RESPONSE += f'"{component_name}.{attribute}": {attr}'
             self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace('"False"', 'false').replace('"True"', 'true').replace(
                 '"None"', 'null')
         else:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: the component '%s' does not have an attribute named '%s'." % \
-                                            (component_name, attribute)
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the component '{component_name}' does not have an attribute named '{attribute}'."
 
     def print_current_config(self, analysis_context):
         """
@@ -268,14 +266,14 @@ class AminerRemoteControlExecutionMethods:
         """
         for config_property in analysis_context.aminer_config.config_properties:
             if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
-                self.REMOTE_CONTROL_RESPONSE += '"%s": "%s",\n' % (
-                    config_property, analysis_context.aminer_config.config_properties[config_property])
+                self.REMOTE_CONTROL_RESPONSE += f'"{config_property}": ' \
+                                                f'"{analysis_context.aminer_config.config_properties[config_property]}",\n'
             else:
                 self.REMOTE_CONTROL_RESPONSE += attr_str % (
                     config_property, analysis_context.aminer_config.config_properties[config_property])
         for component_id in analysis_context.get_registered_component_ids():
-            self.REMOTE_CONTROL_RESPONSE += '"%s": {\n' % analysis_context.get_name_by_component(
-                analysis_context.get_component_by_id(component_id))
+            self.REMOTE_CONTROL_RESPONSE += \
+                f'"{analysis_context.get_name_by_component(analysis_context.get_component_by_id(component_id))}": ' + '{\n'
             component = analysis_context.get_component_by_id(component_id)
             self.REMOTE_CONTROL_RESPONSE += self.get_all_vars(component, '  ')
             self.REMOTE_CONTROL_RESPONSE += "},\n\n"
@@ -348,15 +346,15 @@ class AminerRemoteControlExecutionMethods:
         backup_path = persistence_dir + '/backup/'
         backup_path_with_date = os.path.join(backup_path, backup_time_str)
         shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
-        msg = 'Created backup %s' % backup_time_str
-        self.REMOTE_CONTROL_RESPONSE = 'Created backup %s' % backup_time_str
+        msg = f"Created backup {backup_time_str}"
+        self.REMOTE_CONTROL_RESPONSE = f"Created backup {backup_time_str}"
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def list_backups(self, analysis_context):
         """List all available backups from the persistence directory."""
         persistence_dir = analysis_context.aminer_config.config_properties.get(KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
         for _dirpath, dirnames, _filenames in os.walk(os.path.join(persistence_dir, 'backup')):
-            self.REMOTE_CONTROL_RESPONSE = '"backups": %s' % dirnames
+            self.REMOTE_CONTROL_RESPONSE = f'"backups": {dirnames}'
             break
         self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace("'", '"')
 
@@ -370,20 +368,19 @@ class AminerRemoteControlExecutionMethods:
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
         if component.__class__.__name__ not in [
                 "EnhancedNewMatchPathValueComboDetector", "MissingMatchPathValueDetector", "NewMatchPathDetector",
                 "NewMatchPathValueComboDetector", "NewMatchIdValueComboDetector", "EventCorrelationDetector",
                 "NewMatchPathValueDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
-                "FAILURE: component class '%s' does not support allowlisting! Only the following classes support allowlisting: " \
-                "EnhancedNewMatchPathValueComboDetector, MissingMatchPathValueDetector, NewMatchPathDetector," \
-                " NewMatchIdValueComboDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector and EventCorrelationDetector." \
-                % component.__class__.__name__
+                f"FAILURE: component class '{component.__class__.__name__}' does not support allowlisting! Only the following classes " \
+                f"support allowlisting: EnhancedNewMatchPathValueComboDetector, MissingMatchPathValueDetector, NewMatchPathDetector," \
+                f" NewMatchIdValueComboDetector, NewMatchPathValueComboDetector, NewMatchPathValueDetector and EventCorrelationDetector."
             return
         try:
-            msg = component.allowlist_event("Analysis.%s" % component.__class__.__name__, event_data, allowlisting_data)
+            msg = component.allowlist_event(f"Analysis.{component.__class__.__name__}", event_data, allowlisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -400,14 +397,14 @@ class AminerRemoteControlExecutionMethods:
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
         if component.__class__.__name__ not in ["EventCorrelationDetector"]:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component class '%s' does not support blocklisting! Only the following classes " \
-                                            "support blocklisting: EventCorrelationDetector." % component.__class__.__name__
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component class '{component.__class__.__name__}' does not support blocklisting!" \
+                                            f" Only the following classes support blocklisting: EventCorrelationDetector."
             return
         try:
-            msg = component.blocklist_event("Analysis.%s" % component.__class__.__name__, event_data, blocklisting_data)
+            msg = component.blocklist_event(f"Analysis.{component.__class__.__name__}", event_data, blocklisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -423,17 +420,16 @@ class AminerRemoteControlExecutionMethods:
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
         if component.__class__.__name__ not in ["EventFrequencyDetector", "MinimalTransitionTimeDetector",
                                                 "PathValueTimeIntervalDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
-                "FAILURE: component class '%s' does not support the print_persistency_event! Only the following classes support it: " \
-                "EventFrequencyDetector, MinimalTransitionTimeDetector and PathValueTimeIntervalDetector." \
-                % component.__class__.__name__
+                f"FAILURE: component class '{component.__class__.__name__}' does not support the print_persistency_event! Only the " \
+                f"following classes support it: EventFrequencyDetector, MinimalTransitionTimeDetector and PathValueTimeIntervalDetector."
             return
         try:
-            msg = component.print_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.print_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -449,17 +445,17 @@ class AminerRemoteControlExecutionMethods:
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
         if component.__class__.__name__ not in ["NewMatchPathValueComboDetector", "MinimalTransitionTimeDetector",
                                                 "PathValueTimeIntervalDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
-                "FAILURE: component class '%s' does not support the add_to_persistency_event! Only the following classes support it: " \
-                "NewMatchPathValueComboDetector, MinimalTransitionTimeDetector and PathValueTimeIntervalDetector." \
-                % component.__class__.__name__
+                f"FAILURE: component class '{component.__class__.__name__}' does not support the add_to_persistency_event! Only the " \
+                f"following classes support it: NewMatchPathValueComboDetector, MinimalTransitionTimeDetector and" \
+                f" PathValueTimeIntervalDetector."
             return
         try:
-            msg = component.add_to_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.add_to_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -475,16 +471,15 @@ class AminerRemoteControlExecutionMethods:
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component '%s' does not exist!" % component
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
         if component.__class__.__name__ not in ["MinimalTransitionTimeDetector", "PathValueTimeIntervalDetector"]:
             self.REMOTE_CONTROL_RESPONSE += \
-                "FAILURE: component class '%s' does not support the remove_from_persistency_event! Only the following classes support it: "\
-                "MinimalTransitionTimeDetector and PathValueTimeIntervalDetector." \
-                % component.__class__.__name__
+                f"FAILURE: component class '{component.__class__.__name__}' does not support the remove_from_persistency_event! Only the " \
+                f"following classes support it: MinimalTransitionTimeDetector and PathValueTimeIntervalDetector."
             return
         try:
-            msg = component.remove_from_persistence_event("Analysis.%s" % component.__class__.__name__, event_data)
+            msg = component.remove_from_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
         # skipcq: PYL-W0703
@@ -501,17 +496,17 @@ class AminerRemoteControlExecutionMethods:
         """
         atom_filter = analysis_context.get_component_by_name(atom_handler)
         if atom_filter is None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: atom_handler '%s' does not exist!" % atom_handler
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: atom_handler '{atom_handler}' does not exist!"
             return
         if analysis_context.get_component_by_name(component_name) is not None:
-            self.REMOTE_CONTROL_RESPONSE += "FAILURE: component with same name already registered! (%s)" % component_name
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component with same name already registered! ({component_name})"
             return
         if not isinstance(component, AtomHandlerInterface):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: 'component' must implement the AtomHandlerInterface!"
             return
         atom_filter.add_handler(component)
         analysis_context.register_component(component, component_name)
-        msg = "Component '%s' added to '%s' successfully." % (component_name, atom_handler)
+        msg = f"Component '{component_name}' added to '{atom_handler}' successfully."
         self.REMOTE_CONTROL_RESPONSE += msg
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
@@ -534,18 +529,18 @@ class AminerRemoteControlExecutionMethods:
                 if event_id != dump_event_id:
                     continue
                 append_log_lines_flag = True
-                result_string = 'OK\nEvent %d: %s (%s)' % (event_id, event_message, event_type)
+                result_string = f"OK\nEvent {event_id}: {event_message} ({event_type})"
                 if event_type == 'Analysis.NewMatchPathDetector':
-                    result_string += '\n  Logline: %s' % (sorted_log_lines[0],)
+                    result_string += f"\n  Logline: {sorted_log_lines[0]}"
                 elif event_type == 'Analysis.NewMatchPathValueComboDetector':
                     result_string += '\nParser match:\n' + event_data[0].parser_match.matchElement.annotate_match('  ')
                 elif event_type == 'Analysis.AllowlistViolationDetector':
                     result_string += '\nParser match:\n' + event_data.parser_match.matchElement.annotate_match('  ')
                 elif event_type == 'ParserModel.UnparsedData':
-                    result_string += '\n  Unparsed line: %s' % sorted_log_lines[0]
+                    result_string += f"\n  Unparsed line: {sorted_log_lines[0]}"
                     append_log_lines_flag = False
                 else:
-                    result_string += '\n  Data: %s' % str(event_data)
+                    result_string += f"\n  Data: {str(event_data)}"
 
                 if append_log_lines_flag and (sorted_log_lines is not None) and (len(sorted_log_lines) != 0):
                     result_string += '\n  Log lines:\n    %s' % '\n    '.join(sorted_log_lines)
@@ -585,7 +580,7 @@ class AminerRemoteControlExecutionMethods:
                 delete_count += 1
             else:
                 event_pos += 1
-        msg = 'OK\n%d elements ignored' % delete_count
+        msg = f"OK\n{delete_count} elements ignored"
         self.REMOTE_CONTROL_RESPONSE = msg
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
@@ -606,7 +601,7 @@ class AminerRemoteControlExecutionMethods:
                 max_event_count = max_events
             result_string = 'OK'
             for event_id, _event_type, event_message, sorted_log_lines, _event_data, _event_source in history_data[:max_event_count]:
-                result_string += ('\nEvent %d: %s; Log data: %s' % (event_id, event_message, repr(sorted_log_lines)))[:240]
+                result_string += f"\nEvent {event_id}: {event_message}; Log data: {repr(sorted_log_lines)}"[:240]
             self.REMOTE_CONTROL_RESPONSE = result_string
 
     def allowlist_events_from_history(self, analysis_context, history_component_name, id_spec_list, allowlisting_data=None):
@@ -649,21 +644,21 @@ class AminerRemoteControlExecutionMethods:
                 try:
                     message = event_source.allowlist_event(
                         event_type, sorted_log_lines, event_data, allowlisting_data)
-                    result_string += 'OK %d: %s\n' % (event_id, message)
+                    result_string += f"OK {event_id}: {message}\n"
                     logging.getLogger(DEBUG_LOG_NAME).info(result_string)
                     allowlisted_flag = True
                 except NotImplementedError:
-                    result_string += 'FAIL %d: component does not support allowlisting.' % event_id
+                    result_string += f"FAIL {event_id}: component does not support allowlisting."
                 # skipcq: PYL-W0703
                 except Exception as wl_exception:
-                    result_string += 'FAIL %d: %s\n' % (event_id, str(wl_exception))
+                    result_string += f"FAIL {event_id}: {str(wl_exception)}\n"
             elif event_type == 'Analysis.AllowlistViolationDetector':
-                result_string += 'FAIL %d: No automatic modification of allowlist rules, manual changes required\n' % event_id
+                result_string += f"FAIL {event_id}: No automatic modification of allowlist rules, manual changes required\n"
                 allowlisted_flag = True
             elif event_type == 'ParserModel.UnparsedData':
-                result_string += 'FAIL %d: No automatic modification of parsers yet\n' % event_id
+                result_string += f"FAIL {event_id}: No automatic modification of parsers yet\n"
             else:
-                result_string += 'FAIL %d: Unsupported event type %s\n' % (event_id, event_type)
+                result_string += f"FAIL {event_id}: Unsupported event type {event_type}\n"
             if allowlisted_flag:
                 # Clear the allowlisted event.
                 history_data[:] = history_data[:event_pos] + history_data[event_pos + 1:]
@@ -739,5 +734,5 @@ def _reformat_attr(attr):
         try:
             float(rep)
         except ValueError:  # skipcq: FLK-E722
-            rep = '"%s"' % rep
+            rep = f'"{rep}"'
     return rep

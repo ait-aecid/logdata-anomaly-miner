@@ -132,7 +132,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         persistence_data = [self.target_path_index_list, self.period_length_list, self.prediction_history]
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
@@ -153,7 +153,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         event_index = self.event_type_detector.current_index
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         # Check if enough log lines have appeared to calculate the period length, initialize the arima model, or make a prediction

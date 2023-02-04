@@ -84,5 +84,5 @@ def encode_byte_string_as_string(byte_string):
         if byte in b'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!"#$&\'()*+,-./:;<=>?@[]\\^_`{}|~ ':
             encoded += chr(byte)
         else:
-            encoded += '%%%02x' % byte
+            encoded += '%%%02x' % byte  # skipcq: PYL-C0209
     return encoded

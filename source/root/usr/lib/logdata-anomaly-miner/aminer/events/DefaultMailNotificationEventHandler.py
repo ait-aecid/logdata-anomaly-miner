@@ -176,4 +176,4 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         self.events_collected = 0
         self.current_message = ''
         self.next_alert_time = 0
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} sent notification.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s sent notification.", self.__class__.__name__)

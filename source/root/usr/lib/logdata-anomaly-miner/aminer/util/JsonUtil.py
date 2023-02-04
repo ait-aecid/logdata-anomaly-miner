@@ -50,7 +50,7 @@ def encode_object(term):
     elif isinstance(term, (bool, int, float)) or term is None:
         encoded_object = term
     else:
-        msg = 'Unencodeable object %s' % type(term)
+        msg = f"Unencodeable object {type(term)}"
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     return encoded_object

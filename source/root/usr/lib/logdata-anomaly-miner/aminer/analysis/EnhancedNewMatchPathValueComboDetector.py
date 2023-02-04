@@ -73,7 +73,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             # the first lists to tuples to allow hash operation needed by set.
             for value_tuple, extra_data in persistence_data:
                 self.known_values_dict[tuple(value_tuple)] = extra_data
-            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """
@@ -85,7 +85,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         match_dict = log_atom.parser_match.get_match_dictionary()
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
         timestamp = log_atom.get_timestamp()
         if timestamp is None:
@@ -167,7 +167,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         for dict_record in self.known_values_dict.items():
             persistence_data.append(dict_record)
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -194,13 +194,13 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned_path_value_combos} new value combinations in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully and learned %s new value combinations in the last 60 minutes.",
+                component_name, self.log_success, self.log_total, self.log_learned_path_value_combos)
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned_path_value_combos} new value combinations in the last 60 minutes. Following new value combinations "
-                f"were learned: {self.log_new_learned_values}")
+                "'%s' processed %d out of %d log atoms successfully and learned %s new value combinations in the last 60 minutes."
+                " Following new value combinations were learned: %s", component_name, self.log_success, self.log_total,
+                self.log_learned_path_value_combos, self.log_new_learned_values)
         self.log_success = 0
         self.log_total = 0
         self.log_learned_path_value_combos = 0
