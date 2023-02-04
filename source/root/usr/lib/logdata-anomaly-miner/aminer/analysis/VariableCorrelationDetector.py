@@ -1499,9 +1499,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 sum(len([i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if len(self.w_rel_list[event_index][
                     pos_var_cor_index][0][i_val]) > 0 and sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) >
                     self.min_values_cors_thres]) for pos_var_cor_index, pos_var_cor_val in enumerate(self.w_rel_list[event_index])
-                    if pos_var_cor_val != [{}, {}]) + sum(len([j_val for j_val in pos_var_cor_val[1] if len(pos_var_cor_val[1][j_val]) > 0
-                        and sum(pos_var_cor_val[1][j_val].values()) > self.min_values_cors_thres]) for pos_var_cor_index, pos_var_cor_val in
-                            enumerate(self.w_rel_list[event_index]) if pos_var_cor_val != [{}, {}]))
+                    if pos_var_cor_val != [{}, {}]) + sum(
+                        len([j_val for j_val in pos_var_cor_val[1] if len(pos_var_cor_val[1][j_val]) > 0 and sum(
+                            pos_var_cor_val[1][j_val].values()) > self.min_values_cors_thres]) for pos_var_cor_index, pos_var_cor_val in
+                        enumerate(self.w_rel_list[event_index]) if pos_var_cor_val != [{}, {}]))
         sorted_log_lines = []
         event_data = {'EventIndex': event_index}
         affected_log_atom_paths = []
