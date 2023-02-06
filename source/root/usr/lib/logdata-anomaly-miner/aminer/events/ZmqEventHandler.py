@@ -59,10 +59,10 @@ class ZmqEventHandler(EventHandlerInterface):
             return True
         if self.zmq_imported is False:
             try:
-                self.context = zmq.Context()
+                self.context = zmq.Context()  # skipcq: PYL-E0110
                 self.producer = self.context.socket(zmq.PUB)
                 self.producer.bind(self.url)
-                logging.getLogger(DEBUG_LOG_NAME).info(f"Created socket on {self.url}")
+                logging.getLogger(DEBUG_LOG_NAME).info("Created socket on %s", self.url)
                 self.zmq_imported = True
             except ImportError:
                 msg = 'ZeroMQ module not found.'

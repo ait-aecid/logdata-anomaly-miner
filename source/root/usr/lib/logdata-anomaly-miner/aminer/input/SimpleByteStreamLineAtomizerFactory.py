@@ -39,7 +39,7 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         self.eol_sep = eol_sep
         self.json_format = json_format
 
-    def get_atomizer_for_resource(self, resource_name):
+    def get_atomizer_for_resource(self, resource_name):  # skipcq: PYL-W0613
         """
         Get an atomizer for a given resource.
         @param resource_name the resource name for atomizer selection is ignored in this type of factory.

@@ -1017,8 +1017,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     for i_val in self.w_rel_list[event_index][pos_var_cor_index][0]:
                         # States True after the following steps if all tests were positive, and False if at least one was negative.
                         tmp_bool = True
-                        if sum([current_appearance_list[pos_var_cor_index][0][i_val][j_val] for j_val in current_appearance_list[
-                                pos_var_cor_index][0][i_val]]) > self.min_values_cors_thres:
+                        if sum(current_appearance_list[pos_var_cor_index][0][i_val][j_val] for j_val in current_appearance_list[
+                                pos_var_cor_index][0][i_val]) > self.min_values_cors_thres:
                             tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][0][i_val],
                                                              current_appearance_list[pos_var_cor_index][0][i_val], event_index,
                                                              pos_var_cor_index, 0, i_val)
@@ -1036,8 +1036,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     for j_val in self.w_rel_list[event_index][pos_var_cor_index][1]:
                         # States True after the following steps if all tests were positive, and False if at least one was negative
                         tmp_bool = True
-                        if sum([current_appearance_list[pos_var_cor_index][1][j_val][i_val] for i_val in current_appearance_list[
-                                pos_var_cor_index][1][j_val]]) > self.min_values_cors_thres:
+                        if sum(current_appearance_list[pos_var_cor_index][1][j_val][i_val] for i_val in current_appearance_list[
+                                pos_var_cor_index][1][j_val]) > self.min_values_cors_thres:
                             tmp_bool = self.homogeneity_test(self.w_rel_list[event_index][pos_var_cor_index][1][j_val],
                                                              current_appearance_list[pos_var_cor_index][1][j_val], event_index,
                                                              pos_var_cor_index, 1, j_val)
@@ -1330,13 +1330,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 for event_index, event_val in enumerate(self.rel_list):
                     for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):  # skipcq: PTC-W0060
                         # Check if the correlations i=i_val -> j=j_val have a high enough score
-                        tmp_sum = sum([sum(event_val[pos_var_cor_index][0][i_val].values()) for i_val in event_val[pos_var_cor_index][0]])
+                        tmp_sum = sum(sum(event_val[pos_var_cor_index][0][i_val].values()) for i_val in event_val[pos_var_cor_index][0])
 
                         if tmp_sum < self.event_type_detector.num_event_lines[event_index]*self.validate_cor_cover_vals_thres:
                             event_val[pos_var_cor_index][0] = {}
 
                         # Check if the correlations j=j_val -> i=i_val have a high enough score
-                        tmp_sum = sum([sum(event_val[pos_var_cor_index][1][j_val].values()) for j_val in event_val[pos_var_cor_index][1]])
+                        tmp_sum = sum(sum(event_val[pos_var_cor_index][1][j_val].values()) for j_val in event_val[pos_var_cor_index][1])
 
                         if tmp_sum < self.event_type_detector.num_event_lines[event_index]*self.validate_cor_cover_vals_thres:
                             event_val[pos_var_cor_index][1] = {}
@@ -1345,13 +1345,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 for event_index, event_val in enumerate(self.w_rel_list):
                     for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):  # skipcq: PTC-W0060
                         # Check if the correlations i=i_val -> j=j_val have a high enough score
-                        tmp_sum = sum([sum(event_val[pos_var_cor_index][0][i_val].values()) for i_val in event_val[pos_var_cor_index][0]])
+                        tmp_sum = sum(sum(event_val[pos_var_cor_index][0][i_val].values()) for i_val in event_val[pos_var_cor_index][0])
 
                         if tmp_sum < self.event_type_detector.num_event_lines[event_index]*self.validate_cor_cover_vals_thres:
                             event_val[pos_var_cor_index][0] = {}
 
                         # Check if the correlations j=j_val -> i=i_val have a high enough score
-                        tmp_sum = sum([sum(event_val[pos_var_cor_index][1][j_val].values()) for j_val in event_val[pos_var_cor_index][1]])
+                        tmp_sum = sum(sum(event_val[pos_var_cor_index][1][j_val].values()) for j_val in event_val[pos_var_cor_index][1])
 
                         if tmp_sum < self.event_type_detector.num_event_lines[event_index]*self.validate_cor_cover_vals_thres:
                             event_val[pos_var_cor_index][1] = {}
@@ -1384,15 +1384,15 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         total_frequency = max(1, sum(frequency_list))
 
                         # Mean of the distributions
-                        mean_list = [sum([distribution_list[i][j]*frequency_list[j] for j in range(len(frequency_list))])/total_frequency
+                        mean_list = [sum(distribution_list[i][j]*frequency_list[j] for j in range(len(frequency_list)))/total_frequency
                                      for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]]))]
 
                         # Variance of the correlations
                         variance_list = [0 for _ in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]]))]
                         # Calculate the variance of the single values
                         for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]])):  # skipcq: PTC-W0060
-                            variance_list[i] = sum([(distribution_list[i][j] - mean_list[i])**2 * frequency_list[j] / total_frequency for j
-                                                   in range(len(frequency_list))])
+                            variance_list[i] = sum((distribution_list[i][j] - mean_list[i])**2 * frequency_list[j] / total_frequency for j
+                                                   in range(len(frequency_list)))
 
                         # Check if the variance exceeds the threshold
                         if sum(variance_list) < self.validate_cor_distinct_thres:
@@ -1418,7 +1418,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         total_frequency = max(1, sum(frequency_list))
 
                         # Mean of the distributions
-                        mean_list = [sum([distribution_list[i][j]*frequency_list[j] for j in range(len(frequency_list))])/total_frequency
+                        mean_list = [sum(distribution_list[i][j]*frequency_list[j] for j in range(len(frequency_list)))/total_frequency
                                      for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[0]]))]
 
                         # Variance of the correlations
@@ -1426,8 +1426,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                         # Calculate the variance of the single values
                         for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[0]])):  # skipcq: PTC-W0060
-                            variance_list[i] = sum([(distribution_list[i][j] - mean_list[i])**2 * frequency_list[j] / total_frequency for j
-                                                    in range(len(frequency_list))])
+                            variance_list[i] = sum((distribution_list[i][j] - mean_list[i])**2 * frequency_list[j] / total_frequency for j
+                                                   in range(len(frequency_list)))
 
                         # Check if the variance exceeds the threshold
                         if sum(variance_list) < self.validate_cor_distinct_thres:
@@ -1438,10 +1438,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         message = f'Initialisation of the method relations of the event {self.event_type_detector.get_event_type(event_index)}'
         # skipcq: PYL-C0209
         message += '\n%s rules have been generated for this event type' % (
-                sum([len(self.rel_list[event_index][pos_var_cor_index][0]) for pos_var_cor_index in range(len(
-                    self.rel_list[event_index])) if self.rel_list[event_index][pos_var_cor_index] != [{}, {}]]) + sum([len(
+                sum(len(self.rel_list[event_index][pos_var_cor_index][0]) for pos_var_cor_index in range(len(
+                    self.rel_list[event_index])) if self.rel_list[event_index][pos_var_cor_index] != [{}, {}]) + sum(len(
                         self.rel_list[event_index][pos_var_cor_index][1]) for pos_var_cor_index in range(len(self.rel_list[event_index])) if
-                        self.rel_list[event_index][pos_var_cor_index] != [{}, {}]]))
+                        self.rel_list[event_index][pos_var_cor_index] != [{}, {}]))
         sorted_log_lines = []
         event_data = {'EventIndex': event_index}
         affected_log_atom_paths = []
@@ -1496,13 +1496,13 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         message = f'Initialisation of the method weighted relations of the event {self.event_type_detector.get_event_type(event_index)}'
         # skipcq: PYL-C0209
         message += '\n%s rules have been generated for this event type' % (
-                sum([len([i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if len(self.w_rel_list[event_index][
+                sum(len([i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if len(self.w_rel_list[event_index][
                     pos_var_cor_index][0][i_val]) > 0 and sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) >
-                    self.min_values_cors_thres])
-                    for pos_var_cor_index, pos_var_cor_val in enumerate(self.w_rel_list[event_index]) if pos_var_cor_val != [
-                        {}, {}]]) + sum([len([j_val for j_val in pos_var_cor_val[1] if len(pos_var_cor_val[1][j_val]) > 0 and sum(
+                    self.min_values_cors_thres]) for pos_var_cor_index, pos_var_cor_val in enumerate(self.w_rel_list[event_index])
+                    if pos_var_cor_val != [{}, {}]) + sum(
+                        len([j_val for j_val in pos_var_cor_val[1] if len(pos_var_cor_val[1][j_val]) > 0 and sum(
                             pos_var_cor_val[1][j_val].values()) > self.min_values_cors_thres]) for pos_var_cor_index, pos_var_cor_val in
-                            enumerate(self.w_rel_list[event_index]) if pos_var_cor_val != [{}, {}]]))
+                        enumerate(self.w_rel_list[event_index]) if pos_var_cor_val != [{}, {}]))
         sorted_log_lines = []
         event_data = {'EventIndex': event_index}
         affected_log_atom_paths = []

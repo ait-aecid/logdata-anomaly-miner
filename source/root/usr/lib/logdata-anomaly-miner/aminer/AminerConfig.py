@@ -79,7 +79,7 @@ def load_config(config_file_name):
         logging.getLogger(DEBUG_LOG_NAME).error(e)
         raise e
     except Exception:
-        msg = 'Failed to load configuration from %s' % config_file_name
+        msg = f"Failed to load configuration from {config_file_name}"
         print(msg, file=sys.stderr)
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         exception_info = sys.exc_info()
@@ -103,10 +103,10 @@ def save_config(analysis_context, new_file):
         old = file.read()
 
     for config_property in analysis_context.aminer_config.config_properties:
-        find_str = "config_properties['%s'] = " % config_property
+        find_str = f"config_properties['{config_property}'] = "
         pos = old.find(find_str)
         if pos == -1:
-            msg += "WARNING: %snot found in the old config file.\n" % find_str
+            msg += f"WARNING: {find_str}not found in the old config file.\n"
             rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
             rc_logger.warning(msg.strip('\n'))
         else:
@@ -116,8 +116,8 @@ def save_config(analysis_context, new_file):
             prop = analysis_context.aminer_config.config_properties[config_property]
             if (string[0] == "'" and string[-1] == "'") or (string[0] == '"' and string[-1] == '"'):
                 prop = "'" + prop + "'"
-            if "%s" % string != "%s" % prop:
-                old = old[:pos + len(find_str)] + "%s" % prop + old[pos + len(find_str) + old_len:]
+            if f"{string}" != f"{prop}":
+                old = old[:pos + len(find_str)] + f"{prop}" + old[pos + len(find_str) + old_len:]
 
     for component_id in analysis_context.get_registered_component_ids():
         component = analysis_context.get_component_by_id(component_id)
@@ -140,8 +140,8 @@ def save_config(analysis_context, new_file):
             old_len = old_component_name_end - old_component_name_start + 1
             old_component_name = old[old_component_name_start:]
             old_component_name = old_component_name[:old_len]
-            if old_component_name != '"%s"' % name:
-                old = old[:old_component_name_start] + '"%s"' % name + old[old_component_name_end + 1:]
+            if old_component_name != f'"{name}"':
+                old = old[:old_component_name_start] + f'"{name}"' + old[old_component_name_end + 1:]
 
     log_dir = analysis_context.aminer_config.config_properties.get(KEY_LOG_DIR, DEFAULT_LOG_DIR)
     remote_control_log_file = analysis_context.aminer_config.config_properties.get(
@@ -150,7 +150,7 @@ def save_config(analysis_context, new_file):
         with open(remote_control_log_file, "r") as logFile:
             logs = logFile.readlines()
     except OSError as e:
-        msg = 'Could not read %s: %s\n' % (remote_control_log_file, e)
+        msg = f"Could not read {remote_control_log_file}: {e}\n"
         logging.getLogger(DEBUG_LOG_NAME).error(msg.strip('\n'))
         print(msg, file=sys.stderr)
 
@@ -175,23 +175,23 @@ def save_config(analysis_context, new_file):
                 attr = arr[2].split('"')[1]
             value = arr[3].strip().split(")")[0]
 
-            pos = old.find('component_name="%s"' % component_name)
+            pos = old.find(f'component_name="{component_name}"')
             if pos == -1:
-                pos = old.find("component_name='%s'" % component_name)
+                pos = old.find(f"component_name='{component_name}'")
             while old[pos] != '\n':
                 pos = pos - 1
             pos = old.find(register_component, pos) + len(register_component)
             var = old[pos:old.find(',', pos)]
-            pos = old.find("%s =" % var)
+            pos = old.find(f"{var} =")
             if pos == -1:
-                pos = old.find("%s=" % var)
+                pos = old.find(f"{var}=")
             pos = old.find(attr, pos)
             p1 = old.find(")", pos)
             p2 = old.find(",", pos)
             if -1 not in (p1, p2):
                 end = min(old.find(")", pos), old.find(",", pos))
             elif p1 == -1 and p2 == -1:
-                msg += "WARNING: '%s.%s' could not be found in the current config!\n" % (component_name, attr)
+                msg += f"WARNING: '{component_name}.{attr}' could not be found in the current config!\n"
                 rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
                 rc_logger.warning(msg.strip('\n'))
                 continue
@@ -199,7 +199,7 @@ def save_config(analysis_context, new_file):
                 end = p2
             elif p2 == -1:
                 end = p1
-            old = old[:old.find("=", pos) + 1] + "%s" % value + old[end:]
+            old = old[:old.find("=", pos) + 1] + f"{value}" + old[end:]
 
         if "REMOTECONTROL add_handler_to_atom_filter_and_register_analysis_component" in log:
             parameters = log.split(",", 2)
@@ -216,11 +216,11 @@ def save_config(analysis_context, new_file):
             new_parameters = parameters[2].split(")")
             component_name = new_parameters[1].strip(', ')
 
-            var = "analysis_component%d" % VAR_ID
+            var = f"analysis_component{VAR_ID}"
             VAR_ID = VAR_ID + 1
-            old = old + "\n  %s = %s)" % (var, new_parameters[0].strip())
-            old = old + "\n  %s.register_component(%s, component_name=%s)" % (filter_config, var, component_name)
-            old = old + "\n  %s.add_handler(%s)\n" % (filter_config, var)
+            old = old + f"\n  {var} = {new_parameters[0].strip()})"
+            old = old + f"\n  {filter_config}.register_component({var}, component_name={component_name})"
+            old = old + f"\n  {filter_config}.add_handler({var})\n"
 
     # remove double lines
     old = old.replace('\n\n\n', '\n\n')
@@ -228,10 +228,10 @@ def save_config(analysis_context, new_file):
     try:
         with open(new_file, "w") as file:
             file.write(old)
-        msg += "Successfully saved the current config to %s." % new_file
+        msg += f"Successfully saved the current config to {new_file}."
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
         return msg
     except FileNotFoundError:
-        msg += "FAILURE: file '%s' could not be found or opened!" % new_file
+        msg += f"FAILURE: file '{new_file}' could not be found or opened!"
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         return msg

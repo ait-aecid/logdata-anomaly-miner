@@ -91,7 +91,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             return False
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         match_dict = log_atom.parser_match.get_match_dictionary()
@@ -220,7 +220,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         for id_tuple, counter in self.counter_reduce_time_intervals.items():
             persist_data[1].append((id_tuple, counter))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
@@ -230,7 +230,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.appeared_time_list[tuple(id_tuple)] = time_list
             for id_tuple, counter in persistence_data[1]:
                 self.counter_reduce_time_intervals[tuple(id_tuple)] = counter
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def print_persistence_event(self, event_type, event_data):
         """

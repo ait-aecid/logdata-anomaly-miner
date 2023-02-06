@@ -84,7 +84,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 for sequence_elem in sequence:
                     sequence_elem_tuple.append(tuple(sequence_elem))
                 self.sequences.add(tuple(sequence_elem_tuple))
-            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -92,7 +92,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         self.log_total += 1
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         # Skip paths from ignore list.
@@ -226,7 +226,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, list(self.sequences))
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -271,13 +271,13 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned} new sequences in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully and learned %d new sequences in the last 60 minutes.", component_name,
+                self.log_success, self.log_total, self.log_learned)
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned} new sequences in the last 60 minutes. Following new sequences were learned: "
-                f"{str(self.log_learned_sequences)}")
+                "'%s' processed %d out of %d log atoms successfully and learned %d new sequences in the last 60 minutes. Following new"
+                " sequences were learned: %s", component_name, self.log_success, self.log_total, self.log_learned,
+                self.log_learned_sequences)
         self.log_success = 0
         self.log_total = 0
         self.log_learned = 0

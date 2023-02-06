@@ -153,7 +153,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.stat_data)
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def update(self, stat_data, timestamp_value, value):
         """
@@ -187,7 +187,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         Perform the analysis and progress from the last bin to the next one.
         @return None when statistical data was as expected and debugging is disabled.
         """
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} performs analysis.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s performs analysis.", self.__class__.__name__)
         current_bin = stat_data[3]
         current_average = current_bin[1] / current_bin[0]
         current_variance = (current_bin[2] - (current_bin[1] * current_bin[1]) / current_bin[0]) / (current_bin[0] - 1)

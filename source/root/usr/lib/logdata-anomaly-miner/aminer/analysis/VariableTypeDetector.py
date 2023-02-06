@@ -2316,7 +2316,7 @@ def convert_to_floats(list_in):
     for item in list_in:
         try:
             num_list.append(float(item))
-        except:  # skipcq: FLK-E722
+        except (ValueError, TypeError):
             return []
     return num_list
 
@@ -2423,4 +2423,4 @@ def cramervonmises2(rvs1, rvs2):
 
 def durbin_watson(rvs):
     """Return the durbin watson test statistic."""
-    return sum([(rvs[i+1] - rvs[i])**2 for i in range(len(rvs) - 1)]) / sum([rvs[i]**2 for i in range(len(rvs))])
+    return sum((rvs[i+1] - rvs[i])**2 for i in range(len(rvs) - 1)) / sum(rvs[i]**2 for i in range(len(rvs)))
