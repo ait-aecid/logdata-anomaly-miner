@@ -85,7 +85,7 @@ class ScoringEventHandler(EventHandlerInterface):
                 event_data_confidence = event_data_confidence[path]
 
             # Calculate the absolute confidence
-            confidence_absolut = sum([self.get_weight(val) for val in analyis_list])
+            confidence_absolut = sum(self.get_weight(val) for val in analyis_list)
             # Add the the absolute and mean confidence to the message
             event_data_confidence[output_field_path[-1]] = {'confidence_absolut': confidence_absolut,
                                                             'confidence_mean': confidence_absolut / len(analyis_list)}
@@ -114,4 +114,4 @@ class ScoringEventHandler(EventHandlerInterface):
             # Return 0.5 if the value is not in the weigth list and the weights are not automatically calculated
             return 0.5
         # Else calculate the weight through 10 / (10 + number of value appearances)
-        return 10 / (10 + sum([value in value_list for value_list in self.history_list]))
+        return 10 / (10 + sum(value in value_list for value_list in self.history_list))

@@ -57,7 +57,7 @@ if command_list is None:
     command_list = []
 if args.exec_file is not None:
     if not os.path.exists(args.exec_file):
-        print('File %s does not exist' % args.exec_file)
+        print(f"File {args.exec_file} does not exist")
         sys.exit(1)
     with open(args.exec_file, 'rb') as exec_file:
         command_list += exec_file.readlines()
@@ -71,8 +71,8 @@ remote_control_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 try:
     remote_control_socket.connect(remote_control_socket_name)
 except socket.error as connectException:
-    print('Failed to connect to socket %s, aminer might not be running or remote control is disabled in '
-          'configuration: %s' % (remote_control_socket_name, str(connectException)))
+    print(f"Failed to connect to socket {remote_control_socket_name}, aminer might not be running or remote control is disabled in "
+          f"configuration: {str(connectException)}")
     sys.exit(1)
 remote_control_socket.setblocking(True)
 
@@ -91,15 +91,15 @@ for remote_control_code in command_list:
         try:
             remote_data = json.loads(request_data[8:])
             if remote_data[0] is not None:
-                print('Remote execution exception:\n%s' % remote_data[0])
+                print(f"Remote execution exception:\n{remote_data[0]}")
             if string_response_flag:
-                print('Remote execution response: %s' % str(remote_data[1]))
+                print(f"Remote execution response: {str(remote_data[1])}")
             else:
-                print('Remote execution response: %s' % repr(remote_data[1]))
+                print(f"Remote execution response: {repr(remote_data[1])}")
         except:  # skipcq: FLK-E722
-            print('Failed to process response %s' % repr(request_data))
+            print(f"Failed to process response {repr(request_data)}")
             traceback.print_exc()
     else:
-        raise Exception('Invalid request type %s' % repr(request_type))
+        raise Exception(f"Invalid request type {repr(request_type)}")
 
 remote_control_socket.close()

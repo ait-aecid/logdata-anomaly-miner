@@ -223,13 +223,13 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         tmp_list.append(self.id_path_list_tuples)
         PersistenceUtil.store_json(self.persistence_file_name, tmp_list)
 
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def add_following_modules(self, following_module):
         """Add the given Module to the following module list."""
         self.following_modules.append(following_module)
         logging.getLogger(DEBUG_LOG_NAME).debug(
-            f'{self.__class__.__name__} added following module {following_module.__class__.__name__}.')
+            "%s added following module %s.", self.__class__.__name__, following_module.__class__.__name__)
 
     def init_values(self, current_index):
         """Initialize the variable_key_list and the list for the values."""

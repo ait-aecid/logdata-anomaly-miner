@@ -86,7 +86,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     value[1] = default_interval
                     value[2] = value[0] + default_interval
                 self.expected_values_dict[key] = value
-            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
         self.analysis_string = 'Analysis.%s'
 
     def receive_atom(self, log_atom):
@@ -100,7 +100,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.log_total += 1
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         value = self.get_channel_key(log_atom)
@@ -264,7 +264,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     def remove_check_value(self, value):
         """Remove checks for given value."""
         del self.expected_values_dict[value]
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} removed check value {str(value)}.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s removed check value %s.", self.__class__.__name__, str(value))
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -281,7 +281,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.expected_values_dict)
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -312,13 +312,12 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned_values} new values in the last 60 minutes.)")
+                "'%s' processed %d out of %d log atoms successfully and learned %d new values in the last 60 minutes.",
+                component_name, self.log_success, self.log_total, self.log_learned_values)
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_learned_values} new values in the last 60 minutes. Following new values were learned: "
-                f"{self.log_new_learned_values}")
+                "'%s' processed %d out of %d log atoms successfully and learned %d new values in the last 60 minutes. Following new values"
+                " were learned: %s", component_name, self.log_success, self.log_total, self.log_learned_values, self.log_new_learned_values)
         self.log_success = 0
         self.log_total = 0
         self.log_learned_values = 0

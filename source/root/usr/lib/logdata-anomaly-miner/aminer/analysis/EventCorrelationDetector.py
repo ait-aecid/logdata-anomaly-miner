@@ -148,7 +148,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         self.forward_rules_inv[implied_event].append(rule)
                     else:
                         self.forward_rules_inv[implied_event] = [rule]
-            logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} loaded persistence data.')
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
@@ -184,7 +184,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         parser_match = log_atom.parser_match
@@ -700,7 +700,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 known_path_set.add(
                     ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
-        logging.getLogger(DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """
@@ -709,15 +709,14 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and learned "
-                f"{self.log_forward_rules_learned} new forward rules and {self.log_back_rules_learned} new back rules in the last 60 "
-                f"minutes.")
+                "'%s' processed %d out of %d log atoms successfully and learned %s new forward rules and %s new back rules in the last 60 "
+                "minutes.", component_name, self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned)
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully and"
-                f" learned {self.log_forward_rules_learned} new forward rules and {self.log_back_rules_learned} new back rules in the last "
-                f"60 minutes. Following new forward rules were learned: {self.log_forward_rules_learned}. Following new back rules were"
-                f" learned: {self.log_back_rules_learned}")
+                "'%s' processed %d out of %d log atoms successfully and learned %s new forward rules and %s new back rules in the last "
+                "60 minutes. Following new forward rules were learned: %s. Following new back rules were learned: %s", component_name,
+                self.log_success, self.log_total, self.log_forward_rules_learned, self.log_back_rules_learned,
+                self.log_forward_rules_learned, self.log_back_rules_learned)
         self.log_success = 0
         self.log_total = 0
         self.log_forward_rules_learned = 0

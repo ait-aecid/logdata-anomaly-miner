@@ -70,8 +70,8 @@ class AnalysisContext:
     def add_time_triggered_component(self, component, trigger_class=None):
         """Add a time-triggered component to the registry."""
         if not isinstance(component, TimeTriggeredComponentInterface):
-            msg = 'Attempting to register component of class %s not implementing aminer.util.TimeTriggeredComponentInterface' % (
-                  component.__class__.__name__)
+            msg = f"Attempting to register component of class {component.__class__.__name__} not implementing " \
+                  f"aminer.util.TimeTriggeredComponentInterface"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if trigger_class is None:
@@ -81,7 +81,7 @@ class AnalysisContext:
         elif trigger_class == AnalysisContext.TIME_TRIGGER_CLASS_ANALYSISTIME:
             self.analysis_time_triggered_components.append(component)
         else:
-            msg = 'Attempting to timer component for unknown class %s' % trigger_class
+            msg = f"Attempting to timer component for unknown class {trigger_class}"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         logging.getLogger(DEBUG_LOG_NAME).debug(
@@ -184,7 +184,7 @@ class AnalysisContext:
                     if reopen:
                         event_handler.stream = open(event_handler.stream.name, "w+")
                 except IOError as e:
-                    msg = "Error when closing or opening stream with the name %s, shutting down.\n%s" % (event_handler.stream.name, e)
+                    msg = f"Error when closing or opening stream with the name {event_handler.stream.name}, shutting down.\n{e}"
                     logging.getLogger(DEBUG_LOG_NAME).critical(msg)
                     print(msg, file=sys.stderr)
                     sys.exit(1)
@@ -229,7 +229,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         # Override the signal handler to allow graceful shutdown.
         def graceful_shutdown_handler(_signo, _stack_frame):
             """React on typical shutdown signals."""
-            msg = '%s: caught signal, shutting down' % program_name
+            msg = f"{program_name}: caught signal, shutting down"
             print(msg, file=sys.stderr)
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
             self.run_analysis_loop_flag = False
@@ -272,7 +272,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb * 1024 * 1024, resource.RLIM_INFINITY))
                 logging.getLogger(DEBUG_LOG_NAME).debug('set max memory limit to %d MB.', max_memory_mb)
             except ValueError:
-                msg = '%s must be an integer, terminating' % KEY_RESOURCES_MAX_MEMORY_USAGE
+                msg = f"{KEY_RESOURCES_MAX_MEMORY_USAGE} must be an integer, terminating"
                 print('FATAL: ' + msg, file=sys.stderr)
                 logging.getLogger(DEBUG_LOG_NAME).critical(msg)
                 return 1
@@ -328,7 +328,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 # Interrupting signals, e.g. for shutdown are OK.
                 if select_error[0] == errno.EINTR:
                     continue
-                msg = 'Unexpected select result %s' % str(select_error)
+                msg = f"Unexpected select result {str(select_error)}"
                 print(msg, file=sys.stderr)
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 delayed_return_status = 1
@@ -353,7 +353,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     try:
                         fd_handler_object.do_receive()
                     except ConnectionError as receiveException:
-                        msg = 'Unclean termination of remote control: %s' % str(receiveException)
+                        msg = f"Unclean termination of remote control: {str(receiveException)}"
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         print(msg, file=sys.stderr)
                     if fd_handler_object.is_dead():
@@ -378,7 +378,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     self.tracked_fds_dict[control_client_socket.fileno()] = remote_control_handler
                     continue
 
-                msg = 'Unhandled object type %s' % type(fd_handler_object)
+                msg = f"Unhandled object type {type(fd_handler_object)}"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
 
@@ -389,13 +389,13 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     try:
                         buffer_flushed_flag = fd_handler_object.do_send()
                     except OSError as sendError:
-                        msg = 'Error at sending data via remote control: %s' % str(sendError)
+                        msg = f"Error at sending data via remote control: {str(sendError)}"
                         print(msg, file=sys.stderr)
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         try:
                             fd_handler_object.terminate()
                         except ConnectionError as terminateException:
-                            msg = 'Unclean termination of remote control: %s' % str(terminateException)
+                            msg = f"Unclean termination of remote control: {str(terminateException)}"
                             print(msg, file=sys.stderr)
                             logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     if buffer_flushed_flag:
@@ -403,7 +403,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     if fd_handler_object.is_dead():
                         del self.tracked_fds_dict[write_fd]
                     continue
-                msg = 'Unhandled object type %s' % type(fd_handler_object)
+                msg = f"Unhandled object type {type(fd_handler_object)}"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
 
@@ -504,7 +504,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             os.close(received_fd)
             self.tracked_fds_dict[self.remote_control_socket.fileno()] = self.remote_control_socket
         else:
-            msg = 'Unhandled type info on received fd: %s' % repr(received_type_info)
+            msg = f"Unhandled type info on received fd: {repr(received_type_info)}"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -690,7 +690,7 @@ class AnalysisChildRemoteControlHandler:
             # This is little dirty but avoids having to pass over remoteControlResponse dumping again.
             if json_remote_control_response is None:
                 json_remote_control_response = 'null'
-            json_response = '[%s, %s]' % (json.dumps(exception_data), json_remote_control_response)
+            json_response = f"[{json.dumps(exception_data)}, {json_remote_control_response}]"
             if len(json_response) + 8 > self.max_control_packet_size:
                 # Damn: the response would be larger than packet size. Fake a secondary exception and return part of the json string
                 # included. Binary search of size could be more efficient, knowing the maximal size increase a string could have in json.
@@ -702,7 +702,7 @@ class AnalysisChildRemoteControlHandler:
                     if test_size == min_include_size:
                         break
                     emergency_response_data = json.dumps(
-                        ['Exception: Response too large\nPartial response data: %s...' % json_response[:test_size], None])
+                        [f"Exception: Response too large\nPartial response data: {json_response[:test_size], None}..."])
                     if len(emergency_response_data) + 8 > self.max_control_packet_size:
                         max_include_size = test_size - 1
                     else:
@@ -713,7 +713,7 @@ class AnalysisChildRemoteControlHandler:
             json_response = json_response.encode()
             self.output_buffer += struct.pack("!I", len(json_response) + 8) + b'RRRR' + json_response
         else:
-            msg = 'Invalid request type %s' % repr(request_type)
+            msg = f"Invalid request type {repr(request_type)}"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -736,8 +736,8 @@ class AnalysisChildRemoteControlHandler:
             return None
         request_length = struct.unpack("!I", self.input_buffer[:4])[0]
         if (request_length < 0) or (request_length >= self.max_control_packet_size):
-            msg = 'Invalid length value 0x%x in malformed request starting with b64:%s' % (
-                request_length, base64.b64encode(self.input_buffer[:60]))
+            msg = f"Invalid length value 0x{request_length} in malformed request starting with b64:" \
+                  f"{base64.b64encode(self.input_buffer[:60])}"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if request_length > len(self.input_buffer):

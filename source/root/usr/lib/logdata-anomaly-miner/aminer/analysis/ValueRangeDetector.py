@@ -75,7 +75,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         parser_match = log_atom.parser_match
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info(f"Stopping learning in the {self.__class__.__name__}.")
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
         # Skip atom when ignore paths in atom or constraint paths not in atom.
@@ -173,7 +173,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, [self.ranges_min, self.ranges_max])
-        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug(f'{self.__class__.__name__} persisted data.')
+        logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -218,9 +218,11 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         """
         if AminerConfig.STAT_LEVEL == 1:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully in the last 60 minutes.",
+                component_name, self.log_success, self.log_total)
         elif AminerConfig.STAT_LEVEL == 2:
             logging.getLogger(STAT_LOG_NAME).info(
-                f"'{component_name}' processed {self.log_success} out of {self.log_total} log atoms successfully in the last 60 minutes.")
+                "'%s' processed %d out of %d log atoms successfully in the last 60 minutes.",
+                component_name, self.log_success, self.log_total)
         self.log_success = 0
         self.log_total = 0

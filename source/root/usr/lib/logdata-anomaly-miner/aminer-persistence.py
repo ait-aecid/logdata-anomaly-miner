@@ -53,11 +53,11 @@ def main():
             sys.exit(1)
         absolute_persistence_path = args.restore
     if '.' in args.user or '/' in args.user:
-        print('The aminer user %s must not contain any . or /' % args.user, file=sys.stderr)
+        print(f"The aminer user {args.user} must not contain any . or /", file=sys.stderr)
         sys.exit(1)
     aminer_user = args.user
     if '.' in args.group or '/' in args.group:
-        print('The aminer group %s must not contain any . or /' % args.group, file=sys.stderr)
+        print(f"The aminer group {args.group} must not contain any . or /", file=sys.stderr)
         sys.exit(1)
     aminer_grp = args.group
     if not args.persistence_dir.startswith('/'):
@@ -80,7 +80,7 @@ def main():
             persistence_dir = '/var/lib/aminer'
 
         if not os.path.exists(absolute_persistence_path):
-            print('%s does not exist.' % absolute_persistence_path, file=sys.stderr)
+            print(f"{absolute_persistence_path} does not exist.", file=sys.stderr)
         else:
             from pwd import getpwnam
             from grp import getgrnam
@@ -92,7 +92,7 @@ def main():
                 os.chown(dirpath, child_user_id, child_group_id)
                 for filename in filenames:
                     os.chown(os.path.join(dirpath, filename), child_user_id, child_group_id)
-            print('Restored persistence from %s successfully.' % absolute_persistence_path)
+            print(f"Restored persistence from {absolute_persistence_path} successfully.")
 
 
 main()

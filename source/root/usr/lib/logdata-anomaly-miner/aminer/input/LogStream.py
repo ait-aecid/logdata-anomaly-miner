@@ -219,7 +219,7 @@ class UnixSocketLogDataResource(LogDataResource):
             log_socket.connect(self.log_resource_name[7:])
         except socket.error as socketError:
             logging.getLogger(DEBUG_LOG_NAME).error(
-                f'OSError occurred in UnixSocketLogDataResource.open(). Error message: {socketError.msg}')
+                "OSError occurred in UnixSocketLogDataResource.open(). Error message: %s", socketError.msg)
             if log_socket is not None:
                 log_socket.close()
             if socketError.errno in (errno.ENOENT, errno.ECONNREFUSED):

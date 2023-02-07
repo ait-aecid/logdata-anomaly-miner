@@ -67,7 +67,7 @@ def close_base_directory():
             os.close(tmp_base_dir_fd)
             tmp_base_dir_fd = None
     except OSError as e:
-        msg = 'Could not close the base directory. Error: %s' % e
+        msg = f"Could not close the base directory. Error: {e}"
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
@@ -106,7 +106,7 @@ def close_log_directory():
             log_dir_fd = None
             log_dir_path = None
     except OSError as e:
-        msg = 'Could not close the base log directory. Error: %s' % e
+        msg = f"Could not close the base log directory. Error: {e}"
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
@@ -179,7 +179,7 @@ def receive_annoted_file_descriptor(receive_socket):
     """
     message_data, anc_data, _flags, _remote_address = receive_socket.recvmsg(1 << 16, socket.CMSG_LEN(struct.calcsize('i')))
     if len(anc_data) != 1:
-        msg = 'Received %d sets of ancillary data instead of 1' % len(anc_data)
+        msg = f"Received {len(anc_data)} sets of ancillary data instead of 1"
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     cmsg_level, cmsg_type, cmsg_data = anc_data[0]
@@ -189,7 +189,7 @@ def receive_annoted_file_descriptor(receive_socket):
         raise Exception(msg)
     # Do not accept multiple or unaligned FDs.
     if len(cmsg_data) != 4:
-        msg = 'Unsupported control message length %d' % len(cmsg_data)
+        msg = f"Unsupported control message length {len(cmsg_data)}"
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     received_fd = struct.unpack('i', cmsg_data)[0]
@@ -202,7 +202,7 @@ def receive_annoted_file_descriptor(receive_socket):
     type_info = message_data[:split_pos]
     annotation_data = message_data[split_pos + 1:]
     if received_fd <= 2:
-        msg = 'received "reserved" fd %d' % received_fd
+        msg = f'received "reserved" fd {received_fd}'
         logging.getLogger(DEBUG_LOG_NAME).warning(msg)
         print('WARNING: ' + msg, file=sys.stderr)
     if isinstance(type_info, str):

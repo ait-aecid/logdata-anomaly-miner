@@ -61,7 +61,7 @@ class ParserMatch:
                     try:
                         pos = next(i for i, x in enumerate(result_dict[test_match.path]) if not isinstance(x, list) and isinstance(
                             test_match.match_object, type(x.match_object)) and test_match.match_object == x.match_object)
-                        path += "/%d" % pos
+                        path += f"/{pos}"
                     except StopIteration:
                         path += "/%d" % counter_dict[path]
                         counter_dict[test_match.path] += 1
@@ -74,4 +74,4 @@ class ParserMatch:
         return result_dict
 
     def __str__(self):
-        return "ParserMatch: %s" % (self.match_element.annotate_match("  "))
+        return f'ParserMatch: {self.match_element.annotate_match("  ")}'

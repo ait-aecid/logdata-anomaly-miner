@@ -32,8 +32,8 @@ def add_persistable_component(component):
     """Add a component to the registry of all persistable components."""
     for c in persistable_components:
         if hasattr(c, 'persistence_file_name') and c.persistence_file_name == component.persistence_file_name:
-            msg = 'Detectors of type %s use the persistence_id "%s" multiple times. Please assign a unique persistence_id for every ' \
-                  'component.' % (c.__class__.__name__, os.path.split(c.persistence_file_name)[1])
+            msg = f'Detectors of type {c.__class__.__name__} use the persistence_id "{os.path.split(c.persistence_file_name)[1]}" ' \
+                  f'multiple times. Please assign a unique persistence_id for every component.'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             if not SKIP_PERSISTENCE_ID_WARNING:
                 print('Warning: ' + msg, file=sys.stderr)
@@ -67,7 +67,7 @@ def replace_persistence_file(file_name, new_file_handle):
             logging.getLogger(DEBUG_LOG_NAME).error(openOsError)
             raise openOsError
 
-    tmp_file_name = os.readlink('/proc/self/fd/%d' % new_file_handle)
+    tmp_file_name = os.readlink(f"/proc/self/fd/{new_file_handle}")
     if SecureOSFunctions.base_dir_path.decode() in file_name:
         file_name = file_name.replace(SecureOSFunctions.base_dir_path.decode(), '').lstrip('/')
     os.link(
@@ -101,8 +101,8 @@ def load_json(file_name):
     result = None
     try:
         result = JsonUtil.load_json(persistence_data)
-    except ValueError as valueError:
-        msg = 'Corrupted data in %s' % file_name, valueError
+    except ValueError as value_error:
+        msg = f"Corrupted data in {file_name, value_error}"
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
     return result
@@ -142,7 +142,7 @@ def clear_persistence(persistence_dir_name):
                 continue
             shutil.rmtree(file_path)
         except OSError as e:
-            msg = 'Failed to delete %s. Reason: %s' % (file_path, e)
+            msg = f"Failed to delete {file_path}. Reason: {e}"
             print(msg, file=sys.stderr)
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
 
