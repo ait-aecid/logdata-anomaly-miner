@@ -17,7 +17,7 @@ def get_model():
     """Return a model to parse Syslogs from the AIT-LDS."""
     alphabet = b"!'#$%&\"()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]"
 
-    model = SequenceModelElement("model", [
+    model = SequenceModelElement("dns", [
         DateTimeModelElement("time", b"%b %d %H:%M:%S ", start_year=2022),
         DelimitedDataModelElement("service", b"["),
         FixedDataModelElement("br_open", b"["),
@@ -83,6 +83,7 @@ def get_model():
             FixedDataModelElement("read_hosts", b"read /etc/hosts - 7 addresses"),
             FixedDataModelElement("failed_access", b"failed to access /etc/dnsmasq.d/dnsmasq-resolv.conf: No such file or directory"),
             FixedDataModelElement("version.bind", b"config version.bind is <TXT>"),
+            FixedDataModelElement("sigterm", b"exiting on receipt of SIGTERM"),
         ])
     ])
 

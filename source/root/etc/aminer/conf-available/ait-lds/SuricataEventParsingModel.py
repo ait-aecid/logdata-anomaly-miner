@@ -81,7 +81,7 @@ def get_model():
                 FixedDataModelElement("brack_str", b"}")
         ])
 
-    model = SequenceModelElement("model", [
+    model = SequenceModelElement("suricata_event", [
         FixedDataModelElement("time_str", b'{"timestamp":"'),
         DateTimeModelElement("time", b"%Y-%m-%dT%H:%M:%S.%f%z"),
         FixedDataModelElement("comma_str", b'",'),

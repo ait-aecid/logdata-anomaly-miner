@@ -14,7 +14,7 @@ from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 
 def get_model():
     """Return a model to parse Apache Error logs from the AIT-LDS."""
-    model = FirstMatchModelElement("model", [
+    model = FirstMatchModelElement("apache_error", [
         FixedDataModelElement("mkdir_failed", b"mkdir failed on directory /var/run/samba/msg.lock: Permission denied"),
         SequenceModelElement("with_data", [
             FixedDataModelElement("sp1", b"["),
@@ -72,8 +72,10 @@ def get_model():
                                     DelimitedDataModelElement("path", b" "),
                                     FixedDataModelElement("compatible_str", b" on line "),
                                     DecimalIntegerValueModelElement("line"),
-                                    FixedDataModelElement("referer_str", b", referer: "),
-                                    AnyByteDataModelElement("referer"),
+                                    OptionalMatchModelElement("opt", SequenceModelElement("referer", [
+                                        FixedDataModelElement("referer_str", b", referer: "),
+                                        AnyByteDataModelElement("referer")
+                                    ]))
                                 ]),
                                 SequenceModelElement("fatal", [
                                     FixedDataModelElement("fatal_str", b"Fatal error:  "),
@@ -115,5 +117,10 @@ def get_model():
                     DecimalIntegerValueModelElement("remote_port")
                 ])
             ])
-        ])])
+        ]),
+        SequenceModelElement("bash", [
+            FixedDataModelElement("bash", b"bash: "),
+            AnyByteDataModelElement("error_msg")
+        ])
+    ])
     return model

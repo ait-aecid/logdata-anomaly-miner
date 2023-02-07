@@ -16,7 +16,7 @@ def get_model():
     """Return a model to parse Exim logs from the AIT-LDS."""
     alphabet = b"!'#$%&\"()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]"
 
-    model = SequenceModelElement("model", [
+    model = SequenceModelElement("exim", [
         DateTimeModelElement("time", b"%Y-%m-%d %H:%M:%S"),
         FixedDataModelElement("sp", b" "),
         FirstMatchModelElement("fm", [
