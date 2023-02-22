@@ -10,7 +10,7 @@ from aminer.parsing.SequenceModelElement import SequenceModelElement
 
 def get_model():
     """Return a model to parse Suricata Fast logs from the AIT-LDS."""
-    model = SequenceModelElement("suricata_fast", [
+    model = SequenceModelElement("model", [
         DateTimeModelElement("time", b"%m/%d/%Y-%H:%M:%S.%f"),
         FixedDataModelElement("brack_str1", b"  [**] ["),
         DecimalIntegerValueModelElement("id1"),

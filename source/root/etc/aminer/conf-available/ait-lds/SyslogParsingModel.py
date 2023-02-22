@@ -57,14 +57,14 @@ def get_model():
         FixedDataModelElement("bracket_str", b">"),
         ])
 
-    model = SequenceModelElement("syslog", [
+    model = SequenceModelElement("model", [
         DateTimeModelElement("time", b"%b %d %H:%M:%S", start_year=2022),
         FixedDataModelElement("sp1", b" "),
         DelimitedDataModelElement("host", b" "),
         FirstMatchModelElement("service", [
             SequenceModelElement("dovecot", [
                 FixedDataModelElement("dovecot_str", b" dovecot: "),
-                FirstMatchModelElement("fm", [
+                FirstMatchModelElement("imap", [
                     SequenceModelElement("imap", [
                         FixedDataModelElement("imap_str", b"imap("),
                         DelimitedDataModelElement("user", b")"),

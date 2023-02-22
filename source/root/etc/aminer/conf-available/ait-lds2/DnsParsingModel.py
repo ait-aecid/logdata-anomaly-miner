@@ -17,7 +17,7 @@ def get_model():
     """Return a model to parse Syslogs from the AIT-LDS."""
     alphabet = b"!'#$%&\"()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]"
 
-    model = SequenceModelElement("dns", [
+    model = SequenceModelElement("model", [
         DateTimeModelElement("time", b"%b %d %H:%M:%S ", start_year=2022),
         DelimitedDataModelElement("service", b"["),
         FixedDataModelElement("br_open", b"["),

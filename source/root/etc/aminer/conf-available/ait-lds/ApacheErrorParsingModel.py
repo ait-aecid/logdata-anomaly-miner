@@ -14,7 +14,7 @@ from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 
 def get_model():
     """Return a model to parse Apache Error logs from the AIT-LDS."""
-    model = FirstMatchModelElement("apache_error", [
+    model = FirstMatchModelElement("model", [
         FixedDataModelElement("mkdir_failed", b"mkdir failed on directory /var/run/samba/msg.lock: Permission denied"),
         SequenceModelElement("with_data", [
             FixedDataModelElement("sp1", b"["),

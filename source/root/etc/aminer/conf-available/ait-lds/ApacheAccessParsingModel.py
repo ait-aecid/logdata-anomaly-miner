@@ -16,7 +16,7 @@ def get_model():
     """Return a model to parse Apache Access logs from the AIT-LDS."""
     alphabet = b"!'#$%&\"()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]"
 
-    model = SequenceModelElement("apache_access", [
+    model = SequenceModelElement("model", [
 
         FirstMatchModelElement("client_ip", [
             SequenceModelElement("client_ip", [

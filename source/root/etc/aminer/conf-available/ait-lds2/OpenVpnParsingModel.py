@@ -14,7 +14,7 @@ from aminer.parsing.HexStringModelElement import HexStringModelElement
 
 def get_model():
     """Return a model to parse OpenVPN logs from the AIT-LDS2."""
-    model = SequenceModelElement("openVPN", [
+    model = SequenceModelElement("model", [
         DateTimeModelElement("datetime", b"%Y-%m-%d %H:%M:%S "),
         OptionalMatchModelElement("user", SequenceModelElement("user", [
             DelimitedDataModelElement("user", b"/"),

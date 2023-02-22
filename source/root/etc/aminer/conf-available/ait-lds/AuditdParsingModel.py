@@ -55,7 +55,7 @@ def get_model():
         FixedDataModelElement("res_str", b" res="),
         VariableByteDataModelElement("res", alphabet)]
 
-    model = SequenceModelElement("auditd", [
+    model = SequenceModelElement("model", [
         FixedDataModelElement("type_str", b"type="),
         FirstMatchModelElement("type", [
             SequenceModelElement("execve", [
