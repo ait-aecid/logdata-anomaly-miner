@@ -17,7 +17,6 @@ def get_model():
     alphabet = b"!'#$%&\"()*+,-./0123456789:;<>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]"
 
     model = SequenceModelElement("model", [
-
         FirstMatchModelElement("client_ip", [
             SequenceModelElement("client_ip", [
                 DelimitedDataModelElement("domain", b" "),
