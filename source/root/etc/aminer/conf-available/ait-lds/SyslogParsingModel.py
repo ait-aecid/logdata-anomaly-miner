@@ -58,7 +58,7 @@ def get_model():
         ])
 
     model = SequenceModelElement("model", [
-        DateTimeModelElement("time", b"%b %d %H:%M:%S", start_year=2022),
+        DateTimeModelElement("time", b"%b %d %H:%M:%S", start_year=2020),
         FixedDataModelElement("sp1", b" "),
         DelimitedDataModelElement("host", b" "),
         FirstMatchModelElement("service", [
