@@ -21,7 +21,6 @@
 # error is output by the aminer by comparing the output with the lines between 27th and 28th ```.
 # 15.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 10th ```yaml and 34th ```, run CMD and check if no error is output by the aminer.
 # 16.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 11th ```yaml and 43th ```, run CMD and check if no error is output by the aminer.
-
 # 17.) Replace all Analysis config lines in CFG_PATH with Analysis config lines between 12th ```yaml and 48rd ```, run CMD and check if no error is output by the aminer.
 # 18.) Replace all Parser config lines in CFG_PATH with Parser config lines between 14th ```yaml and 58rd ```, run CMD and check if no error is output by the aminer.
 # 19.) Replace all Parser config lines in CFG_PATH with Parser config lines between 17th ```yaml and 65th ```, run CMD and check if no error is output by the aminer.
@@ -169,6 +168,9 @@ if [[ $? != 0 ]]; then
 	exit_code=1
 fi
 
+testConfigError $OUT "Failed Test in 14."
+exit_code=$((exit_code | $?))
+
 echo "$(awk '/^{$/ && ++n == 2, /^}$/' < $OUT)" > $OUT # remove NewMatchPathDetector output.
 IN1=$(sed -n '1,22p' < $OUT)
 IN2=$(sed -n '24,26p' < $OUT)
@@ -198,6 +200,13 @@ fi
 testConfigError $OUT "Failed Test in 15."
 exit_code=$((exit_code | $?))
 
+# skipping this check, because it has to change the log resources.
+#IN1=$(cat $OUT)
+#awk '/^```$/ && ++n == 39, /^```$/ && n++ == 40' < $INPUT_FILE | sed '/^```/ d' > $OUT
+#OUT1=$(cat $OUT)
+#compareStrings "$OUT1" "$IN1" "Failed Test in 15."
+#exit_code=$((exit_code | $?))
+
 # Replace the Analysis config and compare the output. (16.)
 ANALYSIS_PREFIX='Analysis:
 '
@@ -216,6 +225,13 @@ fi
 
 testConfigError $OUT "Failed Test in 16."
 exit_code=$((exit_code | $?))
+
+# skipping this check, because not all log lines were used in this test, so the output can not be reproduced.
+#IN1=$(sed -n '113,148p' < $OUT)
+#awk '/^```$/ && ++n == 46, /^```$/ && n++ == 47' < $INPUT_FILE | sed '/^```/ d' > $OUT
+#OUT1=$(cat $OUT)
+#compareStrings "$OUT1" "$IN1" "Failed Test in 16."
+#exit_code=$((exit_code | $?))
 
 # Replace the Analysis config and compare the output. (17.)
 CFG_ANALYSIS=$(awk '/^```yaml$/ && ++n == 12, /^```$/' < $INPUT_FILE | sed '/^```/ d')
@@ -247,6 +263,9 @@ runAminerUntilEnd "$CMD -C" "$LOG1" "/var/lib/aminer/AnalysisChild/Repositioning
 if [[ $? != 0 ]]; then
 	exit_code=1
 fi
+
+testConfigError $OUT "Failed Test in 18."
+exit_code=$((exit_code | $?))
 
 # Replace the Parser config. (19.)
 CFG_PARSER=$(awk '/^```yaml$/ && ++n == 17, /^```$/' < $INPUT_FILE | sed '/^```/ d')

@@ -409,11 +409,9 @@ class JsonModelElement(ModelElementInterface):
                         del matches[-1]
                         continue
         if len(json_match_data.keys()) > i + 1:
-            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ARRAY - Searching next key")
             match_context.update(match_context.match_data[:match_context.match_data.find(
                 list(json_match_data.keys())[i + 1].encode())])
         else:
-            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ARRAY - No more keys found")
             match_context.update(match_context.match_data[:match_context.match_data.find(search_string) + len(search_string)])
         return None
 

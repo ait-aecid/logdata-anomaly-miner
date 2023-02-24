@@ -18,6 +18,16 @@ def get_model():
 
     model = SequenceModelElement("model", [
         FirstMatchModelElement("client_ip", [
+            SequenceModelElement("client_ip", [
+                DelimitedDataModelElement("domain", b" "),
+                FixedDataModelElement("sp0", b" "),
+                IpAddressDataModelElement("client_ip")
+                ]),
+            SequenceModelElement("localhost", [
+                DelimitedDataModelElement("domain", b" "),
+                FixedDataModelElement("sp0", b" "),
+                FixedDataModelElement("localhost", b"::1")
+                ]),
             IpAddressDataModelElement("client_ip"),
             FixedDataModelElement("localhost", b"::1")
             ]),
@@ -32,7 +42,8 @@ def get_model():
             FixedDataModelElement("dash", b"-"),
             SequenceModelElement("request", [
                 FixedWordlistDataModelElement("method", [
-                    b"GET", b"POST", b"PUT", b"HEAD", b"DELETE", b"CONNECT", b"OPTIONS", b"TRACE", b"PATCH"]),
+                    b"GET", b"POST", b"PUT", b"HEAD", b"DELETE", b"CONNECT", b"OPTIONS", b"TRACE", b"PATCH", b"REPORT", b"PROPFIND",
+                    b"MKCOL"]),
                 FixedDataModelElement("sp5", b" "),
                 DelimitedDataModelElement("request", b" ", b"\\"),
                 FixedDataModelElement("sp6", b" "),
