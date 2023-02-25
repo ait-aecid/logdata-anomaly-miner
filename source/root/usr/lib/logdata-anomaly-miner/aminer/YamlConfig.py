@@ -16,6 +16,7 @@ import logging
 import copy
 import ast
 from aminer.AminerConfig import DEBUG_LOG_NAME
+from aminer.util.StringUtil import decode_string_as_byte_string
 
 
 config_properties = {}
@@ -129,8 +130,8 @@ def build_analysis_pipeline(analysis_context):
     Define the function to create pipeline for parsing the log data.
     It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
     """
-    parsing_model = build_parsing_model()
-    anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model)
+    parsing_model, parser_model_dict = build_parsing_model()
+    anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model, parser_model_dict)
     build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model)
     event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
     # do not check UnparsedAtomHandler
@@ -290,10 +291,10 @@ def build_parsing_model(data=None):
         parsing_model = start
     else:
         parsing_model = parser_model_dict[start['id']]
-    return parsing_model
+    return parsing_model, parser_model_dict
 
 
-def build_input_pipeline(analysis_context, parsing_model):
+def build_input_pipeline(analysis_context, parsing_model, parser_model_dict):
     """Build the input pipeline."""
     # Some generic imports.
     from aminer.analysis import AtomFilters
@@ -324,9 +325,21 @@ def build_input_pipeline(analysis_context, parsing_model):
             atom_handler_list = [SimpleMonotonicTimestampAdjust([atom_filter])]
         else:
             atom_handler_list = [atom_filter]
+    log_resources = {}
+    for resource in yaml_data['LogResourceList']:
+        obj = {}
+        if isinstance(resource, str):
+            obj["url"] = decode_string_as_byte_string(resource)
+        elif isinstance(resource, dict):
+            obj = resource
+        if "type" not in obj.keys():
+            obj["type"] = None
+        if "parser_id" not in obj.keys():
+            obj["parser_id"] = None
+        log_resources[obj["url"]] = obj
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_path_list=timestamp_paths, eol_sep=eol_sep,
-        json_format=json_format)
+        json_format=json_format, parser_model_dict=parser_model_dict, log_resources=log_resources)
     return anomaly_event_handlers, atom_filter
 
 
