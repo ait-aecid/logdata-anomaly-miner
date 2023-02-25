@@ -506,9 +506,9 @@ def main():
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
-        if "type" not in obj.keys():
+        if "type" not in obj:
             obj["type"] = None
-        if "parser_id" not in obj.keys():
+        if "parser_id" not in obj:
             obj["parser_id"] = None
         url = obj["url"]
         if url.startswith(b'file://'):
