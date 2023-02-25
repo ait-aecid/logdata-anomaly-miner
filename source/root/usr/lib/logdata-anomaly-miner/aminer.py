@@ -495,8 +495,13 @@ def main():
             obj["url"] = decode_string_as_byte_string(resource)
         elif isinstance(resource, dict):
             for key, val in resource.items():
-                if key not in ("url", "type", "parser_id"):
+                if key not in ("url", "json", "parser_id"):
                     msg = f"Unknown argument in LogResourceList: {key}"
+                    print(msg, file=sys.stderr)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    sys.exit(1)
+                if key == "json" and not isinstance(val, bool):
+                    msg = f"Argument json must be of type boolean!"
                     print(msg, file=sys.stderr)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     sys.exit(1)
@@ -506,8 +511,8 @@ def main():
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
-        if "type" not in obj:
-            obj["type"] = None
+        if "json" not in obj:
+            obj["json"] = None
         if "parser_id" not in obj:
             obj["parser_id"] = None
         url = obj["url"]
