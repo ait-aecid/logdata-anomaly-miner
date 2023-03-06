@@ -501,7 +501,7 @@ def main():
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     sys.exit(1)
                 if key == "json" and not isinstance(val, bool):
-                    msg = f"Argument json must be of type boolean!"
+                    msg = "Argument json must be of type boolean!"
                     print(msg, file=sys.stderr)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     sys.exit(1)

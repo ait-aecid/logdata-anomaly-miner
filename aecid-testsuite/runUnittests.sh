@@ -65,5 +65,5 @@ sudo rm -r $KAFKA_VERSIONSTRING/
 sudo rm -r /tmp/zookeeper
 sudo rm -r /tmp/kafka-logs
 sudo rm /etc/aminer/kafka-client.conf
-sudo rm etc/aminer/conf-enabled/Sub*
+sudo rm /etc/aminer/conf-enabled/Sub*
 exit $exit_code
