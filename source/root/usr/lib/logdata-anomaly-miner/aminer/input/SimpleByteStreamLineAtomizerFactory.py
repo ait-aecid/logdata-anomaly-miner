@@ -22,8 +22,8 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
     All parsed and unparsed atoms are delivered via two lists of handlers.
     """
 
-    def __init__(
-            self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_path_list=None, eol_sep=b'\n', json_format=False):
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_path_list=None, eol_sep=b'\n',
+                 json_format=False, parser_model_dict=None, log_resources=None):
         """
         Create the factory to forward data and events to the given lists for each newly created atomizer.
         @param default_timestamp_path_list if not empty list, the value of this timestamp field is extracted from parsed atoms and stored
@@ -38,6 +38,8 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
             self.default_timestamp_path_list = default_timestamp_path_list
         self.eol_sep = eol_sep
         self.json_format = json_format
+        self.parser_model_dict = parser_model_dict
+        self.log_resources = log_resources
 
     def get_atomizer_for_resource(self, resource_name):  # skipcq: PYL-W0613
         """
@@ -45,5 +47,15 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         @param resource_name the resource name for atomizer selection is ignored in this type of factory.
         @return a StreamAtomizer object
         """
+        if self.log_resources is not None and resource_name in self.log_resources.keys():
+            resource = self.log_resources[resource_name]
+            json = resource["json"]
+            if json is None:
+                json = self.json_format
+            parser = self.parsing_model
+            if resource["parser_id"] is not None:
+                parser = self.parser_model_dict[resource["parser_id"]]
+            return ByteStreamLineAtomizer(parser, self.atom_handler_list, self.event_handler_list, 1 << 16,
+                                          self.default_timestamp_path_list, self.eol_sep, json)
         return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16,
                                       self.default_timestamp_path_list, self.eol_sep, self.json_format)
