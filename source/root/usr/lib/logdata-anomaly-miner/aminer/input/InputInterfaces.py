@@ -16,7 +16,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import abc
 import time
 import logging
-from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
+from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME
 from aminer import AminerConfig
 
 
@@ -134,7 +134,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "stop_learning_no_anomaly_time has to be of the type int, float or None."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if (stop_learning_time is not None and stop_learning_time <= 0) or (stop_learning_no_anomaly_time is not None and stop_learning_no_anomaly_time <= 0):
+        if (stop_learning_time is not None and stop_learning_time <= 0) or (
+                stop_learning_no_anomaly_time is not None and stop_learning_no_anomaly_time <= 0):
             msg = "stop_learning_time and stop_learning_no_anomaly_time must be bigger than 0."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
@@ -145,10 +146,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
         if stop_learning_no_anomaly_time is not None:
             self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
-
-        if hasattr(self, "aminer_config"):
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         if mutable_default_args is not None:
             for argument in mutable_default_args:
