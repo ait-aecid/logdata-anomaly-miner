@@ -3,11 +3,9 @@ from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 from aminer.input.LogAtom import LogAtom
 import time
 from datetime import datetime
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
-from unit.TestBase import TestBase
+from unit.TestBase import TestBase, DummyFixedDataModelElement
 from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
 
 
@@ -23,12 +21,12 @@ class NewMatchPathDetectorTest(TestBase):
     pid = " pid="
     uid = " uid=2"
 
-    match_context_fixed_dme = MatchContext(b' pid=')
-    fixed_dme = FixedDataModelElement('s1', b' pid=')
+    match_context_fixed_dme = MatchContext(b" pid=")
+    fixed_dme = DummyFixedDataModelElement("s1", b" pid=")
     match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
 
-    match_context_decimal_integer_value_me = MatchContext(b'25537 uid=2')
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE, DecimalIntegerValueModelElement.PAD_TYPE_NONE)
+    match_context_decimal_integer_value_me = MatchContext(b"25537 uid=2")
+    decimal_integer_value_me = DummyFixedDataModelElement("d1", b"25537")
     match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("", match_context_decimal_integer_value_me)
 
     def test1receive_atom(self):
@@ -42,7 +40,7 @@ class NewMatchPathDetectorTest(TestBase):
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
 
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+        log_atom_fixed_dme = LogAtom(self.fixed_dme.data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
         log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
                                                     ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
 
@@ -119,7 +117,7 @@ class NewMatchPathDetectorTest(TestBase):
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+        log_atom_fixed_dme = LogAtom(self.fixed_dme.data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
         new_match_path_detector.receive_atom(log_atom_fixed_dme)
         self.assertRaises(Exception, new_match_path_detector.allowlist_event, self.analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
@@ -147,7 +145,7 @@ class NewMatchPathDetectorTest(TestBase):
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+        log_atom_fixed_dme = LogAtom(self.fixed_dme.data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
         log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
                                                     ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
 
@@ -180,7 +178,6 @@ class NewMatchPathDetectorTest(TestBase):
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=set())
         NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], persistence_id="Default")
 
-        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=None)
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=b"True")
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode="True")
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=123)

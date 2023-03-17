@@ -114,7 +114,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
             setattr(self, argument, value)
 
-        if not isinstance(learn_mode, bool):
+        if learn_mode is not None and not isinstance(learn_mode, bool):
             msg = "learn_mode has to be of the type bool."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
@@ -185,11 +185,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 msg = "persistence_id must not be empty."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
-        if hasattr(self, "output_logline"):
-            if not isinstance(self.output_logline, bool):
-                msg = "output_logline has to be of the type bool."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "output_logline") and not isinstance(self.output_logline, bool):
+            msg = "output_logline has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):
