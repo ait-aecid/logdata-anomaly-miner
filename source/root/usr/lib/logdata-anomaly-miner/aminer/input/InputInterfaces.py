@@ -16,7 +16,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import abc
 import time
 import logging
-from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME
+from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer import AminerConfig
 
 
@@ -103,7 +103,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         ]
         self.log_success = 0
         self.log_total = 0
-        self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:
                 setattr(self, argument, value)
@@ -139,6 +138,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "stop_learning_time and stop_learning_no_anomaly_time must be bigger than 0."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
+
+        if hasattr(self, "aminer_config"):
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         self.stop_learning_timestamp = None
         if stop_learning_time is not None:
@@ -185,6 +188,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 msg = "persistence_id must not be empty."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
+        else:
+            self.persistence_id = None  # persistence_id is always needed.
         if hasattr(self, "output_logline") and not isinstance(self.output_logline, bool):
             msg = "output_logline has to be of the type bool."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)

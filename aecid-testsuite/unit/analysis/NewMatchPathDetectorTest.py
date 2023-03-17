@@ -100,10 +100,6 @@ class NewMatchPathDetectorTest(TestBase):
         """Test if the do_timer method is implemented properly."""
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
         t = time.time()
-        self.assertEqual(new_match_path_detector.do_timer(t + 200), DEFAULT_PERSISTENCE_PERIOD)
-        self.assertEqual(new_match_path_detector.do_timer(t + 400), DEFAULT_PERSISTENCE_PERIOD)
-        self.assertEqual(new_match_path_detector.do_timer(t + 10000), DEFAULT_PERSISTENCE_PERIOD)
-
         new_match_path_detector.next_persist_time = t + 400
         self.assertEqual(new_match_path_detector.do_timer(t + 200), 200)
         self.assertEqual(new_match_path_detector.do_timer(t + 400), DEFAULT_PERSISTENCE_PERIOD)
