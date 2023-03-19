@@ -729,6 +729,22 @@ class YamlConfigTest(TestBase):
         # ApacheAccessModel
         self.assertEqual(pm.children[3].element_id, "accesslog")
 
+    def test31_granular_log_resource_list(self):
+        """Test if granular configs of the LogResourceList work properly."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/granular_log_resource_list.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        atomizer = context.atomizer_factory.get_atomizer_for_resource("file:///var/log/apache2/access.log")
+        self.assertEqual(atomizer.parsing_model.element_id, "accesslog")
+        self.assertFalse(atomizer.json_format)
+        atomizer = context.atomizer_factory.get_atomizer_for_resource("unix:///var/lib/akafka/aminer.sock")
+        self.assertEqual(atomizer.parsing_model.element_id, "model")
+        self.assertTrue(isinstance(atomizer.parsing_model, SequenceModelElement))
+        self.assertTrue(atomizer.json_format)
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))

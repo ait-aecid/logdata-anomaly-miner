@@ -206,6 +206,8 @@ LogResourceList
 * Resource-Types: ``file://``, ``unix://``
 
 Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. This will just result in a warning. However if they exist, they have to be readable by the aminer process!
+Every resource needs to define the ``url`` with the resource-type. Optionally every resource can define ``json`` parameter (boolean) to define if the resource input data is json and ``parser_id`` to define the parser which should process the log data from this resource.
+By default the ``json_format`` parameter in the ``input`` section is used to determine if the input data is json or not.
 
 Supported types are:
 
@@ -215,11 +217,15 @@ Supported types are:
 .. code-block:: yaml
 
    LogResourceList:
-       - 'file:///var/log/apache2/access.log'
-       - 'file:///home/ubuntu/data/mail.cup.com-train/daemon.log'
-       - 'file:///home/ubuntu/data/mail.cup.com-train/auth.log'
-       - 'file:///home/ubuntu/data/mail.cup.com-train/suricata/eve.json'
-       - 'file:///home/ubuntu/data/mail.cup.com-train/suricata/fast.log'
+       - url: 'file:///var/log/apache2/access.log'
+       - url: 'file:///home/ubuntu/data/mail.cup.com-train/daemon.log'
+         json: True
+         parser_id: 'syslog_parser'
+       - url: 'file:///home/ubuntu/data/mail.cup.com-train/auth.log'
+       - url: 'file:///home/ubuntu/data/mail.cup.com-train/suricata/eve.json'
+       - url: 'file:///home/ubuntu/data/mail.cup.com-train/suricata/fast.log'
+         json: True
+         parser_id: 'suricata_fastlog'
 
 Core.PersistenceDir
 ~~~~~~~~~~~~~~~~~~~

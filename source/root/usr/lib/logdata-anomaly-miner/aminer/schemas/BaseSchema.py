@@ -94,7 +94,7 @@
         'LogResourceList': {
             'required': True,
             'type': 'list',
-            'schema': {'type': 'string', 'regex': '^file://.+|^unix://.+', 'empty': False}
+            'schema': {'type': ['string', 'dict'], 'regex': '^file://.+|^unix://.+', 'empty': False}
         },
         'Log.StatisticsPeriod': {
             'required': False,

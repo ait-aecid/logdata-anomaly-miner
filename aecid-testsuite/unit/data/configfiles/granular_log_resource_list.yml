@@ -1,0 +1,31 @@
+LogResourceList:
+   - url: "file:///var/log/apache2/access.log"
+   - url: "unix:///var/lib/akafka/aminer.sock"
+     json: True
+     parser_id: kafka_audit_logs
+
+
+Parser:
+   - id: kafka_audit_logs
+     type: AuditdParsingModel
+     name: 'kafka'
+
+   - id: ApacheAccessModel
+     type: ApacheAccessModel
+     name: 'ApacheAccessModel'
+
+   - id: 'startModel'
+     start: True
+     type: SequenceModelElement
+     name: 'accesslog'
+     args:
+       - ApacheAccessModel
+
+Input:
+  timestamp_paths: "/accesslog/time"
+  json_format: False
+
+EventHandlers:
+  - id: stpe
+    json: True
+    type: StreamPrinterEventHandler
