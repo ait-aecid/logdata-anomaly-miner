@@ -127,4 +127,4 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "Count report", [output_string], event_data, None, self)
         for k in self.count_dict:
             self.count_dict[k][current_processed_lines_str] = 0
-        logging.getLogger(DEBUG_LOG_NAME).debug(f"{self.__class__.__name__} sent report.")
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s sent report.", self.__class__.__name__)

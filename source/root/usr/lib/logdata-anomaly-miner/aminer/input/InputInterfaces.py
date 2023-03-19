@@ -115,7 +115,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
         # test booleans
         for attr in ("learn_mode", "output_logline", "split_reports_flag"):
-            if hasattr(self, attr) and attr in kwargs.keys():
+            if hasattr(self, attr) and attr in kwargs:
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
                     msg = f"{attr} has to be of the type bool."
@@ -211,8 +211,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                         msg = f"{attr} paths must not be empty."
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-        if hasattr(self, "report_interval") and not isinstance(self.report_interval, (int, float)) or isinstance(
-                self.report_interval, bool):
+        if hasattr(self, "report_interval") and (not isinstance(self.report_interval, (int, float)) or isinstance(
+                self.report_interval, bool)):
             msg = "report_interval has to be of the type integer or float."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
