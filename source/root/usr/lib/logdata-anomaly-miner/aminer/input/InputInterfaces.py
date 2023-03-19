@@ -115,7 +115,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
         # test booleans
         for attr in ("learn_mode", "output_logline", "split_reports_flag"):
-            if hasattr(self, attr) and attr in kwargs:
+            if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
                     msg = f"{attr} has to be of the type bool."
@@ -194,8 +194,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
         else:
             self.persistence_id = None  # persistence_id is always needed.
-        for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_value_list", "target_label_list",
-                     "unique_path_list"):
+        for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_label_list", "unique_path_list"):
             if hasattr(self, attr) and self.__getattribute__(attr) is not None:
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, list):
