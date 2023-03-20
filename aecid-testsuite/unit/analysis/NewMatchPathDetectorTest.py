@@ -3,9 +3,8 @@ from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 from aminer.input.LogAtom import LogAtom
 import time
 from datetime import datetime
-from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
-from unit.TestBase import TestBase, DummyFixedDataModelElement
+from unit.TestBase import TestBase, DummyFixedDataModelElement, DummyMatchContext
 from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
 
 
@@ -21,11 +20,11 @@ class NewMatchPathDetectorTest(TestBase):
     pid = " pid="
     uid = " uid=2"
 
-    match_context_fixed_dme = MatchContext(b" pid=")
+    match_context_fixed_dme = DummyMatchContext(b" pid=")
     fixed_dme = DummyFixedDataModelElement("s1", b" pid=")
     match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
 
-    match_context_decimal_integer_value_me = MatchContext(b"25537 uid=2")
+    match_context_decimal_integer_value_me = DummyMatchContext(b"25537 uid=2")
     decimal_integer_value_me = DummyFixedDataModelElement("d1", b"25537")
     match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("", match_context_decimal_integer_value_me)
 
