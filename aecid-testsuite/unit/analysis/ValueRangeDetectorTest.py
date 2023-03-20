@@ -3,19 +3,7 @@ from aminer.analysis.ValueRangeDetector import ValueRangeDetector
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.ParserMatch import ParserMatch
-from unit.TestBase import TestBase
-
-
-class TestHandler():
-    """Dummy anomaly handler."""
-
-    def __init__(self):
-        self.anomaly = None
-
-    # skipcq: PYL-W0613
-    def receive_event(self, name, msg, ll, evdat, atom, obj):
-        """Receive anomaly information."""
-        self.anomaly = evdat
+from unit.TestBase import TestBase, DummyMatchContext
 
 
 class ValueRangeDetectorTest(TestBase):
@@ -30,11 +18,11 @@ class ValueRangeDetectorTest(TestBase):
     pid = " pid="
     uid = " uid=2"
 
-    match_context_fixed_dme = MatchContext(b" pid=")
+    match_context_fixed_dme = DummyMatchContext(b" pid=")
     fixed_dme = DummyFixedDataModelElement("s1", b" pid=")
     match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
 
-    match_context_decimal_integer_value_me = MatchContext(b"25537 uid=2")
+    match_context_decimal_integer_value_me = DummyMatchContext(b"25537 uid=2")
     decimal_integer_value_me = DummyFixedDataModelElement("d1", b"25537")
     match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("", match_context_decimal_integer_value_me)
 
@@ -247,8 +235,7 @@ class ValueRangeDetectorTest(TestBase):
         description = "Test1ValueRangeeDetector"
 
         # Initialize detector
-        test_handler = TestHandler()
-        value_range_detector = ValueRangeDetector(self.aminer_config, [test_handler], ['/model/id'], ['/model/value'], 'Default', True,
+        value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ['/model/id'], ['/model/value'], 'Default', True,
                                                   False)
         self.analysis_context.register_component(value_range_detector, description)
 
