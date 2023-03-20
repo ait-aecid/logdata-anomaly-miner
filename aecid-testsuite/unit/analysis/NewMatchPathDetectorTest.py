@@ -108,7 +108,7 @@ class NewMatchPathDetectorTest(TestBase):
     def test3allowlist_event(self):
         """Test if the allowlist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
-        description = "Test8NewMatchPathDetector"
+        description = "Test3allowlist_event"
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
