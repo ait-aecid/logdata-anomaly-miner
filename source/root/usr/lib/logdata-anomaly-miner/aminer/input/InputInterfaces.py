@@ -114,7 +114,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             setattr(self, argument, value)
 
         # test booleans
-        for attr in ("learn_mode", "output_logline", "split_reports_flag"):
+        for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
