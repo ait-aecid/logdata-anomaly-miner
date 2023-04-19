@@ -103,7 +103,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         ]
         self.log_success = 0
         self.log_total = 0
-        self.persistence_id = None  # persistence_id is always needed.
         for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:
                 setattr(self, argument, value)
@@ -114,6 +113,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
             setattr(self, argument, value)
 
+        if learn_mode is not None and not isinstance(learn_mode, bool):
+            msg = "learn_mode has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
             msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -122,14 +125,23 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int)):
-            msg = "stop_learning_time has to be of the type int or None."
+        if not isinstance(stop_learning_time, (type(None), int, float)):
+            msg = "stop_learning_time has to be of the type int, float or None."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int or None."
+        if not isinstance(stop_learning_no_anomaly_time, (type(None), int, float)):
+            msg = "stop_learning_no_anomaly_time has to be of the type int, float or None."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
+        if (stop_learning_time is not None and stop_learning_time <= 0) or (
+                stop_learning_no_anomaly_time is not None and stop_learning_no_anomaly_time <= 0):
+            msg = "stop_learning_time and stop_learning_no_anomaly_time must be bigger than 0."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        if hasattr(self, "aminer_config"):
+            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
+                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         self.stop_learning_timestamp = None
         if stop_learning_time is not None:
@@ -137,10 +149,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
         if stop_learning_no_anomaly_time is not None:
             self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
-
-        if hasattr(self, "aminer_config"):
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
 
         if mutable_default_args is not None:
             for argument in mutable_default_args:
@@ -168,10 +176,24 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 self.allowed_id_tuples = []
             else:
                 self.allowed_id_tuples = [tuple(tuple_list) for tuple_list in self.allowed_id_tuples]
-
         if hasattr(self, "confidence_factor") and not 0 <= self.confidence_factor <= 1:
             logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
             self.confidence_factor = 1
+        if hasattr(self, "persistence_id"):
+            if not isinstance(self.persistence_id, str):
+                msg = "persistence_id has to be of the type String."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(self.persistence_id) < 1:
+                msg = "persistence_id must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+        else:
+            self.persistence_id = None  # persistence_id is always needed.
+        if hasattr(self, "output_logline") and not isinstance(self.output_logline, bool):
+            msg = "output_logline has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):
