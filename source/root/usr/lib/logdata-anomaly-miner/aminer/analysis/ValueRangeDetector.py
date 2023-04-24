@@ -30,7 +30,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, id_path_list, target_path_list=None, persistence_id='Default',
+    def __init__(self, aminer_config, anomaly_event_handlers, id_path_list, target_path_list=None, persistence_id="Default",
                  learn_mode=False, output_logline=True, ignore_list=None, constraint_list=None, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None):
         """
@@ -53,21 +53,27 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         super().__init__(
             mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, id_path_list=id_path_list, target_path_list=target_path_list,
-            learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list,
-            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list,
+            constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
+        if not id_path_list:
+            msg = "id_path_list must not be None or empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
 
-        self.ranges_min = {}
-        self.ranges_max = {}
+        self.ranges = {"min": {}, "max": {}}
 
         # Persisted data consists of min and max values for each identifier, i.e.,
         # [["min", [<id1, id2, ...>], <min_value>], ["max", [<id1, id2, ...>], <max_value>]]
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
+        self.load_persistence_data()
+
+    def load_persistence_data(self):
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
-            self.ranges_min = persistence_data[0]
-            self.ranges_max = persistence_data[1]
+            self.ranges = persistence_data
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -124,7 +130,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         id_event = tuple(id_vals)
 
         # Check if one of the values is outside of expected value ranges for a specific id path.
-        if id_event in self.ranges_min and (min(values) < self.ranges_min[id_event] or max(values) > self.ranges_max[id_event]):
+        if id_event in self.ranges["min"] and (min(values) < self.ranges["min"][id_event] or max(values) > self.ranges["max"][id_event]):
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
@@ -136,7 +142,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             else:
                 sorted_log_lines = [data]
             analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': values,
-                                  'Range': [self.ranges_min[id_event], self.ranges_max[id_event]], 'IDpaths': self.id_path_list,
+                                  'Range': [self.ranges["min"][id_event], self.ranges["max"][id_event]], 'IDpaths': self.id_path_list,
                                   'IDvalues': list(id_event)}
             event_data = {'AnalysisComponent': analysis_component}
             for listener in self.anomaly_event_handlers:
@@ -145,15 +151,15 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
 
         # Extend ranges if learn mode is active.
         if self.learn_mode is True:
-            if id_event in self.ranges_min:
-                self.ranges_min[id_event] = min(self.ranges_min[id_event], min(values))
+            if id_event in self.ranges["min"]:
+                self.ranges["min"][id_event] = min(self.ranges["min"][id_event], min(values))
             else:
-                self.ranges_min[id_event] = min(values)
+                self.ranges["min"][id_event] = min(values)
 
-            if id_event in self.ranges_max:
-                self.ranges_max[id_event] = max(self.ranges_max[id_event], max(values))
+            if id_event in self.ranges["max"]:
+                self.ranges["max"][id_event] = max(self.ranges["max"][id_event], max(values))
             else:
-                self.ranges_max[id_event] = max(values)
+                self.ranges["max"][id_event] = max(values)
             if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                 self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
         self.log_success += 1
@@ -167,12 +173,12 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, [self.ranges_min, self.ranges_max])
+        PersistenceUtil.store_json(self.persistence_file_name, self.ranges)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
@@ -191,6 +197,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
+        if event_data in self.ignore_list:
+            self.ignore_list.remove(event_data)
         return f'Allowlisted path {event_data}.'
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
@@ -209,6 +217,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)
+        if event_data in self.constraint_list:
+            self.constraint_list.remove(event_data)
         return f'Blocklisted path {event_data}.'
 
     def log_statistics(self, component_name):
