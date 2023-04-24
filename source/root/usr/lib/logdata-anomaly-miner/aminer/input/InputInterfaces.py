@@ -113,10 +113,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
             setattr(self, argument, value)
 
-        if learn_mode is not None and not isinstance(learn_mode, bool):
-            msg = "learn_mode has to be of the type bool."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+        # test booleans
+        for attr in ("learn_mode", "output_logline", "split_reports_flag"):
+            if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
+                attr_val = self.__getattribute__(attr)
+                if not isinstance(attr_val, bool):
+                    msg = f"{attr} has to be of the type bool."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
             msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -190,8 +194,25 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 raise ValueError(msg)
         else:
             self.persistence_id = None  # persistence_id is always needed.
-        if hasattr(self, "output_logline") and not isinstance(self.output_logline, bool):
-            msg = "output_logline has to be of the type bool."
+        for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_label_list", "unique_path_list"):
+            if hasattr(self, attr) and self.__getattribute__(attr) is not None:
+                attr_val = self.__getattribute__(attr)
+                if not isinstance(attr_val, list):
+                    msg = f"{attr} has to be of the type list."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
+                for path in attr_val:
+                    if not isinstance(path, str):
+                        msg = f"{attr} paths must be of the type String."
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                        raise TypeError(msg)
+                    if path == "":
+                        msg = f"{attr} paths must not be empty."
+                        logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                        raise ValueError(msg)
+        if hasattr(self, "report_interval") and (not isinstance(self.report_interval, (int, float)) or isinstance(
+                self.report_interval, bool)):
+            msg = "report_interval has to be of the type integer or float."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
 

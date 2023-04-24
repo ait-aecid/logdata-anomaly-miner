@@ -193,17 +193,6 @@ class DummyFixedDataModelElement(ModelElementInterface):
         self.element_id = element_id
         self.data = data
 
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
-        """
-        Get all possible child model elements of this element.
-        @return None as there are no children of this element.
-        """
-        return None
-
     def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         if not match_context.match_data.startswith(self.data):
@@ -223,14 +212,6 @@ class DummyFirstMatchModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):
-        """Get all possible child model elements of this element."""
-        return self.children
-
     def get_match_element(self, path, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         current_path = "%s/%s" % (path, self.element_id)
@@ -242,6 +223,40 @@ class DummyFirstMatchModelElement(ModelElementInterface):
                 return child_match
             match_context.match_data = match_data
         return None
+
+
+class DummySequenceModelElement(ModelElementInterface):
+    """This class defines an element to find matches that comprise matches of all given child model elements."""
+
+    def __init__(self, element_id, children):
+        self.element_id = element_id
+        self.children = children
+        if (children is None) or (None in children):
+            msg = 'Invalid children list'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+    def get_match_element(self, path, match_context):
+        """
+        Try to find a match on given data for this model element and all its children.
+        When a match is found, the matchContext is updated accordingly.
+        @param path the model path to the parent model element invoking this method.
+        @param match_context an instance of MatchContext class holding the data context to match against.
+        @return the matchElement or None if model did not match.
+        """
+        current_path = f"{path}/{self.element_id}"
+        start_data = match_context.match_data
+        matches = []
+        for child_element in self.children:
+            child_match = child_element.get_match_element(current_path, match_context)
+            if child_match is None:
+                match_context.match_data = start_data
+                return None
+            matches += [child_match]
+
+        return MatchElement(current_path, start_data[:len(start_data) - len(match_context.match_data)],
+                            start_data[:len(start_data) - len(match_context.match_data)], matches)
+
 
 
 if __name__ == "__main__":
