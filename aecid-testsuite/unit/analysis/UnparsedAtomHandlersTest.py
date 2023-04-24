@@ -1,60 +1,80 @@
 import unittest
-from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-from time import time
+import time
 from aminer.parsing.ParserMatch import ParserMatch
-from aminer.parsing.MatchContext import MatchContext
 from aminer.input.LogAtom import LogAtom
-from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
-from unit.TestBase import TestBase
+from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
+from unit.TestBase import TestBase, DummyFixedDataModelElement, DummyMatchContext
+from datetime import datetime
 
 
 class SimpleUnparsedAtomHandlerTest(TestBase):
     """Unittests for the SimpleUnparsedAtomHandler."""
 
-    calculation = b'256 * 2 = 512'
+    datetime_format_string = "%Y-%m-%d %H:%M:%S"
+    calculation = b"256 * 2 = 512"
 
-    def test1_atom_is_unparsed(self):
-        """The atom in this test case has a ParserMatch."""
+    def test1SimpleUnparsedAtomHandler_receive_atom(self):
+        """Test if the SimpleUnparsedAtomHandler can handle matching log atoms and not matching log atoms."""
         description = "Test1SimpleUnparsedAtomHandler"
-        any_byte_data_model_element = AnyByteDataModelElement('a1')
-        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
+        t = time.time()
+        fdme = DummyFixedDataModelElement("s1", self.calculation)
+        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
 
-        match_context = MatchContext(self.calculation)
-        match_element = any_byte_data_model_element.get_match_element('match', match_context)
-        log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), time(), new_match_path_detector1)
-
-        simple_unparsed_atom_handler = SimpleUnparsedAtomHandler([self.stream_printer_event_handler])
-        self.analysis_context.register_component(simple_unparsed_atom_handler, description)
-        self.assertTrue(not simple_unparsed_atom_handler.receive_atom(log_atom))
-
-    def test2_atom_is_parsed(self):
-        """The atom in this test case has no ParserMatch."""
-        description = "Test2SimpleUnparsedAtomHandler"
-        any_byte_data_model_element = AnyByteDataModelElement('a1')
-        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-
-        match_context = MatchContext(self.calculation)
-        match_element = any_byte_data_model_element.get_match_element('match', match_context)
-        log_atom = LogAtom(match_element.match_object, None, time(), new_match_path_detector1)
+        # match exists
+        match_context = DummyMatchContext(self.calculation)
+        match_element = fdme.get_match_element("match", match_context)
+        log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, new_match_path_detector1)
 
         simple_unparsed_atom_handler = SimpleUnparsedAtomHandler([self.stream_printer_event_handler])
         self.analysis_context.register_component(simple_unparsed_atom_handler, description)
+        self.assertFalse(simple_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), "")
+
+        # match does not exist
+        log_atom = LogAtom(match_element.match_object, None, t, new_match_path_detector1)
         self.assertTrue(simple_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(),
+                         f'{datetime.fromtimestamp(t).strftime(self.datetime_format_string)} Unparsed atom received\n'
+                         f'{simple_unparsed_atom_handler.__class__.__name__}: "{description}" (1 lines)\n  {self.calculation.decode()}\n\n')
+        self.reset_output_stream()
 
-    def test3_parser_match_is_other_element(self):
-        """In this test case the ParserMatch actually is no instance of ParserMatch. The atom should still be considered to be parsed."""
-        description = "Test3SimpleUnparsedAtomHandler"
-        any_byte_data_model_element = AnyByteDataModelElement('a1')
-        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
+        # the ParserMatch actually is no instance of ParserMatch, but the atom should still be considered to be parsed.
+        log_atom = LogAtom(match_element.match_object, fdme, t, new_match_path_detector1)
+        self.assertFalse(simple_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), "")
 
-        match_context = MatchContext(self.calculation)
-        match_element = any_byte_data_model_element.get_match_element('match', match_context)
-        log_atom = LogAtom(match_element.match_object, any_byte_data_model_element, time(), new_match_path_detector1)
+    def test2VerboseUnparsedAtomHandler_receive_atom(self):
+        """Test if the VerboseUnparsedAtomHandler can handle matching log atoms and not matching log atoms."""
+        description = "Test2VerboseUnparsedAtomHandler"
+        t = time.time()
+        fdme = DummyFixedDataModelElement("s1", self.calculation)
+        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
 
-        simple_unparsed_atom_handler = SimpleUnparsedAtomHandler([self.stream_printer_event_handler])
-        self.analysis_context.register_component(simple_unparsed_atom_handler, description)
-        self.assertTrue(not simple_unparsed_atom_handler.receive_atom(log_atom))
+        # match exists
+        match_context = DummyMatchContext(self.calculation)
+        match_element = fdme.get_match_element("match", match_context)
+        log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, new_match_path_detector1)
+
+        verbose_unparsed_atom_handler = VerboseUnparsedAtomHandler([self.stream_printer_event_handler], fdme)
+        self.analysis_context.register_component(verbose_unparsed_atom_handler, description)
+        self.assertFalse(verbose_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), "")
+
+        # match does not exist
+        log_atom = LogAtom(match_element.match_object, None, t, new_match_path_detector1)
+        self.assertTrue(verbose_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(),
+                         f'{datetime.fromtimestamp(t).strftime(self.datetime_format_string)} Unparsed atom received\n'
+                         f'{verbose_unparsed_atom_handler.__class__.__name__}: "{description}" (1 lines)\n  Starting match update on "'
+                         f'{self.calculation.decode()}"\n  Removed: "{self.calculation.decode()}", remaining 0 bytes\n  Shortest unmatched '
+                         f'data: ""\n{self.calculation.decode()}\n\n')
+        self.reset_output_stream()
+
+        # the ParserMatch actually is no instance of ParserMatch, but the atom should still be considered to be parsed.
+        log_atom = LogAtom(match_element.match_object, fdme, t, new_match_path_detector1)
+        self.assertFalse(verbose_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), "")
 
 
 if __name__ == "__main__":
