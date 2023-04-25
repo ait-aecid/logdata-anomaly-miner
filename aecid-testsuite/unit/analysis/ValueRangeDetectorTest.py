@@ -303,6 +303,18 @@ class ValueRangeDetectorTest(TestBase):
 
     def test6validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        self.assertRaises(ValueError, ValueRangeDetector, self.aminer_config, [], ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, ["default"], ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, None, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, "", ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, b"Default", ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, True, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, 123, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, 123.3, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, {"id": "Default"}, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, (), ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, set(), ["Default"])
+
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], "")
         self.assertRaises(ValueError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], None)
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], b"Default")

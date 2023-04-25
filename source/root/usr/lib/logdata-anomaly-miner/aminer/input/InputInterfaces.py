@@ -19,6 +19,7 @@ import logging
 from io import IOBase
 
 from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
+from aminer.events.EventInterfaces import EventHandlerInterface
 from aminer import AminerConfig
 
 
@@ -172,6 +173,16 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if hasattr(self, "aminer_config"):
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
                 KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+        if hasattr(self, "anomaly_event_handlers"):
+            if not isinstance(self.anomaly_event_handlers, list) or \
+                    not all(isinstance(handler, EventHandlerInterface) for handler in self.anomaly_event_handlers):
+                msg = "Only subclasses of EventHandlerInterface are allowed in anomaly_event_handlers."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(self.anomaly_event_handlers) < 1:
+                msg = "At least one anomaly event handler must be used."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
 
         self.stop_learning_timestamp = None
         if stop_learning_time is not None:
@@ -232,7 +243,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             self.confidence_factor = 1
         if not hasattr(self, "persistence_id"):
             self.persistence_id = None  # persistence_id is always needed.
-        for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_label_list", "unique_path_list"):
+        for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_label_list", "unique_path_list",
+                     "target_value_list"):
             if hasattr(self, attr) and self.__getattribute__(attr) is not None:
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, list):

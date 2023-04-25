@@ -156,6 +156,18 @@ class NewMatchPathDetectorTest(TestBase):
 
     def test5validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        self.assertRaises(ValueError, NewMatchPathDetector, self.aminer_config, [])
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, ["default"])
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, None)
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, "")
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, b"Default")
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, True)
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, 123)
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, 123.3)
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, {"id": "Default"})
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, ())
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, set())
+
         self.assertRaises(ValueError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id="")
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=None)
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=b"Default")

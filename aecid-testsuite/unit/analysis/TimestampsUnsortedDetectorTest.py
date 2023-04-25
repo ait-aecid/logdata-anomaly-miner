@@ -57,6 +57,18 @@ class TimestampsUnsortedDetectorTest(TestBase):
 
     def test2validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        self.assertRaises(ValueError, TimestampsUnsortedDetector, self.aminer_config, [])
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, ["default"])
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, None)
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, "")
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, b"Default")
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, True)
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, 123)
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, 123.3)
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, {"id": "Default"})
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, ())
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, set())
+
         self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], exit_on_error_flag=b"True")
         self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], exit_on_error_flag="True")
         self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], exit_on_error_flag=123)

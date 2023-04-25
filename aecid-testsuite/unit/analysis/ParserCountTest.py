@@ -94,6 +94,18 @@ class ParserCountTest(TestBase):
 
     def test4validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        self.assertRaises(ValueError, ParserCount, self.aminer_config, ["fixed/seq"], [])
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], ["default"])
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], None)
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], "")
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], b"Default")
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], True)
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], 123)
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], 123.3)
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], {"id": "Default"})
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], ())
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], set())
+
         self.assertRaises(ValueError, ParserCount, self.aminer_config, [""], [self.stream_printer_event_handler])
         self.assertRaises(TypeError, ParserCount, self.aminer_config, "", [self.stream_printer_event_handler])
         self.assertRaises(TypeError, ParserCount, self.aminer_config, b"Default", [self.stream_printer_event_handler])
