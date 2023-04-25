@@ -174,32 +174,31 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 raise TypeError(msg)
             for handler_pos, handler_element in enumerate(self.subhandler_list):
                 self.subhandler_list[handler_pos] = (handler_element, self.stop_when_handled_flag)
-        if hasattr(self, "parsed_atom_handler_lookup_list"):
-            if (not isinstance(self.parsed_atom_handler_lookup_list, list)) or \
-                    (not all(isinstance(val, tuple) for val in self.parsed_atom_handler_lookup_list)) or \
-                    (not all(len(val) == 2 for val in self.parsed_atom_handler_lookup_list)) or \
-                    (not all(isinstance(path, str) and isinstance(handler, AtomHandlerInterface) for
-                             path, handler in self.parsed_atom_handler_lookup_list)):
-                msg = "Only subclasses of (String, AtomHandlerInterface) are allowed in parsed_atom_handler_lookup_list."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-        if hasattr(self, "default_parsed_atom_handler"):
-            if self.default_parsed_atom_handler is not None and not isinstance(self.default_parsed_atom_handler, AtomHandlerInterface):
-                msg = "Only subclasses of AtomHandlerInterface are allowed in default_parsed_atom_handler."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-        if hasattr(self, "target_path"):
-            if not isinstance(self.target_path, str) or self.target_path == "":
-                msg = "target_path must be of type str and not empty."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-        if hasattr(self, "parsed_atom_handler_dict"):
-            if (not isinstance(self.parsed_atom_handler_dict, dict)) or \
-                    (not all(isinstance(key, bytes) for key in self.parsed_atom_handler_dict.keys())) or \
-                    (not all(isinstance(handler, AtomHandlerInterface) for handler in self.parsed_atom_handler_dict.values())):
-                msg = "Only subclasses of AtomHandlerInterface are allowed in parsed_atom_handler_dict."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "parsed_atom_handler_lookup_list") and (
+                not isinstance(self.parsed_atom_handler_lookup_list, list) or
+                not all(isinstance(val, tuple) for val in self.parsed_atom_handler_lookup_list) or
+                not all(len(val) == 2 for val in self.parsed_atom_handler_lookup_list) or
+                not all(isinstance(path, str) and isinstance(handler, AtomHandlerInterface) for
+                        path, handler in self.parsed_atom_handler_lookup_list)):
+            msg = "Only subclasses of (String, AtomHandlerInterface) are allowed in parsed_atom_handler_lookup_list."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if hasattr(self, "default_parsed_atom_handler") and self.default_parsed_atom_handler is not None and \
+                not isinstance(self.default_parsed_atom_handler, AtomHandlerInterface):
+            msg = "Only subclasses of AtomHandlerInterface are allowed in default_parsed_atom_handler."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if hasattr(self, "target_path") and (not isinstance(self.target_path, str) or self.target_path == ""):
+            msg = "target_path must be of type str and not empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if hasattr(self, "parsed_atom_handler_dict") and (
+                not isinstance(self.parsed_atom_handler_dict, dict) or
+                not all(isinstance(key, bytes) for key in self.parsed_atom_handler_dict.keys()) or
+                not all(isinstance(handler, AtomHandlerInterface) for handler in self.parsed_atom_handler_dict.values())):
+            msg = "Only subclasses of AtomHandlerInterface are allowed in parsed_atom_handler_dict."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         if hasattr(self, "allowed_id_tuples"):
             if self.allowed_id_tuples is None:
                 self.allowed_id_tuples = []
