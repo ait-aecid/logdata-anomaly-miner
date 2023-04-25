@@ -1,143 +1,223 @@
 import unittest
 from aminer.analysis.AtomFilters import SubhandlerFilter, MatchPathFilter, MatchValueFilter
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.MatchContext import MatchContext
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 import time
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from unit.TestBase import TestBase
+from datetime import datetime
+from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
 
 
 class AtomFiltersTest(TestBase):
     """Unittests for the AtomFilters."""
 
-    match_context_fixed_dme = MatchContext(b'25000')
-    fixed_dme = FixedDataModelElement('s1', b'25000')
-    match_element_fixed_dme = fixed_dme.get_match_element("fixed", match_context_fixed_dme)
+    __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s: %s\n%s\n%s\n\n'
+    match_path = "fixed/s1"
+    datetime_format_string = "%Y-%m-%d %H:%M:%S"
 
-    match_context_decimal_integer_value_me = MatchContext(b'25000')
-    decimal_integer_value_me = DecimalIntegerValueModelElement('d1', DecimalIntegerValueModelElement.SIGN_TYPE_NONE,
-                                                               DecimalIntegerValueModelElement.PAD_TYPE_NONE)
-    match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("integer", match_context_decimal_integer_value_me)
-
-    def test1_no_list_or_no_atom_handler_list(self):
-        """This test case verifies, that exceptions are raised when using wrong parameters."""
-        self.assertRaises(Exception, SubhandlerFilter, NewMatchPathDetector(self.aminer_config, [], 'Default', True), False)
-        self.assertRaises(Exception, SubhandlerFilter, FixedDataModelElement('fixed', b'gesuchter String'), False)
-
-    def test2receive_atom_unhandled(self):
-        """In this test case no handler can handle the log atom."""
-        description = "Test2AtomFilters"
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(new_match_path_detector, description)
+    def test1receive_atom_SubhandlerFilter(self):
+        """Test if log atoms are processed correctly with the SubhandlerFilter and the stop_when_handled flag is working properly."""
+        description = "Test1SubhandlerFilter"
+        data = b"25000"
+        match_context = DummyMatchContext(data)
+        fdme = DummyFixedDataModelElement("s1", data)
+        match_element = fdme.get_match_element("fixed", match_context)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        self.analysis_context.register_component(nmpd, description)
+        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        self.analysis_context.register_component(other_nmpd, description + "2")
         t = time.time()
+        log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)
 
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+        # more than one subhandler can handle the log_atom (stop_when_handled flag is false).
+        subhandler_filter = SubhandlerFilter([nmpd, other_nmpd], False)
+        self.assertTrue(subhandler_filter.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
+            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description, 1,
+            self.match_path, data.decode(), f"['{self.match_path}']", data.decode()) + self.__expected_string % (
+            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description + "2", 1,
+            self.match_path, data.decode(), f"['{self.match_path}']", data.decode()))
+        self.reset_output_stream()
 
+        # SubhandlerFilter stops processing after first subhandler handles the log_atom (stop_when_handled flag is true).
+        subhandler_filter = SubhandlerFilter([nmpd, other_nmpd], True)
+        self.assertTrue(subhandler_filter.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
+            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description, 1,
+            self.match_path, data.decode(), f"['{self.match_path}']", data.decode()))
+        self.reset_output_stream()
+
+        # atom not handled.
         subhandler_filter = SubhandlerFilter([], True)
-        self.assertTrue(not subhandler_filter.receive_atom(log_atom_fixed_dme))
+        log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)
+        self.assertFalse(subhandler_filter.receive_atom(log_atom))
 
-    def test3receive_atom_handled_by_more_handlers(self):
-        """In this test case more than one handler can handle the log atom. The impact of the stop_when_handled flag is tested."""
-        description = "Test3AtomFilters"
-        other_description = "Test3OtherAtomFilters"
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(new_match_path_detector, description)
+    def test2add_handler_SubhandlerFilter(self):
+        """Test if new detectors can be added to the SubhandlerFilter."""
+        description = "Test2SubhandlerFilter"
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", False)
+        self.analysis_context.register_component(nmpd, description)
+        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", False)
+        self.analysis_context.register_component(other_nmpd, description + "2")
+        subhandler_filter = SubhandlerFilter([nmpd, other_nmpd], False)
+        self.assertEqual(subhandler_filter.subhandler_list, [(nmpd, False), (other_nmpd, False)])
+        subhandler_filter.add_handler(nmpd, True)
+        subhandler_filter.add_handler(other_nmpd, False)
+        self.assertEqual(subhandler_filter.subhandler_list, [(nmpd, False), (other_nmpd, False), (nmpd, True), (other_nmpd, False)])
+        subhandler_filter = SubhandlerFilter([nmpd, other_nmpd], True)
+        self.assertEqual(subhandler_filter.subhandler_list, [(nmpd, True), (other_nmpd, True)])
+
+    def test3receive_atom_MatchPathFilter(self):
+        """Test if log atoms are processed correctly with the MatchPathFilter and the stop_when_handled flag is working properly."""
+        description = "Test3MatchPathFilter"
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        self.analysis_context.register_component(nmpd, description)
+        data = b"data"
+        match_context = DummyMatchContext(data)
+        fdme = DummyFixedDataModelElement("s1", data)
+        match_element = fdme.get_match_element("fixed", match_context)
         t = time.time()
+        log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)
 
-        other_new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(other_new_match_path_detector, other_description)
+        # There is a path in the dictionary and the handler are not None. The default_parsed_atom_handler is None.
+        match_path_filter = MatchPathFilter([(match_element.get_path(), nmpd)], None)
+        self.assertTrue(match_path_filter.receive_atom(log_atom))
 
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+        # The searched path is not in the dictionary. The default_parsed_atom_handler is None.
+        match_path_filter = MatchPathFilter([("d1", nmpd)], None)
+        self.assertFalse(match_path_filter.receive_atom(log_atom))
 
-        subhandler_filter = SubhandlerFilter([new_match_path_detector, other_new_match_path_detector], False)
-        self.assertTrue(subhandler_filter.receive_atom(log_atom_fixed_dme))
-        result = self.output_stream.getvalue()
-        self.reset_output_stream()
+        # The searched path is not in the dictionary. The default_parsed_atom_handler is set.
+        match_path_filter = MatchPathFilter([("d1", nmpd)], nmpd)
+        self.assertTrue(match_path_filter.receive_atom(log_atom))
 
-        new_match_path_detector.receive_atom(log_atom_fixed_dme)
-        result_fixed_dme = self.output_stream.getvalue()
-        self.reset_output_stream()
-
-        other_new_match_path_detector.receive_atom(log_atom_fixed_dme)
-        result_decimal_integer_value_me = self.output_stream.getvalue()
-
-        self.assertEqual(result, result_fixed_dme + result_decimal_integer_value_me)
-
-    def test4match_path_filter_receive_atom_path_in_dictionary(self):
-        """There is a path in the dictionary and the handler is not None. The default_parsed_atom_handler is None."""
-        description = "Test4AtomFilters"
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(new_match_path_detector, description)
+    def test4receive_atom_MatchValueFilter(self):
+        """Test if log atoms are processed correctly with the MatchValueFilter and the stop_when_handled flag is working properly."""
+        description = "Test4MatchValueFilter"
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        self.analysis_context.register_component(nmpd, description)
+        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        self.analysis_context.register_component(nmpd, description + "1")
+        data = b"data"
+        other_data = b"other data"
+        match_context = DummyMatchContext(data)
+        fdme = DummyFixedDataModelElement("s1", data)
+        match_element = fdme.get_match_element("fixed", match_context)
         t = time.time()
+        log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)
 
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+        # A target_value and a handler, which can handle the match_object is found.
+        match_value_filter = MatchValueFilter(match_element.get_path(), {fdme.data: nmpd}, other_nmpd)
+        self.assertTrue(match_value_filter.receive_atom(log_atom))
 
-        match_path_filter = MatchPathFilter([(self.match_element_fixed_dme.get_path(), new_match_path_detector)], None)
-        self.assertTrue(match_path_filter.receive_atom(log_atom_fixed_dme))
+        # No default handler is used.
+        other_match_context = DummyMatchContext(other_data)
+        other_fdme = DummyFixedDataModelElement("d1", other_data)
+        other_match_element = other_fdme.get_match_element("fixed", other_match_context)
+        log_atom = LogAtom(other_fdme.data, ParserMatch(other_match_element), t, other_nmpd)
+        self.assertTrue(match_value_filter.receive_atom(log_atom))
 
-    def test5match_path_filter_receive_atom_path_not_in_dictionary(self):
-        """The searched path is not in the dictionary. The default_parsed_atom_handler is None."""
-        description = "Test5AtomFilters"
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(new_match_path_detector, description)
-        t = time.time()
+        # No target_value was found in the dictionary.
+        log_atom = LogAtom(other_data, None, t, nmpd)
+        self.assertFalse(match_value_filter.receive_atom(log_atom))
 
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+    def test5validate_parameters_SubhandlerFilter(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", False)
+        self.assertRaises(TypeError, SubhandlerFilter, [""], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [b""], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [True], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [None], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [123], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [123.2], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [{"id": "Default"}], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [["Default"]], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [set()], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [()], True)
+        self.assertRaises(TypeError, SubhandlerFilter, [(nmpd, False)], True)
 
-        match_path_filter = MatchPathFilter([(self.match_element_decimal_integer_value_me.get_path(), new_match_path_detector)], None)
-        self.assertTrue(not match_path_filter.receive_atom(log_atom_fixed_dme))
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], "")
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], None)
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], b"Default")
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], 123)
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], 123.2)
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], {"id": "Default"})
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], ["Default"])
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], [])
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], ())
+        self.assertRaises(TypeError, SubhandlerFilter, [nmpd], set())
+        SubhandlerFilter([nmpd], False)
 
-    def test6match_path_filter_receive_atom_path_not_in_dictionary_default_set(self):
-        """The searched path is not in the dictionary. The default_parsed_atom_handler is set."""
-        description = "Test6AtomFilters"
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(new_match_path_detector, description)
-        t = time.time()
+    def test6validate_parameters_MatchPathFilter(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        self.assertRaises(TypeError, MatchPathFilter, [""])
+        self.assertRaises(TypeError, MatchPathFilter, [b""])
+        self.assertRaises(TypeError, MatchPathFilter, [True])
+        self.assertRaises(TypeError, MatchPathFilter, [None])
+        self.assertRaises(TypeError, MatchPathFilter, [123])
+        self.assertRaises(TypeError, MatchPathFilter, [123.2])
+        self.assertRaises(TypeError, MatchPathFilter, [{"id": "Default"}])
+        self.assertRaises(TypeError, MatchPathFilter, [["Default"]])
+        self.assertRaises(TypeError, MatchPathFilter, [set()])
+        self.assertRaises(TypeError, MatchPathFilter, [()])
+        self.assertRaises(TypeError, MatchPathFilter, [("path", None)])
 
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], "")
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], True)
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], b"Default")
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], 123)
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], 123.2)
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], {"id": "Default"})
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], ["Default"])
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], [])
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], ())
+        self.assertRaises(TypeError, MatchPathFilter, [("path", nmpd)], set())
+        MatchPathFilter([("path", nmpd)], None)
+        MatchPathFilter([("path", nmpd)], nmpd)
 
-        match_path_filter = MatchPathFilter([(self.match_element_decimal_integer_value_me.get_path(), new_match_path_detector)],
-                                            new_match_path_detector)
-        self.assertTrue(match_path_filter.receive_atom(log_atom_fixed_dme))
+    def test7validate_parameters_MatchValueFilter(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        dictionary = {b"val": nmpd}
+        path = "path"
+        self.assertRaises(TypeError, MatchValueFilter, "", dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, b"", dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, True, dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, None, dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, 123, dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, 123.2, dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, {"id": "Default"}, dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, ["Default"], dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, set(), dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, (), dictionary)
+        self.assertRaises(TypeError, MatchValueFilter, ("path", None), dictionary)
 
-    def test7match_value_filter_receive_atom_target_value_and_handler_found(self):
-        """A target_value and a handler, which can handle the matchObject is found."""
-        description = "Test7AtomFilters"
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(new_match_path_detector, description)
-        t = time.time()
+        self.assertRaises(TypeError, MatchValueFilter, path, "")
+        self.assertRaises(TypeError, MatchValueFilter, path, True)
+        self.assertRaises(TypeError, MatchValueFilter, path, b"Default")
+        self.assertRaises(TypeError, MatchValueFilter, path, 123)
+        self.assertRaises(TypeError, MatchValueFilter, path, 123.2)
+        self.assertRaises(TypeError, MatchValueFilter, path, {"id": "Default"})
+        self.assertRaises(TypeError, MatchValueFilter, path, ["Default"])
+        self.assertRaises(TypeError, MatchValueFilter, path, [])
+        self.assertRaises(TypeError, MatchValueFilter, path, ())
+        self.assertRaises(TypeError, MatchValueFilter, path, set())
+        self.assertRaises(TypeError, MatchValueFilter, path, {"id": None})
 
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, "")
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, b"")
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, True)
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, 123)
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, 123.22)
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, {"id": "Default"})
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, ["Default"])
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, [nmpd])
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, set())
+        self.assertRaises(TypeError, MatchValueFilter, path, dictionary, ())
 
-        match_value_filter = MatchValueFilter(self.match_element_fixed_dme.get_path(), {self.fixed_dme.fixed_data: new_match_path_detector},
-                                              None)
-        self.assertTrue(match_value_filter.receive_atom(log_atom_fixed_dme))
-
-    def test8match_value_filter_receive_atom_target_value_found_handler_not_found(self):
-        """A target_value was found, but no handler can handle it. DefaultParsedAtomHandler = None."""
-        description = "Test8AtomFilters"
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(new_match_path_detector, description)
-        t = time.time()
-
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.fixed_data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
-
-        match_value_filter = MatchValueFilter(self.match_element_fixed_dme.get_path(), {self.fixed_dme.fixed_data: None}, None)
-        self.assertTrue(not match_value_filter.receive_atom(log_atom_fixed_dme))
-
-    def test9match_value_filter_receive_atom_target_value_not_found(self):
-        """No target_value was found in the dictionary."""
-        description = "Test9AtomFilters"
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-        self.analysis_context.register_component(new_match_path_detector, description)
-        t = time.time()
-
-        log_atom_fixed_dme = LogAtom(b'24999', ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
-        match_value_filter = MatchValueFilter(self.match_element_fixed_dme.get_path(), {self.fixed_dme.fixed_data: None}, None)
-        self.assertTrue(not match_value_filter.receive_atom(log_atom_fixed_dme))
+        MatchValueFilter("path", dictionary, None)
+        MatchValueFilter("path", dictionary, nmpd)
 
 
 if __name__ == "__main__":

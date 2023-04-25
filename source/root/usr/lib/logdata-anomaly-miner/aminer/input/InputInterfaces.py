@@ -64,8 +64,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
     output_event_handlers = None
 
-    def __init__(self, mutable_default_args=None, learn_mode=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
-                 stop_when_handled_flag=None, **kwargs):
+    def __init__(self, mutable_default_args=None, learn_mode=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, **kwargs):
         """Initialize the parameters of analysis components. See the classes of the analysis components for parameter descriptions."""
         allowed_kwargs = [
             "mutable_default_args", "aminer_config", "anomaly_event_handlers", "learn_mode", "persistence_id", "id_path_list",
@@ -114,7 +113,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             setattr(self, argument, value)
 
         # test booleans
-        for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag"):
+        for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -170,11 +169,37 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if hasattr(self, "subhandler_list"):
             if (not isinstance(self.subhandler_list, list)) or \
                     (not all(isinstance(handler, AtomHandlerInterface) for handler in self.subhandler_list)):
-                msg = "Only subclasses of AtomHandlerInterface allowed in subhandler_list."
+                msg = "Only subclasses of AtomHandlerInterface are allowed in subhandler_list."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
             for handler_pos, handler_element in enumerate(self.subhandler_list):
-                self.subhandler_list[handler_pos] = (handler_element, stop_when_handled_flag)
+                self.subhandler_list[handler_pos] = (handler_element, self.stop_when_handled_flag)
+        if hasattr(self, "parsed_atom_handler_lookup_list"):
+            if (not isinstance(self.parsed_atom_handler_lookup_list, list)) or \
+                    (not all(isinstance(val, tuple) for val in self.parsed_atom_handler_lookup_list)) or \
+                    (not all(len(val) == 2 for val in self.parsed_atom_handler_lookup_list)) or \
+                    (not all(isinstance(path, str) and isinstance(handler, AtomHandlerInterface) for
+                             path, handler in self.parsed_atom_handler_lookup_list)):
+                msg = "Only subclasses of (String, AtomHandlerInterface) are allowed in parsed_atom_handler_lookup_list."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+        if hasattr(self, "default_parsed_atom_handler"):
+            if self.default_parsed_atom_handler is not None and not isinstance(self.default_parsed_atom_handler, AtomHandlerInterface):
+                msg = "Only subclasses of AtomHandlerInterface are allowed in default_parsed_atom_handler."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+        if hasattr(self, "target_path"):
+            if not isinstance(self.target_path, str) or self.target_path == "":
+                msg = "target_path must be of type str and not empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+        if hasattr(self, "parsed_atom_handler_dict"):
+            if (not isinstance(self.parsed_atom_handler_dict, dict)) or \
+                    (not all(isinstance(key, bytes) for key in self.parsed_atom_handler_dict.keys())) or \
+                    (not all(isinstance(handler, AtomHandlerInterface) for handler in self.parsed_atom_handler_dict.values())):
+                msg = "Only subclasses of AtomHandlerInterface are allowed in parsed_atom_handler_dict."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
         if hasattr(self, "allowed_id_tuples"):
             if self.allowed_id_tuples is None:
                 self.allowed_id_tuples = []
