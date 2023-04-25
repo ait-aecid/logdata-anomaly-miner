@@ -16,6 +16,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import abc
 import time
 import logging
+from io import IOBase
+
 from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer import AminerConfig
 
@@ -120,6 +122,31 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     msg = f"{attr} has to be of the type bool."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
+        # test non-empty strings:
+        for attr in ("persistence_id", "target_path"):
+            if hasattr(self, attr):
+                attr_val = self.__getattribute__(attr)
+                if not isinstance(attr_val, str):
+                    msg = f"{attr} has to be of the type string."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
+                if len(attr_val) < 1:
+                    msg = f"{attr} must not be empty."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+        # test byte-strings
+        for attr in ("separator", "missing_value_string"):
+            if hasattr(self, attr):
+                attr_val = self.__getattribute__(attr)
+                if not isinstance(attr_val, bytes):
+                    msg = f"{attr} has to be of the type bytes."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
+                # test non-empty byte-strings
+                if attr in ("separator",) and len(attr_val) < 1:
+                    msg = f"{attr} must not be empty."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
             msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -188,10 +215,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "Only subclasses of AtomHandlerInterface are allowed in default_parsed_atom_handler."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if hasattr(self, "target_path") and (not isinstance(self.target_path, str) or self.target_path == ""):
-            msg = "target_path must be of type str and not empty."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if hasattr(self, "parsed_atom_handler_dict") and (
                 not isinstance(self.parsed_atom_handler_dict, dict) or
                 not all(isinstance(key, bytes) for key in self.parsed_atom_handler_dict.keys()) or
@@ -207,16 +230,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if hasattr(self, "confidence_factor") and not 0 <= self.confidence_factor <= 1:
             logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
             self.confidence_factor = 1
-        if hasattr(self, "persistence_id"):
-            if not isinstance(self.persistence_id, str):
-                msg = "persistence_id has to be of the type String."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if len(self.persistence_id) < 1:
-                msg = "persistence_id must not be empty."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
-        else:
+        if not hasattr(self, "persistence_id"):
             self.persistence_id = None  # persistence_id is always needed.
         for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_label_list", "unique_path_list"):
             if hasattr(self, attr) and self.__getattribute__(attr) is not None:
@@ -237,6 +251,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if hasattr(self, "report_interval") and (not isinstance(self.report_interval, (int, float)) or isinstance(
                 self.report_interval, bool)):
             msg = "report_interval has to be of the type integer or float."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if hasattr(self, "stream") and not isinstance(self.stream, IOBase):
+            msg = "stream must be an instance of IOBase."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
 

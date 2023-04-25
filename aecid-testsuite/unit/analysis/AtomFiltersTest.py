@@ -181,7 +181,7 @@ class AtomFiltersTest(TestBase):
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
         dictionary = {b"val": nmpd}
         path = "path"
-        self.assertRaises(TypeError, MatchValueFilter, "", dictionary)
+        self.assertRaises(ValueError, MatchValueFilter, "", dictionary)
         self.assertRaises(TypeError, MatchValueFilter, b"", dictionary)
         self.assertRaises(TypeError, MatchValueFilter, True, dictionary)
         self.assertRaises(TypeError, MatchValueFilter, None, dictionary)

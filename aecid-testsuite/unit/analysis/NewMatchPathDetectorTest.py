@@ -20,13 +20,13 @@ class NewMatchPathDetectorTest(TestBase):
     pid = " pid="
     uid = " uid=2"
 
-    match_context_fixed_dme = DummyMatchContext(b" pid=")
-    fixed_dme = DummyFixedDataModelElement("s1", b" pid=")
-    match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
+    match_context1 = DummyMatchContext(b" pid=")
+    fdme1 = DummyFixedDataModelElement("s1", b" pid=")
+    match_element1 = fdme1.get_match_element("", match_context1)
 
-    match_context_decimal_integer_value_me = DummyMatchContext(b"25537 uid=2")
-    decimal_integer_value_me = DummyFixedDataModelElement("d1", b"25537")
-    match_element_decimal_integer_value_me = decimal_integer_value_me.get_match_element("", match_context_decimal_integer_value_me)
+    match_context2 = DummyMatchContext(b"25537 uid=2")
+    fdme2 = DummyFixedDataModelElement("d1", b"25537")
+    match_element2 = fdme2.get_match_element("", match_context2)
 
     def test1receive_atom(self):
         """
@@ -39,60 +39,59 @@ class NewMatchPathDetectorTest(TestBase):
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
 
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
-        log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
-                                                    ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
+        log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t, new_match_path_detector)
+        log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t, new_match_path_detector)
 
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description, 1,
             self.match_path_s1, self.pid))
         self.reset_output_stream()
 
         # repeating should NOT produce the same result
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
         self.assertEqual(self.output_stream.getvalue(), '')
         self.reset_output_stream()
 
         # learn_mode = False
         new_match_path_detector.learn_mode = False
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me))
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom2))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description, 1,
             self.match_path_d1, self.uid))
         self.reset_output_stream()
 
         # repeating should produce the same result
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me))
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom2))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
             datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector.__class__.__name__, description, 1,
             self.match_path_d1, self.uid))
 
         # stop_learning_time
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False, stop_learning_time=100)
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
-        log_atom_fixed_dme.atom_time = t + 99
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
+        log_atom1.atom_time = t + 99
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
         self.assertTrue(new_match_path_detector.learn_mode)
-        log_atom_fixed_dme.atom_time = t + 101
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
+        log_atom1.atom_time = t + 101
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
         self.assertFalse(new_match_path_detector.learn_mode)
 
         # stop_learning_no_anomaly_time
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False, stop_learning_no_anomaly_time=100)
-        log_atom_fixed_dme.atom_time = t
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
-        log_atom_fixed_dme.atom_time = t + 100
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
+        log_atom1.atom_time = t
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
+        log_atom1.atom_time = t + 100
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
         self.assertTrue(new_match_path_detector.learn_mode)
-        log_atom_decimal_integer_value_me.atom_time = t + 100
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me))
+        log_atom2.atom_time = t + 100
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom2))
         self.assertTrue(new_match_path_detector.learn_mode)
-        log_atom_fixed_dme.atom_time = t + 200
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
+        log_atom1.atom_time = t + 200
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
         self.assertTrue(new_match_path_detector.learn_mode)
-        log_atom_fixed_dme.atom_time = t + 201
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
+        log_atom1.atom_time = t + 201
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
         self.assertFalse(new_match_path_detector.learn_mode)
 
     def test2do_timer(self):
@@ -112,26 +111,24 @@ class NewMatchPathDetectorTest(TestBase):
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
-        new_match_path_detector.receive_atom(log_atom_fixed_dme)
+        log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t, new_match_path_detector)
+        new_match_path_detector.receive_atom(log_atom1)
         self.assertRaises(Exception, new_match_path_detector.allowlist_event, self.analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
         # The NewMatchPathDetector can not handle allowlisting data and therefore an exception is expected.
-        self.assertRaises(Exception, new_match_path_detector.allowlist_event, self.analysis % new_match_path_detector.__class__.__name__,
-                          self.output_stream.getvalue(), ["random", "Data"])
+        self.assertRaises(Exception, new_match_path_detector.allowlist_event, self.analysis % new_match_path_detector.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
         # This test case checks in which cases an event is triggered and compares with expected results.
         self.assertEqual(new_match_path_detector.allowlist_event(
-            self.analysis % new_match_path_detector.__class__.__name__, self.match_element_fixed_dme.get_path(), None),
-            "Allowlisted path(es) %s in %s." % (
-                self.match_element_fixed_dme.get_path(), self.analysis % new_match_path_detector.__class__.__name__))
+            self.analysis % new_match_path_detector.__class__.__name__, self.match_element1.get_path(), None),
+            "Allowlisted path(es) %s in %s." % (self.match_element1.get_path(), self.analysis % new_match_path_detector.__class__.__name__))
         self.assertEqual(new_match_path_detector.known_path_set, {"/s1"})
 
         new_match_path_detector.learn_mode = False
         self.assertEqual(new_match_path_detector.allowlist_event(
-            self.analysis % new_match_path_detector.__class__.__name__, self.match_element_decimal_integer_value_me.get_path(), None),
+            self.analysis % new_match_path_detector.__class__.__name__, self.match_element2.get_path(), None),
             "Allowlisted path(es) %s in %s." % (
-                self.match_element_decimal_integer_value_me.path, self.analysis % new_match_path_detector.__class__.__name__))
+                self.match_element2.path, self.analysis % new_match_path_detector.__class__.__name__))
         self.assertEqual(new_match_path_detector.known_path_set, {"/s1", "/d1"})
 
     def test4persistence(self):
@@ -140,12 +137,11 @@ class NewMatchPathDetectorTest(TestBase):
         new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
         self.analysis_context.register_component(new_match_path_detector, description)
         t = round(time.time(), 3)
-        log_atom_fixed_dme = LogAtom(self.fixed_dme.data, ParserMatch(self.match_element_fixed_dme), t, new_match_path_detector)
-        log_atom_decimal_integer_value_me = LogAtom(self.match_context_decimal_integer_value_me.match_data,
-                                                    ParserMatch(self.match_element_decimal_integer_value_me), t, new_match_path_detector)
+        log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t, new_match_path_detector)
+        log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t, new_match_path_detector)
 
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_fixed_dme))
-        self.assertTrue(new_match_path_detector.receive_atom(log_atom_decimal_integer_value_me))
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom1))
+        self.assertTrue(new_match_path_detector.receive_atom(log_atom2))
         self.assertEqual(new_match_path_detector.known_path_set, {"/s1", "/d1"})
         new_match_path_detector.do_persist()
         with open(new_match_path_detector.persistence_file_name, "r") as f:
