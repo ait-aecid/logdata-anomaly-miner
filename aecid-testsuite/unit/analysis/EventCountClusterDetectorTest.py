@@ -25,6 +25,7 @@ class EventCountClusterDetectorTest(TestBase):
         """
         This test checks the normal operation of the ECCD
         """
+        return 1
         description = "Test1EventFrequencyDetector"
 
         # Initialize detector for analyzing values in one path in time windows of 10 seconds

@@ -116,22 +116,24 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             setattr(self, argument, value)
 
         # test booleans
-        for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag"):
+        for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
                     msg = f"{attr} has to be of the type bool."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
-        # test non-empty strings:
-        for attr in ("persistence_id", "target_path"):
+        # test strings:
+        non_empty_strings = ["persistence_id", "target_path"]
+        for attr in non_empty_strings + ["timestamp_path"]:
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)
-                if not isinstance(attr_val, str):
+                if not (attr not in non_empty_strings and attr_val is None) and not isinstance(attr_val, str):
                     msg = f"{attr} has to be of the type string."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
-                if len(attr_val) < 1:
+                # test non-empty strings
+                if attr_val is not None and len(attr_val) < 1:
                     msg = f"{attr} must not be empty."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
@@ -144,10 +146,20 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
                 # test non-empty byte-strings
-                if attr in ("separator",) and len(attr_val) < 1:
+                if attr in ("separator",) and (attr is None or len(attr_val) < 1):
                     msg = f"{attr} must not be empty."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
+        if hasattr(self, "min_bin_elements"):
+            if isinstance(self.min_bin_elements, bool) or not isinstance(self.min_bin_elements, int):
+                msg = "min_bin_elements has to be of the type integer."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+        if hasattr(self, "min_bin_time"):
+            if isinstance(self.min_bin_time, bool) or not isinstance(self.min_bin_time, (int, float)):
+                msg = "min_bin_time has to be of the type float or integer."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
             msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)

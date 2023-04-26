@@ -16,7 +16,6 @@ class MatchValueStreamWriterTest(TestBase):
         euro_char = b"\x80"
         number = b"25537"
         space = b" "
-        description = "Test1MatchValueStreamWriter"
         match_context = MatchContext(b"25537 Euro "*100)
         fdme_number = DummyFixedDataModelElement("s1", number)
         fdme_sp = DummyFixedDataModelElement("sp", space)
@@ -24,7 +23,6 @@ class MatchValueStreamWriterTest(TestBase):
         fdme_euro_char = DummyFixedDataModelElement("s3", euro_char)
         sme = DummySequenceModelElement("sequence", [fdme_number, fdme_sp, fdme_euro, fdme_sp])
         mvsw = MatchValueStreamWriter(self.output_stream, ["match/sequence/s1", "match/sequence/sp", "match/sequence/s2", "match/sequence/sp"], b";", b"-")
-        self.analysis_context.register_component(mvsw, description)
         match_element = sme.get_match_element("match", match_context)
         log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, mvsw)
 

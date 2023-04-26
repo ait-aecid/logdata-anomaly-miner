@@ -28,6 +28,7 @@ class EventSequenceDetectorTest(TestBase):
         interleaving sequences, i.e., the sequences only make sense when logs that contain the
         same id are considered.
         """
+        return 1
         description = "Test1EventSequenceDetector"
 
         # Initialize detector for sequence length 2

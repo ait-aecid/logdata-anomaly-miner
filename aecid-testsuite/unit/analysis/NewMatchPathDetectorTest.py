@@ -10,16 +10,6 @@ from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
 
 class NewMatchPathDetectorTest(TestBase):
     """Unittests for the NewMatchPathDetector."""
-
-    __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
-    match_path_s1 = "['/s1']"
-    match_path_d1 = "['/d1']"
-
-    datetime_format_string = "%Y-%m-%d %H:%M:%S"
-    analysis = "Analysis.%s"
-    pid = " pid="
-    uid = " uid=2"
-
     match_context1 = DummyMatchContext(b" pid=")
     fdme1 = DummyFixedDataModelElement("s1", b" pid=")
     match_element1 = fdme1.get_match_element("", match_context1)
@@ -33,19 +23,18 @@ class NewMatchPathDetectorTest(TestBase):
         Test if log atoms are processed correctly and the detector is learning (learn_mode=True) and stops if learn_mode=False.
         Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
+        expected_string = '%s New path(es) detected\n%s: "None" (%d lines)\n  %s\n%s\n\n'
+        datetime_format_string = "%Y-%m-%d %H:%M:%S"
         # learn_mode = True
-        description = "test1receive_atom"
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
-        self.analysis_context.register_component(nmpd, description)
         t = round(time.time(), 3)
 
         log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t, nmpd)
         log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t, nmpd)
 
         self.assertTrue(nmpd.receive_atom(log_atom1))
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description, 1,
-            self.match_path_s1, self.pid))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1, "['/s1']", " pid="))
         self.reset_output_stream()
 
         # repeating should NOT produce the same result
@@ -56,16 +45,14 @@ class NewMatchPathDetectorTest(TestBase):
         # learn_mode = False
         nmpd.learn_mode = False
         self.assertTrue(nmpd.receive_atom(log_atom2))
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description, 1,
-            self.match_path_d1, self.uid))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1, "['/d1']", " uid=2"))
         self.reset_output_stream()
 
         # repeating should produce the same result
         self.assertTrue(nmpd.receive_atom(log_atom2))
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description, 1,
-            self.match_path_d1, self.uid))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1, "['/d1']", " uid=2"))
 
         # stop_learning_time
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False, stop_learning_time=100)
@@ -107,35 +94,29 @@ class NewMatchPathDetectorTest(TestBase):
     def test3allowlist_event(self):
         """Test if the allowlist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
-        description = "Test3allowlist_event"
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
-        self.analysis_context.register_component(nmpd, description)
         t = round(time.time(), 3)
+        analysis = "Analysis.%s"
         log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t, nmpd)
         nmpd.receive_atom(log_atom1)
-        self.assertRaises(Exception, nmpd.allowlist_event, self.analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
+        self.assertRaises(Exception, nmpd.allowlist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
         # The NewMatchPathDetector can not handle allowlisting data and therefore an exception is expected.
-        self.assertRaises(Exception, nmpd.allowlist_event, self.analysis % nmpd.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
+        self.assertRaises(Exception, nmpd.allowlist_event, analysis % nmpd.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
         # This test case checks in which cases an event is triggered and compares with expected results.
-        self.assertEqual(nmpd.allowlist_event(
-            self.analysis % nmpd.__class__.__name__, self.match_element1.get_path(), None),
-            "Allowlisted path(es) %s in %s." % (self.match_element1.get_path(), self.analysis % nmpd.__class__.__name__))
+        self.assertEqual(nmpd.allowlist_event(analysis % nmpd.__class__.__name__, self.match_element1.get_path(), None),
+            "Allowlisted path(es) %s in %s." % (self.match_element1.get_path(), analysis % nmpd.__class__.__name__))
         self.assertEqual(nmpd.known_path_set, {"/s1"})
 
         nmpd.learn_mode = False
-        self.assertEqual(nmpd.allowlist_event(
-            self.analysis % nmpd.__class__.__name__, self.match_element2.get_path(), None),
-            "Allowlisted path(es) %s in %s." % (
-                self.match_element2.path, self.analysis % nmpd.__class__.__name__))
+        self.assertEqual(nmpd.allowlist_event(analysis % nmpd.__class__.__name__, self.match_element2.get_path(), None),
+            "Allowlisted path(es) %s in %s." % (self.match_element2.path, analysis % nmpd.__class__.__name__))
         self.assertEqual(nmpd.known_path_set, {"/s1", "/d1"})
 
     def test4persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        description = "test4persistence"
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True, output_logline=False)
-        self.analysis_context.register_component(nmpd, description)
         t = round(time.time(), 3)
         log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t, nmpd)
         log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t, nmpd)
@@ -156,7 +137,6 @@ class NewMatchPathDetectorTest(TestBase):
 
     def test5validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
-        self.assertRaises(ValueError, NewMatchPathDetector, self.aminer_config, [])
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, ["default"])
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, None)
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, "")

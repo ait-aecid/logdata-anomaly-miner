@@ -12,10 +12,6 @@ from datetime import datetime
 class ValueRangeDetectorTest(TestBase):
     """Unittests for the ValueRangeDetectorDetector."""
 
-    __expected_string = '%s Value range anomaly detected\n%s: "%s" (%d lines)\n  %s\n\n'
-    datetime_format_string = "%Y-%m-%d %H:%M:%S"
-    analysis = "Analysis.%s"
-
     def test1receive_atom(self):
         """
         This test case checks the normal detection of new value ranges.
@@ -23,9 +19,9 @@ class ValueRangeDetectorTest(TestBase):
         Test if log atoms are processed correctly and the detector is learning (learn_mode=True) and stops if learn_mode=False.
         Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
-        description = "test1receive_atom"
+        expected_string = '%s Value range anomaly detected\n%s: "None" (%d lines)\n  %s\n\n'
+        datetime_format_string = "%Y-%m-%d %H:%M:%S"
         value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], "Default", True, False)
-        self.analysis_context.register_component(value_range_detector, description)
         t = round(time.time(), 3)
 
         # Prepare log atoms that represent two entities (id) with floats (value). Anomalies are generated when ranges are first established.
@@ -92,16 +88,16 @@ class ValueRangeDetectorTest(TestBase):
         # Input: id: a value: 4.75
         # Expected output: Anomaly
         value_range_detector.receive_atom(log_atom_3)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % ( datetime.fromtimestamp(t+2).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_3.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % ( datetime.fromtimestamp(t+2).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_3.raw_data.decode()))
         self.reset_output_stream()
 
         # Second value of id (b) should generate an anomaly for new range
         # Input: id: b value: 6.3
         # Expected output: Anomaly
         value_range_detector.receive_atom(log_atom_4)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % ( datetime.fromtimestamp(t+3).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_4.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % ( datetime.fromtimestamp(t+3).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_4.raw_data.decode()))
         self.reset_output_stream()
 
         # Third value of id (a) is in expected range, thus no anomaly is generated
@@ -112,8 +108,8 @@ class ValueRangeDetectorTest(TestBase):
 
         # Third value of id (b) is outside of expected range, thus anomaly is generated
         value_range_detector.receive_atom(log_atom_6)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % ( datetime.fromtimestamp(t+5).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_6.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % ( datetime.fromtimestamp(t+5).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_6.raw_data.decode()))
         self.reset_output_stream()
 
 
@@ -127,14 +123,14 @@ class ValueRangeDetectorTest(TestBase):
         value_range_detector.learn_mode = False
 
         value_range_detector.receive_atom(log_atom_4)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (datetime.fromtimestamp(t + 3).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_4.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t + 3).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_4.raw_data.decode()))
         self.reset_output_stream()
 
         # repeating should produce the same result
         value_range_detector.receive_atom(log_atom_4)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (datetime.fromtimestamp(t + 3).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_4.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t + 3).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_4.raw_data.decode()))
         self.reset_output_stream()
 
         # stop_learning_time
@@ -180,60 +176,48 @@ class ValueRangeDetectorTest(TestBase):
     def test3allowlist_event(self):
         """Test if the allowlist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
-        description = "Test3allowlist_event"
         value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], None, "Default", True, output_logline=False)
-        self.analysis_context.register_component(value_range_detector, description)
-        t = round(time.time(), 3)
-        self.assertRaises(Exception, value_range_detector.allowlist_event, self.analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
+        analysis = "Analysis.%s"
+        self.assertRaises(Exception, value_range_detector.allowlist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
         # The ValueRangeDetector can not handle allowlisting data and therefore an exception is expected.
-        self.assertRaises(Exception, value_range_detector.allowlist_event, self.analysis % value_range_detector.__class__.__name__,
-                          self.output_stream.getvalue(), ["random", "Data"])
+        self.assertRaises(Exception, value_range_detector.allowlist_event, analysis % value_range_detector.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
         # Allowlist event which is in the ignore_list. If a value from the ignore_list is allowlisted, it should be deleted.
         value_range_detector.ignore_list = ["/s1"]
         # This test case checks in which cases an event is triggered and compares with expected results.
-        self.assertEqual(value_range_detector.allowlist_event(
-            self.analysis % value_range_detector.__class__.__name__, "/s1", None), "Allowlisted path %s." % "/s1")
+        self.assertEqual(value_range_detector.allowlist_event(analysis % value_range_detector.__class__.__name__, "/s1", None), "Allowlisted path %s." % "/s1")
         self.assertEqual(value_range_detector.constraint_list, ["/s1"])
         self.assertEqual(value_range_detector.ignore_list, [])
 
         value_range_detector.learn_mode = False
-        self.assertEqual(value_range_detector.allowlist_event(
-            self.analysis % value_range_detector.__class__.__name__, "/d1", None), "Allowlisted path %s." % "/d1")
+        self.assertEqual(value_range_detector.allowlist_event(analysis % value_range_detector.__class__.__name__, "/d1", None), "Allowlisted path %s." % "/d1")
         self.assertEqual(value_range_detector.constraint_list, ["/s1", "/d1"])
 
     def test4blocklist_event(self):
         """Test if the blocklist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
-        description = "Test4blocklist_event"
         value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], None, "Default", True, output_logline=False)
-        self.analysis_context.register_component(value_range_detector, description)
-        t = round(time.time(), 3)
-        self.assertRaises(Exception, value_range_detector.blocklist_event, self.analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
+        analysis = "Analysis.%s"
+        self.assertRaises(Exception, value_range_detector.blocklist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
         # The ValueRangeDetector can not handle allowlisting data and therefore an exception is expected.
-        self.assertRaises(Exception, value_range_detector.blocklist_event, self.analysis % value_range_detector.__class__.__name__,
-                          self.output_stream.getvalue(), ["random", "Data"])
+        self.assertRaises(Exception, value_range_detector.blocklist_event, analysis % value_range_detector.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
         # Blocklist event which is in the constraint_list. If a value from the constraint_list is blocklisted, it should be deleted.
         value_range_detector.constraint_list = ["/s1"]
         # This test case checks in which cases an event is triggered and compares with expected results.
-        self.assertEqual(value_range_detector.blocklist_event(
-            self.analysis % value_range_detector.__class__.__name__, "/s1", None), "Blocklisted path /s1.")
+        self.assertEqual(value_range_detector.blocklist_event(analysis % value_range_detector.__class__.__name__, "/s1", None), "Blocklisted path /s1.")
         self.assertEqual(value_range_detector.ignore_list, ["/s1"])
         self.assertEqual(value_range_detector.constraint_list, [])
 
         value_range_detector.learn_mode = False
-        self.assertEqual(value_range_detector.blocklist_event(
-            self.analysis % value_range_detector.__class__.__name__, "/d1", None), "Blocklisted path /d1.")
+        self.assertEqual(value_range_detector.blocklist_event(analysis % value_range_detector.__class__.__name__, "/d1", None), "Blocklisted path /d1.")
         self.assertEqual(value_range_detector.ignore_list, ["/s1", "/d1"])
 
     def test5persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        description = "test4persistence"
         value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], "Default", True, False)
-        self.analysis_context.register_component(value_range_detector, description)
 
         # Prepare log atoms that represent two entities (id) with floats (value). Anomalies are generated when ranges are first established.
         # Then, one identifier (a) has a valid value, while the other one (b) has a value outside of the range that generates an anomaly.
@@ -303,7 +287,6 @@ class ValueRangeDetectorTest(TestBase):
 
     def test6validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
-        self.assertRaises(ValueError, ValueRangeDetector, self.aminer_config, [], ["Default"])
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, ["default"], ["Default"])
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, None, ["Default"])
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, "", ["Default"])

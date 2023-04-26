@@ -12,19 +12,17 @@ class MatchFilterTest(TestBase):
 
     def test1receive_atom(self):
         """Test if log atoms are processed correctly."""
-        description = "Test1MatchFilterTest"
         fmme = DummyFirstMatchModelElement("first", [DummyFixedDataModelElement(f"s{i}", f"val{i}".encode()) for i in range(10)])
         match_filter = MatchFilter(self.aminer_config, [f"/first/s{i}" for i in range(10)], [self.stream_printer_event_handler])
-        self.analysis_context.register_component(match_filter, description)
         t = time.time()
-        expected_string = '%s Log Atom Filtered\nMatchFilter: "%s" (1 lines)\n  val%d\n\n'
+        expected_string = '%s Log Atom Filtered\nMatchFilter: "None" (1 lines)\n  val%d\n\n'
 
         # check if an event is triggered if the path is in the target_path_list.
         for val in range(10):
             val_str = f"val{val}".encode()
             log_atom = LogAtom(val_str, ParserMatch(fmme.get_match_element("", DummyMatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
-            self.assertEqual(expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val), self.output_stream.getvalue())
+            self.assertEqual(expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), val), self.output_stream.getvalue())
             self.reset_output_stream()
 
         # check if an event is not triggered if the path is not in the target_path_list.
@@ -42,7 +40,7 @@ class MatchFilterTest(TestBase):
             val_str = f"val{val}".encode()
             log_atom = LogAtom(val_str, ParserMatch(fmme.get_match_element("", DummyMatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
-            self.assertEqual(expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val), self.output_stream.getvalue())
+            self.assertEqual(expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), val), self.output_stream.getvalue())
             self.reset_output_stream()
 
         # check if an event is not triggered when the path is in the target_path_list and the value is not in the target_value_list.
@@ -52,7 +50,7 @@ class MatchFilterTest(TestBase):
             log_atom = LogAtom(val_str, ParserMatch(fmme.get_match_element("", DummyMatchContext(val_str))), t, match_filter)
             match_filter.receive_atom(log_atom)
             if val <= 5:
-                self.assertEqual(expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), description, val), self.output_stream.getvalue())
+                self.assertEqual(expected_string % (datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), val), self.output_stream.getvalue())
             else:
                 self.assertEqual("", self.output_stream.getvalue())
             self.reset_output_stream()
@@ -70,7 +68,6 @@ class MatchFilterTest(TestBase):
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, (), [self.stream_printer_event_handler])
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, set(), [self.stream_printer_event_handler])
 
-        self.assertRaises(ValueError, MatchFilter, self.aminer_config, ["Default"], [])
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], ["default"])
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], None)
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], "")

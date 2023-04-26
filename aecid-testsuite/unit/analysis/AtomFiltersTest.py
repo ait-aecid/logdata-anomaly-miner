@@ -11,40 +11,35 @@ from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElemen
 class AtomFiltersTest(TestBase):
     """Unittests for the AtomFilters."""
 
-    __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s: %s\n%s\n%s\n\n'
-    match_path = "fixed/s1"
-    datetime_format_string = "%Y-%m-%d %H:%M:%S"
-
     def test1receive_atom_SubhandlerFilter(self):
         """Test if log atoms are processed correctly with the SubhandlerFilter and the stop_when_handled flag is working properly."""
-        description = "Test1SubhandlerFilter"
+        expected_string = '%s New path(es) detected\n%s: "None" (%d lines)\n  %s: %s\n%s\n%s\n\n'
+        match_path = "fixed/s1"
+        datetime_format_string = "%Y-%m-%d %H:%M:%S"
         data = b"25000"
         match_context = DummyMatchContext(data)
         fdme = DummyFixedDataModelElement("s1", data)
         match_element = fdme.get_match_element("fixed", match_context)
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
-        self.analysis_context.register_component(nmpd, description)
         other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
-        self.analysis_context.register_component(other_nmpd, description + "2")
         t = time.time()
         log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)
 
         # more than one subhandler can handle the log_atom (stop_when_handled flag is false).
         subhandler_filter = SubhandlerFilter([nmpd, other_nmpd], False)
         self.assertTrue(subhandler_filter.receive_atom(log_atom))
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description, 1,
-            self.match_path, data.decode(), f"['{self.match_path}']", data.decode()) + self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description + "2", 1,
-            self.match_path, data.decode(), f"['{self.match_path}']", data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1,
+            match_path, data.decode(), f"['{match_path}']", data.decode()) + expected_string % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1,
+            match_path, data.decode(), f"['{match_path}']", data.decode()))
         self.reset_output_stream()
 
         # SubhandlerFilter stops processing after first subhandler handles the log_atom (stop_when_handled flag is true).
         subhandler_filter = SubhandlerFilter([nmpd, other_nmpd], True)
         self.assertTrue(subhandler_filter.receive_atom(log_atom))
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
-            datetime.fromtimestamp(t).strftime(self.datetime_format_string), nmpd.__class__.__name__, description, 1,
-            self.match_path, data.decode(), f"['{self.match_path}']", data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (
+            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1, match_path, data.decode(), f"['{match_path}']", data.decode()))
         self.reset_output_stream()
 
         # atom not handled.
@@ -54,11 +49,8 @@ class AtomFiltersTest(TestBase):
 
     def test2add_handler_SubhandlerFilter(self):
         """Test if new detectors can be added to the SubhandlerFilter."""
-        description = "Test2SubhandlerFilter"
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", False)
-        self.analysis_context.register_component(nmpd, description)
         other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", False)
-        self.analysis_context.register_component(other_nmpd, description + "2")
         subhandler_filter = SubhandlerFilter([nmpd, other_nmpd], False)
         self.assertEqual(subhandler_filter.subhandler_list, [(nmpd, False), (other_nmpd, False)])
         subhandler_filter.add_handler(nmpd, True)
@@ -69,9 +61,7 @@ class AtomFiltersTest(TestBase):
 
     def test3receive_atom_MatchPathFilter(self):
         """Test if log atoms are processed correctly with the MatchPathFilter and the stop_when_handled flag is working properly."""
-        description = "Test3MatchPathFilter"
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
-        self.analysis_context.register_component(nmpd, description)
         data = b"data"
         match_context = DummyMatchContext(data)
         fdme = DummyFixedDataModelElement("s1", data)
@@ -93,11 +83,8 @@ class AtomFiltersTest(TestBase):
 
     def test4receive_atom_MatchValueFilter(self):
         """Test if log atoms are processed correctly with the MatchValueFilter and the stop_when_handled flag is working properly."""
-        description = "Test4MatchValueFilter"
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
-        self.analysis_context.register_component(nmpd, description)
         other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
-        self.analysis_context.register_component(nmpd, description + "1")
         data = b"data"
         other_data = b"other data"
         match_context = DummyMatchContext(data)

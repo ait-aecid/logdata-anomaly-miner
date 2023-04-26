@@ -13,12 +13,10 @@ class TimestampCorrectionFiltersTest(TestBase):
 
     def test1receive_atom(self):
         """This test case checks if the timestamp is adjusted and log atoms are forwarded correctly."""
-        description = "Test1TimestampCorrectionFilter"
         match_context = DummyMatchContext(b" pid=")
         fdme = DummyFixedDataModelElement("s1", b" pid=")
         match_element = fdme.get_match_element("match", match_context)
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False, output_logline=False)
-        self.analysis_context.register_component(nmpd, description)
         smta = SimpleMonotonicTimestampAdjust([nmpd], False)
 
         # the atom time should be set automatically if None.

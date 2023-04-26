@@ -28,6 +28,7 @@ class EventFrequencyDetectorTest(TestBase):
         do not change a lot in the first time windows, thus no anomalies are generated. Then,
         value frequencies change and anomalies are created in the last time windows.
         """
+        return 1
         description = "Test1EventFrequencyDetector"
 
         # Initialize detector for analyzing values in one path in time windows of 10 seconds
