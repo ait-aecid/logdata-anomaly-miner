@@ -62,7 +62,7 @@ class MatchFilter(AtomHandlerInterface):
                     affected_log_atom_values.append(match.match_object.decode(AminerConfig.ENCODING))
                 else:
                     affected_log_atom_values.append(match.match_object)
-            if self.target_value_list and not all([x in self.target_value_list for x in affected_log_atom_values]):
+            if self.target_value_list and not all(x in self.target_value_list for x in affected_log_atom_values):
                 continue
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)

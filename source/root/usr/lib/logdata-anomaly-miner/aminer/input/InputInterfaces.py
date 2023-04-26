@@ -179,10 +179,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 msg = "Only subclasses of EventHandlerInterface are allowed in anomaly_event_handlers."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
-            if len(self.anomaly_event_handlers) < 1:
-                msg = "At least one anomaly event handler must be used."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
 
         self.stop_learning_timestamp = None
         if stop_learning_time is not None:
