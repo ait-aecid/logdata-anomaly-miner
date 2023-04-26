@@ -150,16 +150,14 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     msg = f"{attr} must not be empty."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
-        if hasattr(self, "min_bin_elements"):
-            if isinstance(self.min_bin_elements, bool) or not isinstance(self.min_bin_elements, int):
-                msg = "min_bin_elements has to be of the type integer."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-        if hasattr(self, "min_bin_time"):
-            if isinstance(self.min_bin_time, bool) or not isinstance(self.min_bin_time, (int, float)):
-                msg = "min_bin_time has to be of the type float or integer."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "min_bin_elements") and (isinstance(self.min_bin_elements, bool) or not isinstance(self.min_bin_elements, int)):
+            msg = "min_bin_elements has to be of the type integer."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if hasattr(self, "min_bin_time") and (isinstance(self.min_bin_time, bool) or not isinstance(self.min_bin_time, (int, float))):
+            msg = "min_bin_time has to be of the type float or integer."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
             msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)

@@ -142,6 +142,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             self.stat_data.append((path, [],))
 
         def replace_brackets(val):
+            """replace lists with tuples."""
             if isinstance(val, list):
                 val = tuple(val)
             return val
