@@ -12,9 +12,11 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, DEBUG_LOG_NAME
 from aminer import AminerConfig
+from aminer.analysis.Rules import MatchRule
 
 
 class AllowlistViolationDetector(AtomHandlerInterface):
@@ -31,6 +33,15 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         """
         super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, output_logline=output_logline,
                          allowlist_rules=allowlist_rules)
+        if allowlist_rules is None:
+            msg = "allowlist_rules must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        for path in self.allowlist_rules:
+            if not isinstance(path, MatchRule):
+                msg = "allowlist_rules values must be of the type MatchRule."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
 
     def receive_atom(self, log_atom):
         """
@@ -49,11 +60,11 @@ class AllowlistViolationDetector(AtomHandlerInterface):
             data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
             data = repr(log_atom.raw_data)
-        analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()), 'AffectedLogAtomValues': [data]}
+        analysis_component = {"AffectedLogAtomPaths": list(log_atom.parser_match.get_match_dictionary()), "AffectedLogAtomValues": [data]}
         sorted_log_lines = [original_log_line_prefix + data]
-        event_data['AnalysisComponent'] = analysis_component
+        event_data["AnalysisComponent"] = analysis_component
         for listener in self.anomaly_event_handlers:
-            listener.receive_event(f'Analysis.{self.__class__.__name__}', 'No allowlisting for current atom', sorted_log_lines,
+            listener.receive_event(f"Analysis.{self.__class__.__name__}", "No allowlisting for current atom", sorted_log_lines,
                                    event_data, log_atom, self)
         return False
 
@@ -64,4 +75,4 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         """
         super().log_statistics(component_name)
         for i, rule in enumerate(self.allowlist_rules):
-            rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))
+            rule.log_statistics(component_name + "." + rule.__class__.__name__ + str(i))

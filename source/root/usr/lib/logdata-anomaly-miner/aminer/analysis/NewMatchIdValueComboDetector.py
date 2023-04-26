@@ -205,7 +205,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.known_values)
-        logging.getLogger(DEBUG_LOG_NAME).debug("%d persisted data.", self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """

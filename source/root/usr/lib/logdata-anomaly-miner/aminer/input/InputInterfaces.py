@@ -173,12 +173,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if hasattr(self, "aminer_config"):
             self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
                 KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-        if hasattr(self, "anomaly_event_handlers"):
-            if not isinstance(self.anomaly_event_handlers, list) or \
-                    not all(isinstance(handler, EventHandlerInterface) for handler in self.anomaly_event_handlers):
-                msg = "Only subclasses of EventHandlerInterface are allowed in anomaly_event_handlers."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
+        if hasattr(self, "anomaly_event_handlers") and (
+                not isinstance(self.anomaly_event_handlers, list) or
+                not all(isinstance(handler, EventHandlerInterface) for handler in self.anomaly_event_handlers)):
+            msg = "Only subclasses of EventHandlerInterface are allowed in anomaly_event_handlers."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
         self.stop_learning_timestamp = None
         if stop_learning_time is not None:
@@ -249,11 +249,11 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     raise TypeError(msg)
                 for path in attr_val:
                     if not isinstance(path, str):
-                        msg = f"{attr} paths must be of the type String."
+                        msg = f"{attr} values must be of the type String."
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise TypeError(msg)
                     if path == "":
-                        msg = f"{attr} paths must not be empty."
+                        msg = f"{attr} values must not be empty."
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
         if hasattr(self, "report_interval") and (not isinstance(self.report_interval, (int, float)) or isinstance(
@@ -265,6 +265,15 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "stream must be an instance of IOBase."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
+        if hasattr(self, "allowlist_rules"):
+            if not isinstance(self.allowlist_rules, list):
+                msg = "allowlist_rules has to be of the type list."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(self.allowlist_rules) == 0:
+                msg = "allowlist_rules must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):
