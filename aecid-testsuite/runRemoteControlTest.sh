@@ -326,8 +326,8 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True), 'NewMatchPathDet')" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True), 'NewMatchPathDet')")
+echo "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.event_handler_list, learn_mode=True), 'NewMatchPathDet')" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.event_handler_list, learn_mode=True), 'NewMatchPathDet')")
 expected="$PREFIX\"Component 'NewMatchPathDet' added to 'AtomFilter' successfully.\""
 expected_list="${expected_list}${expected}
 "
