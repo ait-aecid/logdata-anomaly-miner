@@ -249,8 +249,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             self.confidence_factor = 1
         if not hasattr(self, "persistence_id"):
             self.persistence_id = None  # persistence_id is always needed.
-        for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_label_list", "unique_path_list",
-                     "target_value_list"):
+        for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_label_list", "unique_path_list",):
             if hasattr(self, attr) and self.__getattribute__(attr) is not None:
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, list):
@@ -266,6 +265,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                         msg = f"{attr} values must not be empty."
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
+        if hasattr(self, "target_value_list") and self.target_value_list is not None and not isinstance(self.target_value_list, list):
+            msg = "target_value_list has to be of the type list."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         if hasattr(self, "report_interval") and (not isinstance(self.report_interval, (int, float)) or isinstance(
                 self.report_interval, bool)):
             msg = "report_interval has to be of the type integer or float."

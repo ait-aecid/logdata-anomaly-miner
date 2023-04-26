@@ -80,8 +80,6 @@ class MatchFilterTest(TestBase):
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], set())
 
         # target_value_list can actually be empty with [] or None.
-        self.assertRaises(ValueError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], [""])
-        self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], [b"default"])
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], True)
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], 123)
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], 123.3)
@@ -99,6 +97,7 @@ class MatchFilterTest(TestBase):
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], output_logline=())
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], output_logline=set())
         MatchFilter(self.aminer_config, ["Default"], [self.stream_printer_event_handler], ["val"], True)
+        MatchFilter(self.aminer_config, ["Default"], [self.stream_printer_event_handler], [123, 123.2], True)
 
 
 if __name__ == "__main__":
