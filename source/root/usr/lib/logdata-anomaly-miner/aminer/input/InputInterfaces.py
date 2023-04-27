@@ -161,7 +161,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     msg = f"{attr} has to be of the type integer."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
-                elif isinstance(attr_val, bool) or not isinstance(attr_val, (int, float)):
+                if isinstance(attr_val, bool) or not isinstance(attr_val, (int, float)):
                     msg = f"{attr} has to be of the type float or integer."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
