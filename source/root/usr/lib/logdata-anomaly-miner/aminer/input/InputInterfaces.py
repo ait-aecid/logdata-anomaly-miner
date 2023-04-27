@@ -116,7 +116,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             setattr(self, argument, value)
 
         # test booleans
-        for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode"):
+        for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode",
+                     "combine_values"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -138,7 +139,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
         # test byte-strings
-        for attr in ("separator", "missing_value_string"):
+        for attr in ["separator", "missing_value_string"]:
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bytes):
@@ -150,14 +151,25 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     msg = f"{attr} must not be empty."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
-        if hasattr(self, "min_bin_elements") and (isinstance(self.min_bin_elements, bool) or not isinstance(self.min_bin_elements, int)):
-            msg = "min_bin_elements has to be of the type integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if hasattr(self, "min_bin_time") and (isinstance(self.min_bin_time, bool) or not isinstance(self.min_bin_time, (int, float))):
-            msg = "min_bin_time has to be of the type float or integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
+        # test numeric values
+        integer_only = ["min_bin_elements"]
+        non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval"]
+        for attr in set([] + integer_only + non_zero_or_negative):
+            if hasattr(self, attr):
+                attr_val = self.__getattribute__(attr)
+                if attr in integer_only and (isinstance(attr_val, bool) or not isinstance(attr_val, int)):
+                    msg = f"{attr} has to be of the type integer."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
+                elif isinstance(attr_val, bool) or not isinstance(attr_val, (int, float)):
+                    msg = f"{attr} has to be of the type float or integer."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise TypeError(msg)
+                # test non-zero-or-negative values
+                if attr in non_zero_or_negative and attr_val <= 0:
+                    msg = f"{attr} must not be zero or negative."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
             msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)

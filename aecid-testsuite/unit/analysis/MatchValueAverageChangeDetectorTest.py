@@ -132,6 +132,8 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], set(), 1)
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], True, 1)
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 123.3, 1)
+        self.assertRaises(ValueError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], -1, 1)
+        self.assertRaises(ValueError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 0, 1)
 
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, None)
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, "1")
@@ -141,6 +143,8 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, ())
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, set())
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, True)
+        self.assertRaises(ValueError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, -1)
+        self.assertRaises(ValueError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 0)
         MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1)
         MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1.2)
 
