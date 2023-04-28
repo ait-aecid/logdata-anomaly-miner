@@ -510,8 +510,8 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "allowlist_event_in_component(analysis_context,'NewMatchPathValue','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValue','/model/somepath',allowlisting_data=None)")
+echo "allowlist_event_in_component(analysis_context,'NewMatchPathValue',b'/model/somepath',allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValue',b'/model/somepath',allowlisting_data=None)")
 expected="${PREFIX}'Allowlisted path(es) /model/DailyCron/Job Number, /model/IPAddresses/Username with /model/somepath.'"
 expected_list="${expected_list}${expected}
 "
