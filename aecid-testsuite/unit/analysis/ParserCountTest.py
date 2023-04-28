@@ -124,8 +124,8 @@ class ParserCountTest(TestBase):
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=[])
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=())
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=set())
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=123.22)
         ParserCount(self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=123)
-        ParserCount(self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=123.22)
 
         self.assertRaises(ValueError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], target_label_list=[])
         self.assertRaises(ValueError, ParserCount, self.aminer_config, None, [self.stream_printer_event_handler], target_label_list=["p"])
