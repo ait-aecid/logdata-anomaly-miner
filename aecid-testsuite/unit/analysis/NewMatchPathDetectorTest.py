@@ -39,7 +39,7 @@ class NewMatchPathDetectorTest(TestBase):
 
         # repeating should NOT produce the same result
         self.assertTrue(nmpd.receive_atom(log_atom1))
-        self.assertEqual(self.output_stream.getvalue(), '')
+        self.assertEqual(self.output_stream.getvalue(), "")
         self.reset_output_stream()
 
         # learn_mode = False

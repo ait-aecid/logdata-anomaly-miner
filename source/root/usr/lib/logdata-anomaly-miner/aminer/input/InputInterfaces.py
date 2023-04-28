@@ -80,7 +80,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_windows", "confidence_factor", "empty_window_warnings", "early_exceeding_anomaly_output", "set_lower_limit",
             "set_upper_limit", "local_maximum_threshold", "seq_len", "allow_missing_id", "timeout", "allowed_id_tuples", "min_num_vals",
             "max_num_vals", "save_values", "track_time_for_tsa", "waiting_time", "num_sections_waiting_time", "histogram_definitions",
-            "report_interval", "reset_after_report_flag", "bin_definition", "target_value_list", "timestamp_path", "min_bin_elements",
+            "report_interval", "reset_after_report_flag", "target_value_list", "timestamp_path", "min_bin_elements",
             "min_bin_time", "debug_mode", "stream", "separator", "missing_value_string", "num_log_lines_solidify_matrix",
             "time_output_threshold", "anomaly_threshold", "default_interval", "realert_interval", "combine_values", "min_allowed_time_diff",
             "target_label_list", "split_reports_flag", "event_type_detector", "num_init", "force_period_length", "set_period_length",
@@ -117,7 +117,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
         # test booleans
         for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode",
-                     "combine_values"):
+                     "combine_values", "reset_after_report_flag"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -281,9 +281,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "target_value_list has to be of the type list."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if hasattr(self, "report_interval") and (not isinstance(self.report_interval, (int, float)) or isinstance(
-                self.report_interval, bool)):
-            msg = "report_interval has to be of the type integer or float."
+        if hasattr(self, "report_interval") and (not isinstance(self.report_interval, int) or isinstance(self.report_interval, bool)):
+            msg = "report_interval has to be of the type integer."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if hasattr(self, "stream") and not isinstance(self.stream, IOBase):

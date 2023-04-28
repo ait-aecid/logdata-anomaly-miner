@@ -243,7 +243,6 @@
                         'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'empty': False}}, 'required': True},
                     'report_interval': {'type': 'integer', 'required': True, 'min': 1},
                     'reset_after_report_flag': {'type': 'boolean'},
-                    'persistence_id': {'type': 'string', 'empty': False},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
@@ -255,7 +254,6 @@
                     'bin_definition': {'type': 'string', 'required': True, 'empty': False},
                     'report_interval': {'type': 'integer', 'required': True, 'min': 1},
                     'reset_after_report_flag': {'type': 'boolean'},
-                    'persistence_id': {'type': 'string', 'empty': False},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
