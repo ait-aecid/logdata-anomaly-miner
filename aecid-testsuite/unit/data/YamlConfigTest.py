@@ -491,7 +491,6 @@ class YamlConfigTest(TestBase):
         log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, 'DefaultNewMatchPathDetector')
         datetime_format_string = '%Y-%m-%d %H:%M:%S'
         match_path_s1 = "['/s1']"
-        pid = " pid="
         __expected_string2 = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
         fixed_dme2 = FixedDataModelElement('s1', b'25537 uid=')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
@@ -515,7 +514,7 @@ class YamlConfigTest(TestBase):
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
             datetime.fromtimestamp(t).strftime(datetime_format_string), default_nmpd.__class__.__name__, 'DefaultNewMatchPathDetector', 1,
-            match_path_s1, pid))
+            match_path_s1))
         self.reset_output_stream()
 
         context.aminer_config.yaml_data['Analysis'][2]['suppress'] = True
