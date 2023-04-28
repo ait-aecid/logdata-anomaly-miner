@@ -12,7 +12,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
 import os
 import logging
 
@@ -31,7 +30,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', learn_mode=False,
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", learn_mode=False,
                  output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -53,17 +52,17 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
+        if not self.target_path_list:
+            msg = "target_path_list must not be None or empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
         self.log_learned_path_values = 0
         self.log_new_learned_values = []
+        self.known_values_set = set()
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.known_values_set = set()
-        else:
-            self.known_values_set = set(persistence_data)
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -91,14 +90,15 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                         self.log_learned_path_values += 1
                         self.log_new_learned_values.append(match.match_object)
                         if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                            self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                            self.stop_learning_timestamp = max(
+                                self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
                     if isinstance(match.match_object, bytes):
                         affected_log_atom_values.append(match.match_object.decode(AminerConfig.ENCODING))
                     else:
                         affected_log_atom_values.append(str(match.match_object))
             if len(affected_log_atom_values) > 0:
-                analysis_component = {'AffectedLogAtomPaths': [target_path], 'AffectedLogAtomValues': affected_log_atom_values}
+                analysis_component = {"AffectedLogAtomPaths": [target_path], "AffectedLogAtomValues": affected_log_atom_values}
                 if isinstance(match_dict.get(target_path), list):
                     res = {target_path: affected_log_atom_values}
                 else:
@@ -114,11 +114,12 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     sorted_log_lines = [str(res) + os.linesep + original_log_line_prefix + data]
                 else:
                     sorted_log_lines = [str(res)]
-                event_data = {'AnalysisComponent': analysis_component}
+                event_data = {"AnalysisComponent": analysis_component}
                 for listener in self.anomaly_event_handlers:
-                    listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New value(s) detected', sorted_log_lines, event_data,
+                    listener.receive_event(f"Analysis.{self.__class__.__name__}", "New value(s) detected", sorted_log_lines, event_data,
                                            log_atom, self)
                 self.log_success += 1
+        return True
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -129,13 +130,20 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
+        PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.known_values_set)))
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
+
+    def load_persistence_data(self):
+        PersistenceUtil.add_persistable_component(self)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            self.known_values_set = set(persistence_data)
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -143,12 +151,12 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
-            msg = 'Allowlisting data not understood by this detector'
+            msg = "Allowlisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.known_values_set.add(event_data)
