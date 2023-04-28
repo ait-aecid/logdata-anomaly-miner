@@ -483,7 +483,7 @@ class YamlConfigTest(TestBase):
         Check if the suppress property and SuppressNewMatchPathDetector are working as expected.
         This test only includes the StreamPrinterEventHandler.
         """
-        __expected_string1 = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
+        __expected_string1 = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n\n'
         t = time()
         fixed_dme = FixedDataModelElement('s1', b' pid=')
         match_context_fixed_dme = MatchContext(b' pid=')
