@@ -471,9 +471,9 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector','/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path(es) /model/IPAddresses/Username, /model/IPAddresses/IP with /model/somepath.'"
+echo "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector',(b'value1',b'value2'),allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector',(b'value1',b'value2'),allowlisting_data=None)")
+expected="${PREFIX}\"Allowlisted path(es) /model/IPAddresses/Username, /model/IPAddresses/IP with (b'value1', b'value2').\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
