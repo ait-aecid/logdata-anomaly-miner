@@ -57,6 +57,7 @@ import abc
 import logging
 from datetime import datetime
 
+import numpy
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -203,8 +204,8 @@ class LinearNumericBinDefinition(BinDefinition):
         if self.outlier_bins_flag and (bin_pos == 0 or bin_pos > self.bin_count):
             return None
         p_value = binomial_test(bin_values, total_values, self.expected_bin_ratio)
-        if not isinstance(p_value, (int, float)):
-            p_value = p_value.pvalue()
+        if not isinstance(p_value, (numpy.floating, float)):
+            p_value = p_value.pvalue
         return p_value
 
 
