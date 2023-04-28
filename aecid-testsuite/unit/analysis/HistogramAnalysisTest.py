@@ -28,12 +28,13 @@ class HistogramAnalysisTest(TestBase):
         # test get_bin_p_values method
         lnbd = LinearNumericBinDefinition(0, 1, 10, True)
         if lnbd.get_bin_p_value(2, 10, 2) is None:
+            scipy_version = None
             try:
                 import scipy
-                print(scipy.version.full_version)
+                scipy_version = scipy.version.full_version
             except:
                 pass
-            self.assertNotEqual(lnbd.get_bin_p_value(2, 10, 2), None, "Probably the scipy module could not be loaded. Please check your installation.")
+            self.assertNotEqual(lnbd.get_bin_p_value(2, 10, 2), None, "Probably the scipy module could not be loaded. Please check your installation. Version %s" % scipy_version)
 
     def test2ModuloTimeBinDefinition(self):
         """This test case aims to validate the functionality of the ModuloTimeBinDefinition."""
