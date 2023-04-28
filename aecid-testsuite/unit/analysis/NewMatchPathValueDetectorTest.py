@@ -109,12 +109,12 @@ class NewMatchPathValueDetectorTest(TestBase):
 
         # This test case checks in which cases an event is triggered and compares with expected results.
         self.assertEqual(nmpvd.allowlist_event(analysis % nmpvd.__class__.__name__, value, None),
-            "Allowlisted path(es) %s with %s." % (self.match_element1.path, value))
+            "Allowlisted path(es) %s with %s." % (self.match_element1.path, value.decode()))
         self.assertEqual(nmpvd.known_values_set, {b" pid=", b"value"})
 
         nmpvd.learn_mode = False
         self.assertEqual(nmpvd.allowlist_event(analysis % nmpvd.__class__.__name__, value2, None),
-            "Allowlisted path(es) %s with %s." % (self.match_element1.path, value2))
+            "Allowlisted path(es) %s with %s." % (self.match_element1.path, value2.decode()))
         self.assertEqual(nmpvd.known_values_set, {b" pid=", b"value", b"value2"})
 
     def test4persistence(self):
