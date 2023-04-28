@@ -498,7 +498,7 @@ class YamlConfigTest(TestBase):
         match_context_sequence_me = MatchContext(b'25537 uid=2')
         seq = SequenceModelElement('seq', [fixed_dme2, decimal_integer_value_me])
         match_element_sequence_me = seq.get_match_element('first', match_context_sequence_me)
-        string2 = "  (b'25537 uid=', 2)\n25537 uid=2"
+        string2 = "  (b'25537 uid=', 2)"
 
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
