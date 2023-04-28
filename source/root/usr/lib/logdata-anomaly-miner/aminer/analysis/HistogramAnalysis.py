@@ -57,6 +57,7 @@ import abc
 import logging
 from datetime import datetime
 
+import scipy.version
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.input.InputInterfaces import AtomHandlerInterface
@@ -64,8 +65,11 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 binomial_test = None
 try:
     from scipy import stats
-
-    binomial_test = stats.binomtest
+    v = [int(x) for x in scipy.version.full_version.split(".")]
+    if v[0] >= 1 and v[1] >= 7:
+        binomial_test = stats.binomtest
+    else:
+        binomial_test = stats.binom_test
 # skipcq: FLK-E722
 except:
     pass
