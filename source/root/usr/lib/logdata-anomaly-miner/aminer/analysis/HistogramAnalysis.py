@@ -57,15 +57,14 @@ import abc
 import logging
 from datetime import datetime
 
-import scipy.version
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.input.InputInterfaces import AtomHandlerInterface
 
 binomial_test = None
 try:
-    from scipy import stats
-    v = [int(x) for x in scipy.version.full_version.split(".")]
+    from scipy import stats, version
+    v = [int(x) for x in version.full_version.split(".")]
     if v[0] >= 1 and v[1] >= 7:
         binomial_test = stats.binomtest
     else:
@@ -203,7 +202,10 @@ class LinearNumericBinDefinition(BinDefinition):
             return None
         if self.outlier_bins_flag and (bin_pos == 0 or bin_pos > self.bin_count):
             return None
-        return binomial_test(bin_values, total_values, self.expected_bin_ratio)
+        p_value = binomial_test(bin_values, total_values, self.expected_bin_ratio)
+        if not isinstance(p_value, (int, float)):
+            p_value = p_value.pvalue()
+        return p_value
 
 
 class ModuloTimeBinDefinition(LinearNumericBinDefinition):
@@ -314,7 +316,7 @@ class HistogramData:
         for bin_pos, count in enumerate(self.bin_data):
             if count == 0:
                 continue
-            p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count).pvalue
+            p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count)
             if p_value is None:
                 # skipcq: PYL-C0209
                 result += "\n%s* %s: %d (ratio = %.2e)" % (indent, self.bin_names[bin_pos], count, float(count) / f_elements)
