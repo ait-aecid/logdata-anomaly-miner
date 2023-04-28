@@ -136,12 +136,13 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
     def do_persist(self):
         """Immediately write persistence data to storage."""
         data = list(self.known_values_set)
-        bts = list(filter(lambda x: type(x) == bytes, data))
-        other = list(filter(lambda x: type(x) != bytes, data))
+        bts = list(filter(lambda x: isinstance(x, bytes), data))
+        other = list(filter(lambda x: not isinstance(x, bytes), data))
         PersistenceUtil.store_json(self.persistence_file_name, sorted(other) + sorted(bts))
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def load_persistence_data(self):
+        """Load the persistence data from storage."""
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
@@ -162,6 +163,10 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             msg = "Allowlisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
+        if not isinstance(event_data, bytes):
+            msg = "event_data has to be of type bytes."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.known_values_set.add(event_data)
         return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data.decode()}."
 
