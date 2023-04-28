@@ -556,10 +556,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         msg = f'{histogram_definition[1]} first must be defined before used.'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    histogram_definitions.append([histogram_definition[0], analysis_dict[histogram_definition[1]]])
+                    histogram_definitions.append((histogram_definition[0], analysis_dict[histogram_definition[1]]))
                 tmp_analyser = func(analysis_context.aminer_config, histogram_definitions, item['report_interval'], anomaly_event_handlers,
-                                    reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
-                                    output_logline=item['output_logline'])
+                                    reset_after_report_flag=item['reset_after_report_flag'], output_logline=item['output_logline'])
             elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
                     msg = f'{item["bin_definition"]} first must be defined before used.'
@@ -567,8 +566,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, item['path'], analysis_dict[item['bin_definition']], item['report_interval'],
-                    anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
-                    output_logline=item['output_logline'])
+                    anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], output_logline=item['output_logline'])
             elif item['type'].name == 'EnhancedNewMatchPathValueComboDetector':
                 tuple_transformation_function = None
                 if item['tuple_transformation_function'] == 'demo':
