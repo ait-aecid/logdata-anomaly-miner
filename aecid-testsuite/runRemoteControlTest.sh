@@ -484,9 +484,9 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector','/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path(es) /model/type/path/name, /model/type/syscall/syscall with /model/somepath.'"
+echo "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/id':1, '/model/type/syscall/id':1},allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/id':1, '/model/type/syscall/id':1},allowlisting_data=None)")
+expected="${PREFIX}\"Allowlisted path(es) /model/type/path/id, /model/type/syscall/id with {'/model/type/path/id': 1, '/model/type/syscall/id': 1}.\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
