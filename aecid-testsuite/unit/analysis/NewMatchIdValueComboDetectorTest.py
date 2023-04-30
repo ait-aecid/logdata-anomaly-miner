@@ -117,8 +117,8 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100, learn_mode=True, output_logline=False)
         t = round(time.time(), 3)
         analysis = "Analysis.%s"
-        value = b"value"
-        value2 = b"2"
+        value = "value"
+        value2 = "2"
         log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, nmivcd)
         nmivcd.receive_atom(log_atom1)
         self.assertRaises(Exception, nmivcd.allowlist_event, analysis % "NewMatchPathDetector", self.output_stream.getvalue(), None)

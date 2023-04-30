@@ -235,8 +235,9 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if not isinstance(event_data, dict) or len(event_data) != len(self.target_path_list) or \
-                not all(x in self.target_path_list for x in event_data.keys()):
-            msg = "event_data has to be of type dict."
+                not all(x in self.target_path_list for x in event_data.keys()) or \
+                not all(not isinstance(x, bytes) for x in event_data.values()):
+            msg = "event_data has to be of type dict and the values should not be bytes."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if not self.allow_missing_values_flag and None in event_data.values():
