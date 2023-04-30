@@ -153,7 +153,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     raise ValueError(msg)
         # test numeric values
         integer_only = ["min_bin_elements"]
-        non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval"]
+        non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff"]
         for attr in set([] + integer_only + non_zero_or_negative):
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)

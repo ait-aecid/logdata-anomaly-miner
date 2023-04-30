@@ -14,7 +14,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
 import os
 import logging
 
@@ -65,18 +64,21 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode, output_logline=output_logline,
             stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
+        if not self.target_path_list:
+            msg = "target_path_list must not be None or empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not self.id_path_list:
+            msg = "id_path_list must not be None or empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
 
-        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.known_values = []
-        if persistence_data is not None:
-            # Combinations are stored as list of dictionaries
-            for record in persistence_data:
-                self.known_values.append(record)
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
-        PersistenceUtil.add_persistable_component(self)
+        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.load_persistence_data()
 
         self.id_dict_current = {}
         self.id_dict_old = {}
@@ -172,7 +174,8 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 self.log_learned_path_value_combos += 1
                 self.log_new_learned_values.append(id_dict_entry)
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
             analysis_component = {'AffectedLogAtomValues': [str(i) for i in list(id_dict_entry.values())]}
             event_data = {'AnalysisComponent': analysis_component}
@@ -185,7 +188,7 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
                 sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
                     id_dict_entry) + os.linesep + original_log_line_prefix + data]
             else:
-                sorted_log_lines = [repr(id_dict_entry) + os.linesep + original_log_line_prefix + data]
+                sorted_log_lines = [repr(id_dict_entry)]
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New value combination(s) detected', sorted_log_lines,
                                        event_data, log_atom, self)
@@ -199,13 +202,23 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
         PersistenceUtil.store_json(self.persistence_file_name, self.known_values)
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            # Combinations are stored as list of dictionaries
+            for record in persistence_data:
+                self.known_values.append(record)
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
+        PersistenceUtil.add_persistable_component(self)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -221,6 +234,15 @@ class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentI
             msg = 'Allowlisting data not understood by this detector'
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
+        if not isinstance(event_data, dict) or len(event_data) != len(self.target_path_list) or \
+                not all(x in self.target_path_list for x in event_data.keys()):
+            msg = "event_data has to be of type dict."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not self.allow_missing_values_flag and None in event_data.values():
+            msg = "event_data must not have None values if allow_missing_values_flag is False."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         if event_data not in self.known_values:
             self.known_values.append(event_data)
         return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data}."

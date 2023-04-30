@@ -11,288 +11,274 @@ from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelE
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
-from unit.TestBase import TestBase
+from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement, DummySequenceModelElement
+from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
+from datetime import datetime
 
 
 class NewMatchIdValueComboDetectorTest(TestBase):
     """Unittests for the NewMatchIdValueComboDetector."""
 
-    log_lines = [
-        b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367386.000:2): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367387.000:2): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367388.000:3): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367389.000:3): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367388.500:100): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1'
-        b' ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=SYSCALL msg=audit(1580367390.000:4): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367391.000:4): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=PATH msg=audit(1580367392.000:5): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367393.000:5): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=SYSCALL msg=audit(1580367394.000:6): arch=c000003e syscall=4 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367395.000:7): item=0 name="five" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367396.000:8): arch=c000003e syscall=6 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367397.000:6): item=0 name="four" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367398.000:7): arch=c000003e syscall=5 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367399.000:8): item=0 name="six" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)']
+    match_context = DummyMatchContext(b" pid=25537 uid=2")
+    fdme1 = DummyFixedDataModelElement("s1", b" pid=")
+    fdme2 = DummyFixedDataModelElement("d1", b"25537")
+    seq1 = DummySequenceModelElement("seq", [fdme1, fdme2])
+    match_element1 = seq1.get_match_element("", match_context)
 
-    expected_allowlist_string = "Allowlisted path(es) parser/type/path/name, parser/type/syscall/syscall with %s."
+    match_context = DummyMatchContext(b"ddd 25538ddd 25539")
+    fdme3 = DummyFixedDataModelElement("s1", b"ddd ")
+    fdme4 = DummyFixedDataModelElement("d1", b"25538")
+    fdme5 = DummyFixedDataModelElement("d1", b"25539")
+    seq2 = DummySequenceModelElement("seq", [fdme3, fdme4])
+    match_element2 = seq2.get_match_element("", match_context)
+    seq3 = DummySequenceModelElement("seq", [fdme3, fdme5])
+    match_element3 = seq3.get_match_element("", match_context)
 
-    parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path', [
-        FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
-        DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'), DecimalIntegerValueModelElement('id'),
-        FixedDataModelElement('item_string', b'): item='), DecimalIntegerValueModelElement('item'),
-        FixedDataModelElement('name_string', b' name="'), DelimitedDataModelElement('name', b'"'),
-        FixedDataModelElement('inode_string', b'" inode='), DecimalIntegerValueModelElement('inode'),
-        FixedDataModelElement('dev_string', b' dev='), DelimitedDataModelElement('dev', b' '),
-        FixedDataModelElement('mode_string', b' mode='), DecimalIntegerValueModelElement(
-            'mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
-        FixedDataModelElement('ouid_string', b' ouid='), DecimalIntegerValueModelElement('ouid'),
-        FixedDataModelElement('ogid_string', b' ogid='), DecimalIntegerValueModelElement('ogid'),
-        FixedDataModelElement('rdev_string', b' rdev='), DelimitedDataModelElement('rdev', b' '),
-        FixedDataModelElement('nametype_string', b' nametype='), FixedWordlistDataModelElement('nametype', [b'NORMAL', b'ERROR'])]),
-        SequenceModelElement('syscall', [
-            FixedDataModelElement('type', b'type=SYSCALL '), FixedDataModelElement('msg_audit', b'msg=audit('),
-            DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'), DecimalIntegerValueModelElement('id'),
-            FixedDataModelElement('arch_string', b'): arch='), DelimitedDataModelElement('arch', b' '),
-            FixedDataModelElement('syscall_string', b' syscall='), DecimalIntegerValueModelElement('syscall'),
-            FixedDataModelElement('success_string', b' success='), FixedWordlistDataModelElement('success', [b'yes', b'no']),
-            FixedDataModelElement('exit_string', b' exit='), DecimalIntegerValueModelElement('exit'),
-            AnyByteDataModelElement('remainding_data')])])
+    def test1receive_atom(self):
+        """
+        Test if log atoms are processed correctly and the detector is learning (learn_mode=True) and stops if learn_mode=False.
+        Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
+        """
+        expected_string = '%s New value combination(s) detected\n%s: "None" (%d lines)\n  %s\n\n'
+        datetime_format_string = "%Y-%m-%d %H:%M:%S"
+        # learn_mode = True
+        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 120, learn_mode=True, output_logline=False)
+        t = round(time.time(), 3)
 
-    def test1receive_match_in_time_with_learn_mode(self):
-        """This test case checks if log_atoms are accepted as expected with the learn_mode=True."""
-        description = 'test1newMatchIdValueComboDetectorTest'
-        output_stream_empty_results = [True, False, True, False, True, False, True, True, True, True, True, True, True, True, False, False,
-                                       False, True, False, True, False]
-        id_dict_current_results = [
-            {1: {'parser/type/syscall/syscall': 1}}, {}, {2: {'parser/type/syscall/syscall': 2}}, {},
-            {3: {'parser/type/syscall/syscall': 3}}, {}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 4: {'parser/type/syscall/syscall': 1}}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 5: {'parser/type/path/name': 'two'}}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 6: {'parser/type/syscall/syscall': 4}},
-            {100: {'parser/type/syscall/syscall': 1}, 6: {'parser/type/syscall/syscall': 4}, 7: {'parser/type/path/name': 'five'}},
-            {100: {'parser/type/syscall/syscall': 1}, 6: {'parser/type/syscall/syscall': 4}, 7: {'parser/type/path/name': 'five'},
-                8: {'parser/type/syscall/syscall': 6}},
-            {100: {'parser/type/syscall/syscall': 1}, 7: {'parser/type/path/name': 'five'}, 8: {'parser/type/syscall/syscall': 6}},
-            {100: {'parser/type/syscall/syscall': 1}, 8: {'parser/type/syscall/syscall': 6}}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 9: {'parser/type/syscall/syscall': 2}}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 10: {'parser/type/path/name': 'one'}}, {100: {'parser/type/syscall/syscall': 1}}]
-        id_dict_old_results = [{}] * 21
-        min_allowed_time_diff = 0.1
-        log_atoms = []
-        for line in self.log_lines:
-            t = time.time()
-            log_atoms.append(
-                LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
-        new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
-            'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
-            id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            learn_mode=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
-        self.analysis_context.register_component(new_match_id_value_combo_detector, description)
+        log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, nmivcd)
+        log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t, nmivcd)
+        log_atom3 = LogAtom(self.match_element3.match_string, ParserMatch(self.match_element3), t, nmivcd)
 
-        for i, log_atom in enumerate(log_atoms):
-            self.assertTrue(new_match_id_value_combo_detector.receive_atom(log_atom))
-            self.assertEqual(self.output_stream.getvalue() == "", output_stream_empty_results[i], log_atom.raw_data)
-            self.assertEqual(new_match_id_value_combo_detector.id_dict_current, id_dict_current_results[i])
-            self.assertEqual(new_match_id_value_combo_detector.id_dict_old, id_dict_old_results[i])
-            self.reset_output_stream()
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t).strftime(datetime_format_string), nmivcd.__class__.__name__, 1, "{'/seq/s1': ' pid=', '/seq/d1': '25537'}"))
+        self.reset_output_stream()
 
-    def test2receive_match_after_max_allowed_time_diff_with_learn_mode(self):
-        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the learn_mode=True."""
-        description = 'test2newMatchIdValueComboDetectorTest'
-        output_stream_empty_results = [True, False, True, False, True, False, True, True, True, True, True, True, True, True, False, False,
-                                       False, True, False, True, False]
-        id_dict_current_results = [
-            {1: {'parser/type/syscall/syscall': 1}}, {}, {2: {'parser/type/syscall/syscall': 2}}, {},
-            {3: {'parser/type/syscall/syscall': 3}}, {}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 4: {'parser/type/syscall/syscall': 1}}, {100: {'parser/type/syscall/syscall': 1}},
-            {5: {'parser/type/path/name': 'two'}, 100: {'parser/type/syscall/syscall': 1}}, {}, {6: {'parser/type/syscall/syscall': 4}},
-            {6: {'parser/type/syscall/syscall': 4}, 7: {'parser/type/path/name': 'five'}},
-            {6: {'parser/type/syscall/syscall': 4}, 7: {'parser/type/path/name': 'five'}, 8: {'parser/type/syscall/syscall': 6}},
-            {7: {'parser/type/path/name': 'five'}, 8: {'parser/type/syscall/syscall': 6}}, {}, {}, {9: {'parser/type/syscall/syscall': 2}},
-            {}, {10: {'parser/type/path/name': 'one'}}, {}]
-        id_dict_old_results = [{}] * 10 + [{100: {'parser/type/syscall/syscall': 1}}] * 5 + [{8: {'parser/type/syscall/syscall': 6}}] + [
-            {}] * 5
-        min_allowed_time_diff = 5
-        log_atoms = []
+        # repeating should NOT produce the same result
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.reset_output_stream()
+
+        # learn_mode = False
+        nmivcd.learn_mode = False
+        self.assertTrue(nmivcd.receive_atom(log_atom2))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t).strftime(datetime_format_string), nmivcd.__class__.__name__, 1, "{'/seq/s1': 'ddd ', '/seq/d1': '25538'}"))
+        self.reset_output_stream()
+
+        # repeating should produce the same result
+        self.assertTrue(nmivcd.receive_atom(log_atom2))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t).strftime(datetime_format_string), nmivcd.__class__.__name__, 1, "{'/seq/s1': 'ddd ', '/seq/d1': '25538'}"))
+        self.reset_output_stream()
+
+        # allow_missing_values_flag=True
+        nmivcd.allow_missing_values_flag = True
+        self.assertTrue(nmivcd.receive_atom(log_atom3))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t).strftime(datetime_format_string), nmivcd.__class__.__name__, 1, "{'/seq/s1': 'ddd ', '/seq/d1': '25539'}"))
+
+        # stop_learning_time
+        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 120, learn_mode=True, output_logline=False, stop_learning_time=100)
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        log_atom1.atom_time = t + 99
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertTrue(nmivcd.learn_mode)
+        log_atom1.atom_time = t + 101
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertFalse(nmivcd.learn_mode)
+
+        # stop_learning_no_anomaly_time
+        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 120, learn_mode=True, output_logline=False, stop_learning_no_anomaly_time=100)
+        log_atom1.atom_time = t
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        log_atom1.atom_time = t + 100
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertTrue(nmivcd.learn_mode)
+        log_atom2.atom_time = t + 100
+        self.assertTrue(nmivcd.receive_atom(log_atom2))
+        self.assertTrue(nmivcd.learn_mode)
+        log_atom1.atom_time = t + 200
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertTrue(nmivcd.learn_mode)
+        log_atom1.atom_time = t + 201
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertFalse(nmivcd.learn_mode)
+
+    def test2do_timer(self):
+        """Test if the do_timer method is implemented properly."""
+        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ["path/id"], 120, learn_mode=True, output_logline=False)
         t = time.time()
-        for line in self.log_lines:
-            log_atoms.append(
-                LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
-            t = t + min_allowed_time_diff * 0.25
+        nmivcd.next_persist_time = t + 400
+        self.assertEqual(nmivcd.do_timer(t + 200), 200)
+        self.assertEqual(nmivcd.do_timer(t + 400), DEFAULT_PERSISTENCE_PERIOD)
+        self.assertEqual(nmivcd.do_timer(t + 999), 1)
+        self.assertEqual(nmivcd.do_timer(t + 1000), DEFAULT_PERSISTENCE_PERIOD)
 
-        new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
-            'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
-            id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            learn_mode=True, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
-        self.analysis_context.register_component(new_match_id_value_combo_detector, description)
+    def test3allowlist_event(self):
+        """Test if the allowlist_event method is implemented properly."""
+        # This test case checks whether an exception is thrown when entering an event of another class.
+        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100, learn_mode=True, output_logline=False)
+        t = round(time.time(), 3)
+        analysis = "Analysis.%s"
+        value = b"value"
+        value2 = b"2"
+        log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, nmivcd)
+        nmivcd.receive_atom(log_atom1)
+        self.assertRaises(Exception, nmivcd.allowlist_event, analysis % "NewMatchPathDetector", self.output_stream.getvalue(), None)
 
-        for i, log_atom in enumerate(log_atoms):
-            self.assertTrue(new_match_id_value_combo_detector.receive_atom(log_atom))
-            self.assertEqual(self.output_stream.getvalue() == "", output_stream_empty_results[i], log_atom.raw_data)
-            self.assertEqual(new_match_id_value_combo_detector.id_dict_current, id_dict_current_results[i], log_atom.raw_data)
-            self.assertEqual(new_match_id_value_combo_detector.id_dict_old, id_dict_old_results[i])
-            self.reset_output_stream()
+        # The NewMatchPathValueComboDetector can not handle allowlisting data and therefore an exception is expected.
+        self.assertRaises(Exception, nmivcd.allowlist_event, analysis % nmivcd.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
-    def test3receive_match_in_time_without_learn_mode(self):
-        """This test case checks if log_atoms are accepted as expected with the learn_mode=False."""
-        description = 'test3newMatchIdValueComboDetectorTest'
-        output_stream_empty_results = [True, False, True, False, True, False, True, True, False, True, False, True, True, True, False,
-                                       False, False, True, False, True, False]
-        id_dict_current_results = [
-            {1: {'parser/type/syscall/syscall': 1}}, {}, {2: {'parser/type/syscall/syscall': 2}}, {},
-            {3: {'parser/type/syscall/syscall': 3}}, {}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 4: {'parser/type/syscall/syscall': 1}}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 5: {'parser/type/path/name': 'two'}}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 6: {'parser/type/syscall/syscall': 4}},
-            {100: {'parser/type/syscall/syscall': 1}, 6: {'parser/type/syscall/syscall': 4}, 7: {'parser/type/path/name': 'five'}},
-            {100: {'parser/type/syscall/syscall': 1}, 6: {'parser/type/syscall/syscall': 4}, 7: {'parser/type/path/name': 'five'},
-                8: {'parser/type/syscall/syscall': 6}},
-            {100: {'parser/type/syscall/syscall': 1}, 7: {'parser/type/path/name': 'five'}, 8: {'parser/type/syscall/syscall': 6}},
-            {100: {'parser/type/syscall/syscall': 1}, 8: {'parser/type/syscall/syscall': 6}}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 9: {'parser/type/syscall/syscall': 2}}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 10: {'parser/type/path/name': 'one'}}, {100: {'parser/type/syscall/syscall': 1}}]
-        id_dict_old_results = [{}] * 21
-        min_allowed_time_diff = 0.1
-        log_atoms = []
-        for line in self.log_lines:
-            t = time.time()
-            log_atoms.append(
-                LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
-        new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
-            'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
-            id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
-        self.analysis_context.register_component(new_match_id_value_combo_detector, description)
+        # This test case checks in which cases an event is triggered and compares with expected results.
+        self.assertEqual(nmivcd.allowlist_event(analysis % nmivcd.__class__.__name__, {"/seq/s1": value, "/seq/d1": value2}, None), "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", {"/seq/s1": value, "/seq/d1": value2}))
+        self.assertEqual(nmivcd.known_values, [{"/seq/s1": " pid=", "/seq/d1": "25537"},  {"/seq/s1": value, "/seq/d1": value2}])
 
-        for i, log_atom in enumerate(log_atoms):
-            self.assertTrue(new_match_id_value_combo_detector.receive_atom(log_atom))
-            self.assertEqual(self.output_stream.getvalue() == "", output_stream_empty_results[i], log_atom.raw_data)
-            self.assertEqual(new_match_id_value_combo_detector.id_dict_current, id_dict_current_results[i])
-            self.assertEqual(new_match_id_value_combo_detector.id_dict_old, id_dict_old_results[i])
-            self.assertEqual(new_match_id_value_combo_detector.known_values, [])
-            self.reset_output_stream()
+        self.assertRaises(TypeError, nmivcd.allowlist_event, analysis % nmivcd.__class__.__name__, {"/seq/s1": None, "/seq/d1": value2}, None)
+        self.assertRaises(TypeError, nmivcd.allowlist_event, analysis % nmivcd.__class__.__name__, {"/seq/d1": value2}, None)
+        self.assertRaises(TypeError, nmivcd.allowlist_event, analysis % nmivcd.__class__.__name__, {"/seq/s2": value, "/seq/d1": value2}, None)
 
-    def test4receive_match_after_max_allowed_time_diff_without_learn_mode(self):
-        """This test case checks if log_atoms are deleted after the maximal allowed time difference with the learn_mode=False."""
-        description = 'test4newMatchIdValueComboDetectorTest'
-        output_stream_empty_results = [True, False, True, False, True, False, True, True, False, True, False, True, True, True, False,
-                                       False, False, True, False, True, False]
-        id_dict_current_results = [
-            {1: {'parser/type/syscall/syscall': 1}}, {}, {2: {'parser/type/syscall/syscall': 2}}, {},
-            {3: {'parser/type/syscall/syscall': 3}}, {}, {100: {'parser/type/syscall/syscall': 1}},
-            {100: {'parser/type/syscall/syscall': 1}, 4: {'parser/type/syscall/syscall': 1}}, {100: {'parser/type/syscall/syscall': 1}},
-            {5: {'parser/type/path/name': 'two'}, 100: {'parser/type/syscall/syscall': 1}}, {}, {6: {'parser/type/syscall/syscall': 4}},
-            {6: {'parser/type/syscall/syscall': 4}, 7: {'parser/type/path/name': 'five'}},
-            {6: {'parser/type/syscall/syscall': 4}, 7: {'parser/type/path/name': 'five'}, 8: {'parser/type/syscall/syscall': 6}},
-            {7: {'parser/type/path/name': 'five'}, 8: {'parser/type/syscall/syscall': 6}}, {}, {}, {9: {'parser/type/syscall/syscall': 2}},
-            {}, {10: {'parser/type/path/name': 'one'}}, {}]
-        id_dict_old_results = [{}] * 10 + [{100: {'parser/type/syscall/syscall': 1}}] * 5 + [{8: {'parser/type/syscall/syscall': 6}}] + [
-            {}] * 5
-        min_allowed_time_diff = 5
-        log_atoms = []
-        t = time.time()
-        for line in self.log_lines:
-            log_atoms.append(
-                LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
-            t = t + min_allowed_time_diff * 0.25
+        # allow_missing_values_flag = True
+        nmivcd.allow_missing_values_flag = True
+        self.assertEqual(nmivcd.allowlist_event(analysis % nmivcd.__class__.__name__,  {"/seq/s1": None, "/seq/d1": value2}, None), "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", {"/seq/s1": None, "/seq/d1": value2}))
+        self.assertEqual(nmivcd.known_values, [{"/seq/s1": " pid=", "/seq/d1": "25537"},  {"/seq/s1": value, "/seq/d1": value2}, {"/seq/s1": None, "/seq/d1": value2}])
 
-        new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
-            'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
-            id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
-        self.analysis_context.register_component(new_match_id_value_combo_detector, description)
+    def test4persistence(self):
+        """Test the do_persist and load_persistence_data methods."""
+        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100, learn_mode=True, output_logline=False)
+        t = round(time.time(), 3)
+        log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, nmivcd)
+        log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t, nmivcd)
 
-        for i, log_atom in enumerate(log_atoms):
-            self.assertTrue(new_match_id_value_combo_detector.receive_atom(log_atom))
-            self.assertEqual(self.output_stream.getvalue() == "", output_stream_empty_results[i], log_atom.raw_data)
-            self.assertEqual(new_match_id_value_combo_detector.id_dict_current, id_dict_current_results[i], log_atom.raw_data)
-            self.assertEqual(new_match_id_value_combo_detector.id_dict_old, id_dict_old_results[i])
-            self.assertEqual(new_match_id_value_combo_detector.known_values, [])
-            self.reset_output_stream()
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertTrue(nmivcd.receive_atom(log_atom2))
+        self.assertEqual(nmivcd.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}])
+        nmivcd.do_persist()
+        with open(nmivcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.readline(), '[{"string:/seq/s1": "string: pid=", "string:/seq/d1": "string:25537"}, {"string:/seq/s1": "string:ddd ", "string:/seq/d1": "string:25538"}]')
 
-    def test5allowlist_unknown_target_path(self):
-        """This test case checks if an unknown target path can be added to the known_values with the allowlist_event method."""
-        description = 'test5newMatchIdValueComboDetectorTest'
-        min_allowed_time_diff = 5
-        new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
-            'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
-            id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
-        self.analysis_context.register_component(new_match_id_value_combo_detector, description)
-        self.assertEqual(new_match_id_value_combo_detector.known_values, [])
-        event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
-        output = new_match_id_value_combo_detector.allowlist_event(
-            'Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__, event_data, None)
-        self.assertEqual(new_match_id_value_combo_detector.known_values, [
-            {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
-        self.assertEqual(output, self.expected_allowlist_string % event_data)
+        nmivcd.known_values = []
+        nmivcd.load_persistence_data()
+        self.assertEqual(nmivcd.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}])
 
-        event_data = {'parser/type/syscall/syscall': 2, 'parser/type/path/name': 'two'}
-        output = new_match_id_value_combo_detector.allowlist_event(
-            'Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__, event_data, None)
-        self.assertEqual(new_match_id_value_combo_detector.known_values, [
-            {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'},
-            {'parser/type/syscall/syscall': 2, 'parser/type/path/name': 'two'}])
-        self.assertEqual(output, self.expected_allowlist_string % event_data)
+        other = NewMatchIdValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler], ["/seq/s1/id", "/seq/d1/id"], 100)
+        self.assertEqual(nmivcd.known_values, other.known_values)
 
-    def test6allowlist_known_target_path(self):
-        """This test case checks if a known target path is not added twice to the known_values with the allowlist_event method."""
-        description = 'test6newMatchIdValueComboDetectorTest'
-        min_allowed_time_diff = 5
-        new_match_id_value_combo_detector = NewMatchIdValueComboDetector(self.aminer_config, [
-            'parser/type/path/name', 'parser/type/syscall/syscall'], [self.stream_printer_event_handler],
-            id_path_list=['parser/type/path/id', 'parser/type/syscall/id'], min_allowed_time_diff=min_allowed_time_diff,
-            learn_mode=False, allow_missing_values_flag=True, persistence_id='audit_type_path', output_logline=False)
-        self.analysis_context.register_component(new_match_id_value_combo_detector, description)
-        self.assertEqual(new_match_id_value_combo_detector.known_values, [])
-        event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
-        output = new_match_id_value_combo_detector.allowlist_event(
-            'Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__, event_data, None)
-        self.assertEqual(new_match_id_value_combo_detector.known_values,
-                         [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
-        self.assertEqual(output, self.expected_allowlist_string % event_data)
+    def test5validate_parameters(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        ids = ["path/id"]
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, [""], [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, [], [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, None, [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, "", [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, b"Default", [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, True, [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, 123, [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, 123.3, [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, {"id": "Default"}, [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, (), [self.stream_printer_event_handler], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, set(), [self.stream_printer_event_handler], ids, 1)
 
-        event_data = {'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}
-        output = new_match_id_value_combo_detector.allowlist_event(
-            'Analysis.%s' % new_match_id_value_combo_detector.__class__.__name__, event_data, None)
-        self.assertEqual(new_match_id_value_combo_detector.known_values,
-                         [{'parser/type/syscall/syscall': 1, 'parser/type/path/name': 'one'}])
-        self.assertEqual(output, self.expected_allowlist_string % event_data)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], ["default"], ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], None, ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], "", ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], b"Default", ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], True, ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], 123, ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], 123.3, ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], {"id": "Default"}, ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], (), ids, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], set(), ids, 1)
+
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], [""], 1)
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], [], 1)
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], None, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], "", 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], b"Default", 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], True, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], 123, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], 123.3, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], {"id": "Default"}, 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], (), 1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], set(), 1)
+
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 0)
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, -1)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, ["default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, None)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, "")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, b"default")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, True)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, {"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, ())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, set())
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 0.1)
+
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id="")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=None)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=b"Default")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=True)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=123)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=123.22)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=["Default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=[])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=set())
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id="Default")
+
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=b"True")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag="True")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=123)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=123.22)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=["Default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=[])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=set())
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=True)
+
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=b"True")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode="True")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=123)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=123.22)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=["Default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=[])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=set())
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True)
+
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=None)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=b"True")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline="True")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=123)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=123.22)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=["Default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=[])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=set())
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, output_logline=True)
+
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=-1)
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=0)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=b"Default")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time="123")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=["Default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=[])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=set())
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=100)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=100.22)
+
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=-1)
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=0)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=b"Default")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time="123")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=["Default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=[])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=set())
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=100)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_no_anomaly_time=100.22)
+
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, learn_mode=True, stop_learning_time=100, stop_learning_no_anomaly_time=100)

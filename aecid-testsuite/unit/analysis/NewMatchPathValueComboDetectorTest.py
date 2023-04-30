@@ -125,6 +125,8 @@ class NewMatchPathValueComboDetectorTest(TestBase):
             "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (value, value2)))
         self.assertEqual(nmpvcd.known_values_set, {(b" pid=", b"25537"), (value, value2)})
 
+        self.assertRaises(TypeError, nmpvcd.allowlist_event, analysis % nmpvcd.__class__.__name__, (value, None), None)
+
         # allow_missing_values_flag = True
         nmpvcd.allow_missing_values_flag = True
         self.assertEqual(nmpvcd.allowlist_event(analysis % nmpvcd.__class__.__name__, (value, None), None),
@@ -140,14 +142,14 @@ class NewMatchPathValueComboDetectorTest(TestBase):
 
         self.assertTrue(nmpvcd.receive_atom(log_atom1))
         self.assertTrue(nmpvcd.receive_atom(log_atom2))
-        self.assertEqual(nmpvcd.known_values_set, {(b'ddd ', b'25538'), (b' pid=', b'25537')})
+        self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537")})
         nmpvcd.do_persist()
         with open(nmpvcd.persistence_file_name, "r") as f:
             self.assertEqual(f.readline(), '[["bytes: pid=", "bytes:25537"], ["bytes:ddd ", "bytes:25538"]]')
 
         nmpvcd.known_values_set = set()
         nmpvcd.load_persistence_data()
-        self.assertEqual(nmpvcd.known_values_set, {(b'ddd ', b'25538'), (b' pid=', b'25537')})
+        self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537")})
 
         other = NewMatchPathValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler])
         self.assertEqual(nmpvcd.known_values_set, other.known_values_set)
