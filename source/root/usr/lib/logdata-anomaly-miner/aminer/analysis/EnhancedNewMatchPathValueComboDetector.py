@@ -196,8 +196,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             msg = "Allowlisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
-        if not isinstance(event_data, tuple) or len(event_data) != len(self.target_path_list):
-            msg = "event_data has to be of type tuple."
+        if not isinstance(event_data, tuple) or len(event_data) != 2 or not isinstance(event_data[0], (float, int)) or \
+                len(event_data[1]) != len(self.target_path_list):
+            msg = "event_data has to be of type tuple and must contain timestamp and tuple of values."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if not self.allow_missing_values_flag and None in event_data:

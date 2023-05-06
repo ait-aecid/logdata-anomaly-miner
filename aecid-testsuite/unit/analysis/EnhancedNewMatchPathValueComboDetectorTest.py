@@ -1,9 +1,5 @@
 import unittest
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
-from aminer.parsing.SequenceModelElement import SequenceModelElement
 from aminer.input.LogAtom import LogAtom
 from aminer.analysis.EnhancedNewMatchPathValueComboDetector import EnhancedNewMatchPathValueComboDetector
 import time
@@ -126,17 +122,17 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertRaises(Exception, enmpvcd.allowlist_event, analysis % enmpvcd.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
         # This test case checks in which cases an event is triggered and compares with expected results.
-        self.assertEqual(enmpvcd.allowlist_event(analysis % enmpvcd.__class__.__name__, (value, value2), None),
-            "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (value, value2)))
-        self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"), (value, value2)})
+        self.assertEqual(enmpvcd.allowlist_event(analysis % enmpvcd.__class__.__name__, (t, (value, value2)), None),
+            "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (t, (value, value2))))
+        self.assertEqual(enmpvcd.known_values_dict, {(b' pid=', b'25537'): [t, t, 1], (value, value2): [t, t, 1]})
 
         self.assertRaises(TypeError, enmpvcd.allowlist_event, analysis % enmpvcd.__class__.__name__, (value, None), None)
 
         # allow_missing_values_flag = True
         enmpvcd.allow_missing_values_flag = True
-        self.assertEqual(enmpvcd.allowlist_event(analysis % enmpvcd.__class__.__name__, (value, None), None),
-            "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (value, None)))
-        self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"), (value, value2), (value, None)})
+        self.assertEqual(enmpvcd.allowlist_event(analysis % enmpvcd.__class__.__name__, (t, (value, None)), None),
+            "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (t, (value, None))))
+        self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"): [t, t, 1], (value, value2): [t, t, 1], (value, None): [t, t, 1]})
 
     def test4persistence(self):
         """Test the do_persist and load_persistence_data methods."""
@@ -150,11 +146,11 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertEqual(enmpvcd.known_values_dict, {(b' pid=', b'25537'): [t, t, 1], (b"ddd ", b"25538"): [t, t, 1]})
         enmpvcd.do_persist()
         with open(enmpvcd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), '[["bytes: pid=", "bytes:25537"], ["bytes:ddd ", "bytes:25538"]]')
+            self.assertEqual(f.readline(), f'[[["bytes: pid=", "bytes:25537"], [{t}, {t}, 1]], [["bytes:ddd ", "bytes:25538"], [{t}, {t}, 1]]]')
 
-        enmpvcd.known_values_dict = set()
+        enmpvcd.known_values_dict = dict()
         enmpvcd.load_persistence_data()
-        self.assertEqual(enmpvcd.known_values_dict, {(b"ddd ", b"25538"), (b" pid=", b"25537")})
+        self.assertEqual(enmpvcd.known_values_dict, {(b' pid=', b'25537'): [t, t, 1], (b"ddd ", b"25538"): [t, t, 1]})
 
         other = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler])
         self.assertEqual(enmpvcd.known_values_dict, other.known_values_dict)
