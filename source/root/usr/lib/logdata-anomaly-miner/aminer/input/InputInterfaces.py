@@ -117,7 +117,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
         # test booleans
         for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode",
-                     "combine_values", "reset_after_report_flag", "allow_missing_values_flag"):
+                     "combine_values", "reset_after_report_flag", "allow_missing_values_flag", "allow_missing_id", "save_values"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -152,7 +152,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
         # test numeric values
-        integer_only = ["min_bin_elements"]
+        integer_only = ["min_bin_elements", "min_num_vals", "max_num_vals"]
         non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff"]
         for attr in set([] + integer_only + non_zero_or_negative):
             if hasattr(self, attr):
@@ -170,6 +170,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     msg = f"{attr} must not be zero or negative."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
+        if hasattr(self, "min_num_vals") and hasattr(self, "max_num_vals") and (
+                self.min_num_vals >= self.max_num_vals or self.min_num_vals < 0):
+            msg = "min_num_vals must be smaller than max_num_vals and both values must be bigger than zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
         if learn_mode is False and (stop_learning_time is not None or stop_learning_no_anomaly_time is not None):
             msg = "It is not possible to use the stop_learning_time or stop_learning_no_anomaly_time when the learn_mode is False."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -254,8 +260,13 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if hasattr(self, "allowed_id_tuples"):
             if self.allowed_id_tuples is None:
                 self.allowed_id_tuples = []
+            if not isinstance(self.allowed_id_tuples, list) or not all(isinstance(x, tuple) and len(x) != 0 for x in
+                                                                       self.allowed_id_tuples):
+                msg = "allowed_id_tuples must be of type list with tuples as values."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
             else:
-                self.allowed_id_tuples = [tuple(tuple_list) for tuple_list in self.allowed_id_tuples]
+                self.allowed_id_tuples = [tuple(x) for x in self.allowed_id_tuples]
         if hasattr(self, "confidence_factor") and not 0 <= self.confidence_factor <= 1:
             logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
             self.confidence_factor = 1

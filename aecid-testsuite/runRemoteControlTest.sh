@@ -432,9 +432,9 @@ if [[ "$stdout" != "$expected"* ]]; then
 fi
 
 timestamp=$(date +%s)
-echo "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,'/model/path'),allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,'/model/path'),allowlisting_data=None)")
-expected="${PREFIX}\"Allowlisted path(es) /model/DailyCron/UName, /model/DailyCron/JobNumber with ($timestamp, '/model/path').\""
+echo "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,('/model/path',1)),allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,('/model/path',1)),allowlisting_data=None)")
+expected="${PREFIX}\"Allowlisted path(es) /model/DailyCron/UName, /model/DailyCron/JobNumber with ($timestamp, ('/model/path', 1)).\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
