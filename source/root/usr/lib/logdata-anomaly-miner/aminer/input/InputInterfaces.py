@@ -265,8 +265,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 msg = "allowed_id_tuples must be of type list with tuples as values."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
-            else:
-                self.allowed_id_tuples = [tuple(x) for x in self.allowed_id_tuples]
+            self.allowed_id_tuples = [tuple(x) for x in self.allowed_id_tuples]
         if hasattr(self, "confidence_factor") and not 0 <= self.confidence_factor <= 1:
             logging.getLogger(DEBUG_LOG_NAME).warning('confidence_factor must be in the range [0,1]!')
             self.confidence_factor = 1
