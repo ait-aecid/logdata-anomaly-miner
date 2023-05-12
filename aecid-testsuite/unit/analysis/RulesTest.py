@@ -15,7 +15,6 @@ from datetime import datetime, timezone
 
 class RuleTest(TestBase):
     """NOTE: DebugMatchRule and DebugHistoryMatchRule are intentionally not tested, as there is not much to be tested."""
-
     def test1EventGenerationMatchAction(self):
         """This test case checks if events are generated and pushed to all event handlers."""
         expected_string = '%s This message was generated, when the unittest was successful.\n%s: "None" (%d lines)\n  %s\n\n'
@@ -803,15 +802,11 @@ class RuleTest(TestBase):
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=set(), default_limit=[43200, 86400])
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list="default", default_limit=[43200, 86400])
 
-        self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={-1: [43200, 86400]})
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={1550145600: [86400, 43200]})
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={1550145600: [43200, 86401]})
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={1550145600: [43200]})
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={1550145600: [43200, 86401, 1]})
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={1550145600: (43200, 86401)})
-        self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={"1550145600": [43200, 86400]})
-        self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={b"1550145600": [43200, 86400]})
-        self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={True: [43200, 86400]})
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={None: [43200, 86400]})
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={1550145600: ["43200", 86400]})
         self.assertRaises(TypeError, ValueDependentModuloTimeMatchRule, "default", 86400, target_path_list=["default"], limit_lookup_dict={1550145600: [b"43200", 86400]})

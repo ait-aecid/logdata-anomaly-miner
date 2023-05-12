@@ -132,8 +132,8 @@ def build_analysis_pipeline(analysis_context):
     """
     parsing_model, parser_model_dict = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model, parser_model_dict)
-    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model)
     event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
+    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model)
     # do not check UnparsedAtomHandler
     for index, analysis_component in enumerate(atom_filter.subhandler_list[1:]):
         if analysis_component[0].output_event_handlers is not None:
@@ -649,7 +649,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                             raise ValueError(msg)
                         rule_lookup_dict[ast.literal_eval(key)] = match_rules_dict[rule]
                     tmp_analyser = func(
-                        item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
+                        item['paths'], rule_lookup_dict, default_rule=match_rules_dict[item['default_rule']], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
                         msg = f'The match rule {item["sub_rule"]} does not exist!'

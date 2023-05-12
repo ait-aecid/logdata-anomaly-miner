@@ -24,7 +24,7 @@ class NewMatchPathDetectorTest(TestBase):
         Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
         expected_string = '%s New path(es) detected\n%s: "None" (%d lines)\n  %s\n\n'
-        datetime_format_string = "%Y-%m-%d %H:%M:%S"
+        dtf = "%Y-%m-%d %H:%M:%S"
         # learn_mode = True
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, output_logline=False)
         t = round(time.time(), 3)
@@ -33,8 +33,7 @@ class NewMatchPathDetectorTest(TestBase):
         log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t, nmpd)
 
         self.assertTrue(nmpd.receive_atom(log_atom1))
-        self.assertEqual(self.output_stream.getvalue(), expected_string % (
-            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1, "['/s1']"))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t).strftime(dtf), nmpd.__class__.__name__, 1, "['/s1']"))
         self.reset_output_stream()
 
         # repeating should NOT produce the same result
@@ -45,14 +44,12 @@ class NewMatchPathDetectorTest(TestBase):
         # learn_mode = False
         nmpd.learn_mode = False
         self.assertTrue(nmpd.receive_atom(log_atom2))
-        self.assertEqual(self.output_stream.getvalue(), expected_string % (
-            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1, "['/d1']"))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t).strftime(dtf), nmpd.__class__.__name__, 1, "['/d1']"))
         self.reset_output_stream()
 
         # repeating should produce the same result
         self.assertTrue(nmpd.receive_atom(log_atom2))
-        self.assertEqual(self.output_stream.getvalue(), expected_string % (
-            datetime.fromtimestamp(t).strftime(datetime_format_string), nmpd.__class__.__name__, 1, "['/d1']"))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t).strftime(dtf), nmpd.__class__.__name__, 1, "['/d1']"))
 
         # stop_learning_time
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, output_logline=False, stop_learning_time=100)

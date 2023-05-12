@@ -117,7 +117,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
         # test booleans
         for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode",
-                     "combine_values", "reset_after_report_flag", "allow_missing_values_flag", "allow_missing_id", "save_values"):
+                     "combine_values", "reset_after_report_flag", "allow_missing_values_flag", "allow_missing_id", "save_values",
+                     "use_path_match", "use_value_match"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -152,8 +153,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
         # test numeric values
-        integer_only = ["min_bin_elements", "min_num_vals", "max_num_vals"]
-        non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff"]
+        integer_only = ["min_bin_elements", "min_num_vals", "max_num_vals", "parallel_check_count", "record_count_before_event",
+                        "min_rule_attributes", "max_rule_attributes"]
+        non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff",
+                                "parallel_check_count", "record_count_before_event", "max_rule_attributes"]
         for attr in set([] + integer_only + non_zero_or_negative):
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)

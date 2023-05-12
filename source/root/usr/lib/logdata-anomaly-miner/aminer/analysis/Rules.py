@@ -731,19 +731,19 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if limit_lookup_dict is not None and (
-                not isinstance(limit_lookup_dict, dict) or
-                not all(not isinstance(x, bool) and isinstance(x, int) and x >= 0 for x in limit_lookup_dict.keys()) or
-                not all(isinstance(x, list) and all(not isinstance(y, bool) and isinstance(y, int) for y in x) and len(x) == 2 and
+                not isinstance(limit_lookup_dict, dict) or None in limit_lookup_dict.keys() or
+                not all(isinstance(x, list) and all(not isinstance(y, bool) and isinstance(y, (int, float)) for y in x) and len(x) == 2 and
                         x[0] < x[1] <= seconds_modulo for x in limit_lookup_dict.values())):
-            msg = "limit_lookup_dict has to be of type dict with integer key values and a list with two integer limit values as values. " \
-                  "The first limit value must be smaller than the second and both must be smaller than seconds_modulo"
+            msg = "limit_lookup_dict has to be of type dict with a list of two integer or float limit values as values. " \
+                  "The first limit value must be smaller than the second and both must be smaller than seconds_modulo."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if default_limit is not None and (
-                not isinstance(default_limit, list) or not all(not isinstance(x, bool) and isinstance(x, int) for x in default_limit) or
+                not isinstance(default_limit, list) or
+                not all(not isinstance(x, bool) and isinstance(x, (int, float)) for x in default_limit) or
                 len(default_limit) != 2 or default_limit[0] > default_limit[1] or default_limit[1] > seconds_modulo):
-            msg = "default_limit has to be a list with two integer limit values. The first value must be smaller than the second and " \
-                  "both must be smaller than seconds_modulo"
+            msg = "default_limit has to be a list with two integer or float limit values. The first value must be smaller than the " \
+                  "second and both must be smaller than seconds_modulo."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         if default_limit is None and (not limit_lookup_dict or not target_path_list):
