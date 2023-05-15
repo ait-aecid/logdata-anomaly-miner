@@ -462,7 +462,6 @@ def build_analysis_pipeline(analysis_context):
     rules = [Rules.PathExistsMatchRule('/model/CronAnnouncement/Run', a_class_selector),
              Rules.PathExistsMatchRule('/model/CronExecution/Job', b_class_selector)]
 
-    time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers,
-                                                                           output_logline=True)
+    time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers)
     analysis_context.register_component(time_correlation_violation_detector, component_name="TimeCorrelationViolationDetector")
     atom_filter.add_handler(time_correlation_violation_detector)
