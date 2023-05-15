@@ -484,8 +484,6 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['TimeCorrelationViolationDetector'], 'required': True},
                     'ruleset': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
-                    'persistence_id': {'type': 'string', 'empty': False},
-                    'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
                 },
@@ -495,7 +493,8 @@
                     'min_time_delta': {'type': 'integer', 'required': True, 'min': 1},
                     'max_time_delta': {'type': 'integer', 'required': True, 'min': 1, 'bigger_than_or_equal': ['min_time_delta', None]},
                     'artefact_match_parameters': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
-                                                  'nullable': True}
+                                                  'nullable': True},
+                    'max_violations': {'type': 'integer', 'required': True, 'min': 1}
                 },
                 {
                     'type': {'type': 'string', 'allowed': ['EventClassSelector'], 'required': True},

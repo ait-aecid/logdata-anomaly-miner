@@ -103,6 +103,7 @@
                 'max_time_delta': {'type': 'integer'},
                 'artefact_match_parameters': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}},
                                               'nullable': True, 'default': None},
+                'max_violations': {'type': 'integer', 'default': 20},
                 'action_id': {'type': 'string'},
                 'artefact_a_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'artefact_b_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},

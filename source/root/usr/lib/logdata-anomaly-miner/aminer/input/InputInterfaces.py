@@ -86,7 +86,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "target_label_list", "split_reports_flag", "event_type_detector", "num_init", "force_period_length", "set_period_length",
             "alpha_bt", "num_results_bt", "num_min_time_history", "num_max_time_history", "num_periods_tsa_ini", "time_period_length",
             "max_time_diff", "num_reduce_time_list", "min_anomaly_score", "min_variance", "parallel_check_count",
-            "record_count_before_event", "use_path_match", "use_value_match", "min_rule_attributes", "max_rule_attributes", "ruleset",
+            "record_count_before_event", "use_path_match", "use_value_match", "min_rule_attributes", "max_rule_attributes",
             "exit_on_error_flag", "acf_pause_interval_percentage", "acf_auto_pause_interval", "acf_auto_pause_interval_num_min",
             "build_sum_over_values", "num_division_time_step", "acf_threshold", "round_time_interval_threshold",
             "min_log_lines_per_time_step", "num_update", "disc_div_thres", "num_steps_create_new_rules", "num_upd_until_validation",
@@ -139,7 +139,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
                 # test non-empty strings
-                if attr_val is not None and len(attr_val) < 1:
+                if attr_val is not None and len(attr_val) == 0:
                     msg = f"{attr} must not be empty."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)

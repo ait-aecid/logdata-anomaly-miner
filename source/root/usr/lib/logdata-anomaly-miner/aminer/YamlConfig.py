@@ -703,7 +703,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 for match_parameters in item['artefact_match_parameters']:
                     artefact_match_parameters.append(tuple(i for i in match_parameters))
                 tmp_analyser = func(item['rule_id'], item['min_time_delta'], item['max_time_delta'],
-                                    artefact_match_parameters=artefact_match_parameters)
+                                    artefact_match_parameters=artefact_match_parameters, max_violations=item['max_violations'])
                 correlation_rules[item['rule_id']] = tmp_analyser
                 continue
             elif item['type'].name == 'EventClassSelector':
