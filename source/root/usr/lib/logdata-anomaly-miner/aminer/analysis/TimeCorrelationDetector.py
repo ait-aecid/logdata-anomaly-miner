@@ -17,17 +17,15 @@ import random
 import time
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.History import get_log_int
-from aminer.util import PersistenceUtil
-from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class TimeCorrelationDetector(AtomHandlerInterface):
     """
     This class tries to find time correlation patterns between different log atoms.
     When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
@@ -68,15 +66,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
 
-        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.feature_list = []
-            self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
-            self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
-        else:
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
+        self.feature_list = []
+        self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
+        self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
@@ -168,22 +160,6 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                 r[var] = attr
         return r
 
-    def do_timer(self, trigger_time):
-        """Check if current ruleset should be persisted."""
-        if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
-        delta = self.next_persist_time - trigger_time
-        if delta <= 0:
-            self.do_persist()
-            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = trigger_time + delta
-        return delta
-
-    def do_persist(self):
-        """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
-
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""
         parser_match = log_atom.parser_match
@@ -203,21 +179,15 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                 continue
 
             attribute_count -= 1
-            rule_type = 1  # default is value_match only if none specified
-            if self.use_path_match and not self.use_value_match:
-                rule_type = 0
-            if not self.use_path_match and self.use_value_match:
-                rule_type = 1
+            rule_type = 1  # default is value_match only
             if self.use_path_match and self.use_value_match:
                 rule_type = random.randint(0, 1)
+            elif self.use_path_match:
+                rule_type = 0
             if rule_type == 0:
                 sub_rules.append(Rules.PathExistsMatchRule(key_name))
-            elif rule_type == 1:
-                sub_rules.append(Rules.ValueMatchRule(key_name, key_value))
             else:
-                msg = "Invalid rule type"
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise Exception(msg)
+                sub_rules.append(Rules.ValueMatchRule(key_name, key_value))
             if not all_keys:
                 break
 

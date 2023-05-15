@@ -125,6 +125,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     msg = f"{attr} has to be of the type bool."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
+        if hasattr(self, "use_path_match") and hasattr(self, "use_value_match") and not self.use_path_match and not self.use_value_match:
+            msg = "Either use_path_match or use_value_match must be used."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         # test strings:
         non_empty_strings = ["persistence_id", "target_path"]
         for attr in non_empty_strings + ["timestamp_path"]:

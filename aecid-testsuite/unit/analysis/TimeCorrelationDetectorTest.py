@@ -132,6 +132,7 @@ class TimeCorrelationDetectorTest(TestBase):
         self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, use_path_match=set())
         TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, use_path_match=True)
 
+        self.assertRaises(ValueError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, use_value_match=False, use_path_match=False)
         self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, use_value_match=b"True")
         self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, use_value_match="True")
         self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, use_value_match=123)
