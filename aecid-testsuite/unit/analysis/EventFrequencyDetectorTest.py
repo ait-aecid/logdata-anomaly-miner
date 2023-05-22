@@ -421,7 +421,6 @@ class EventFrequencyDetectorTest(TestBase):
 
         self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], window_size=-1)
         self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], window_size=0)
-        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], window_size=100.22)
         self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], window_size=b"Default")
         self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], window_size="123")
         self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], window_size={"id": "Default"})
@@ -430,6 +429,7 @@ class EventFrequencyDetectorTest(TestBase):
         self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], window_size=())
         self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], window_size=set())
         EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], window_size=100)
+        EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], window_size=0.5)
 
         self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], num_windows=-1)
         self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], num_windows=0)
