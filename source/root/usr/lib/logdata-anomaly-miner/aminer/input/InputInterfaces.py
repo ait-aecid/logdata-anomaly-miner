@@ -159,11 +159,11 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         # test numeric values
         integer_only = ["min_bin_elements", "min_num_vals", "max_num_vals", "parallel_check_count", "record_count_before_event",
                         "min_rule_attributes", "max_rule_attributes", "max_hypotheses", "max_observations", "candidates_size",
-                        "num_windows"]
+                        "num_windows", "seq_len"]
         non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff",
                                 "parallel_check_count", "record_count_before_event", "max_rule_attributes", "max_hypotheses",
                                 "hypothesis_max_delta_time", "max_observations", "candidates_size", "hypotheses_eval_delta_time",
-                                "delta_time_to_discard_hypothesis", "window_size", "num_windows"]
+                                "delta_time_to_discard_hypothesis", "window_size", "num_windows", "seq_len"]
         zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha", "confidence_factor"]
         for attr in set([] + integer_only + non_zero_or_negative + zero_to_one):
             if hasattr(self, attr):
@@ -335,6 +335,15 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "set_lower_limit must be smaller than set_upper_limit."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
+        if hasattr(self, "timeout") and self.timeout is not None:
+            if not isinstance(self.timeout, (int, float)) or isinstance(self.timeout, bool):
+                msg = "timeout has to be of the type integer or float."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if self.timeout <= 0:
+                msg = "timeout has to be greater than zero."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
         if hasattr(self, "stream") and not isinstance(self.stream, IOBase):
             msg = "stream must be an instance of IOBase."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)

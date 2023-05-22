@@ -12,7 +12,7 @@ from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
 class EventFrequencyDetectorTest(TestBase):
     """Unittests for the EventFrequencyDetector."""
 
-    def test1_receive_atom(self):
+    def test1receive_atom(self):
         """
         This test case checks the normal detection of new frequencies. The EFD is used with one path to be analyzed over four time windows.
         The frequencies do not change a lot in the first time windows, thus no anomalies are generated. Then, value frequencies change and
