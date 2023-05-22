@@ -71,6 +71,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                The default value is [] as None is not iterable.
         @param persistence_id name of persistence file.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
@@ -144,6 +145,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     # Store common values for fast retrieval
                     self.min_eval_true_dict[(max_observations, p0, alpha)] = max_observations - i
                 return max_observations - i
+        return max_observations
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""

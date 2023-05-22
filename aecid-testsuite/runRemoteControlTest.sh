@@ -499,7 +499,7 @@ fi
 
 echo "allowlist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path /model/somepath.'"
+expected="${PREFIX}'Allowlisted path /model/somepath in Analysis.EventCorrelationDetector.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -525,7 +525,7 @@ fi
 
 echo "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)")
-expected="${PREFIX}'Blocklisted path /model/somepath.'"
+expected="${PREFIX}'Blocklisted path /model/somepath in Analysis.EventCorrelationDetector.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -538,7 +538,7 @@ fi
 
 echo "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)")
-expected="${PREFIX}'Blocklisted path /model/somepath.'"
+expected="${PREFIX}'Blocklisted path /model/somepath in Analysis.EventCorrelationDetector.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
