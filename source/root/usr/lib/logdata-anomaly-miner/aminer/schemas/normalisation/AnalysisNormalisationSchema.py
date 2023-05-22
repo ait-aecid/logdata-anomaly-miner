@@ -52,7 +52,7 @@
                 'default_freqs': {'type': 'boolean', 'default': False},
                 'skip_repetitions': {'type': 'boolean', 'default': False},
                 'seq_len': {'type': 'integer', 'default': 3},
-                'timeout': {'type': ['integer', 'float'], 'default': None},
+                'timeout': {'type': ['integer', 'float'], 'nullable': True, 'default': None},
                 'allow_missing_id': {'type': 'boolean', 'default': False},
                 'window_size': {'type': ['integer', 'float'], 'default': 600},
                 'confidence_factor': {'type': 'float', 'default': 0.33},

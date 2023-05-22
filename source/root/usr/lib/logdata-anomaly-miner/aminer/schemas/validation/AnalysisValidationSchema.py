@@ -132,7 +132,7 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'seq_len': {'type': 'integer', 'min': 1},
-                    'timeout': {'type': 'integer', 'min': -1},
+                    'timeout': {'type': 'integer', 'min': 0.1, 'nullable': True},
                     'allow_missing_id': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
