@@ -399,7 +399,7 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
-        if not hasattr("blocklist_event", component.__class__.__name__):
+        if not hasattr(component, "blocklist_event"):
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component class '{component.__class__.__name__}' does not support blocklisting!"
             return
         try:
@@ -421,7 +421,7 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
-        if not hasattr("print_persistence_event", component.__class__.__name__):
+        if not hasattr(component, "print_persistence_event"):
             self.REMOTE_CONTROL_RESPONSE += \
                 f"FAILURE: component class '{component.__class__.__name__}' does not support the print_persistence_event!"
             return
@@ -444,7 +444,7 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
-        if not hasattr("add_to_persistence_event", component.__class__.__name__):
+        if not hasattr(component, "add_to_persistence_event"):
             self.REMOTE_CONTROL_RESPONSE += \
                 f"FAILURE: component class '{component.__class__.__name__}' does not support the add_to_persistence_event!"
             return
@@ -467,7 +467,7 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
-        if not hasattr("remove_from_persistence_event", component.__class__.__name__):
+        if not hasattr(component, "remove_from_persistence_event"):
             self.REMOTE_CONTROL_RESPONSE += \
                 f"FAILURE: component class '{component.__class__.__name__}' does not support the remove_from_persistence_event!"
             return
