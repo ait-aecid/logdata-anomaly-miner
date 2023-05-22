@@ -151,7 +151,6 @@ class EventCorrelationDetectorTest(TestBase):
 
     def test5persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        self.maxDiff = None
         ecd = EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], check_rules_flag=True, learn_mode=True)
         self.run_ecd_test(ecd, self.perfect_data_diff5[:12000])
         ecd.do_persist()
