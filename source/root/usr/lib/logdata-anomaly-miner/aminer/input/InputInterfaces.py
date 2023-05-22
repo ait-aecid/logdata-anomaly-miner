@@ -159,7 +159,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         # test numeric values
         integer_only = ["min_bin_elements", "min_num_vals", "max_num_vals", "parallel_check_count", "record_count_before_event",
                         "min_rule_attributes", "max_rule_attributes", "max_hypotheses", "max_observations", "candidates_size",
-                        "window_size", "num_windows"]
+                        "num_windows"]
         non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff",
                                 "parallel_check_count", "record_count_before_event", "max_rule_attributes", "max_hypotheses",
                                 "hypothesis_max_delta_time", "max_observations", "candidates_size", "hypotheses_eval_delta_time",
