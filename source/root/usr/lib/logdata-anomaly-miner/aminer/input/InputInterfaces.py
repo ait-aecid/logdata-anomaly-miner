@@ -118,7 +118,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         # test booleans
         for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode",
                      "combine_values", "reset_after_report_flag", "allow_missing_values_flag", "allow_missing_id", "save_values",
-                     "use_path_match", "use_value_match"):
+                     "use_path_match", "use_value_match", "check_rules_flag"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -158,10 +158,13 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                     raise ValueError(msg)
         # test numeric values
         integer_only = ["min_bin_elements", "min_num_vals", "max_num_vals", "parallel_check_count", "record_count_before_event",
-                        "min_rule_attributes", "max_rule_attributes"]
+                        "min_rule_attributes", "max_rule_attributes", "max_hypotheses", "max_observations", "candidates_size"]
         non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff",
-                                "parallel_check_count", "record_count_before_event", "max_rule_attributes"]
-        for attr in set([] + integer_only + non_zero_or_negative):
+                                "parallel_check_count", "record_count_before_event", "max_rule_attributes", "max_hypotheses",
+                                "hypothesis_max_delta_time", "max_observations", "candidates_size", "hypotheses_eval_delta_time",
+                                "delta_time_to_discard_hypothesis"]
+        zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha"]
+        for attr in set([] + integer_only + non_zero_or_negative + zero_to_one):
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)
                 if attr in integer_only and (isinstance(attr_val, bool) or not isinstance(attr_val, int)):
@@ -175,6 +178,11 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 # test non-zero-or-negative values
                 if attr in non_zero_or_negative and attr_val <= 0:
                     msg = f"{attr} must not be zero or negative."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
+                # test zero-to-one values
+                if attr in zero_to_one and (attr_val < 0 or attr_val > 1):
+                    msg = f"{attr} must be a value between zero and one."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
         if hasattr(self, "min_num_vals") and hasattr(self, "max_num_vals") and (
