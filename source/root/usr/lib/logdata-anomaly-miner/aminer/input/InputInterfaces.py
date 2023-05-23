@@ -119,7 +119,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode",
                      "combine_values", "reset_after_report_flag", "allow_missing_values_flag", "allow_missing_id", "save_values",
                      "use_path_match", "use_value_match", "check_rules_flag", "empty_window_warnings", "early_exceeding_anomaly_output",
-                     "default_freqs", "skip_repetitions"):
+                     "default_freqs", "skip_repetitions", "idf", "norm", "add_normal", "check_empty_windows"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -358,6 +358,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                 msg = "allowlist_rules must not be empty."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
+        if hasattr(self, "idf") and self.idf and not self.id_path_list:
+            msg = "id_path_list must be set when using idf=True."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):

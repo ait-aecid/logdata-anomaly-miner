@@ -374,7 +374,7 @@ class EventTypeDetectorTest(TestBase):
         self.assertEqual(etd.num_event_lines, [1, 2])
         etd.do_persist()
         # with open(etd.persistence_file_name, "r") as f:
-        #     self.assertEqual(f.readline(), '[[["string:/seq", "string:/seq/s11", "string:/seq/d1"], ["string:/seq", "string:/seq/s11", "string:/seq/d1"]], [["string:/seq", "string:/seq/s11", "string:/seq/d1"], ["string:/seq", "string:/seq/s11", "string:/seq/d1"]], [[["string: pid=25537"], ["string: pid="], [25537.0]], [[], ["string:ddd ", "string:ddd "], []]], [], [[true, true, true], [false, true, false]], [1, 2], [["string: pid="], ["string:ddd "]]]')
+        #     self.assertEqual(f.read(), '[[["string:/seq", "string:/seq/s11", "string:/seq/d1"], ["string:/seq", "string:/seq/s11", "string:/seq/d1"]], [["string:/seq", "string:/seq/s11", "string:/seq/d1"], ["string:/seq", "string:/seq/s11", "string:/seq/d1"]], [[["string: pid=25537"], ["string: pid="], [25537.0]], [[], ["string:ddd ", "string:ddd "], []]], [], [[true, true, true], [false, true, false]], [1, 2], [["string: pid="], ["string:ddd "]]]')
 
         etd.num_events = 0
         etd.found_keys = []

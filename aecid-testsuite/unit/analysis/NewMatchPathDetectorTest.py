@@ -123,7 +123,7 @@ class NewMatchPathDetectorTest(TestBase):
         self.assertEqual(nmpd.known_path_set, {"/s1", "/d1"})
         nmpd.do_persist()
         with open(nmpd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), '["string:/d1", "string:/s1"]')
+            self.assertEqual(f.read(), '["string:/d1", "string:/s1"]')
 
         nmpd.known_path_set = set()
         nmpd.load_persistence_data()

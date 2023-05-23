@@ -310,7 +310,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertTrue(mmpvd.receive_atom(log_atom))
         mmpvd.do_persist()
         with open(mmpvd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), f"""{{"string:[' pid=']": [{int(round(t, 0))}, {mmpvd.default_interval}, 0, "string:['match/s1']"]}}""")
+            self.assertEqual(f.read(), f"""{{"string:[' pid=']": [{int(round(t, 0))}, {mmpvd.default_interval}, 0, "string:['match/s1']"]}}""")
 
         mmpvd.expected_values_dict = {}
         mmpvd.load_persistence_data()
@@ -330,7 +330,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertTrue(mmpvd.receive_atom(log_atom))
         mmpvd.do_persist()
         with open(mmpvd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), f"""{{"string: pid=": [{int(round(t, 0))}, {mmpvd.default_interval}, 0, "string:match/s1"]}}""")
+            self.assertEqual(f.read(), f"""{{"string: pid=": [{int(round(t, 0))}, {mmpvd.default_interval}, 0, "string:match/s1"]}}""")
 
         mmpvd.expected_values_dict = {}
         mmpvd.load_persistence_data()
@@ -353,7 +353,7 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertTrue(mmplvd.receive_atom(log_atom))
         mmplvd.do_persist()
         with open(mmplvd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(),f"""{{"string:22": [{int(round(t, 0))}, {mmplvd.default_interval}, 0, "string:match/s2"], "string: pid=": [{int(round(t, 0))}, {mmplvd.default_interval}, 0, "string:match/s1"]}}""")
+            self.assertEqual(f.read(),f"""{{"string:22": [{int(round(t, 0))}, {mmplvd.default_interval}, 0, "string:match/s2"], "string: pid=": [{int(round(t, 0))}, {mmplvd.default_interval}, 0, "string:match/s1"]}}""")
 
         mmplvd.expected_values_dict = {}
         mmplvd.load_persistence_data()

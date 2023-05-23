@@ -276,7 +276,7 @@ class ValueRangeDetectorTest(TestBase):
         self.assertEqual(value_range_detector1.ranges, {"min": {('a',): 2.5, ('b',): 3.1}, "max": {('a',): 4.75, ('b',): 6.3}})
 
         with open(value_range_detector.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), """{"string:min": {"tuple:('a',)": 2.5, "tuple:('b',)": 3.1}, "string:max": {"tuple:('a',)": 4.75, "tuple:('b',)": 6.3}}""")
+            self.assertEqual(f.read(), """{"string:min": {"tuple:('a',)": 2.5, "tuple:('b',)": 3.1}, "string:max": {"tuple:('a',)": 4.75, "tuple:('b',)": 6.3}}""")
 
         value_range_detector.ranges = {"min": {}, "max": {}}
         value_range_detector.load_persistence_data()

@@ -146,7 +146,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertEqual(enmpvcd.known_values_dict, {(b' pid=', b'25537'): [t, t, 1], (b"ddd ", b"25538"): [t, t, 1]})
         enmpvcd.do_persist()
         with open(enmpvcd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), f'[[["bytes: pid=", "bytes:25537"], [{t}, {t}, 1]], [["bytes:ddd ", "bytes:25538"], [{t}, {t}, 1]]]')
+            self.assertEqual(f.read(), f'[[["bytes: pid=", "bytes:25537"], [{t}, {t}, 1]], [["bytes:ddd ", "bytes:25538"], [{t}, {t}, 1]]]')
 
         enmpvcd.known_values_dict = dict()
         enmpvcd.load_persistence_data()

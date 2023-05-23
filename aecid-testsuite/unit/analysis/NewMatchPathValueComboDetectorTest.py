@@ -145,7 +145,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537")})
         nmpvcd.do_persist()
         with open(nmpvcd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), '[["bytes: pid=", "bytes:25537"], ["bytes:ddd ", "bytes:25538"]]')
+            self.assertEqual(f.read(), '[["bytes: pid=", "bytes:25537"], ["bytes:ddd ", "bytes:25538"]]')
 
         nmpvcd.known_values_set = set()
         nmpvcd.load_persistence_data()

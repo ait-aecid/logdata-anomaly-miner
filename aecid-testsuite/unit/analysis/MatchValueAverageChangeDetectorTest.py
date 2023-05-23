@@ -77,7 +77,7 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         mvacd.stat_data = [("cron/job1", [57600, 57600, (3, 3000.0, 5000000.0, 1000.0, 1000000.0), (2, 30000.0, 500000000.0)])]
         mvacd.do_persist()
         with open(mvacd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), '[["string:cron/job1", [57600, 57600, [3, 3000.0, 5000000.0, 1000.0, 1000000.0], [2, 30000.0, 500000000.0]]]]')
+            self.assertEqual(f.read(), '[["string:cron/job1", [57600, 57600, [3, 3000.0, 5000000.0, 1000.0, 1000000.0], [2, 30000.0, 500000000.0]]]]')
 
         mvacd.stat_data = []
         mvacd.load_persistence_data()

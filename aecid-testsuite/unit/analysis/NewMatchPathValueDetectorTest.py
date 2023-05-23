@@ -129,7 +129,7 @@ class NewMatchPathValueDetectorTest(TestBase):
         self.assertEqual(nmpvd.known_values_set, {b" pid=", b"25537"})
         nmpvd.do_persist()
         with open(nmpvd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), '["bytes: pid=", "bytes:25537"]')
+            self.assertEqual(f.read(), '["bytes: pid=", "bytes:25537"]')
 
         nmpvd.known_values_set = set()
         nmpvd.load_persistence_data()

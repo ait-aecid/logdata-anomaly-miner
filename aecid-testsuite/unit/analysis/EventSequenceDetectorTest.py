@@ -253,7 +253,7 @@ class EventSequenceDetectorTest(TestBase):
         esd.receive_atom(log_atom5)
         esd.do_persist()
         with open(esd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), '[[["string:a"], ["string:b"]], [["string:a"], ["string:c"]]]')
+            self.assertEqual(f.read(), '[[["string:a"], ["string:b"]], [["string:a"], ["string:c"]]]')
 
         self.assertEqual(esd.sequences, {(("a",), ("b",)), (("a",), ("c",))})
         esd.sequences = set()

@@ -151,7 +151,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         self.assertEqual(nmivcd.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}])
         nmivcd.do_persist()
         with open(nmivcd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), '[{"string:/seq/s1": "string: pid=", "string:/seq/d1": "string:25537"}, {"string:/seq/s1": "string:ddd ", "string:/seq/d1": "string:25538"}]')
+            self.assertEqual(f.read(), '[{"string:/seq/s1": "string: pid=", "string:/seq/d1": "string:25537"}, {"string:/seq/s1": "string:ddd ", "string:/seq/d1": "string:25538"}]')
 
         nmivcd.known_values = []
         nmivcd.load_persistence_data()

@@ -210,7 +210,7 @@ class CharsetDetectorTest(TestBase):
         cd.receive_atom(log_atom6)
         cd.do_persist()
         with open(cd.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), '[[["string:a"], [97, 98, 99, 115, 100, 102, 120, 109]], [["string:b"], [120, 121, 122]]]')
+            self.assertEqual(f.read(), '[[["string:a"], [97, 98, 99, 115, 100, 102, 120, 109]], [["string:b"], [120, 121, 122]]]')
 
         self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abcdfmsx"]), ("b",): set([ord(x) for x in "xyz"])})
         cd.charsets = {}
