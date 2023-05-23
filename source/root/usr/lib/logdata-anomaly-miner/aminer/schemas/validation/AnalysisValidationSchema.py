@@ -171,7 +171,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EntropyDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'prob_thresh': {'type': 'float'},
                     'default_freqs': {'type': 'boolean'},
                     'skip_repetitions': {'type': 'boolean'},

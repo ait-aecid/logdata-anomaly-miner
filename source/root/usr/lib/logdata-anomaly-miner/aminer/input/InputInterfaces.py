@@ -101,7 +101,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_stat_stop_update", "num_updates_until_var_reduction", "var_reduction_thres", "num_skipped_ind_for_weights",
             "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr", "used_range_test", "range_alpha", "range_threshold",
             "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics", "idf", "norm", "add_normal", "check_empty_windows",
-            "unique_path_list"
+            "unique_path_list", "default_freqs"
         ]
         self.log_success = 0
         self.log_total = 0
@@ -118,7 +118,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         # test booleans
         for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode",
                      "combine_values", "reset_after_report_flag", "allow_missing_values_flag", "allow_missing_id", "save_values",
-                     "use_path_match", "use_value_match", "check_rules_flag", "empty_window_warnings", "early_exceeding_anomaly_output"):
+                     "use_path_match", "use_value_match", "check_rules_flag", "empty_window_warnings", "early_exceeding_anomaly_output",
+                     "default_freqs", "skip_repetitions"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -164,7 +165,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                                 "parallel_check_count", "record_count_before_event", "max_rule_attributes", "max_hypotheses",
                                 "hypothesis_max_delta_time", "max_observations", "candidates_size", "hypotheses_eval_delta_time",
                                 "delta_time_to_discard_hypothesis", "window_size", "num_windows", "seq_len"]
-        zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha", "confidence_factor"]
+        zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha", "confidence_factor", "prob_thresh"]
         for attr in set([] + integer_only + non_zero_or_negative + zero_to_one):
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)
