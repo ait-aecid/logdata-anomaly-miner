@@ -158,7 +158,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['CharsetDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},

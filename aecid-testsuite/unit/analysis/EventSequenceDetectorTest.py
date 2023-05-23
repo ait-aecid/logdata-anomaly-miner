@@ -21,7 +21,6 @@ class EventSequenceDetectorTest(TestBase):
         """
         # Initialize detector for sequence length 2
         t = time.time()
-        esd = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/model/id"], seq_len=2, learn_mode=True, output_logline=False)
         expected_string = '%s New sequence detected\n%s: "None" (%d lines)\n  %s\n\n'
         dtf = "%Y-%m-%d %H:%M:%S"
 
@@ -53,6 +52,8 @@ class EventSequenceDetectorTest(TestBase):
         m9 = MatchElement("/model/id", b"2", b"2", None)
         m10 = MatchElement("/model/value", b"b", b"b", None)
         log_atom5 = LogAtom(b"2b", ParserMatch(MatchElement("/model", b"2b", b"2b", [m9, m10])), t+5, None)
+
+        esd = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/model/id"], seq_len=2, learn_mode=True, output_logline=False)
 
         esd.receive_atom(log_atom1)
         self.assertEqual(self.output_stream.getvalue(), "")
@@ -245,9 +246,6 @@ class EventSequenceDetectorTest(TestBase):
         m10 = MatchElement("/model/value", b"b", b"b", None)
         log_atom5 = LogAtom(b"2b", ParserMatch(MatchElement("/model", b"2b", b"2b", [m9, m10])), t + 5, None)
 
-        # Start of window 4:
-        m10 = MatchElement("/value", b"a", b"a", None)
-        log_atom10 = LogAtom(b"a", ParserMatch(m10), t + 35, None)
         esd.receive_atom(log_atom1)
         esd.receive_atom(log_atom2)
         esd.receive_atom(log_atom3)
