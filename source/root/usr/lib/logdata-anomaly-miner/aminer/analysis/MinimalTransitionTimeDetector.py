@@ -12,11 +12,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
 import logging
-import sys
-import time
-
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX,\
     KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer import AminerConfig
@@ -32,9 +28,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, id_path_list=None, ignore_list=None,
+    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list, id_path_list=None, ignore_list=None, constraint_list=None,
                  allow_missing_id=False, num_log_lines_solidify_matrix=100, time_output_threshold=0, anomaly_threshold=0.05,
-                 persistence_id='Default', learn_mode=False, output_logline=True, stop_learning_time=None,
+                 persistence_id="Default", learn_mode=False, output_logline=True, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
@@ -45,6 +41,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param id_path_list the list of paths where id values can be stored in all relevant log event types.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are
                omitted. The default value is [] as None is not iterable.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
         @param allow_missing_id specifies whether log atoms without id path should be omitted (only if id path is set).
                does not refer to an existing parsed data object.
         @param num_log_lines_solidify_matrix number of processed log lines after which the matrix is solidified.
@@ -60,19 +57,13 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "id_path_list", "ignore_list"], aminer_config=aminer_config,
+            mutable_default_args=["target_path_list", "id_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, id_path_list=id_path_list,
-            ignore_list=ignore_list, allow_missing_id=allow_missing_id, num_log_lines_solidify_matrix=num_log_lines_solidify_matrix,
-            time_output_threshold=time_output_threshold, anomaly_threshold=anomaly_threshold, persistence_id=persistence_id,
-            learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            ignore_list=ignore_list, constraint_list=constraint_list, allow_missing_id=allow_missing_id,
+            num_log_lines_solidify_matrix=num_log_lines_solidify_matrix, time_output_threshold=time_output_threshold,
+            anomaly_threshold=anomaly_threshold, persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline,
+            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
-
-        # Test if both target_path_list and id_path_list are not empty
-        if [] in (self.target_path_list, self.id_path_list):
-            msg = 'Both target_path_list and id_path_list must not be empty.'
-            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
-            print('WARNING: ' + msg, file=sys.stderr)
 
         # Initialization auxiliary variables
         self.time_matrix = {}
@@ -83,27 +74,17 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Load persistence
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is not None:
-            return_matrix = persistence_data[0]
-            keys_1 = [tuple(key) for key in persistence_data[1]]
-            keys_2 = [[tuple(key) for key in persistence_data[2][i]] for i in range(len(persistence_data[2]))]
-            self.time_matrix = {keys_1[i]: {keys_2[i][j]: return_matrix[i][j] for j in range(len(keys_2[i]))} for i in range(len(keys_1))}
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source and analyzes minimal times between transitions."""
-        parser_match = log_atom.parser_match
-
-        # Do not analyze the log line if target_path_list or id_path_list is empty
-        if [] in (self.target_path_list, self.id_path_list):
-            return False
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
+            self.learn_mode = False
 
         # Skip paths from ignore list.
-        if any(ignore_path in parser_match.get_match_dictionary().keys() for ignore_path in self.ignore_list):
-            return False
-
-        # Skip line if atom_time is not defined.
-        if log_atom.atom_time is None:
+        if any(ignore_path in log_atom.parser_match.get_match_dictionary().keys() for ignore_path in self.ignore_list):
             return False
 
         # Increase the count by one and check if the matrix should be solidified.
@@ -118,7 +99,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             if match is None:
                 if self.allow_missing_id is True:
                     # Insert placeholder for path that is not available
-                    event_value += ('',)
+                    event_value += ("",)
                 else:
                     # Omit log atom if one of the id paths is not found.
                     return False
@@ -135,7 +116,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             if id_match is None:
                 if self.allow_missing_id is True:
                     # Insert placeholder for id_path that is not available
-                    id_tuple += ('',)
+                    id_tuple += ("",)
                 else:
                     # Omit log atom if one of the id paths is not found.
                     return False
@@ -156,11 +137,11 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.last_time[id_tuple] = log_atom.atom_time
                 return True
             if log_atom.atom_time - self.last_time[id_tuple] < 0:
-                additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
-                                          'AffectedIdValues': list(id_tuple), 'PreviousTime': self.last_time[id_tuple],
-                                          'NewTime': log_atom.atom_time}
-                self.print(f'Anomaly in log line order: {list(self.last_value[id_tuple])} - {list(event_value)} ({list(id_tuple)}): '
-                           f'{self.last_time[id_tuple]} - {log_atom.atom_time}', log_atom, self.target_path_list, confidence=1,
+                additional_information = {"AffectedLogAtomValues": [list(self.last_value[id_tuple]), list(event_value)],
+                                          "AffectedIdValues": list(id_tuple), "PreviousTime": self.last_time[id_tuple],
+                                          "NewTime": log_atom.atom_time}
+                self.print(f"Anomaly in log line order: {list(self.last_value[id_tuple])} - {list(event_value)} ({list(id_tuple)}): "
+                           f"{self.last_time[id_tuple]} - {log_atom.atom_time}", log_atom, self.target_path_list, confidence=1,
                            additional_information=additional_information)
                 return True
 
@@ -179,28 +160,29 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 if event_value not in self.time_matrix:
                     self.time_matrix[event_value] = {}
 
-                additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
-                                          'AffectedIdValues': list(id_tuple),
-                                          'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
-                message = f'First Appearance: {list(self.last_value[id_tuple])} - {list(event_value)} ({list(id_tuple)}),' \
-                          f' {log_atom.atom_time - self.last_time[id_tuple]}'
+                additional_information = {"AffectedLogAtomValues": [list(self.last_value[id_tuple]), list(event_value)],
+                                          "AffectedIdValues": list(id_tuple),
+                                          "NewMinimalTime": log_atom.atom_time - self.last_time[id_tuple]}
+                message = f"First Appearance: {list(self.last_value[id_tuple])} - {list(event_value)} ({list(id_tuple)})," \
+                          f" {log_atom.atom_time - self.last_time[id_tuple]}"
                 self.print(message, log_atom, self.target_path_list, additional_information=additional_information)
                 if self.learn_mode:
                     self.time_matrix[event_value][self.last_value[id_tuple]] = log_atom.atom_time - self.last_time[id_tuple]
                     if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                        self.stop_learning_timestamp = max(
+                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
             else:
-                # Check and update if the time was under cut
+                # Check and update if the time was undercut
                 if self.time_matrix[event_value_1][event_value_2] > log_atom.atom_time - self.last_time[id_tuple] and\
                         self.time_matrix[event_value_1][event_value_2] > self.time_output_threshold:
                     if 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2] >\
                             self.anomaly_threshold:
-                        additional_information = {'AffectedLogAtomValues': [list(self.last_value[id_tuple]), list(event_value)],
-                                                  'AffectedIdValues': list(id_tuple),
-                                                  'PreviousMinimalTime': self.time_matrix[event_value_1][event_value_2],
-                                                  'NewMinimalTime': log_atom.atom_time - self.last_time[id_tuple]}
-                        message = f'Undercut transition time: {list(self.last_value[id_tuple])} - {list(event_value)} ({list(id_tuple)}),' \
-                                  f' {self.time_matrix[event_value_1][event_value_2]} -> {log_atom.atom_time - self.last_time[id_tuple]}'
+                        additional_information = {"AffectedLogAtomValues": [list(self.last_value[id_tuple]), list(event_value)],
+                                                  "AffectedIdValues": list(id_tuple),
+                                                  "PreviousMinimalTime": self.time_matrix[event_value_1][event_value_2],
+                                                  "NewMinimalTime": log_atom.atom_time - self.last_time[id_tuple]}
+                        message = f"Undercut transition time: {list(self.last_value[id_tuple])} - {list(event_value)} ({list(id_tuple)})," \
+                                  f" {self.time_matrix[event_value_1][event_value_2]} -> {log_atom.atom_time - self.last_time[id_tuple]}"
                         confidence = 1 - (log_atom.atom_time - self.last_time[id_tuple]) / self.time_matrix[event_value_1][event_value_2]
                         self.print(
                             message, log_atom, self.target_path_list, confidence=confidence, additional_information=additional_information)
@@ -208,12 +190,12 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                     if self.learn_mode:
                         self.time_matrix[event_value_1][event_value_2] = log_atom.atom_time - self.last_time[id_tuple]
                         if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                            self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                            self.stop_learning_timestamp = max(
+                                self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
             # Update the last_value and time
             self.last_value[id_tuple] = event_value
             self.last_time[id_tuple] = log_atom.atom_time
-
         return True
 
     def solidify_matrix(self):
@@ -288,7 +270,6 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                                     self.time_matrix[old_pair[0]][old_pair[1]]
                             if [key_2_1, key_2_2] not in new_pairs:
                                 new_pairs += [[key_2_1, key_2_2]]
-
             old_pairs = new_pairs
 
     def do_timer(self, trigger_time):
@@ -300,7 +281,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
 
     def do_persist(self):
@@ -315,23 +296,32 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            return_matrix = persistence_data[0]
+            keys_1 = [tuple(key) for key in persistence_data[1]]
+            keys_2 = [[tuple(key) for key in persistence_data[2][i]] for i in range(len(persistence_data[2]))]
+            self.time_matrix = {keys_1[i]: {keys_2[i][j]: return_matrix[i][j] for j in range(len(keys_2[i]))} for i in range(len(keys_1))}
+
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
         Allowlist an event generated by this source using the information emitted when generating the event.
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
-            msg = 'Allowlisting data not understood by this detector'
+            msg = "Allowlisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
-        return f'Allowlisted path {event_data}.'
+        return f"Allowlisted path {event_data} in {event_type}."
 
     def print_persistence_event(self, event_type, event_data):
         """
@@ -339,8 +329,8 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about the persistence.
         @throws Exception when the output for the event_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -351,9 +341,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                      all(isinstance(value, str) for value in event_data[0]) and all(isinstance(value, str) for value in event_data[1])) or (
                             len(event_data) == 1 and isinstance(event_data[0], list) and len(event_data[0]) == len(self.target_path_list)
                             and all(isinstance(value, str) for value in event_data[0])) or len(event_data) == 0)):
-            msg = 'Event_data has the wrong format.' \
-                'The supported formats are [], [path_value_list] and [path_value_list_1, path_value_list_2], ' \
-                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
+            msg = "Event_data has the wrong format." \
+                "The supported formats are [], [path_value_list] and [path_value_list_1, path_value_list_2], " \
+                "where the path value lists are lists of strings with the same length as the defined paths in the config."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -371,7 +361,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             values_list = list(values_set)
             values_list.sort()
 
-            string = f'Persistence includes transition times to the following path values: {values_list}'
+            string = f"Persistence includes transition times to the following path values: {values_list}"
         elif len(event_data) == 1:
             # Print the set of all path values which have a transition time to the path value specified in event_data
             # Check if the path value has an entry in self.time_matrix
@@ -390,9 +380,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
 
             # Set output string
             if len(values_set) > 0:
-                string = f'Persistence includes transition times from {event_data[0]} to the following path values: {values_list}'
+                string = f"Persistence includes transition times from {event_data[0]} to the following path values: {values_list}"
             else:
-                string = f'Persistence includes no transition time from {event_data[0]}.'
+                string = f"Persistence includes no transition time from {event_data[0]}."
         else:
             # Print the transition time
             # Check in which order the event_values appear in the time matrix
@@ -408,9 +398,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
 
             # Set output string
             if event_value_1 is None:
-                string = f'No transition time for {list(event_data[0])} - {list(event_data[1])}.'
+                string = f"No transition time for {list(event_data[0])} - {list(event_data[1])}."
             else:
-                string = f'Transition time {list(event_data[0])} - {list(event_data[1])}: {self.time_matrix[event_value_1][event_value_2]}.'
+                string = f"Transition time {list(event_data[0])} - {list(event_data[1])}: {self.time_matrix[event_value_1][event_value_2]}."
         return string
 
     def add_to_persistence_event(self, event_type, event_data):
@@ -419,8 +409,8 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about the addition to the persistence.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -429,9 +419,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
                 isinstance(event_data[1], list) and len(event_data[0]) == len(self.target_path_list) and
                 len(event_data[1]) == len(self.target_path_list) and all(isinstance(value, str) for value in event_data[0]) and
                 all(isinstance(value, str) for value in event_data[1]) and isinstance(event_data[2], (int, float))):
-            msg = 'Event_data has the wrong format.' \
-                'The supported format is [path_value_list_1, path_value_list_2, new_transition_time], ' \
-                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
+            msg = "Event_data has the wrong format." \
+                "The supported format is [path_value_list_1, path_value_list_2, new_transition_time], " \
+                "where the path value lists are lists of strings with the same length as the defined paths in the config."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -457,11 +447,11 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
 
             self.time_matrix[event_data[0]][event_data[1]] = float(event_data[2])
 
-            return f'Added transition time: {list(event_data[0])} - {list(event_data[1])}, {float(event_data[2])}'
+            return f"Added transition time: {list(event_data[0])} - {list(event_data[1])}, {float(event_data[2])}"
 
         old_transition_time = self.time_matrix[event_value_1][event_value_2]
         self.time_matrix[event_value_1][event_value_2] = float(event_data[2])
-        return f'Changed transition time {list(event_data[0])} - {list(event_data[1])} from {old_transition_time} to {float(event_data[2])}'
+        return f"Changed transition time {list(event_data[0])} - {list(event_data[1])} from {old_transition_time} to {float(event_data[2])}"
 
     def remove_from_persistence_event(self, event_type, event_data):
         """
@@ -469,8 +459,8 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about the removal from the persistence.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -478,9 +468,9 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         if not (len(event_data) == 2 and isinstance(event_data[0], list) and isinstance(event_data[1], list) and
                 len(event_data[0]) == len(self.target_path_list) and len(event_data[1]) == len(self.target_path_list) and
                 all(isinstance(value, str) for value in event_data[0]) and all(isinstance(value, str) for value in event_data[1])):
-            msg = 'Event_data has the wrong format. ' \
-                'The supported format is [path_value_list_1, path_value_list_2], ' \
-                'where the path value lists are lists of strings with the same length as the defined paths in the config.'
+            msg = "Event_data has the wrong format. " \
+                "The supported format is [path_value_list_1, path_value_list_2], " \
+                "where the path value lists are lists of strings with the same length as the defined paths in the config."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -501,7 +491,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
 
         # Check if the transition time between the path values exists
         if event_value_1 is None:
-            string = f'Transition time for {list(event_data[0])} - {list(event_data[1])} does not exist and therefore could not be deleted.'
+            string = f"Transition time for {list(event_data[0])} - {list(event_data[1])} does not exist and therefore could not be deleted."
         else:
             # Delete the transition time
             deleted_time = self.time_matrix[event_value_1].pop(event_value_2)
@@ -510,7 +500,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             if self.time_matrix[event_value_1] == {}:
                 self.time_matrix.pop(event_value_1)
 
-            string = f'Deleted transition time {list(event_data[0])} - {list(event_data[1])}: {deleted_time}.'
+            string = f"Deleted transition time {list(event_data[0])} - {list(event_data[1])}: {deleted_time}."
 
         return string
 
@@ -520,17 +510,17 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if blocklisting_data is not None:
-            msg = 'Blocklisting data not understood by this detector'
+            msg = "Blocklisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)
-        return f'Blocklisted path {event_data}.'
+        return f"Blocklisted path {event_data} in {event_type}."
 
     def print(self, message, log_atom, affected_path, confidence=None, additional_information=None):
         """Print the message."""
@@ -541,28 +531,19 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
-            original_log_line_prefix = ''
-
+            original_log_line_prefix = ""
         if self.output_logline:
-            tmp_str = ''
-            for x in list(log_atom.parser_match.get_match_dictionary().keys()):
-                tmp_str += '  ' + x + os.linesep
-            tmp_str = tmp_str.lstrip('  ')
-            sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
-            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
+            sorted_log_lines = [original_log_line_prefix + log_atom.raw_data.decode()]
+            analysis_component = {"AffectedLogAtomPaths": list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
-            tmp_str = ''
-            for x in affected_path:
-                tmp_str += '  ' + x + os.linesep
-            tmp_str = tmp_str.lstrip('  ')
-            sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
-            analysis_component = {'AffectedLogAtomPaths': affected_path}
+            sorted_log_lines = [log_atom.raw_data.decode()]
+            analysis_component = {"AffectedLogAtomPaths": affected_path}
 
         for key, value in additional_information.items():
             analysis_component[key] = value
 
-        event_data = {'AnalysisComponent': analysis_component, 'TypeInfo': {}}
+        event_data = {"AnalysisComponent": analysis_component, "TypeInfo": {}}
         if confidence is not None:
-            event_data['TypeInfo']['Confidence'] = confidence
+            event_data["TypeInfo"]["Confidence"] = confidence
         for listener in self.anomaly_event_handlers:
-            listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, log_atom, self)

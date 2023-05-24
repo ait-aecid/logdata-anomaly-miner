@@ -276,7 +276,6 @@ class EventFrequencyDetectorTest(TestBase):
         """Test if the allowlist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
         efd = EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler])
-        t = round(time.time(), 3)
         analysis = "Analysis.%s"
         self.assertRaises(Exception, efd.allowlist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
@@ -295,7 +294,6 @@ class EventFrequencyDetectorTest(TestBase):
         """Test if the blocklist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
         efd = EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler])
-        t = round(time.time(), 3)
         analysis = "Analysis.%s"
         self.assertRaises(Exception, efd.blocklist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
@@ -367,8 +365,8 @@ class EventFrequencyDetectorTest(TestBase):
         self.assertEqual(efd.counts, {("/value",): [0]})
 
         other = EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], empty_window_warnings=True, learn_mode=True)
-        self.assertEqual(other.counts, {("/value",): [0]})
-        self.assertEqual(other.scoring_value_list, {})
+        self.assertEqual(other.counts, efd.counts)
+        self.assertEqual(other.scoring_value_list, efd.scoring_value_list)
 
     def test6validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""

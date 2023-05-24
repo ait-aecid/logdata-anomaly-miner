@@ -10,7 +10,7 @@ from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
 
 
 class EventSequenceDetectorTest(TestBase):
-    """Unittests for the EventSequenceDetectorDetector."""
+    """Unittests for the EventSequenceDetector."""
 
     def test1receive_atom(self):
         """
@@ -189,7 +189,6 @@ class EventSequenceDetectorTest(TestBase):
         """Test if the allowlist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
         esd = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler])
-        t = round(time.time(), 3)
         analysis = "Analysis.%s"
         self.assertRaises(Exception, esd.allowlist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
@@ -208,7 +207,6 @@ class EventSequenceDetectorTest(TestBase):
         """Test if the blocklist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
         esd = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler])
-        t = round(time.time(), 3)
         analysis = "Analysis.%s"
         self.assertRaises(Exception, esd.blocklist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
@@ -261,7 +259,7 @@ class EventSequenceDetectorTest(TestBase):
         self.assertEqual(esd.sequences, {(("a",), ("b",)), (("a",), ("c",))})
 
         other = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/model/id"], target_path_list=["/model/value"], seq_len=2, learn_mode=True)
-        self.assertEqual(other.sequences, {(("a",), ("b",)), (("a",), ("c",))})
+        self.assertEqual(other.sequences, esd.sequences)
 
     def test6validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""

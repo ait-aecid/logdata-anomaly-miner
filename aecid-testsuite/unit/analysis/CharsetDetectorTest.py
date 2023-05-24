@@ -140,7 +140,6 @@ class CharsetDetectorTest(TestBase):
         """Test if the allowlist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
         cd = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"])
-        t = round(time.time(), 3)
         analysis = "Analysis.%s"
         self.assertRaises(Exception, cd.allowlist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
@@ -159,7 +158,6 @@ class CharsetDetectorTest(TestBase):
         """Test if the blocklist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
         cd = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"])
-        t = round(time.time(), 3)
         analysis = "Analysis.%s"
         self.assertRaises(Exception, cd.blocklist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 

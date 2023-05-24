@@ -672,6 +672,7 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'allow_missing_id': {'type': 'boolean'},
                     'num_log_lines_solidify_matrix': {'type': 'integer', 'min': 1},
                     'time_output_threshold': {'type': 'integer', 'min': 0},

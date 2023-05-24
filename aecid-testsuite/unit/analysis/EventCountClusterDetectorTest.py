@@ -160,7 +160,6 @@ class EventCountClusterDetectorTest(TestBase):
         """Test if the allowlist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
         eccd = EventCountClusterDetector(self.aminer_config, [self.stream_printer_event_handler])
-        t = round(time.time(), 3)
         analysis = "Analysis.%s"
         self.assertRaises(Exception, eccd.allowlist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
@@ -179,7 +178,6 @@ class EventCountClusterDetectorTest(TestBase):
         """Test if the blocklist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
         eccd = EventCountClusterDetector(self.aminer_config, [self.stream_printer_event_handler])
-        t = round(time.time(), 3)
         analysis = "Analysis.%s"
         self.assertRaises(Exception, eccd.blocklist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 

@@ -160,23 +160,32 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         # test numeric values
         integer_only = ["min_bin_elements", "min_num_vals", "max_num_vals", "parallel_check_count", "record_count_before_event",
                         "min_rule_attributes", "max_rule_attributes", "max_hypotheses", "max_observations", "candidates_size",
-                        "num_windows", "seq_len"]
-        non_zero_or_negative = ["min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff",
-                                "parallel_check_count", "record_count_before_event", "max_rule_attributes", "max_hypotheses",
-                                "hypothesis_max_delta_time", "max_observations", "candidates_size", "hypotheses_eval_delta_time",
-                                "delta_time_to_discard_hypothesis", "window_size", "num_windows", "seq_len"]
-        zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha", "confidence_factor", "prob_thresh"]
-        for attr in set([] + integer_only + non_zero_or_negative + zero_to_one):
+                        "num_windows", "seq_len", "num_log_lines_solidify_matrix", "report_interval"]
+        non_negative = ["set_lower_limit", "set_upper_limit", "timeout", "time_output_threshold"]
+        non_zero_or_negative = [
+            "min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff", "parallel_check_count",
+            "record_count_before_event", "max_rule_attributes", "max_hypotheses", "hypothesis_max_delta_time", "max_observations",
+            "candidates_size", "hypotheses_eval_delta_time", "delta_time_to_discard_hypothesis", "window_size", "num_windows", "seq_len",
+            "num_log_lines_solidify_matrix"]
+        zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha", "confidence_factor", "prob_thresh",
+                       "anomaly_threshold"]
+        nullable = ["stop_learning_time", "stop_learning_no_anomaly_time"]
+        for attr in set([] + integer_only + non_negative + non_zero_or_negative + zero_to_one):
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)
                 if attr in integer_only and (isinstance(attr_val, bool) or not isinstance(attr_val, int)):
                     msg = f"{attr} has to be of the type integer."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
-                if isinstance(attr_val, bool) or not isinstance(attr_val, (int, float)):
+                if (attr not in nullable and attr is None) and (isinstance(attr_val, bool) or not isinstance(attr_val, (int, float))):
                     msg = f"{attr} has to be of the type float or integer."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
+                # test non-negative values
+                if attr in non_negative and attr_val < 0:
+                    msg = f"{attr} must not be negative."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
                 # test non-zero-or-negative values
                 if attr in non_zero_or_negative and attr_val <= 0:
                     msg = f"{attr} must not be zero or negative."
@@ -201,14 +210,6 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "stop_learning_time is mutually exclusive to stop_learning_no_anomaly_time. Only one of these attributes may be used."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if not isinstance(stop_learning_time, (type(None), int, float)):
-            msg = "stop_learning_time has to be of the type int, float or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if not isinstance(stop_learning_no_anomaly_time, (type(None), int, float)):
-            msg = "stop_learning_no_anomaly_time has to be of the type int, float or None."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
         if (stop_learning_time is not None and stop_learning_time <= 0) or (
                 stop_learning_no_anomaly_time is not None and stop_learning_no_anomaly_time <= 0):
             msg = "stop_learning_time and stop_learning_no_anomaly_time must be bigger than 0."
@@ -309,42 +310,11 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             msg = "target_value_list has to be of the type list."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
-        if hasattr(self, "report_interval") and (not isinstance(self.report_interval, int) or isinstance(self.report_interval, bool)):
-            msg = "report_interval has to be of the type integer."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise TypeError(msg)
-        if hasattr(self, "set_lower_limit") and self.set_lower_limit is not None:
-            if not isinstance(self.set_lower_limit, (int, float)) or isinstance(self.set_lower_limit, bool):
-                msg = "set_lower_limit has to be of the type integer or float."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if self.set_lower_limit < 0:
-                msg = "set_lower_limit has to be greater than or equal to zero."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
-        if hasattr(self, "set_upper_limit") and self.set_upper_limit is not None:
-            if not isinstance(self.set_upper_limit, (int, float)) or isinstance(self.set_upper_limit, bool):
-                msg = "set_upper_limit has to be of the type integer or float."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if self.set_upper_limit <= 0:
-                msg = "set_upper_limit has to be greater than zero."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
         if hasattr(self, "set_lower_limit") and self.set_lower_limit is not None and hasattr(self, "set_upper_limit") and \
                 self.set_upper_limit is not None and self.set_lower_limit >= self.set_upper_limit:
             msg = "set_lower_limit must be smaller than set_upper_limit."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        if hasattr(self, "timeout") and self.timeout is not None:
-            if not isinstance(self.timeout, (int, float)) or isinstance(self.timeout, bool):
-                msg = "timeout has to be of the type integer or float."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise TypeError(msg)
-            if self.timeout <= 0:
-                msg = "timeout has to be greater than zero."
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise ValueError(msg)
         if hasattr(self, "stream") and not isinstance(self.stream, IOBase):
             msg = "stream must be an instance of IOBase."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
