@@ -22,7 +22,6 @@ class PathArimaDetectorTest(TestBase):
         Test if log atoms are processed correctly and the detector is learning (learn_mode=True) and stops if learn_mode=False.
         Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
-        t = time.time()
         expected_string = '%s Calculated the periods for the event %d (%s): %s\n%s: "None" (%d lines)\n  %s\n\n'
         dtf = "%Y-%m-%d %H:%M:%S"
 
@@ -36,9 +35,10 @@ class PathArimaDetectorTest(TestBase):
         self.run_pad_test(pad, etd, self.data)
 
         # stop_learning_time
-        log_atom1 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t+1, None)
-        log_atom2 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t+3, None)
-        log_atom3 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t+7, None)
+        t = time.time()
+        log_atom1 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t, None)
+        log_atom2 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t, None)
+        log_atom3 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t, None)
         pad = PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=["/model/value"], learn_mode=True, stop_learning_time=100)
         self.assertTrue(pad.receive_atom(log_atom1))
         log_atom1.atom_time = t + 99
@@ -249,7 +249,6 @@ class PathArimaDetectorTest(TestBase):
 
         self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history=-1)
         self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history=0)
-        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history=100.22)
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history=b"Default")
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history="123")
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history={"id": "Default"})
@@ -261,7 +260,6 @@ class PathArimaDetectorTest(TestBase):
         self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_max_time_history=-1)
         self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_max_time_history=0)
         self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history=30, num_max_time_history=20)
-        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_max_time_history=100.22)
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_max_time_history=b"Default")
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_max_time_history="123")
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_max_time_history={"id": "Default"})
@@ -270,6 +268,7 @@ class PathArimaDetectorTest(TestBase):
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_max_time_history=())
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_max_time_history=set())
         PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history=20, num_max_time_history=100)
+        PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_min_time_history=20.1, num_max_time_history=100.1)
 
         self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_periods_tsa_ini=-1)
         self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_periods_tsa_ini=0)
@@ -324,19 +323,10 @@ class PathArimaDetectorTest(TestBase):
 
     def run_pad_test(self, pad, etd, log_atoms):
         """Run the ECD test."""
-        diff = log_atoms[1].atom_time - log_atoms[0].atom_time
-        log_atom = None
         for log_atom in log_atoms:
             etd.receive_atom(log_atom)
             pad.receive_atom(log_atom)
         self.assertTrue(pad.arima_models)
-        # sorted_forward_rules = dict(sorted(ecd.forward_rules.items()))
-        # sorted_back_rules = dict(sorted(ecd.back_rules.items()))
-        # self.assertEqual(len(sorted_forward_rules), len(self.alphabet_model.children))
-        # self.assertEqual(len(sorted_back_rules), len(self.alphabet_model.children))
-        #self.check_rules(sorted_back_rules, sorted_forward_rules, diff)
-        # ecd.learn_mode = False
-        #self.check_anomaly_detection(ecd, log_atom.atom_time, diff)
 
     def generate_data(self, iterations, diff):
         """Generate data without any error."""
@@ -344,15 +334,12 @@ class PathArimaDetectorTest(TestBase):
         t = time.time()
         for i in range(1, iterations+1):
             char = bytes([self.alphabet[i % len(self.alphabet)]])
-            parser_match = ParserMatch(self.alphabet_model.get_match_element("/model", DummyMatchContext(char)))
             t += diff
             num = str(random.uniform(0, 1000)).encode()
             m1 = MatchElement("/model/id", num, num, None)
             m2 = MatchElement("/model/value", char, char, None)
             log_atoms.append(LogAtom(num + char, ParserMatch(MatchElement("/model", num + char, num + char, [m1, m2])), t + 1, None))
         return log_atoms
-
-
 
 
 if __name__ == "__main__":

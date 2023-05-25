@@ -11,12 +11,11 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import time
 import logging
 import numpy as np
 import statsmodels
 import statsmodels.api as sm
-from scipy.stats import binom_test
+from scipy.stats import binomtest
 
 from aminer import AminerConfig
 from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
@@ -290,7 +289,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         except:  # skipcq FLK-E722
                             self.arima_models[event_index][count_index] = None
                     if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                        self.stop_learning_timestamp = max(
+                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
             # Make a one-step prediction with the new values
             elif self.arima_models[event_index][count_index] is not None:
@@ -338,7 +338,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if self.learn_mode and (
                         sum(self.result_list[event_index][count_index][-self.num_results_bt:]) +
                         max(0, self.num_results_bt - len(self.result_list[event_index][count_index])) < self.bt_min_suc or
-                        binom_test(x=sum(self.result_list[event_index][count_index][
+                        binomtest(k=sum(self.result_list[event_index][count_index][
                         -self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]:]),
                         n=self.num_periods_tsa_ini * self.period_length_list[event_index][count_index],
                         p=(1-self.alpha), alternative="greater") < self.alpha_bt):
@@ -351,9 +351,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     # Discard the trained model and reset the result_list
                     self.arima_models[event_index][count_index] = None
                     self.result_list[event_index][count_index] = []
-
                     if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                        self.stop_learning_timestamp = max(
+                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 else:
                     # Update the model
                     self.arima_models[event_index][count_index] = self.arima_models[event_index][count_index].append([count])

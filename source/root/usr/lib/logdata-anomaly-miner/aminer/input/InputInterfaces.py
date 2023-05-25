@@ -119,7 +119,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         for attr in ("learn_mode", "output_logline", "split_reports_flag", "exit_on_error_flag", "stop_when_handled_flag", "debug_mode",
                      "combine_values", "reset_after_report_flag", "allow_missing_values_flag", "allow_missing_id", "save_values",
                      "use_path_match", "use_value_match", "check_rules_flag", "empty_window_warnings", "early_exceeding_anomaly_output",
-                     "default_freqs", "skip_repetitions", "idf", "norm", "add_normal", "check_empty_windows", "force_period_length"):
+                     "default_freqs", "skip_repetitions", "idf", "norm", "add_normal", "check_empty_windows", "force_period_length",
+                     "acf_auto_pause_interval", "build_sum_over_values"):
             if hasattr(self, attr) and (attr in kwargs or attr == "learn_mode"):
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, bool):
@@ -161,16 +162,19 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         integer_only = ["min_bin_elements", "min_num_vals", "max_num_vals", "parallel_check_count", "record_count_before_event",
                         "min_rule_attributes", "max_rule_attributes", "max_hypotheses", "max_observations", "candidates_size",
                         "num_windows", "seq_len", "num_log_lines_solidify_matrix", "report_interval", "num_init", "set_period_length",
-                        "num_results_bt", "num_min_time_history", "num_max_time_history", "num_periods_tsa_ini"]
+                        "num_results_bt", "num_periods_tsa_ini", "acf_auto_pause_interval_num_min", "num_division_time_step",
+                        "set_period_length", "min_log_lines_per_time_step"]
         non_negative = ["set_lower_limit", "time_output_threshold"]
         non_zero_or_negative = [
             "min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff", "parallel_check_count",
             "record_count_before_event", "max_rule_attributes", "max_hypotheses", "hypothesis_max_delta_time", "max_observations",
             "candidates_size", "hypotheses_eval_delta_time", "delta_time_to_discard_hypothesis", "window_size", "num_windows", "seq_len",
             "num_log_lines_solidify_matrix", "set_upper_limit", "timeout", "num_init", "set_period_length", "num_min_time_history",
-            "num_max_time_history", "num_periods_tsa_ini", "num_results_bt"]
+            "num_max_time_history", "num_periods_tsa_ini", "num_results_bt", "waiting_time", "num_sections_waiting_time",
+            "acf_auto_pause_interval_num_min", "num_division_time_step", "set_period_length", "min_log_lines_per_time_step"]
         zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha", "confidence_factor", "prob_thresh",
-                       "anomaly_threshold", "alpha", "alpha_bt"]
+                       "anomaly_threshold", "alpha", "alpha_bt", "acf_pause_interval_percentage", "acf_threshold",
+                       "round_time_interval_threshold"]
         nullable = ["stop_learning_time", "stop_learning_no_anomaly_time", "set_lower_limit", "set_upper_limit", "timeout"]
         for attr in set([] + integer_only + non_negative + non_zero_or_negative + zero_to_one):
             if hasattr(self, attr):
