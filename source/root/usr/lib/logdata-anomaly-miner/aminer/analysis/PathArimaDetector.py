@@ -15,7 +15,6 @@ import logging
 import numpy as np
 import statsmodels
 import statsmodels.api as sm
-from scipy.stats import binomtest
 
 from aminer import AminerConfig
 from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
@@ -24,6 +23,13 @@ from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
+binomial_test = None
+from scipy import stats, version
+v = [int(x) for x in version.full_version.split(".")]
+if v[0] >= 1 and v[1] >= 7:
+    binomial_test = stats.binomtest
+else:
+    binomial_test = stats.binom_test
 
 
 class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
@@ -338,7 +344,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 if self.learn_mode and (
                         sum(self.result_list[event_index][count_index][-self.num_results_bt:]) +
                         max(0, self.num_results_bt - len(self.result_list[event_index][count_index])) < self.bt_min_suc or
-                        binomtest(k=sum(self.result_list[event_index][count_index][
+                        binomial_test(sum(self.result_list[event_index][count_index][
                         -self.num_periods_tsa_ini * self.period_length_list[event_index][count_index]:]),
                         n=self.num_periods_tsa_ini * self.period_length_list[event_index][count_index],
                         p=(1-self.alpha), alternative="greater") < self.alpha_bt):
