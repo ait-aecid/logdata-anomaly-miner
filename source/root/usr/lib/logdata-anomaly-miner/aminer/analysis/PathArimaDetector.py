@@ -23,8 +23,8 @@ from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
-binomial_test = None
 from scipy import stats, version
+binomial_test = None
 v = [int(x) for x in version.full_version.split(".")]
 if v[0] >= 1 and v[1] >= 7:
     binomial_test = stats.binomtest
