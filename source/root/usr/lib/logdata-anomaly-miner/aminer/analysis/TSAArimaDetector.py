@@ -112,6 +112,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
         # Assumed occurring time steps in seconds. 1 minute: 60, 1 hour: 3600, 12 hours: 43200, 1 day: 86400, 1 week: 604800.
         self.assumed_time_steps = [60, 3600, 43200, 86400, 604800]
+        self.test_pause = None
 
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -287,7 +288,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             self.time_trigger_list[0].append(-1)
             self.time_trigger_list[1].append(-1)
             self.time_trigger_list[2].append(-1)
-            self.test_pause = None
 
     def calculate_time_steps(self, counts, log_atom):
         """Returns a list of the timestep lengths in seconds, if no timestep should be created the value is set to -1"""
