@@ -604,7 +604,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['PathValueTimeIntervalDetector'], 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'time_period_length': {'type': 'integer', 'min': 1},
                     'max_time_diff': {'type': 'integer', 'min': 1},

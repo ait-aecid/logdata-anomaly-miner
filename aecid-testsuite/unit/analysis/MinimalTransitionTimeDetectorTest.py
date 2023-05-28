@@ -254,6 +254,8 @@ class MinimalTransitionTimeDetectorTest(TestBase):
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, set(), ["/model/value"])
 
         self.assertRaises(ValueError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], [""])
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], [None])
+        self.assertRaises(ValueError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], None)
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], "")
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], b"Default")
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], True)
@@ -262,8 +264,7 @@ class MinimalTransitionTimeDetectorTest(TestBase):
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], {"id": "Default"})
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ())
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], set())
-        MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], [])
-        MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], None)
+        MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], ["default"])
 
         self.assertRaises(ValueError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], id_path_list=[""])
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], id_path_list="")

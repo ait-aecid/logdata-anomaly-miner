@@ -64,6 +64,10 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
             anomaly_threshold=anomaly_threshold, persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline,
             stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
+        if not self.target_path_list:
+            msg = "target_path_list must not be empty or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
 
         # Initialization auxiliary variables
         self.time_matrix = {}

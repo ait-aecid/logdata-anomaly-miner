@@ -71,7 +71,7 @@ class EventSequenceDetectorTest(TestBase):
         esd.receive_atom(log_atom4)
         self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t + 4).strftime(dtf), esd.__class__.__name__, 1, "1c"))
         self.reset_output_stream()
-        sequences_set.add((('/model', '/model/id', '/model/value'), ('/model', '/model/id', '/model/value')))
+        sequences_set.add((("/model", "/model/id", "/model/value"), ("/model", "/model/id", "/model/value")))
         self.assertEqual(esd.sequences, sequences_set)
 
         esd.receive_atom(log_atom5)

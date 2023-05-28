@@ -163,7 +163,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                         "min_rule_attributes", "max_rule_attributes", "max_hypotheses", "max_observations", "candidates_size",
                         "num_windows", "seq_len", "num_log_lines_solidify_matrix", "report_interval", "num_init", "set_period_length",
                         "num_results_bt", "num_periods_tsa_ini", "acf_auto_pause_interval_num_min", "num_division_time_step",
-                        "set_period_length", "min_log_lines_per_time_step"]
+                        "set_period_length", "min_log_lines_per_time_step", "time_period_length", "max_time_diff", "num_reduce_time_list"]
         non_negative = ["set_lower_limit", "time_output_threshold"]
         non_zero_or_negative = [
             "min_bin_time", "min_bin_elements", "default_interval", "realert_interval", "min_allowed_time_diff", "parallel_check_count",
@@ -171,7 +171,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "candidates_size", "hypotheses_eval_delta_time", "delta_time_to_discard_hypothesis", "window_size", "num_windows", "seq_len",
             "num_log_lines_solidify_matrix", "set_upper_limit", "timeout", "num_init", "set_period_length", "num_min_time_history",
             "num_max_time_history", "num_periods_tsa_ini", "num_results_bt", "waiting_time", "num_sections_waiting_time",
-            "acf_auto_pause_interval_num_min", "num_division_time_step", "set_period_length", "min_log_lines_per_time_step"]
+            "acf_auto_pause_interval_num_min", "num_division_time_step", "set_period_length", "min_log_lines_per_time_step",
+            "time_period_length", "max_time_diff", "num_reduce_time_list"]
         zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha", "confidence_factor", "prob_thresh",
                        "anomaly_threshold", "alpha", "alpha_bt", "acf_pause_interval_percentage", "acf_threshold",
                        "round_time_interval_threshold"]

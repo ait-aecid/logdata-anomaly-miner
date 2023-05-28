@@ -22,9 +22,6 @@ class PathArimaDetectorTest(TestBase):
         Test if log atoms are processed correctly and the detector is learning (learn_mode=True) and stops if learn_mode=False.
         Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
-        expected_string = '%s Calculated the periods for the event %d (%s): %s\n%s: "None" (%d lines)\n  %s\n\n'
-        dtf = "%Y-%m-%d %H:%M:%S"
-
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         pad = PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, output_logline=False)
         self.run_pad_test(pad, etd, self.data)
