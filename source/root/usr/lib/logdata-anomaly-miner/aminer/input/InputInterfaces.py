@@ -172,10 +172,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_log_lines_solidify_matrix", "set_upper_limit", "timeout", "num_init", "set_period_length", "num_min_time_history",
             "num_max_time_history", "num_periods_tsa_ini", "num_results_bt", "waiting_time", "num_sections_waiting_time",
             "acf_auto_pause_interval_num_min", "num_division_time_step", "set_period_length", "min_log_lines_per_time_step",
-            "time_period_length", "max_time_diff", "num_reduce_time_list"]
+            "time_period_length", "max_time_diff", "num_reduce_time_list", "min_anomaly_score"]
         zero_to_one = ["generation_probability", "generation_factor", "p0", "alpha", "confidence_factor", "prob_thresh",
                        "anomaly_threshold", "alpha", "alpha_bt", "acf_pause_interval_percentage", "acf_threshold",
-                       "round_time_interval_threshold"]
+                       "round_time_interval_threshold", "min_variance"]
         nullable = ["stop_learning_time", "stop_learning_no_anomaly_time", "set_lower_limit", "set_upper_limit", "timeout"]
         for attr in set([] + integer_only + non_negative + non_zero_or_negative + zero_to_one):
             if hasattr(self, attr):

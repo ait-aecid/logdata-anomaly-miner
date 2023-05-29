@@ -10,11 +10,9 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import time
 import os
 import logging
 import numpy as np
-
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
@@ -195,7 +193,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if log_ev not in self.counts or (len(self.counts[log_ev]) < 2 and (
                         self.set_lower_limit is None or self.set_upper_limit is None)):
                     # At least counts from 1 window necessary for prediction
-                    self.reset_counter(log_ev)
+                    self.reset_counter(log_ev, log_atom)
                     continue
                 # Compare log event frequency of previous time windows and current time window
                 if self.counts[log_ev][-1] < self.ranges[log_ev][0] or self.counts[log_ev][-1] > self.ranges[log_ev][1]:
@@ -233,7 +231,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
                 # Reset counter and range estimation
                 for _ in range(skipped_windows + 1):
-                    self.reset_counter(log_ev)
+                    self.reset_counter(log_ev, log_atom)
                 self.ranges[log_ev] = None
             # Reset all stored unique values for every log event
             for log_ev in self.unique_values:
@@ -305,15 +303,16 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_success += 1
         return True
 
-    def reset_counter(self, log_event):
+    def reset_counter(self, log_event, log_atom):
         """Create count index for new time window"""
         if self.learn_mode is True:
             if len(self.counts[log_event]) <= self.num_windows + 1:
                 self.counts[log_event].append(0)
             else:
                 self.counts[log_event] = self.counts[log_event][1:] + [0]
-            if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
         else:
             self.counts[log_event][-1] = 0
         # Reset scoring_value_list
