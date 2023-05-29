@@ -24,7 +24,7 @@ class EventFrequencyDetectorTest(TestBase):
         expected_string = '%s Frequency anomaly detected\n%s: "None" (%d lines)\n  %s\n\n'
         dtf = "%Y-%m-%d %H:%M:%S"
         efd = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[self.stream_printer_event_handler], window_size=10,
-                                     num_windows=1, confidence_factor=0.51, empty_window_warnings=True, persistence_id="Default", learn_mode=True, output_logline=False)
+            num_windows=1, confidence_factor=0.51, empty_window_warnings=True, learn_mode=True, output_logline=False)
 
         # Prepare log atoms that represent different amounts of values a, b over time
         # Four time windows are used. The first time window is used for initialization. The
@@ -45,38 +45,22 @@ class EventFrequencyDetectorTest(TestBase):
         #  window 4:
         #   value a: 1 time
         # Start of window 1:
-        m1 = MatchElement("/value", b"a", b"a", None)
-        log_atom1 = LogAtom(b"a", ParserMatch(m1), t+1, None)
-
-        m2 = MatchElement("/value", b"b", b"b", None)
-        log_atom2 = LogAtom(b"b", ParserMatch(m2), t+3, None)
-
-        m3 = MatchElement("/value", b"a", b"a", None)
-        log_atom3 = LogAtom(b"a", ParserMatch(m3), t+7, None)
+        log_atom1 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t+1, None)
+        log_atom2 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t+3, None)
+        log_atom3 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t+7, None)
 
         # Start of window 2:
-        m4 = MatchElement("/value", b"a", b"a", None)
-        log_atom4 = LogAtom(b"a", ParserMatch(m4), t+13, None)
-
-        m5 = MatchElement("/value", b"b", b"b", None)
-        log_atom5 = LogAtom(b"b", ParserMatch(m5), t+17, None)
-
-        m6 = MatchElement("/value", b"a", b"a", None)
-        log_atom6 = LogAtom(b"a", ParserMatch(m6), t+18, None)
-
-        m7 = MatchElement("/value", b"a", b"a", None)
-        log_atom7 = LogAtom(b"a", ParserMatch(m7), t+19, None)
+        log_atom4 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t+13, None)
+        log_atom5 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t+17, None)
+        log_atom6 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t+18, None)
+        log_atom7 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t+19, None)
 
         # Start of window 3:
-        m8 = MatchElement("/value", b"b", b"b", None)
-        log_atom8 = LogAtom(b"b", ParserMatch(m8), t+25, None)
-
-        m9 = MatchElement("/value", b"b", b"b", None)
-        log_atom9 = LogAtom(b"b", ParserMatch(m9), t+25, None)
+        log_atom8 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t+25, None)
+        log_atom9 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t+25, None)
 
         # Start of window 4:
-        m10 = MatchElement("/value", b"a", b"a", None)
-        log_atom10 = LogAtom(b"a", ParserMatch(m10), t+35, None)
+        log_atom10 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t+35, None)
 
         efd.receive_atom(log_atom1)
         self.assertEqual(self.output_stream.getvalue(), "")
@@ -120,7 +104,7 @@ class EventFrequencyDetectorTest(TestBase):
 
         # target_path_list
         efd = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[self.stream_printer_event_handler], target_path_list=["/value"], window_size=10,
-                                     num_windows=1, confidence_factor=0.51, empty_window_warnings=True, persistence_id="Default", learn_mode=True, output_logline=False)
+            num_windows=1, confidence_factor=0.51, empty_window_warnings=True, learn_mode=True, output_logline=False)
         # Forward log atoms to detector
         # Log atoms of initial window 1 should not create anomalies and add to counts
         # Input: a; initial time window is started
@@ -192,7 +176,7 @@ class EventFrequencyDetectorTest(TestBase):
 
         # unique_path_list
         efd = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[self.stream_printer_event_handler], unique_path_list=["/value"], window_size=10,
-                                     num_windows=1, confidence_factor=0.51, empty_window_warnings=True, persistence_id="Default", learn_mode=True, output_logline=False)
+            num_windows=1, confidence_factor=0.51, empty_window_warnings=True, learn_mode=True, output_logline=False)
         efd.receive_atom(log_atom1)
         self.assertEqual(self.output_stream.getvalue(), "")
         self.assertEqual(efd.counts, {("/value",): [1]})
@@ -235,7 +219,7 @@ class EventFrequencyDetectorTest(TestBase):
 
         # stop_learning_time
         efd = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[self.stream_printer_event_handler], target_path_list=["/value"], window_size=10, num_windows=1,
-                                     confidence_factor=0.51, empty_window_warnings=True, persistence_id="Default", learn_mode=True, output_logline=False, stop_learning_time=100)
+            confidence_factor=0.51, empty_window_warnings=True, learn_mode=True, output_logline=False, stop_learning_time=100)
         self.assertTrue(efd.receive_atom(log_atom1))
         log_atom1.atom_time = t + 99
         self.assertTrue(efd.receive_atom(log_atom1))
@@ -246,7 +230,7 @@ class EventFrequencyDetectorTest(TestBase):
 
         # stop_learning_no_anomaly_time
         efd = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[self.stream_printer_event_handler], target_path_list=["/value"], window_size=10, num_windows=1,
-                                     confidence_factor=0.51, empty_window_warnings=True, persistence_id="Default", learn_mode=True, output_logline=False, stop_learning_no_anomaly_time=100)
+            confidence_factor=0.51, empty_window_warnings=True, learn_mode=True, output_logline=False, stop_learning_no_anomaly_time=100)
         log_atom1.atom_time = t
         self.assertTrue(efd.receive_atom(log_atom1))
         log_atom1.atom_time = t + 100
@@ -312,38 +296,22 @@ class EventFrequencyDetectorTest(TestBase):
         """Test the do_persist and load_persistence_data methods."""
         t = time.time()
         efd = EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], empty_window_warnings=True, learn_mode=True)
-        m1 = MatchElement("/value", b"a", b"a", None)
-        log_atom1 = LogAtom(b"a", ParserMatch(m1), t + 1, None)
-
-        m2 = MatchElement("/value", b"b", b"b", None)
-        log_atom2 = LogAtom(b"b", ParserMatch(m2), t + 3, None)
-
-        m3 = MatchElement("/value", b"a", b"a", None)
-        log_atom3 = LogAtom(b"a", ParserMatch(m3), t + 7, None)
+        log_atom1 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t + 1, None)
+        log_atom2 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t + 3, None)
+        log_atom3 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t + 7, None)
 
         # Start of window 2:
-        m4 = MatchElement("/value", b"a", b"a", None)
-        log_atom4 = LogAtom(b"a", ParserMatch(m4), t + 13, None)
-
-        m5 = MatchElement("/value", b"b", b"b", None)
-        log_atom5 = LogAtom(b"b", ParserMatch(m5), t + 17, None)
-
-        m6 = MatchElement("/value", b"a", b"a", None)
-        log_atom6 = LogAtom(b"a", ParserMatch(m6), t + 18, None)
-
-        m7 = MatchElement("/value", b"a", b"a", None)
-        log_atom7 = LogAtom(b"a", ParserMatch(m7), t + 19, None)
+        log_atom4 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t + 13, None)
+        log_atom5 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t + 17, None)
+        log_atom6 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t + 18, None)
+        log_atom7 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t + 19, None)
 
         # Start of window 3:
-        m8 = MatchElement("/value", b"b", b"b", None)
-        log_atom8 = LogAtom(b"b", ParserMatch(m8), t + 25, None)
-
-        m9 = MatchElement("/value", b"b", b"b", None)
-        log_atom9 = LogAtom(b"b", ParserMatch(m9), t + 25, None)
+        log_atom8 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t + 25, None)
+        log_atom9 = LogAtom(b"b", ParserMatch(MatchElement("/value", b"b", b"b", None)), t + 25, None)
 
         # Start of window 4:
-        m10 = MatchElement("/value", b"a", b"a", None)
-        log_atom10 = LogAtom(b"a", ParserMatch(m10), t + 35, None)
+        log_atom10 = LogAtom(b"a", ParserMatch(MatchElement("/value", b"a", b"a", None)), t + 35, None)
         efd.receive_atom(log_atom1)
         efd.receive_atom(log_atom2)
         efd.receive_atom(log_atom3)
