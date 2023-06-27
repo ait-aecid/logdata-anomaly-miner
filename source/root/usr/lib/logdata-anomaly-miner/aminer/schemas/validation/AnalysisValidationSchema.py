@@ -97,6 +97,7 @@
                     'early_exceeding_anomaly_output': {'type': 'boolean'},
                     'set_lower_limit': {'type': 'integer', 'min': 0, 'nullable': True},
                     'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True},
+                    'season': {'type': 'float', 'min': 0, 'nullable': True},
                     'confidence_factor': {'type': 'float', 'min': 0, 'max': 1},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},

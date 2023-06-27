@@ -215,6 +215,7 @@
                 'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
                 'local_maximum_threshold': {'type': 'float', 'default': 0.2},
                 'combine_values': {'type': 'boolean', 'nullable': True, 'default': True},
+                'season': {'type': 'float', 'nullable': True, 'default': None},
             }
         }
     }

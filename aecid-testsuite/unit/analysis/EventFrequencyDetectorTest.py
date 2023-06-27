@@ -182,6 +182,103 @@ class EventFrequencyDetectorTest(TestBase):
                                'Confidence': 0.5}}])
         self.assertEqual(event_frequency_detector.counts, {('a',): [3, 0, 1], ('b',): [1, 2, 0]})
 
+    def test2_seasonal_frequency_detection(self):
+        """
+        Test for periodically changing frequencies
+        """
+        description = "Test2EventFrequencyDetector"
+
+        # Initialize detector for analyzing values in one path in time windows of 10 seconds
+        test_handler = TestHandler()
+        event_frequency_detector = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[test_handler],
+                                                          target_path_list=['/value'], window_size=10, num_windows=100,
+                                                          confidence_factor=0.51, empty_window_warnings=True, persistence_id='Default',
+                                                          learn_mode=True, output_logline=True, season=20)
+        self.analysis_context.register_component(event_frequency_detector, description)
+
+        # Windows have 1 and 2 atoms alternatingly; the season is thus 2 and expected atom frequencies can be predicted exactly.
+        # The anomaly is that in window 6, only 1 atom occurs although 2 should occur following the sequence.
+        # The anomaly is reported by the log atom in window 7 that concludes window 6.
+        # The following log atoms are created:
+        #  window 1:
+        #   value a: 1 times
+        #  window 2:
+        #   value a: 2 time
+        #  window 3:
+        #   value a: 1 time
+        #  window 4:
+        #   value a: 2 times
+        #  window 5:
+        #   value a: 1 time
+        #  window 6:
+        #   value a: 1 time
+        #  window 7:
+        #   value a: 1 time
+        m_1 = MatchElement('/value', b'a', b'a', None)
+        parser_match_1 = ParserMatch(m_1)
+        log_atom_1 = LogAtom(b'a', parser_match_1, 1, None)
+
+        m_2 = MatchElement('/value', b'a', b'a', None)
+        parser_match_2 = ParserMatch(m_2)
+        log_atom_2 = LogAtom(b'a', parser_match_2, 15, None)
+
+        m_3 = MatchElement('/value', b'a', b'a', None)
+        parser_match_3 = ParserMatch(m_3)
+        log_atom_3 = LogAtom(b'a', parser_match_3, 16, None)
+
+        m_4 = MatchElement('/value', b'a', b'a', None)
+        parser_match_4 = ParserMatch(m_4)
+        log_atom_4 = LogAtom(b'a', parser_match_4, 25, None)
+
+        m_6 = MatchElement('/value', b'a', b'a', None)
+        parser_match_6 = ParserMatch(m_6)
+        log_atom_6 = LogAtom(b'a', parser_match_6, 35, None)
+
+        m_7 = MatchElement('/value', b'a', b'a', None)
+        parser_match_7 = ParserMatch(m_7)
+        log_atom_7 = LogAtom(b'a', parser_match_7, 36, None)
+
+        m_8 = MatchElement('/value', b'a', b'a', None)
+        parser_match_8 = ParserMatch(m_8)
+        log_atom_8 = LogAtom(b'a', parser_match_8, 45, None)
+
+        m_9 = MatchElement('/value', b'a', b'a', None)
+        parser_match_9 = ParserMatch(m_9)
+        log_atom_9 = LogAtom(b'a', parser_match_9, 55, None)
+
+        m_10 = MatchElement('/value', b'a', b'a', None)
+        parser_match_10 = ParserMatch(m_10)
+        log_atom_10 = LogAtom(b'a', parser_match_10, 65, None)
+
+        event_frequency_detector.receive_atom(log_atom_1)
+        self.assertFalse(test_handler.anomalies)
+        event_frequency_detector.receive_atom(log_atom_2)
+        self.assertFalse(test_handler.anomalies)
+        event_frequency_detector.receive_atom(log_atom_3)
+        self.assertFalse(test_handler.anomalies)
+        event_frequency_detector.receive_atom(log_atom_4)
+        # Delete anomaly that occurs since second window has 2 but first only 1 atoms. 
+        self.assertTrue(test_handler.anomalies)
+        test_handler.anomalies = []
+        event_frequency_detector.receive_atom(log_atom_6)
+        self.assertFalse(test_handler.anomalies)
+        event_frequency_detector.receive_atom(log_atom_7)
+        self.assertFalse(test_handler.anomalies)
+        event_frequency_detector.receive_atom(log_atom_8)
+        self.assertFalse(test_handler.anomalies)
+        event_frequency_detector.receive_atom(log_atom_9)
+        self.assertFalse(test_handler.anomalies)
+        event_frequency_detector.receive_atom(log_atom_10)
+        self.assertEqual(test_handler.anomalies, [
+            {'AnalysisComponent':
+                {'AffectedLogAtomPaths': ['/value'],
+                 'AffectedLogAtomValues': ['a']}, 'FrequencyData': {
+                     'ExpectedLogAtomValuesFrequency': 2.0,
+                     'ExpectedLogAtomValuesFrequencyRange': [2.0, 2.0],
+                     'LogAtomValuesFrequency': 1,
+                     'WindowSize': 10, 'ConfidenceFactor': 0.51, 'Confidence': 0.5
+                     }}])
+
 
 if __name__ == "__main__":
     unittest.main()
