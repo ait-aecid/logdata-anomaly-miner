@@ -86,7 +86,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if season is not None:
             lookback = math.ceil(season / window_size)
             if lookback > num_windows:
-                logging.getLogger(DEBUG_LOG_NAME).warning(str(self.__class__.__name__) + ' requires num_windows to be at least ' + str(lookback) + '; seasonality is ignored.')
+                logging.getLogger(DEBUG_LOG_NAME).warning(str(self.__class__.__name__) + ' requires num_windows to be at least ' + \
+                        str(lookback) + '; seasonality is ignored.')
                 self.lookback = None
             else:
                 self.lookback = lookback
@@ -212,11 +213,11 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     self.exceeded_range_frequency[log_ev] = False
                 # Calculate the ranges if it was not already calculated
                 if self.ranges[log_ev] is None:
-                    self.ranges[log_ev] = self.calculate_range(log_ev, log_atom.atom_time)
+                    self.ranges[log_ev] = self.calculate_range(log_ev)
                 if log_ev not in self.counts or (len(self.counts[log_ev]) < 2 and (
                         self.set_lower_limit is None or self.set_upper_limit is None)):
                     # At least counts from 1 window necessary for prediction
-                    self.reset_counter(log_ev, log_atom.atom_time)
+                    self.reset_counter(log_ev)
                     continue
                 # Compare log event frequency of previous time windows and current time window
                 if self.counts[log_ev][-1] < self.ranges[log_ev][0] or self.counts[log_ev][-1] > self.ranges[log_ev][1]:
@@ -254,7 +255,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
                 # Reset counter and range estimation
                 for _ in range(skipped_windows + 1):
-                    self.reset_counter(log_ev, log_atom.atom_time)
+                    self.reset_counter(log_ev)
                 self.ranges[log_ev] = None
             # Reset all stored unique values for every log event
             for log_ev in self.unique_values:
@@ -267,7 +268,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.exceeded_range_frequency[log_event] = False
             # Calculate the ranges if it was not already calculated
             if self.ranges[log_event] is None:
-                self.ranges[log_event] = self.calculate_range(log_event, log_atom.atom_time)
+                self.ranges[log_event] = self.calculate_range(log_event)
             # Compare log event frequency of previous time windows and current time window
             if self.counts[log_event][-1] > self.ranges[log_event][1] and not self.exceeded_range_frequency[log_event]:
                 occurrences_mean = (self.ranges[log_event][0] + self.ranges[log_event][1]) / 2
@@ -331,7 +332,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
             self.learn_mode = False
 
-    def reset_counter(self, log_event, atom_time):
+    def reset_counter(self, log_event):
         """Create count index for new time window"""
         if self.learn_mode is True:
             if len(self.counts[log_event]) <= self.num_windows + 1:
@@ -348,7 +349,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if len(self.scoring_path_list) > 0:
             self.scoring_value_list[log_event] = []
 
-    def calculate_range(self, log_event, atom_time):
+    def calculate_range(self, log_event):
         """Calculate the corresponding range to log_event."""
         if self.set_lower_limit is None or self.set_upper_limit is None:
             if log_event not in self.counts or len(self.counts[log_event]) < 2:
@@ -357,7 +358,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             if self.lookback is not None and len(self.counts[log_event]) > self.lookback + 2:
                 counts_tmp = []
                 season_offset_list = []
-                current_index = self.time_index[log_event][-1] # math.floor((atom_time % self.season) / self.window_size)
+                current_index = self.time_index[log_event][-1]
                 for i in range(0, len(self.counts[log_event]) - 1):
                     # Get all values where lag of size season can be differentiated
                     if i >= self.lookback:
