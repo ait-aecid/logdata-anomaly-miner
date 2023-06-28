@@ -86,7 +86,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if season is not None:
             lookback = math.ceil(season / window_size)
             if lookback > num_windows:
-                logging.getLogger(DEBUG_LOG_NAME).warning(str(self.__class__.__name__) + ' requires num_windows to be at least ' + \
+                logging.getLogger(DEBUG_LOG_NAME).warning(str(self.__class__.__name__) + ' requires num_windows to be at least ' +
                         str(lookback) + '; seasonality is ignored.')
                 self.lookback = None
             else:
