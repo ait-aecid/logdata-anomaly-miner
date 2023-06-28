@@ -339,12 +339,13 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.counts[log_event].append(0)
             else:
                 self.counts[log_event] = self.counts[log_event][1:] + [0]
-            if self.lookback is not None:
-                self.time_index[log_event].append((self.time_index[log_event][-1] + 1) % self.lookback)
             if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                 self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
         else:
             self.counts[log_event][-1] = 0
+        if self.lookback is not None:
+            # Update seasonal index of value to be predicted
+            self.time_index[log_event].append((self.time_index[log_event][-1] + 1) % self.lookback)
         # Reset scoring_value_list
         if len(self.scoring_path_list) > 0:
             self.scoring_value_list[log_event] = []
