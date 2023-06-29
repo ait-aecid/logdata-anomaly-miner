@@ -5,8 +5,9 @@ from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.parsing.MatchElement import MatchElement
 from unit.TestBase import TestBase
+from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
 
-from time import time
+import time
 import random
 from copy import deepcopy
 
@@ -28,7 +29,7 @@ class VariableCorrelationDetectorTest(TestBase):
 
     def filter_variables(self, use_vtd):
         """Run the filter variables code with or without the VariableTypeDetector."""
-        t = time()
+        t = time.time()
         stat_data = b"5.3.0-55-generic"
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data, stat_data, None)), t, self.__class__.__name__)
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -202,7 +203,7 @@ class VariableCorrelationDetectorTest(TestBase):
         0.05 <= percentage_random_cors < 0.15 exactly one combination is expected. The combinations also must not be repeated reversed and
         combinations with itself are not allowed. The used discrete data is for every path the same.
         """
-        t = time()
+        t = time.time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["random"])
         values = []
@@ -240,7 +241,7 @@ class VariableCorrelationDetectorTest(TestBase):
         successfully. In the second case intersect_presel_meth=True and no correlations are found because they are excluded in
         "excludeDueDistr".
         """
-        t = time()
+        t = time.time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd_union = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["excludeDueDistr", "matchDiscVals"], intersect_presel_meth=False)
         vcd_intersection = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_presel_meth=["excludeDueDistr", "matchDiscVals"], intersect_presel_meth=True)
@@ -291,7 +292,7 @@ class VariableCorrelationDetectorTest(TestBase):
         introduces 5 new values. Therefore 15 combinations exist (5+4+3+2+1=15). 10 correlations exist when "/" = i*1 -> child = i*1. In the
         second half 5 new correlations are added when "/" = i*1 -> child = i*2.
         """
-        t = time()
+        t = time.time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, num_init=self.dataset_size)
         values1 = []
@@ -401,7 +402,7 @@ class VariableCorrelationDetectorTest(TestBase):
         value the child elements use (i % 10) * 2 as the condition (i % 7 == 0 and i != 0) is met. Comparing the count of values with
         h*10, as h is used to get the steps with 10%. If the count is smaller than h*10, no value must be found.
         """
-        t = time()
+        t = time.time()
         # run test for every 10% of validate_cor_cover_vals_thres
         for h in range(1, 11, 1):
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -459,7 +460,7 @@ class VariableCorrelationDetectorTest(TestBase):
         correlations is not guaranteed with the distinctDistr validation method. To achieve the equality test, both correlation variables
         are compared to [[], [], []] after all existing correlations are removed.
         """
-        t = time()
+        t = time.time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=["distinctDistr"], validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
         # init and validate
@@ -547,10 +548,8 @@ class VariableCorrelationDetectorTest(TestBase):
         keys are calculated with (i % 10) * 0.2. Due to that the existing value"s count must stay the same in cases where new values are not
         created and new values must be created from 1.0 to 1.8. Values are increased by or created with a count of 10.
         """
-        description = "test15VCD1"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["Rel"], num_init=self.dataset_size)
-        self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True)
         for rel in vcd.rel_list[0]:
             for r in rel:
@@ -565,11 +564,9 @@ class VariableCorrelationDetectorTest(TestBase):
                     else:
                         self.assertEqual({key: 10}, value)
 
-        description = "test15VCD2"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
                                           used_cor_meth=["Rel"], num_init=self.dataset_size)
-        self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False)
         for rel in vcd.rel_list[0]:
             for r in rel:
@@ -585,18 +582,14 @@ class VariableCorrelationDetectorTest(TestBase):
                     else:
                         self.assertEqual({key: 10}, value)
 
-        description = "test15VCD3"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["Rel"], num_init=self.dataset_size)
-        self.analysis_context.register_component(vcd, description)
         old_rel_list = self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=False, generate_rules=False)
         # no values in the rel_list should be changed.
         self.assertEqual(vcd.rel_list[0], old_rel_list)
 
-        description = "test15VCD4"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["Rel"], num_init=self.dataset_size)
-        self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False, offset=offset)
         # old correlations from child elements with the value being divisible by 2 should be deleted. The first ten correlations from the
@@ -630,7 +623,7 @@ class VariableCorrelationDetectorTest(TestBase):
 
     def update_or_test_with_rel_correlation_method(self, etd, vcd, update_rules, generate_rules, offset=0):
         """Run the update or test of rel correlations."""
-        t = time()
+        t = time.time()
         values = []
         # generate the initialization data with child elements being (i % 10) * 1.
         for i in range(self.dataset_size):
@@ -670,10 +663,8 @@ class VariableCorrelationDetectorTest(TestBase):
         """
         # This part tests if rules are updated when update_rules=True and generate_rules=True, however no new rules are generated as the
         # same data is passed on in the update process.
-        description = "test16VCD1"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
-        self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
         for rel in vcd.w_rel_list[0]:
@@ -692,10 +683,8 @@ class VariableCorrelationDetectorTest(TestBase):
 
         # This part tests if rules are updated when update_rules=True and generate_rules=False. Therefore the assumptions of correlations is
         # the same as above, because there were no new correlations generated due to the same data being used.
-        description = "test16VCD2"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
-        self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
         for rel in vcd.w_rel_list[0]:
@@ -713,10 +702,8 @@ class VariableCorrelationDetectorTest(TestBase):
                         self.assertTrue(value in ({key: 15}, {key*2: 5, key: 15}))
 
         # This part tests if rules are updated when update_rules=False and generate_rules=False. No correlation should be changed.
-        description = "test16VCD3"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
-        self.analysis_context.register_component(vcd, description)
         old_w_rel_list = self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=False, generate_rules=False)
         # no values in the rel_list should be changed.
         self.assertEqual(vcd.w_rel_list[0], old_w_rel_list)
@@ -724,10 +711,8 @@ class VariableCorrelationDetectorTest(TestBase):
         # This part tests if rules are updated when update_rules=True and generate_rules=False but with an offset of 200. Therefore the
         # assumptions of correlations for the first part should stay the same and no new correlations should be learned, because an offset
         # is added to all data.
-        description = "test16VCD4"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
-        self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False, offset=offset)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
@@ -748,10 +733,8 @@ class VariableCorrelationDetectorTest(TestBase):
         # This part tests if rules are updated when update_rules=True and generate_rules=True but with an offset of 200. Therefore the
         # assumptions of correlations for the first part should stay the same and new correlations should be learned, because an offset
         # is added to all data.
-        description = "test16VCD5"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
-        self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True, offset=offset)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
@@ -774,7 +757,7 @@ class VariableCorrelationDetectorTest(TestBase):
         Run the update or test of w_rel correlations. This method initializes the vcd with a distribution of 70% 0.1 and 30% 0.2.
         In the update phase the distribution is 80% 1 and 20% 2.
         """
-        t = time()
+        t = time.time()
         values = []
         # generate the initialization data with child elements being (i % 10) * 1.
         for i in range(70):
@@ -827,11 +810,9 @@ class VariableCorrelationDetectorTest(TestBase):
 
     def test17init_and_update_timings(self):
         """This test checks if the init and update intervals are calculated correctly."""
-        description = "test17VCD1"
-        t = time()
+        t = time.time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, num_init=self.dataset_size, num_update=self.dataset_size)
-        self.analysis_context.register_component(vcd, description)
         values = []
         for i in range(self.dataset_size):
             stat_data = bytes(str((i % 10) * 0.1), "utf-8")
@@ -873,3 +854,500 @@ class VariableCorrelationDetectorTest(TestBase):
         self.assertEqual(vcd.pos_var_val, old_pos_var_val)
         self.assertNotEqual(vcd.w_rel_list, old_w_rel_list)
         self.assertNotEqual(vcd.rel_list, old_rel_list)
+
+    def test18do_timer(self):
+        """Test if the do_timer method is implemented properly."""
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
+        t = time.time()
+        vcd.next_persist_time = t + 400
+        self.assertEqual(vcd.do_timer(t + 200), 200)
+        self.assertEqual(vcd.do_timer(t + 400), DEFAULT_PERSISTENCE_PERIOD)
+        self.assertEqual(vcd.do_timer(t + 999), 1)
+        self.assertEqual(vcd.do_timer(t + 1000), DEFAULT_PERSISTENCE_PERIOD)
+
+    def test19persistence(self):
+        """Test the do_persist and load_persistence_data methods."""
+        t = time.time()
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1, test_gof_int=False, sim_thres=0.5, gof_alpha=self.significance_niveau)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
+        for i in range(self.dataset_size):
+            stat_data = bytes(str((i % 60) * 0.1), "utf-8")
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, None)), t, self.__class__.__name__)
+            etd.receive_atom(log_atom)
+            vtd.receive_atom(log_atom)
+        vcd.init_cor(0)
+        # the vcd should not learn any correlations in others data.
+        self.assertEqual(vcd.pos_var_cor, [[]])
+        self.assertEqual(vcd.pos_var_val, [[]])
+        self.assertEqual(vcd.discrete_indices, [[]])
+        self.assertEqual(vcd.update_rules, [True])
+        self.assertEqual(vcd.generate_rules, [True])
+        self.assertEqual(vcd.rel_list, [[]])
+        self.assertEqual(vcd.w_rel_list, [[]])
+        self.assertEqual(vcd.w_rel_num_ll_to_vals, [[]])
+        self.assertEqual(vcd.w_rel_ht_results, [])
+        self.assertEqual(vcd.w_rel_confidences, [])
+
+        vcd.do_persist()
+        with open(vcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), '[[[]], [[]], [[]], [true], [true], [[]], [[]], [[]], [], []]')
+
+        vcd.load_persistence_data()
+        self.assertEqual(vcd.pos_var_cor, [[]])
+        self.assertEqual(vcd.pos_var_val, [[]])
+        self.assertEqual(vcd.discrete_indices, [[]])
+        self.assertEqual(vcd.update_rules, [True])
+        self.assertEqual(vcd.generate_rules, [True])
+        self.assertEqual(vcd.rel_list, [[]])
+        self.assertEqual(vcd.w_rel_list, [[]])
+        self.assertEqual(vcd.w_rel_num_ll_to_vals, [[]])
+        self.assertEqual(vcd.w_rel_ht_results, [])
+        self.assertEqual(vcd.w_rel_confidences, [])
+
+        other = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
+        self.assertEqual(vcd.pos_var_cor, other.pos_var_cor)
+        self.assertEqual(vcd.pos_var_val, other.pos_var_val)
+        self.assertEqual(vcd.discrete_indices, other.discrete_indices)
+        self.assertEqual(vcd.update_rules, other.update_rules)
+        self.assertEqual(vcd.generate_rules, other.generate_rules)
+        self.assertEqual(vcd.rel_list, other.rel_list)
+        self.assertEqual(vcd.w_rel_list, other.w_rel_list)
+        self.assertEqual(vcd.w_rel_num_ll_to_vals, other.w_rel_num_ll_to_vals)
+        self.assertEqual(vcd.w_rel_ht_results, other.w_rel_ht_results)
+        self.assertEqual(vcd.w_rel_confidences, other.w_rel_confidences)
+
+    def test20validate_parameters(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, ["default"], etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, None, etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, "", etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, b"Default", etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, True, etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, 123, etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, 123.3, etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, {"id": "Default"}, etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, (), etd)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, set(), etd)
+
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], "")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], None)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], {"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], [])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], ())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id="")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=None)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, persistence_id="Default")
+
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=b"True")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode="True")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True)
+
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list="")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=["/model/path"])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=[])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, target_path_list=None)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init=0)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_init=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=100)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update=0)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update=100.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_update=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_update=100)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=1)
+
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=100.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=100)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=-1)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_steps_create_new_rules=0)
+
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=100.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=100)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=-1)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_end_learning_phase=0)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_thres=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_prob_thres=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=-1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=100.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=100)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, check_cor_num_thres=0)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=-1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=100.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=100)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, min_values_cors_thres=0)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=0)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=100)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, new_vals_alarm_thres=100.22)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=0)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=100.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_bt=100)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, alpha_bt=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test="SomethingElse")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=None)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test="Chi")
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_homogeneity_test="MaxDist")
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, alpha_chisquare_test=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, max_dist_rule_distr=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=["SomethingElse"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=None)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=[])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=["matchDiscDistr"])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=["excludeDueDistr"])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=["matchDiscVals"])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_presel_meth=["random"])
+
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=None)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=b"True")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth="True")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, intersect_presel_meth=True)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=1.1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=0)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=0.1)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, percentage_random_cors=0.99)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_vals_sim_tresh=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, exclude_due_distr_lower_limit=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, match_disc_distr_threshold=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=["SomethingElse"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=None)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=[])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=["Rel"])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_cor_meth=["WRel"])
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=["SomethingElse"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=None)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=[])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=["coverVals"])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, used_validate_cor_meth=["distinctDistr"])
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_cover_vals_thres=1)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=1.1)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=0)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=0.5)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, validate_cor_distinct_thres=1)
+
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list="")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=["/model/path"])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=[])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, ignore_list=None)
+
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list="")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=True)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=123)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=123.22)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=["/model/path"])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=[])
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, constraint_list=None)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=0)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=100)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=100.22)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=-1)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=0)
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=b"Default")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time="123")
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time={"id": "Default"})
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=["Default"])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=[])
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=())
+        self.assertRaises(TypeError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=set())
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=100)
+        VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_no_anomaly_time=100.22)
+
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=100, stop_learning_no_anomaly_time=100)
