@@ -14,11 +14,8 @@ from copy import deepcopy
 class VariableCorrelationDetectorTest(TestBase):
     """This class containts unittests for the VariableCorrelationDetector."""
 
-    # Number of execution of the tested function
     iterations = 20
-    # Size of the initial datasample
     dataset_size = 100
-    # Significance level
     significance_niveau = 0.05
 
     def test1filter_variables_with_vtd(self):
@@ -32,12 +29,11 @@ class VariableCorrelationDetectorTest(TestBase):
     def filter_variables(self, use_vtd):
         """Run the filter variables code with or without the VariableTypeDetector."""
         t = time()
-        stat_data = b'5.3.0-55-generic'
+        stat_data = b"5.3.0-55-generic"
         log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data, stat_data, None)), t, self.__class__.__name__)
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
-            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for _ in range(self.dataset_size):
             etd.receive_atom(log_atom)
@@ -49,11 +45,10 @@ class VariableCorrelationDetectorTest(TestBase):
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
-            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_gof_int=False, sim_thres=0.5, gof_alpha=self.significance_niveau)
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1, test_gof_int=False, sim_thres=0.5, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         for i in range(self.dataset_size):
-            stat_data = bytes(str((i % 60) * 0.1), 'utf-8')
+            stat_data = bytes(str((i % 60) * 0.1), "utf-8")
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             if use_vtd:
@@ -64,12 +59,11 @@ class VariableCorrelationDetectorTest(TestBase):
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
-            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values = []
         for i in range(self.dataset_size):
-            stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+            stat_data = bytes(str((i % 10) * 0.1), "utf-8")
             values.append(float(stat_data))
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
@@ -82,12 +76,11 @@ class VariableCorrelationDetectorTest(TestBase):
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         if use_vtd:
-            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size,
-                                       div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
+            vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1, test_gof_int=True, sim_thres=0.3, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1)
         values = []
         for i in range(self.dataset_size):
-            stat_data = bytes(str((i % 11) * 0.1), 'utf-8')
+            stat_data = bytes(str((i % 11) * 0.1), "utf-8")
             values.append(float(stat_data))
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement(None, stat_data, stat_data, None)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
@@ -182,13 +175,13 @@ class VariableCorrelationDetectorTest(TestBase):
 
         values = []
         for i in range(58):
-            stat_data = bytes(str(i * 0.1), 'utf-8')
+            stat_data = bytes(str(i * 0.1), "utf-8")
             values.append(float(stat_data))
         values_set1 = values
 
         values = []
         for i in range(41):
-            stat_data = bytes(str(i * 0.2), 'utf-8')
+            stat_data = bytes(str(i * 0.2), "utf-8")
             values.append(float(stat_data))
         values_set2 = values
         # an correlation should be detected if not too many values are different.
@@ -196,7 +189,7 @@ class VariableCorrelationDetectorTest(TestBase):
 
         values = []
         for i in range(42):
-            stat_data = bytes(str(i * 0.2), 'utf-8')
+            stat_data = bytes(str(i * 0.2), "utf-8")
             values.append(float(stat_data))
         values_set2 = values
         # an correlation should not be detected if too many values are different.
@@ -211,14 +204,13 @@ class VariableCorrelationDetectorTest(TestBase):
         """
         t = time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1,
-                                          used_presel_meth=['random'])
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["random"])
         values = []
         for i in range(self.dataset_size):
-            stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+            stat_data = bytes(str((i % 10) * 0.1), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(j), stat_data, stat_data, None) for j in range(5)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str(i).encode(), str(i).encode(), children)),
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", str(i).encode(), str(i).encode(), children)),
                                t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
@@ -236,45 +228,32 @@ class VariableCorrelationDetectorTest(TestBase):
                 self.assertFalse([corr[1], corr[0]] in correlations)
 
         # test if a ValueError is raised when percentage_random_cors is out of range.
-        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_presel_meth=['random'], percentage_random_cors=1.2)
-        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_presel_meth=['random'], percentage_random_cors=1.0)
-        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_presel_meth=['random'], percentage_random_cors=0.0)
-        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_presel_meth=['random'], percentage_random_cors=-1.2)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["random"], percentage_random_cors=1.2)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["random"], percentage_random_cors=1.0)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["random"], percentage_random_cors=0.0)
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["random"], percentage_random_cors=-1.2)
 
     def test7initialize_variables_with_intersect_presel_meth(self):
         """
         This test case checks the functionality of the intersect_presel_meth flag with multiple preselection methods.
-        These are 'excludeDueDistr' and 'matchDiscVals'. In the first case intersect_presel_meth=False and correlations can be detected
+        These are "excludeDueDistr" and "matchDiscVals". In the first case intersect_presel_meth=False and correlations can be detected
         successfully. In the second case intersect_presel_meth=True and no correlations are found because they are excluded in
-        'excludeDueDistr'.
+        "excludeDueDistr".
         """
         t = time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd_union = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=[
-                'excludeDueDistr', 'matchDiscVals'], intersect_presel_meth=False)
-        vcd_intersection = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_presel_meth=[
-                'excludeDueDistr', 'matchDiscVals'], intersect_presel_meth=True)
-        vcd_exclude = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1,
-                                                  used_presel_meth=['excludeDueDistr'])
-        vcd_match = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1,
-                                                used_presel_meth=['matchDiscVals'])
-        var1 = ['a']*50 + ['b']*50
-        var2 = ['a']*90 + ['b']*10
-        var3 = ['c']*20 + ['d']*50 + ['e']*30
-        var4 = ['c']*50 + ['d']*50
+        vcd_union = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["excludeDueDistr", "matchDiscVals"], intersect_presel_meth=False)
+        vcd_intersection = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_presel_meth=["excludeDueDistr", "matchDiscVals"], intersect_presel_meth=True)
+        vcd_exclude = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["excludeDueDistr"])
+        vcd_match = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["matchDiscVals"])
+        var1 = ["a"]*50 + ["b"]*50
+        var2 = ["a"]*90 + ["b"]*10
+        var3 = ["c"]*20 + ["d"]*50 + ["e"]*30
+        var4 = ["c"]*50 + ["d"]*50
 
         for i, val in enumerate(var1):
-            children = [MatchElement('2', var2[i].encode(), var2[i].encode(), None),
-                        MatchElement('3', var3[i].encode(), var3[i].encode(), None),
-                        MatchElement('4', var4[i].encode(), var4[i].encode(), None)]
-            log_atom = LogAtom(val.encode(), ParserMatch(MatchElement('/', val.encode(), val.encode(), children)), t,
-                               self.__class__.__name__)
+            children = [MatchElement("2", var2[i].encode(), var2[i].encode(), None), MatchElement("3", var3[i].encode(), var3[i].encode(), None), MatchElement("4", var4[i].encode(), var4[i].encode(), None)]
+            log_atom = LogAtom(val.encode(), ParserMatch(MatchElement("/", val.encode(), val.encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd_union.init_cor(0)
         vcd_intersection.init_cor(0)
@@ -306,33 +285,30 @@ class VariableCorrelationDetectorTest(TestBase):
     def test8initialize_variables_with_no_preselection_method(self):
         """
         This test case checks the selection with no preselection method used.
-        Also this test case checks the functionality of the Rel and WRel methods. For the data generation the main path '/' always contains
+        Also this test case checks the functionality of the Rel and WRel methods. For the data generation the main path "/" always contains
         (i % 10)*1 and child elements contain (i % 10)*1 for half of the time and (i % 10)*2 for the other half. The first half of
         the data contains 10 different values. These values are not combined with other values like in the second half of the data, which
-        introduces 5 new values. Therefore 15 combinations exist (5+4+3+2+1=15). 10 correlations exist when '/' = i*1 -> child = i*1. In the
-        second half 5 new correlations are added when '/' = i*1 -> child = i*2.
+        introduces 5 new values. Therefore 15 combinations exist (5+4+3+2+1=15). 10 correlations exist when "/" = i*1 -> child = i*1. In the
+        second half 5 new correlations are added when "/" = i*1 -> child = i*2.
         """
         t = time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          num_init=self.dataset_size)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, num_init=self.dataset_size)
         values1 = []
         # generate the first half of the data with child elements being (i % 10) * 0.1.
         for i in range(self.dataset_size // 2):
-            stat_data = bytes(str((i % 10) * 1), 'utf-8')
+            stat_data = bytes(str((i % 10) * 1), "utf-8")
             values1.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
-                               t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         values2 = []
         # generate the second half of the data with child elements being (i % 10) * 2.
         for i in range(self.dataset_size // 2):
-            stat_data = bytes(str((i % 10) * 2), 'utf-8')
+            stat_data = bytes(str((i % 10) * 2), "utf-8")
             values2.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
-                               t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
         values_set = list(set(values1 + values2))
@@ -374,7 +350,7 @@ class VariableCorrelationDetectorTest(TestBase):
                     elif key % 2 == 0:
                         self.assertEqual({(key/2): 5}, value)
                     else:
-                        raise ValueError('The %f: %f combination must not occur in Rel.' % (key, value))
+                        raise ValueError("The %f: %f combination must not occur in Rel." % (key, value))
 
         # relations should be found in both directions and the count should be equal.
         cnt_half = 0  # for example key = 18.0 -> inner key = 9.0
@@ -404,21 +380,19 @@ class VariableCorrelationDetectorTest(TestBase):
                     elif step == 2.0:
                         self.assertEqual({key/2: 5, key: 5}, value)
                     else:
-                        raise ValueError('The %f: %f combination must not occur in WRel.' % (key, value))
+                        raise ValueError("The %f: %f combination must not occur in WRel." % (key, value))
         self.assertEqual(cnt_half, 1)
         self.assertEqual(cnt_double, 1)
 
     def test9nonexistent_preselection_methods(self):
         """This test case checks if an error occurs, when using an nonexistent preselection method."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_presel_meth=['nonexistentPreselMeth'])
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_presel_meth=["nonexistentPreselMeth"])
 
     def test10nonexistent_correlation_methods(self):
         """This test case checks if an error occurs, when using an nonexistent correlation method or empty list."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_cor_meth=['nonexistentCorDMeth'])
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_cor_meth=["nonexistentCorDMeth"])
 
     def test11validate_correlation_rules_coverVals(self):
         """
@@ -431,16 +405,14 @@ class VariableCorrelationDetectorTest(TestBase):
         # run test for every 10% of validate_cor_cover_vals_thres
         for h in range(1, 11, 1):
             etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-            vcd = VariableCorrelationDetector(
-                self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_validate_cor_meth=['coverVals'],
-                validate_cor_cover_vals_thres=0.7, num_init=self.dataset_size)
+            vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_validate_cor_meth=["coverVals"], validate_cor_cover_vals_thres=0.7, num_init=self.dataset_size)
             # set new validate_cor_cover_vals_thres
             vcd.validate_cor_cover_vals_thres = h*0.1
             # init and validate. This is needed as the ETD also needs to be initialized.
             for i in range(self.dataset_size):
                 stat_data = str((i % 10)).encode()
                 children = [MatchElement(str(0), stat_data, stat_data, None)]
-                log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data, stat_data, children)), t, self.__class__.__name__)
+                log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, children)), t, self.__class__.__name__)
                 etd.receive_atom(log_atom)
             vcd.init_cor(0)
             vcd.rel_list = [[[{9.0: {9.0: 26}, 16.0: {16.0: 13}}, {9.0: {9.0: 26}, 16.0: {16.0: 13}}]]]
@@ -489,34 +461,30 @@ class VariableCorrelationDetectorTest(TestBase):
         """
         t = time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=['distinctDistr'],
-            validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=["distinctDistr"], validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
         # init and validate
-        similar_data1 = ['a']*50 + ['b']*20 + ['c']*25 + ['d']*5
-        similar_data2 = ['a']*45 + ['b']*25 + ['c']*15 + ['d']*10 + ['e']*5
-        similar_data3 = ['a']*55 + ['b']*15 + ['c']*20 + ['d']*10
-        unsimilar_data1 = ['a']*50 + ['b']*20 + ['c']*25 + ['d']*5
-        unsimilar_data2 = ['a']*10 + ['b']*15 + ['c']*15 + ['d']*10 + ['e']*50
-        unsimilar_data3 = ['a']*25 + ['b']*15 + ['c']*50 + ['d']*10
+        similar_data1 = ["a"]*50 + ["b"]*20 + ["c"]*25 + ["d"]*5
+        similar_data2 = ["a"]*45 + ["b"]*25 + ["c"]*15 + ["d"]*10 + ["e"]*5
+        similar_data3 = ["a"]*55 + ["b"]*15 + ["c"]*20 + ["d"]*10
+        unsimilar_data1 = ["a"]*50 + ["b"]*20 + ["c"]*25 + ["d"]*5
+        unsimilar_data2 = ["a"]*10 + ["b"]*15 + ["c"]*15 + ["d"]*10 + ["e"]*50
+        unsimilar_data3 = ["a"]*25 + ["b"]*15 + ["c"]*50 + ["d"]*10
 
         for i in range(self.dataset_size):
-            children = [MatchElement(str(1), similar_data2[i].encode(), similar_data2[i].encode(), None),
-                        MatchElement(str(2), similar_data3[i].encode(), similar_data3[i].encode(), None)]
-            log_atom = LogAtom(similar_data1, ParserMatch(MatchElement(
-                '/', similar_data1[i].encode(), similar_data1[i].encode(), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(1), similar_data2[i].encode(), similar_data2[i].encode(), None), MatchElement(str(2), similar_data3[i].encode(), similar_data3[i].encode(), None)]
+            log_atom = LogAtom(similar_data1, ParserMatch(MatchElement("/", similar_data1[i].encode(), similar_data1[i].encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
         old_w_rel_list = deepcopy(vcd.w_rel_list[0])
         vcd.validate_cor()
         self.assertEqual(len(old_w_rel_list), len(vcd.w_rel_list[0]))
         expected_similar_correlations = [[{
-            'd': {'e': 5}, 'c': {'d': 10, 'c': 15}, 'b': {'b': 20}, 'a': {'b': 5, 'a': 45}}, {
-            'e': {'d': 5}, 'd': {'c': 10}, 'c': {'c': 15}, 'b': {'b': 20, 'a': 5}, 'a': {'a': 45}}], [{
-                'd': {'d': 5}, 'c': {'d': 5, 'c': 20}, 'b': {'b': 15, 'a': 5}, 'a': {'a': 50}}, {
-                'd': {'d': 5, 'c': 5}, 'c': {'c': 20}, 'b': {'b': 15}, 'a': {'b': 5, 'a': 50}}], [{
-                    'e': {'d': 5}, 'd': {'d': 5, 'c': 5}, 'c': {'c': 15}, 'b': {'b': 15, 'a': 10}, 'a': {'a': 45}},
-            {'d': {'e': 5, 'd': 5}, 'c': {'d': 5, 'c': 15}, 'b': {'b': 15}, 'a': {'b': 10, 'a': 45}}]]
+            "d": {"e": 5}, "c": {"d": 10, "c": 15}, "b": {"b": 20}, "a": {"b": 5, "a": 45}}, {
+            "e": {"d": 5}, "d": {"c": 10}, "c": {"c": 15}, "b": {"b": 20, "a": 5}, "a": {"a": 45}}], [{
+                "d": {"d": 5}, "c": {"d": 5, "c": 20}, "b": {"b": 15, "a": 5}, "a": {"a": 50}}, {
+                "d": {"d": 5, "c": 5}, "c": {"c": 20}, "b": {"b": 15}, "a": {"b": 5, "a": 50}}], [{
+                    "e": {"d": 5}, "d": {"d": 5, "c": 5}, "c": {"c": 15}, "b": {"b": 15, "a": 10}, "a": {"a": 45}},
+            {"d": {"e": 5, "d": 5}, "c": {"d": 5, "c": 15}, "b": {"b": 15}, "a": {"b": 10, "a": 45}}]]
         for w_rel in vcd.w_rel_list[0]:
             for cor in w_rel:
                 deleted = False
@@ -528,20 +496,15 @@ class VariableCorrelationDetectorTest(TestBase):
                         break
                 # if the correlation was not deleted an error is raised and the test fails.
                 if not deleted:
-                    raise ValueError('Correlation %s could not be found in the WRel List.' % cor)
+                    raise ValueError("Correlation %s could not be found in the WRel List." % cor)
         self.assertEqual([[], [], []], expected_similar_correlations)
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1,
-                                   test_gof_int=True, sim_thres=0.1, gof_alpha=self.significance_niveau)
-        vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=['distinctDistr'],
-            validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
+        vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1, test_gof_int=True, sim_thres=0.1, gof_alpha=self.significance_niveau)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=["distinctDistr"], validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
         for i in range(self.dataset_size):
-            children = [MatchElement(str(1), unsimilar_data2[i].encode(), unsimilar_data2[i].encode(), None),
-                        MatchElement(str(2), unsimilar_data3[i].encode(), unsimilar_data3[i].encode(), None)]
-            log_atom = LogAtom(unsimilar_data1[i], ParserMatch(MatchElement(
-                '/', unsimilar_data1[i].encode(), unsimilar_data1[i].encode(), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(1), unsimilar_data2[i].encode(), unsimilar_data2[i].encode(), None), MatchElement(str(2), unsimilar_data3[i].encode(), unsimilar_data3[i].encode(), None)]
+            log_atom = LogAtom(unsimilar_data1[i], ParserMatch(MatchElement("/", unsimilar_data1[i].encode(), unsimilar_data1[i].encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             vtd.receive_atom(log_atom)
         vcd.init_cor(0)
@@ -549,10 +512,10 @@ class VariableCorrelationDetectorTest(TestBase):
         vcd.validate_cor()
         self.assertEqual(len(old_w_rel_list), len(vcd.w_rel_list[0]))
         expected_unsimilar_correlations = [[
-            {}, {'a': {'a': 10}, 'b': {'a': 15}, 'c': {'a': 15}, 'd': {'a': 10}, 'e': {'b': 20, 'c': 25, 'd': 5}}], [
-            {}, {'a': {'a': 25}, 'b': {'a': 15}, 'd': {'c': 5, 'd': 5}}], [
-            {'a': {'a': 10}, 'b': {'a': 15}, 'c': {'b': 15}, 'd': {'c': 10}, 'e': {'c': 40, 'd': 10}}, {
-                'a': {'a': 10, 'b': 15}, 'b': {'c': 15}, 'c': {'d': 10, 'e': 40}, 'd': {'e': 10}}]]
+            {}, {"a": {"a": 10}, "b": {"a": 15}, "c": {"a": 15}, "d": {"a": 10}, "e": {"b": 20, "c": 25, "d": 5}}], [
+            {}, {"a": {"a": 25}, "b": {"a": 15}, "d": {"c": 5, "d": 5}}], [
+            {"a": {"a": 10}, "b": {"a": 15}, "c": {"b": 15}, "d": {"c": 10}, "e": {"c": 40, "d": 10}}, {
+                "a": {"a": 10, "b": 15}, "b": {"c": 15}, "c": {"d": 10, "e": 40}, "d": {"e": 10}}]]
         for w_rel in vcd.w_rel_list[0]:
             for cor in w_rel:
                 deleted = False
@@ -564,32 +527,29 @@ class VariableCorrelationDetectorTest(TestBase):
                         break
                 # if the correlation was not deleted an error is raised and the test fails.
                 if not deleted:
-                    raise ValueError('Correlation %s could not be found in the WRel List.%s' % (cor, vcd.w_rel_list[0]))
+                    raise ValueError("Correlation %s could not be found in the WRel List.%s" % (cor, vcd.w_rel_list[0]))
         self.assertEqual([[], [], []], expected_unsimilar_correlations)
 
     def test13validate_correlation_rules_distinctDistr_without_WRel(self):
         """This test case checks if an error occurs, when using the distinctDistr validation method without the WRel correlation method."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_cor_meth=['Rel'], used_validate_cor_meth=['distinctDistr'])
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_cor_meth=["Rel"], used_validate_cor_meth=["distinctDistr"])
 
     def test14nonexistent_validation_method(self):
         """This test case checks if an error occurs, when using an nonexistent validation method or empty list."""
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd,
-                          disc_div_thres=0.1, used_validate_cor_meth=['nonexistentValidateCorDMeth'])
+        self.assertRaises(ValueError, VariableCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=["nonexistentValidateCorDMeth"])
 
     def test15update_and_test_correlation_rules_with_rel_correlation_method(self):
         """
         This test case checks the functionality of the Rel correlation method in the update, correlation generation and test phases.
         The correlations are initialized with 10 values for each correlation and keys calculated with (i % 10) * 0.1. In the update phase
-        keys are calculated with (i % 10) * 0.2. Due to that the existing value's count must stay the same in cases where new values are not
+        keys are calculated with (i % 10) * 0.2. Due to that the existing value"s count must stay the same in cases where new values are not
         created and new values must be created from 1.0 to 1.8. Values are increased by or created with a count of 10.
         """
-        description = 'test15VCD1'
+        description = "test15VCD1"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          used_cor_meth=['Rel'], num_init=self.dataset_size)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["Rel"], num_init=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True)
         for rel in vcd.rel_list[0]:
@@ -605,10 +565,10 @@ class VariableCorrelationDetectorTest(TestBase):
                     else:
                         self.assertEqual({key: 10}, value)
 
-        description = 'test15VCD2'
+        description = "test15VCD2"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          used_cor_meth=['Rel'], num_init=self.dataset_size)
+                                          used_cor_meth=["Rel"], num_init=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False)
         for rel in vcd.rel_list[0]:
@@ -625,19 +585,17 @@ class VariableCorrelationDetectorTest(TestBase):
                     else:
                         self.assertEqual({key: 10}, value)
 
-        description = 'test15VCD3'
+        description = "test15VCD3"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          used_cor_meth=['Rel'], num_init=self.dataset_size)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["Rel"], num_init=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         old_rel_list = self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=False, generate_rules=False)
         # no values in the rel_list should be changed.
         self.assertEqual(vcd.rel_list[0], old_rel_list)
 
-        description = 'test15VCD4'
+        description = "test15VCD4"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          used_cor_meth=['Rel'], num_init=self.dataset_size)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["Rel"], num_init=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False, offset=offset)
@@ -676,11 +634,10 @@ class VariableCorrelationDetectorTest(TestBase):
         values = []
         # generate the initialization data with child elements being (i % 10) * 1.
         for i in range(self.dataset_size):
-            stat_data = bytes(str((i % 10) * 1), 'utf-8')
+            stat_data = bytes(str((i % 10) * 1), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data, stat_data, children)), t,
-                               self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
         # test if the initialization contains only correlations with 10 values.
@@ -694,11 +651,10 @@ class VariableCorrelationDetectorTest(TestBase):
         values = []
         # generate the update data with child elements being (i % 10) * 2.
         for i in range(self.dataset_size):
-            stat_data = bytes(str((i % 10) * 2 + offset), 'utf-8')
+            stat_data = bytes(str((i % 10) * 2 + offset), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 2).encode(), str((i % 10) * 2).encode(), children)),
-                               t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", str((i % 10) * 2).encode(), str((i % 10) * 2).encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.log_atom = log_atom
         vcd.update_rules[0] = update_rules
@@ -714,11 +670,9 @@ class VariableCorrelationDetectorTest(TestBase):
         """
         # This part tests if rules are updated when update_rules=True and generate_rules=True, however no new rules are generated as the
         # same data is passed on in the update process.
-        description = 'test16VCD1'
+        description = "test16VCD1"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=['WRel'],
-            num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
@@ -738,11 +692,9 @@ class VariableCorrelationDetectorTest(TestBase):
 
         # This part tests if rules are updated when update_rules=True and generate_rules=False. Therefore the assumptions of correlations is
         # the same as above, because there were no new correlations generated due to the same data being used.
-        description = 'test16VCD2'
+        description = "test16VCD2"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=['WRel'],
-            num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False)
         self.assertEqual(1, len(vcd.w_rel_list[0]))
@@ -761,11 +713,9 @@ class VariableCorrelationDetectorTest(TestBase):
                         self.assertTrue(value in ({key: 15}, {key*2: 5, key: 15}))
 
         # This part tests if rules are updated when update_rules=False and generate_rules=False. No correlation should be changed.
-        description = 'test16VCD3'
+        description = "test16VCD3"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=['WRel'],
-            num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         old_w_rel_list = self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=False, generate_rules=False)
         # no values in the rel_list should be changed.
@@ -774,11 +724,9 @@ class VariableCorrelationDetectorTest(TestBase):
         # This part tests if rules are updated when update_rules=True and generate_rules=False but with an offset of 200. Therefore the
         # assumptions of correlations for the first part should stay the same and no new correlations should be learned, because an offset
         # is added to all data.
-        description = 'test16VCD4'
+        description = "test16VCD4"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=['WRel'],
-            num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=False, offset=offset)
@@ -800,11 +748,9 @@ class VariableCorrelationDetectorTest(TestBase):
         # This part tests if rules are updated when update_rules=True and generate_rules=True but with an offset of 200. Therefore the
         # assumptions of correlations for the first part should stay the same and new correlations should be learned, because an offset
         # is added to all data.
-        description = 'test16VCD5'
+        description = "test16VCD5"
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(
-            self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-            used_cor_meth=['WRel'], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, used_cor_meth=["WRel"], num_init=self.dataset_size, num_update=self.dataset_size, max_dist_rule_distr=0.5)
         self.analysis_context.register_component(vcd, description)
         offset = 200
         self.update_or_test_with_w_rel_correlation_method(etd, vcd, update_rules=True, generate_rules=True, offset=offset)
@@ -832,18 +778,16 @@ class VariableCorrelationDetectorTest(TestBase):
         values = []
         # generate the initialization data with child elements being (i % 10) * 1.
         for i in range(70):
-            stat_data = bytes(str((i % 10) * 1), 'utf-8')
+            stat_data = bytes(str((i % 10) * 1), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data, stat_data, children)), t,
-                               self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         for i in range(30):
-            stat_data = bytes(str((i % 10) * 2), 'utf-8')
+            stat_data = bytes(str((i % 10) * 2), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
-                               t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
         old_w_rel_list = deepcopy(vcd.w_rel_list[0])
@@ -864,18 +808,16 @@ class VariableCorrelationDetectorTest(TestBase):
 
         values = []
         for i in range(80):
-            stat_data = bytes(str((i % 10) * 1 + offset), 'utf-8')
+            stat_data = bytes(str((i % 10) * 1 + offset), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', stat_data, stat_data, children)), t,
-                               self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", stat_data, stat_data, children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         for i in range(20):
-            stat_data = bytes(str((i % 10) * 2 + offset), 'utf-8')
+            stat_data = bytes(str((i % 10) * 2 + offset), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
-                               t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.log_atom = log_atom
         vcd.update_rules[0] = update_rules
@@ -885,19 +827,17 @@ class VariableCorrelationDetectorTest(TestBase):
 
     def test17init_and_update_timings(self):
         """This test checks if the init and update intervals are calculated correctly."""
-        description = 'test17VCD1'
+        description = "test17VCD1"
         t = time()
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5,
-                                          num_init=self.dataset_size, num_update=self.dataset_size)
+        vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.5, num_init=self.dataset_size, num_update=self.dataset_size)
         self.analysis_context.register_component(vcd, description)
         values = []
         for i in range(self.dataset_size):
-            stat_data = bytes(str((i % 10) * 0.1), 'utf-8')
+            stat_data = bytes(str((i % 10) * 0.1), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement(
-                '/', str((i % 10) * 0.1).encode(), str((i % 10) * 0.1).encode(), children)), t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", str((i % 10) * 0.1).encode(), str((i % 10) * 0.1).encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             vcd.receive_atom(log_atom)
             if i < self.dataset_size - 1:
@@ -917,11 +857,10 @@ class VariableCorrelationDetectorTest(TestBase):
 
         values = []
         for i in range(self.dataset_size):
-            stat_data = bytes(str((i % 10) * 1), 'utf-8')
+            stat_data = bytes(str((i % 10) * 1), "utf-8")
             values.append(float(stat_data))
             children = [MatchElement(str(0), stat_data, stat_data, None)]
-            log_atom = LogAtom(stat_data, ParserMatch(MatchElement('/', str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)),
-                               t, self.__class__.__name__)
+            log_atom = LogAtom(stat_data, ParserMatch(MatchElement("/", str((i % 10) * 1).encode(), str((i % 10) * 1).encode(), children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             vcd.receive_atom(log_atom)
             if i < self.dataset_size - 1:

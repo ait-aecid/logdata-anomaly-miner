@@ -216,6 +216,8 @@
                 'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
                 'local_maximum_threshold': {'type': 'float', 'default': 0.2},
                 'combine_values': {'type': 'boolean', 'nullable': True, 'default': True},
+                'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
+                'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
             }
         }
     }

@@ -594,7 +594,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 self.forward_hypotheses_inv[log_event] = [implication]
                             self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses + 1
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
             # Periodically remove old or unstable hypotheses.
             if log_atom.atom_time >= self.last_hypotheses_eval_timestamp + self.hypotheses_eval_delta_time:

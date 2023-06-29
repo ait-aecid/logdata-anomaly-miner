@@ -47,7 +47,9 @@
                     'output_logline': {'type': 'boolean'},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'output_event_handlers': {'type': 'list', 'nullable': True}
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
@@ -59,6 +61,8 @@
                     'tuple_transformation_function': {'type': 'string', 'allowed': ['demo'], 'nullable': True},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -83,6 +87,8 @@
                     'output_logline': {'type': 'boolean'},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -104,6 +110,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -124,6 +132,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -140,6 +150,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -153,6 +165,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -166,6 +180,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -181,6 +197,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -212,6 +230,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -302,6 +322,8 @@
                     'realert_interval': {'type': 'integer', 'min': 1, 'bigger_than_or_equal': ['check_interval', 3600]},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -315,6 +337,8 @@
                     'realert_interval': {'type': 'integer', 'min': 1, 'bigger_than_or_equal': ['check_interval', 3600]},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -328,6 +352,8 @@
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -337,6 +363,8 @@
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -348,6 +376,8 @@
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -358,6 +388,8 @@
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -547,6 +579,8 @@
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -597,6 +631,8 @@
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'learn_mode': {'type': 'boolean'},
                     'suppress': {'type': 'boolean'}
                 },
@@ -613,6 +649,8 @@
                     'output_logline': {'type': 'boolean'},
                     'learn_mode': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -633,6 +671,8 @@
                     'num_periods_tsa_ini': {'type': 'integer', 'min': 2},
                     'learn_mode': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -662,6 +702,8 @@
                     'set_period_length': {'type': 'integer', 'min': 1},
                     'min_log_lines_per_time_step': {'type': 'integer', 'min': 1},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'learn_mode': {'type': 'boolean'},
                     'suppress': {'type': 'boolean'}
                 },
@@ -678,6 +720,9 @@
                     'time_output_threshold': {'type': 'integer', 'min': 0},
                     'anomaly_threshold': {'type': 'float', 'min': 0, 'max': 1.0},
                     'output_logline': {'type': 'boolean'},
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'learn_mode': {'type': 'boolean'}
                 },
                 {

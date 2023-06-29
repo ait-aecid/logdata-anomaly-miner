@@ -13,7 +13,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import logging
-import time
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, KEY_PERSISTENCE_PERIOD,\
     DEFAULT_PERSISTENCE_PERIOD
@@ -151,7 +150,8 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             if self.learn_mode:
                 self.charsets[id_event].update(missing_chars)
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
         else:
             self.charsets[id_event] = set(b"".join(values))
         self.log_success += 1

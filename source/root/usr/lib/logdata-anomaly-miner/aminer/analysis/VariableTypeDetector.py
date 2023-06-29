@@ -469,7 +469,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
 
     def do_persist(self):
@@ -891,7 +891,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                                 self.var_type_history_list_reference[event_index][var_index].append(sum(
                                         type_val[-self.num_var_type_hist_ref:]))
                     if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                        self.stop_learning_timestamp = max(
+                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
     def detect_var_type(self, event_index, var_index):
         """Give back the assumed variable type of the variable with the in self.event_type_detector stored values."""
@@ -1305,7 +1306,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.var_type[event_index][var_index] = self.calculate_value_range(
                     self.event_type_detector.values[event_index][var_index][-self.num_update:])
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
         # Test and update for ascending values
         elif self.var_type[event_index][var_index][0] == 'asc':
@@ -1435,7 +1437,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     self.d_init_bt(event_index, var_index)
 
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 return
 
         # Test and update for static variables

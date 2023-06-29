@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
 import os
 import logging
 
@@ -178,7 +177,8 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 self.log_learned += 1
                 self.log_learned_sequences.append(self.current_sequences[id_tuple])
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
