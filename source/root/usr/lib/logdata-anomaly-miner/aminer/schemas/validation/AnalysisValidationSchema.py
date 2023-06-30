@@ -728,6 +728,7 @@
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['SimpleUnparsedAtomHandler', 'VerboseUnparsedAtomHandler'], 'required': True},
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
                 }
             ]
