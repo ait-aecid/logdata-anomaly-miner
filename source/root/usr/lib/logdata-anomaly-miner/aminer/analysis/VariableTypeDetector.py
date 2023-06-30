@@ -22,6 +22,7 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
+from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
@@ -132,6 +133,22 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             ignore_list=ignore_list, constraint_list=constraint_list, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
+        if not isinstance(self.event_type_detector, EventTypeDetector):
+            msg = "event_type_detector must be an instance of EventTypeDetector."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if self.used_gof_test not in ("KS", "CM"):
+            msg = "used_gof_test must be either 'KF' or 'CM'."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if self.used_multinomial_test not in ("MT", "Approx", "Chi"):
+            msg = "used_multinomial_test must be either 'MT', 'Approx' or 'Chi'."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if self.used_range_test not in ("MeanSD", "EmpiricQuantiles", "MinMax"):
+            msg = "used_range_test must be either 'MeanSD', 'EmpiricQuantiles' or 'MinMax'."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
 
         # Initialization of variables, which are no input parameters
         # Saves the minimal number of successes for the BT for the s_gof-test
@@ -362,12 +379,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # Loads the persistence
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
 
-        # Imports the persistence
-        if persistence_data is not None:
-            self.load_persistence_data(persistence_data)
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        self.load_persistence_data()
 
         # Generate the modifiers for the estimation of the minimum and maximum for the uniform distribution
         self.min_mod_ini_uni = 1 / (self.num_init + 1)
@@ -485,41 +498,44 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.failed_indicators_total, self.failed_indicators_values, self.failed_indicators_paths, self.failed_indicators])
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
-    def load_persistence_data(self, persistence_data):
+    def load_persistence_data(self):
         """Extract the persistence data and appends various lists to create a consistent state."""
-        # Import the lists of the persistence
-        self.var_type = persistence_data[0]
-        self.alternative_distribution_types = persistence_data[1]
-        self.var_type_history_list = persistence_data[2]
-        self.var_type_history_list_reference = persistence_data[3]
-        self.failed_indicators = persistence_data[4]
-        self.distr_val = persistence_data[5]
-        self.num_events = len(self.var_type)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            # Import the lists of the persistence
+            self.var_type = persistence_data[0]
+            self.alternative_distribution_types = persistence_data[1]
+            self.var_type_history_list = persistence_data[2]
+            self.var_type_history_list_reference = persistence_data[3]
+            self.failed_indicators = persistence_data[4]
+            self.distr_val = persistence_data[5]
+            self.num_events = len(self.var_type)
 
-        # Create the initial lists which derive from the persistence
-        # Number of variables of the single events
-        self.length = [len(self.event_type_detector.variable_key_list[event_index]) for event_index in range(self.num_events)]
-        self.variable_path_num = [[] for _ in range(self.num_events)]
-        # List of the successes of the binomialtest for the rejection in the s_gof or variables of discrete type
-        self.bt_results = [[[] for var_index in range(self.length[event_index])] for event_index in range(self.num_events)]
+            # Create the initial lists which derive from the persistence
+            # Number of variables of the single events
+            self.length = [len(self.event_type_detector.variable_key_list[event_index]) for event_index in range(self.num_events)]
+            self.variable_path_num = [[] for _ in range(self.num_events)]
+            # List of the successes of the binomialtest for the rejection in the s_gof or variables of discrete type
+            self.bt_results = [[[] for var_index in range(self.length[event_index])] for event_index in range(self.num_events)]
 
-        # Updates the lists for each eventType individually
-        for event_index in range(self.num_events):
-            # Adds the variable indices to the variable_path_num-list if the target_path_list is not empty
-            if self.target_path_list is not None:
-                for var_index in range(self.length[event_index]):
-                    if self.event_type_detector.variable_key_list[event_index][var_index] in self.target_path_list:
-                        self.variable_path_num[event_index].append(var_index)
+            # Updates the lists for each eventType individually
+            for event_index in range(self.num_events):
+                # Adds the variable indices to the variable_path_num-list if the target_path_list is not empty
+                if self.target_path_list is not None:
+                    for var_index in range(self.length[event_index]):
+                        if self.event_type_detector.variable_key_list[event_index][var_index] in self.target_path_list:
+                            self.variable_path_num[event_index].append(var_index)
 
-            # Initializes the lists for the discrete distribution, or continuous distribution
-            for var_index, var_val in enumerate(self.var_type[event_index]):
-                if len(var_val) > 0:
-                    if var_val[0] in self.distr_list:
-                        self.bt_results[event_index][var_index] = [1] * self.num_s_gof_bt
-                        if var_val[0] in ('betam', 'spec'):
-                            self.s_gof_get_quantiles(event_index, var_index)
-                    elif var_val[0] == 'd':
-                        self.d_init_bt(event_index, var_index)
+                # Initializes the lists for the discrete distribution, or continuous distribution
+                for var_index, var_val in enumerate(self.var_type[event_index]):
+                    if len(var_val) > 0:
+                        if var_val[0] in self.distr_list:
+                            self.bt_results[event_index][var_index] = [1] * self.num_s_gof_bt
+                            if var_val[0] in ('betam', 'spec'):
+                                self.s_gof_get_quantiles(event_index, var_index)
+                        elif var_val[0] == 'd':
+                            self.d_init_bt(event_index, var_index)
+            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def process_ll(self, event_index, log_atom):
         """Process the log line. Extracts and appends the values of the log line to the values-list."""
