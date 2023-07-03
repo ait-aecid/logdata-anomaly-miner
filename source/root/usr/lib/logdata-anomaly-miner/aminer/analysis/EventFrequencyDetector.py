@@ -217,7 +217,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 if log_ev not in self.counts or (len(self.counts[log_ev]) < 2 and (
                         self.set_lower_limit is None or self.set_upper_limit is None)):
                     # At least counts from 1 window necessary for prediction
-                    self.reset_counter(log_ev)
+                    self.reset_counter(log_ev, log_atom.atom_time)
                     continue
                 # Compare log event frequency of previous time windows and current time window
                 if self.counts[log_ev][-1] < self.ranges[log_ev][0] or self.counts[log_ev][-1] > self.ranges[log_ev][1]:
@@ -255,7 +255,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
                 # Reset counter and range estimation
                 for _ in range(skipped_windows + 1):
-                    self.reset_counter(log_ev)
+                    self.reset_counter(log_ev, log_atom.atom_time)
                 self.ranges[log_ev] = None
             # Reset all stored unique values for every log event
             for log_ev in self.unique_values:
@@ -332,7 +332,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
             self.learn_mode = False
 
-    def reset_counter(self, log_event):
+    def reset_counter(self, log_event, atom_time):
         """Create count index for new time window"""
         if self.learn_mode is True:
             if len(self.counts[log_event]) <= self.num_windows + 1:
