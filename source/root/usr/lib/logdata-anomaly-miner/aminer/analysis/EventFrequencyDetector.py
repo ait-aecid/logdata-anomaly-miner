@@ -222,6 +222,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     else:
                         sorted_log_lines = [data]
                     analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": list(log_ev)}
+                    confidence = 1
+                    if max(occurrences_mean, self.counts[log_ev][-1]) != 0:
+                        confidence = 1 - min(occurrences_mean, self.counts[log_ev][-1]) / max(occurrences_mean, self.counts[log_ev][-1])
                     frequency_info = {"ExpectedLogAtomValuesFrequency": occurrences_mean,
                                       "ExpectedLogAtomValuesFrequencyRange": [
                                           np.ceil(max(0, self.ranges[log_ev][0])),
@@ -229,8 +232,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                       "LogAtomValuesFrequency": self.counts[log_ev][-1],
                                       "WindowSize": self.window_size,
                                       "ConfidenceFactor": self.confidence_factor,
-                                      "Confidence": 1 - min(occurrences_mean, self.counts[log_ev][-1]) /
-                                      max(occurrences_mean, self.counts[log_ev][-1])}
+                                      "Confidence": confidence}
                     # In case that scoring_path_list is set, give their values to the event handlers for further analysis.
                     if len(self.scoring_path_list) > 0:
                         frequency_info["IdValues"] = self.scoring_value_list[log_ev]
@@ -371,7 +373,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 occurrences_std = np.std(counts_tmp[-self.num_windows-1:-1])
             else:
                 # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
-                occurrences_std = occurrences_mean * (1 - self.confidence_factor)
+                occurrences_std = np.mean(self.counts[log_event][-self.num_windows-1:-1]) * (1 - self.confidence_factor)
         # Calculate limits
         if self.set_lower_limit is not None:
             lower_limit = self.set_lower_limit
