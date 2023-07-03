@@ -12,7 +12,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
 import os
 import logging
 
@@ -32,7 +31,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, target_path_list, min_bin_elements, min_bin_time,
-                 debug_mode=False, persistence_id='Default', output_logline=True):
+                 debug_mode=False, persistence_id="Default", output_logline=True):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -53,29 +52,15 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             target_path_list=target_path_list, min_bin_elements=min_bin_elements, min_bin_time=min_bin_time, debug_mode=debug_mode,
             persistence_id=persistence_id, output_logline=output_logline
         )
+        if not self.target_path_list:
+            msg = "target_path_list must not be empty or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.stat_data = []
-        for path in target_path_list:
-            self.stat_data.append((path, [],))
-        if persistence_data is not None:
-            for val in persistence_data:
-                if isinstance(val, str):
-                    val = val.strip('[').strip(']').split(',', 2)
-                    path = val[0].strip('"')
-                    values = val[1].strip(' ').strip('[').strip(']')
-                else:
-                    path = val[0]
-                    values = val[1]
-                index = 0
-                for p, _ in self.stat_data:
-                    if p == path:
-                        break
-                    index += 1
-                for value in values:
-                    self.stat_data[index][1].append(value)
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):
         """Send summary to all event handlers."""
@@ -89,14 +74,14 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             if match_value is None:
                 return
             timestamp_value = match_value.match_object
-            event_data = {'MatchValue': match_value.match_object}
+            event_data = {"MatchValue": match_value.match_object}
 
-        analysis_summary = ''
+        analysis_summary = ""
         ready_for_analysis_flag = True
         for (path, stat_data) in self.stat_data:
             match = value_dict.get(path)
             if match is None:
-                ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, None))
+                ready_for_analysis_flag = (self.update(stat_data, timestamp_value, None) and ready_for_analysis_flag)
             else:
                 if isinstance(match, list):
                     data = []
@@ -104,38 +89,38 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                         data.append(m.match_object)
                 else:
                     data = match.match_object
-                ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, data))
+                ready_for_analysis_flag = (self.update(stat_data, timestamp_value, data) and ready_for_analysis_flag)
 
         if ready_for_analysis_flag:
             anomaly_scores = []
             for (path, stat_data) in self.stat_data:
                 analysis_data = self.analyze(stat_data)
                 if analysis_data is not None:
-                    d = {'Path': path}
+                    d = {"Path": path}
                     a = {}
-                    new = {'N': analysis_data[1], 'Avg': analysis_data[2], 'Var': analysis_data[3]}
-                    old = {'N': analysis_data[4], 'Avg': analysis_data[5], 'Var': analysis_data[6]}
-                    a['New'] = new
-                    a['Old'] = old
-                    d['AnalysisData'] = a
-                    if analysis_summary == '':
+                    new = {"N": analysis_data[1], "Avg": analysis_data[2], "Var": analysis_data[3]}
+                    old = {"N": analysis_data[4], "Avg": analysis_data[5], "Var": analysis_data[6]}
+                    a["New"] = new
+                    a["Old"] = old
+                    d["AnalysisData"] = a
+                    if analysis_summary == "":
                         analysis_summary += f'"{path}": {analysis_data[0]}'
                     else:
                         analysis_summary += os.linesep
                         analysis_summary += f'  "{path}": {analysis_data[0]}'
                     anomaly_scores.append(d)
-            analysis_component = {'AffectedLogAtomPaths': list(value_dict),
-                                  'AnomalyScores': anomaly_scores,
-                                  'MinBinElements': self.min_bin_elements,
-                                  'MinBinTime': self.min_bin_time,
-                                  'DebugMode': self.debug_mode}
-            event_data = {'AnalysisComponent': analysis_component}
+            analysis_component = {"AffectedLogAtomPaths": list(value_dict),
+                                  "AnomalyScores": anomaly_scores,
+                                  "MinBinElements": self.min_bin_elements,
+                                  "MinBinTime": self.min_bin_time,
+                                  "DebugMode": self.debug_mode}
+            event_data = {"AnalysisComponent": analysis_component}
 
         if analysis_summary:
-            res = [''] * stat_data[2][0]
+            res = [""] * stat_data[2][0]
             res[0] = analysis_summary
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Statistical data report', res, event_data, log_atom, self)
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", "Statistical data report", res, event_data, log_atom, self)
         self.log_success += 1
 
     def do_timer(self, trigger_time):
@@ -147,8 +132,32 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        for path in self.target_path_list:
+            self.stat_data.append((path, [],))
+
+        def replace_brackets(val):
+            """replace lists with tuples."""
+            if isinstance(val, list):
+                val = tuple(val)
+            return val
+
+        if persistence_data is not None:
+            for val in persistence_data:
+                values = replace_brackets(val[1])
+                index = 0
+                for p, _ in self.stat_data:
+                    if p == val[0]:
+                        break
+                    index += 1
+                for value in values:
+                    value = replace_brackets(value)
+                    self.stat_data[index][1].append(value)
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
@@ -199,7 +208,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             stat_data[2] = (current_bin[0], current_bin[1], current_bin[2], current_average, current_variance,)
             stat_data[3] = (0, 0.0, 0.0)
             if self.debug_mode:
-                return f'Initial: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}'
+                return [f"Initial: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}"] + [None]*10
         else:
             total_n = old_bin[0] + current_bin[0]
             total_sum = old_bin[1] + current_bin[1]
@@ -210,8 +219,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             stat_data[3] = (0, 0.0, 0.0)
 
             if (current_variance > 2 * old_bin[4]) or (abs(current_average - old_bin[3]) > old_bin[4]) or self.debug_mode:
-                res = [f'Change: new: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}; old: n = '
-                       f'{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = { old_bin[4]}', current_bin[0],
+                res = [f"Change: new: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}; old: n = "
+                       f"{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = { old_bin[4]}", current_bin[0],
                        current_average + stat_data[1], current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]]
                 return res
         return None

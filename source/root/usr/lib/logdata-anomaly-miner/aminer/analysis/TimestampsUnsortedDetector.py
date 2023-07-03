@@ -36,10 +36,8 @@ class TimestampsUnsortedDetector(AtomHandlerInterface):
         """
         # avoid "defined outside init" issue
         self.log_success, self.log_total = [None]*2
-        super().__init__(
-            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, exit_on_error_flag=exit_on_error_flag,
-            output_logline=output_logline
-        )
+        super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, exit_on_error_flag=exit_on_error_flag,
+                         output_logline=output_logline)
         self.last_timestamp = 0
 
     def receive_atom(self, log_atom):
@@ -59,14 +57,14 @@ class TimestampsUnsortedDetector(AtomHandlerInterface):
                 data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             if self.output_logline:
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix + data]
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match("") + os.linesep + original_log_line_prefix + data]
             else:
                 sorted_log_lines = [original_log_line_prefix + data]
-            analysis_component = {'LastTimestamp': self.last_timestamp}
-            event_data = {'AnalysisComponent': analysis_component}
+            analysis_component = {"LastTimestamp": self.last_timestamp}
+            event_data = {"AnalysisComponent": analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(
-                    f'Analysis.{self.__class__.__name__}',
+                    f"Analysis.{self.__class__.__name__}",
                     f"Timestamp {datetime.fromtimestamp(log_atom.get_timestamp()).strftime('%Y-%m-%d %H:%M:%S')} below "
                     f"{datetime.fromtimestamp(self.last_timestamp).strftime('%Y-%m-%d %H:%M:%S')}", sorted_log_lines, event_data,
                     log_atom, self)

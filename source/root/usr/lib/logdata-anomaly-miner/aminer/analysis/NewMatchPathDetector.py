@@ -88,14 +88,14 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             if self.output_logline:
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match("") + os.linesep + repr(
                     unknown_path_list) + os.linesep + original_log_line_prefix + data]
             else:
-                sorted_log_lines = [repr(unknown_path_list) + os.linesep + original_log_line_prefix + data]
-            analysis_component = {'AffectedLogAtomPaths': list(unknown_path_list)}
-            event_data = {'AnalysisComponent': analysis_component}
+                sorted_log_lines = [repr(unknown_path_list)]
+            analysis_component = {"AffectedLogAtomPaths": list(unknown_path_list)}
+            event_data = {"AnalysisComponent": analysis_component}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New path(es) detected', sorted_log_lines, event_data,
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New path(es) detected", sorted_log_lines, event_data,
                                        log_atom, self)
         self.log_success += 1
         return True
@@ -130,16 +130,20 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
-            msg = 'Allowlisting data not understood by this detector'
+            msg = "Allowlisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
+        if not isinstance(event_data, str):
+            msg = "event_data has to be of type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.known_path_set.add(event_data)
-        return f'Allowlisted path(es) {event_data} in {event_type}.'
+        return f"Allowlisted path(es) {event_data} in {event_type}."
 
     def log_statistics(self, component_name):
         """

@@ -926,13 +926,13 @@ Analysis:
           learn_mode: True
         - type: ModuloTimeMatchRule
           id: "mt"
-          path: null
+          path: "mtmr"
           seconds_modulo: 3
           lower_limit: 0
           upper_limit: 3
         - type: ValueDependentModuloTimeMatchRule
           id: "vdmt"
-          path: null
+          path: "vdmtmr"
           seconds_modulo: 3
           paths:
             - "/model/ECD/g"
@@ -964,7 +964,6 @@ Analysis:
             (b"j",): "vdmt"
             (b"k",): "vdmt"
             (b"l",): "vdmt"
-            None: "mt"
           default_rule: "mt"
         - type: EventGenerationMatchAction
           id: "ip_match_action"

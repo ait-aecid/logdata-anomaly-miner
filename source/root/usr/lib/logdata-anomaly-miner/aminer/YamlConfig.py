@@ -132,8 +132,8 @@ def build_analysis_pipeline(analysis_context):
     """
     parsing_model, parser_model_dict = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model, parser_model_dict)
-    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model)
     event_handler_id_list = build_event_handlers(analysis_context, anomaly_event_handlers)
+    build_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, parsing_model)
     # do not check UnparsedAtomHandler
     for index, analysis_component in enumerate(atom_filter.subhandler_list[1:]):
         if analysis_component[0].output_event_handlers is not None:
@@ -556,10 +556,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         msg = f'{histogram_definition[1]} first must be defined before used.'
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
-                    histogram_definitions.append([histogram_definition[0], analysis_dict[histogram_definition[1]]])
+                    histogram_definitions.append((histogram_definition[0], analysis_dict[histogram_definition[1]]))
                 tmp_analyser = func(analysis_context.aminer_config, histogram_definitions, item['report_interval'], anomaly_event_handlers,
-                                    reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
-                                    output_logline=item['output_logline'])
+                                    reset_after_report_flag=item['reset_after_report_flag'], output_logline=item['output_logline'])
             elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
                     msg = f'{item["bin_definition"]} first must be defined before used.'
@@ -567,8 +566,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     raise ValueError(msg)
                 tmp_analyser = func(
                     analysis_context.aminer_config, item['path'], analysis_dict[item['bin_definition']], item['report_interval'],
-                    anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], persistence_id=item['persistence_id'],
-                    output_logline=item['output_logline'])
+                    anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], output_logline=item['output_logline'])
             elif item['type'].name == 'EnhancedNewMatchPathValueComboDetector':
                 tuple_transformation_function = None
                 if item['tuple_transformation_function'] == 'demo':
@@ -651,7 +649,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                             raise ValueError(msg)
                         rule_lookup_dict[ast.literal_eval(key)] = match_rules_dict[rule]
                     tmp_analyser = func(
-                        item['paths'], rule_lookup_dict, default_rule=item['default_rule'], match_action=match_action)
+                        item['paths'], rule_lookup_dict, default_rule=match_rules_dict[item['default_rule']], match_action=match_action)
                 if item['type'].name == 'NegationMatchRule':
                     if item['sub_rule'] not in match_rules_dict:
                         msg = f'The match rule {item["sub_rule"]} does not exist!'
@@ -705,7 +703,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 for match_parameters in item['artefact_match_parameters']:
                     artefact_match_parameters.append(tuple(i for i in match_parameters))
                 tmp_analyser = func(item['rule_id'], item['min_time_delta'], item['max_time_delta'],
-                                    artefact_match_parameters=artefact_match_parameters)
+                                    artefact_match_parameters=artefact_match_parameters, max_violations=item['max_violations'])
                 correlation_rules[item['rule_id']] = tmp_analyser
                 continue
             elif item['type'].name == 'EventClassSelector':
@@ -742,8 +740,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     ruleset.append(match_rules_dict[rule])
-                tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers, persistence_id=item['persistence_id'],
-                                    output_logline=item['output_logline'])
+                tmp_analyser = func(analysis_context.aminer_config, ruleset, anomaly_event_handlers)
             elif item['type'].name == 'TimestampsUnsortedDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, exit_on_error_flag=item['exit_on_error_flag'],
                                     output_logline=item['output_logline'])

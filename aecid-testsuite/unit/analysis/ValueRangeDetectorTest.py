@@ -12,10 +12,6 @@ from datetime import datetime
 class ValueRangeDetectorTest(TestBase):
     """Unittests for the ValueRangeDetectorDetector."""
 
-    __expected_string = '%s Value range anomaly detected\n%s: "%s" (%d lines)\n  %s\n\n'
-    datetime_format_string = "%Y-%m-%d %H:%M:%S"
-    analysis = "Analysis.%s"
-
     def test1receive_atom(self):
         """
         This test case checks the normal detection of new value ranges.
@@ -23,9 +19,8 @@ class ValueRangeDetectorTest(TestBase):
         Test if log atoms are processed correctly and the detector is learning (learn_mode=True) and stops if learn_mode=False.
         Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
-        description = "test1receive_atom"
-        value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], "Default", True, False)
-        self.analysis_context.register_component(value_range_detector, description)
+        expected_string = '%s Value range anomaly detected\n%s: "None" (%d lines)\n  %s\n\n'
+        datetime_format_string = "%Y-%m-%d %H:%M:%S"
         t = round(time.time(), 3)
 
         # Prepare log atoms that represent two entities (id) with floats (value). Anomalies are generated when ranges are first established.
@@ -37,48 +32,49 @@ class ValueRangeDetectorTest(TestBase):
         #  id: b value: 6.3
         #  id: a value: 4.25
         #  id: b value: 3.1
-        m_1 = MatchElement('/model/id', b'a', b'a', None)
-        m_2 = MatchElement('/model/value', b'2.5', 2.5, None)
-        match_element_1 = MatchElement('/model', b'a2.5', b'a2.5', [m_1, m_2])
+        m_1 = MatchElement("/model/id", b"a", b"a", None)
+        m_2 = MatchElement("/model/value", b"2.5", 2.5, None)
+        match_element_1 = MatchElement("/model", b"a2.5", b"a2.5", [m_1, m_2])
         parser_match_1 = ParserMatch(match_element_1)
-        log_atom_1 = LogAtom(b'a2.5', parser_match_1, t, None)
+        log_atom_1 = LogAtom(b"a2.5", parser_match_1, t, None)
 
-        m_3 = MatchElement('/model/id', b'b', b'b', None)
-        m_4 = MatchElement('/model/value', b'5', 5, None)
-        match_element_2 = MatchElement('/model', b'b5', b'b5', [m_3, m_4])
+        m_3 = MatchElement("/model/id", b"b", b"b", None)
+        m_4 = MatchElement("/model/value", b"5", 5, None)
+        match_element_2 = MatchElement("/model", b"b5", b"b5", [m_3, m_4])
         parser_match_2 = ParserMatch(match_element_2)
-        log_atom_2 = LogAtom(b'b5', parser_match_2, t+1, None)
+        log_atom_2 = LogAtom(b"b5", parser_match_2, t+1, None)
 
-        m_5 = MatchElement('/model/id', b'a', b'a', None)
-        m_6 = MatchElement('/model/value', b'4.75', 4.75, None)
-        match_element_3 = MatchElement('/model', b'a4.75', b'a4.75', [m_5, m_6])
+        m_5 = MatchElement("/model/id", b"a", b"a", None)
+        m_6 = MatchElement("/model/value", b"4.75", 4.75, None)
+        match_element_3 = MatchElement("/model", b"a4.75", b"a4.75", [m_5, m_6])
         parser_match_3 = ParserMatch(match_element_3)
-        log_atom_3 = LogAtom(b'a4.75', parser_match_3, t+2, None)
+        log_atom_3 = LogAtom(b"a4.75", parser_match_3, t+2, None)
 
-        m_7 = MatchElement('/model/id', b'b', b'b', None)
-        m_8 = MatchElement('/model/value', b'6.3', 6.3, None)
-        match_element_4 = MatchElement('/model', b'b6.3', b'b6.3', [m_7, m_8])
+        m_7 = MatchElement("/model/id", b"b", b"b", None)
+        m_8 = MatchElement("/model/value", b"6.3", 6.3, None)
+        match_element_4 = MatchElement("/model", b"b6.3", b"b6.3", [m_7, m_8])
         parser_match_4 = ParserMatch(match_element_4)
-        log_atom_4 = LogAtom(b'b6.3', parser_match_4, t+3, None)
+        log_atom_4 = LogAtom(b"b6.3", parser_match_4, t+3, None)
 
-        m_9 = MatchElement('/model/id', b'a', b'a', None)
-        m_10 = MatchElement('/model/value', b'4.25', 4.25, None)
-        match_element_5 = MatchElement('/model', b'a4.25', b'a4.25', [m_9, m_10])
+        m_9 = MatchElement("/model/id", b"a", b"a", None)
+        m_10 = MatchElement("/model/value", b"4.25", 4.25, None)
+        match_element_5 = MatchElement("/model", b"a4.25", b"a4.25", [m_9, m_10])
         parser_match_5 = ParserMatch(match_element_5)
-        log_atom_5 = LogAtom(b'a4.25', parser_match_5, t+4, None)
+        log_atom_5 = LogAtom(b"a4.25", parser_match_5, t+4, None)
 
-        m_11 = MatchElement('/model/id', b'b', b'b', None)
-        m_12 = MatchElement('/model/value', b'3.1', 3.1, None)
-        match_element_6 = MatchElement('/model', b'b3.1', b'b3.1', [m_11, m_12])
+        m_11 = MatchElement("/model/id", b"b", b"b", None)
+        m_12 = MatchElement("/model/value", b"3.1", 3.1, None)
+        match_element_6 = MatchElement("/model", b"b3.1", b"b3.1", [m_11, m_12])
         parser_match_6 = ParserMatch(match_element_6)
-        log_atom_6 = LogAtom(b'b3.1', parser_match_6, t+5, None)
+        log_atom_6 = LogAtom(b"b3.1", parser_match_6, t+5, None)
 
-        # learn_mode = True
+        # learn_mode = True, with id_path_list set
 
         # Forward log atoms to detector
         # First value of id (a) should not generate an anomaly
         # Input: id: a value: 2.5
         # Expected output: None
+        value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], "Default", True, False)
         value_range_detector.receive_atom(log_atom_1)
         self.assertEqual(self.output_stream.getvalue(), "")
 
@@ -92,16 +88,16 @@ class ValueRangeDetectorTest(TestBase):
         # Input: id: a value: 4.75
         # Expected output: Anomaly
         value_range_detector.receive_atom(log_atom_3)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % ( datetime.fromtimestamp(t+2).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_3.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % ( datetime.fromtimestamp(t+2).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_3.raw_data.decode()))
         self.reset_output_stream()
 
         # Second value of id (b) should generate an anomaly for new range
         # Input: id: b value: 6.3
         # Expected output: Anomaly
         value_range_detector.receive_atom(log_atom_4)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % ( datetime.fromtimestamp(t+3).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_4.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % ( datetime.fromtimestamp(t+3).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_4.raw_data.decode()))
         self.reset_output_stream()
 
         # Third value of id (a) is in expected range, thus no anomaly is generated
@@ -110,14 +106,59 @@ class ValueRangeDetectorTest(TestBase):
         value_range_detector.receive_atom(log_atom_5)
         self.assertEqual(self.output_stream.getvalue(), "")
 
-        # Third value of id (b) is outside of expected range, thus anomaly is generated
+        # Third value of id (b) is outside the expected range, thus anomaly is generated
         value_range_detector.receive_atom(log_atom_6)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % ( datetime.fromtimestamp(t+5).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_6.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % ( datetime.fromtimestamp(t+5).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_6.raw_data.decode()))
         self.reset_output_stream()
 
 
+        # learn_mode = True, without id_path_list set
+
+        # Forward log atoms to detector
+        # First value of id (a) should not generate an anomaly
+        # Input: id: a value: 2.5
+        # Expected output: None
+        value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/model/value"], "Default", True, False)
+        value_range_detector.receive_atom(log_atom_1)
+        self.assertEqual(self.output_stream.getvalue(), "")
+
+        # First value of id (b) should not generate an anomaly
+        # Input: id: b value: 5
+        # Expected output: Anomaly
+        value_range_detector.receive_atom(log_atom_2)
+        self.assertEqual(self.output_stream.getvalue(), expected_string % ( datetime.fromtimestamp(t+1).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_2.raw_data.decode()))
+        self.reset_output_stream()
+
+        # Second value of id (a) should generate an anomaly for new range
+        # Input: id: a value: 4.75
+        # Expected output: None
+        value_range_detector.receive_atom(log_atom_3)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.reset_output_stream()
+
+        # Second value of id (b) should generate an anomaly for new range
+        # Input: id: b value: 6.3
+        # Expected output: Anomaly
+        value_range_detector.receive_atom(log_atom_4)
+        self.assertEqual(self.output_stream.getvalue(), expected_string % ( datetime.fromtimestamp(t+3).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_4.raw_data.decode()))
+        self.reset_output_stream()
+
+        # Third value of id (a) is in expected range, thus no anomaly is generated
+        # Input: id: a value: 4.25
+        # Expected output: None
+        value_range_detector.receive_atom(log_atom_5)
+        self.assertEqual(self.output_stream.getvalue(), "")
+
+        # All values are used in only one path, so this value should not produce an anomaly.
+        value_range_detector.receive_atom(log_atom_6)
+        self.assertEqual(self.output_stream.getvalue(), "")
+
+
         # learn_mode = False
+        value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], "Default", True, False)
         value_range_detector.ranges = {"min": {}, "max": {}}
         # setup
         value_range_detector.receive_atom(log_atom_1)
@@ -127,14 +168,14 @@ class ValueRangeDetectorTest(TestBase):
         value_range_detector.learn_mode = False
 
         value_range_detector.receive_atom(log_atom_4)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (datetime.fromtimestamp(t + 3).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_4.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t + 3).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_4.raw_data.decode()))
         self.reset_output_stream()
 
         # repeating should produce the same result
         value_range_detector.receive_atom(log_atom_4)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (datetime.fromtimestamp(t + 3).strftime(self.datetime_format_string),
-            value_range_detector.__class__.__name__, description, 1, log_atom_4.raw_data.decode()))
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t + 3).strftime(datetime_format_string),
+            value_range_detector.__class__.__name__, 1, log_atom_4.raw_data.decode()))
         self.reset_output_stream()
 
         # stop_learning_time
@@ -180,63 +221,51 @@ class ValueRangeDetectorTest(TestBase):
     def test3allowlist_event(self):
         """Test if the allowlist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
-        description = "Test3allowlist_event"
         value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], None, "Default", True, output_logline=False)
-        self.analysis_context.register_component(value_range_detector, description)
-        t = round(time.time(), 3)
-        self.assertRaises(Exception, value_range_detector.allowlist_event, self.analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
+        analysis = "Analysis.%s"
+        self.assertRaises(Exception, value_range_detector.allowlist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
         # The ValueRangeDetector can not handle allowlisting data and therefore an exception is expected.
-        self.assertRaises(Exception, value_range_detector.allowlist_event, self.analysis % value_range_detector.__class__.__name__,
-                          self.output_stream.getvalue(), ["random", "Data"])
+        self.assertRaises(Exception, value_range_detector.allowlist_event, analysis % value_range_detector.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
         # Allowlist event which is in the ignore_list. If a value from the ignore_list is allowlisted, it should be deleted.
         value_range_detector.ignore_list = ["/s1"]
         # This test case checks in which cases an event is triggered and compares with expected results.
-        self.assertEqual(value_range_detector.allowlist_event(
-            self.analysis % value_range_detector.__class__.__name__, "/s1", None), "Allowlisted path %s." % "/s1")
+        self.assertEqual(value_range_detector.allowlist_event(analysis % value_range_detector.__class__.__name__, "/s1", None), "Allowlisted path %s." % "/s1")
         self.assertEqual(value_range_detector.constraint_list, ["/s1"])
         self.assertEqual(value_range_detector.ignore_list, [])
 
         value_range_detector.learn_mode = False
-        self.assertEqual(value_range_detector.allowlist_event(
-            self.analysis % value_range_detector.__class__.__name__, "/d1", None), "Allowlisted path %s." % "/d1")
+        self.assertEqual(value_range_detector.allowlist_event(analysis % value_range_detector.__class__.__name__, "/d1", None), "Allowlisted path %s." % "/d1")
         self.assertEqual(value_range_detector.constraint_list, ["/s1", "/d1"])
 
     def test4blocklist_event(self):
         """Test if the blocklist_event method is implemented properly."""
         # This test case checks whether an exception is thrown when entering an event of another class.
-        description = "Test4blocklist_event"
         value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], None, "Default", True, output_logline=False)
-        self.analysis_context.register_component(value_range_detector, description)
-        t = round(time.time(), 3)
-        self.assertRaises(Exception, value_range_detector.blocklist_event, self.analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
+        analysis = "Analysis.%s"
+        self.assertRaises(Exception, value_range_detector.blocklist_event, analysis % "NewMatchPathValueDetector", self.output_stream.getvalue(), None)
 
         # The ValueRangeDetector can not handle allowlisting data and therefore an exception is expected.
-        self.assertRaises(Exception, value_range_detector.blocklist_event, self.analysis % value_range_detector.__class__.__name__,
-                          self.output_stream.getvalue(), ["random", "Data"])
+        self.assertRaises(Exception, value_range_detector.blocklist_event, analysis % value_range_detector.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
         # Blocklist event which is in the constraint_list. If a value from the constraint_list is blocklisted, it should be deleted.
         value_range_detector.constraint_list = ["/s1"]
         # This test case checks in which cases an event is triggered and compares with expected results.
-        self.assertEqual(value_range_detector.blocklist_event(
-            self.analysis % value_range_detector.__class__.__name__, "/s1", None), "Blocklisted path /s1.")
+        self.assertEqual(value_range_detector.blocklist_event(analysis % value_range_detector.__class__.__name__, "/s1", None), "Blocklisted path /s1.")
         self.assertEqual(value_range_detector.ignore_list, ["/s1"])
         self.assertEqual(value_range_detector.constraint_list, [])
 
         value_range_detector.learn_mode = False
-        self.assertEqual(value_range_detector.blocklist_event(
-            self.analysis % value_range_detector.__class__.__name__, "/d1", None), "Blocklisted path /d1.")
+        self.assertEqual(value_range_detector.blocklist_event(analysis % value_range_detector.__class__.__name__, "/d1", None), "Blocklisted path /d1.")
         self.assertEqual(value_range_detector.ignore_list, ["/s1", "/d1"])
 
     def test5persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        description = "test4persistence"
         value_range_detector = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], "Default", True, False)
-        self.analysis_context.register_component(value_range_detector, description)
 
         # Prepare log atoms that represent two entities (id) with floats (value). Anomalies are generated when ranges are first established.
-        # Then, one identifier (a) has a valid value, while the other one (b) has a value outside of the range that generates an anomaly.
+        # Then, one identifier (a) has a valid value, while the other one (b) has a value outside the range that generates an anomaly.
         # The following events are generated:
         #  id: a value: 2.5
         #  id: b value: 5
@@ -244,41 +273,41 @@ class ValueRangeDetectorTest(TestBase):
         #  id: b value: 6.3
         #  id: a value: 4.25
         #  id: b value: 3.1
-        m_1 = MatchElement('/model/id', b'a', b'a', None)
-        m_2 = MatchElement('/model/value', b'2.5', 2.5, None)
-        match_element_1 = MatchElement('/model', b'a2.5', b'a2.5', [m_1, m_2])
+        m_1 = MatchElement("/model/id", b"a", b"a", None)
+        m_2 = MatchElement("/model/value", b"2.5", 2.5, None)
+        match_element_1 = MatchElement("/model", b"a2.5", b"a2.5", [m_1, m_2])
         parser_match_1 = ParserMatch(match_element_1)
-        log_atom_1 = LogAtom(b'a2.5', parser_match_1, 1, None)
+        log_atom_1 = LogAtom(b"a2.5", parser_match_1, 1, None)
 
-        m_3 = MatchElement('/model/id', b'b', b'b', None)
-        m_4 = MatchElement('/model/value', b'5', 5, None)
-        match_element_2 = MatchElement('/model', b'b5', b'b5', [m_3, m_4])
+        m_3 = MatchElement("/model/id", b"b", b"b", None)
+        m_4 = MatchElement("/model/value", b"5", 5, None)
+        match_element_2 = MatchElement("/model", b"b5", b"b5", [m_3, m_4])
         parser_match_2 = ParserMatch(match_element_2)
-        log_atom_2 = LogAtom(b'b5', parser_match_2, 2, None)
+        log_atom_2 = LogAtom(b"b5", parser_match_2, 2, None)
 
-        m_5 = MatchElement('/model/id', b'a', b'a', None)
-        m_6 = MatchElement('/model/value', b'4.75', 4.75, None)
-        match_element_3 = MatchElement('/model', b'a4.75', b'a4.75', [m_5, m_6])
+        m_5 = MatchElement("/model/id", b"a", b"a", None)
+        m_6 = MatchElement("/model/value", b"4.75", 4.75, None)
+        match_element_3 = MatchElement("/model", b"a4.75", b"a4.75", [m_5, m_6])
         parser_match_3 = ParserMatch(match_element_3)
-        log_atom_3 = LogAtom(b'a4.75', parser_match_3, 3, None)
+        log_atom_3 = LogAtom(b"a4.75", parser_match_3, 3, None)
 
-        m_7 = MatchElement('/model/id', b'b', b'b', None)
-        m_8 = MatchElement('/model/value', b'6.3', 6.3, None)
-        match_element_4 = MatchElement('/model', b'b6.3', b'b6.3', [m_7, m_8])
+        m_7 = MatchElement("/model/id", b"b", b"b", None)
+        m_8 = MatchElement("/model/value", b"6.3", 6.3, None)
+        match_element_4 = MatchElement("/model", b"b6.3", b"b6.3", [m_7, m_8])
         parser_match_4 = ParserMatch(match_element_4)
-        log_atom_4 = LogAtom(b'b6.3', parser_match_4, 4, None)
+        log_atom_4 = LogAtom(b"b6.3", parser_match_4, 4, None)
 
-        m_9 = MatchElement('/model/id', b'a', b'a', None)
-        m_10 = MatchElement('/model/value', b'4.25', 4.25, None)
-        match_element_5 = MatchElement('/model', b'a4.25', b'a4.25', [m_9, m_10])
+        m_9 = MatchElement("/model/id", b"a", b"a", None)
+        m_10 = MatchElement("/model/value", b"4.25", 4.25, None)
+        match_element_5 = MatchElement("/model", b"a4.25", b"a4.25", [m_9, m_10])
         parser_match_5 = ParserMatch(match_element_5)
-        log_atom_5 = LogAtom(b'a4.25', parser_match_5, 5, None)
+        log_atom_5 = LogAtom(b"a4.25", parser_match_5, 5, None)
 
-        m_11 = MatchElement('/model/id', b'b', b'b', None)
-        m_12 = MatchElement('/model/value', b'3.1', 3.1, None)
-        match_element_6 = MatchElement('/model', b'b3.1', b'b3.1', [m_11, m_12])
+        m_11 = MatchElement("/model/id", b"b", b"b", None)
+        m_12 = MatchElement("/model/value", b"3.1", 3.1, None)
+        match_element_6 = MatchElement("/model", b"b3.1", b"b3.1", [m_11, m_12])
         parser_match_6 = ParserMatch(match_element_6)
-        log_atom_6 = LogAtom(b'b3.1', parser_match_6, 6, None)
+        log_atom_6 = LogAtom(b"b3.1", parser_match_6, 6, None)
 
         value_range_detector.receive_atom(log_atom_1)
         value_range_detector.receive_atom(log_atom_2)
@@ -287,33 +316,44 @@ class ValueRangeDetectorTest(TestBase):
         value_range_detector.receive_atom(log_atom_5)
         value_range_detector.receive_atom(log_atom_6)
         value_range_detector.do_persist()
-        value_range_detector1 = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ['/model/id'], ['/model/value'], 'Default', True, False)
+        value_range_detector1 = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], "Default", True, False)
         self.assertEqual(value_range_detector.ranges, value_range_detector1.ranges)
-        self.assertEqual(value_range_detector1.ranges, {"min": {('a',): 2.5, ('b',): 3.1}, "max": {('a',): 4.75, ('b',): 6.3}})
+        self.assertEqual(value_range_detector1.ranges, {"min": {("a",): 2.5, ("b",): 3.1}, "max": {("a",): 4.75, ("b",): 6.3}})
 
         with open(value_range_detector.persistence_file_name, "r") as f:
-            self.assertEqual(f.readline(), """{"string:min": {"tuple:('a',)": 2.5, "tuple:('b',)": 3.1}, "string:max": {"tuple:('a',)": 4.75, "tuple:('b',)": 6.3}}""")
+            self.assertEqual(f.read(), """{"string:min": {"tuple:('a',)": 2.5, "tuple:('b',)": 3.1}, "string:max": {"tuple:('a',)": 4.75, "tuple:('b',)": 6.3}}""")
 
         value_range_detector.ranges = {"min": {}, "max": {}}
         value_range_detector.load_persistence_data()
-        self.assertEqual(value_range_detector.ranges, {"min": {('a',): 2.5, ('b',): 3.1}, "max": {('a',): 4.75, ('b',): 6.3}})
+        self.assertEqual(value_range_detector.ranges, {"min": {("a",): 2.5, ("b",): 3.1}, "max": {("a",): 4.75, ("b",): 6.3}})
 
         other = ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], "Default", False, False)
         self.assertEqual(value_range_detector.ranges, other.ranges)
 
     def test6validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, ["default"], ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, None, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, "", ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, b"Default", ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, True, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, 123, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, 123.3, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, {"id": "Default"}, ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, (), ["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, set(), ["Default"])
+
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], "")
-        self.assertRaises(ValueError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], None)
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], b"Default")
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], True)
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], 123)
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], 123.22)
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], {"id": "Default"})
-        self.assertRaises(ValueError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], [])
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ())
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], set())
         ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"])
+        ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], None)
+        ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], [])
 
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], target_path_list="")
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], target_path_list=b"Default")

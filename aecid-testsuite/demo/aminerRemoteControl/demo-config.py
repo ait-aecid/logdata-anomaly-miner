@@ -267,7 +267,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.NewMatchIdValueComboDetector import NewMatchIdValueComboDetector
     new_match_id_value_combo_detector = NewMatchIdValueComboDetector(
-        analysis_context.aminer_config, ['/model/type/path/name', '/model/type/syscall/syscall'], anomaly_event_handlers,
+        analysis_context.aminer_config, ['/model/type/path/id', '/model/type/syscall/id'], anomaly_event_handlers,
         id_path_list=['/model/type/path/id', '/model/type/syscall/id'], min_allowed_time_diff=5, learn_mode=True,
         allow_missing_values_flag=True, output_logline=True)
     analysis_context.register_component(new_match_id_value_combo_detector, component_name="NewMatchIdValueComboDetector")

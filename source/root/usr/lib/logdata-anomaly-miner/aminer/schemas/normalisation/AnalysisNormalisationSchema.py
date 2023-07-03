@@ -52,7 +52,7 @@
                 'default_freqs': {'type': 'boolean', 'default': False},
                 'skip_repetitions': {'type': 'boolean', 'default': False},
                 'seq_len': {'type': 'integer', 'default': 3},
-                'timeout': {'type': ['integer', 'float'], 'default': -1},
+                'timeout': {'type': ['integer', 'float'], 'nullable': True, 'default': None},
                 'allow_missing_id': {'type': 'boolean', 'default': False},
                 'window_size': {'type': ['integer', 'float'], 'default': 600},
                 'confidence_factor': {'type': 'float', 'default': 0.33},
@@ -103,6 +103,7 @@
                 'max_time_delta': {'type': 'integer'},
                 'artefact_match_parameters': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string'}},
                                               'nullable': True, 'default': None},
+                'max_violations': {'type': 'integer', 'default': 20},
                 'action_id': {'type': 'string'},
                 'artefact_a_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'artefact_b_rules': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
@@ -215,6 +216,8 @@
                 'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True, 'default': None},
                 'local_maximum_threshold': {'type': 'float', 'default': 0.2},
                 'combine_values': {'type': 'boolean', 'nullable': True, 'default': True},
+                'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
+                'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
             }
         }
     }

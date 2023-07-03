@@ -8,25 +8,25 @@ import time
 class ParserCountTest(TestBase):
     """Unittests for the ParserCount."""
 
-    match_context_m1 = DummyMatchContext(b"First string")
-    match_context_m2 = DummyMatchContext(b" to match.")
-    match_context_m3 = DummyMatchContext(b"some completely other string to match.")
-    match_context_seq = DummyMatchContext(b"First string to match.")
-    fixed_dme_m1 = DummyFixedDataModelElement("m1", b"First string")
-    fixed_dme_m2 = DummyFixedDataModelElement("m2", b" to match.")
-    seq = DummySequenceModelElement("seq", [fixed_dme_m1, fixed_dme_m2])
-    fixed_dme_m3 = DummyFixedDataModelElement("m3", b"some completely other string to match.")
-    match_element_m1 = fixed_dme_m1.get_match_element("fixed", match_context_m1)
-    match_element_m2 = fixed_dme_m2.get_match_element("fixed", match_context_m2)
-    match_element_m3 = fixed_dme_m3.get_match_element("fixed", match_context_m3)
-    match_element_seq = seq.get_match_element("fixed", match_context_seq)
-
     def test1receive_atom(self):
         """Test if the receive_atom method counts all paths properly."""
+        match_context_m1 = DummyMatchContext(b"First string")
+        match_context_m2 = DummyMatchContext(b" to match.")
+        match_context_m3 = DummyMatchContext(b"some completely other string to match.")
+        match_context_seq = DummyMatchContext(b"First string to match.")
+        fixed_dme_m1 = DummyFixedDataModelElement("m1", b"First string")
+        fixed_dme_m2 = DummyFixedDataModelElement("m2", b" to match.")
+        seq = DummySequenceModelElement("seq", [fixed_dme_m1, fixed_dme_m2])
+        fixed_dme_m3 = DummyFixedDataModelElement("m3", b"some completely other string to match.")
+        match_element_m1 = fixed_dme_m1.get_match_element("fixed", match_context_m1)
+        match_element_m2 = fixed_dme_m2.get_match_element("fixed", match_context_m2)
+        match_element_m3 = fixed_dme_m3.get_match_element("fixed", match_context_m3)
+        match_element_seq = seq.get_match_element("fixed", match_context_seq)
+
         # no path in the match_dictionary matches
         parser_count = ParserCount(self.aminer_config, ["fixed/seq", "fixed/seq/m1", "fixed/seq/m2"], [self.stream_printer_event_handler])
         t = time.time()
-        log_atom = LogAtom(self.fixed_dme_m3.data, ParserMatch(self.match_element_m3), t, parser_count)
+        log_atom = LogAtom(fixed_dme_m3.data, ParserMatch(match_element_m3), t, parser_count)
         old_count_dict = dict(parser_count.count_dict)
         parser_count.receive_atom(log_atom)
         self.assertEqual(parser_count.count_dict, old_count_dict)
@@ -41,7 +41,7 @@ class ParserCountTest(TestBase):
 
         # multiple paths matching
         parser_count = ParserCount(self.aminer_config, ["fixed/seq", "fixed/seq/m1", "fixed/seq/m2", "fixed/m3"], [self.stream_printer_event_handler])
-        log_atom = LogAtom(self.match_context_seq.match_data, ParserMatch(self.match_element_seq), t, parser_count)
+        log_atom = LogAtom(match_context_seq.match_data, ParserMatch(match_element_seq), t, parser_count)
         old_count_dict = dict(parser_count.count_dict)
         old_count_dict["fixed/seq"][current_processed_lines_str] = 1
         old_count_dict["fixed/seq"][total_processed_lines_str] = 1
@@ -55,7 +55,7 @@ class ParserCountTest(TestBase):
         # multiple paths matching without having target_paths specified
         parser_count = ParserCount(self.aminer_config, None, [self.stream_printer_event_handler])
         t = time.time()
-        log_atom = LogAtom(self.match_context_seq.match_data, ParserMatch(self.match_element_seq), t, parser_count)
+        log_atom = LogAtom(match_context_seq.match_data, ParserMatch(match_element_seq), t, parser_count)
         old_count_dict = dict(parser_count.count_dict)
         old_count_dict["fixed/seq"] = {current_processed_lines_str: 1, total_processed_lines_str: 1}
         parser_count.receive_atom(log_atom)
@@ -94,6 +94,17 @@ class ParserCountTest(TestBase):
 
     def test4validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], ["default"])
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], None)
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], "")
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], b"Default")
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], True)
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], 123)
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], 123.3)
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], {"id": "Default"})
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], ())
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], set())
+
         self.assertRaises(ValueError, ParserCount, self.aminer_config, [""], [self.stream_printer_event_handler])
         self.assertRaises(TypeError, ParserCount, self.aminer_config, "", [self.stream_printer_event_handler])
         self.assertRaises(TypeError, ParserCount, self.aminer_config, b"Default", [self.stream_printer_event_handler])
@@ -113,8 +124,8 @@ class ParserCountTest(TestBase):
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=[])
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=())
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=set())
+        self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=123.22)
         ParserCount(self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=123)
-        ParserCount(self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], report_interval=123.22)
 
         self.assertRaises(ValueError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], target_label_list=[])
         self.assertRaises(ValueError, ParserCount, self.aminer_config, None, [self.stream_printer_event_handler], target_label_list=["p"])

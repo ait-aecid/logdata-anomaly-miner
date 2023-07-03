@@ -47,7 +47,9 @@
                     'output_logline': {'type': 'boolean'},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'output_event_handlers': {'type': 'list', 'nullable': True}
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
@@ -59,6 +61,8 @@
                     'tuple_transformation_function': {'type': 'string', 'allowed': ['demo'], 'nullable': True},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -83,6 +87,8 @@
                     'output_logline': {'type': 'boolean'},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -95,8 +101,8 @@
                     'num_windows': {'type': 'integer'},
                     'empty_window_warnings': {'type': 'boolean'},
                     'early_exceeding_anomaly_output': {'type': 'boolean'},
-                    'set_lower_limit': {'type': 'integer', 'min': 0, 'nullable': True},
-                    'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True},
+                    'set_lower_limit': {'type': ['integer', 'float'], 'min': 0, 'nullable': True},
+                    'set_upper_limit': {'type': ['integer', 'float'], 'min': 0, 'nullable': True},
                     'confidence_factor': {'type': 'float', 'min': 0, 'max': 1},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
@@ -104,6 +110,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -124,6 +132,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -132,7 +142,7 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'seq_len': {'type': 'integer', 'min': 1},
-                    'timeout': {'type': 'integer', 'min': -1},
+                    'timeout': {'type': 'integer', 'min': 0.1, 'nullable': True},
                     'allow_missing_id': {'type': 'boolean'},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
@@ -140,6 +150,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -153,12 +165,14 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['CharsetDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
@@ -166,12 +180,14 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['EntropyDetector'], 'required': True},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'prob_thresh': {'type': 'float'},
                     'default_freqs': {'type': 'boolean'},
                     'skip_repetitions': {'type': 'boolean'},
@@ -181,6 +197,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -204,7 +222,7 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'scoring_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'window_size': {'type': ['integer', 'float'], 'min': 0.001},
-                    'set_upper_limit': {'type': 'integer', 'min': 0, 'nullable': True},
+                    'set_upper_limit': {'type': ['integer', 'float'], 'min': 0},
                     'local_maximum_threshold': {'type': 'float', 'min': 0.000001, 'max': 1.0},
                     'persistence_id': {'type': 'string', 'empty': False},
                     'learn_mode': {'type': 'boolean'},
@@ -212,6 +230,8 @@
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -243,7 +263,6 @@
                         'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'empty': False}}, 'required': True},
                     'report_interval': {'type': 'integer', 'required': True, 'min': 1},
                     'reset_after_report_flag': {'type': 'boolean'},
-                    'persistence_id': {'type': 'string', 'empty': False},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
@@ -255,7 +274,6 @@
                     'bin_definition': {'type': 'string', 'required': True, 'empty': False},
                     'report_interval': {'type': 'integer', 'required': True, 'min': 1},
                     'reset_after_report_flag': {'type': 'boolean'},
-                    'persistence_id': {'type': 'string', 'empty': False},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
@@ -304,6 +322,8 @@
                     'realert_interval': {'type': 'integer', 'min': 1, 'bigger_than_or_equal': ['check_interval', 3600]},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -317,6 +337,8 @@
                     'realert_interval': {'type': 'integer', 'min': 1, 'bigger_than_or_equal': ['check_interval', 3600]},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -330,6 +352,8 @@
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -339,6 +363,8 @@
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -350,6 +376,8 @@
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -360,6 +388,8 @@
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -486,8 +516,6 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['TimeCorrelationViolationDetector'], 'required': True},
                     'ruleset': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
-                    'persistence_id': {'type': 'string', 'empty': False},
-                    'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
                 },
@@ -497,7 +525,8 @@
                     'min_time_delta': {'type': 'integer', 'required': True, 'min': 1},
                     'max_time_delta': {'type': 'integer', 'required': True, 'min': 1, 'bigger_than_or_equal': ['min_time_delta', None]},
                     'artefact_match_parameters': {'type': 'list', 'schema': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
-                                                  'nullable': True}
+                                                  'nullable': True},
+                    'max_violations': {'type': 'integer', 'min': 1}
                 },
                 {
                     'type': {'type': 'string', 'allowed': ['EventClassSelector'], 'required': True},
@@ -550,6 +579,8 @@
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -600,6 +631,8 @@
                     'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'learn_mode': {'type': 'boolean'},
                     'suppress': {'type': 'boolean'}
                 },
@@ -607,7 +640,7 @@
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['PathValueTimeIntervalDetector'], 'required': True},
                     'persistence_id': {'type': 'string', 'empty': False},
-                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'time_period_length': {'type': 'integer', 'min': 1},
                     'max_time_diff': {'type': 'integer', 'min': 1},
@@ -616,6 +649,8 @@
                     'output_logline': {'type': 'boolean'},
                     'learn_mode': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -636,6 +671,8 @@
                     'num_periods_tsa_ini': {'type': 'integer', 'min': 2},
                     'learn_mode': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'}
                 },
                 {
@@ -665,6 +702,8 @@
                     'set_period_length': {'type': 'integer', 'min': 1},
                     'min_log_lines_per_time_step': {'type': 'integer', 'min': 1},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'learn_mode': {'type': 'boolean'},
                     'suppress': {'type': 'boolean'}
                 },
@@ -675,16 +714,21 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'constraint_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'allow_missing_id': {'type': 'boolean'},
                     'num_log_lines_solidify_matrix': {'type': 'integer', 'min': 1},
                     'time_output_threshold': {'type': 'integer', 'min': 0},
                     'anomaly_threshold': {'type': 'float', 'min': 0, 'max': 1.0},
                     'output_logline': {'type': 'boolean'},
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'learn_mode': {'type': 'boolean'}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
                     'type': {'type': 'string', 'allowed': ['SimpleUnparsedAtomHandler', 'VerboseUnparsedAtomHandler'], 'required': True},
+                    'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'}
                 }
             ]
