@@ -1,39 +1,67 @@
 import unittest
-from aminer.parsing.MatchContext import MatchContext
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.analysis.TimestampCorrectionFilters import SimpleMonotonicTimestampAdjust
 from time import time
-from unit.TestBase import TestBase
+from unit.TestBase import TestBase, DummyFixedDataModelElement, DummyMatchContext
 from datetime import datetime
 
 
 class TimestampCorrectionFiltersTest(TestBase):
     """Unittests for the TimestampCorrectionFilters."""
 
-    __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n pid=\n\n'
-    match_path = "['match/s1']"
+    def test1receive_atom(self):
+        """This test case checks if the timestamp is adjusted and log atoms are forwarded correctly."""
+        match_context = DummyMatchContext(b" pid=")
+        fdme = DummyFixedDataModelElement("s1", b" pid=")
+        match_element = fdme.get_match_element("match", match_context)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False, output_logline=False)
+        smta = SimpleMonotonicTimestampAdjust([nmpd], False)
 
-    def test1simple_monotonic_timestamp_adjust_test(self):
-        """This test case checks if the timestamp is adjusted and logAtoms are forwarded correctly."""
-        description = "Test1TimestampCorrectionFilter"
-        match_context_fixed_dme = MatchContext(b' pid=')
-        fixed_dme = FixedDataModelElement('s1', b' pid=')
-        match_element_fixed_dme = fixed_dme.get_match_element("match", match_context_fixed_dme)
-        t = time()
+        # the atom time should be set automatically if None.
+        log_atom = LogAtom(fdme.data, ParserMatch(match_element), None, nmpd)
+        self.assertEqual(smta.receive_atom(log_atom), True)
+        self.assertEqual(smta.latest_timestamp_seen, 0)
+        self.assertNotEqual(log_atom.atom_time, None)
+        t = log_atom.atom_time + 100
 
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False,
-                                                       output_logline=False)
-        self.analysis_context.register_component(new_match_path_detector, description)
-        simple_monotonic_timstamp_adjust = SimpleMonotonicTimestampAdjust([new_match_path_detector], False)
-        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, new_match_path_detector)
-        self.assertEqual(simple_monotonic_timstamp_adjust.receive_atom(log_atom_fixed_dme), True)
-        self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
-            datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), new_match_path_detector.__class__.__name__, description, 1,
-            self.match_path))
+        log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)
+        self.assertEqual(smta.receive_atom(log_atom), True)
+        self.assertEqual(smta.latest_timestamp_seen, t)
+        self.assertEqual(log_atom.atom_time, t)
 
+        log_atom = LogAtom(fdme.data, ParserMatch(match_element), t-1000, nmpd)
+        self.assertEqual(smta.receive_atom(log_atom), True)
+        self.assertEqual(smta.latest_timestamp_seen, t)
+        self.assertEqual(log_atom.atom_time, t)
+
+    def test2validate_parameters(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [""], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [b""], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [True], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [None], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [123], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [123.2], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [{"id": "Default"}], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [["Default"]], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [set()], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [()], True)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [(nmpd, False)], True)
+
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], "")
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], None)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], b"Default")
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], 123)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], 123.2)
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], {"id": "Default"})
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], ["Default"])
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], [])
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], ())
+        self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [nmpd], set())
+        SimpleMonotonicTimestampAdjust([nmpd], False)
 
 if __name__ == "__main__":
     unittest.main()

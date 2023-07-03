@@ -55,7 +55,7 @@ class OptionalMatchModelElementTest(TestBase):
 
     def test4optional_element_input_validation(self):
         """Check if optional_element is validated."""
-        self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, "fixed_dme")
+        self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, "fdme1")
         self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, None)
         self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, b"path")
         self.assertRaises(TypeError, OptionalMatchModelElement, self.id_, True)

@@ -13,7 +13,7 @@ from datetime import datetime
 class SimpleMultisourceAtomSyncTest(TestBase):
     """Unittests for the SimpleMultisourceAtomSync."""
 
-    __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
+    __expected_string = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n\n'
 
     calculation = b'256 * 2 = 512'
     datetime_format_string = '%Y-%m-%d %H:%M:%S'
@@ -51,9 +51,9 @@ class SimpleMultisourceAtomSyncTest(TestBase):
         self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom2))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
           datetime.fromtimestamp(t + 1).strftime(self.datetime_format_string), new_match_path_detector1.__class__.__name__, description, 1,
-          self.match_path, self.calculation.decode()) + self.__expected_string % (
+          self.match_path) + self.__expected_string % (
           datetime.fromtimestamp(t + 1).strftime(self.datetime_format_string), new_match_path_detector1.__class__.__name__,
-          description + "2", 1, self.match_path, self.calculation.decode()))
+          description + "2", 1, self.match_path))
 
     def test2no_timestamp_log_atom(self):
         """In this test case a LogAtom with no timestamp is received by the class."""
@@ -74,7 +74,7 @@ class SimpleMultisourceAtomSyncTest(TestBase):
         self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
           datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector1.__class__.__name__, description, 1,
-          self.match_path, self.calculation.decode()))
+          self.match_path))
 
     def test3unsorted_log_atom(self):
         """In this test case multiple, UNSORTED LogAtoms of different sources are received by the class."""
@@ -105,13 +105,13 @@ class SimpleMultisourceAtomSyncTest(TestBase):
         self.assertTrue(simple_multisource_atom_sync.receive_atom(log_atom1))
         self.assertEqual(self.output_stream.getvalue(), self.__expected_string % (
           datetime.fromtimestamp(t - 1).strftime(self.datetime_format_string), new_match_path_detector1.__class__.__name__, description, 1,
-          self.match_path, self.calculation.decode()) + self.__expected_string % (
+          self.match_path) + self.__expected_string % (
           datetime.fromtimestamp(t - 1).strftime(self.datetime_format_string), new_match_path_detector1.__class__.__name__,
-          description + "2", 1, self.match_path, self.calculation.decode()) + self.__expected_string % (
+          description + "2", 1, self.match_path) + self.__expected_string % (
           datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector1.__class__.__name__, description, 1,
-          self.match_path, self.calculation.decode()) + self.__expected_string % (
+          self.match_path) + self.__expected_string % (
           datetime.fromtimestamp(t).strftime(self.datetime_format_string), new_match_path_detector1.__class__.__name__, description + "2",
-          1, self.match_path, self.calculation.decode()))
+          1, self.match_path))
 
     def test4has_idle_source(self):
         """In this test case a source becomes idle and expires."""

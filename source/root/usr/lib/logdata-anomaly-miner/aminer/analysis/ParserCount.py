@@ -106,12 +106,13 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def send_report(self):
         """Send a report to the event handlers."""
         output_string = f"Parsed paths in the last {str(self.report_interval)} seconds:\n"
+        t = time.time()
         if not self.split_reports_flag:
             for k in self.count_dict:
                 c = self.count_dict[k]
                 output_string += f"\t{str(k)}: {str(c)}\n"
             output_string = output_string[:-1]
-            event_data = {"StatusInfo": self.count_dict, "FromTime": time.time() - self.report_interval, "ToTime": time.time()}
+            event_data = {"StatusInfo": self.count_dict, "FromTime": t - self.report_interval, "ToTime": t}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", "Count report", [output_string], event_data, None, self)
         else:
@@ -122,7 +123,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 status_info = {k: {
                     current_processed_lines_str: c[current_processed_lines_str],
                     total_processed_lines_str: c[total_processed_lines_str]}}
-                event_data = {"StatusInfo": status_info, "FromTime": time.time() - self.report_interval, "ToTime": time.time()}
+                event_data = {"StatusInfo": status_info, "FromTime": t - self.report_interval, "ToTime": t}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "Count report", [output_string], event_data, None, self)
         for k in self.count_dict:

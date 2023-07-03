@@ -31,14 +31,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
-    python3-pip \
     python3-tz \
     python3-scipy \
     python3-pkg-resources \
     python3-setuptools \
     python3-dateutil \
     python3-six \
-    python3-scipy \
     python3-kafka \
     python3-cerberus \
     python3-yaml \

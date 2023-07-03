@@ -16,10 +16,11 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import datetime
+import re
 import sys
 import abc
 import logging
+from datetime import datetime, timezone
 
 from aminer.util.History import LogarithmicBackoffHistory
 from aminer.util.History import ObjectHistory
@@ -27,8 +28,9 @@ from aminer.util.History import ObjectHistory
 from aminer.analysis.AtomFilters import SubhandlerFilter
 from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LOG_NAME
 from aminer import AminerConfig
+from aminer.events.EventInterfaces import EventHandlerInterface
 
-result_string = '%s(%s)'
+result_string = "%s(%s)"
 
 
 class MatchAction(metaclass=abc.ABCMeta):
@@ -49,6 +51,26 @@ class EventGenerationMatchAction(MatchAction):
         self.event_type = event_type
         self.event_message = event_message
         self.event_handlers = event_handlers
+        if not isinstance(event_type, str):
+            msg = "event_type has to be of type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(event_type) == 0:
+            msg = "event_type must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(event_message, str):
+            msg = "event_message has to be of type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(event_handlers, list) or not all(isinstance(x, EventHandlerInterface) for x in event_handlers):
+            msg = "event_handlers has to be a list of EventHandlers."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(event_handlers) == 0:
+            msg = "event_handlers must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
 
     def match_action(self, log_atom):
         """
@@ -57,7 +79,7 @@ class EventGenerationMatchAction(MatchAction):
         """
         event_data = {}
         for handler in self.event_handlers:
-            handler.receive_event(self.event_type, self.event_message, [log_atom.parser_match.match_element.annotate_match('')], event_data,
+            handler.receive_event(self.event_type, self.event_message, [log_atom.parser_match.match_element.annotate_match("")], event_data,
                                   log_atom, self)
 
 
@@ -72,7 +94,7 @@ class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
         Invoke this method if a rule has matched.
         @param log_atom the LogAtom matching the rules.
         """
-        self.receive_atom(log_atom)
+        return self.receive_atom(log_atom)
 
 
 class MatchRule(metaclass=abc.ABCMeta):
@@ -92,17 +114,17 @@ class MatchRule(metaclass=abc.ABCMeta):
                                                   rule_id, self.log_success, self.log_total)
         self.log_success = 0
         self.log_total = 0
-        if hasattr(self, 'sub_rules'):
+        if hasattr(self, "sub_rules"):
             for i, rule in enumerate(self.sub_rules):
-                rule.log_statistics(rule_id + '.' + rule.__class__.__name__ + str(i))
-        if hasattr(self, 'rule_lookup_dict'):
+                rule.log_statistics(rule_id + "." + rule.__class__.__name__ + str(i))
+        if hasattr(self, "rule_lookup_dict"):
             for i, rule_key in enumerate(self.rule_lookup_dict):
                 rule = self.rule_lookup_dict[rule_key]
-                rule.log_statistics(rule_id + '.' + rule.__class__.__name__ + str(i))
-        if hasattr(self, 'default_rule'):
-            self.default_rule.log_statistics(rule_id + '.default_rule.' + self.default_rule.__class__.__name__)
-        if hasattr(self, 'sub_rule'):
-            self.sub_rule.log_statistics(rule_id + '.' + self.sub_rule.__class__.__name__)
+                rule.log_statistics(rule_id + "." + rule.__class__.__name__ + str(i))
+        if hasattr(self, "default_rule"):
+            self.default_rule.log_statistics(rule_id + ".default_rule." + self.default_rule.__class__.__name__)
+        if hasattr(self, "sub_rule"):
+            self.sub_rule.log_statistics(rule_id + "." + self.sub_rule.__class__.__name__)
 
 
 class AndMatchRule(MatchRule):
@@ -115,6 +137,18 @@ class AndMatchRule(MatchRule):
         """
         self.sub_rules = sub_rules
         self.match_action = match_action
+        if not isinstance(sub_rules, list) or not all(isinstance(x, MatchRule) for x in sub_rules):
+            msg = "sub_rules has to be a list of MatchRules."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(sub_rules) < 2:
+            msg = "At least two sub rules must exist in the AndMatchRule."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """
@@ -132,11 +166,11 @@ class AndMatchRule(MatchRule):
         return True
 
     def __str__(self):
-        result = ''
-        preamble = ''
+        result = ""
+        preamble = ""
         for match_element in self.sub_rules:
             result += result_string % (preamble, match_element)
-            preamble = ' and '
+            preamble = " and "
         return result
 
 
@@ -150,6 +184,18 @@ class OrMatchRule(MatchRule):
         """
         self.sub_rules = sub_rules
         self.match_action = match_action
+        if not isinstance(sub_rules, list) or not all(isinstance(x, MatchRule) for x in sub_rules):
+            msg = "sub_rules has to be a list of MatchRules."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(sub_rules) < 2:
+            msg = "At least two sub rules must exist in the AndMatchRule."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """
@@ -167,11 +213,11 @@ class OrMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        result = ''
-        preamble = ''
+        result = ""
+        preamble = ""
         for match_element in self.sub_rules:
             result += result_string % (preamble, match_element)
-            preamble = ' or '
+            preamble = " or "
         return result
 
 
@@ -189,6 +235,18 @@ class ParallelMatchRule(MatchRule):
         """
         self.sub_rules = sub_rules
         self.match_action = match_action
+        if not isinstance(sub_rules, list) or not all(isinstance(x, MatchRule) for x in sub_rules):
+            msg = "sub_rules has to be a list of MatchRules."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(sub_rules) < 2:
+            msg = "At least two sub rules must exist in the AndMatchRule."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """
@@ -208,11 +266,11 @@ class ParallelMatchRule(MatchRule):
         return match_flag
 
     def __str__(self):
-        result = ''
-        preamble = ''
+        result = ""
+        preamble = ""
         for match_element in self.sub_rules:
             result += result_string % (preamble, match_element)
-            preamble = ' por '
+            preamble = " por "
         return result
 
 
@@ -225,17 +283,38 @@ class ValueDependentDelegatedMatchRule(MatchRule):
     def __init__(self, target_path_list, rule_lookup_dict, default_rule=None, match_action=None):
         """
         Create the rule.
-        @param list with value paths that are used to extract the lookup keys for ruleLookupDict. If value lookup fails, None
-        will be used for lookup.
+        @param target_path_list with value paths that are used to extract the lookup keys for rule_lookup_dict. If value lookup fails, None
+               will be used for lookup.
         @param rule_lookup_dict dictionary with tuple containing values for valuePathList as key and target rule as value.
         @param default_rule when not none, this rule will be executed as default. Otherwise, when rule lookup failed, False will
-        be returned unconditionally.
+               be returned unconditionally.
         @param match_action if None, no action is performed.
         """
         self.target_path_list = target_path_list
         self.rule_lookup_dict = rule_lookup_dict
         self.default_rule = default_rule
         self.match_action = match_action
+        if not isinstance(target_path_list, list) or not all(isinstance(x, str) for x in target_path_list):
+            msg = "target_path_list has to be a list of String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(target_path_list) == 0 or not all(x != "" for x in target_path_list):
+            msg = "target_path_list must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(rule_lookup_dict, dict) or not all(isinstance(x, tuple) and len(x) != 0 for x in rule_lookup_dict.keys()) or \
+                not all(isinstance(x, MatchRule) for x in rule_lookup_dict.values()):
+            msg = "rule_lookup_dict has to be a dict of with tuples as keys and MatchRules as values."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if default_rule is not None and not isinstance(default_rule, MatchRule):
+            msg = "default_rule has to be of type MatchRule."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """
@@ -264,7 +343,7 @@ class ValueDependentDelegatedMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        result = 'ValueDependentDelegatedMatchRule'
+        result = "ValueDependentDelegatedMatchRule"
         return result
 
 
@@ -274,6 +353,14 @@ class NegationMatchRule(MatchRule):
     def __init__(self, sub_rule, match_action=None):
         self.sub_rule = sub_rule
         self.match_action = match_action
+        if not isinstance(sub_rule, MatchRule):
+            msg = "sub_rule has to be of type MatchRule."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -286,7 +373,7 @@ class NegationMatchRule(MatchRule):
         return True
 
     def __str__(self):
-        return f'not {self.sub_rule}'
+        return f"not {self.sub_rule}"
 
 
 class PathExistsMatchRule(MatchRule):
@@ -295,6 +382,18 @@ class PathExistsMatchRule(MatchRule):
     def __init__(self, target_path, match_action=None):
         self.target_path = target_path
         self.match_action = match_action
+        if not isinstance(target_path, str):
+            msg = "target_path has to be of type String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if target_path == "":
+            msg = "target_path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -307,7 +406,7 @@ class PathExistsMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return f'hasPath({self.target_path})'
+        return f"hasPath({self.target_path})"
 
 
 class ValueMatchRule(MatchRule):
@@ -317,6 +416,22 @@ class ValueMatchRule(MatchRule):
         self.target_path = target_path
         self.value = value
         self.match_action = match_action
+        if not isinstance(target_path, str):
+            msg = "target_path has to be of type String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if target_path == "":
+            msg = "target_path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if isinstance(value, (str, bytes)) and len(value) == 0:
+            msg = "value must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -340,7 +455,7 @@ class ValueMatchRule(MatchRule):
     def __str__(self):
         if isinstance(self.value, bytes):
             self.value = self.value.decode()
-        return f'value({self.target_path})=={self.value}'
+        return f"value({self.target_path})=={self.value}"
 
 
 class ValueListMatchRule(MatchRule):
@@ -350,6 +465,27 @@ class ValueListMatchRule(MatchRule):
         self.target_path = target_path
         self.target_value_list = target_value_list
         self.match_action = match_action
+        if not isinstance(target_path, str):
+            msg = "target_path has to be of type String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if target_path == "":
+            msg = "target_path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(target_value_list, list):
+            msg = "target_value_list must be of type list."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not all(isinstance(x, (bytes, str)) and len(x) != 0 or not isinstance(x, (bytes, str)) for x in target_value_list) or \
+                len(target_value_list) == 0:
+            msg = "target values must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -374,6 +510,30 @@ class ValueRangeMatchRule(MatchRule):
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
         self.match_action = match_action
+        if not isinstance(target_path, str):
+            msg = "target_path has to be of type String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if isinstance(lower_limit, bool) or not isinstance(lower_limit, (int, float)):
+            msg = "lower_limit has to be of type int or float."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if isinstance(upper_limit, bool) or not isinstance(upper_limit, (int, float)):
+            msg = "upper_limit has to be of type int or float."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if lower_limit >= upper_limit:
+            msg = "lower_limit must be smaller than upper_limit."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if target_path == "":
+            msg = "target_path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -390,7 +550,7 @@ class ValueRangeMatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return f'value({self.target_path}) inrange ({self.lower_limit}, {self.upper_limit})'
+        return f"value({self.target_path}) inrange ({self.lower_limit}, {self.upper_limit})"
 
 
 class StringRegexMatchRule(MatchRule):
@@ -400,6 +560,22 @@ class StringRegexMatchRule(MatchRule):
         self.target_path = target_path
         self.match_regex = match_regex
         self.match_action = match_action
+        if not isinstance(target_path, str):
+            msg = "target_path has to be of type String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if target_path == "":
+            msg = "target_path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(match_regex, re.Pattern):
+            msg = "match_regex has to be of type re.Pattern."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -414,7 +590,7 @@ class StringRegexMatchRule(MatchRule):
         return True
 
     def __str__(self):
-        return f'string({self.target_path}) =regex= {self.match_regex.pattern}'
+        return f"string({self.target_path}) =regex= {self.match_regex.pattern}"
 
 
 class ModuloTimeMatchRule(MatchRule):
@@ -436,7 +612,55 @@ class ModuloTimeMatchRule(MatchRule):
         self.match_action = match_action
         self.tzinfo = tzinfo
         if tzinfo is None:
-            self.tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+            self.tzinfo = datetime.now(timezone.utc).astimezone().tzinfo
+        if not isinstance(target_path, str):
+            msg = "target_path has to be of type String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if target_path == "":
+            msg = "target_path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if isinstance(seconds_modulo, bool) or not isinstance(seconds_modulo, int):
+            msg = "seconds_modulo has to be of type int."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if seconds_modulo <= 0:
+            msg = "seconds_modulo must be bigger than zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if isinstance(lower_limit, bool) or not isinstance(lower_limit, int):
+            msg = "lower_limit has to be of type int."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if isinstance(upper_limit, bool) or not isinstance(upper_limit, int):
+            msg = "upper_limit has to be of type int."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if lower_limit >= upper_limit:
+            msg = "lower_limit must be smaller than upper_limit."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if lower_limit < 0:
+            msg = "lower_limit must be greater than or equal zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if upper_limit <= 0:
+            msg = "upper_limit must be greater than zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if upper_limit > seconds_modulo:
+            msg = "upper_limit can not be greater than seconds_modulo."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(self.tzinfo, timezone):
+            msg = "tzinfo has to be of type datetime.timezone."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -448,7 +672,7 @@ class ModuloTimeMatchRule(MatchRule):
             time_match = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
             if time_match is None:
                 return False
-            test_value = time_match.match_object + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
+            test_value = time_match.match_object + datetime.now(self.tzinfo).utcoffset().total_seconds()
 
         if test_value is None:
             return False
@@ -468,8 +692,8 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
     [lower, upper] range selected by values from the match.
     """
 
-    def __init__(
-            self, target_path, seconds_modulo, target_path_list, limit_lookup_dict, default_limit=None, match_action=None, tzinfo=None):
+    def __init__(self, target_path, seconds_modulo, target_path_list=None, limit_lookup_dict=None, default_limit=None, match_action=None,
+                 tzinfo=None):
         """
         @param target_path the target_path to the datetime object to use to evaluate the modulo time rules on.
         When None, the default timestamp associated with the match is used.
@@ -484,7 +708,56 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         self.match_action = match_action
         self.tzinfo = tzinfo
         if tzinfo is None:
-            self.tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+            self.tzinfo = datetime.now(timezone.utc).astimezone().tzinfo
+        if not isinstance(target_path, str):
+            msg = "target_path has to be of type String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if target_path == "":
+            msg = "target_path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if isinstance(seconds_modulo, bool) or not isinstance(seconds_modulo, int):
+            msg = "seconds_modulo has to be of type int."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if seconds_modulo <= 0:
+            msg = "seconds_modulo must be bigger than zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if target_path_list is not None and (not isinstance(target_path_list, list) or
+                                             not all(isinstance(x, str) and len(x) > 0 for x in target_path_list)):
+            msg = "target_path_list has to be a list of strings."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if limit_lookup_dict is not None and (
+                not isinstance(limit_lookup_dict, dict) or None in limit_lookup_dict.keys() or
+                not all(isinstance(x, list) and all(not isinstance(y, bool) and isinstance(y, (int, float)) for y in x) and len(x) == 2 and
+                        x[0] < x[1] <= seconds_modulo for x in limit_lookup_dict.values())):
+            msg = "limit_lookup_dict has to be of type dict with a list of two integer or float limit values as values. " \
+                  "The first limit value must be smaller than the second and both must be smaller than seconds_modulo."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if default_limit is not None and (
+                not isinstance(default_limit, list) or
+                not all(not isinstance(x, bool) and isinstance(x, (int, float)) for x in default_limit) or
+                len(default_limit) != 2 or default_limit[0] > default_limit[1] or default_limit[1] > seconds_modulo):
+            msg = "default_limit has to be a list with two integer or float limit values. The first value must be smaller than the " \
+                  "second and both must be smaller than seconds_modulo."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if default_limit is None and (not limit_lookup_dict or not target_path_list):
+            msg = "Either default_limit or limit_lookup_dict and target_path_list must not be None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(self.tzinfo, timezone):
+            msg = "tzinfo has to be of type datetime.timezone."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -504,17 +777,14 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
         if limits is None:
             return False
 
-        test_value = None
         if self.target_path is None:
             test_value = log_atom.get_timestamp()
         else:
             time_match = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
             if time_match is None:
                 return False
-            test_value = time_match.match_object + datetime.datetime.now(self.tzinfo).utcoffset().total_seconds()
+            test_value = time_match.match_object + datetime.now(self.tzinfo).utcoffset().total_seconds()
 
-        if test_value is None:
-            return False
         test_value %= self.seconds_modulo
         if limits[0] <= test_value <= limits[1]:
             if self.match_action is not None:
@@ -533,6 +803,18 @@ class IPv4InRFC1918MatchRule(MatchRule):
     def __init__(self, target_path, match_action=None):
         self.target_path = target_path
         self.match_action = match_action
+        if not isinstance(target_path, str):
+            msg = "target_path has to be of type String."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if target_path == "":
+            msg = "target_path must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if match_action is not None and not isinstance(match_action, MatchAction):
+            msg = "match_action has to be of type MatchAction."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def match(self, log_atom):
         """Check if this rule matches. On match an optional match_action could be triggered."""
@@ -549,7 +831,7 @@ class IPv4InRFC1918MatchRule(MatchRule):
         return False
 
     def __str__(self):
-        return f'hasPath({self.target_path})'
+        return f"hasPath({self.target_path})"
 
 
 class DebugMatchRule(MatchRule):
@@ -574,7 +856,7 @@ class DebugMatchRule(MatchRule):
         return self.debug_match_result
 
     def __str__(self):
-        return f'{self.debug_match_result}'
+        return f"{self.debug_match_result}"
 
 
 class DebugHistoryMatchRule(MatchRule):
@@ -591,7 +873,7 @@ class DebugHistoryMatchRule(MatchRule):
         if object_history is None:
             object_history = LogarithmicBackoffHistory(10)
         elif not isinstance(object_history, ObjectHistory):
-            msg = 'object_history is not an instance of ObjectHistory'
+            msg = "object_history is not an instance of ObjectHistory"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.object_history = object_history

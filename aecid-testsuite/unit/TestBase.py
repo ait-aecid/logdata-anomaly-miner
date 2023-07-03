@@ -201,6 +201,20 @@ class DummyFixedDataModelElement(ModelElementInterface):
         return MatchElement("%s/%s" % (path, self.element_id), self.data, self.data, None)
 
 
+class DummyNumberModelElement(ModelElementInterface):
+    """Dummy class for any data."""
+
+    def get_match_element(self, path: str, match_context):
+        for i in range(len(match_context.match_data)):
+            if match_context.match_data[i:i+1] not in b"0123456789":
+                if i == 0:
+                    return None
+                match_data = match_context.match_data[:i]
+                match_context.update(match_data)
+                return MatchElement(f"{path}/{self.element_id}", match_data, int(match_data), None)
+        return MatchElement(f"{path}/{self.element_id}", match_context.match_data, int(match_context.match_data), None)
+
+
 class DummyFirstMatchModelElement(ModelElementInterface):
     """This class defines a model element to return the match from the the first matching child model within a given list."""
 

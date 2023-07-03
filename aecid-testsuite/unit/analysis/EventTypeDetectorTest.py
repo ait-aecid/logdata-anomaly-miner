@@ -2,209 +2,520 @@ import time
 import unittest
 from aminer.analysis.EventTypeDetector import EventTypeDetector
 from aminer.input.LogAtom import LogAtom
-from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
-from aminer.parsing.SequenceModelElement import SequenceModelElement
-from aminer.parsing.FixedDataModelElement import FixedDataModelElement
-from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
-from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
-from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
-from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.parsing.ParserMatch import ParserMatch
-from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
-from unit.TestBase import TestBase
+from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement, DummySequenceModelElement
+from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
 
 
 class EventTypeDetectorTest(TestBase):
     """Unittests for the EventTypeDetector."""
 
-    log_lines = [
-        b'type=SYSCALL msg=audit(1580367384.000:1): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367385.000:1): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367386.000:2): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367387.000:2): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367388.000:3): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367389.000:3): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367388.500:100): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1'
-        b' ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=SYSCALL msg=audit(1580367390.000:4): arch=c000003e syscall=1 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367391.000:4): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=PATH msg=audit(1580367392.000:5): item=0 name="two" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367393.000:5): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=SYSCALL msg=audit(1580367394.000:6): arch=c000003e syscall=4 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367395.000:7): item=0 name="five" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367396.000:8): arch=c000003e syscall=6 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367397.000:6): item=0 name="four" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367398.000:7): arch=c000003e syscall=5 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367399.000:8): item=0 name="six" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367400.000:9): arch=c000003e syscall=2 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)',
-        b'type=PATH msg=audit(1580367401.000:9): item=0 name="three" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=PATH msg=audit(1580367402.000:10): item=0 name="one" inode=790106 dev=fe:01 mode=0100666 ouid=1000 ogid=1000 rdev=00:00 '
-        b'nametype=NORMAL',
-        b'type=SYSCALL msg=audit(1580367403.000:10): arch=c000003e syscall=3 success=yes exit=21 a0=7ffda5863060 a1=0 a2=1b6 a3=4f items=1 '
-        b'ppid=22913 pid=13187 auid=4294967295 uid=33 gid=33 euid=33 suid=33 fsuid=33 egid=33 sgid=33 fsgid=33 tty=(none) ses=4294967295 '
-        b'comm="apache2" exe="/usr/sbin/apache2" key=(null)']
+    match_context = DummyMatchContext(b" pid=25537 uid=2")
+    fdme1 = DummyFixedDataModelElement("s11", b" pid=")
+    fdme2 = DummyFixedDataModelElement("d1", b"25537")
+    seq1 = DummySequenceModelElement("seq", [fdme1, fdme2])
+    match_element1 = seq1.get_match_element("", match_context)
 
-    parsing_model = FirstMatchModelElement('type', [SequenceModelElement('path', [
-        FixedDataModelElement('type', b'type=PATH '), FixedDataModelElement('msg_audit', b'msg=audit('),
-        DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'), DecimalIntegerValueModelElement('id'),
-        FixedDataModelElement('item_string', b'): item='), DecimalIntegerValueModelElement('item'),
-        FixedDataModelElement('name_string', b' name="'), DelimitedDataModelElement('name', b'"'),
-        FixedDataModelElement('inode_string', b'" inode='), DecimalIntegerValueModelElement('inode'),
-        FixedDataModelElement('dev_string', b' dev='), DelimitedDataModelElement('dev', b' '),
-        FixedDataModelElement('mode_string', b' mode='), DecimalIntegerValueModelElement(
-            'mode', value_pad_type=DecimalIntegerValueModelElement.PAD_TYPE_ZERO),
-        FixedDataModelElement('ouid_string', b' ouid='), DecimalIntegerValueModelElement('ouid'),
-        FixedDataModelElement('ogid_string', b' ogid='), DecimalIntegerValueModelElement('ogid'),
-        FixedDataModelElement('rdev_string', b' rdev='), DelimitedDataModelElement('rdev', b' '),
-        FixedDataModelElement('nametype_string', b' nametype='), FixedWordlistDataModelElement('nametype', [b'NORMAL', b'ERROR'])]),
-        SequenceModelElement('syscall', [
-            FixedDataModelElement('type', b'type=SYSCALL '), FixedDataModelElement('msg_audit', b'msg=audit('),
-            DelimitedDataModelElement('msg', b':'), FixedDataModelElement('placeholder', b':'), DecimalIntegerValueModelElement('id'),
-            FixedDataModelElement('arch_string', b'): arch='), DelimitedDataModelElement('arch', b' '),
-            FixedDataModelElement('syscall_string', b' syscall='), DecimalIntegerValueModelElement('syscall'),
-            FixedDataModelElement('success_string', b' success='), FixedWordlistDataModelElement('success', [b'yes', b'no']),
-            FixedDataModelElement('exit_string', b' exit='), DecimalIntegerValueModelElement('exit'),
-            AnyByteDataModelElement('remainding_data')])])
+    match_context = DummyMatchContext(b"ddd 25538ddd ")
+    fdme3 = DummyFixedDataModelElement("s11", b"ddd ")
+    fdme4 = DummyFixedDataModelElement("d1", b"25538")
+    seq2 = DummySequenceModelElement("seq", [fdme3, fdme4])
+    match_element2 = seq2.get_match_element("", match_context)
+    match_element3 = fdme3.get_match_element("/seq", match_context)
 
-    def test1receive_atoms_with_default_values(self):
-        """
-        In this test case multiple log_atoms are received with default values of the EventTypeDetector.
-        target_path_list is empty and all paths are learned dynamically in variable_key_list.
-        """
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        log_atoms = []
-        for line in self.log_lines:
-            t = time.time()
-            log_atoms.append(
-                LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
-        for i, log_atom in enumerate(log_atoms):
-            self.assertTrue(event_type_detector.receive_atom(log_atom))
-            self.assertEqual(event_type_detector.total_records, i + 1)
+    def test1receive_atom(self):
+        """Test if log atoms are processed correctly."""
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+        t = round(time.time(), 3)
+        log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, etd)
+        log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t, etd)
+        log_atom3 = LogAtom(self.match_element3.match_string, ParserMatch(self.match_element3), t, etd)
 
-    def test2receive_atoms_with_defined_path_list(self):
-        """
-        In this test case multiple log_atoms are received with default values of the EventTypeDetector.
-        target_path_list is set to a static list of paths and variable_key_list should not be used.
-        """
-        event_type_detector = EventTypeDetector(
-            self.aminer_config, [self.stream_printer_event_handler], target_path_list=['parser/type/path/nametype'])
-        results = [True, False, True, False, True, False, True, True, False, False, True, True, False, True, False, True, False, True,
-                   False, False, True]
-        log_atoms = []
-        for line in self.log_lines:
-            t = time.time()
-            log_atoms.append(
-                LogAtom(line, ParserMatch(self.parsing_model.get_match_element('parser', MatchContext(line))), t, self.__class__.__name__))
-        for i, log_atom in enumerate(log_atoms):
-            old_vals = (event_type_detector.num_events, event_type_detector.num_event_lines,
-                        event_type_detector.total_records, event_type_detector.longest_path)
-            self.assertEqual(event_type_detector.receive_atom(log_atom), not results[i], i)
-            if results[i]:
-                self.assertEqual(old_vals, (
-                    event_type_detector.num_events, event_type_detector.num_event_lines,
-                    event_type_detector.total_records, event_type_detector.longest_path))
+        # default arguments
+        # In this test case multiple log_atoms are received with default values of the EventTypeDetector. target_path_list is empty and all paths are learned dynamically in variable_key_list.
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True]])
+        self.assertEqual(etd.longest_path, ["/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1])
 
-    def test3append_values_float(self):
-        """This unittest checks the append_values method with raw_match_object being a float value."""
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        # initialize all values.
-        t = time.time()
-        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', b'22.2', 22.2, None)), t, self.__class__.__name__)
-        event_type_detector.receive_atom(log_atom)
+        self.assertTrue(etd.receive_atom(log_atom2))
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0, 25538.0], [" pid=", "ddd "], [" pid=25537", "ddd 25538"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True]])
+        self.assertEqual(etd.longest_path, ["/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [2])
 
-        event_type_detector.values = [[[]]]
-        event_type_detector.append_values(log_atom, 0)
-        self.assertEqual(event_type_detector.values, [[[22.2]]])
+        self.assertTrue(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0, 25538.0], [" pid=", "ddd "], [" pid=25537", "ddd 25538"]], [["ddd "]]])
+        self.assertEqual(etd.check_variables, [[True, True, True], [True]])
+        self.assertEqual(etd.longest_path, ["/seq/s11", "/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [2, 1])
 
-        log_atom = LogAtom(b'22', ParserMatch(MatchElement('path', b'22', 22, None)), t, self.__class__.__name__)
-        event_type_detector.values = [[[]]]
-        event_type_detector.append_values(log_atom, 0)
-        self.assertEqual(event_type_detector.values, [[[22]]])
+        # default arguments + save_values=False
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], save_values=False)
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, ["/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1])
 
-        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', b'22', b'22', None)), t, self.__class__.__name__)
-        event_type_detector.values = [[[]]]
-        event_type_detector.append_values(log_atom, 0)
-        self.assertEqual(event_type_detector.values, [[[22]]])
+        self.assertTrue(etd.receive_atom(log_atom2))
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, ["/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [2])
 
-    def test4append_values_bytestring(self):
-        """
-        This unittest checks the append_values method with raw_match_object being a bytestring.
-        This should trigger a ValueError and append the match_string.
-        """
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        # initialize all values.
-        t = time.time()
-        log_atom = LogAtom(b'This is a string', ParserMatch(
-            MatchElement('path', b'This is a string', b'This is a string', None)), t, self.__class__.__name__)
-        event_type_detector.receive_atom(log_atom)
+        self.assertTrue(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, ["/seq/s11", "/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [2, 1])
 
-        event_type_detector.values = [[[]]]
-        event_type_detector.append_values(log_atom, 0)
-        self.assertEqual(event_type_detector.values, [[['This is a string']]])
+        # target_path_list + save_values=True
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=["/seq/s11"])
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/s11"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[" pid="]]])
+        self.assertEqual(etd.check_variables, [[True]])
+        self.assertEqual(etd.longest_path, ["/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1])
 
-        log_atom = LogAtom(b'24.05.', ParserMatch(MatchElement('path', b'24.05.', b'24.05.', None)), t, self.__class__.__name__)
-        event_type_detector.values = [[[]]]
-        event_type_detector.append_values(log_atom, 0)
-        self.assertEqual(event_type_detector.values, [[['24.05.']]])
+        self.assertTrue(etd.receive_atom(log_atom2))
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/s11"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[" pid=", "ddd "]]])
+        self.assertEqual(etd.check_variables, [[True]])
+        self.assertEqual(etd.longest_path, ["/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [2])
 
-    def test5check_value_reduction(self):
-        """This unittest checks the functionality of reducing the values when the maxNumVals threshold is reached."""
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        t = time.time()
+        self.assertTrue(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/s11"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[" pid=", "ddd "]], [["ddd "]]])
+        self.assertEqual(etd.check_variables, [[True], [True]])
+        self.assertEqual(etd.longest_path, ["/seq/s11", "/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [2, 1])
+
+        # target_path_list + save_values=False
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=["/seq/s11"], save_values=False)
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/s11"])] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, ["/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1])
+
+        self.assertTrue(etd.receive_atom(log_atom2))
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/s11"])] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, ["/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [2])
+
+        self.assertTrue(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/s11"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, ["/seq/s11", "/seq/s11"])
+        self.assertEqual(etd.id_path_list_tuples, [])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [2, 1])
+
+        # id_path_list + save_values=True
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/seq/s11"])
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",)])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1])
+
+        self.assertTrue(etd.receive_atom(log_atom2))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]], [[25538.0], ["ddd "], ["ddd 25538"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True], [True, True, True]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",), ("ddd ",)])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [1, 1])
+
+        self.assertTrue(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if len(y) > 0 and isinstance(y[0], (int, float))]) + sorted([y for y in x if len(y) > 0 and isinstance(y[0], str)]) + [y for y in x if len(y) == 0] for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]], [["ddd ", "ddd "], [], []]])
+        self.assertEqual(etd.check_variables, [[True, True, True], [y != [] for y in etd.values[1]]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",), ("ddd ",)])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [1, 2])
+
+        # id_path_list + save_values=False
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/seq/s11"], save_values=False)
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",)])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1])
+
+        self.assertTrue(etd.receive_atom(log_atom2))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",), ("ddd ",)])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [1, 1])
+
+        self.assertTrue(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual(etd.values, [])
+        self.assertEqual(etd.check_variables, [])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",), ("ddd ",)])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [1, 2])
+
+        # id_path_list + save_values=True + allow_missing_id=True
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/seq/s11", "/seq/s12"])
+        self.assertFalse(etd.receive_atom(log_atom1))
+        self.assertFalse(etd.receive_atom(log_atom2))
+        self.assertFalse(etd.receive_atom(log_atom3))
+
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/seq/s11", "/seq/s12"], allow_missing_id=True)
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=", "")])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1])
+
+        self.assertTrue(etd.receive_atom(log_atom2))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]], [[25538.0], ["ddd "], ["ddd 25538"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True], [True, True, True]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=", ""), ("ddd ", "")])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [1, 1])
+
+        self.assertTrue(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if len(y) > 0 and isinstance(y[0], (int, float))]) + sorted([y for y in x if len(y) > 0 and isinstance(y[0], str)]) + [y for y in x if len(y) == 0] for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]], [["ddd ", "ddd "], [], []]])
+        self.assertEqual(etd.check_variables, [[True, True, True], [y != [] for y in etd.values[1]]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=", ""), ("ddd ", "")])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [1, 2])
+
+        # id_path_list + save_values=True + allowed_id_tuples
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/seq/s11"], allowed_id_tuples=[(" pid=",)])
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertEqual(self.output_stream.getvalue(), "")
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",)])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1])
+
+        self.assertFalse(etd.receive_atom(log_atom2))
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"])] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",)])
+        self.assertEqual(etd.current_index, -1)
+        self.assertEqual(etd.num_event_lines, [1])
+
+        self.assertFalse(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 1)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if isinstance(y[0], (int, float))]) + sorted([y for y in x if isinstance(y[0], str)]) for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]]])
+        self.assertEqual(etd.check_variables, [[True, True, True]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",)])
+        self.assertEqual(etd.current_index, -1)
+        self.assertEqual(etd.num_event_lines, [1])
+
+        # test min_num_vals and max_num_vals
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         val_list = [[[]]]
-        for i in range(1, event_type_detector.max_num_vals + 1, 1):
-            log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement('path', str(i).encode(), i, None)), t, self.__class__.__name__)
+        for i in range(1, etd.max_num_vals + 1, 1):
+            log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement("path", str(i).encode(), i, None)), t, self.__class__.__name__)
             val_list[0][0].append(float(i))
-            self.assertTrue(event_type_detector.receive_atom(log_atom))
-            self.assertEqual(event_type_detector.values, val_list)
+            self.assertTrue(etd.receive_atom(log_atom))
+            self.assertEqual(etd.values, val_list)
         i += 1
-        log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement('path', str(i).encode(), i, None)), t, self.__class__.__name__)
+        log_atom = LogAtom(str(i).encode(), ParserMatch(MatchElement("path", str(i).encode(), i, None)), t, self.__class__.__name__)
         val_list[0][0].append(float(i))
-        self.assertTrue(event_type_detector.receive_atom(log_atom))
-        self.assertEqual(event_type_detector.values, [[val_list[0][0][-event_type_detector.min_num_vals:]]])
+        self.assertTrue(etd.receive_atom(log_atom))
+        self.assertEqual(etd.values, [[val_list[0][0][-etd.min_num_vals:]]])
 
-    def test6persist_and_load_data(self):
-        """This unittest checks the functionality of the persistence by persisting and reloading values."""
-        event_type_detector = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+        #, ["/seq/s1", "/seq/d1"]
+
+    def test2do_timer(self):
+        """Test if the do_timer method is implemented properly."""
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         t = time.time()
-        log_atom = LogAtom(b'22.2', ParserMatch(MatchElement('path', b'22.2', 22.2, None)), t, self.__class__.__name__)
-        event_type_detector.receive_atom(log_atom)
-        event_type_detector.do_persist()
-        event_type_detector_loaded = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
-        self.assertEqual(event_type_detector.variable_key_list, event_type_detector_loaded.variable_key_list)
-        self.assertEqual(event_type_detector.values, event_type_detector_loaded.values)
-        self.assertEqual(event_type_detector.longest_path, event_type_detector_loaded.longest_path)
-        self.assertEqual(event_type_detector.check_variables, event_type_detector_loaded.check_variables)
-        self.assertEqual(event_type_detector.num_event_lines, event_type_detector_loaded.num_event_lines)
+        etd.next_persist_time = t + 400
+        self.assertEqual(etd.do_timer(t + 200), 200)
+        self.assertEqual(etd.do_timer(t + 400), DEFAULT_PERSISTENCE_PERIOD)
+        self.assertEqual(etd.do_timer(t + 999), 1)
+        self.assertEqual(etd.do_timer(t + 1000), DEFAULT_PERSISTENCE_PERIOD)
+
+    def test3persistence(self):
+        """Test the do_persist and load_persistence_data methods."""
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+        t = round(time.time(), 3)
+        log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, etd)
+        log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t, etd)
+        log_atom3 = LogAtom(self.match_element3.match_string, ParserMatch(self.match_element3), t, etd)
+
+        etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/seq/s11"])
+        self.assertTrue(etd.receive_atom(log_atom1))
+        self.assertTrue(etd.receive_atom(log_atom2))
+        self.assertTrue(etd.receive_atom(log_atom3))
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if len(y) > 0 and isinstance(y[0], (int, float))]) + sorted([y for y in x if len(y) > 0 and isinstance(y[0], str)]) + [y for y in x if len(y) == 0] for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]], [["ddd ", "ddd "], [], []]])
+        self.assertEqual(etd.check_variables, [[True, True, True], [y != [] for y in etd.values[1]]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",), ("ddd ",)])
+        self.assertEqual(etd.current_index, 1)
+        self.assertEqual(etd.num_event_lines, [1, 2])
+        etd.do_persist()
+        # with open(etd.persistence_file_name, "r") as f:
+        #     self.assertEqual(f.read(), '[[["string:/seq", "string:/seq/s11", "string:/seq/d1"], ["string:/seq", "string:/seq/s11", "string:/seq/d1"]], [["string:/seq", "string:/seq/s11", "string:/seq/d1"], ["string:/seq", "string:/seq/s11", "string:/seq/d1"]], [[["string: pid=25537"], ["string: pid="], [25537.0]], [[], ["string:ddd ", "string:ddd "], []]], [], [[true, true, true], [false, true, false]], [1, 2], [["string: pid="], ["string:ddd "]]]')
+
+        etd.num_events = 0
+        etd.found_keys = []
+        etd.variable_key_list = []
+        etd.values = []
+        etd.num_event_lines = []
+        etd.current_index = 0
+        etd.id_path_list_tuples = []
+        etd.load_persistence_data()
+        self.assertEqual(etd.num_events, 2)
+        self.assertTrue(all(x in [{"/seq", "/seq/s11", "/seq/d1"}, {"/seq/s11"}] for x in etd.found_keys))
+        self.assertTrue(all(sorted(x) in [sorted(["/seq/d1", "/seq/s11", "/seq"]), ["/seq/s11"]] for x in etd.variable_key_list))
+        self.assertEqual([sorted([y for y in x if len(y) > 0 and isinstance(y[0], (int, float))]) + sorted([y for y in x if len(y) > 0 and isinstance(y[0], str)]) + [y for y in x if len(y) == 0] for x in etd.values], [[[25537.0], [" pid="], [" pid=25537"]], [["ddd ", "ddd "], [], []]])
+        self.assertEqual(etd.check_variables, [[True, True, True], [y != [] for y in etd.values[1]]])
+        self.assertEqual(etd.longest_path, [])
+        self.assertEqual(etd.id_path_list_tuples, [(" pid=",), ("ddd ",)])
+        self.assertEqual(etd.current_index, 0)
+        self.assertEqual(etd.num_event_lines, [1, 2])
+
+        other = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
+        self.assertEqual(etd.num_events, other.num_events)
+        self.assertEqual(etd.found_keys, other.found_keys)
+        self.assertEqual(etd.variable_key_list, other.variable_key_list)
+        self.assertEqual(etd.values, other.values)
+        self.assertEqual(etd.check_variables, other.check_variables)
+        self.assertEqual(etd.longest_path, other.longest_path)
+        self.assertEqual(etd.id_path_list_tuples, other.id_path_list_tuples)
+        self.assertEqual(etd.current_index, other.current_index)
+        self.assertEqual(etd.num_event_lines, other.num_event_lines)
+
+    def test4validate_parameters(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, ["default"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, None)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, "")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, b"Default")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, True)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, 123)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, 123.3)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, {"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, ())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, set())
+
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id="")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=None)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=b"Default")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=True)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=123)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=123.22)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=["Default"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=[])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=set())
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], persistence_id="Default")
+
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list=[""])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list=[b"True"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list="True")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list=True)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list=123)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list=123.22)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], target_path_list=set())
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=["default"])
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=None)
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], target_path_list=[])
+
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list=[""])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list=[b"True"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list="True")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list=True)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list=123)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list=123.22)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], id_path_list=set())
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["default"])
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=None)
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=[])
+
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id=b"True")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id="True")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id=123)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id=123.22)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id=["Default"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id=[])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allow_missing_id=set())
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], allow_missing_id=True)
+
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=b"True")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples="True")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=123)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=123.22)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=["Default"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=[()])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=set())
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=[])
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=None)
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], allowed_id_tuples=[(b"value",)])
+
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=-1)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=b"Default")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals="123")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=["Default"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=[])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=set())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=100.22)
+
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals=-1)
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals=0)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals=b"Default")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals="123")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals=["Default"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals=[])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals=set())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], max_num_vals=100.22)
+
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=100, max_num_vals=100)
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], min_num_vals=101, max_num_vals=100)
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], min_num_vals=10, max_num_vals=100)
+
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values=b"True")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values="True")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values=123)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values=123.22)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values=["Default"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values=[])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values=set())
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], save_values=True)
 
 
 if __name__ == "__main__":
