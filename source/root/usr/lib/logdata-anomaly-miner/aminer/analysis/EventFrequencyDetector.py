@@ -240,6 +240,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency anomaly detected", sorted_log_lines,
                                                event_data, self.last_seen_log[log_ev], self)
+                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_timestamp = max(
+                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                     # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
                     self.exceeded_range_frequency[log_ev] = False
 
@@ -286,6 +289,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency exceeds range for the first time",
                                            sorted_log_lines, event_data, log_atom, self)
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
         # Get the id list if the scoring_path_list is set and save it for the anomaly message
         if len(self.scoring_path_list) > 0:
@@ -315,13 +321,13 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         else:
             self.counts[log_event] = [1]
         self.log_success += 1
-        return True
 
         # Switching the learn mode is placed at the end of receive_atom to ensure that last time window before switching is added to model
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
             self.learn_mode = False
+        return True
 
     def reset_counter(self, log_event, log_atom):
         """Create count index for new time window"""
@@ -330,9 +336,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.counts[log_event].append(0)
             else:
                 self.counts[log_event] = self.counts[log_event][1:] + [0]
-                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = max(
-                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
         else:
             self.counts[log_event][-1] = 0
         if self.lookback is not None:

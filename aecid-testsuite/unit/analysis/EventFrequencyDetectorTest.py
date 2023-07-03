@@ -240,9 +240,6 @@ class EventFrequencyDetectorTest(TestBase):
         self.assertTrue(efd.receive_atom(log_atom2))
         self.assertTrue(efd.learn_mode)
         log_atom1.atom_time = t + 200
-        self.assertTrue(efd.receive_atom(log_atom3))
-        self.assertTrue(efd.learn_mode)
-        log_atom1.atom_time = t + 201
         self.assertTrue(efd.receive_atom(log_atom1))
         self.assertFalse(efd.learn_mode)
 
@@ -553,19 +550,18 @@ class EventFrequencyDetectorTest(TestBase):
 
         self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, stop_learning_time=100, stop_learning_no_anomaly_time=100)
 
-    def test2_seasonal_frequency_detection(self):
+    def test7seasonal_frequency_detection(self):
         """
         Test for periodically changing frequencies
         """
-        description = "Test2EventFrequencyDetector"
-
         # Initialize detector for analyzing values in one path in time windows of 10 seconds
-        test_handler = TestHandler()
-        event_frequency_detector = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[test_handler],
+        t = 0
+        expected_string = '%s Frequency anomaly detected\n%s: "None" (%d lines)\n  /value: %s\n%s\n\n'
+        dtf = "%Y-%m-%d %H:%M:%S"
+        efd = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[self.stream_printer_event_handler],
                                                           target_path_list=['/value'], window_size=10, num_windows=100,
                                                           confidence_factor=0.51, empty_window_warnings=True, persistence_id='Default',
                                                           learn_mode=True, output_logline=True, season=20)
-        self.analysis_context.register_component(event_frequency_detector, description)
 
         # Windows have 1 and 2 atoms alternatingly; the season is thus 2 and expected atom frequencies can be predicted exactly.
         # The anomaly is that in window 6, only 1 atom occurs although 2 should occur following the sequence.
@@ -621,34 +617,26 @@ class EventFrequencyDetectorTest(TestBase):
         parser_match_10 = ParserMatch(m_10)
         log_atom_10 = LogAtom(b'a', parser_match_10, 65, None)
 
-        event_frequency_detector.receive_atom(log_atom_1)
-        self.assertFalse(test_handler.anomalies)
-        event_frequency_detector.receive_atom(log_atom_2)
-        self.assertFalse(test_handler.anomalies)
-        event_frequency_detector.receive_atom(log_atom_3)
-        self.assertFalse(test_handler.anomalies)
-        event_frequency_detector.receive_atom(log_atom_4)
+        efd.receive_atom(log_atom_1)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_2)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_3)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_4)
         # Delete anomaly that occurs since second window has 2 but first only 1 atoms. 
-        self.assertTrue(test_handler.anomalies)
-        test_handler.anomalies = []
-        event_frequency_detector.receive_atom(log_atom_6)
-        self.assertFalse(test_handler.anomalies)
-        event_frequency_detector.receive_atom(log_atom_7)
-        self.assertFalse(test_handler.anomalies)
-        event_frequency_detector.receive_atom(log_atom_8)
-        self.assertFalse(test_handler.anomalies)
-        event_frequency_detector.receive_atom(log_atom_9)
-        self.assertFalse(test_handler.anomalies)
-        event_frequency_detector.receive_atom(log_atom_10)
-        self.assertEqual(test_handler.anomalies, [
-            {'AnalysisComponent':
-                {'AffectedLogAtomPaths': ['/value'],
-                 'AffectedLogAtomValues': ['a']}, 'FrequencyData': {
-                     'ExpectedLogAtomValuesFrequency': 2.0,
-                     'ExpectedLogAtomValuesFrequencyRange': [2.0, 2.0],
-                     'LogAtomValuesFrequency': 1,
-                     'WindowSize': 10, 'ConfidenceFactor': 0.51, 'Confidence': 0.5
-                     }}])
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t+25).strftime(dtf), efd.__class__.__name__, 1, "a", "a"))
+        self.reset_output_stream()
+        efd.receive_atom(log_atom_6)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_7)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_8)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_9)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_10)
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t+65).strftime(dtf), efd.__class__.__name__, 1, "a", "a"))
 
 
 if __name__ == "__main__":
