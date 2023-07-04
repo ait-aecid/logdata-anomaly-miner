@@ -31,7 +31,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, target_path_list, min_bin_elements, min_bin_time,
-                 debug_mode=False, persistence_id="Default", output_logline=True):
+                 avg_factor=1, var_factor=2, debug_mode=False, persistence_id="Default", output_logline=True, learn_mode=False):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -39,8 +39,11 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         @param timestamp_path if not None, use this path value for timestamp based bins.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
                considered for value range generation.
+        @param learn_mode specifies whether new statistics should be learned.
         @param min_bin_elements evaluate the latest bin only after at least that number of elements was added to it.
         @param min_bin_time evaluate the latest bin only when the first element is received after min_bin_time has elapsed.
+        @param avg_factor the maximum allowed deviation for the average value before an anomaly is raised.
+        @param var_factor the maximum allowed deviation for the variance of the value before an anomaly is raised.
         @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.
         @param persistence_id name of persistence file.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
@@ -50,7 +53,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, timestamp_path=timestamp_path,
             target_path_list=target_path_list, min_bin_elements=min_bin_elements, min_bin_time=min_bin_time, debug_mode=debug_mode,
-            persistence_id=persistence_id, output_logline=output_logline
+            persistence_id=persistence_id, output_logline=output_logline, avg_factor=avg_factor, var_factor=var_factor,
+            learn_mode=learn_mode
         )
         if not self.target_path_list:
             msg = "target_path_list must not be empty or None."
@@ -214,11 +218,13 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             total_sum = old_bin[1] + current_bin[1]
             total_sum2 = old_bin[2] + current_bin[2]
 
-            stat_data[2] = (
-                total_n, total_sum, total_sum2, total_sum / total_n, (total_sum2 - (total_sum * total_sum) / total_n) / (total_n - 1))
+            if self.learn_mode:
+                stat_data[2] = (
+                    total_n, total_sum, total_sum2, total_sum / total_n, (total_sum2 - (total_sum * total_sum) / total_n) / (total_n - 1))
             stat_data[3] = (0, 0.0, 0.0)
 
-            if (current_variance > 2 * old_bin[4]) or (abs(current_average - old_bin[3]) > old_bin[4]) or self.debug_mode:
+            if (current_variance > self.var_factor * old_bin[4]) or (abs(current_average - old_bin[3]) > self.avg_factor * old_bin[4]) or
+               self.debug_mode:
                 res = [f"Change: new: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}; old: n = "
                        f"{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = { old_bin[4]}", current_bin[0],
                        current_average + stat_data[1], current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]]

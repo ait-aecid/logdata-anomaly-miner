@@ -584,7 +584,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['timestamp_path'], item['paths'],
                                     item['min_bin_elements'], item['min_bin_time'], debug_mode=item['debug_mode'],
-                                    persistence_id=item['persistence_id'], output_logline=item['output_logline'])
+                                    persistence_id=item['persistence_id'], output_logline=item['output_logline'],
+                                    avg_factor=item['avg_factor'], var_factor=item['var_factor'], learn_mode=learn)
             elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':

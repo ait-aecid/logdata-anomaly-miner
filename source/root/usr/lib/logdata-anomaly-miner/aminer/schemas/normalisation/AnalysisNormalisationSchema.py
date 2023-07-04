@@ -218,6 +218,8 @@
                 'combine_values': {'type': 'boolean', 'nullable': True, 'default': True},
                 'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
                 'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
+                'avg_factor': {'type': 'float', 'min': 0, 'default': 1},
+                'var_factor': {'type': 'float', 'min': 0, 'default': 2}
             }
         }
     }
