@@ -31,7 +31,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, target_path_list, min_bin_elements, min_bin_time,
-                 avg_factor=1, var_factor=2, debug_mode=False, persistence_id="Default", output_logline=True, learn_mode=False):
+                 debug_mode=False, persistence_id="Default", output_logline=True, learn_mode=False, avg_factor=1, var_factor=2):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
