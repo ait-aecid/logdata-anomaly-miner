@@ -189,7 +189,6 @@ class JsonModelElement(ModelElementInterface):
             return [None]
 
         for i, key in enumerate(json_match_data.keys()):
-            split_key = key
             key = self.get_full_key(key, json_dict)
             if key not in json_dict:
                 index = match_context.match_data.find(key.encode())
@@ -208,72 +207,69 @@ class JsonModelElement(ModelElementInterface):
                 else:
                     return [None]
             value = json_dict[key]
-            if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3, Key: " + split_key + ", Value: " + repr(value))
+            if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or key not in json_match_data):
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3, Key: " + key + ", Value: " + repr(value))
                 return [None]
             if isinstance(value, dict):
-                if json_match_data[split_key] is None and (self.is_nullable_key(key) or json_dict[key] == "NULL_OBJECT"):
+                if json_match_data[key] is None and (self.is_nullable_key(key) or json_dict[key] == "NULL_OBJECT"):
                     data = b"null"
-                    matches.append(MatchElement(current_path, data, data, None))
+                    matches.append(MatchElement(f"{current_path}/{key}", data, data, None))
                     index = match_context.match_data.find(data)
                     if match_context.match_data[index + 4] == 34:  # "
                         index += 1
                     match_context.update(match_context.match_data[:index + len(data)])
                     return matches
 
-                matches += self.parse_json_dict(value, json_match_data[split_key], f"{current_path}/{split_key}", match_context)
-                if json_match_data[split_key] == {}:
-                    index = match_context.match_data.find(split_key.encode())
+                matches += self.parse_json_dict(value, json_match_data[key], f"{current_path}/{key}", match_context)
+                if json_match_data[key] == {}:
+                    index = match_context.match_data.find(key.encode())
                     index = match_context.match_data.find(b"}", index)
                     match_element = MatchElement(
-                        current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
+                        f"{current_path}/{key}", match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
 
                 if len(matches) == 0 or matches[-1] is None:
-                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + key)
                     return matches
             elif isinstance(value, list):
-                res = self.parse_json_array(json_dict, json_match_data, key, split_key, current_path, matches, match_context, i)
+                res = self.parse_json_array(json_dict, json_match_data, key, current_path, matches, match_context, i)
                 if res is not None:
                     return res
             elif value == "EMPTY_OBJECT":
-                if isinstance(json_match_data[split_key], dict) and len(json_match_data[split_key].keys()) == 0:
+                if isinstance(json_match_data[key], dict) and len(json_match_data[key].keys()) == 0:
                     index = match_context.match_data.find(b"}") + 1
                     match_element = MatchElement(
-                        current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
+                        f"{current_path}/{key}", match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
                 else:
                     logging.getLogger(DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + "EMPTY_OBJECT " + split_key + " is not empty. Keys: " + str(json_match_data[split_key].keys()))
+                        debug_log_prefix + "EMPTY_OBJECT " + key + " is not empty. Keys: " + str(json_match_data[key].keys()))
                     matches.append(None)
             elif json_dict[key] == "EMPTY_ARRAY":
-                if isinstance(json_match_data[split_key], list) and len(json_match_data[split_key]) == 0:
+                if isinstance(json_match_data[key], list) and len(json_match_data[key]) == 0:
                     index = match_context.match_data.find(b"]") + 1
                     match_element = MatchElement(
-                        current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
+                        f"{current_path}/{key}", match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
                 else:
                     logging.getLogger(DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + "EMPTY_ARRAY " + split_key + " is not empty. Data: " + str(json_match_data[split_key]))
+                        debug_log_prefix + "EMPTY_ARRAY " + key + " is not empty. Data: " + str(json_match_data[key]))
                     matches.append(None)
             else:
-                if key != split_key and split_key not in json_match_data:
-                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + f"Optional Key {key} not found in json_match_data")
-                    continue
-                if split_key not in json_match_data:
+                if key not in json_match_data:
                     logging.getLogger(DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + f"Key {split_key} not found in json_match_data. RETURN [NONE] 4")
+                        debug_log_prefix + f"Key {key} not found in json_match_data. RETURN [NONE] 4")
                     return [None]
-                match_element, index, data = self.parse_json_object(json_dict, json_match_data, key, split_key, current_path, match_context)
+                match_element, index, data = self.parse_json_object(json_dict, json_match_data, key, current_path, match_context)
                 matches.append(match_element)
                 if index == -1 and match_element is None:
                     backslash = b"\\"
                     logging.getLogger(DEBUG_LOG_NAME).debug(
                         debug_log_prefix + f"Necessary element did not match! Key: {key}, MatchElement: {match_element}, Data: "
-                                           f"{data.decode()}, IsFloat {isinstance(json_match_data[split_key], float)}, Index: {index}, "
+                                           f"{data.decode()}, IsFloat {isinstance(json_match_data[key], float)}, Index: {index}, "
                                            f"MatchContext: {match_context.match_data.replace(backslash, b'').decode()}")
                     return matches
                 match_context.update(match_context.match_data[:index + len(data)])
@@ -321,26 +317,25 @@ class JsonModelElement(ModelElementInterface):
                 res.append(val)
         return res
 
-    def parse_json_array(self, json_dict: dict, json_match_data: dict, key: str, split_key: str, current_path: str, matches: list,
+    def parse_json_array(self, json_dict: dict, json_match_data: dict, key: str, current_path: str, matches: list,
                          match_context, i: int):
         """Parse an array in a json object."""
-        if self.is_nullable_key(key) and json_match_data[split_key] is None:
+        if self.is_nullable_key(key) and json_match_data[key] is None:
             return None
-        if not isinstance(json_match_data[split_key], list):
-            if key.startswith(self.optional_key_prefix) and json_match_data[split_key] is None:
+        if not isinstance(json_match_data[key], list):
+            if key.startswith(self.optional_key_prefix) and json_match_data[key] is None:
                 data = b"null"
-                index = match_context.match_data.find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
+                index = match_context.match_data.find(key.encode() + b'":') + len(key.encode() + b'":')
                 index += match_context.match_data[index:].find(b"null") + len(b"null")
                 match_context.update(match_context.match_data[:index])
-                matches.append(MatchElement(current_path, data, data, None))
+                matches.append(MatchElement(f"{current_path}/{key}", data, data, None))
                 return matches
             logging.getLogger(DEBUG_LOG_NAME).debug(
-                debug_log_prefix + "Key " + split_key + " is no array. Data: " + str(json_match_data[split_key]))
+                debug_log_prefix + "Key " + key + " is no array. Data: " + str(json_match_data[key]))
             return [None]
         search_string = b"]"
-        match_array = self.flatten_list(json_match_data[split_key])
+        match_array = self.flatten_list(json_match_data[key])
         value = self.flatten_list(json_dict[key])
-
         for j, data in enumerate(match_array):
             for k, val in enumerate(value):
                 if isinstance(data, str):
@@ -353,11 +348,10 @@ class JsonModelElement(ModelElementInterface):
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 if isinstance(val, dict):  # skipcq: PYL-R1723
-                    matches += self.parse_json_dict(
-                        val, match_array[j], f"{current_path}/{split_key}", match_context)
+                    matches += self.parse_json_dict(val, match_array[j], f"{current_path}/{key}", match_context)
                     if matches[-1] is None:
                         if len(value) - 1 == k:
-                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
+                            logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + key)
                             return matches
                         del matches[-1]
                         continue
@@ -365,19 +359,19 @@ class JsonModelElement(ModelElementInterface):
                 else:
                     if val == "ALLOW_ALL":
                         logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "ALLOW_ALL (ARRAY)")
-                        match_element = MatchElement(current_path+"/"+key, data, data, None)
+                        match_element = MatchElement(f"{current_path}/{key}", data, data, None)
                     elif json_dict[key] == "EMPTY_ARRAY":
                         if isinstance(data, list) and len(data) == 0:
                             index = match_context.match_data.find(search_string)
                             match_element = MatchElement(
-                                current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
+                                f"{current_path}/{key}", match_context.match_data[:index], match_context.match_data[:index], None)
                             match_context.update(match_context.match_data[:index])
                         else:
                             logging.getLogger(DEBUG_LOG_NAME).debug(
-                                debug_log_prefix + "EMPTY_ARRAY " + split_key + " is not empty. Data: " + json_match_data[split_key])
+                                debug_log_prefix + "EMPTY_ARRAY " + key + " is not empty. Data: " + json_match_data[key])
                             return None
                     else:
-                        match_element = val.get_match_element(current_path, MatchContext(data))
+                        match_element = val.get_match_element(f"{current_path}/{key}", MatchContext(data))
                         if match_element is not None and len(match_element.match_string) != len(data):
                             logging.getLogger(DEBUG_LOG_NAME).debug(
                                 debug_log_prefix + "MatchElement NONE 1. match_string: " + match_element.match_string.decode() +
@@ -415,9 +409,10 @@ class JsonModelElement(ModelElementInterface):
             match_context.update(match_context.match_data[:match_context.match_data.find(search_string) + len(search_string)])
         return None
 
-    def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
+    def parse_json_object(self, json_dict, json_match_data, key, current_path, match_context):  # skipcq: PYL-R0201
         """Parse a literal from the json object."""
-        data = json_match_data[split_key]
+        current_path += "/" + key
+        data = json_match_data[key]
         enc = "utf-8"
         if isinstance(data, str):
             if self.is_escaped_unicode(data) and self.dec_escapes:
@@ -448,7 +443,7 @@ class JsonModelElement(ModelElementInterface):
         elif json_dict[key] == "EMPTY_STRING":
             if data == b"":
                 match_element = MatchElement(current_path, data, data, None)
-                index = match_context.match_data.find(split_key.encode()) + len(split_key)
+                index = match_context.match_data.find(key.encode()) + len(key)
                 index += match_context.match_data[index:].find(b'""') + len(b'""')
             else:
                 match_element = None
@@ -461,9 +456,9 @@ class JsonModelElement(ModelElementInterface):
                     debug_log_prefix + f"Data length not matching! match_string: {len(match_element.match_string)}, data: {len(data)},"
                                        f" data: {data.decode()}")
                 match_element = None
-            index = max([match_context.match_data.replace(b"\\", b"").find(split_key.encode()),
-                         match_context.match_data.find(split_key.encode()), match_context.match_data.decode().find(split_key)])
-            index += match_context.match_data[index:].find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
+            index = max([match_context.match_data.replace(b"\\", b"").find(key.encode()),
+                         match_context.match_data.find(key.encode()), match_context.match_data.decode().find(key)])
+            index += match_context.match_data[index:].find(key.encode() + b'":') + len(key.encode() + b'":')
             try:
                 index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
                               match_context.match_data.decode(enc)[index:].find(data.decode(enc))])
@@ -474,7 +469,7 @@ class JsonModelElement(ModelElementInterface):
             if match_context.match_data[index:].find(b'"') == 0:
                 index += len(b'"')
             # for example float scientific representation is converted to normal float..
-            if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
+            if index == -1 and match_element is not None and isinstance(json_match_data[key], float):
                 indices = [match_context.match_data.find(b",", len(match_element.match_string) // 3),
                            match_context.match_data.find(b"]"), match_context.match_data.find(b"}")]
                 indices = [x for x in indices if x >= 0]
