@@ -7,7 +7,8 @@ Core.PersistenceDir: '/tmp/lib/aminer'
 Core.PersistencePeriod: 600
 
 LogResourceList:
-        - 'file:///tmp/syslog'
+        - url: 'file:///tmp/syslog'
+          parser_id: 'model'
 
 MailAlerting.TargetAddress: 'root@localhost'
 
