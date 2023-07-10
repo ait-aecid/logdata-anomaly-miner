@@ -888,6 +888,9 @@ Analysis:
           event_type_detector: EventTypeDetector
           ignore_list:
             - "/model/RandomTime"
+        - type: TSAArimaDetector
+          id: TSAArimaDetector
+          event_type_detector: EventTypeDetector
         - type: EventCorrelationDetector
           id: EventCorrelationDetector
           check_rules_flag: True

@@ -317,6 +317,11 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(vtd, component_name="VariableCorrelationDetector")
     atom_filter.add_handler(vtd)
 
+    from aminer.analysis.TSAArimaDetector import TSAArimaDetector
+    tsaad = TSAArimaDetector(analysis_context.aminer_config, anomaly_event_handlers, etd)
+    analysis_context.register_component(tsaad, component_name="TSAArimaDetector")
+    atom_filter.add_handler(tsaad)
+
     from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
                                    hypothesis_max_delta_time=1.0, learn_mode=True)
