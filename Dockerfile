@@ -40,6 +40,7 @@ RUN apt-get update && apt-get install -y \
     python3-pylibacl \
     python3-urllib3 \
     python3-statsmodels \
+    python3-pandas \
     libacl1-dev
 
 # Docs
