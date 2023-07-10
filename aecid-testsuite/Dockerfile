@@ -28,8 +28,8 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 
 # Install necessary debian packages
 ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get update && apt-get install -y \
-    apt-utils \
     python3 \
     python3-pip \
     python3-tz \
