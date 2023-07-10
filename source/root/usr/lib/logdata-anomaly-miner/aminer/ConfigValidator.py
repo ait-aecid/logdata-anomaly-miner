@@ -4,8 +4,7 @@ import logging
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
-from cerberus import Validator
-from cerberus import TypeDefinition
+from cerberus import Validator, TypeDefinition  # skipcq: FLK-E402
 
 
 class ParserModelType:
