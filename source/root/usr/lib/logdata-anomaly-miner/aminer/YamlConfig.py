@@ -336,6 +336,8 @@ def build_input_pipeline(analysis_context, parsing_model, parser_model_dict):
             obj["json"] = None
         if "parser_id" not in obj:
             obj["parser_id"] = None
+        if isinstance(obj["url"], str):
+            obj["url"] = decode_string_as_byte_string(obj["url"])
         log_resources[obj["url"]] = obj
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_path_list=timestamp_paths, eol_sep=eol_sep,

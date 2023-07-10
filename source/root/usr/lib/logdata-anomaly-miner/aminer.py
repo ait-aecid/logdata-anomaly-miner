@@ -515,6 +515,8 @@ def main():
             obj["json"] = None
         if "parser_id" not in obj:
             obj["parser_id"] = None
+        if isinstance(obj["url"], str):
+            obj["url"] = decode_string_as_byte_string(obj["url"])
         url = obj["url"]
         if url.startswith(b'file://'):
             obj["log_resource"] = FileLogDataResource(url, -1)
