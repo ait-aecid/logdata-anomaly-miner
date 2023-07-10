@@ -2,6 +2,8 @@ import sys
 import os
 import logging
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
 from cerberus import Validator
 from cerberus import TypeDefinition
 
