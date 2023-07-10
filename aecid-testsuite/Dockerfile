@@ -29,6 +29,7 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 # Install necessary debian packages
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
+    apt-utils \
     python3 \
     python3-pip \
     python3-tz \
@@ -101,6 +102,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/six.py /etc/aminer/conf-enabled/six.py \
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /etc/aminer/conf-enabled/urllib3 \
 	&& ln -s /usr/lib/python3/dist-packages/statsmodels /etc/aminer/conf-enabled/statsmodels \
+	&& ln -s /usr/lib/python3/dist-packages/packaging /etc/aminer/conf-enabled/packaging \
 	&& ln -s /usr/lib/python3/dist-packages/pandas /etc/aminer/conf-enabled/pandas \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
     && chown aminer.aminer -R /var/lib/aminer && chmod 0755 /etc/aminer
