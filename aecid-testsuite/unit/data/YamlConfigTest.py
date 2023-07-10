@@ -417,6 +417,7 @@ class YamlConfigTest(TestBase):
         del yml_config_properties['Analysis']
         del yml_config_properties['EventHandlers']
         del yml_config_properties['LearnMode']
+        del yml_config_properties['LogResourceList'][0]['json']
 
         # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the YamlConfig.
         py_registered_components = copy.copy(py_context.registered_components)
@@ -736,10 +737,10 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/granular_log_resource_list.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        atomizer = context.atomizer_factory.get_atomizer_for_resource("file:///var/log/apache2/access.log")
+        atomizer = context.atomizer_factory.get_atomizer_for_resource(b"file:///var/log/apache2/access.log")
         self.assertEqual(atomizer.parsing_model.element_id, "accesslog")
         self.assertFalse(atomizer.json_format)
-        atomizer = context.atomizer_factory.get_atomizer_for_resource("unix:///var/lib/akafka/aminer.sock")
+        atomizer = context.atomizer_factory.get_atomizer_for_resource(b"unix:///var/lib/akafka/aminer.sock")
         self.assertEqual(atomizer.parsing_model.element_id, "model")
         self.assertTrue(isinstance(atomizer.parsing_model, SequenceModelElement))
         self.assertTrue(atomizer.json_format)

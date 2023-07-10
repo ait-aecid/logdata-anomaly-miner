@@ -9,7 +9,7 @@ config_properties = {}  # skipcq: PY-W0072
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = ['file:///tmp/syslog']
+config_properties['LogResourceList'] = [{'url': b'file:///tmp/syslog', 'parser_id': 'model'}]
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:

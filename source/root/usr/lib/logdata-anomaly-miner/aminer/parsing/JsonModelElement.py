@@ -214,7 +214,7 @@ class JsonModelElement(ModelElementInterface):
             if isinstance(value, dict):
                 if json_match_data[split_key] is None and (self.is_nullable_key(key) or json_dict[key] == "NULL_OBJECT"):
                     data = b"null"
-                    matches.append(MatchElement(current_path, data, data, None))
+                    matches.append(MatchElement(f"{current_path}/{key}", data, data, None))
                     index = match_context.match_data.find(data)
                     if match_context.match_data[index + 4] == 34:  # "
                         index += 1
@@ -267,7 +267,8 @@ class JsonModelElement(ModelElementInterface):
                     logging.getLogger(DEBUG_LOG_NAME).debug(
                         debug_log_prefix + f"Key {split_key} not found in json_match_data. RETURN [NONE] 4")
                     return [None]
-                match_element, index, data = self.parse_json_object(json_dict, json_match_data, key, split_key, current_path, match_context)
+                match_element, index, data = self.parse_json_object(
+                    json_dict, json_match_data, key, split_key, current_path, match_context)
                 matches.append(match_element)
                 if index == -1 and match_element is None:
                     backslash = b"\\"
@@ -332,7 +333,7 @@ class JsonModelElement(ModelElementInterface):
                 index = match_context.match_data.find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
                 index += match_context.match_data[index:].find(b"null") + len(b"null")
                 match_context.update(match_context.match_data[:index])
-                matches.append(MatchElement(current_path, data, data, None))
+                matches.append(MatchElement(f"{current_path}/{key}", data, data, None))
                 return matches
             logging.getLogger(DEBUG_LOG_NAME).debug(
                 debug_log_prefix + "Key " + split_key + " is no array. Data: " + str(json_match_data[split_key]))
@@ -340,7 +341,6 @@ class JsonModelElement(ModelElementInterface):
         search_string = b"]"
         match_array = self.flatten_list(json_match_data[split_key])
         value = self.flatten_list(json_dict[key])
-
         for j, data in enumerate(match_array):
             for k, val in enumerate(value):
                 if isinstance(data, str):
@@ -353,8 +353,7 @@ class JsonModelElement(ModelElementInterface):
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 if isinstance(val, dict):  # skipcq: PYL-R1723
-                    matches += self.parse_json_dict(
-                        val, match_array[j], f"{current_path}/{split_key}", match_context)
+                    matches += self.parse_json_dict(val, match_array[j], f"{current_path}/{split_key}", match_context)
                     if matches[-1] is None:
                         if len(value) - 1 == k:
                             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
@@ -417,6 +416,7 @@ class JsonModelElement(ModelElementInterface):
 
     def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
         """Parse a literal from the json object."""
+        current_path += "/" + key
         data = json_match_data[split_key]
         enc = "utf-8"
         if isinstance(data, str):
