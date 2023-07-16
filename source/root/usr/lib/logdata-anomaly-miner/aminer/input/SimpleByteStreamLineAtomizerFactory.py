@@ -56,6 +56,6 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
             if resource["parser_id"] is not None:
                 parser = self.parser_model_dict[resource["parser_id"]]
             return ByteStreamLineAtomizer(parser, self.atom_handler_list, self.event_handler_list, 1 << 16,
-                                          self.default_timestamp_path_list, self.eol_sep, json)
+                                          self.default_timestamp_path_list, self.eol_sep, json, resource_name)
         return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16,
-                                      self.default_timestamp_path_list, self.eol_sep, self.json_format)
+                                      self.default_timestamp_path_list, self.eol_sep, self.json_format, resource_name)

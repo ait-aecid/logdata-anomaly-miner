@@ -46,7 +46,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     COUNTER = 0
 
     def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_path_list, eol_sep=b'\n',
-                 json_format=False):
+                 json_format=False, resource_name=None):
         """
         Create the atomizer.
         @param event_handler_list when not None, send events to those handlers. The list might be empty at invocation and populated
@@ -65,6 +65,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             sys.exit(-1)
         self.eol_sep = eol_sep
         self.json_format = json_format
+        self.resource_name = resource_name
 
         self.in_overlong_line_flag = False
         # If consuming of data was already attempted but the downstream handlers refused to handle it, keep the data and the parsed
