@@ -1751,6 +1751,8 @@ This detector calculates the average of a given list of values to monitor. Repor
 * **paths**: List of match paths to analyze in this detector. List of strings( **required**)
 * **min_bin_elements**: Evaluate the latest bin only after at least that number of elements was added to it. Integer, min: 1 (**required**)
 * **min_bin_time**: Evaluate the latest bin only when the first element is received after min_bin_time has elapsed. Integer, min: 1 (**required**)
+* **avg_factor** the maximum allowed deviation for the average value before an anomaly is raised. Float, default: 1
+* **var_factor** the maximum allowed deviation for the variance of the value before an anomaly is raised. Float, default: 2
 * **debug_mode**: Enables debug output. Boolean(Default: False)
 * **persistence_id**: The name of the file where the learned models are stored. String
 * **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
