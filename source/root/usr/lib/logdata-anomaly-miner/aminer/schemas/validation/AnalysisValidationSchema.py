@@ -101,6 +101,7 @@
                     'num_windows': {'type': 'integer'},
                     'empty_window_warnings': {'type': 'boolean'},
                     'early_exceeding_anomaly_output': {'type': 'boolean'},
+                    'season': {'type': 'float', 'min': 0, 'nullable': True},
                     'set_lower_limit': {'type': ['integer', 'float'], 'min': 0, 'nullable': True},
                     'set_upper_limit': {'type': ['integer', 'float'], 'min': 0, 'nullable': True},
                     'confidence_factor': {'type': 'float', 'min': 0, 'max': 1},

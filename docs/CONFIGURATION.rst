@@ -1503,6 +1503,7 @@ This module defines a detector for event and value frequency deviations.
 * **early_exceeding_anomaly_output** states if a anomaly should be raised the first time the appearance count exceedes the range.
 * **set_lower_limit** sets the lower limit of the frequency test to the specified value.
 * **set_upper_limit** sets the upper limit of the frequency test to the specified value.
+* **season** the seasonality/periodicity of the time-series in seconds.
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
