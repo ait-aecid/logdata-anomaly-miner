@@ -1,4 +1,4 @@
-scipy==1.5.4
+scipy==1.10.0
 pylibacl==0.5.4
 kafka_python==2.0.2
 pytz==2020.4

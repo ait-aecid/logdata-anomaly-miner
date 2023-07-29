@@ -240,9 +240,6 @@ class EventFrequencyDetectorTest(TestBase):
         self.assertTrue(efd.receive_atom(log_atom2))
         self.assertTrue(efd.learn_mode)
         log_atom1.atom_time = t + 200
-        self.assertTrue(efd.receive_atom(log_atom3))
-        self.assertTrue(efd.learn_mode)
-        log_atom1.atom_time = t + 201
         self.assertTrue(efd.receive_atom(log_atom1))
         self.assertFalse(efd.learn_mode)
 
@@ -552,6 +549,94 @@ class EventFrequencyDetectorTest(TestBase):
         EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, stop_learning_no_anomaly_time=100.22)
 
         self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, stop_learning_time=100, stop_learning_no_anomaly_time=100)
+
+    def test7seasonal_frequency_detection(self):
+        """
+        Test for periodically changing frequencies
+        """
+        # Initialize detector for analyzing values in one path in time windows of 10 seconds
+        t = 0
+        expected_string = '%s Frequency anomaly detected\n%s: "None" (%d lines)\n  /value: %s\n%s\n\n'
+        dtf = "%Y-%m-%d %H:%M:%S"
+        efd = EventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[self.stream_printer_event_handler],
+                                                          target_path_list=['/value'], window_size=10, num_windows=100,
+                                                          confidence_factor=0.51, empty_window_warnings=True, persistence_id='Default',
+                                                          learn_mode=True, output_logline=True, season=20)
+
+        # Windows have 1 and 2 atoms alternatingly; the season is thus 2 and expected atom frequencies can be predicted exactly.
+        # The anomaly is that in window 6, only 1 atom occurs although 2 should occur following the sequence.
+        # The anomaly is reported by the log atom in window 7 that concludes window 6.
+        # The following log atoms are created:
+        #  window 1:
+        #   value a: 1 times
+        #  window 2:
+        #   value a: 2 time
+        #  window 3:
+        #   value a: 1 time
+        #  window 4:
+        #   value a: 2 times
+        #  window 5:
+        #   value a: 1 time
+        #  window 6:
+        #   value a: 1 time
+        #  window 7:
+        #   value a: 1 time
+        m_1 = MatchElement('/value', b'a', b'a', None)
+        parser_match_1 = ParserMatch(m_1)
+        log_atom_1 = LogAtom(b'a', parser_match_1, 1, None)
+
+        m_2 = MatchElement('/value', b'a', b'a', None)
+        parser_match_2 = ParserMatch(m_2)
+        log_atom_2 = LogAtom(b'a', parser_match_2, 15, None)
+
+        m_3 = MatchElement('/value', b'a', b'a', None)
+        parser_match_3 = ParserMatch(m_3)
+        log_atom_3 = LogAtom(b'a', parser_match_3, 16, None)
+
+        m_4 = MatchElement('/value', b'a', b'a', None)
+        parser_match_4 = ParserMatch(m_4)
+        log_atom_4 = LogAtom(b'a', parser_match_4, 25, None)
+
+        m_6 = MatchElement('/value', b'a', b'a', None)
+        parser_match_6 = ParserMatch(m_6)
+        log_atom_6 = LogAtom(b'a', parser_match_6, 35, None)
+
+        m_7 = MatchElement('/value', b'a', b'a', None)
+        parser_match_7 = ParserMatch(m_7)
+        log_atom_7 = LogAtom(b'a', parser_match_7, 36, None)
+
+        m_8 = MatchElement('/value', b'a', b'a', None)
+        parser_match_8 = ParserMatch(m_8)
+        log_atom_8 = LogAtom(b'a', parser_match_8, 45, None)
+
+        m_9 = MatchElement('/value', b'a', b'a', None)
+        parser_match_9 = ParserMatch(m_9)
+        log_atom_9 = LogAtom(b'a', parser_match_9, 55, None)
+
+        m_10 = MatchElement('/value', b'a', b'a', None)
+        parser_match_10 = ParserMatch(m_10)
+        log_atom_10 = LogAtom(b'a', parser_match_10, 65, None)
+
+        efd.receive_atom(log_atom_1)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_2)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_3)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_4)
+        # Delete anomaly that occurs since second window has 2 but first only 1 atoms. 
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t+25).strftime(dtf), efd.__class__.__name__, 1, "a", "a"))
+        self.reset_output_stream()
+        efd.receive_atom(log_atom_6)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_7)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_8)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_9)
+        self.assertEqual(self.output_stream.getvalue(), "")
+        efd.receive_atom(log_atom_10)
+        self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t+65).strftime(dtf), efd.__class__.__name__, 1, "a", "a"))
 
 
 if __name__ == "__main__":
