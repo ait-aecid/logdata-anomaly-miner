@@ -101,6 +101,7 @@
                     'num_windows': {'type': 'integer'},
                     'empty_window_warnings': {'type': 'boolean'},
                     'early_exceeding_anomaly_output': {'type': 'boolean'},
+                    'season': {'type': 'float', 'min': 0, 'nullable': True},
                     'set_lower_limit': {'type': ['integer', 'float'], 'min': 0, 'nullable': True},
                     'set_upper_limit': {'type': ['integer', 'float'], 'min': 0, 'nullable': True},
                     'confidence_factor': {'type': 'float', 'min': 0, 'max': 1},
@@ -299,7 +300,10 @@
                     'persistence_id': {'type': 'string', 'empty': False},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'suppress': {'type': 'boolean'}
+                    'suppress': {'type': 'boolean'},
+                    'avg_factor': {'type': ['integer', 'float'], 'nullable': True, 'min': 0},
+                    'var_factor': {'type': ['integer', 'float'], 'nullable': True, 'min': 0},
+                    'learn_mode': {'type': 'boolean'}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},

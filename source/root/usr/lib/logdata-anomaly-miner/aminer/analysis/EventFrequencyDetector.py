@@ -13,6 +13,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 import logging
 import numpy as np
+import math
+
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
@@ -30,8 +32,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, scoring_path_list=None, unique_path_list=None,
                  window_size=600, num_windows=50, confidence_factor=0.33, empty_window_warnings=True, early_exceeding_anomaly_output=False,
-                 set_lower_limit=None, set_upper_limit=None, persistence_id="Default", learn_mode=False, output_logline=True,
-                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 set_lower_limit=None, set_upper_limit=None, persistence_id='Default', learn_mode=False, output_logline=True,
+                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, season=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -59,6 +61,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         @param constraint_list list of paths that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
+        @param season the seasonality/periodicity of the time-series in seconds.
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
@@ -79,6 +82,18 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.exceeded_range_frequency = {}
         self.log_windows = 0
         self.last_seen_log = {}
+        if season is not None:
+            lookback = math.ceil(season / window_size)
+            if lookback > num_windows:
+                logging.getLogger(DEBUG_LOG_NAME).warning(str(self.__class__.__name__) + ' requires num_windows to be at least ' +
+                                                          str(lookback) + '; seasonality is ignored.')
+                self.lookback = None
+            else:
+                self.lookback = lookback
+        else:
+            self.lookback = None
+        self.season = season
+        self.time_index = {}
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -88,11 +103,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """Receive a log atom from a source."""
         parser_match = log_atom.parser_match
         self.log_total += 1
-
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
-            self.learn_mode = False
 
         # Skip paths from ignore list.
         for ignore_path in self.ignore_list:
@@ -165,15 +175,17 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             # First processed log atom, initialize next check time.
             self.next_check_time = log_atom.atom_time + self.window_size
             self.log_windows += 1
+            if self.season is not None:
+                self.time_index[log_event] = [math.floor((log_atom.atom_time % self.season) / self.window_size)]
         elif log_atom.atom_time >= self.next_check_time:
             # Log atom exceeded next check time; time window is complete.
-            self.next_check_time = self.next_check_time + self.window_size
+            self.next_check_time += self.window_size
             self.log_windows += 1
 
             # Update next_check_time if a time window was skipped
             skipped_windows = 0
             if log_atom.atom_time >= self.next_check_time:
-                skipped_windows = 1 + int((log_atom.atom_time - self.next_check_time) / self.window_size)
+                skipped_windows = 1 + math.floor((log_atom.atom_time - self.next_check_time) / self.window_size)
                 self.next_check_time = self.next_check_time + skipped_windows * self.window_size
                 # Output anomaly in case that no log event occurs within a time window
                 if self.empty_window_warnings is True:
@@ -210,6 +222,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     else:
                         sorted_log_lines = [data]
                     analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": list(log_ev)}
+                    confidence = 1
+                    if max(occurrences_mean, self.counts[log_ev][-1]) != 0:
+                        confidence = 1 - min(occurrences_mean, self.counts[log_ev][-1]) / max(occurrences_mean, self.counts[log_ev][-1])
                     frequency_info = {"ExpectedLogAtomValuesFrequency": occurrences_mean,
                                       "ExpectedLogAtomValuesFrequencyRange": [
                                           np.ceil(max(0, self.ranges[log_ev][0])),
@@ -217,8 +232,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                       "LogAtomValuesFrequency": self.counts[log_ev][-1],
                                       "WindowSize": self.window_size,
                                       "ConfidenceFactor": self.confidence_factor,
-                                      "Confidence": 1 - min(occurrences_mean, self.counts[log_ev][-1]) /
-                                      max(occurrences_mean, self.counts[log_ev][-1])}
+                                      "Confidence": confidence}
                     # In case that scoring_path_list is set, give their values to the event handlers for further analysis.
                     if len(self.scoring_path_list) > 0:
                         frequency_info["IdValues"] = self.scoring_value_list[log_ev]
@@ -226,6 +240,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency anomaly detected", sorted_log_lines,
                                                event_data, self.last_seen_log[log_ev], self)
+                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_timestamp = max(
+                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                     # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
                     self.exceeded_range_frequency[log_ev] = False
 
@@ -272,6 +289,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency exceeds range for the first time",
                                            sorted_log_lines, event_data, log_atom, self)
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
         # Get the id list if the scoring_path_list is set and save it for the anomaly message
         if len(self.scoring_path_list) > 0:
@@ -301,6 +321,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         else:
             self.counts[log_event] = [1]
         self.log_success += 1
+
+        # Switching the learn mode is placed at the end of receive_atom to ensure that last time window before switching is added to model
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
+            self.learn_mode = False
         return True
 
     def reset_counter(self, log_event, log_atom):
@@ -310,11 +336,14 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 self.counts[log_event].append(0)
             else:
                 self.counts[log_event] = self.counts[log_event][1:] + [0]
-                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = max(
-                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
         else:
             self.counts[log_event][-1] = 0
+        if self.lookback is not None:
+            # Update seasonal index of value to be predicted
+            if log_event in self.time_index:
+                self.time_index[log_event].append((self.time_index[log_event][-1] + 1) % self.lookback)
+            else:
+                self.time_index[log_event] = [math.floor((log_atom.atom_time % self.season) / self.window_size)]
         # Reset scoring_value_list
         if len(self.scoring_path_list) > 0:
             self.scoring_value_list[log_event] = []
@@ -324,22 +353,39 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         if self.set_lower_limit is None or self.set_upper_limit is None:
             if log_event not in self.counts or len(self.counts[log_event]) < 2:
                 return None
-            occurrences_mean = np.mean(self.counts[log_event][-self.num_windows-1:-1])
-            if len(self.counts[log_event][-self.num_windows-1:-1]) > 1:
+            season_offset = 0
+            if self.lookback is not None and len(self.counts[log_event]) > self.lookback + 2:
+                counts_tmp = []
+                season_offset_list = []
+                current_index = self.time_index[log_event][-1]
+                for i in range(0, len(self.counts[log_event]) - 1):
+                    # Get all values where lag of size season can be differentiated
+                    if i >= self.lookback:
+                        counts_tmp.append(self.counts[log_event][i] - self.counts[log_event][i - self.lookback])
+                    # Get all values that lag a multiple of seasonality lookback behind
+                    if self.time_index[log_event][i] == current_index:
+                        season_offset_list.append(self.counts[log_event][i])
+                season_offset = np.mean(season_offset_list)
+            else:
+                counts_tmp = self.counts[log_event]
+            occurrences_mean = -1
+            occurrences_std = -1
+            occurrences_mean = np.mean(counts_tmp[-self.num_windows-1:-1])
+            if len(counts_tmp[-self.num_windows-1:-1]) > 1:
                 # Only compute standard deviation for at least 2 observed counts
-                occurrences_std = np.std(self.counts[log_event][-self.num_windows-1:-1])
+                occurrences_std = np.std(counts_tmp[-self.num_windows-1:-1])
             else:
                 # Otherwise use default value so that only (1 - confidence_factor) relevant (other factor cancels out)
-                occurrences_std = occurrences_mean * (1 - self.confidence_factor)
+                occurrences_std = np.mean(self.counts[log_event][-self.num_windows-1:-1]) * (1 - self.confidence_factor)
         # Calculate limits
         if self.set_lower_limit is not None:
             lower_limit = self.set_lower_limit
         else:
-            lower_limit = occurrences_mean - occurrences_std / self.confidence_factor
+            lower_limit = occurrences_mean + season_offset - occurrences_std / self.confidence_factor
         if self.set_upper_limit is not None:
             upper_limit = self.set_upper_limit
         else:
-            upper_limit = occurrences_mean + occurrences_std / self.confidence_factor
+            upper_limit = occurrences_mean + season_offset + occurrences_std / self.confidence_factor
         return [lower_limit, upper_limit]
 
     def do_timer(self, trigger_time):
@@ -410,10 +456,6 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
             string = f"Event frequency is tracked for the following path values: {values_list}"
         elif len(event_data) == 1:
-            # Print the current count, the frequency interval and the time when the counter resets
-            if event_data[0] in self.ranges and self.ranges[event_data[0]] is None and len(self.counts[event_data[0]]) > 1:
-                self.ranges[event_data[0]] = self.calculate_range(event_data[0])
-
             # Set output string
             if event_data[0] in self.counts and self.ranges[event_data[0]] is not None:
                 if self.counts[event_data[0]][-1] < self.ranges[event_data[0]][0] or\
