@@ -153,11 +153,12 @@
             'type': 'dict',
             'schema': {
                 'multi_source': {'type': 'boolean', 'required': False, 'default': False},
-                'timestamp_paths': {'type': ['string', 'list'], 'empty': False},
+                'timestamp_paths': {'type': ['string', 'list'], 'empty': False, 'required': True},
                 'adjust_timestamps': {'type': 'boolean', 'required': False, 'default': False},
                 'sync_wait_time': {'type': ['integer', 'float'], 'min': 1, 'default': 5},
                 'eol_sep': {'type': 'string', 'required': False, 'default': '\n', 'empty': False},
-                'json_format': {'type': 'boolean', 'required': False, 'default': False}
+                'json_format': {'type': 'boolean', 'required': False, 'default': False},
+                'use_real_time': {'type': 'boolean', 'required': False, 'default': False}
             }
         }
 }

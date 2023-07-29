@@ -51,7 +51,6 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
 import os
 import abc
 import logging
@@ -381,8 +380,6 @@ class HistogramAnalysis(AtomHandlerInterface):
             data_item.add_value(match.match_object)
 
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         if self.next_report_time < timestamp:
             if self.last_report_time is None:
                 self.last_report_time = timestamp
@@ -544,8 +541,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
                 self.histogram_data[path] = new_record
 
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         if self.next_report_time < timestamp:
             if self.last_report_time is None:
                 self.last_report_time = timestamp
