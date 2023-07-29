@@ -488,7 +488,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     early_exceeding_anomaly_output=item['early_exceeding_anomaly_output'],
                                     set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
                                     learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
-                                    constraint_list=item['constraint_list'])
+                                    constraint_list=item['constraint_list'], season=item['season'])
             elif item['type'].name == 'EventCountClusterDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], id_path_list=item['id_path_list'],
@@ -586,7 +586,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['timestamp_path'], item['paths'],
                                     item['min_bin_elements'], item['min_bin_time'], debug_mode=item['debug_mode'],
-                                    persistence_id=item['persistence_id'], output_logline=item['output_logline'])
+                                    persistence_id=item['persistence_id'], output_logline=item['output_logline'],
+                                    avg_factor=item['avg_factor'], var_factor=item['var_factor'], learn_mode=learn)
             elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
