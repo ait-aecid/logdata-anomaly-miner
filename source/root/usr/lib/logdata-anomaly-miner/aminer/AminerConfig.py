@@ -53,6 +53,7 @@ CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
 DEFAULT_LOG_LINE_PREFIX = ''
 CONFIG_KEY_ENCODING = 'Log.Encoding'
 ENCODING = 'utf-8'
+KEY_AMINER_ID = 'AminerId'
 
 
 def load_config(config_file_name):
