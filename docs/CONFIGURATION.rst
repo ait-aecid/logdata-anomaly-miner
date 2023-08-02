@@ -1549,6 +1549,7 @@ DeepLearningFeatureExtractor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module defines an ingration components to support deep learning based detector. It is part of aminer-deep pipline, aims to parse log events and genrate sequence before forward it to aminer-deep. 
+For more details about aminer-deep please go to https://github.com/imas1e15/aminer-deep.
 
 * **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed. In case paths value is not integer value or it is combination of multiple paths, make sure to enable event_encoding option. 
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
