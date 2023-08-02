@@ -511,6 +511,13 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     report_interval=item['report_interval'],
                     target_label_list=item['labels'],
                     split_reports_flag=item['split_reports_flag'])
+            elif item['type'].name == 'DeepLearningFeatureExtractor':
+                tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, 
+                                    item['paths'], item['ignore_list'], item['group_by_list'], window_size=item['window_size'],
+                                    publisher_address=item['publisher_address'], subscriber_address=item['subscriber_address'],
+                                    publisher_topic=item['publisher_topic'], subscriber_topic=item['subscriber_topic'], 
+                                    event_encoding=item['event_encoding'], persistence_id=item['persistence_id'],
+                                    learn_mode=learn, output_logline=item['output_logline'])
             elif item['type'].name == 'EventCorrelationDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
