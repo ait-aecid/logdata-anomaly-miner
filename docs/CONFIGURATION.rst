@@ -1929,6 +1929,24 @@ This detector works similar to the NewMatchPathValueComboDetector, but allows to
           allow_missing_values: True
           learn_mode: True
 
+NewMatchPathDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This class creates events when new data path was found in a parsed atom.
+
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchPathDetector
+          id: NewMatchPathDetector
+          learn_mode: True
+
 NewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1995,6 +2013,41 @@ This component counts occurring combinations of values and periodically sends th
             - "/model/type/syscall/syscall"
           report_interval: 10
 
+PathArimaDetector
+~~~~~~~~~~~~~~~~
+
+This detector uses a tsa-arima model to analyze the values of the chosen paths.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **event_type_detector** used to track the number of events in the time windows.
+* **persistence_id** name of persistency document.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies.
+* **num_init** number of lines processed before the period length is calculated.
+* **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
+* **set_period_length** states how long the period length is if force_period_length is set to True.
+* **alpha** significance level of the estimated values.
+* **alpha_bt** significance level for the bt test.
+* **num_results_bt** number of results which are used in the binomial test.
+* **num_min_time_history** number of lines processed before the period length is calculated.
+* **num_max_time_history** maximum number of values of the time_history.
+* **num_periods_tsa_ini** number of periods used to initialize the Arima-model.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: "EventTypeDetector"
+          id: ETD
+
+        - type: 'PathArimaDetector'
+          id: PTSA
+          event_type_detector: ETD
+          paths: ["/model/model/val1", "/model/model/val2"]
+          num_init: 20
+          force_period_length: True
+          set_period_length: 15
+          num_periods_tsa_ini: 10
+
 PathValueTimeIntervalDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2052,91 +2105,6 @@ This class creates events if event or value occurrence counts are outliers in PC
           min_variance: 0.95
           num_windows: 100
           learn_mode: true
-
-TSAArimaDetector
-~~~~~~~~~~~~~~~~
-
-This detector uses a tsa-arima model to track appearance frequencies of event lines.
-
-* **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
-* **event_type_detector** used to track the number of event lines in the time windows (string).
-* **waiting_time_for_tsa** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
-* **num_sections_waiting_time_for_tsa** number of sections of the initialization window (integer, defaults to 10).
-* **acf_pause_interval_percentage** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
-* **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
-* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 20).
-* **num_division_time_step** Number of divisions of the time window to calculate the time step (integer, defaults to 10).
-* **alpha** significance level of the estimated values (float, defaults to 0.05).
-* **num_min_time_history** minimal number of values of the time_history after it is initialized (integer, defaults to 20).
-* **num_max_time_history** maximal number of values of the time_history (integer, defaults to 30).
-* **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model (integer, defaults to 15).
-* **alpha_bt** significance level for the bt test (float, defaults to 0.05).
-* **round_time_interval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
-* **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
-* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
-* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
-* **acf_auto_pause_interval** states if the pause area is automatically set. If enabled, the variable acf_pause_interval_percentage loses its functionality.
-* **acf_auto_pause_interval_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not an outlier.
-* **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
-* **set_period_length** states how long the period length is if force_period_length is set to True.
-* **min_log_lines_per_time_step** states the minimal average number of log lines per time step to make a TSA.
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: 'EventTypeDetector'
-          id: ETD
-          save_values: False
-
-        - type: 'TSAArimaDetector'
-          id: TSA
-          event_type_detector: ETD
-          waiting_time_for_tsa: 1728000
-          num_sections_waiting_time_for_tsa: 1000
-          num_division_time_step: 10
-          alpha: 0.05
-          num_results_bt: 30
-          alpha_bt: 0.05
-          num_max_time_history: 30000
-          round_time_interval_threshold: 0.1
-          acf_threshold: 0.02
-
-PathArimaDetector
-~~~~~~~~~~~~~~~~
-
-This detector uses a tsa-arima model to analyze the values of the chosen paths.
-
-* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
-* **event_type_detector** used to track the number of events in the time windows.
-* **persistence_id** name of persistency document.
-* **output_logline** specifies whether the full parsed log atom should be provided in the output.
-* **learn_mode** specifies whether new frequency measurements override ground truth frequencies.
-* **num_init** number of lines processed before the period length is calculated.
-* **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
-* **set_period_length** states how long the period length is if force_period_length is set to True.
-* **alpha** significance level of the estimated values.
-* **alpha_bt** significance level for the bt test.
-* **num_results_bt** number of results which are used in the binomial test.
-* **num_min_time_history** number of lines processed before the period length is calculated.
-* **num_max_time_history** maximum number of values of the time_history.
-* **num_periods_tsa_ini** number of periods used to initialize the Arima-model.
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: "EventTypeDetector"
-          id: ETD
-
-        - type: 'PathArimaDetector'
-          id: PTSA
-          event_type_detector: ETD
-          paths: ["/model/model/val1", "/model/model/val2"]
-          num_init: 20
-          force_period_length: True
-          set_period_length: 15
-          num_periods_tsa_ini: 10
 
 SlidingEventFrequencyDetector
 ~~~~~~~~~~~~~~~~
@@ -2228,6 +2196,82 @@ configuration errors, e.g. invalid timezone configuration.
         - type: TimestampsUnsortedDetector
           id: TimestampsUnsortedDetector
 
+TSAArimaDetector
+~~~~~~~~~~~~~~~~
+
+This detector uses a tsa-arima model to track appearance frequencies of event lines.
+
+* **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
+* **event_type_detector** used to track the number of event lines in the time windows (string).
+* **waiting_time_for_tsa** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
+* **num_sections_waiting_time_for_tsa** number of sections of the initialization window (integer, defaults to 10).
+* **acf_pause_interval_percentage** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
+* **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
+* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 20).
+* **num_division_time_step** Number of divisions of the time window to calculate the time step (integer, defaults to 10).
+* **alpha** significance level of the estimated values (float, defaults to 0.05).
+* **num_min_time_history** minimal number of values of the time_history after it is initialized (integer, defaults to 20).
+* **num_max_time_history** maximal number of values of the time_history (integer, defaults to 30).
+* **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model (integer, defaults to 15).
+* **alpha_bt** significance level for the bt test (float, defaults to 0.05).
+* **round_time_interval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
+* **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **acf_auto_pause_interval** states if the pause area is automatically set. If enabled, the variable acf_pause_interval_percentage loses its functionality.
+* **acf_auto_pause_interval_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not an outlier.
+* **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
+* **set_period_length** states how long the period length is if force_period_length is set to True.
+* **min_log_lines_per_time_step** states the minimal average number of log lines per time step to make a TSA.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+          save_values: False
+
+        - type: 'TSAArimaDetector'
+          id: TSA
+          event_type_detector: ETD
+          waiting_time_for_tsa: 1728000
+          num_sections_waiting_time_for_tsa: 1000
+          num_division_time_step: 10
+          alpha: 0.05
+          num_results_bt: 30
+          alpha_bt: 0.05
+          num_max_time_history: 30000
+          round_time_interval_threshold: 0.1
+          acf_threshold: 0.02
+
+VerboseUnparsedAtomHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Creates verbose output for unparsed events.
+
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'VerboseUnparsedAtomHandler'
+          id: vuah
+
+SimpleUnparsedAtomHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Creates basic output for unparsed events.
+
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'SimpleUnparsedAtomHandler'
+          id: vuah
+
 ValueRangeDetector
 ~~~~~~~~~~~~~~~~~~
 
@@ -2303,33 +2347,6 @@ First, this detector finds a list of viable variables for each event type. Secon
           used_presel_meth: ['matchDiscDistr', 'excludeDueDistr']
           used_validate_cor_meth: ['distinctDistr', 'coverVals']
           used_cor_meth: ['WRel']
-
-VerboseUnparsedAtomHandler
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Creates verbose output for unparsed events.
-
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: 'VerboseUnparsedAtomHandler'
-          id: vuah
-
-SimpleUnparsedAtomHandler
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Creates basic output for unparsed events.
-
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: 'SimpleUnparsedAtomHandler'
-          id: vuah
-
 
 VariableTypeDetector
 ~~~~~~~~~~~~~~~~~~~~
