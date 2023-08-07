@@ -123,8 +123,7 @@ def build_analysis_pipeline(analysis_context):
     # based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_path_list=['model/DiskUpgrade/Date'],
-        use_real_time=True)
+        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_path_list=['model/DiskUpgrade/Date'])
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler

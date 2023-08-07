@@ -67,6 +67,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.eol_sep = eol_sep
         self.json_format = json_format
         self.use_real_time = use_real_time
+        self.printed_warning = False
 
         self.in_overlong_line_flag = False
         # If consuming of data was already attempted but the downstream handlers refused to handle it, keep the data and the parsed
@@ -166,12 +167,13 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             if log_atom.atom_time is None:
                 if self.use_real_time:
                     log_atom.atom_time = time.time()
-                else:
+                elif not self.printed_warning:
                     msg = "No timestamp was found for a log_atom. The timestamp_paths parameter is probably not set correctly in the" \
                           " Input config which might lead to errors. Alternatively the use_real_time parameter might be used in the" \
                           " Input config."
-                    print("WARNING: " + msg, sys.stderr)
+                    print("WARNING: " + msg, file=sys.stderr)
                     logging.getLogger(DEBUG_LOG_NAME).warning(msg)
+                    self.printed_warning = True
             if self.dispatch_atom(log_atom):
                 consumed_length = line_end + len(self.eol_sep) - (
                         valid_json and stream_data[line_end:line_end+len(self.eol_sep)] != self.eol_sep)
