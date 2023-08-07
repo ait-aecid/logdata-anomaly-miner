@@ -148,6 +148,11 @@
             'type': 'string',
             'empty': False
         },
+        'AminerId': {
+            'required': False,
+            'type': 'string',
+            'empty': False
+        },
         'Input': {
             'required': True,
             'type': 'dict',

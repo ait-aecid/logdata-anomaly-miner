@@ -77,6 +77,7 @@ config_properties['Log.StatisticsLevel'] = 1
 config_properties['Log.DebugLevel'] = 1
 config_properties['Log.Rotation.BackupCount'] = 5
 config_properties['Log.Rotation.MaxBytes'] = 104857600  # 100 Megabytes
+config_properties['AminerId'] = 'demo-aminer'
 
 # Add your ruleset here:
 
