@@ -126,7 +126,7 @@ ADD scripts/testingwrapper.sh /testingwrapper.sh
 ADD source /home/aminer/source
 ADD docs /home/aminer/docs
 
-RUN pip3 install orjson
+RUN pip3 install orjson patsy
 RUN PACK=$(find /usr/local/lib/ -name orjson.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 USER aminer
