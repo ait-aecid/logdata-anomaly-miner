@@ -30,7 +30,7 @@ class KafkaEventHandlerTest(TestBase):
     expected_string = '{\n  "AnalysisComponent": {\n    "AnalysisComponentIdentifier": 0,\n' \
                       '    "AnalysisComponentType": "%s",\n    "AnalysisComponentName": "%s",\n    "Message": "%s",\n' \
                       '    "PersistenceFileName": "%s",\n    "AffectedParserPaths": [\n      "test/path/1",\n' \
-                      '      "test/path/2"\n    ]\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
+                      '      "test/path/2"\n    ],\n    "LogResource": "testresource"\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
                       '"Timestamps": [\n      %s\n    ],\n    "DetectionTimestamp": %s,\n    "LogLinesCount": 5,\n' \
                       '    "AnnotatedMatchElement": {\n      "match/s1": " pid="\n    }\n  }%s\n}\n'
 
