@@ -47,7 +47,7 @@ class YamlConfigTest(TestBase):
     """Unittests for the YamlConfig."""
 
     sysp = sys.path
-    resource_name = "testresource"
+    resource_name = b"testresource"
 
     def setUp(self):
         """Add the aminer syspath."""
