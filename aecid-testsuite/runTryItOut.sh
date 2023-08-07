@@ -172,12 +172,12 @@ testConfigError $OUT "Failed Test in 14."
 exit_code=$((exit_code | $?))
 
 echo "$(awk '/^{$/ && ++n == 2, /^}$/' < $OUT)" > $OUT # remove NewMatchPathDetector output.
-IN1=$(sed -n '1,22p' < $OUT)
-IN2=$(sed -n '24,26p' < $OUT)
+IN1=$(sed -n '1,23p' < $OUT)
+IN2=$(sed -n '25,27p' < $OUT)
 
 awk '/^```$/ && ++n == 27, /^```$/ && n++ == 28' < $INPUT_FILE | sed '/^```/ d' > $OUT
-OUT1=$(sed -n '1,22p' < $OUT)
-OUT2=$(sed -n '24,26p' < $OUT)
+OUT1=$(sed -n '1,23p' < $OUT)
+OUT2=$(sed -n '25,27p' < $OUT)
 compareStrings "$OUT1" "$IN1" "Failed Test in 14."
 exit_code=$((exit_code | $?))
 compareStrings "$OUT2" "$IN2" "Failed Test in 14."
