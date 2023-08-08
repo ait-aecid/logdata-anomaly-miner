@@ -11,8 +11,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-import time
 import logging
 
 from aminer.AminerConfig import DEBUG_LOG_NAME
@@ -335,8 +333,6 @@ class CorrelationRule:
         """Return a history entry for a parser match."""
         parser_match = log_atom.parser_match
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         length = 4
         if self.artefact_match_parameters is not None:
             length += len(self.artefact_match_parameters)

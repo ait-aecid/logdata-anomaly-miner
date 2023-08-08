@@ -14,7 +14,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
 import random
-import time
 import logging
 
 from aminer.AminerConfig import DEBUG_LOG_NAME
@@ -75,8 +74,6 @@ class TimeCorrelationDetector(AtomHandlerInterface):
         self.log_total += 1
         event_data = {}
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         if timestamp < self.last_timestamp:
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(
