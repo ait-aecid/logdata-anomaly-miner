@@ -16,7 +16,6 @@ from scipy.stats import kstest, ks_2samp, norm, multinomial, distributions, chis
 import os
 import logging
 import sys
-import time
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
@@ -833,10 +832,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                         indicator = sum(indicator_list[var_index] for var_index in indices_failed_tests)
 
                         if self.save_statistics:
-                            if log_atom.atom_time is not None:
-                                self.failed_indicators_total.append(log_atom.atom_time)
-                            else:
-                                self.failed_indicators_total.append(time.time())
+                            self.failed_indicators_total.append(log_atom.atom_time)
                             self.failed_indicators_values.append(np.arctan(2 * indicator) / np.pi * 2)
                             if self.event_type_detector.id_path_list != []:
                                 self.failed_indicators_paths.append(self.event_type_detector.id_path_list_tuples[event_index])

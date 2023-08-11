@@ -13,8 +13,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-import time
 import os
 import logging
 import types
@@ -97,8 +95,6 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         timestamp = round(timestamp, 3)
         match_value_list = []
         for target_path in self.target_path_list:

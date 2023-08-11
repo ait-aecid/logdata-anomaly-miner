@@ -257,7 +257,8 @@ def build_analysis_pipeline(analysis_context):
     # based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers, default_timestamp_path_list=["/model/DailyCron/DTM"])
+        parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers, default_timestamp_path_list=["/model/DailyCron/DTM"],
+        use_real_time=True)
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
