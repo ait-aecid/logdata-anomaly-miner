@@ -22,7 +22,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 from collections import deque
 import random
 import math
-import time
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
@@ -150,8 +149,6 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         self.log_total += 1
-        if log_atom.get_timestamp() is None:
-            log_atom.atom_time = time.time()
 
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:

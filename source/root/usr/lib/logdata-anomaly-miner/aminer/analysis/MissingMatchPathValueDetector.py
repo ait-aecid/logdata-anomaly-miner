@@ -10,8 +10,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-import time
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
@@ -101,8 +99,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             target_paths = [target_paths]
             value_list = [value_list]
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         for i, target_path in enumerate(target_paths):
             value = value_list[i]
             detector_info = self.expected_values_dict.get(value)
