@@ -47,6 +47,7 @@ class YamlConfigTest(TestBase):
     """Unittests for the YamlConfig."""
 
     sysp = sys.path
+    resource_name = b"testresource"
 
     def setUp(self):
         """Add the aminer syspath."""
@@ -489,7 +490,7 @@ class YamlConfigTest(TestBase):
         fixed_dme = FixedDataModelElement('s1', b' pid=')
         match_context_fixed_dme = MatchContext(b' pid=')
         match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
-        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, 'DefaultNewMatchPathDetector')
+        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, self)
         datetime_format_string = '%Y-%m-%d %H:%M:%S'
         match_path_s1 = "['/s1']"
         __expected_string2 = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
@@ -529,8 +530,7 @@ class YamlConfigTest(TestBase):
         self.reset_output_stream()
 
         value_combo_det = context.registered_components[1][0]
-        log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t,
-                                       value_combo_det)
+        log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t, self)
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), __expected_string2 % (
