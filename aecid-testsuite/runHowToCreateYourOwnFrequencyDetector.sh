@@ -58,8 +58,6 @@ cd logdata-anomaly-miner.wiki 2> /dev/null
 git checkout $BRANCH > /dev/null 2>&1
 cd ..
 
-cp /home/user/Documents/HowTo-Create-your-own-FrequencyDetector.md logdata-anomaly-miner.wiki/
-
 # create log file (1.)
 awk '/^```$/ && ++n == 1, /^```$/ && n++ == 2' < $INPUT | sed '/^```/ d' > $LOG
 
@@ -199,10 +197,10 @@ exit_code=$((exit_code | $?))
 # delete detectionTimestamp from comparison
 tac $OUT | sed '32d' | tac > $TMP_SCHEMA
 cp $TMP_SCHEMA $OUT
-OUT1=$(tail -n 59 $OUT)
+OUT1=$(tail -n 60 $OUT)
 awk '/^```json$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' > $OUT
 # delete detectionTimestamp from comparison
-sed -i -e "29d" $OUT
+sed -i -e "30d" $OUT
 IN1=`cat $OUT`
 compareStrings "$OUT1" "$IN1" "Failed Test in 17."
 exit_code=$((exit_code | $?))

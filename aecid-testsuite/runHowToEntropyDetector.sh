@@ -61,7 +61,7 @@ IN=$(awk '/^```$/ && ++n == 6, /^```$/ && n++ == 7' < $INPUT_FILE | sed '/^```/ 
 i=0
 while IFS= read -r line
 do
-  if [[ $i -ne 22 && $i -ne 24 && $i -ne 50 && $i -ne 52 ]]; then
+  if [[ $i -ne 23 && $i -ne 25 && $i -ne 52 && $i -ne 54 ]]; then
     echo "$line" >> $TMPFILE1
   fi
   i=$(($i+1))
@@ -70,10 +70,10 @@ done <<< "$IN"
 i=0
 while IFS= read -r line
 do
-  if [[ $i -ge 76 && $i -ne 98 && $i -ne 100 && $i -ne 126 && $i -ne 128 ]]; then
+  if [[ $i -ge 77 && $i -ne 100 && $i -ne 102 && $i -ne 129 && $i -ne 131 ]]; then
     echo "$line" >> $TMPFILE2
   fi
-  if [[ $i -eq 131 ]]; then
+  if [[ $i -eq 134 ]]; then
     break
   fi
   i=$(($i+1))
@@ -83,6 +83,10 @@ cmp --silent $TMPFILE1 $TMPFILE2
 res=$?
 if [[ $res != 0 ]]; then
   echo "Failed Test in 4."
+  cat "$TMPFILE1"
+  echo
+  echo
+  cat "$TMPFILE2"
 fi
 exit_code=$((exit_code | res))
 rm $TMPFILE1
@@ -93,7 +97,7 @@ IN=$(awk '/^```$/ && ++n == 8, /^```$/ && n++ == 9' < $INPUT_FILE | sed '/^```/ 
 i=0
 while IFS= read -r line
 do
-  if [[ $i -ne 22 && $i -ne 24 ]]; then
+  if [[ $i -ne 23 && $i -ne 25 ]]; then
     echo "$line" >> $TMPFILE1
   fi
   i=$(($i+1))
@@ -102,10 +106,10 @@ done <<< "$IN"
 i=0
 while IFS= read -r line
 do
-  if [[ $i -ge 2082 && $i -ne 2104 && $i -ne 2106 ]]; then
+  if [[ $i -ge 2154 && $i -ne 2177 && $i -ne 2179 ]]; then
     echo "$line" >> $TMPFILE2
   fi
-  if [[ $i -eq 2109 ]]; then
+  if [[ $i -eq 2183 ]]; then
     break
   fi
   i=$(($i+1))
@@ -148,7 +152,7 @@ IFS='#' read -ra ADDR <<< "$CMD"
 CMD="sudo${ADDR[1]}"
 CMD=$(sed "s?config_test.yml?$CFG_PATH?g" <<<"$CMD")
 runAminerUntilEnd "$CMD" "$LOG1" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"
-OUTPUT=$(head -n 28 $OUT) # skipping ParserCount output from runAminerUntilEndTest.
+OUTPUT=$(head -n 29 $OUT) # skipping ParserCount output from runAminerUntilEndTest.
 
 # compare results (10.)
 awk '/^```$/ && ++n == 13, /^```$/ && n++ == 14' < $INPUT_FILE | sed '/^```/ d' > $OUT
@@ -157,7 +161,7 @@ IN="$(tail -n +2 $OUT)"
 i=0
 while IFS= read -r line
 do
-  if [[ $i -ne 22 && $i -ne 24 ]]; then
+  if [[ $i -ne 23 && $i -ne 25 ]]; then
     echo "$line" >> $TMPFILE1
   fi
   i=$(($i+1))
@@ -166,7 +170,7 @@ done <<< "$IN"
 i=0
 while IFS= read -r line
 do
-  if [[ $i -ne 22 && $i -ne 24 ]]; then
+  if [[ $i -ne 23 && $i -ne 25 ]]; then
     echo "$line" >> $TMPFILE2
   fi
   i=$(($i+1))
