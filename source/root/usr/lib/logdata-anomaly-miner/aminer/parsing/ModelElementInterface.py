@@ -102,13 +102,19 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
         @param strict_mode If strict is set to true all keys must be defined. The parser will fail if the logdata has a json-key that is
                not defined in the key_parser_dict
         @param ignore_null ignore json-keys with values "null"
+        @param root_element: The name of the root xml element.
+        @param attribute_prefix: This prefix indicates that the element is an attribute of the previous element.
+        @param optional_attribute_prefix: If some attribute starts with this prefix it will be considered optional.
+        @param empty_allowed_prefix: If an element starts with this prefix, it may be empty.
+        @param xml_header_expected: True if the xml header is expected.
         """
         allowed_kwargs = [
             "date_format", "time_zone", "text_locale", "start_year", "max_time_jump_seconds", "value_sign_type", "value_pad_type",
             "exponent_type", "delimiter", "escape", "consume_delimiter", "value_model", "value_path", "branch_model_dict", "default_branch",
             "children", "fixed_data", "wordlist", "ipv6", "key_parser_dict", "optional_key_prefix", "nullable_key_prefix",
             "allow_all_fields", "optional_element", "repeated_element", "min_repeat", "max_repeat", "upper_case", "alphabet",
-            "strict_mode", "ignore_null", "timestamp_scale"
+            "strict_mode", "ignore_null", "timestamp_scale", "root_element", "attribute_prefix", "optional_attribute_prefix",
+            "empty_allowed_prefix", "xml_header_expected"
         ]
         for argument, value in list(locals().items())[1:-1]:  # skip self parameter and kwargs
             if value is not None:
@@ -419,6 +425,69 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
 
         if hasattr(self, "ignore_null") and not isinstance(self.ignore_null, bool):
             msg = "ignore_null has to be of the type bool."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+
+        if hasattr(self, "root_element") and self.root_element is not None:
+            if not isinstance(self.root_element, str):
+                msg = "root_element has to be of the type string."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(self.root_element) < 1:
+                msg = "root_element must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+
+        if hasattr(self, "attribute_prefix"):
+            if not isinstance(self.attribute_prefix, str):
+                msg = "attribute_prefix has to be of the type string."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(self.attribute_prefix) < 1:
+                msg = "attribute_prefix must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+
+        if hasattr(self, "optional_attribute_prefix"):
+            if not isinstance(self.optional_attribute_prefix, str):
+                msg = "optional_attribute_prefix has to be of the type string."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(self.optional_attribute_prefix) < 1:
+                msg = "optional_attribute_prefix must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+
+        if hasattr(self, "empty_allowed_prefix"):
+            if not isinstance(self.empty_allowed_prefix, str):
+                msg = "empty_allowed_prefix has to be of the type string."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise TypeError(msg)
+            if len(self.empty_allowed_prefix) < 1:
+                msg = "empty_allowed_prefix must not be empty."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
+
+        if hasattr(self, "attribute_prefix") and hasattr(self, "optional_attribute_prefix") and\
+                self.attribute_prefix == self.optional_attribute_prefix:
+            msg = "attribute_prefix must not be the same as optional_attribute_prefix!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        if hasattr(self, "attribute_prefix") and hasattr(self, "empty_allowed_prefix") and\
+                self.attribute_prefix == self.optional_attribute_prefix:
+            msg = "attribute_prefix must not be the same as empty_allowed_prefix!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        if hasattr(self, "optional_attribute_prefix") and hasattr(self, "empty_allowed_prefix") and\
+                self.attribute_prefix == self.optional_attribute_prefix:
+            msg = "optional_attribute_prefix must not be the same as empty_allowed_prefix!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        if hasattr(self, "xml_header_expected") and not isinstance(self.xml_header_expected, bool):
+            msg = "xml_header_expected has to be of the type bool."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
 
