@@ -47,7 +47,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     COUNTER = 0
 
     def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_path_list, eol_sep=b'\n',
-                 json_format=False, use_real_time=False, resource_name=None):
+                 json_format=False, use_real_time=False, resource_name=None, continuous_timestamp_missing_warning=True):
         """
         Create the atomizer.
         @param event_handler_list when not None, send events to those handlers. The list might be empty at invocation and populated
@@ -69,6 +69,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.resource_name = resource_name
         self.use_real_time = use_real_time
         self.printed_warning = False
+        self.continuous_timestamp_missing_warning = continuous_timestamp_missing_warning
 
         self.in_overlong_line_flag = False
         # If consuming of data was already attempted but the downstream handlers refused to handle it, keep the data and the parsed
@@ -168,7 +169,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             if log_atom.atom_time is None:
                 if self.use_real_time:
                     log_atom.atom_time = time.time()
-                elif not self.printed_warning:
+                elif not self.printed_warning or self.continuous_timestamp_missing_warning:
                     msg = "No timestamp was found for a log_atom. The timestamp_paths parameter is probably not set correctly in the" \
                           " Input config which might lead to errors. Alternatively the use_real_time parameter might be used in the" \
                           " Input config."

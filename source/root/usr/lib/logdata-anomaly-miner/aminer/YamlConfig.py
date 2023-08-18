@@ -309,6 +309,7 @@ def build_input_pipeline(analysis_context, parsing_model, parser_model_dict):
     if isinstance(timestamp_paths, str):
         timestamp_paths = [timestamp_paths]
     use_real_time = yaml_data['Input']['use_real_time']
+    continuous_timestamp_missing_warning = yaml_data['Input']['continuous_timestamp_missing_warning']
     sync_wait_time = yaml_data['Input']['sync_wait_time']
     eol_sep = yaml_data['Input']['eol_sep'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
         replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
@@ -342,7 +343,8 @@ def build_input_pipeline(analysis_context, parsing_model, parser_model_dict):
         log_resources[obj["url"]] = obj
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_path_list=timestamp_paths, eol_sep=eol_sep,
-        json_format=json_format, parser_model_dict=parser_model_dict, log_resources=log_resources, use_real_time=use_real_time)
+        json_format=json_format, parser_model_dict=parser_model_dict, log_resources=log_resources, use_real_time=use_real_time,
+        continuous_timestamp_missing_warning=continuous_timestamp_missing_warning)
     return anomaly_event_handlers, atom_filter
 
 
