@@ -23,6 +23,7 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 
 # Install necessary debian packages
 ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get update && apt-get install -y \
     supervisor \
     python3 \
@@ -40,6 +41,7 @@ RUN apt-get update && apt-get install -y \
     python3-pylibacl \
     python3-urllib3 \
     python3-statsmodels \
+    python3-pandas \
     libacl1-dev
 
 # Docs
@@ -85,6 +87,9 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/six.py /usr/lib/logdata-anomaly-miner/six.py \
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /usr/lib/logdata-anomaly-miner/urllib3 \
 	&& ln -s /usr/lib/python3/dist-packages/statsmodels /usr/lib/logdata-anomaly-miner/statsmodels \
+	&& ln -s /usr/lib/python3/dist-packages/packaging /usr/lib/logdata-anomaly-miner/packaging \
+	&& ln -s /usr/lib/python3/dist-packages/pandas /usr/lib/logdata-anomaly-miner/pandas \
+	&& ln -s /usr/lib/python3/dist-packages/patsy /etc/aminer/conf-enabled/patsy \
 	&& groupadd -g $GID -o $UNAME && useradd -u $UID -g $GID -ms /usr/sbin/nologin $UNAME && mkdir -p /var/lib/aminer/logs \
     && chown $UID.$GID -R /var/lib/aminer \
     && chown $UID.$GID -R /docs \
