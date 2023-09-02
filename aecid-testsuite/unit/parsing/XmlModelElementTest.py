@@ -1,6 +1,6 @@
 import copy
 import unittest
-import xml.etree.ElementTree as xml
+import defusedxml.ElementTree as xml
 import json
 from aminer.parsing.XmlModelElement import XmlModelElement, decode_xml
 from aminer.parsing.MatchContext import MatchContext

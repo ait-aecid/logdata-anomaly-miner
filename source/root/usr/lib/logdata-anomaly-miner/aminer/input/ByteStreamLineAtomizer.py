@@ -178,6 +178,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         return consumed_length
 
     def parse_log_atom(self, parse_data):
+        """Parse a log atom."""
         log_atom = LogAtom(parse_data, None, None, self)
         if self.parsing_model is not None:
             match_context = MatchContext(parse_data)

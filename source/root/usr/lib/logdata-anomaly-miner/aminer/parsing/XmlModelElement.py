@@ -13,7 +13,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import warnings
 import logging
-import xml.etree.ElementTree as xml
+import defusedxml.ElementTree as xml
 from typing import List, Union, Any
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.MatchContext import MatchContext
@@ -26,20 +26,20 @@ debug_log_prefix = "XmlModelElement: "
 
 
 def decode_xml(xml_string, obj=None, attribute_prefix="+"):
+    """Decode xml data from a string recursively."""
     children = [elem.tag for elem in xml_string]
     if obj is None and len(children) > 0:
         obj = {}
         obj[xml_string.tag] = [{children[0]: decode_xml(elem, obj)} for elem in xml_string]
         return obj
-    elif len(children) > 0:
+    if len(children) > 0:
         res = {}
         for key, value in xml_string.attrib.items():
             res[attribute_prefix + key] = value
         for elem in xml_string:
             res[elem.tag] = decode_xml(elem, obj)
         return res
-    else:
-        return xml_string.text
+    return xml_string.text
 
 
 class XmlModelElement(ModelElementInterface):

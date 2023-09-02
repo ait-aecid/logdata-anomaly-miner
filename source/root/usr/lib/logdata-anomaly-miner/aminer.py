@@ -518,7 +518,7 @@ def main():
             sys.exit(1)
         if "json" in obj and "xml" in obj:
             msg = "Log resources can not be in the json and xml format at the same time."
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
         if "json" not in obj:
             obj["json"] = None

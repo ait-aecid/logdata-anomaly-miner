@@ -155,7 +155,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise ValueError(msg)
             try:
-                old_locale = locale.getdefaultlocale()
+                old_locale = locale.getlocale()
                 if old_locale != self.text_locale:
                     locale.setlocale(locale.LC_ALL, self.text_locale)
                     msg = f"Changed time locale from {self.text_locale} to {''.join(self.text_locale)}."
