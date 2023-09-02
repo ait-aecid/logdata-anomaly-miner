@@ -24,7 +24,8 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
     """
 
     def __init__(self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_path_list=None, eol_sep=b'\n',
-                 json_format=False, xml_format=False, parser_model_dict=None, log_resources=None, use_real_time=False):
+                 json_format=False, xml_format=False, parser_model_dict=None, log_resources=None, use_real_time=False,
+                 continuous_timestamp_missing_warning=True):
         """
         Create the factory to forward data and events to the given lists for each newly created atomizer.
         @param default_timestamp_path_list if not empty list, the value of this timestamp field is extracted from parsed atoms and stored
@@ -47,6 +48,7 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         self.parser_model_dict = parser_model_dict
         self.log_resources = log_resources
         self.use_real_time = use_real_time
+        self.continuous_timestamp_missing_warning = continuous_timestamp_missing_warning
 
     def get_atomizer_for_resource(self, resource_name):  # skipcq: PYL-W0613
         """
@@ -65,8 +67,9 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
             parser = self.parsing_model
             if resource["parser_id"] is not None:
                 parser = self.parser_model_dict[resource["parser_id"]]
-            return ByteStreamLineAtomizer(parser, self.atom_handler_list, self.event_handler_list, 1 << 16,
-                                          self.default_timestamp_path_list, self.eol_sep, json, xml, self.use_real_time, resource_name)
-        return ByteStreamLineAtomizer(self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16,
-                                      self.default_timestamp_path_list, self.eol_sep, self.json_format, self.xml_format, self.use_real_time,
-                                      resource_name)
+            return ByteStreamLineAtomizer(
+                parser, self.atom_handler_list, self.event_handler_list, 1 << 16, self.default_timestamp_path_list, self.eol_sep, json,
+                xml, self.use_real_time, resource_name, self.continuous_timestamp_missing_warning)
+        return ByteStreamLineAtomizer(
+            self.parsing_model, self.atom_handler_list, self.event_handler_list, 1 << 16, self.default_timestamp_path_list, self.eol_sep,
+            self.json_format, self.xml_format, self.use_real_time, resource_name, self.continuous_timestamp_missing_warning)
