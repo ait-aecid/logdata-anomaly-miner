@@ -22,33 +22,10 @@ from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-debug_log_prefix = "JsonModelElement: "
+debug_log_prefix = "XmlModelElement: "
 
 
-def format_float(val):
-    """This function formats the float-value and parses the sign and the exponent."""
-    exp = None
-    if "e" in val:
-        exp = "e"
-    elif "E" in val:
-        exp = "E"
-    if "+" in val:
-        sign = "+"
-    else:
-        sign = "-"
-    if exp is not None:
-        pos_point = val.find(exp)
-        if "." in val:
-            pos_point = val.find(".")
-        if len(val) - val.find(sign) <= 2:
-            result = format(float(val), f"1.{val.find(exp) - pos_point}E")[:-2]
-            result += format(float(val), f"1.{val.find(exp) - pos_point}E")[-1]
-            return result
-        return format(float(val), f"1.{val.find(exp) - pos_point}E")
-    return float(val)
-
-
-def decode_xml(xml_string, obj=None, attribute_prefix="!"):
+def decode_xml(xml_string, obj=None, attribute_prefix="+"):
     children = [elem.tag for elem in xml_string]
     if obj is None and len(children) > 0:
         obj = {}
@@ -66,14 +43,13 @@ def decode_xml(xml_string, obj=None, attribute_prefix="!"):
 
 
 class XmlModelElement(ModelElementInterface):
-    """Parse single- or multi-lined JSON data."""
+    """Parse single- or multi-lined XML data."""
 
-    def __init__(self, element_id: str, root_element: str, key_parser_dict: dict, attribute_prefix: str = "!",
-                 optional_attribute_prefix: str = "_", empty_allowed_prefix: str = "?", xml_header_expected: bool = False):
+    def __init__(self, element_id: str, key_parser_dict: dict, attribute_prefix: str = "+", optional_attribute_prefix: str = "_",
+                 empty_allowed_prefix: str = "?", xml_header_expected: bool = False):
         """
         Initialize the XmlModelElement.
         @param element_id: The ID of the element.
-        @param root_element: The name of the root xml element.
         @param key_parser_dict: A dictionary of all keys with the according parsers (excluding the root element). If an attribute should be
                optional, the associated key must start with the optional_attribute_prefix. To allow every child element in a XML document
                use "key": "ALLOW_ALL". To allow empty elements the key must start with empty_allowed_prefix.
@@ -82,7 +58,7 @@ class XmlModelElement(ModelElementInterface):
         @param empty_allowed_prefix: If an element starts with this prefix, it may be empty.
         @param xml_header_expected: True if the xml header is expected.
         """
-        super().__init__(element_id, key_parser_dict=key_parser_dict, root_element=root_element, attribute_prefix=attribute_prefix,
+        super().__init__(element_id, key_parser_dict=key_parser_dict, attribute_prefix=attribute_prefix,
                          optional_attribute_prefix=optional_attribute_prefix, empty_allowed_prefix=empty_allowed_prefix,
                          xml_header_expected=xml_header_expected)
         self.dec_escapes = False
@@ -146,7 +122,7 @@ class XmlModelElement(ModelElementInterface):
 
     def get_match_element(self, path: str, match_context):
         """
-        Try to parse all the match_context against JSON.
+        Try to parse all the match_context against XML.
         When a match is found, the match_context is updated accordingly.
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.
@@ -188,14 +164,14 @@ class XmlModelElement(ModelElementInterface):
         if self.is_escaped_unicode(match_context.match_data.decode()):
             match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
             self.dec_escapes = False
-        matches += self.parse_json_dict(self.key_parser_dict, xml_match_data, current_path, match_context)
-        remove_chars = b' }]"\r\n'
+        matches += self.parse_dict(self.key_parser_dict, xml_match_data, current_path, match_context)
+        remove_chars = b' \r\n'
         match_data = match_context.match_data
         for c in remove_chars:
             match_data = match_data.replace(bytes(chr(c), encoding="utf-8"), b"")
         if None in matches or (match_data != b"" and len(matches) > 0):
             logging.getLogger(DEBUG_LOG_NAME).debug(
-                debug_log_prefix + "get_match_element_main NONE RETURNED\n" + match_context.match_data.strip(b' }]"\r\n').decode())
+                debug_log_prefix + "get_match_element_main NONE RETURNED\n" + match_context.match_data.decode())
             match_context.match_data = old_match_data
             return None
         # remove all remaining spaces and brackets.
@@ -206,25 +182,25 @@ class XmlModelElement(ModelElementInterface):
             resulting_matches = matches
         return MatchElement(current_path, xml_string, xml_match_data, resulting_matches)
 
-    def parse_json_dict(self, json_dict: dict, json_match_data: dict, current_path: str, match_context):
-        """Parse a json dictionary."""
+    def parse_dict(self, xml_dict: dict, xml_match_data: dict, current_path: str, match_context):
+        """Parse a dictionary."""
         matches: List[Union[MatchElement, None]] = []
-        if not self.check_keys(json_dict, json_match_data, match_context):
+        if not self.check_keys(xml_dict, xml_match_data, match_context):
             return [None]
-        for i, key in enumerate(json_match_data.keys()):
+        for i, key in enumerate(xml_match_data.keys()):
             split_key = key
-            key = self.get_full_key(key, json_dict)
-            if key not in json_dict:
+            key = self.get_full_key(key, xml_dict)
+            if key not in xml_dict:
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
-                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2" + key + str(json_dict))
+                logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 2" + key + str(xml_dict))
                 return [None]
-            value = json_dict[key]
-            if isinstance(value, (dict, list)) and (not isinstance(json_match_data, dict) or split_key not in json_match_data):
+            value = xml_dict[key]
+            if isinstance(value, (dict, list)) and (not isinstance(xml_match_data, dict) or split_key not in xml_match_data):
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 3, Key: " + split_key + ", Value: " + repr(value))
                 return [None]
             if isinstance(value, dict):
-                if json_match_data[split_key] is None and self.is_nullable_key(key):
+                if xml_match_data[split_key] is None and self.is_nullable_key(key):
                     data = b"null"
                     matches.append(MatchElement(f"{current_path}/{key}", data, data, None))
                     index = match_context.match_data.find(data)
@@ -233,10 +209,9 @@ class XmlModelElement(ModelElementInterface):
                     match_context.update(match_context.match_data[:index + len(data)])
                     return matches
 
-                matches += self.parse_json_dict(value, json_match_data[split_key], f"{current_path}/{split_key}", match_context)
-                if json_match_data[split_key] == {}:
+                matches += self.parse_dict(value, xml_match_data[split_key], f"{current_path}/{split_key}", match_context)
+                if xml_match_data[split_key] == {}:
                     index = match_context.match_data.find(split_key.encode())
-                    index = match_context.match_data.find(b"}", index)
                     match_element = MatchElement(
                         current_path+"/"+key, match_context.match_data[:index], match_context.match_data[:index], None)
                     matches.append(match_element)
@@ -246,52 +221,55 @@ class XmlModelElement(ModelElementInterface):
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
                     return matches
             elif isinstance(value, list):
-                res = self.parse_json_array(json_dict, json_match_data, key, split_key, current_path, matches, match_context, i)
+                res = self.parse_array(xml_dict, xml_match_data, key, split_key, current_path, matches, match_context, i)
                 if res is not None:
                     return res
             else:
-                if key != split_key and split_key not in json_match_data:
-                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + f"Optional Key {key} not found in json_match_data")
+                if key != split_key and split_key not in xml_match_data:
+                    logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + f"Optional Key {key} not found in xml_match_data")
                     continue
-                if split_key not in json_match_data:
+                if split_key not in xml_match_data:
                     logging.getLogger(DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + f"Key {split_key} not found in json_match_data. RETURN [NONE] 4")
+                        debug_log_prefix + f"Key {split_key} not found in xml_match_data. RETURN [NONE] 4")
                     return [None]
-                match_element, index, data = self.parse_json_object(
-                    json_dict, json_match_data, key, split_key, current_path, match_context)
-                matches.append(match_element)
-                if index == -1 and match_element is None:
-                    backslash = b"\\"
-                    logging.getLogger(DEBUG_LOG_NAME).debug(
-                        debug_log_prefix + f"Necessary element did not match! Key: {key}, MatchElement: {match_element}, Data: "
-                                           f"{data.decode()}, IsFloat {isinstance(json_match_data[split_key], float)}, Index: {index}, "
-                                           f"MatchContext: {match_context.match_data.replace(backslash, b'').decode()}")
-                    return matches
-                match_context.update(match_context.match_data[:index + len(data) + len(f"</{split_key}>")])
-        missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and not (
+                if xml_dict[key] == "ALLOW_ALL":
+                    match_context.update(match_context.match_data[:match_context.match_data.find(
+                        f"</{self.get_stripped_key(split_key)}>".encode()) + len(f"</{self.get_stripped_key(split_key)}>")])
+                else:
+                    match_element, index, data = self.parse_object(xml_dict, xml_match_data, key, split_key, current_path, match_context)
+                    matches.append(match_element)
+                    if index == -1 and match_element is None:
+                        backslash = b"\\"
+                        logging.getLogger(DEBUG_LOG_NAME).debug(
+                            debug_log_prefix + f"Necessary element did not match! Key: {key}, MatchElement: {match_element}, Data: "
+                                               f"{data.decode()}, IsFloat {isinstance(xml_match_data[split_key], float)}, Index: {index}, "
+                                               f"MatchContext: {match_context.match_data.replace(backslash, b'').decode()}")
+                        return matches
+                    match_context.update(match_context.match_data[:index + len(data) + len(f"</{self.get_stripped_key(split_key)}>")])
+        missing_keys = [x for x in xml_dict if self.get_stripped_key(x) not in xml_match_data and not (
                 x.startswith(self.optional_attribute_prefix) or x.startswith(self.attribute_prefix + self.optional_attribute_prefix))]
         for key in missing_keys:
             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "Missing Key: " + key)
             return [None]
         return matches
 
-    def check_keys(self, json_dict, json_match_data, match_context):
+    def check_keys(self, xml_dict, xml_match_data, match_context):
         """Check if no keys are missing and if the value types match."""
-        if json_match_data is None:
+        if xml_match_data is None:
             return False
-        missing_keys = [x for x in json_dict if self.get_stripped_key(x) not in json_match_data and not (x.startswith(
+        missing_keys = [x for x in xml_dict if self.get_stripped_key(x) not in xml_match_data and not (x.startswith(
             self.optional_attribute_prefix) or x.startswith(self.attribute_prefix + self.optional_attribute_prefix))]
         for key in missing_keys:
             if (not key.startswith(self.empty_allowed_prefix) or (
-                    key.startswith(self.empty_allowed_prefix) and key[len(self.empty_allowed_prefix):] not in json_match_data)):
+                    key.startswith(self.empty_allowed_prefix) and key[len(self.empty_allowed_prefix):] not in xml_match_data)):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 1. Key: " + key)
                 return False
-        for key in json_dict.keys():
+        for key in xml_dict.keys():
             k = self.get_stripped_key(key)
-            if not isinstance(json_match_data, dict) or (k in json_match_data and isinstance(json_match_data[k], list) and not isinstance(
-                    json_dict[key], list)):
+            if not isinstance(xml_match_data, dict) or (k in xml_match_data and isinstance(xml_match_data[k], list) and not isinstance(
+                    xml_dict[key], list)):
                 index = match_context.match_data.find(key.encode())
                 match_context.update(match_context.match_data[:index])
                 logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "RETURN [NONE] 5. Key: " + key)
@@ -310,25 +288,18 @@ class XmlModelElement(ModelElementInterface):
                 res.append(val)
         return res
 
-    def parse_json_array(self, json_dict: dict, json_match_data: dict, key: str, split_key: str, current_path: str, matches: list,
-                         match_context, i: int):
-        """Parse an array in a json object."""
-        if self.is_nullable_key(key) and json_match_data[split_key] is None:
+    def parse_array(self, xml_dict: dict, xml_match_data: dict, key: str, split_key: str, current_path: str, matches: list,
+                    match_context, i: int):
+        """Parse an array in a xml object."""
+        if self.is_nullable_key(key) and xml_match_data[split_key] is None:
             return None
-        if not isinstance(json_match_data[split_key], list):
-            # if key.startswith(self.optional_key_prefix) and json_match_data[split_key] is None:
-            #     data = b"null"
-            #     index = match_context.match_data.find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
-            #     index += match_context.match_data[index:].find(b"null") + len(b"null")
-            #     match_context.update(match_context.match_data[:index])
-            #     matches.append(MatchElement(f"{current_path}/{key}", data, data, None))
-            #     return matches
+        if not isinstance(xml_match_data[split_key], list):
             logging.getLogger(DEBUG_LOG_NAME).debug(
-                debug_log_prefix + "Key " + split_key + " is no array. Data: " + str(json_match_data[split_key]))
+                debug_log_prefix + "Key " + split_key + " is no array. Data: " + str(xml_match_data[split_key]))
             return [None]
-        search_string = b"]"
-        match_array = self.flatten_list(json_match_data[split_key])
-        value = self.flatten_list(json_dict[key])
+        search_string = b"</" + self.get_stripped_key(split_key).encode() + b">"
+        match_array = self.flatten_list(xml_match_data[split_key])
+        value = self.flatten_list(xml_dict[key])
         for j, data in enumerate(match_array):
             for k, val in enumerate(value):
                 if isinstance(data, str):
@@ -341,7 +312,7 @@ class XmlModelElement(ModelElementInterface):
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
                 if isinstance(val, dict):  # skipcq: PYL-R1723
-                    matches += self.parse_json_dict(val, match_array[j], f"{current_path}/{split_key}", match_context)
+                    matches += self.parse_dict(val, match_array[j], f"{current_path}/{split_key}", match_context)
                     if matches[-1] is None:
                         if len(value) - 1 == k:
                             logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
@@ -381,17 +352,17 @@ class XmlModelElement(ModelElementInterface):
                             return matches
                         del matches[-1]
                         continue
-        if len(json_match_data.keys()) > i + 1:
+        if len(xml_match_data.keys()) > i + 1:
             match_context.update(match_context.match_data[:match_context.match_data.find(
-                list(json_match_data.keys())[i + 1].encode())])
+                list(xml_match_data.keys())[i + 1].encode())])
         else:
             match_context.update(match_context.match_data[:match_context.match_data.find(search_string) + len(search_string)])
         return None
 
-    def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
-        """Parse a literal from the json object."""
+    def parse_object(self, xml_dict, xml_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
+        """Parse a literal from the xml object."""
         current_path += "/" + key
-        data = json_match_data[split_key]
+        data = xml_match_data[split_key]
         enc = "utf-8"
         if isinstance(data, str):
             if self.is_escaped_unicode(data) and self.dec_escapes:
@@ -412,7 +383,8 @@ class XmlModelElement(ModelElementInterface):
             return None, -1, data
         elif not isinstance(data, bytes):
             data = str(data).encode()
-        match_element = json_dict[key].get_match_element(current_path, MatchContext(data))
+
+        match_element = xml_dict[key].get_match_element(current_path, MatchContext(data))
         if match_element is not None and len(match_element.match_string) != len(data) and (
                 not isinstance(match_element.match_object, bytes) or len(match_element.match_object) != len(data)):
             logging.getLogger(DEBUG_LOG_NAME).debug(
@@ -421,7 +393,7 @@ class XmlModelElement(ModelElementInterface):
             match_element = None
         index = max([match_context.match_data.replace(b"\\", b"").find(split_key.encode()),
                      match_context.match_data.find(split_key.encode()), match_context.match_data.decode().find(split_key)])
-        index += match_context.match_data[index:].find(split_key.encode() + b'":') + len(split_key.encode() + b'":')
+        index += match_context.match_data[index:].find(split_key.encode()) + len(split_key.encode())
         try:
             index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
                           match_context.match_data.decode(enc)[index:].find(data.decode(enc))])
@@ -429,14 +401,6 @@ class XmlModelElement(ModelElementInterface):
             index += max([match_context.match_data.replace(b"\\", b"")[index:].find(data), match_context.match_data[index:].find(data),
                           match_context.match_data.decode()[index:].find(data.decode())])
         index += len(match_context.match_data[index:]) - len(match_context.match_data[index:].lstrip(b" \r\t\n"))
-        if match_context.match_data[index:].find(b'"') == 0:
-            index += len(b'"')
-        # for example float scientific representation is converted to normal float..
-        if index == -1 and match_element is not None and isinstance(json_match_data[split_key], float):
-            indices = [match_context.match_data.find(b",", len(match_element.match_string) // 3),
-                       match_context.match_data.find(b"]"), match_context.match_data.find(b"}")]
-            indices = [x for x in indices if x >= 0]
-            index = min(indices)
         if match_element is None:
             index = -1
         return match_element, index, data

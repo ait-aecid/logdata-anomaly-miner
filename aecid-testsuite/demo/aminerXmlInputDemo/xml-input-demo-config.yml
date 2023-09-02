@@ -1,0 +1,107 @@
+LearnMode: True
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/syslog'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: 'Original log line: '
+
+Log.StatisticsPeriod: 3600
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 1
+
+Parser:
+       - id: id
+         type: DecimalIntegerValueModelElement
+         name: 'id'
+
+       - id: opt
+         type: FixedDataModelElement
+         name: 'opt'
+         args: 'text'
+
+       - id: to
+         type: AnyByteDataModelElement
+         name: 'to'
+
+       - id: from
+         type: AnyByteDataModelElement
+         name: 'from'
+
+       - id: heading
+         type: AnyByteDataModelElement
+         name: 'heading'
+
+       - id: text1
+         type: AnyByteDataModelElement
+         name: 'text1'
+
+       - id: text2
+         type: AnyByteDataModelElement
+         name: 'text2'
+
+       - id: xml
+         start: True
+         type: XmlModelElement
+         name: 'model'
+         xml_header_expected: True
+         key_parser_dict:
+           messages:
+             - note:
+                 +id: id
+                 _+opt: opt
+                 to: to
+                 from: from
+                 ?heading: heading
+                 body:
+                   text1: text1
+                   text2: text2
+
+Input:
+        timestamp_paths: None
+        xml_format: True
+
+Analysis:
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueCombo
+          paths:
+            - "/model/messages/note/id/id"
+            - "/model/messages/note/opt/opt"
+          learn_mode: True
+          output_logline: True
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValue
+          paths:
+            - "/model/messages/note/id/id"
+            - "/model/messages/note/opt/opt"
+          learn_mode: True
+          output_logline: True
+        - type: SimpleUnparsedAtomHandler
+          id: SimpleUnparsedAtomHandler
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler

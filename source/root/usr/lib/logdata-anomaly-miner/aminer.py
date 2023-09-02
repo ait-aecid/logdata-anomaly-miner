@@ -495,7 +495,7 @@ def main():
             obj["url"] = decode_string_as_byte_string(resource)
         elif isinstance(resource, dict):
             for key, val in resource.items():
-                if key not in ("url", "json", "parser_id"):
+                if key not in ("url", "json", "xml", "parser_id"):
                     msg = f"Unknown argument in LogResourceList: {key}"
                     print(msg, file=sys.stderr)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
@@ -505,14 +505,25 @@ def main():
                     print(msg, file=sys.stderr)
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                     sys.exit(1)
+                if key == "xml" and not isinstance(val, bool):
+                    msg = "Argument xml must be of type boolean!"
+                    print(msg, file=sys.stderr)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    sys.exit(1)
                 obj[key] = val
         else:
             msg = "LogResourceList must be of type dict or string"
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
+        if "json" in obj and "xml" in obj:
+            msg = "Log resources can not be in the json and xml format at the same time."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         if "json" not in obj:
             obj["json"] = None
+        if "xml" not in obj:
+            obj["xml"] = None
         if "parser_id" not in obj:
             obj["parser_id"] = None
         if isinstance(obj["url"], str):
@@ -527,6 +538,8 @@ def main():
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
+        if obj["xml"]:
+            obj["log_resource"].default_buffer_size = 1 << 32
         if not os.path.exists(url[7:].decode()):
             msg = f"WARNING: file or socket '{url[7:].decode()}' does not exist (yet)!"
             print(msg, file=sys.stderr)

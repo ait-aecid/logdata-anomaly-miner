@@ -428,7 +428,7 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
 
-        if hasattr(self, "root_element") and self.root_element is not None:
+        if hasattr(self, "root_element"):
             if not isinstance(self.root_element, str):
                 msg = "root_element has to be of the type string."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -475,13 +475,13 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
             raise ValueError(msg)
 
         if hasattr(self, "attribute_prefix") and hasattr(self, "empty_allowed_prefix") and\
-                self.attribute_prefix == self.optional_attribute_prefix:
+                self.attribute_prefix == self.empty_allowed_prefix:
             msg = "attribute_prefix must not be the same as empty_allowed_prefix!"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
 
         if hasattr(self, "optional_attribute_prefix") and hasattr(self, "empty_allowed_prefix") and\
-                self.attribute_prefix == self.optional_attribute_prefix:
+                self.empty_allowed_prefix == self.optional_attribute_prefix:
             msg = "optional_attribute_prefix must not be the same as empty_allowed_prefix!"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
