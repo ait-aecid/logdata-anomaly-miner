@@ -162,4 +162,4 @@ class ParserCountTest(TestBase):
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], log_resource_ignore_list={"id": "Default"})
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], log_resource_ignore_list=())
         self.assertRaises(TypeError, ParserCount, self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], log_resource_ignore_list=set())
-        NewMatchPathDetector(self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
+        ParserCount(self.aminer_config, ["fixed/seq"], [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
