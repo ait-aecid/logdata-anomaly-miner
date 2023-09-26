@@ -68,7 +68,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name == source.decode():
+            if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()

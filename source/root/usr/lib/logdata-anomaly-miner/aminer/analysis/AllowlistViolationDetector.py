@@ -51,7 +51,7 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         @return a boolean value if the log atom matches one of the rules.
         """
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name == source.decode():
+            if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
         event_data = {}

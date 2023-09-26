@@ -85,7 +85,7 @@ class NewMatchPathValueComboDetector(AtomHandlerInterface, TimeTriggeredComponen
         values were new or not.
         """
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name == source.decode():
+            if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
