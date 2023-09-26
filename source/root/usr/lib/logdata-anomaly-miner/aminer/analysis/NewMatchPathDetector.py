@@ -46,7 +46,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id,
-            learn_mode=learn_mode, output_logline=output_logline,  stop_learning_time=stop_learning_time,
+            learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
         )
         self.log_learned_paths = 0
