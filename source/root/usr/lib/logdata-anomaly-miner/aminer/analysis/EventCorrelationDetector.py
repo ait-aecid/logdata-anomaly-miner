@@ -43,7 +43,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
                  learn_mode=True, ignore_list=None, persistence_id="Default", output_logline=True, constraint_list=None,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -77,14 +77,15 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
-            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, max_hypotheses=max_hypotheses,
-            hypothesis_max_delta_time=hypothesis_max_delta_time, generation_probability=generation_probability,
-            generation_factor=generation_factor, max_observations=max_observations, p0=p0, alpha=alpha, candidates_size=candidates_size,
-            hypotheses_eval_delta_time=hypotheses_eval_delta_time, delta_time_to_discard_hypothesis=delta_time_to_discard_hypothesis,
-            check_rules_flag=check_rules_flag, learn_mode=learn_mode, ignore_list=ignore_list, persistence_id=persistence_id,
-            output_logline=output_logline, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            mutable_default_args=["target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
+            max_hypotheses=max_hypotheses, hypothesis_max_delta_time=hypothesis_max_delta_time,
+            generation_probability=generation_probability, generation_factor=generation_factor, max_observations=max_observations, p0=p0,
+            alpha=alpha, candidates_size=candidates_size, hypotheses_eval_delta_time=hypotheses_eval_delta_time,
+            delta_time_to_discard_hypothesis=delta_time_to_discard_hypothesis, check_rules_flag=check_rules_flag, learn_mode=learn_mode,
+            ignore_list=ignore_list, persistence_id=persistence_id, output_logline=output_logline, constraint_list=constraint_list,
+            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
+            log_resource_ignore_list=log_resource_ignore_list
         )
         self.last_unhandled_match = None
         self.total_records = 0
@@ -148,6 +149,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
 
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \

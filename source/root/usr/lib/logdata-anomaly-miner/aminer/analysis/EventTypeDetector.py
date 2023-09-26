@@ -28,7 +28,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id="Default", target_path_list=None, id_path_list=None,
-                 allow_missing_id=False, allowed_id_tuples=None, min_num_vals=1000, max_num_vals=1500, save_values=True):
+                 allow_missing_id=False, allowed_id_tuples=None, min_num_vals=1000, max_num_vals=1500, save_values=True,
+                 log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -48,10 +49,10 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # avoid "defined outside init" issue
         self.next_persist_time, self.log_success, self.log_total = [None]*3
         super().__init__(
-            mutable_default_args=["id_path_list"], aminer_config=aminer_config,
+            mutable_default_args=["id_path_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id, target_path_list=target_path_list,
             id_path_list=id_path_list, allow_missing_id=allow_missing_id, allowed_id_tuples=allowed_id_tuples, min_num_vals=min_num_vals,
-            max_num_vals=max_num_vals, save_values=save_values
+            max_num_vals=max_num_vals, save_values=save_values, log_resource_ignore_list=log_resource_ignore_list
         )
 
         self.num_events = 0
@@ -79,6 +80,9 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         """Receives a parsed atom and keeps track of the event types and the values of the variables of them."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
         valid_log_atom = False
         if self.target_path_list:

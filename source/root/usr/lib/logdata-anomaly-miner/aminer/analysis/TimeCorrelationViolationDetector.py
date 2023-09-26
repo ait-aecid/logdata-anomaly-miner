@@ -29,7 +29,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, ruleset, anomaly_event_handlers):
+    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -37,7 +37,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         """
         self.last_log_atom, self.next_persist_time, self.log_success, self.log_total = [None]*4
-        super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers)
+        super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers,
+                         log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"])
 
         self.ruleset = ruleset
         if not isinstance(ruleset, list) or not all(isinstance(x, Rules.MatchRule) for x in ruleset):
@@ -54,6 +55,9 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     def receive_atom(self, log_atom):
         """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
         self.last_log_atom = log_atom
         for rule in self.ruleset:

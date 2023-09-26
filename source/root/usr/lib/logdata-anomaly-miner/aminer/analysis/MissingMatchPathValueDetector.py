@@ -35,7 +35,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", learn_mode=False,
                  default_interval=3600, realert_interval=86400, combine_values=True, output_logline=True, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None):
+                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -58,7 +58,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, learn_mode=learn_mode, default_interval=default_interval, realert_interval=realert_interval,
             output_logline=output_logline, combine_values=combine_values, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
+            mutable_default_args=["log_resource_ignore_list"]
         )
         # This timestamp is compared with timestamp values from log atoms for activation of alerting logic. The first timestamp from logs
         # above this value will trigger alerting.
@@ -85,6 +86,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
                 at each source implementation sending log atoms.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:

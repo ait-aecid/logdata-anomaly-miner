@@ -31,7 +31,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id="Default", learn_mode=False, output_logline=True,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -47,7 +47,8 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id,
             learn_mode=learn_mode, output_logline=output_logline,  stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
+            mutable_default_args=["log_resource_ignore_list"]
         )
         self.log_learned_paths = 0
         self.log_new_learned_paths = []
@@ -64,6 +65,9 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @return True if this handler was really able to handle and process the match. Depending on this information, the caller
                 may decide if it makes sense passing the parsed atom also to other handlers.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
         unknown_path_list = []
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \

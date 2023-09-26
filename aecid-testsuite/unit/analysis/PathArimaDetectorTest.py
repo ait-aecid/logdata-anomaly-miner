@@ -305,6 +305,17 @@ class PathArimaDetectorTest(TestBase):
 
         self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, learn_mode=True, stop_learning_time=100, stop_learning_no_anomaly_time=100)
 
+        self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list="")
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=True)
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=123)
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=())
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=set())
+        PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=["file:///tmp/syslog"])
+
     @classmethod
     def setUpClass(cls):
         """Set up the data for the all tests."""

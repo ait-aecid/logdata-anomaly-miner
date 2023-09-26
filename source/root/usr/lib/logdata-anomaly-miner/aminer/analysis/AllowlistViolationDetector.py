@@ -26,13 +26,14 @@ class AllowlistViolationDetector(AtomHandlerInterface):
     more than once, the allowlist rules may have match actions attached that set off an alarm by themselves.
     """
 
-    def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_logline=True):
+    def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_logline=True, log_resource_ignore_list=None):
         """
         Initialize the detector.
         @param allowlist_rules list of rules executed until the first rule matches.
         """
         super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, output_logline=output_logline,
-                         allowlist_rules=allowlist_rules)
+                         allowlist_rules=allowlist_rules, log_resource_ignore_list=log_resource_ignore_list,
+                         mutable_default_args=["log_resource_ignore_list"])
         if allowlist_rules is None:
             msg = "allowlist_rules must not be empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -49,6 +50,9 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         @param log_atom atom with parsed data to check
         @return a boolean value if the log atom matches one of the rules.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
         event_data = {}
         for rule in self.allowlist_rules:

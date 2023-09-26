@@ -28,7 +28,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, stream, target_path_list, separator, missing_value_string):
+    def __init__(self, stream, target_path_list, separator, missing_value_string, log_resource_ignore_list=None):
         """
         Initialize the writer.
         @param stream the stream on which the match results are written.
@@ -39,12 +39,16 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """
         # avoid "defined outside init" issue
         self.log_success, self.log_total = [None]*2
-        super().__init__(stream=stream, target_path_list=target_path_list, separator=separator, missing_value_string=missing_value_string)
+        super().__init__(stream=stream, target_path_list=target_path_list, separator=separator, missing_value_string=missing_value_string,
+                         log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"])
         if self.target_path_list is None:
             raise TypeError("target_path_list must not be None.")
 
     def receive_atom(self, log_atom):
         """Forward match value information to the stream."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         add_sep_flag = False

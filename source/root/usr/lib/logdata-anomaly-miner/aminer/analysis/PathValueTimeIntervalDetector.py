@@ -33,7 +33,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list, persistence_id="Default",
                  allow_missing_values_flag=True, ignore_list=None, output_logline=True, learn_mode=False, time_period_length=86400,
-                 max_time_diff=360, num_reduce_time_list=10, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 max_time_diff=360, num_reduce_time_list=10, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -58,11 +59,12 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["ignore_list"], aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers,
-            persistence_id=persistence_id, target_path_list=target_path_list, allow_missing_values_flag=allow_missing_values_flag,
-            ignore_list=ignore_list, output_logline=output_logline, learn_mode=learn_mode, time_period_length=time_period_length,
-            max_time_diff=max_time_diff, num_reduce_time_list=num_reduce_time_list, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            mutable_default_args=["ignore_list", "log_resource_ignore_list"], aminer_config=aminer_config,
+            anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id, target_path_list=target_path_list,
+            allow_missing_values_flag=allow_missing_values_flag, ignore_list=ignore_list, output_logline=output_logline,
+            learn_mode=learn_mode, time_period_length=time_period_length, max_time_diff=max_time_diff,
+            num_reduce_time_list=num_reduce_time_list, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
         if not self.target_path_list:
             msg = "target_path_list must not be empty or None."
@@ -89,6 +91,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         if log_atom.atom_time is None:
             return False
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \

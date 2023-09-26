@@ -745,6 +745,42 @@ class YamlConfigTest(TestBase):
         self.assertTrue(isinstance(atomizer.parsing_model, SequenceModelElement))
         self.assertTrue(atomizer.json_format)
 
+    def test32_log_resource_ignore_list(self):
+        """Test if analysis components can ignore log resources properly."""
+        class Object(object):
+            pass
+        t = time()
+        a = Object()
+        source_a = Object()
+        setattr(a, "source", source_a)
+        setattr(source_a, "resource_name", "file:///tmp/syslog_a")
+        b = Object()
+        source_b = Object()
+        setattr(b, "source", source_b)
+        setattr(source_b, "resource_name", "file:///tmp/syslog_b")
+        fixed_dme_a = FixedDataModelElement('a', b'a')
+        fixed_dme_b = FixedDataModelElement('b', b'b')
+        match_context_a = MatchContext(b'a')
+        match_element_a = fixed_dme_a.get_match_element("", match_context_a)
+        log_atom1 = LogAtom(fixed_dme_a.fixed_data, ParserMatch(match_element_a), t, source_a)
+        match_context_b = MatchContext(b'b')
+        match_element_b = fixed_dme_b.get_match_element("", match_context_b)
+        log_atom2 = LogAtom(fixed_dme_b.fixed_data, ParserMatch(match_element_b), t+1, source_b)
+
+        nmpd1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, log_resource_ignore_list=["file:///tmp/syslog_b"])
+        self.analysis_context.register_component(nmpd1, "Detector1")
+        nmpd2 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, log_resource_ignore_list=["file:///tmp/syslog_a"])
+        self.analysis_context.register_component(nmpd2, "Detector2")
+        self.assertTrue(nmpd1.receive_atom(log_atom1))
+        self.assertFalse(nmpd1.receive_atom(log_atom2))
+        self.assertFalse(nmpd2.receive_atom(log_atom1))
+        self.assertTrue(nmpd2.receive_atom(log_atom2))
+        self.assertEqual(self.output_stream.getvalue(), datetime.fromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S') +
+                         " New path(es) detected\nNewMatchPathDetector: \"Detector1\" (1 lines)\n  /a: a\n['/a']\na\n\n" +
+                         datetime.fromtimestamp(t+1).strftime('%Y-%m-%d %H:%M:%S') +
+                         " New path(es) detected\nNewMatchPathDetector: \"Detector2\" (1 lines)\n  /b: b\n['/b']\nb\n\n")
+        self.reset_output_stream()
+
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""
         self.assertTrue(isinstance(context.registered_components[0][0], SubhandlerFilter))

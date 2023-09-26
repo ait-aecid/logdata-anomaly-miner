@@ -40,7 +40,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id="Default", target_path_list=None,
                  output_logline=True, learn_mode=False, num_init=50, force_period_length=False, set_period_length=10, alpha=0.05,
                  alpha_bt=0.05, num_results_bt=15, num_min_time_history=20, num_max_time_history=30, num_periods_tsa_ini=20,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -67,12 +67,13 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list"], aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers,
-            event_type_detector=event_type_detector, persistence_id=persistence_id, target_path_list=target_path_list,
-            output_logline=output_logline, learn_mode=learn_mode, num_init=num_init, force_period_length=force_period_length,
-            set_period_length=set_period_length, alpha=alpha, alpha_bt=alpha_bt, num_results_bt=num_results_bt,
-            num_min_time_history=num_min_time_history, num_max_time_history=num_max_time_history, num_periods_tsa_ini=num_periods_tsa_ini,
-            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            mutable_default_args=["target_path_list", "log_resource_ignore_list"], aminer_config=aminer_config,
+            anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector, persistence_id=persistence_id,
+            target_path_list=target_path_list, output_logline=output_logline, learn_mode=learn_mode, num_init=num_init,
+            force_period_length=force_period_length, set_period_length=set_period_length, alpha=alpha, alpha_bt=alpha_bt,
+            num_results_bt=num_results_bt, num_min_time_history=num_min_time_history, num_max_time_history=num_max_time_history,
+            num_periods_tsa_ini=num_periods_tsa_ini, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
         # Add the PathArimaDetector to the list of the modules, which use the event_type_detector.
         self.event_type_detector.add_following_modules(self)
@@ -147,6 +148,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         event_index = self.event_type_detector.current_index
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:

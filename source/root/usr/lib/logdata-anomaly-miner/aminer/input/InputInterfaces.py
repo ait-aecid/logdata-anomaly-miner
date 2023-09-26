@@ -101,7 +101,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_stat_stop_update", "num_updates_until_var_reduction", "var_reduction_thres", "num_skipped_ind_for_weights",
             "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr", "used_range_test", "range_alpha", "range_threshold",
             "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics", "idf", "norm", "add_normal", "check_empty_windows",
-            "unique_path_list", "default_freqs", "var_factor", "avg_factor"
+            "unique_path_list", "default_freqs", "var_factor", "avg_factor", "log_resource_ignore_list"
         ]
         self.log_success = 0
         self.log_total = 0
@@ -336,7 +336,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if not hasattr(self, "persistence_id"):
             self.persistence_id = None  # persistence_id is always needed.
         for attr in ("id_path_list", "target_path_list", "constraint_list", "ignore_list", "target_label_list", "unique_path_list",
-                     "scoring_path_list"):
+                     "scoring_path_list", "log_resource_ignore_list"):
             if hasattr(self, attr) and self.__getattribute__(attr) is not None:
                 attr_val = self.__getattribute__(attr)
                 if not isinstance(attr_val, list):
@@ -352,6 +352,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
                         msg = f"{attr} values must not be empty."
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
+        if hasattr(self, "log_resource_ignore_list"):
+            for path in self.log_resource_ignore_list:
+                if not (path.startswith("file://") or path.startswith("unix://")):
+                    msg = "log_resource_ignore_list values must start with file:// or unix://."
+                    logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                    raise ValueError(msg)
         if hasattr(self, "target_value_list") and self.target_value_list is not None and not isinstance(self.target_value_list, list):
             msg = "target_value_list has to be of the type list."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
