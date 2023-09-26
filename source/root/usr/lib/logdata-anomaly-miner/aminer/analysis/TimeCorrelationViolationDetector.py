@@ -57,7 +57,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name == source:
-                return False
+                return
         self.log_total += 1
         self.last_log_atom = log_atom
         for rule in self.ruleset:

@@ -71,7 +71,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         """Send summary to all event handlers."""
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name == source:
-                return False
+                return
         self.log_total += 1
         parser_match = log_atom.parser_match
         value_dict = parser_match.get_match_dictionary()

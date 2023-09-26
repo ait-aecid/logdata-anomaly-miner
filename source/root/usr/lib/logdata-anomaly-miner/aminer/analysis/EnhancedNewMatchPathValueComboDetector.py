@@ -63,8 +63,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode,
             output_logline=output_logline, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
-            mutable_default_args=["log_resource_ignore_list"])
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list)
         if not self.target_path_list:
             msg = "target_path_list must not be None or empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)

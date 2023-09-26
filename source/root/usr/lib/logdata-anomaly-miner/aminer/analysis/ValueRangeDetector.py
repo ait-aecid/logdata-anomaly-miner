@@ -74,7 +74,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         """Receive a log atom from a source."""
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name == source:
-                return False
+                return
         self.log_total += 1
         parser_match = log_atom.parser_match
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
