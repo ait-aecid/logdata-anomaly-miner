@@ -81,7 +81,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def receive_atom(self, log_atom):
         """Receives a parsed atom and keeps track of the event types and the values of the variables of them."""
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name == source:
+            if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
         valid_log_atom = False

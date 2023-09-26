@@ -92,7 +92,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return True if this handler was really able to handle and process the match.
         """
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name == source:
+            if log_atom.source.resource_name.decode() == source:
                 return False
         if log_atom.atom_time is None:
             return False

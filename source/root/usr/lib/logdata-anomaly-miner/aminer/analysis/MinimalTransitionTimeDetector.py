@@ -84,7 +84,7 @@ class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponent
     def receive_atom(self, log_atom):
         """Receive a log atom from a source and analyzes minimal times between transitions."""
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name == source:
+            if log_atom.source.resource_name.decode() == source:
                 return False
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:

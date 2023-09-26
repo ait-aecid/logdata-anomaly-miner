@@ -149,7 +149,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         @return True if this handler was really able to handle and process the match.
         """
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name == source:
+            if log_atom.source.resource_name.decode() == source:
                 return False
         event_index = self.event_type_detector.current_index
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \

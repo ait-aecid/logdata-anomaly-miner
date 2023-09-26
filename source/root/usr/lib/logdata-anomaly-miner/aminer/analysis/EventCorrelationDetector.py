@@ -150,7 +150,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name == source:
+            if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
 
