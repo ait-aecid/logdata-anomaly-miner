@@ -47,7 +47,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
     def receive_atom(self, log_atom):
         """Forward match value information to the stream."""
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name.decode() == source:
+            if log_atom.source.resource_name == source.decode():
                 return
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()

@@ -95,7 +95,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
     def receive_atom(self, log_atom):
         """Receive parsed atom and the information about the parser match."""
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name.decode() == source:
+            if log_atom.source.resource_name == source.decode():
                 return False
         parser_match = log_atom.parser_match
         self.log_total += 1

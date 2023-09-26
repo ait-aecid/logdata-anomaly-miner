@@ -87,7 +87,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 at each source implementation sending log atoms.
         """
         for source in self.log_resource_ignore_list:
-            if log_atom.source.resource_name.decode() == source:
+            if log_atom.source.resource_name == source.decode():
                 return False
         self.log_total += 1
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
