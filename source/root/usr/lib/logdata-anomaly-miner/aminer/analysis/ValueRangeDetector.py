@@ -66,6 +66,7 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         self.load_persistence_data()
 
     def load_persistence_data(self):
+        """Load the persistence data from storage."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             self.ranges = persistence_data
