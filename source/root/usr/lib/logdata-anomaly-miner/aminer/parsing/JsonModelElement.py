@@ -92,11 +92,13 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
 
-    def is_escaped_unicode(self, text: str):  # skipcq: PYL-R0201
+    def is_ascii(self, text: str):  # skipcq: PYL-R0201
         """Check if the text contains only ascii characters."""
-        if all(ord(c) < 128 for c in text):  # is escaped unicode ascii?
+        try:
+            text.encode("ascii")
             return True
-        return False
+        except UnicodeEncodeError:
+            return False
 
     def get_full_key(self, key, dictionary):
         """Find the full key in the dictionary."""
@@ -160,7 +162,7 @@ class JsonModelElement(ModelElementInterface):
             logging.getLogger(debug_log_prefix + DEBUG_LOG_NAME).debug(e)
             return None
         self.dec_escapes = True
-        if self.is_escaped_unicode(match_context.match_data.decode()):
+        if self.is_ascii(match_context.match_data.decode()):
             match_context.match_data = match_context.match_data.decode("unicode-escape").encode()
             self.dec_escapes = False
         matches += self.parse_json_dict(self.key_parser_dict, json_match_data, current_path, match_context)
@@ -344,7 +346,7 @@ class JsonModelElement(ModelElementInterface):
             for k, val in enumerate(value):
                 if isinstance(data, str):
                     enc = "utf-8"
-                    if self.is_escaped_unicode(data) and self.dec_escapes:
+                    if self.is_ascii(data) and self.dec_escapes:
                         enc = "unicode-escape"
                     data = data.encode(enc)
                 if data is None:
@@ -419,7 +421,7 @@ class JsonModelElement(ModelElementInterface):
         data = json_match_data[split_key]
         enc = "utf-8"
         if isinstance(data, str):
-            if self.is_escaped_unicode(data) and self.dec_escapes:
+            if self.is_ascii(data) and self.dec_escapes:
                 enc = "unicode-escape"
             data = data.encode(enc)
         elif isinstance(data, bool):
