@@ -220,7 +220,14 @@
                 'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
                 'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
                 'avg_factor': {'type': 'float', 'min': 0, 'default': 1},
-                'var_factor': {'type': 'float', 'min': 0, 'default': 2}
+                'var_factor': {'type': 'float', 'min': 0, 'default': 2},
+                'group_by_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                'window_size': {'type': 'integer', 'nullable': False, 'default': 10},
+                'event_encoding': {'type': 'boolean', 'default': False},
+                'publisher_address': {'type': 'string', 'default': "tcp://*:5559"},
+                'subscriber_address': {'type': 'string', 'default': "tcp://*:5560"},
+                'subscriber_topic': {'type': 'string', 'default': 'aminerdeep'},
+                'publisher_topic': {'type': 'string', 'default': 'aminer'}
             }
         }
     }

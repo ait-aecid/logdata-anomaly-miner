@@ -1545,6 +1545,46 @@ This module defines an detector for event and value sequences. The concept is ba
           id_path_list:
             - '/model/type/syscall/id'
 
+DeepLearningFeatureExtractor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This module defines an ingration components to support deep learning based detector. It is part of aminer-deep pipline, aims to parse log events and genrate sequence before forward it to aminer-deep. 
+For more details about aminer-deep please go to https://github.com/imas1e15/aminer-deep.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed. In case paths value is not integer value or it is combination of multiple paths, make sure to enable event_encoding option. 
+* **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable.
+* **group_by_list** the path will be used to group the events before generating sequence ex: processId.
+* **window_size** the number of events in each sequence.
+* **publisher_address** the address used by the detector to publish events sequences to consumed by AMiner-Deep. The format of the address, the transport should zmq supported transport. {transport}://{host}:{port}
+* **subscriber_address** the address used by the detector to consume AMiner-Deep output. The format of the address, the transport should zmq supported transport. {transport}://{host}:{port}
+* **publisher_topic** this part of the configrations need to be align with aminer-deep configrations, avoid using :,-,_,[]. Avoid similarity in prefix with subscriber_topic configration.
+* **subscriber_topic** this part of the configrations need to be align with aminer-deep configrations, avoid using :,-,_,[]. Avoid similarity in prefix with publisher_topic configration.
+* **event_encoding** to support the process with ordinal encoding for the analysed events, if False, orginal code will be used, otherwise 
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **learn_mode** in case the learn mode is true, the detector will not waite for the aminer-deep output instead, it will push the log event only.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
+* **output_event_handlers** for handling events, e.g., print events to stdout.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: DeepLeaningFeatureExtractor
+          id: DeepLeaningFeatureExtractor
+          window_size: 10
+          paths:
+            - '/model/type/syscall/syscall'
+          ignore_list:
+            - '/model/type/PROCTITLE'
+            - '/model/type/PATH'
+          group_by_list:
+            - '/model/type/syscall/pid'
+          publisher_address: "tcp://127.0.0.1:5560"
+          subscriber_address: "tcp://127.0.0.1:5559"
+          publisher_topic: "aminer"
+          subscriber_topic: "deep-aminer"
+          learn_mode: False
+          event_encoding: False
+          
 EventTypeDetector
 ~~~~~~~~~~~~~~~~~
 
