@@ -56,7 +56,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     postfix \
-    openjdk-11-jre \
+    openjdk-17-jre \
     locales \
     locales-all \
     rsyslog \
