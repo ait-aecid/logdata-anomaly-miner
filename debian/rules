@@ -14,7 +14,7 @@ execute_before_dh_auto_build:
 	--param man.charmap.use.subset 0 \
 	-o debian/ \
 	http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl \
-	debian/aminer.1.xml debian/aminerremotecontrol.1.xml
+	docs/manpages/aminer.1.xml docs/manpages/aminerremotecontrol.1.xml
 
 # Modify startup behaviour in auto-generated code in postinst:
 # Do not attempt to add aminer.service to autostart if user does
