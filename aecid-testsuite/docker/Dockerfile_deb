@@ -6,6 +6,9 @@ ARG varbranch
 
 ENV BRANCH=$varbranch
 
+# allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
 # Set local timezone
 ENV TZ=Europe/Vienna
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -18,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 	ansible \
         git \
         vim \
-        postfix \ 
+        postfix \
         procps \
         cpulimit \
         mailutils \
@@ -35,7 +38,7 @@ RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     update-locale LANG=en_US.UTF-8
 
 ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en  
+ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 
