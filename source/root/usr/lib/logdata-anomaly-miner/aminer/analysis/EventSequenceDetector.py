@@ -35,7 +35,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list=None, target_path_list=None, seq_len=3, allow_missing_id=False,
                  timeout=None, persistence_id="Default", learn_mode=False, output_logline=True, ignore_list=None,
-                 constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -59,11 +59,12 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["id_path_list", "target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
-            anomaly_event_handlers=anomaly_event_handlers, id_path_list=id_path_list, target_path_list=target_path_list, seq_len=seq_len,
-            allow_missing_id=allow_missing_id, timeout=timeout, persistence_id=persistence_id, learn_mode=learn_mode,
-            output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list,
-            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            mutable_default_args=["id_path_list", "target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, id_path_list=id_path_list,
+            target_path_list=target_path_list, seq_len=seq_len, allow_missing_id=allow_missing_id, timeout=timeout,
+            persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list,
+            constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
         self.sequences = set()
         self.current_sequences = {}
@@ -77,6 +78,9 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return False
         parser_match = log_atom.parser_match
         self.log_total += 1
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \

@@ -38,7 +38,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
                  learn_mode=False, tuple_transformation_function=None, output_logline=True, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None):
+                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param target_path_list the list of values to extract from each match to create the value combination to be checked.
@@ -63,7 +63,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode,
             output_logline=output_logline, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time)
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list)
         if not self.target_path_list:
             msg = "target_path_list must not be None or empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -88,6 +88,9 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
         values were new or not.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return False
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \

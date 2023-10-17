@@ -172,6 +172,17 @@ class TimeCorrelationDetectorTest(TestBase):
         TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, max_rule_attributes=2)
         TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, min_rule_attributes=1, max_rule_attributes=1)
 
+        self.assertRaises(ValueError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list="")
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=True)
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=123)
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=())
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=set())
+        TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=["file:///tmp/syslog"])
+
 
 if __name__ == "__main__":
     unittest.main()

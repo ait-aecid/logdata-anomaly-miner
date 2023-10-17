@@ -144,6 +144,17 @@ class MatchValueStreamWriterTest(TestBase):
         self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", [b"-"])
         self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", set(b";"))
 
+        self.assertRaises(ValueError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list="")
+        self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list=True)
+        self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list=123)
+        self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list=())
+        self.assertRaises(TypeError, MatchValueStreamWriter, StringIO(), ["path"], b";", b"-", log_resource_ignore_list=set())
+        MatchValueStreamWriter(StringIO(), ["path"], b";", b"-", log_resource_ignore_list=["file:///tmp/syslog"])
+
         MatchValueStreamWriter(StringIO(), ["path"], b";", b"")
         MatchValueStreamWriter(StringIO(), ["path"], b";", b"-")
         MatchValueStreamWriter(BytesIO(), ["path"], b";", b"-")
