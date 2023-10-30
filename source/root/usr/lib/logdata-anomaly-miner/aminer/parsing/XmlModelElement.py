@@ -180,7 +180,7 @@ class XmlModelElement(ModelElementInterface):
             resulting_matches = None
         else:
             resulting_matches = matches
-        return MatchElement(current_path, xml_string, xml_match_data, resulting_matches)
+        return MatchElement(current_path, xml_string, xml_match_data, resulting_matches)  # type: ignore[arg-type]
 
     def parse_dict(self, xml_dict: dict, xml_match_data: dict, current_path: str, match_context):
         """Parse a dictionary."""
