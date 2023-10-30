@@ -1706,7 +1706,7 @@ Parser:
     name: 'EximParsingModel'
 
   - id: SyslogParsingModel
-    type: SyslogParsingModel
+    type: SyslogParsingModelAIT-LDSv2
     name: 'SyslogParsingModel'
 
   - id: SuricataFastParsingModel
