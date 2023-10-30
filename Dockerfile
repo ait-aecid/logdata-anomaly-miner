@@ -97,7 +97,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& groupadd -g $GID -o $UNAME && useradd -u $UID -g $GID -ms /usr/sbin/nologin $UNAME && mkdir -p /var/lib/aminer/logs \
     && chown $UID.$GID -R /var/lib/aminer \
     && chown $UID.$GID -R /docs \
-    && chmod 0755 /aminerwrapper.sh
+    && chmod 0755 /aminerwrapper.sh \
     && service rsyslog start
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
