@@ -120,6 +120,7 @@ ADD source/root/etc/aminer /etc/aminer
 ADD aecid-testsuite /home/aminer/aecid-testsuite
 
 RUN chown aminer.aminer -R /home/aminer \
+    && ln -s /usr/lib/logdata-anomaly-miner/aminer /home/aminer/aecid-testsuite/aminer \
     && ln -s /etc/aminer/template_config.py /home/aminer/aecid-testsuite/demo/aminer/template_config.py \
     && ln -s /etc/aminer/template_config.yml /home/aminer/aecid-testsuite/demo/aminer/template_config.yml \
     && chmod +x /home/aminer/aecid-testsuite/*.sh \
