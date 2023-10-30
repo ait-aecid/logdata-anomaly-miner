@@ -182,6 +182,17 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, ())
         self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, set())
 
+        self.assertRaises(ValueError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list="")
+        self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list=True)
+        self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list=123)
+        self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list=())
+        self.assertRaises(TypeError, TimeCorrelationViolationDetector, self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list=set())
+        TimeCorrelationViolationDetector(self.aminer_config, rules, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
+
         self.assertRaises(ValueError, EventClassSelector, "", [cr], [cr])
         self.assertRaises(TypeError, EventClassSelector, ["default"], [cr], [cr])
         self.assertRaises(TypeError, EventClassSelector, None, [cr], [cr])

@@ -35,7 +35,7 @@ class TimeCorrelationDetector(AtomHandlerInterface):
 
     def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id="Default",
                  record_count_before_event=10000, output_logline=True, use_path_match=True, use_value_match=True,
-                 min_rule_attributes=1, max_rule_attributes=5):
+                 min_rule_attributes=1, max_rule_attributes=5, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -54,7 +54,8 @@ class TimeCorrelationDetector(AtomHandlerInterface):
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, parallel_check_count=parallel_check_count,
             persistence_id=persistence_id, record_count_before_event=record_count_before_event, output_logline=output_logline,
             use_path_match=use_path_match, use_value_match=use_value_match, min_rule_attributes=min_rule_attributes,
-            max_rule_attributes=max_rule_attributes
+            max_rule_attributes=max_rule_attributes, log_resource_ignore_list=log_resource_ignore_list,
+            mutable_default_args=["log_resource_ignore_list"]
         )
         self.last_timestamp = 0.0
         self.last_unhandled_match = None
@@ -71,6 +72,9 @@ class TimeCorrelationDetector(AtomHandlerInterface):
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
         event_data = {}
         timestamp = log_atom.get_timestamp()

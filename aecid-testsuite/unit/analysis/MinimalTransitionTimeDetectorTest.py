@@ -412,6 +412,17 @@ class MinimalTransitionTimeDetectorTest(TestBase):
 
         self.assertRaises(ValueError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], learn_mode=True, stop_learning_time=100, stop_learning_no_anomaly_time=100)
 
+        self.assertRaises(ValueError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list="")
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=True)
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=123)
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=())
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=set())
+        MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=["file:///tmp/syslog"])
+
 
 if __name__ == "__main__":
     unittest.main()
