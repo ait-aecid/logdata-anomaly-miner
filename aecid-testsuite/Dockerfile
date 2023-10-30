@@ -139,4 +139,4 @@ WORKDIR /home/aminer/aecid-testsuite
 # The following volumes can be mounted
 VOLUME ["/etc/aminer","/var/lib/aminer","/logs"]
 
-ENTRYPOINT ["/testingwrapper.sh", "start"]
+ENTRYPOINT ["/testingwrapper.sh"]
