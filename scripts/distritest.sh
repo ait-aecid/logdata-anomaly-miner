@@ -1,6 +1,7 @@
 #!/bin/bash
 
-sudo service rsyslog start
+sudo sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
+sudo rsyslogd
 sudo service apache2 start
 curl localhost
 curl -XPOST localhost

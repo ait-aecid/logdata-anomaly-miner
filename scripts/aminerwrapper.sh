@@ -2,12 +2,6 @@
 
 AMINERDIR=/usr/lib/logdata-anomaly-miner
 
-if [ $# -gt 0 ]
-then
-sudo service rsyslog start
-sudo service postfix start
-fi
-
 case "$1" in
 	aminer)
 		$AMINERDIR/aminer.py ${*:2}

@@ -4,7 +4,8 @@ TESTDIR=/home/aminer/aecid-testsuite
 
 if [ $# -gt 0 ]
 then
-sudo service rsyslog start
+sudo sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
+sudo rsyslogd
 sudo service postfix start
 fi
 
@@ -149,7 +150,7 @@ case "$1" in
 		echo "         runConfAvailableTest | runReleaseStringCheck ] <options>"
 		exit 1
 		;;
-        
+
 esac
 
 exit 0
