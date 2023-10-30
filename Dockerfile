@@ -45,7 +45,8 @@ RUN apt-get update && apt-get install -y \
     python3-urllib3 \
     python3-statsmodels \
     python3-pandas \
-    libacl1-dev
+    libacl1-dev \
+    rsyslog
 
 # Docs
 RUN apt-get update && apt-get install -y \
