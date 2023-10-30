@@ -109,9 +109,9 @@ pipeline {
             }
         }
 
-        stage("Json Input Tests") {
+        stage("JSON/XML Input Tests") {
             parallel {
-                stage("Json Input Demo") {
+                stage("JSON Input Demo") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerJsonInputDemo"
                     }
