@@ -22,7 +22,8 @@ from aminer.AminerConfig import DEBUG_LOG_NAME
 class MatchFilter(AtomHandlerInterface):
     """This class creates events for specified paths and values."""
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, target_value_list=None, output_logline=True):
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, target_value_list=None, output_logline=True,
+                 log_resource_ignore_list=None):
         """
         Initialize the detector.
         @param aminer_config configuration from analysis_context.
@@ -36,7 +37,8 @@ class MatchFilter(AtomHandlerInterface):
         self.next_persist_time, self.log_success, self.log_total = [None]*3
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
-            target_value_list=target_value_list, output_logline=output_logline
+            target_value_list=target_value_list, output_logline=output_logline, log_resource_ignore_list=log_resource_ignore_list,
+            mutable_default_args=["log_resource_ignore_list"]
         )
         if len(target_path_list) == 0:
             msg = "target_path_list must not be empty."
@@ -45,6 +47,9 @@ class MatchFilter(AtomHandlerInterface):
 
     def receive_atom(self, log_atom):
         """Forward all log atoms that involve specified path and optionally value."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         for target_path in self.target_path_list:

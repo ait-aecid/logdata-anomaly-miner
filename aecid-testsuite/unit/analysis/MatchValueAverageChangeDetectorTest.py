@@ -185,6 +185,17 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, output_logline=set())
         MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, output_logline=True)
 
+        self.assertRaises(ValueError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list="")
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=True)
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=123)
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=())
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=set())
+        MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=["file:///tmp/syslog"])
+
 
 if __name__ == "__main__":
     unittest.main()

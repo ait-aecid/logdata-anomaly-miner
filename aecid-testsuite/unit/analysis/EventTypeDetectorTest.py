@@ -517,6 +517,17 @@ class EventTypeDetectorTest(TestBase):
         self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], save_values=set())
         EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], save_values=True)
 
+        self.assertRaises(ValueError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list="")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=True)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=123)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=())
+        self.assertRaises(TypeError, EventTypeDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=set())
+        EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
+
 
 if __name__ == "__main__":
     unittest.main()
