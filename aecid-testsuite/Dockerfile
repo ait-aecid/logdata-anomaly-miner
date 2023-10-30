@@ -110,6 +110,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/patsy /etc/aminer/conf-enabled/patsy \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
     && chown aminer.aminer -R /var/lib/aminer && chmod 0755 /etc/aminer
+    && service rsyslog start
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
