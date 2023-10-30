@@ -28,6 +28,8 @@ description:
   from a list.
 * HexStringModelElement: Match a hexadecimal string.
 * IpAddressDataModelElement: Match an IPv4 address.
+* JsonModelElement: Parse JSON data and compare it with an expected key-dictionary.
+* JsonStringModelElement: Compare JSON string keys with an expected key-dictionary.
 * MultiLocaleDateTimeModelElement: Parse datetime elements with
   leap year correction, multiple locale support.
 * OptionalMatchModelElement: Match subelements zero or one time.
@@ -38,3 +40,4 @@ description:
 * VariableByteDataModelElement: Match variable length data encoded
   within a given alphabet.
 * WhiteSpaceLimitedDataModelElement: Match string till next whitespace.
+* XmlModelElement: Parse XML data with an expected key-dictionary structure.

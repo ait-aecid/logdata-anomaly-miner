@@ -184,7 +184,7 @@ class JsonModelElementTest(TestBase):
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_escaped)
         data = self.single_line_escaped_json.decode("unicode-escape").encode()
         value = json.loads(data)
-        match_context = DummyMatchContext(data)
+        match_context = DummyMatchContext(self.single_line_escaped_json)
         match_element = json_model_element.get_match_element(self.path, match_context)
         match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]

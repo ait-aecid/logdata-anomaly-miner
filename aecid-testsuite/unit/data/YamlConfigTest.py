@@ -419,6 +419,7 @@ class YamlConfigTest(TestBase):
         del yml_config_properties['EventHandlers']
         del yml_config_properties['LearnMode']
         del yml_config_properties['LogResourceList'][0]['json']
+        del yml_config_properties['LogResourceList'][0]['xml']
 
         # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the YamlConfig.
         py_registered_components = copy.copy(py_context.registered_components)

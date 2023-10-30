@@ -154,7 +154,8 @@ def build_parsing_model(data=None):
     for item in data['Parser']:
         if item['id'] in parser_model_dict:
             raise ValueError(f'Config-Error: The id "{item["id"]}" occurred multiple times in Parser!')
-        if 'start' in item and item['start'] is True and item['type'].name not in ['JsonModelElement', 'JsonStringModelElement']:
+        if 'start' in item and item['start'] is True and item['type'].name not in ['JsonModelElement', 'JsonStringModelElement',
+                                                                                   'XmlModelElement']:
             start = item
         if item['type'].is_model:
             if 'args' in item:
@@ -267,6 +268,16 @@ def build_parsing_model(data=None):
                 else:
                     parser_model_dict[item['id']] = item['type'].func(
                         item['name'], key_parser_dict, item['optional_key_prefix'], item['nullable_key_prefix'], item['allow_all_fields'])
+            elif item['type'].name == 'XmlModelElement':
+                key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
+                if 'start' in item and item['start'] is True:
+                    start = item['type'].func(
+                        item['name'], key_parser_dict, item['attribute_prefix'], item['optional_attribute_prefix'],
+                        item['empty_allowed_prefix'], item['xml_header_expected'])
+                else:
+                    parser_model_dict[item['id']] = item['type'].func(
+                        item['name'], key_parser_dict, item['attribute_prefix'], item['optional_attribute_prefix'],
+                        item['empty_allowed_prefix'], item['xml_header_expected'])
             elif item['type'].name == 'JsonStringModelElement':
                 key_parser_dict = parse_json_yaml(item['key_parser_dict'], parser_model_dict)
 
@@ -287,7 +298,7 @@ def build_parsing_model(data=None):
                 while callable(parser_model_dict[item['id']]):
                     parser_model_dict[item['id']] = parser_model_dict[item['id']]()
 
-    if start.__class__.__name__ in ['JsonModelElement', 'JsonStringModelElement']:
+    if start.__class__.__name__ in ['JsonModelElement', 'JsonStringModelElement', 'XmlModelElement']:
         parsing_model = start
     else:
         parsing_model = parser_model_dict[start['id']]
@@ -314,6 +325,7 @@ def build_input_pipeline(analysis_context, parsing_model, parser_model_dict):
     eol_sep = yaml_data['Input']['eol_sep'].encode().replace(b"\\n", b"\n").replace(b"\\t", b"\t").replace(b"\\r", b"\r").\
         replace(b"\\\\", b"\\").replace(b"\\b", b"\b")
     json_format = yaml_data['Input']['json_format']
+    xml_format = yaml_data['Input']['xml_format']
     if yaml_data['Input']['multi_source'] is True:
         from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
         if yaml_data['Input']['adjust_timestamps'] is True:
@@ -334,8 +346,14 @@ def build_input_pipeline(analysis_context, parsing_model, parser_model_dict):
             obj["url"] = decode_string_as_byte_string(resource)
         elif isinstance(resource, dict):
             obj = resource
+            if "json" in obj and "xml" in obj:
+                msg = "Log resources can not be in the json and xml format at the same time."
+                logging.getLogger(DEBUG_LOG_NAME).error(msg)
+                raise ValueError(msg)
         if "json" not in obj:
             obj["json"] = None
+        if "xml" not in obj:
+            obj["xml"] = None
         if "parser_id" not in obj:
             obj["parser_id"] = None
         if isinstance(obj["url"], str):
@@ -343,8 +361,8 @@ def build_input_pipeline(analysis_context, parsing_model, parser_model_dict):
         log_resources[obj["url"]] = obj
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
         parsing_model, atom_handler_list, anomaly_event_handlers, default_timestamp_path_list=timestamp_paths, eol_sep=eol_sep,
-        json_format=json_format, parser_model_dict=parser_model_dict, log_resources=log_resources, use_real_time=use_real_time,
-        continuous_timestamp_missing_warning=continuous_timestamp_missing_warning)
+        json_format=json_format, xml_format=xml_format, parser_model_dict=parser_model_dict, log_resources=log_resources,
+        use_real_time=use_real_time, continuous_timestamp_missing_warning=continuous_timestamp_missing_warning)
     return anomaly_event_handlers, atom_filter
 
 
