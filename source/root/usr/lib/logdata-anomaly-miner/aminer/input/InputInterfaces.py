@@ -408,6 +408,21 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         self.log_total = 0
 
 
+class PersistableComponentInterface(metaclass=abc.ABCMeta):
+    """This is the common interface of all handlers suitable for persisting data."""
+
+    def __init__(self):
+        pass
+
+    @abc.abstractmethod
+    def do_persist(self, log_atom):
+        """Immediately write persistence data to storage."""
+
+    @abc.abstractmethod
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+
+
 class LogDataResource(metaclass=abc.ABCMeta):
     """
     This is the superinterface of each logdata resource monitored by aminer.

@@ -17,12 +17,12 @@ import logging
 
 from aminer.AminerConfig import build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """
     This detector calculates the average of a given list of values to monitor.
     Reports are generated if the average of the latest diverges significantly from the values observed before.

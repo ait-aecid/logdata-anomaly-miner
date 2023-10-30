@@ -18,12 +18,12 @@ from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when dissimilar event or value count vectors occur."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME

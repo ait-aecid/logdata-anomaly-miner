@@ -17,12 +17,12 @@ import logging
 from aminer import AminerConfig
 from aminer.AminerConfig import build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
 
-class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """This class keeps track of the found event types and the values of each variable."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME

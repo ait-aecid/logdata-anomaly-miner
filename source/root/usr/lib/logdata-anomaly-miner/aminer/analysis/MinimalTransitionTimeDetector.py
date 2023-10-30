@@ -18,12 +18,13 @@ from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, CON
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class MinimalTransitionTimeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class MinimalTransitionTimeDetector(
+        AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when minimal transition times between states (e.g. value combinations of stated paths) are undercut."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME

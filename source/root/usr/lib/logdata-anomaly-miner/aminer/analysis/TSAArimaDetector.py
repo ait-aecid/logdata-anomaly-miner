@@ -19,7 +19,7 @@ from aminer import AminerConfig
 from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
     DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
@@ -29,7 +29,7 @@ from statsmodels.tsa.stattools import acf
 from scipy.signal import savgol_filter
 
 
-class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """This class is used for an arima time series analysis of the appearances of log lines to events."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME

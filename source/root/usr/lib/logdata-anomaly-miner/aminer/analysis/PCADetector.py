@@ -24,11 +24,11 @@ from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LEVEL, STAT_LOG_NAME, CONFI
     KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import PersistenceUtil
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """This class creates events if event or value occurrence counts are outliers in PCA space."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
