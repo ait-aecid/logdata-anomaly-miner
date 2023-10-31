@@ -29,6 +29,11 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runAminerXmlInputDemo)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	runAminerIntegrationTest)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
@@ -120,6 +125,7 @@ case "$1" in
     ./runAminerEncodingDemo.sh demo/aminer/demo-config.py
     ./runAminerEncodingDemo.sh demo/aminer/demo-config.yml
     ./runAminerJsonInputDemo.sh
+    ./runAminerXmlInputDemo.sh
     ./runJsonDemo.sh demo/aminerJsonInputDemo/json-aminer-demo.yml
     ./runJsonDemo.sh demo/aminerJsonInputDemo/json-elastic-demo.yml
     ./runJsonDemo.sh demo/aminerJsonInputDemo/json-eve-demo.yml
@@ -142,14 +148,14 @@ case "$1" in
 		exit 0
 		;;
 	*)
-		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo "
-		echo "         runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest | runTryItOut "
-		echo "         runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
+		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo"
+		echo "         runAminerXmlInputDemo | runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest"
+		echo "         runTryItOut | runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
 		echo "         runHowToMissingMatchPathValueDetector | runHowToEntropyDetector | runAminerEncodingDemo | runMypy"
 		echo "         runConfAvailableTest | runReleaseStringCheck ] <options>"
 		exit 1
 		;;
-        
+
 esac
 
 exit 0
