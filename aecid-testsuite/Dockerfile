@@ -18,7 +18,10 @@
 #
 
 # Pull base image.
-FROM debian:bullseye
+FROM debian:bookworm
+
+# allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Set local timezone
 ENV TZ=Europe/Vienna
@@ -53,7 +56,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     postfix \
-    openjdk-11-jre \
+    openjdk-17-jre \
     locales \
     locales-all \
     rsyslog \
@@ -129,7 +132,7 @@ ADD scripts/testingwrapper.sh /testingwrapper.sh
 ADD source /home/aminer/source
 ADD docs /home/aminer/docs
 
-RUN pip3 install orjson
+RUN pip3 install orjson defusedxml
 RUN PACK=$(find /usr/local/lib/ -name orjson.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 USER aminer

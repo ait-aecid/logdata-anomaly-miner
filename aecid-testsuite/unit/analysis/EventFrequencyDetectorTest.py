@@ -550,6 +550,17 @@ class EventFrequencyDetectorTest(TestBase):
 
         self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, stop_learning_time=100, stop_learning_no_anomaly_time=100)
 
+        self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list="")
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=True)
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=123)
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=())
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=set())
+        EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
+
     def test7seasonal_frequency_detection(self):
         """
         Test for periodically changing frequencies
@@ -624,7 +635,7 @@ class EventFrequencyDetectorTest(TestBase):
         efd.receive_atom(log_atom_3)
         self.assertEqual(self.output_stream.getvalue(), "")
         efd.receive_atom(log_atom_4)
-        # Delete anomaly that occurs since second window has 2 but first only 1 atoms. 
+        # Delete anomaly that occurs since second window has 2 but first only 1 atoms.
         self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t+25).strftime(dtf), efd.__class__.__name__, 1, "a", "a"))
         self.reset_output_stream()
         efd.receive_atom(log_atom_6)

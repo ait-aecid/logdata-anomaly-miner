@@ -1292,6 +1292,70 @@ This model defines a string that is delimited by a white space.
          type: WhiteSpaceLimitedDataModelElement
          name: 'WhiteSpaceLimitedDataModelElement'
 
+XmlModelElement
+~~~~~~~~~~~~~~~~
+
+This model defines a xml-formatted log line. This model is usually used as a start element and with xml_format: True set in the Input section of the config.yml.
+
+* **key_parser_dict**: a dictionary of keys as defined in the xml-formatted logs and appropriate parser models as values
+
+* **attribute_prefix**: a string that marks the element as an attribute of an element in the xml schema. Default: "+"
+
+* **optional_attribute_prefix**: a string that can be used as a prefix for attributes that are optional in the xml schema. Default: "_"
+
+* **empty_allowed_prefix**: a string that can be used as a prefix for elements where empty values are allowed in the xml schema. Default: "?"
+
+* **xml_header_expected**: defines whether a xml-header is expected. Default: False
+
+.. code-block:: yaml
+
+     Parser:
+       - id: id
+         type: DecimalIntegerValueModelElement
+         name: 'id'
+
+       - id: opt
+         type: FixedDataModelElement
+         name: 'opt'
+         args: 'text'
+
+       - id: to
+         type: AnyByteDataModelElement
+         name: 'to'
+
+       - id: from
+         type: AnyByteDataModelElement
+         name: 'from'
+
+       - id: heading
+         type: AnyByteDataModelElement
+         name: 'heading'
+
+       - id: text1
+         type: AnyByteDataModelElement
+         name: 'text1'
+
+       - id: text2
+         type: AnyByteDataModelElement
+         name: 'text2'
+
+       - id: xml
+         start: True
+         type: XmlModelElement
+         name: 'model'
+         xml_header_expected: True
+         key_parser_dict:
+           messages:
+             - note:
+                 +id: id
+                 _+opt: opt
+                 to: to
+                 from: from
+                 ?heading: heading
+                 body:
+                   text1: text1
+                   text2: text2
+
 ---------
 Analysing
 ---------

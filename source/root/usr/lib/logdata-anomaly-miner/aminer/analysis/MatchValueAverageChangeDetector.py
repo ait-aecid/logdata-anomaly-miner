@@ -31,7 +31,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, target_path_list, min_bin_elements, min_bin_time,
-                 debug_mode=False, persistence_id="Default", output_logline=True, learn_mode=False, avg_factor=1, var_factor=2):
+                 debug_mode=False, persistence_id="Default", output_logline=True, learn_mode=False, avg_factor=1, var_factor=2,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -49,12 +50,13 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
         # avoid "defined outside init" issue
-        self.next_persist_time, self.log_success, self.log_total = [None] * 3
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, timestamp_path=timestamp_path,
             target_path_list=target_path_list, min_bin_elements=min_bin_elements, min_bin_time=min_bin_time, debug_mode=debug_mode,
             persistence_id=persistence_id, output_logline=output_logline, avg_factor=avg_factor, var_factor=var_factor,
-            learn_mode=learn_mode
+            learn_mode=learn_mode, stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
+            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
         )
         if not self.target_path_list:
             msg = "target_path_list must not be empty or None."
@@ -68,9 +70,17 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
     def receive_atom(self, log_atom):
         """Send summary to all event handlers."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return
         self.log_total += 1
         parser_match = log_atom.parser_match
         value_dict = parser_match.get_match_dictionary()
+
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
+            self.learn_mode = False
 
         timestamp_value = log_atom.get_timestamp()
         if self.timestamp_path is not None:
@@ -87,6 +97,9 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             if match is None:
                 ready_for_analysis_flag = (self.update(stat_data, timestamp_value, None) and ready_for_analysis_flag)
             else:
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 if isinstance(match, list):
                     data = []
                     for m in match:

@@ -91,6 +91,17 @@ class AllowlistViolationDetectorTest(TestBase):
         AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], output_logline=True)
         AllowlistViolationDetector(self.aminer_config, allowlist_rules, [], output_logline=True)
 
+        self.assertRaises(ValueError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list="")
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=True)
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=123)
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=())
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=set())
+        AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
+
 
 if __name__ == "__main__":
     unittest.main()

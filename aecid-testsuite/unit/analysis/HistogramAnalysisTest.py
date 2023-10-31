@@ -499,6 +499,17 @@ class HistogramAnalysisTest(TestBase):
         self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], output_logline=())
         self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], output_logline=set())
 
+        self.assertRaises(ValueError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list="")
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=True)
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=123)
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=())
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=set())
+        HistogramAnalysis(self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
+
         self.assertRaises(ValueError, PathDependentHistogramAnalysis, self.aminer_config, "", mtbd, 100, [self.stream_printer_event_handler])
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, b"path", mtbd, 100, [self.stream_printer_event_handler])
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, ["default"], mtbd, 100, [self.stream_printer_event_handler])
@@ -561,6 +572,17 @@ class HistogramAnalysisTest(TestBase):
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], output_logline={"id": "Default"})
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], output_logline=())
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], output_logline=set())
+
+        self.assertRaises(ValueError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=["/tmp/syslog"])
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list="")
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=b"Default")
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=True)
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=123)
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=123.22)
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list={"id": "Default"})
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=())
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=set())
+        PathDependentHistogramAnalysis(self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
 
 if __name__ == "__main__":

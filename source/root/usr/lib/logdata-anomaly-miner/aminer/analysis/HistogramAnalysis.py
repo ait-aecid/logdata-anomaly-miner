@@ -331,7 +331,7 @@ class HistogramAnalysis(AtomHandlerInterface):
     """This class creates a histogram for one or more properties extracted from a parsed atom."""
 
     def __init__(self, aminer_config, histogram_definitions, report_interval, anomaly_event_handlers, reset_after_report_flag=True,
-                 output_logline=True):
+                 output_logline=True, log_resource_ignore_list=None):
         """
         Initialize the analysis component.
         @param aminer_config configuration from analysis_context.
@@ -345,7 +345,8 @@ class HistogramAnalysis(AtomHandlerInterface):
         self.log_success, self.log_total = [None]*2
         super().__init__(
             aminer_config=aminer_config, report_interval=report_interval, anomaly_event_handlers=anomaly_event_handlers,
-            reset_after_report_flag=reset_after_report_flag, output_logline=output_logline
+            reset_after_report_flag=reset_after_report_flag, output_logline=output_logline,
+            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
         )
         if not isinstance(histogram_definitions, list):
             msg = "histogram_definitions has to be a list of tuples of paths and bin definitions."
@@ -370,6 +371,9 @@ class HistogramAnalysis(AtomHandlerInterface):
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         for data_item in self.histogram_data:
@@ -451,7 +455,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
     """
 
     def __init__(self, aminer_config, target_path, bin_definition, report_interval, anomaly_event_handlers, reset_after_report_flag=True,
-                 output_logline=True):
+                 output_logline=True, log_resource_ignore_list=None):
         """
         Initialize the analysis component.
         @param aminer_config configuration from analysis_context.
@@ -467,7 +471,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
         self.log_success, self.log_total = [None]*2
         super().__init__(
             aminer_config=aminer_config, target_path=target_path, report_interval=report_interval,
-            anomaly_event_handlers=anomaly_event_handlers, reset_after_report_flag=reset_after_report_flag, output_logline=output_logline
+            anomaly_event_handlers=anomaly_event_handlers, reset_after_report_flag=reset_after_report_flag, output_logline=output_logline,
+            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
         )
 
         if not isinstance(bin_definition, BinDefinition):
@@ -481,6 +486,9 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         match = match_dict.get(self.target_path, None)
