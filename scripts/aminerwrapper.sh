@@ -23,7 +23,7 @@ case "$1" in
 		echo "Usage: [ aminer | aminerremotecontrol | aminer-persistence | supervisor | mkdocs ] <options>"
 		exit 1
 		;;
-        
+
 esac
 
 exit 0

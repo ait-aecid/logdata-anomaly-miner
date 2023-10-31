@@ -10,10 +10,13 @@
 #
 
 # Pull base image.
-FROM debian:bullseye
+FROM debian:bookworm
 ARG UNAME=aminer
 ARG UID=1000
 ARG GID=1000
+
+# allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Set local timezone
 ENV TZ=Europe/Vienna
@@ -42,7 +45,8 @@ RUN apt-get update && apt-get install -y \
     python3-urllib3 \
     python3-statsmodels \
     python3-pandas \
-    libacl1-dev
+    libacl1-dev \
+    rsyslog
 
 # Docs
 RUN apt-get update && apt-get install -y \
