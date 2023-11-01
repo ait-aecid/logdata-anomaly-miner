@@ -108,6 +108,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/packaging /etc/aminer/conf-enabled/packaging \
 	&& ln -s /usr/lib/python3/dist-packages/pandas /etc/aminer/conf-enabled/pandas \
 	&& ln -s /usr/lib/python3/dist-packages/patsy /etc/aminer/conf-enabled/patsy \
+	&& ln -s /usr/lib/python3/dist-packages/defusedxml /etc/aminer/conf-enabled/defusedxml \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
     && chown aminer.aminer -R /var/lib/aminer && chmod 0755 /etc/aminer
 
@@ -130,7 +131,7 @@ ADD scripts/testingwrapper.sh /testingwrapper.sh
 ADD source /home/aminer/source
 ADD docs /home/aminer/docs
 
-RUN pip3 install orjson defusedxml
+RUN pip3 install orjson
 RUN PACK=$(find /usr/local/lib/ -name orjson.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 USER aminer
