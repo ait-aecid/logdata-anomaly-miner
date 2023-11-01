@@ -411,9 +411,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 class PersistableComponentInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for persisting data."""
 
+    @abc.abstractmethod
     def __init__(self):
-        """Initialize the Interface."""
-        pass
+        """Initialize the PersistableComponentInterface."""
 
     @abc.abstractmethod
     def do_persist(self, log_atom):
