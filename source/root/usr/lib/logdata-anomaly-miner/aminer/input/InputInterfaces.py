@@ -412,6 +412,7 @@ class PersistableComponentInterface(metaclass=abc.ABCMeta):
     """This is the common interface of all handlers suitable for persisting data."""
 
     def __init__(self):
+        """Initialize the Interface."""
         pass
 
     @abc.abstractmethod
