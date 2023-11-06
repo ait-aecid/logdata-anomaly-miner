@@ -49,6 +49,7 @@ RUN apt-get update && apt-get install -y \
     python3-statsmodels \
     python3-pandas \
     python3-numpy \
+    python3-patsy \
     python3-defusedxml \
     libacl1-dev \
     postfix \
