@@ -47,6 +47,7 @@ RUN apt-get update && apt-get install -y \
     python3-pylibacl \
     python3-urllib3 \
     python3-statsmodels \
+    python3-pandas \
     python3-defusedxml \
     libacl1-dev \
     postfix \
@@ -105,6 +106,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/six.py /etc/aminer/conf-enabled/six.py \
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /etc/aminer/conf-enabled/urllib3 \
 	&& ln -s /usr/lib/python3/dist-packages/statsmodels /etc/aminer/conf-enabled/statsmodels \
+	&& ln -s /usr/lib/python3/dist-packages/pandas /etc/aminer/conf-enabled/pandas \
 	&& ln -s /usr/lib/python3/dist-packages/packaging /etc/aminer/conf-enabled/packaging \
 	&& ln -s /usr/lib/python3/dist-packages/defusedxml /etc/aminer/conf-enabled/defusedxml \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
