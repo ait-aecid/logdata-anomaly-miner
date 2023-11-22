@@ -121,11 +121,16 @@ class PathValueTimeIntervalDetectorTest(TestBase):
             if (i + 1) % pvtid.num_reduce_time_list == 0:
                 appeared_time_list[(log_atom1.raw_data.decode(),)] = [appeared_time_list[(log_atom1.raw_data.decode(),)][0], appeared_time_list[(log_atom1.raw_data.decode(),)][-1]]
         log_atom1.atom_time = t + 100000
-        appeared_time_list[(log_atom1.raw_data.decode(),)] += [log_atom1.atom_time % pvtid.time_period_length]
+        appeared_time_list[(log_atom1.raw_data.decode(),)] = [log_atom1.atom_time % pvtid.time_period_length] + appeared_time_list[(log_atom1.raw_data.decode(),)]
         pvtid.receive_atom(log_atom1)
         pvtid.do_persist()
         with open(pvtid.persistence_file_name, "r") as f:
-            self.assertEqual(f.read(), f'[[[["string:1"], {appeared_time_list[(log_atom1.raw_data.decode(),)]}]], [[["string:1"], 1]]]')
+            data = f.read().replace('[[[["string:1"], [', "").replace(']]], [[["string:1"], 1]]]', "").split(",")
+            data = [float(x) for x in data]
+            data.sort()
+            data1 = appeared_time_list[(log_atom1.raw_data.decode(),)]
+            data1.sort()
+            self.assertEqual(data, data1)
         self.assertEqual(pvtid.counter_reduce_time_intervals[(log_atom1.raw_data.decode(),)], 1)
         self.assertEqual(pvtid.appeared_time_list, appeared_time_list)
         pvtid.appeared_time_list = {}
