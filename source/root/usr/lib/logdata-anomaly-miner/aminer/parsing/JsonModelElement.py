@@ -181,7 +181,7 @@ class JsonModelElement(ModelElementInterface):
             resulting_matches = None
         else:
             resulting_matches = matches
-        return MatchElement(current_path, str(json_match_data).encode(), json_match_data, resulting_matches)
+        return MatchElement(current_path, str(json_match_data).encode(), json_match_data, resulting_matches)  # type: ignore[arg-type]
 
     def parse_json_dict(self, json_dict: dict, json_match_data: dict, current_path: str, match_context):
         """Parse a json dictionary."""

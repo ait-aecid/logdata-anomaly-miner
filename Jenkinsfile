@@ -8,10 +8,11 @@ void setBuildStatus(String message, String state) {
     ]);
 }
 
-def  ubuntu18image = false
 def  ubuntu20image = false
+def  ubuntu22image = false
 def  debianbusterimage = false
 def  debianbullseyeimage = false
+def  debianbookwormimage = false
 def  productionimage = false
 def  docsimage = false
 
@@ -109,9 +110,9 @@ pipeline {
             }
         }
 
-        stage("Json Input Tests") {
+        stage("JSON/XML Input Tests") {
             parallel {
-                stage("Json Input Demo") {
+                stage("JSON Input Demo") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerJsonInputDemo"
                     }
@@ -161,6 +162,21 @@ pipeline {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runConfAvailableTest"
                     }
                 }
+                stage("Debian Bookworm") {
+                    steps {
+                        script {
+                            debianbookwormimage = true
+                        }
+                        sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-debian-bookworm:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=debian:bookworm ."
+                        sh "mkdir -p /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
+                        sh "cp aecid-testsuite/demo/aminer/access.log /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
+                        sh "cp -r source/root/etc/aminer /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
+                        sh "cp /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
+                        sh "cp /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        /* the result of timeout is negated with "!". This is because aminer returns 1 if timeout stops the process and otherwise 0. The way around is a valid result for a test */
+                        sh "cd /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && ! timeout -s INT --preserve-status 5 docker run -v $PWD/aminercfg:/etc/aminer -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -it aecid/aminer-debian-bookworm:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
+                    }
+                }
                 stage("Debian Bullseye") {
                     steps {
                         script {
@@ -206,19 +222,19 @@ pipeline {
                         sh "cd /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && ! timeout -s INT --preserve-status 5 docker run -v $PWD/aminercfg:/etc/aminer -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -it aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
-                stage("Test Ubuntu 18.04") {
+                stage("Test Ubuntu 22.04") {
                     when {
                         expression {
                             BRANCH_NAME == "main" || BRANCH_NAME == "development"
                         }
                     }
                     steps {
-                        script{
-                            ubuntu18image = true
+                        script {
+                            ubuntu22image = true
                         }
-                        sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:18.04 ."
-                        sh "docker run --rm aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
-                    }
+                        sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-2204:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:22.04 ."
+                        sh "docker run --rm aecid/aminer-ubuntu-2204:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                   }
                 }
                 stage("Test Ubuntu 20.04") {
                     when {
@@ -323,6 +339,10 @@ pipeline {
         always {
             script {
                 sh "docker rmi aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                if( debianbookwormimage == true ) {
+                    sh "docker rmi aecid/aminer-debian-bookworm:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                    sh "cd / && test -d /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && rm -rf /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                }
                 if( debianbullseyeimage == true ) {
                     sh "docker rmi aecid/aminer-debian-bullseye:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                     sh "cd / && test -d /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && rm -rf /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
@@ -335,8 +355,8 @@ pipeline {
                     sh "docker rmi aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                     sh "cd / && test -d /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && rm -rf /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                 }
-                if( ubuntu18image == true ) {
-                    sh "docker rmi aecid/aminer-ubuntu-1804:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                if( ubuntu22image == true ) {
+                    sh "docker rmi aecid/aminer-ubuntu-2204:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                 }
                 if( ubuntu20image == true ) {
                     sh "docker rmi aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
