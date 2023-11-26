@@ -15,6 +15,8 @@ def  debianbullseyeimage = false
 def  debianbookwormimage = false
 def  productionimage = false
 def  docsimage = false
+def	 fedoraimage = false
+def	 redhatimage = false
 
 pipeline {
     agent any
@@ -233,7 +235,13 @@ pipeline {
                             ubuntu22image = true
                         }
                         sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-2204:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:22.04 ."
-                        sh "docker run --rm aecid/aminer-ubuntu-2204:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                        sh "mkdir -p /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
+                        sh "cp aecid-testsuite/demo/aminer/access.log /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
+                        sh "cp -r source/root/etc/aminer /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
+                        sh "cp /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
+                        sh "cp /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        /* the result of timeout is negated with "!". This is because aminer returns 1 if timeout stops the process and otherwise 0. The way around is a valid result for a test */
+                        sh "cd /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && ! timeout -s INT --preserve-status 5 docker run -v $PWD/aminercfg:/etc/aminer -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -it aecid/aminer-ubuntu-2204:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                    }
                 }
                 stage("Test Ubuntu 20.04") {
@@ -247,8 +255,44 @@ pipeline {
                             ubuntu20image = true
                         }
                         sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:20.04 ."
-                        sh "docker run --rm aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                        sh "mkdir -p /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
+                        sh "cp aecid-testsuite/demo/aminer/access.log /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
+                        sh "cp -r source/root/etc/aminer /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
+                        sh "cp /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
+                        sh "cp /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        /* the result of timeout is negated with "!". This is because aminer returns 1 if timeout stops the process and otherwise 0. The way around is a valid result for a test */
+                        sh "cd /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && ! timeout -s INT --preserve-status 5 docker run -v $PWD/aminercfg:/etc/aminer -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -it aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                    }
+                }
+                stage("Fedora") {
+                    steps {
+                        script {
+                            fedoraimage = true
+                        }
+                        sh "docker build -f aecid-testsuite/docker/Dockerfile_fed -t aecid/aminer-fedora:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development ."
+                        sh "mkdir -p /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
+                        sh "cp aecid-testsuite/demo/aminer/access.log /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
+                        sh "cp -r source/root/etc/aminer /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
+                        sh "cp /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
+                        sh "cp /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        /* the result of timeout is negated with "!". This is because aminer returns 1 if timeout stops the process and otherwise 0. The way around is a valid result for a test */
+                        sh "cd /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && ! timeout -s INT --preserve-status 5 docker run -v $PWD/aminercfg:/etc/aminer -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -it aecid/aminer-debian-fedora:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
+                    }
+                }
+                stage("RedHat") {
+                    steps {
+                        script {
+                            redhatimage = true
+                        }
+                        sh "docker build -f aecid-testsuite/docker/Dockerfile_red -t aecid/aminer-redhat:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development ."
+                        sh "mkdir -p /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
+                        sh "cp aecid-testsuite/demo/aminer/access.log /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
+                        sh "cp -r source/root/etc/aminer /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
+                        sh "cp /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
+                        sh "cp /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        /* the result of timeout is negated with "!". This is because aminer returns 1 if timeout stops the process and otherwise 0. The way around is a valid result for a test */
+                        sh "cd /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && ! timeout -s INT --preserve-status 5 docker run -v $PWD/aminercfg:/etc/aminer -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -it aecid/aminer-debian-redhat:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
+                    }
                 }
                 stage("Build Documentation") {
                     when {
@@ -360,6 +404,12 @@ pipeline {
                 }
                 if( ubuntu20image == true ) {
                     sh "docker rmi aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                }
+                if( fedoraimage == true ) {
+                    sh "docker rmi aecid/aminer-fedora:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                }
+                if( redhatimage == true ) {
+                    sh "docker rmi aecid/aminer-redhat:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                 }
                 if( docsimage == true){
                     sh "docker rmi aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
