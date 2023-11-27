@@ -17,6 +17,80 @@ from unit.TestBase import TestBase
 class PersistenceUtilTest(TestBase):
     """Unittests for the PersistenceUtil class."""
 
+    def test1add_persistable_component(self):
+        """
+        Add a component to the registry of all persistable components.
+        Also test the type of the component, as this task is only performed once for each component.
+        """
+        pass
+
+    def test2open_persistence_file(self):
+        """Test opening a persistence file. Also check if the type of the file_name is string or bytes."""
+        # test type checks
+        # path does not exist (O_CREAT flag not set)
+        # path does not exist (O_CREAT flag set) - repeat if it exists and check if fd is returned
+        # path exists
+        pass
+
+    def test3replace_persistence_file(self):
+        """Test replacing the name of the persistence file."""
+        # test if file name is tested for forbidden characters.
+        # path does not exist
+        # path exists
+        pass
+
+    def test4load_json(self):
+        """Load persisted json data."""
+        # path does not exist
+        # json data corrupted
+        # working example
+        pass
+
+    def test5store_json(self):
+        """Store json data into the persistence file."""
+        pass
+
+    def test6create_missing_directories(self):
+        """Test if all missing directories are created."""
+        # only base directory exists
+        # path already exists
+        pass
+
+    def test7clear_persistence(self):
+        """Test if clearing the persistence data works properly."""
+        pass
+
+    def test8copytree(self):
+        """Test if our copytree is working as expected even when the destination directory is existing."""
+        # destination directory not existing
+        # destination directory existing
+        # some subdirectories are existing in the destination directory
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     string = b'25537 uid=2'
 
     match_context_fixed_dme = MatchContext(b' pid=')

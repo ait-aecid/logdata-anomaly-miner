@@ -31,12 +31,12 @@ SKIP_PERSISTENCE_ID_WARNING = False
 def add_persistable_component(component):
     """Add a component to the registry of all persistable components."""
     for c in persistable_components:
-        if hasattr(c, 'persistence_file_name') and c.persistence_file_name == component.persistence_file_name:
+        if hasattr(c, "persistence_file_name") and c.persistence_file_name == component.persistence_file_name:
             msg = f'Detectors of type {c.__class__.__name__} use the persistence_id "{os.path.split(c.persistence_file_name)[1]}" ' \
-                  f'multiple times. Please assign a unique persistence_id for every component.'
+                  f"multiple times. Please assign a unique persistence_id for every component."
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             if not SKIP_PERSISTENCE_ID_WARNING:
-                print('Warning: ' + msg, file=sys.stderr)
+                print("Warning: " + msg, file=sys.stderr)
     persistable_components.append(component)
 
 
@@ -69,7 +69,7 @@ def replace_persistence_file(file_name, new_file_handle):
 
     tmp_file_name = os.readlink(f"/proc/self/fd/{new_file_handle}")
     if SecureOSFunctions.base_dir_path.decode() in file_name:
-        file_name = file_name.replace(SecureOSFunctions.base_dir_path.decode(), '').lstrip('/')
+        file_name = file_name.replace(SecureOSFunctions.base_dir_path.decode(), "").lstrip("/")
     os.link(
         tmp_file_name, file_name, src_dir_fd=SecureOSFunctions.tmp_base_dir_fd, dst_dir_fd=SecureOSFunctions.secure_open_base_directory())
     os.unlink(tmp_file_name, dir_fd=SecureOSFunctions.tmp_base_dir_fd)
@@ -90,7 +90,7 @@ def load_json(file_name):
     try:
         persistence_file_handle = open_persistence_file(file_name, os.O_RDONLY | os.O_NOFOLLOW)
         persistence_data = os.read(persistence_file_handle, os.fstat(persistence_file_handle).st_size)
-        persistence_data = str(persistence_data, 'utf-8')
+        persistence_data = str(persistence_data, "utf-8")
         os.close(persistence_file_handle)
     except OSError as openOsError:
         if openOsError.errno != errno.ENOENT:
@@ -112,9 +112,9 @@ def store_json(file_name, object_data):
     """Store persistence data to file."""
     persistence_data = JsonUtil.dump_as_json(object_data)
     # Create a temporary file within persistence directory to write new persistence data to it.
-    # Thus the old data is not modified, any error creating or writing the file will not harm the old state.
+    # Thus, the old data is not modified, any error creating or writing the file will not harm the old state.
     fd, _ = tempfile.mkstemp(dir=SecureOSFunctions.tmp_base_dir_path)
-    os.write(fd, bytes(persistence_data, 'utf-8'))
+    os.write(fd, bytes(persistence_data, "utf-8"))
     create_missing_directories(file_name)
     replace_persistence_file(file_name, fd)
     os.close(fd)
@@ -123,7 +123,7 @@ def store_json(file_name, object_data):
 def create_missing_directories(file_name):
     """Create missing persistence directories."""
     # Find out, which directory is missing by stating our way up.
-    dir_name_length = file_name.rfind('/')
+    dir_name_length = file_name.rfind("/")
     if dir_name_length > 0 and not os.path.exists(file_name[:dir_name_length]):
         os.makedirs(file_name[:dir_name_length])
 
@@ -131,12 +131,12 @@ def create_missing_directories(file_name):
 def clear_persistence(persistence_dir_name):
     """Delete all persistence data from the persistence_dir."""
     for filename in os.listdir(persistence_dir_name):
-        if filename == 'backup':
+        if filename == "backup":
             continue
         file_path = os.path.join(persistence_dir_name, filename)
         try:
             if not os.path.isdir(file_path):
-                msg = 'The aminer persistence directory should not contain any files.'
+                msg = "The aminer persistence directory should not contain any files."
                 print(msg, file=sys.stderr)
                 logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                 continue
