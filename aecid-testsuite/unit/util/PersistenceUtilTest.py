@@ -22,6 +22,21 @@ class PersistenceUtilTest(TestBase):
         Add a component to the registry of all persistable components.
         Also test the type of the component, as this task is only performed once for each component.
         """
+        # component is not PersistableComponentInterface (raise TypeError)
+        some_object = {"key": "this is not working"}
+        self.assertRaises(PersistenceUtil.add_persistable_component, some_object, TypeError)
+        # working example
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", True)
+        PersistenceUtil.add_persistable_component(nmpd)
+        # check persistence ID warning
+        PersistenceUtil.SKIP_PERSISTENCE_ID_WARNING = True
+        PersistenceUtil.add_persistable_component(nmpd)
+        self.assertEqual(self.output_stream.getvalue(), 'Warning: Detectors of type NewMatchPathDetector use the persistence_id "Default" '
+            "multiple times. Please assign a unique persistence_id for every component.")
+        self.reset_output_stream()
+        PersistenceUtil.SKIP_PERSISTENCE_ID_WARNING = False
+        PersistenceUtil.add_persistable_component(nmpd)
+        self.assertEqual(self.output_stream.getvalue(), "")
         pass
 
     def test2open_persistence_file(self):
