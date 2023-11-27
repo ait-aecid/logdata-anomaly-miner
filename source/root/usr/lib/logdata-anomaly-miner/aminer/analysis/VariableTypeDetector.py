@@ -22,13 +22,13 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.EventTypeDetector import EventTypeDetector
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 import aminer.analysis.VTDData as VTDData
 
 
-class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """
     This class tests each variable of the event_types for the implemented variable types.
     This module needs to run after the event type detector is initialized

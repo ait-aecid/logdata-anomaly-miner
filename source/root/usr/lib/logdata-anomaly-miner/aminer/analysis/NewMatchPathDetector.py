@@ -20,12 +20,12 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
 
-class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when new data path was found in a parsed atom."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME

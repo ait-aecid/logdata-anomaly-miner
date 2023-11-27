@@ -7,12 +7,12 @@ from scipy.stats import chi2
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.EventTypeDetector import EventTypeDetector
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
 
-class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """
     This class first finds for each eventType a list of pairs of variables, which are afterwards tested if they are correlated.
     For this a couple of preselection methods can be used. (See self.used_presel_meth)

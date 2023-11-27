@@ -18,12 +18,12 @@ from aminer import AminerConfig
 from aminer.AminerConfig import DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, CONFIG_KEY_LOG_LINE_PREFIX,\
     DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
 
-class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """
     This class analyzes the time intervals of the appearance of log_atoms.
     The considered time intervals depend on the combination of values in the target_paths of target_path_list.

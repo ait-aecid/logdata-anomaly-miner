@@ -17,12 +17,13 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class MissingMatchPathValueDetector(
+        AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """
     This class creates events when an expected value is not seen within a given timespan.
     For example because the service was deactivated or logging disabled unexpectedly. This is complementary to the function provided by

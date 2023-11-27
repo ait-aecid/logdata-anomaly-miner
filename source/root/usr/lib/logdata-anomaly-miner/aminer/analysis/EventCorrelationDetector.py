@@ -29,12 +29,12 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class tries to find time correlation patterns between different log atom events."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME

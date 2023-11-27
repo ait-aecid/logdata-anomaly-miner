@@ -22,12 +22,13 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class NewMatchIdValueComboDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class NewMatchIdValueComboDetector(
+        AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """
     This class creates events when a new value combination for a given list of match data.
     Paths need to be found in log atoms with the same id value in a specific path.
