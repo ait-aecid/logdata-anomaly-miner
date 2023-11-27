@@ -1,9 +1,7 @@
 # Pull base image.
-ARG vardistri
+FROM redhat/ubi9
 
-FROM $vardistri
 ARG varbranch
-
 ENV BRANCH=$varbranch
 
 # allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
@@ -15,31 +13,29 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 
-# Install necessary debian packages
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-	ansible \
+RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm python3-pip -y
+RUN pip3 install ansible
+
+# Install necessary dnf packages
+RUN dnf install -y --allowerasing \
         git \
         vim \
         postfix \
         procps \
         cpulimit \
-        mailutils \
+        exim \
         postfix \
         rsyslog \
         sudo \
         curl \
-        apache2 \
-        locales \
-        locales-all
-
-RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
-    dpkg-reconfigure --frontend=noninteractive locales && \
-    update-locale LANG=en_US.UTF-8
+        httpd \
+        glibc-locale-source \
+        glibc-langpack-en
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+RUN localedef --force -i en_US -f UTF-8 en_US.UTF-8
 
 ADD scripts/distritest.sh /distritest.sh
 ADD . /opt/logdata-anomaly-miner
