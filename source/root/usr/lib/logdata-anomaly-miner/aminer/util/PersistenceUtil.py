@@ -45,7 +45,12 @@ def open_persistence_file(file_name, flags):
     Open the given persistence file.
     When O_CREAT was specified, the function will attempt to create the directories too.
     """
-    if isinstance(file_name, str):
+    fn_type = type(file_name)
+    if fn_type not in (str, bytes):
+        msg = "file_name has to be of the type string or boolean."
+        logging.getLogger(DEBUG_LOG_NAME).error(msg)
+        raise TypeError(msg)
+    if fn_type == str:
         file_name = file_name.encode()
     try:
         fd = SecureOSFunctions.secure_open_file(file_name, flags)
@@ -104,7 +109,7 @@ def load_json(file_name):
     except ValueError as value_error:
         msg = f"Corrupted data in {file_name, value_error}"
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
-        raise Exception(msg)
+        raise ValueError(msg)
     return result
 
 
