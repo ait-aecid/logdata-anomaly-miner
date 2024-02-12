@@ -175,6 +175,7 @@ pipeline {
                         sh "cp -r source/root/etc/aminer /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
                         sh "cp /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
                         sh "cp /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "chown -R 1000:1000 /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "cd /tmp/simplerun-bookworm-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-bookworm:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
@@ -189,6 +190,7 @@ pipeline {
                         sh "cp -r source/root/etc/aminer /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
                         sh "cp /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
                         sh "cp /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "chown -R 1000:1000 /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "cd /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-bullseye:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
@@ -203,6 +205,7 @@ pipeline {
                         sh "cp -r source/root/etc/aminer /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
                         sh "cp /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
                         sh "cp /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "chown -R 1000:1000 /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "cd /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
@@ -217,6 +220,7 @@ pipeline {
                         sh "cp -r source/root/etc/aminer /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
                         sh "cp /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
                         sh "cp /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "chown -R 1000:1000 /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "cd /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
@@ -236,6 +240,7 @@ pipeline {
                         sh "cp -r source/root/etc/aminer /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
                         sh "cp /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
                         sh "cp /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "chown -R 1000:1000 /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "cd /tmp/ubuntu-2204-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-ubuntu-2204:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                    }
                 }
@@ -255,6 +260,7 @@ pipeline {
                         sh "cp -r source/root/etc/aminer /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
                         sh "cp /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
                         sh "cp /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "chown -R 1000:1000 /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "cd /tmp/ubuntu-2004-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                    }
                 }
@@ -269,6 +275,7 @@ pipeline {
                         sh "cp -r source/root/etc/aminer /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
                         sh "cp /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
                         sh "cp /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "chown -R 1000:1000 /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "cd /tmp/simplerun-fedora-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-fedora:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
@@ -283,6 +290,7 @@ pipeline {
                         sh "cp -r source/root/etc/aminer /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
                         sh "cp /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
                         sh "cp /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "chown -R 1000:1000 /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "cd /tmp/simplerun-redhat-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-redhat:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
