@@ -50,6 +50,7 @@ RUN echo varbranch $varbranch
 RUN cd /opt/logdata-anomaly-miner/roles && git clone -b $varbranch https://github.com/ait-aecid/aminer-ansible.git aminer
 RUN cd /opt/logdata-anomaly-miner && sed -e "s+{{SOURCEDIR}}+$PWD+g" /opt/logdata-anomaly-miner/.playbook.yml > /opt/logdata-anomaly-miner/playbook.yml
 RUN cd /opt/logdata-anomaly-miner && ansible-playbook playbook.yml
+RUN chown aminer:aminer /var/lib/aminer
 RUN git clone -b $varbranch https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git /opt/wiki
 RUN awk '/^```yaml$/ && ++n == 1, /^```$/' < /opt/wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' | sed '/^```python/ d' > /home/aminer/gettingStarted-config.yml
 RUN ln -s /etc/aminer/conf-available/generic/ApacheAccessModel.py /etc/aminer/conf-enabled/
