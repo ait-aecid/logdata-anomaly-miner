@@ -20,7 +20,7 @@ LogResourceList:
   - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/internal_share/logs/audit/audit.log'
   - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/access.log'
   - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.1'
-  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.2'
   - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.3'
   - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.4'
   - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log'
@@ -66,17 +66,149 @@ LogResourceList:
   - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/audit/audit.log'
 
 Parser:
+  - id: ApacheAccessParsingModel
+    type: ApacheAccessParsingModel
+    name: 'apache'
 
+  - id: ApacheErrorParsingModel
+    type: ApacheErrorParsingModel
+    name: 'apache_error'
 
+  - id: AuditdParsingModel
+    type: AuditdParsingModel
+    name: 'audit'
+
+  - id: model
+    start: True
+    type: FirstMatchModelElement
+    name: 'model'
+    args:
+      - ApacheAccessParsingModel
+      - ApacheErrorParsingModel
+      - AuditdParsingModel
 
 Analysis:
-  - type: StringRegexMatchRule
-    id: stringRegexMatchRule
-    path: "/model/opt/domain/domain"
-    regex: "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}(:[0-9]{1,5})*$"
+  - type: NewMatchPathValueDetector
+    id: apache_client_id_NMPVD
+    persistence_id: apache_client_id_NMPVD
+    paths:
+      - "/model/model/client_ip/client_ip"
+      - "/model/model/client_id"
+    learn_mode: True
+
+  - type: NewMatchPathValueDetector
+    id: apache_user_id_NMPVD
+    persistence_id: apache_user_id_NMPVD
+    paths:
+      - "/model/model/user_id"
+    learn_mode: True
+
+  - type: NewMatchPathValueDetector
+    id: audit_exe_NMPVD
+    persistence_id: audit_exe_NMPVD
+    paths:
+      - "/model/model/type/service_stop/opt/opt_seq/exe"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: apache_client_user_NMPVCD
+    persistence_id: apache_client_user_NMPVCD
+    paths:
+      - "/model/model/client_id"
+      - "/model/model/user_id"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_cred_NMPVCD
+    persistence_id: audit_id_pid_cred_NMPVCD
+    paths:
+      - "/model/model/type/cred_acq/id"
+      - "/model/model/type/cred_acq/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_user_start_NMPVCD
+    persistence_id: audit_id_pid_user_start_NMPVCD
+    paths:
+      - "/model/model/type/user_start/id"
+      - "/model/model/type/user_start/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_user_acct_NMPVCD
+    persistence_id: audit_id_pid_user_acct_NMPVCD
+    paths:
+      - "/model/model/type/user_acct/id"
+      - "/model/model/type/user_acct/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_user_auth_NMPVCD
+    persistence_id: audit_id_pid_user_auth_NMPVCD
+    paths:
+      - "/model/model/type/user_auth/id"
+      - "/model/model/type/user_auth/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_user_login_NMPVCD
+    persistence_id: audit_id_pid_user_login_NMPVCD
+    paths:
+      - "/model/model/type/user_login/id"
+      - "/model/model/type/user_login/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_cred_disp_NMPVCD
+    persistence_id: audit_id_pid_cred_disp_NMPVCD
+    paths:
+      - "/model/model/type/cred_disp/id"
+      - "/model/model/type/cred_disp/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_service_start_NMPVCD
+    persistence_id: audit_id_pid_service_start_NMPVCD
+    paths:
+      - "/model/model/type/service_start/id"
+      - "/model/model/type/service_start/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_service_stop_NMPVCD
+    persistence_id: audit_id_pid_service_stop_NMPVCD
+    paths:
+      - "/model/model/type/service_stop/id"
+      - "/model/model/type/service_stop/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_user_end_NMPVCD
+    persistence_id: audit_id_pid_user_end_NMPVCD
+    paths:
+      - "/model/model/type/user_end/id"
+      - "/model/model/type/user_end/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_user_cmd_NMPVCD
+    persistence_id: audit_id_pid_user_cmd_NMPVCD
+    paths:
+      - "/model/model/type/user_cmd/id"
+      - "/model/model/type/user_cmd/pid"
+    learn_mode: True
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_id_pid_cred_acq_NMPVCD
+    persistence_id: audit_id_pid_cred_acq_NMPVCD
+    paths:
+      - "/model/model/type/cred_acq/id"
+      - "/model/model/type/cred_acq/pid"
+    learn_mode: True
 
 Input:
   timestamp_paths: [""]
+  use_real_time: True
   multi_source: False
   adjust_timestamps: True
   #json_format: True
