@@ -1,0 +1,86 @@
+LearnMode: True
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 2
+
+LogResourceList:
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/error.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/error.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/error.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/error.log.4'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log.4'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/audit/audit.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/inet-firewall/logs/audit/audit.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/internal_share/logs/audit/audit.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.4'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log.4'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-error.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-error.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-error.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-error.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/other_vhosts_access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/audit/audit.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/mail/logs/audit/audit.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/vpn/logs/audit/audit.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log.4'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-error.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-error.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/error.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/error.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/error.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/error.log.4'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log.4'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-error.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/other_vhosts_access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log.4'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-error.log.1'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-error.log.2'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-error.log.3'
+  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/audit/audit.log'
+
+Parser:
+
+
+
+Analysis:
+  - type: StringRegexMatchRule
+    id: stringRegexMatchRule
+    path: "/model/opt/domain/domain"
+    regex: "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}(:[0-9]{1,5})*$"
+
+Input:
+  timestamp_paths: [""]
+  multi_source: False
+  adjust_timestamps: True
+  #json_format: True
+
+EventHandlers:
+  - id: stpe
+    type: StreamPrinterEventHandler
