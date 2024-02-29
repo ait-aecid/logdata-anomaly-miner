@@ -78,14 +78,6 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         match_element = multi_locale_dtme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_ + "/format4", self.path, date, 1549497600, None)
 
-        # test with only time defined. Here obviously the seconds can not be tested.
-        data = b"11:40:23: it still works"
-        date = b"11:40:23"
-        match_context = DummyMatchContext(data)
-        match_element = multi_locale_dtme.get_match_element(self.path, match_context)
-        self.compare_match_results(
-            data, match_element, match_context, self.id_ + "/format6", self.path, date, match_element.match_object, None)
-
         data = b"Feb 25 something happened"
         date = b"Feb 25"
         match_context = DummyMatchContext(data)
@@ -131,17 +123,32 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         match_element = multi_locale_dtme.get_match_element(self.path, match_context)
         self.compare_match_results(data, match_element, match_context, self.id_ + "/format12", self.path, date, 1618326774.201, None)
 
+        multi_locale_dtme = MultiLocaleDateTimeModelElement(self.id_, [
+            (b"%d.%m.%Y %H:%M:%S.%f", None, None), (b"%d.%m.%Y %H:%M:%S%z", None, None),  (b"%d.%m.%Y %H:%M:%S", None, None),
+            (b"%d.%m.%YT%H:%M:%S", None, None), (b"%d.%m.%Y", None, None), (b"%H:%M:%S:%f", None, de_at_utf8),
+            (b"%H:%M:%S", None, None), (b"%b %d", tz_gmt10, de_at_utf8), (b"%d %b %Y", None, en_gb_utf8),
+            (b"%dth %b %Y", None, en_gb_utf8), (b"%d/%m/%Y", None, en_gb_utf8), (b"%m-%d-%Y", None, en_us_utf8),
+            (b"%d.%m. %H:%M:%S:%f", None, de_at_utf8)])
         multi_locale_dtme.latest_parsed_timestamp = None
         # Austrian time no date
         data = b"15:12:54:201 something happened"
         date = b"15:12:54:201"
         match_context = DummyMatchContext(data)
         match_element = multi_locale_dtme.get_match_element(self.path, match_context)
-        dtm = datetime(2021, datetime.now().month, datetime.now().day, 15, 12, 54, 201, tzinfo=timezone.utc)
+        dtm = datetime(datetime.now().year, datetime.now().month, datetime.now().day, 15, 12, 54, 201, tzinfo=timezone.utc)
         # total_seconds should be in UTC, so the timezones are parsed out.
         delta = (dtm - datetime(1970, 1, 1, tzinfo=dtm.tzinfo))
         total_seconds = delta.days * 86400 + delta.seconds + delta.microseconds / 1000
         self.compare_match_results(data, match_element, match_context, self.id_ + "/format5", self.path, date, total_seconds, None)
+
+        # test with only time defined. Here obviously the seconds can not be tested.
+        data = b"11:40:23: it still works"
+        date = b"11:40:23"
+        match_context = DummyMatchContext(data)
+        match_element = multi_locale_dtme.get_match_element(self.path, match_context)
+        print(match_element, multi_locale_dtme.start_year)
+        self.compare_match_results(
+            data, match_element, match_context, self.id_ + "/format6", self.path, date, match_element.match_object, None)
 
     def test2wrong_date(self):
         """Test if wrong input data does not return a match."""
