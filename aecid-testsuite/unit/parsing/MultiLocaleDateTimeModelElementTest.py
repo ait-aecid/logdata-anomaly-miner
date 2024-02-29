@@ -146,7 +146,6 @@ class MultiLocaleDateTimeModelElementTest(TestBase):
         date = b"11:40:23"
         match_context = DummyMatchContext(data)
         match_element = multi_locale_dtme.get_match_element(self.path, match_context)
-        print(match_element, multi_locale_dtme.start_year)
         self.compare_match_results(
             data, match_element, match_context, self.id_ + "/format6", self.path, date, match_element.match_object, None)
 
