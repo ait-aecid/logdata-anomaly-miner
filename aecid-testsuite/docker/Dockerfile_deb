@@ -17,6 +17,7 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 
 # Install necessary debian packages
 ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get update && apt-get install -y \
 	ansible \
         git \
