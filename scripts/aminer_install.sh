@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# if set to 1 this installer will delete the 
+# if set to 1 this installer will delete the
 # source directory after installation
 DELDIR=1
 BRANCH="main"
@@ -52,19 +52,23 @@ while getopts "hb:u:s:d:" options; do
 	esac
 done
 
-
-if [ -e /etc/debian_version ]
+which sudo > /dev/null
+if [ $? -ne 0 ]
 then
-	SUDO=`which sudo`
-	if [ $? -ne 0 ]
-	then
-		echo "Please install and configure sudo first"
-		exit 1
-	fi
+	echo "Please install and configure sudo first"
+	exit 1
+fi
+
+if [ -e /etc/debian_version ]; then
 	sudo /usr/bin/apt-get update
 	sudo DEBIAN_FRONTEND=nointeractive /usr/bin/apt-get install -y -q ansible git
+elif [ -e /etc/fedora-release ] || [ -e /etc/redhat-release ]; then
+	sudo dnf install -y ansible git
 else
-	echo "Currently only debian based distributions are supported"
+	echo "Currently only Debian and Fedora based distributions are supported."
+	echo "More specifically this includes Debian Buster, Debian Bullseye, Debian Bookworm, Ubuntu 20, Ubuntu 22, Fedora, and RedHat."
+	echo "If you decide to install the AMiner on another system, please add **--extra-vars \"ansible_distribution == '$DIST' ansible_distribution_major_version == '$VER'\"**."
+	echo "Choose the best-fitting related distribution of the supported ones for $DIST and $VER."
 	exit 1
 fi
 
@@ -75,7 +79,7 @@ else
 	if [ $DISON -eq 1 ]
 	then
 		cp -rap $AMINERSRC $AMINERDST
-	else	
+	else
 		AMINERDST=$AMINERSRC
 	fi
 fi
@@ -89,7 +93,7 @@ cat > playbook.yml << EOF
 - hosts: localhost
   vars:
          aminer_gitrepo: False
-         # We assume that we cloned the aminer to /home/developer/aminer 
+         # We assume that we cloned the aminer to /home/developer/aminer
          aminer_repopath: "${AMINERDST}"
   roles:
          - aminer
