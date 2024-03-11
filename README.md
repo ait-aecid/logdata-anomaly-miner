@@ -6,7 +6,8 @@ This tool parses log data and allows to define analysis pipelines for anomaly de
 
 ## Requirements
 
-In order to install logdata-anomaly-miner a **Linux system** with **python >= 3.6** is required. **Debian-based** distributions are currently recommended, but also **Fedora** and **RedHat** are supported.
+In order to install logdata-anomaly-miner a **Linux system** with **python >= 3.6** is required. All **Ubuntu** and **Debian** versions that we have in the tests are currently recommended.
+There is only experimental support for **Fedora**.
 
 _See [requirements.txt](https://github.com/ait-aecid/logdata-anomaly-miner/requirements.txt) for further module dependencies_
 
