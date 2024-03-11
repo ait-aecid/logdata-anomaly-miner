@@ -26,13 +26,8 @@ pipeline {
                 sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
             }
         }
-        stage("Testing") {
+        stage("Static Analysis & Basic Functionality") {
             parallel {
-                stage("Declarative: Static Analysis & Basic Functionality") {
-                    steps {
-                        sh "echo \"Running static analysis & basic functionality tests.\""
-                    }
-                }
                 stage("Mypy"){
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runMypy"
@@ -68,17 +63,17 @@ pipeline {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runOfflineMode"
                     }
                 }
-                stage("Unittests") {
-                    steps {
-                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runUnittests"
-                    }
-                }
+            }
+        }
 
-                stage("Declarative: Aminer Demo Tests") {
-                    steps {
-                        sh "echo \"Running AMiner demo tests.\""
-                    }
-                }
+        stage("Unittests") {
+             steps {
+                 sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runUnittests"
+             }
+        }
+
+        stage("Aminer Demo Tests") {
+            parallel {
                 stage("demo-config.py") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerDemo demo/aminer/demo-config.py"
@@ -114,11 +109,11 @@ pipeline {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerEncodingDemo demo/aminer/demo-config.yml"
                     }
                 }
-                stage("Declarative: JSON/XML Input Tests") {
-                    steps {
-                        sh "echo \"Running JSON/XML input tests.\""
-                    }
-                }
+            }
+        }
+
+        stage("JSON/XML Input Tests") {
+            parallel {
                 stage("JSON Input Demo") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerJsonInputDemo"
@@ -129,48 +124,47 @@ pipeline {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runAminerXmlInputDemo"
                     }
                 }
-                stage("AMiner Input Demo") {
+                stage("Aminer") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/json-aminer-demo.yml"
                     }
                 }
-                stage("Elastic Input Demo") {
+                stage("Elastic") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/json-elastic-demo.yml"
                     }
                 }
-                stage("Eve Input Demo") {
+                stage("Eve") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/json-eve-demo.yml"
                     }
                 }
-                stage("Journal Input Demo") {
+                stage("Journal") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/json-journal-demo.yml"
                     }
                 }
-                stage("Wazuh Input Demo") {
+                stage("Wazuh") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/json-wazuh-demo.yml"
                     }
                 }
-                stage("Windows Input Demo") {
+                stage("Windows") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runJsonDemo demo/aminerJsonInputDemo/windows.yml"
                     }
                 }
+            }
+        }
 
-                stage("Declarative: System, Documentation and Wiki Tests") {
-                    steps {
-                        sh "echo \"Running system, documentation and wiki tests.\""
-                    }
-                }
+        stage("System, Documentation and Wiki Tests") {
+            parallel {
                 stage("Available Configs") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runConfAvailableTest"
                     }
                 }
-                stage("Debian Bookworm Docker") {
+                stage("Debian Bookworm") {
                     steps {
                         script {
                             debianbookwormimage = true
@@ -185,7 +179,7 @@ pipeline {
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-bookworm:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
-                stage("Debian Bullseye Docker") {
+                stage("Debian Bullseye") {
                     steps {
                         script {
                             debianbullseyeimage = true
@@ -200,7 +194,7 @@ pipeline {
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-bullseye:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
-                stage("Debian Buster Docker") {
+                stage("Test Debian Buster") {
                     steps {
                         script {
                             debianbusterimage = true
@@ -215,7 +209,7 @@ pipeline {
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
-                stage("Production Docker Image") {
+                stage("Test Production Docker Image") {
                     steps {
                         script {
                             productionimage = true
@@ -230,7 +224,7 @@ pipeline {
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
-                stage("Ubuntu 22.04 Docker") {
+                stage("Test Ubuntu 22.04") {
                     when {
                         expression {
                             BRANCH_NAME == "main" || BRANCH_NAME == "development"
@@ -250,7 +244,7 @@ pipeline {
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-ubuntu-2204:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                    }
                 }
-                stage("Ubuntu 20.04 Docker") {
+                stage("Test Ubuntu 20.04") {
                     when {
                         expression {
                             BRANCH_NAME == "main" || BRANCH_NAME == "development"
@@ -270,7 +264,7 @@ pipeline {
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-ubuntu-2004:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                    }
                 }
-                stage("Fedora Docker") {
+                stage("Fedora") {
                     steps {
                         script {
                             fedoraimage = true
@@ -285,7 +279,7 @@ pipeline {
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-fedora:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
-                stage("RedHat Docker") {
+                stage("RedHat") {
                     steps {
                         script {
                             redhatimage = true
