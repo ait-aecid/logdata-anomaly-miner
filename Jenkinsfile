@@ -23,6 +23,7 @@ pipeline {
     stages {
         stage("Build Test-Container") {
             steps {
+                sh "echo \"Running static analysis & basic functionality tests.\""
                 sh "docker build -f aecid-testsuite/Dockerfile -t aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
             }
         }
