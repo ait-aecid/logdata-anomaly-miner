@@ -18,6 +18,7 @@ if [ "${EUID} ${UID}" = "0 0" ] && touch /fake-root-detect 2> /dev/null; then
   echo "Build should not be run as root!" >&2
   exit 1
 fi
+echo "test"
 
 # Export tmp dir to allow large package builds within vservers
 export TMPDIR="/var/tmp"
