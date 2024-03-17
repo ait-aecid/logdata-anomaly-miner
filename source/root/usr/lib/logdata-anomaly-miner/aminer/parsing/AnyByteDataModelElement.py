@@ -26,6 +26,7 @@ class AnyByteDataModelElement(ModelElementInterface):
         """
         match_data = match_context.match_data
         if not match_data:
+            pass
             return None
         match_context.update(match_data)
         return MatchElement(f"{path}/{self.element_id}", match_data, match_data, None)
