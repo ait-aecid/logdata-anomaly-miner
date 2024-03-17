@@ -1,0 +1,242 @@
+LearnMode: True
+#LearnMode: False
+
+Log.StatisticsLevel: 1
+
+Log.DebugLevel: 2
+
+LogResourceList:
+  - 'file:///home/user/Downloads/train.log'
+#  - 'file:///home/user/Downloads/test.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/error.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/error.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/error.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/error.log.4'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/apache2/other_vhosts_access.log.4'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/cloud_share/logs/audit/audit.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/inet-firewall/logs/audit/audit.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/internal_share/logs/audit/audit.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.1'
+##  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/error.log.4'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-access.log.4'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-error.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-error.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-error.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/intranet.smith.russellmitchell.com-error.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/apache2/other_vhosts_access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/intranet_server/logs/audit/audit.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/mail/logs/audit/audit.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/vpn/logs/audit/audit.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-access.log.4'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-error.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/cloud.smith.russellmitchell.com-error.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/error.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/error.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/error.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/error.log.4'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-access.log.4'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/mail.smith.russellmitchell.com-error.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/other_vhosts_access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-access.log.4'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-error.log.1'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-error.log.2'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/apache2/proxy-error.log.3'
+#  - 'file:///home/user/Downloads/AIT-LDS2/russellmitchell/gather/webserver/logs/audit/audit.log'
+
+Parser:
+  - id: ApacheAccessParsingModel
+    type: ApacheAccessParsingModel
+    name: 'apache'
+
+  - id: AuditdParsingModel
+    type: AuditdParsingModel
+    name: 'audit'
+
+  - id: model
+    start: True
+    type: FirstMatchModelElement
+    name: 'model'
+    args:
+      - ApacheAccessParsingModel
+      - AuditdParsingModel
+
+Analysis:
+  - type: NewMatchPathValueDetector
+    id: apache_NMPVD
+    persistence_id: apache_NMPVD
+    paths:
+      - "/model/model/client_ip/client_ip"
+      - "/model/model/user_id"
+      - "/model/model/fm/request/request"
+
+  - type: NewMatchPathValueComboDetector
+    id: apache_NMPVCD
+    persistence_id: apache_NMPVCD
+    paths:
+      - "/model/model/client_ip/client_ip"
+      - "/model/model/combined/combined/user_agent"
+
+  - type: NewMatchPathValueComboDetector
+    id: apache_NMPVCD2
+    persistence_id: apache_NMPVCD2
+    paths:
+      - "/model/model/combined/combined/referer"
+      - "/model/model/fm/request/request"
+
+  - type: CharsetDetector
+    id: apache_CD
+    persistence_id: apache_CD
+    id_path_list:
+      - "/model/model/client_ip/client_ip"
+    paths:
+      - "/model/model/combined/combined/referer"
+
+  - type: EntropyDetector
+    id: apache_ED
+    persistence_id: apache_ED
+    paths:
+      - "/model/model/fm/request/request"
+
+  - type: ValueRangeDetector
+    id: apache_VRD
+    persistence_id: apache_VRD
+    paths:
+      - "/model/model/content_size"
+
+  - type: EventFrequencyDetector
+    id: apache_EFD
+    persistence_id: apache_EFD
+    paths:
+      - "/model/model/status_code"
+    window_size: 60
+
+  - type: NewMatchPathValueDetector
+    id: audit_NMPVD
+    persistence_id: audit_NMPVD
+    paths:
+      - "/model/model/type/service_stop/opt/opt_seq/exe"
+      - "/model/model/type/syscall/exe"
+      - "/model/model/type/cred_refr/opt/opt_seq/exe"
+      - "/model/model/type/user_start/opt/opt_seq/exe"
+      - "/model/model/type/user_acct/opt/opt_seq/exe"
+      - "/model/model/type/user_auth/opt/opt_seq/exe"
+      - "/model/model/type/user_login/opt/opt_seq/exe"
+      - "/model/model/type/cred_disp/opt/opt_seq/exe"
+      - "/model/model/type/service_start/opt/opt_seq/exe"
+      - "/model/model/type/service_stop/opt/opt_seq/exe"
+      - "/model/model/type/user_end/opt/opt_seq/exe"
+      - "/model/model/type/user_cmd/opt/opt_seq/exe"
+      - "/model/model/type/cred_acq/opt/opt_seq/exe"
+
+  - type: NewMatchPathValueComboDetector
+    id: audit_NMPVCD
+    persistence_id: audit_NMPVCD
+    paths:
+      - "/model/model/type/service_start/uid"
+      - "/model/model/type/service_start/opt/opt_seq/exe"
+
+  - type: CharsetDetector
+    id: audit_CD
+    persistence_id: audit_CD
+    id_path_list:
+      - "/model/model/type/cred_refr/id"
+      - "/model/model/type/user_start/id"
+      - "/model/model/type/user_acct/id"
+      - "/model/model/type/user_auth/id"
+      - "/model/model/type/user_login/id"
+      - "/model/model/type/cred_disp/id"
+      - "/model/model/type/service_start/id"
+      - "/model/model/type/service_stop/id"
+      - "/model/model/type/user_end/id"
+      - "/model/model/type/user_cmd/id"
+      - "/model/model/type/cred_acq/id"
+    paths:
+      - "/model/model/type/cred_refr/msg2"
+      - "/model/model/type/user_start/msg2"
+      - "/model/model/type/user_acct/msg2"
+      - "/model/model/type/user_auth/msg2"
+      - "/model/model/type/user_login/msg2"
+      - "/model/model/type/cred_disp/msg2"
+      - "/model/model/type/service_start/msg2"
+      - "/model/model/type/service_stop/msg2"
+      - "/model/model/type/user_end/msg2"
+      - "/model/model/type/user_cmd/msg2"
+      - "/model/model/type/cred_acq/msg2"
+
+  - type: EntropyDetector
+    id: audit_ED
+    persistence_id: audit_ED
+    paths:
+      - "/model/model/type/cred_refr/msg2"
+      - "/model/model/type/user_start/msg2"
+      - "/model/model/type/user_acct/msg2"
+      - "/model/model/type/user_auth/msg2"
+      - "/model/model/type/user_login/msg2"
+      - "/model/model/type/cred_disp/msg2"
+      - "/model/model/type/service_start/msg2"
+      - "/model/model/type/service_stop/msg2"
+      - "/model/model/type/user_end/msg2"
+      - "/model/model/type/user_cmd/msg2"
+      - "/model/model/type/cred_acq/msg2"
+
+  - type: ValueRangeDetector
+    id: audit_VRD
+    persistence_id: audit_VRD
+    paths:
+      - "/model/model/type/cred_refr/ses"
+      - "/model/model/type/user_start/ses"
+      - "/model/model/type/user_acct/ses"
+      - "/model/model/type/user_auth/ses"
+      - "/model/model/type/user_login/ses"
+      - "/model/model/type/cred_disp/ses"
+      - "/model/model/type/service_start/ses"
+      - "/model/model/type/service_stop/ses"
+      - "/model/model/type/user_end/ses"
+      - "/model/model/type/user_cmd/ses"
+      - "/model/model/type/cred_acq/ses"
+
+  - type: EventFrequencyDetector
+    id: audit_EFD
+    persistence_id: audit_EFD
+    paths:
+      - "/model/model/type/user_start/id"
+
+Input:
+  timestamp_paths: ["/model/model/time", "/model/model/type/execve/time", "/model/model/type/proctitle/time", "/model/model/type/syscall/time", "/model/model/type/path/time",
+                    "/model/model/type/login/time", "/model/model/type/sockaddr/time", "/model/model/type/unknown/time", "/model/model/type/avc/time",
+                    "/model/model/type/user_bprm_fcaps/time", "/model/model/type/cred_refr/time", "/model/model/type/user_start/time", "/model/model/type/user_acct/time",
+                    "/model/model/type/user_auth/time", "/model/model/type/user_login/time", "/model/model/type/cred_disp/time", "/model/model/type/service_start/time",
+                    "/model/model/type/service_stop/time", "/model/model/type/user_end/time", "/model/model/type/user_cmd/time", "/model/model/type/cred_acq/time"]
+  use_real_time: True
+  multi_source: False
+  adjust_timestamps: True
+  #json_format: True
+
+EventHandlers:
+  - id: stpe
+    type: StreamPrinterEventHandler
