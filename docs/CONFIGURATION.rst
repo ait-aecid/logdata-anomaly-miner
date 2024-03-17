@@ -2124,7 +2124,7 @@ This class creates events if event or value occurrence counts are outliers in PC
           paths:
             - "/model/username"
             - "/model/service"
-          windows_size: 60
+          window_size: 60
           min_anomaly_score: 1.2
           min_variance: 0.95
           num_windows: 100
