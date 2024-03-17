@@ -67,6 +67,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name.decode() == source:
+                pass
                 return False
         self.log_total += 1
         unknown_path_list = []
