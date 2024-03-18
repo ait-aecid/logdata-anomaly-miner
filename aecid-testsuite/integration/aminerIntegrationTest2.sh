@@ -10,10 +10,9 @@ AUTH=/tmp/auth.log
 
 
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 sudo rm $SYSLOG 2> /dev/null
 sudo rm $AUTH 2> /dev/null
@@ -41,6 +40,7 @@ DOWNLOAD_PID=$!
 #start aminer
 sudo aminer --config $CFG_PATH21 > $OUT &
 PID=$!
+for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 #Anomaly FixedDataModel HD Repair
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > $SYSLOG
@@ -109,10 +109,9 @@ echo ""
 #END
 
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 sudo rm $SYSLOG 2> /dev/null
 sudo rm $AUTH 2> /dev/null
@@ -129,9 +128,9 @@ sleep 1
 COUNTER=0
 
 #start aminer
-sudo aminer -C --config $CFG_PATH22 -f > $OUT &
+sudo aminer --config $CFG_PATH22 > $OUT &
 PID=$!
-sleep 8
+for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 #Anomaly FixedDataModel HD Repair
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > $SYSLOG
@@ -166,7 +165,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 #ADD HERE
 
 #stop aminer
-sleep 12
+for i in {1..60}; do grep "Original log line: The Path of the home directory shown by pwd of the user guest is: /home/guest" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 sudo pkill -x aminer
 wait $PID
 sleep 3 # leave the kafka handler some time.
