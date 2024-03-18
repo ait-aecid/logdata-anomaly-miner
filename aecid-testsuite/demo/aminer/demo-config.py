@@ -5,7 +5,7 @@ config_properties = {}  # skipcq: PY-W0072
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
-# will just result in a warning. However if they exist, they have
+# will just result in a warning. However, if they exist, they have
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
