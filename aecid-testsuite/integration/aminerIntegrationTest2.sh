@@ -118,9 +118,9 @@ sudo cp ../unit/data/kafka-client.conf /etc/aminer/kafka-client.conf
 wait $DOWNLOAD_PID
 tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
-$KAFKA_VERSIONSTRING/bin/zookeeper-server-start.sh $KAFKA_VERSIONSTRING/config/zookeeper.properties &
+$KAFKA_VERSIONSTRING/bin/zookeeper-server-start.sh $KAFKA_VERSIONSTRING/config/zookeeper.properties > /dev/null &
 sleep 10
-$KAFKA_VERSIONSTRING/bin/kafka-server-start.sh $KAFKA_VERSIONSTRING/config/server.properties &
+$KAFKA_VERSIONSTRING/bin/kafka-server-start.sh $KAFKA_VERSIONSTRING/config/server.properties > /dev/null &
 sleep 10
 
 COUNTER=0
@@ -164,10 +164,10 @@ for i in {1..60}; do grep "The Path of the home directory shown by pwd of the us
 #ADD HERE
 
 #stop aminer
-sleep 12
+sleep 20
 sudo pkill -x aminer
 wait $PID
-sleep 3 # leave the kafka handler some time.
+sleep 15 # leave the kafka handler some time.
 
 result=0
 checkAllOutputs
