@@ -164,7 +164,7 @@ for i in {1..60}; do grep "The Path of the home directory shown by pwd of the us
 #ADD HERE
 
 #stop aminer
-sleep 12
+sleep 30
 sudo pkill -x aminer
 wait $PID
 sleep 3 # leave the kafka handler some time.
