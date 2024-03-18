@@ -1,5 +1,5 @@
 sudo cp demo/aminerRemoteControl/demo-config.py /tmp/demo-config.py
-echo "config_properties['Core.PersistencePeriod'] = 5" | sudo tee -a /tmp/demo-config.py > /dev/null
+echo "config_properties['Core.PersistencePeriod'] = 15" | sudo tee -a /tmp/demo-config.py > /dev/null
 sudo chown aminer:aminer /tmp/demo-config.py 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir /tmp/lib 2> /dev/null
