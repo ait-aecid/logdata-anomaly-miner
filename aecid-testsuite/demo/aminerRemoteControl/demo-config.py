@@ -16,7 +16,7 @@ config_properties = {}
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
-# will just result in a warning. However if they exist, they have
+# will just result in a warning. However, if they exist, they have
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
@@ -40,6 +40,7 @@ config_properties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
 # for the child also.
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
+config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'  # skipcq: BAN-B108
 # Read and store information to be used between multiple invocations
 # of aminer in this directory. The directory must only be accessible
 # to the 'AminerUser' but not group/world readable. On violation,
