@@ -117,6 +117,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                 matches.append(match)
             for match in matches:
                 value = match.match_object
+                if not isinstance(match.match_object, bytes):
+                    value = str(match.match_object).encode(AminerConfig.ENCODING)
                 if value is not None:
                     all_values_none = False
                 values.append(value)
