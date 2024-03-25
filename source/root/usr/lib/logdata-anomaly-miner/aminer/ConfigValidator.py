@@ -1,9 +1,7 @@
 import sys
 import os
 import logging
-
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
+import ast
 from cerberus import Validator, TypeDefinition
 
 
@@ -54,10 +52,10 @@ class ParserModelType:
 
                     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py',
                               'r') as sma:
-                        parser_normalisation_schema = eval(sma.read())
+                        parser_normalisation_schema = ast.literal_eval(sma.read())
                     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py',
                               'r') as sma:
-                        parser_validation_schema = eval(sma.read())
+                        parser_validation_schema = ast.literal_eval(sma.read())
                     normalisation_schema = {**parser_normalisation_schema}
                     validation_schema = {**parser_validation_schema}
 
@@ -151,10 +149,10 @@ class ConfigValidator(Validator):
     """Validates values from the configs."""
 
     def _validate_has_start(self, has_start, field, value):
-        """
-        Test if there is a key named "has_start".
-        The rule's arguments are validated against this schema:
-        {'type': 'boolean'}
+        """Test if there is a key named "has_start".
+
+        The rule's arguments are validated against this schema: {'type':
+        'boolean'}
         """
         seen_start = False
         for var in value:

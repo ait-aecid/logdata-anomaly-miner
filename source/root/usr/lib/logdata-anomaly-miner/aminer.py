@@ -1,9 +1,8 @@
 #!/usr/bin/python3 -BbbEIsSttW all
 # -*- coding: utf-8 -*-
-
-"""
-This is the main program of the "aminer" logfile miner tool.
-It does not import any local default site packages to decrease the attack surface due to manipulation of unused but available packages.
+"""This is the main program of the "aminer" logfile miner tool. It does not
+import any local default site packages to decrease the attack surface due to
+manipulation of unused but available packages.
 
 CAVEAT: This process will keep running with current permissions, no matter what was specified in 'AminerUser' and 'AminerGroup'
 configuration properties. This is required to allow the aminer parent process to reopen log files, which might need the
@@ -44,13 +43,13 @@ from logging.handlers import RotatingFileHandler
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-import aminer.AminerConfig as AminerConfig
-from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string
-from aminer.util.PersistenceUtil import clear_persistence, copytree
-from aminer.util import SecureOSFunctions
-from aminer.AnalysisChild import AnalysisChild
-from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource
-from metadata import __version_string__, __version__
+import aminer.AminerConfig as AminerConfig  # noqa: E402
+from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string  # noqa: E402
+from aminer.util.PersistenceUtil import clear_persistence, copytree  # noqa: E402
+from aminer.util import SecureOSFunctions  # noqa: E402
+from aminer.AnalysisChild import AnalysisChild  # noqa: E402
+from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource  # noqa: E402
+from metadata import __version_string__, __version__  # noqa: E402
 
 
 child_termination_triggered_flag = False
@@ -191,14 +190,11 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
 
 
 def parse_var(s):
-    """
-    Parse a key, value pair, separated by "=".
-    That's the reverse of ShellArgs.
+    """Parse a key, value pair, separated by "=". That's the reverse of
+    ShellArgs.
 
-    On the command line (argparse) a declaration will typically look like:
-        foo=hello
-    or
-        foo="hello world"
+    On the command line (argparse) a declaration will typically look
+    like:     foo=hello or     foo="hello world"
     """
     items = s.split("=")
     key = items[0].strip()  # we remove blanks around keys, as is logical
@@ -390,7 +386,7 @@ def main():
             child_user_id = getpwnam(child_user_name).pw_uid
         if child_group_name is not None:
             child_group_id = getgrnam(child_group_name).gr_gid
-    except:
+    except KeyError:
         print(f"Failed to resolve {AminerConfig.KEY_AMINER_USER} or {AminerConfig.KEY_AMINER_GROUP}", file=sys.stderr)
         sys.exit(1)
 
@@ -675,7 +671,7 @@ def main():
                     aminer_user_id = getpwnam(tmp_username).pw_uid
                 if tmp_group is not None:
                     aminer_group_id = getgrnam(tmp_group).gr_gid
-            except:
+            except KeyError:
                 print(f"Failed to resolve {AminerConfig.KEY_AMINER_USER} or {AminerConfig.KEY_AMINER_GROUP}", file=sys.stderr)
                 sys.exit(1)
 
@@ -714,7 +710,7 @@ def main():
             exec_args.append("--config-properties")
             for config_property in args.config_properties:
                 exec_args.append(config_property)
-        os.execv(sys.argv[0], exec_args)
+        os.execv(sys.argv[0], exec_args)  # nosec B606
         msg = 'Failed to execute child process'
         print(msg, file=sys.stderr)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)

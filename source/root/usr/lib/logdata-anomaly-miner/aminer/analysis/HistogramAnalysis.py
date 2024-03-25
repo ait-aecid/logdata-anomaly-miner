@@ -1,7 +1,7 @@
-"""
-This component performs a histogram analysis on one or more input properties.
-The properties are parsed values denoted by their parsing path. Those values
-are then handed over to the selected "binning function", that calculates the histogram bin.
+"""This component performs a histogram analysis on one or more input
+properties. The properties are parsed values denoted by their parsing path.
+Those values are then handed over to the selected "binning function", that
+calculates the histogram bin.
 
 * Binning:
 
@@ -60,17 +60,14 @@ import numpy
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.input.InputInterfaces import AtomHandlerInterface
+from scipy import stats, version
 
 binomial_test = None
-try:
-    from scipy import stats, version
-    v = [int(x) for x in version.full_version.split(".")]
-    if v[0] >= 1 and v[1] >= 7:
-        binomial_test = stats.binomtest
-    else:
-        binomial_test = stats.binom_test
-except:
-    pass
+v = [int(x) for x in version.full_version.split(".")]
+if v[0] >= 1 and v[1] >= 7:
+    binomial_test = stats.binomtest
+else:
+    binomial_test = stats.binom_test
 
 date_string = "%Y-%m-%d %H:%M:%S"
 
@@ -84,27 +81,31 @@ class BinDefinition(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def has_outlier_bins(self):
-        """
-        Report if this binning works with outlier bins, that are bins for all values outside the normal binning range.
-        If not, outliers are discarded. When true, the outlier bins are the first and last bin.
+        """Report if this binning works with outlier bins, that are bins for
+        all values outside the normal binning range.
+
+        If not, outliers are discarded. When true, the outlier bins are
+        the first and last bin.
         """
 
     @abc.abstractmethod
     def get_bin_names(self):
-        """Get the names of the bins for reporting, including the outlier bins if any."""
+        """Get the names of the bins for reporting, including the outlier bins
+        if any."""
 
     @abc.abstractmethod
     def get_bin(self, value):
-        """
-        Get the number of the bin this value should belong to.
+        """Get the number of the bin this value should belong to.
+
         @return the bin number or None if the value is an outlier and outlier bins were not requested. With outliers, bin 0
         is the bin with outliers below limit, first normal bin is at index 1.
         """
 
     @abc.abstractmethod
     def get_bin_p_value(self, bin_pos, total_values, bin_values):
-        """
-        Calculate a p-Value, how likely the observed number of elements in this bin is.
+        """Calculate a p-Value, how likely the observed number of elements in
+        this bin is.
+
         This method is used as an interface method, but it also returns a default value.
         @return the value or None when not applicable.
         """
@@ -148,14 +149,17 @@ class LinearNumericBinDefinition(BinDefinition):
         self.expected_bin_ratio = 1.0 / float(bin_count)
 
     def has_outlier_bins(self):
-        """
-        Report if this binning works with outlier bins, that are bins for all values outside the normal binning range.
-        If not, outliers are discarded. When true, the outlier bins are the first and last bin.
+        """Report if this binning works with outlier bins, that are bins for
+        all values outside the normal binning range.
+
+        If not, outliers are discarded. When true, the outlier bins are
+        the first and last bin.
         """
         return self.outlier_bins_flag
 
     def get_bin_names(self):
-        """Get the names of the bins for reporting, including the outlier bins if any."""
+        """Get the names of the bins for reporting, including the outlier bins
+        if any."""
         # Cache the names here so that multiple histograms using same BinDefinition do not use separate copies of the strings.
         if self.bin_names is not None:
             return self.bin_names
@@ -172,8 +176,8 @@ class LinearNumericBinDefinition(BinDefinition):
         return self.bin_names
 
     def get_bin(self, value):
-        """
-        Get the number of the bin this value should belong to.
+        """Get the number of the bin this value should belong to.
+
         @return the bin number or None if the value is an outlier and outlier bins were not requested. With outliers, bin 0
         is the bin with outliers below limit, first normal bin is at index 1.
         """
@@ -193,8 +197,9 @@ class LinearNumericBinDefinition(BinDefinition):
         return None
 
     def get_bin_p_value(self, bin_pos, total_values, bin_values):
-        """
-        Calculate a p-Value, how likely the observed number of elements in this bin is.
+        """Calculate a p-Value, how likely the observed number of elements in
+        this bin is.
+
         @return the value or None when not applicable.
         """
         if binomial_test is None:
@@ -236,8 +241,8 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
             raise ValueError(msg)
 
     def get_bin(self, value):
-        """
-        Get the number of the bin this value should belong to.
+        """Get the number of the bin this value should belong to.
+
         @return the bin number or None if the value is an outlier and outlier bins were not requested. With outliers, bin 0
         is the bin with outliers below limit, first normal bin is at index 1.
         """
@@ -254,9 +259,11 @@ class ModuloTimeBinDefinition(LinearNumericBinDefinition):
 
 
 class HistogramData:
-    """
-    This class defines the properties of one histogram to create and performs the accounting and reporting.
-    When the Python scipy package is available, reports will also include probability score created using binomial testing.
+    """This class defines the properties of one histogram to create and
+    performs the accounting and reporting.
+
+    When the Python scipy package is available, reports will also
+    include probability score created using binomial testing.
     """
 
     def __init__(self, property_path, bin_definition):
@@ -296,8 +303,9 @@ class HistogramData:
         self.bin_data = [0] * len(self.bin_data)
 
     def clone(self):
-        """
-        Clone this object so that calls to add_value do not influence the old object anymore.
+        """Clone this object so that calls to add_value do not influence the
+        old object anymore.
+
         This behavior is a mixture of shallow and deep copy.
         """
         histogram_data = HistogramData(self.property_path, self.bin_definition)
@@ -325,12 +333,13 @@ class HistogramData:
 
 
 class HistogramAnalysis(AtomHandlerInterface):
-    """This class creates a histogram for one or more properties extracted from a parsed atom."""
+    """This class creates a histogram for one or more properties extracted from
+    a parsed atom."""
 
     def __init__(self, aminer_config, histogram_definitions, report_interval, anomaly_event_handlers, reset_after_report_flag=True,
                  output_logline=True, log_resource_ignore_list=None):
-        """
-        Initialize the analysis component.
+        """Initialize the analysis component.
+
         @param aminer_config configuration from analysis_context.
         @param histogram_definitions a list of tuples containing the target property path to analyze and the BinDefinition to apply.
         @param report_interval delay in seconds before re-reporting. The parameter is applied to the parsed record data time, not the system
@@ -444,8 +453,9 @@ class HistogramAnalysis(AtomHandlerInterface):
 
 
 class PathDependentHistogramAnalysis(AtomHandlerInterface):
-    """
-    This class provides a histogram analysis for only one property but separate histograms for each group of correlated match paths.
+    """This class provides a histogram analysis for only one property but
+    separate histograms for each group of correlated match paths.
+
     Assume there two paths that include the requested property but they separate after the property was found on the path.
     Then objects of this class will produce 3 histograms: one for common path part including all occurences of the target property
     and one for each separate subpath, counting only those property values where the specific subpath was followed.
@@ -453,8 +463,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
 
     def __init__(self, aminer_config, target_path, bin_definition, report_interval, anomaly_event_handlers, reset_after_report_flag=True,
                  output_logline=True, log_resource_ignore_list=None):
-        """
-        Initialize the analysis component.
+        """Initialize the analysis component.
+
         @param aminer_config configuration from analysis_context.
         @param target_path the path to be analyzed in the parser match of the log atom.
         @param bin_definition the bin definition (LinearNumericBinDefinition, ModuloTimeBinDefinition) to be used.
@@ -503,13 +513,13 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
                 unmapped_path.append(path)
                 continue
             # So the path is already mapped to one histogram. See if all paths to the given histogram are still in all_path_set. If not,
-            # a split  within the mapping is needed.
+            # a split within the mapping is needed.
             clone_set = all_path_set.copy()
             mapped_path = None
             for mapped_path in histogram_mapping[0]:
                 try:
                     clone_set.remove(mapped_path)
-                except:
+                except KeyError:
                     if mapped_path != path:
                         missing_paths.add(mapped_path)
             if not missing_paths:

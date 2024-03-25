@@ -1,2 +1,3 @@
 [bandit]
 exclude = ./aecid-testsuite/unit/*
+skips = B108
