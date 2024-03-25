@@ -1,4 +1,5 @@
-"""This module defines a detector for correlations between discrete variables."""
+"""This module defines a detector for correlations between discrete
+variables."""
 import numpy as np
 import logging
 import sys
@@ -13,11 +14,13 @@ from aminer.util import PersistenceUtil
 
 
 class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """
-    This class first finds for each eventType a list of pairs of variables, which are afterwards tested if they are correlated.
-    For this a couple of preselection methods can be used. (See self.used_presel_meth)
-    Thereafter the correlations are checked, with the selected methods. (See self.used_cor_meth)
-    This module builds upon the event_type_detector.
+    """This class first finds for each eventType a list of pairs of variables,
+    which are afterwards tested if they are correlated.
+
+    For this a couple of preselection methods can be used. (See
+    self.used_presel_meth) Thereafter the correlations are checked, with
+    the selected methods. (See self.used_cor_meth) This module builds
+    upon the event_type_detector.
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -31,8 +34,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
                  validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, learn_mode=True, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param event_type_detector used to track the number of occurring events.
@@ -189,8 +193,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         self.load_persistence_data()
 
     def receive_atom(self, log_atom):
-        """
-        Receive an parsed atom and the information about the parser match.
+        """Receive an parsed atom and the information about the parser match.
+
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
@@ -277,7 +281,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
     def load_persistence_data(self):
-        """Extract the persistence data and appends various lists to create a consistent state."""
+        """Extract the persistence data and appends various lists to create a
+        consistent state."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             self.pos_var_cor = persistence_data[0]
@@ -296,7 +301,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     self.initialized[event_index] = True
 
     def init_cor(self, event_index):
-        """Initialise the possible correlations and runs the init-functions for the methods in self.used_cor_meth."""
+        """Initialise the possible correlations and runs the init-functions for
+        the methods in self.used_cor_meth."""
         # Append the supporting lists if necessary
         if len(self.pos_var_cor) < event_index+1:
             for i in range(event_index + 1 - len(self.pos_var_cor)):
@@ -496,7 +502,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     self.rel_list[event_index][pos_var_cor_index][1][j_val][i_val] += 1
 
     def init_cor_w_rel(self, event_index):
-        """Initialize w_rel_list and runs init_single_cor_w_rel for the chosen indices."""
+        """Initialize w_rel_list and runs init_single_cor_w_rel for the chosen
+        indices."""
         # Append the w_rel_list and w_rel_num_ll_to_vals if necessary
         if len(self.w_rel_list) < event_index+1:
             for _ in range(event_index + 1 - len(self.w_rel_list)):
@@ -552,7 +559,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
         # Removes the entries of w_rel_list[event_index][pos_var_cor_index] which can not be considered possible correlations
         # Generate the list of entries in i, which should be deleted
-        delete_i_vals = [i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if not(
+        delete_i_vals = [i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if not (
             self.check_cor_w_rel(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values(), len(
                 self.pos_var_val[event_index][j])))]
 
@@ -562,7 +569,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             del self.w_rel_num_ll_to_vals[event_index][pos_var_cor_index][0][i_val]
 
         # Generate the list of entries in j, which should be deleted
-        delete_j_vals = [j_val for j_val in self.w_rel_list[event_index][pos_var_cor_index][1] if not(
+        delete_j_vals = [j_val for j_val in self.w_rel_list[event_index][pos_var_cor_index][1] if not (
             self.check_cor_w_rel(self.w_rel_list[event_index][pos_var_cor_index][1][j_val].values(), len(
                 self.pos_var_val[event_index][i])))]
 
@@ -572,7 +579,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             del self.w_rel_num_ll_to_vals[event_index][pos_var_cor_index][1][j_val]
 
     def update_or_test_cor(self, event_index):
-        """Update or test the possible correlations and removes the false ones."""
+        """Update or test the possible correlations and removes the false
+        ones."""
         for meth in self.used_cor_meth:
             if meth == "Rel":
                 self.update_or_test_cor_rel(event_index)
@@ -1222,7 +1230,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         return True
 
     def pick_cor_match_disc_distr(self, prob_list1, prob_list2):
-        """Check if the the two discrete distribution could have a possible correlation."""
+        """Check if the the two discrete distribution could have a possible
+        correlation."""
         list1 = prob_list1.copy()
         list2 = prob_list2.copy()
         list1.sort(reverse=True)
@@ -1234,8 +1243,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         return True
 
     def pick_cor_exclude_due_distr(self, prob_list):
-        """
-        Check if the the discrete distribution can be expected to have possible correlation.
+        """Check if the the discrete distribution can be expected to have
+        possible correlation.
+
         Returns True for possible correlation and False to be excluded.
         """
         # Assigning epsilon
@@ -1247,7 +1257,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         return True
 
     def pick_cor_match_disc_vals(self, val_list1, val_list2):
-        """Check through the values of the two discrete distributions if they could have a possible correlation."""
+        """Check through the values of the two discrete distributions if they
+        could have a possible correlation."""
         if len([val for val in val_list1 if val in val_list2]) > self.match_disc_vals_sim_tresh*min(
                 len(val_list1), len(val_list2)):
             return True
@@ -1288,7 +1299,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             event_index])) if [i, j] not in tmp_list]
 
     def check_cor_w_rel(self, probability_list, total_pos_val):
-        """Check if the probabilities can be considered a possible correlation."""
+        """Check if the probabilities can be considered a possible
+        correlation."""
         if (self.check_cor_thres * total_pos_val < len(probability_list)) and (
                 total_pos_val > self.check_cor_num_thres or max(probability_list) - min(probability_list) < (
                     self.check_cor_prob_thres * sum(probability_list) / len(probability_list))):
@@ -1296,7 +1308,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         return True
 
     def validate_cor(self):
-        """Validate the found correlations and removes the ones, which fail the requirements."""
+        """Validate the found correlations and removes the ones, which fail the
+        requirements."""
         for meth in self.used_validate_cor_meth:
             if meth == "coverVals":
                 self.validate_cor_cover_vals()
@@ -1304,9 +1317,11 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 self.validate_cor_distinct_distr()
 
     def validate_cor_cover_vals(self):
-        """
-        Rate all found relation in regards to their coverage of the values in the first variable.
-        It removes the ones, which have a low rating and therefore can not considered real relations.
+        """Rate all found relation in regards to their coverage of the values
+        in the first variable.
+
+        It removes the ones, which have a low rating and therefore can
+        not considered real relations.
         """
         for meth in self.used_cor_meth:
             if meth == "Rel":
@@ -1340,9 +1355,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             event_val[pos_var_cor_index][1] = {}
 
     def validate_cor_distinct_distr(self):
-        """
-        Compare the right hand sides of the found relations.
-        It removes the correlations, which are too similar to the distribution of the variable type.
+        """Compare the right hand sides of the found relations.
+
+        It removes the correlations, which are too similar to the
+        distribution of the variable type.
         """
         for meth in self.used_cor_meth:
             if meth == "WRel":
@@ -1470,7 +1486,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, self.log_atom, self)
 
     def print_ini_w_rel(self, event_index):
-        """Print the generated correlations for the method "weighted relations"."""
+        """Print the generated correlations for the method "weighted
+        relations"."""
         message = f"Initialisation of the method weighted relations of the event {self.event_type_detector.get_event_type(event_index)}"
         message += "\n%s rules have been generated for this event type" % (
                 sum(len([i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if len(self.w_rel_list[event_index][
@@ -1529,7 +1546,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, self.log_atom, self)
 
     def print_failed_wrel_test(self, event_index, pos_var_cor_index, cor_direction, value1):
-        """Print the correlations which failed in a test step for the method "weighted relations"."""
+        """Print the correlations which failed in a test step for the method
+        "weighted relations"."""
         cor_direction_neg = 0
         if cor_direction == 0:
             cor_direction_neg = 1
@@ -1564,7 +1582,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, self.log_atom, self)
 
     def print_failed_wrel_update(self, event_index, pos_var_cor_index, cor_direction, value1):
-        """Print the correlations which failed in an update step for the method "weighted relations"."""
+        """Print the correlations which failed in an update step for the method
+        "weighted relations"."""
         cor_direction_neg = 0
         if cor_direction == 0:
             cor_direction_neg = 1
@@ -1599,9 +1618,11 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, self.log_atom, self)
 
     def bt_min_successes(self, num_BT, p, alpha):
-        """
-        Calculate the minimal number of successes for the BT with significance alpha.
-        p is the probability of success and num_BT is the number of observed tests.
+        """Calculate the minimal number of successes for the BT with
+        significance alpha.
+
+        p is the probability of success and num_BT is the number of
+        observed tests.
         """
         tmp_sum = 0.0
         max_observations_factorial = np.math.factorial(num_BT)

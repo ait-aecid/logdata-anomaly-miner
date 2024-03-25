@@ -1,5 +1,5 @@
-"""
-This module is a detector which uses a tsa-arima model to track appearance frequencies of events.
+"""This module is a detector which uses a tsa-arima model to track appearance
+frequencies of events.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,7 +16,7 @@ import logging
 import copy
 
 from aminer import AminerConfig
-from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
+from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, \
     DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
@@ -30,7 +30,8 @@ from scipy.signal import savgol_filter
 
 
 class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """This class is used for an arima time series analysis of the appearances of log lines to events."""
+    """This class is used for an arima time series analysis of the appearances
+    of log lines to events."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -41,8 +42,9 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                  acf_threshold=0.2, round_time_interval_threshold=0.02, force_period_length=False, set_period_length=604800,
                  min_log_lines_per_time_step=10, persistence_id="Default", target_path_list=None, ignore_list=None, output_logline=True,
                  learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param event_type_detector used to track the number of events in the time windows.
@@ -119,9 +121,10 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
         self.load_persistence_data()
 
     def receive_atom(self, log_atom):
-        """
-        Receive the atom and return True.
-        The log_atom doesn't need to be analyzed, because the counting and calls of the predictions is performed by the ETD.
+        """Receive the atom and return True.
+
+        The log_atom doesn't need to be analyzed, because the counting
+        and calls of the predictions is performed by the ETD.
         """
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name == source:
@@ -268,7 +271,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                                               sum(self.time_window_history[event_index][-self.num_division_time_step:])],
                                           order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                             self.arima_models[event_index] = model.fit()
-                    except:
+                    except Exception:
                         self.arima_models[event_index] = None
                         self.time_window_history[event_index] = []
                 else:
@@ -289,7 +292,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
             self.time_trigger_list[2].append(-1)
 
     def calculate_time_steps(self, counts, log_atom):
-        """Returns a list of the timestep lengths in seconds, if no timestep should be created the value is set to -1"""
+        """Returns a list of the timestep lengths in seconds, if no timestep
+        should be created the value is set to -1."""
         time_step_list = []  # List of the resulting time_steps
         self.time_window_history = [[] for _ in range(len(counts))]  # Initialize time_window_history
         self.arima_models = [None for _ in range(len(counts))]  # Initialize arima_models
@@ -356,7 +360,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
         return time_step_list
 
     def test_num_appearance(self, event_index, count, log_atom):
-        """This function makes a one-step prediction and raises an alert if the count do not match the expected appearance"""
+        """This function makes a one-step prediction and raises an alert if the
+        count do not match the expected appearance."""
         # Append the list of time_window_history and arima_models if it is to short
         if len(self.time_window_history) <= event_index:
             self.time_window_history += [[] for _ in range(event_index + 1 - len(self.time_window_history))]
@@ -386,7 +391,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                                 self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models[event_index] = model.fit()
-                    except:
+                    except Exception:
                         self.arima_models[event_index] = None
                 else:
                     # Add the arima_model to the list
@@ -398,7 +403,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                                 sum(self.time_window_history[event_index][-self.num_division_time_step:])],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models[event_index] = model.fit()
-                    except:
+                    except Exception:
                         self.arima_models[event_index] = None
                         self.time_window_history[event_index] = []
             if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
@@ -498,7 +503,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                 self.arima_models[event_index] = self.arima_models[event_index].append([count_sum])
 
     def one_step_prediction(self, event_index):
-        """Make a one step prediction with the Arima model"""
+        """Make a one step prediction with the Arima model."""
         prediction = self.arima_models[event_index].get_forecast(1)
         prediction = prediction.conf_int(alpha=self.alpha)
 
@@ -506,9 +511,11 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
         return prediction[0][0], prediction[0][1]
 
     def bt_min_successes(self, num_bt, p, alpha):
-        """
-        Calculate the minimal number of successes for the BT with significance alpha.
-        p is the probability of success and num_bt is the number of observed tests.
+        """Calculate the minimal number of successes for the BT with
+        significance alpha.
+
+        p is the probability of success and num_bt is the number of
+        observed tests.
         """
         tmp_sum = 0.0
         max_observations_factorial = np.math.factorial(num_bt)

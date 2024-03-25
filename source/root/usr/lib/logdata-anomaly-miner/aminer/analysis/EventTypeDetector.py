@@ -1,6 +1,6 @@
-"""
-This module can assigns every parsed log line a eventtype and can be used for profiling purposes.
-It supports the modules VariableTypeDetector and VariableCorrelationDetector.
+"""This module can assigns every parsed log line a eventtype and can be used
+for profiling purposes. It supports the modules VariableTypeDetector and
+VariableCorrelationDetector.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -23,15 +23,17 @@ from aminer.util import PersistenceUtil
 
 
 class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """This class keeps track of the found event types and the values of each variable."""
+    """This class keeps track of the found event types and the values of each
+    variable."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id="Default", target_path_list=None, id_path_list=None,
                  allow_missing_id=False, allowed_id_tuples=None, min_num_vals=1000, max_num_vals=1500, save_values=True,
                  log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param persistence_id name of persistence file.
@@ -79,7 +81,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
         self.load_persistence_data()
 
     def receive_atom(self, log_atom):
-        """Receives a parsed atom and keeps track of the event types and the values of the variables of them."""
+        """Receives a parsed atom and keeps track of the event types and the
+        values of the variables of them."""
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name.decode() == source:
                 return False
@@ -243,7 +246,8 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
             self.values.append([[] for _ in range(len(self.variable_key_list[current_index]))])
 
     def append_values(self, log_atom, current_index):
-        """Add the values of the variables of the current line to self.values."""
+        """Add the values of the variables of the current line to
+        self.values."""
         for var_index, var_key in enumerate(self.variable_key_list[current_index]):
             # Skips the variable if check_variable is False, or if the var_key is not included in the match_dict
             if not self.check_variables[current_index][var_index]:
@@ -268,7 +272,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                     self.values[current_index][var_index].append(
                         float(log_atom.parser_match.get_match_dictionary()[var_key].match_object))
             # Add the strings as values
-            except:
+            except ValueError:
                 if isinstance(log_atom.parser_match.get_match_dictionary()[var_key].match_string, bytes):
                     self.values[current_index][var_index].append(
                         repr(log_atom.parser_match.get_match_dictionary()[var_key].match_string)[2:-1])
