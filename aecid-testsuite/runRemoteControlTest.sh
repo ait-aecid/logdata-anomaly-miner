@@ -2,16 +2,15 @@ FILE=/tmp/demo-config.py
 CMD_PATH=/tmp/commands.txt
 sudo cp demo/aminerRemoteControl/demo-config.py $FILE
 sudo sed -i 's/StreamPrinterEventHandler(analysis_context)/StreamPrinterEventHandler(analysis_context, stream=open("\/tmp\/log.txt", "a"))/g' $FILE
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
-sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
+OUTPUT_FILE=/tmp/output.txt
 
-sudo aminer --config "$FILE" & > /dev/null
-sleep 1
+sudo aminer --config "$FILE" & > $OUTPUT_FILE
+for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 stdout=$(sudo aminerremotecontrol --exec-file $CMD_PATH)
 expected="File $CMD_PATH does not exist"
@@ -580,14 +579,13 @@ expected_list="${expected_list}${stdout}
 
 sudo pkill -x aminer
 sleep 2 & wait $!
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
-sudo aminer --config "$FILE" & > /dev/null
-sleep 1
+sudo aminer --config "$FILE" & > $OUTPUT_FILE
+for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 START_TIME=$(date +%s)
 stdout=$(sudo aminerremotecontrol --exec-file $CMD_PATH)
@@ -606,6 +604,7 @@ EXEC_FILE_TIME=$(($(date +%s)-START_TIME))
 sudo pkill -x aminer
 sleep 2 & wait $!
 sudo rm $CMD_PATH
+sudo rm $OUTPUT_FILE
 echo "Command execution time with --exec ${EXEC_TIME}s"
 echo "Command execution time with --exec-file ${EXEC_FILE_TIME}s"
 exit $exit_code
