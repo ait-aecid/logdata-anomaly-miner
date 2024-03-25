@@ -75,7 +75,6 @@ class DateTimeModelElement(ModelElementInterface):
     determine the length of the parsed string.
     """
 
-    # skipcq: PYL-W0613
     def __init__(self, element_id: str, date_format: bytes, time_zone: timezone = None, text_locale: Union[str, tuple] = None,
                  start_year: int = None, max_time_jump_seconds: int = 86400, timestamp_scale: int = 1):
         """
@@ -266,7 +265,7 @@ class DateTimeModelElement(ModelElementInterface):
         # Now combine the values and build the final value.
         parsed_date_time = None
         total_seconds = result[7]
-        if total_seconds != 0:  # skipcq: PTC-W0048
+        if total_seconds != 0:
             total_seconds += result[6]
         # For epoch second formats, the datetime value usually is not important. So stay with parsed_date_time to none.
         else:

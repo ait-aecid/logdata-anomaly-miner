@@ -50,6 +50,7 @@ RUN apt-get update && apt-get install -y \
     python3-pandas \
     python3-patsy \
     python3-defusedxml \
+    python3-bandit
     libacl1-dev \
     postfix \
     procps \

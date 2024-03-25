@@ -268,7 +268,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                     self.values[current_index][var_index].append(
                         float(log_atom.parser_match.get_match_dictionary()[var_key].match_object))
             # Add the strings as values
-            except:  # skipcq: FLK-E722
+            except:
                 if isinstance(log_atom.parser_match.get_match_dictionary()[var_key].match_string, bytes):
                     self.values[current_index][var_index].append(
                         repr(log_atom.parser_match.get_match_dictionary()[var_key].match_string)[2:-1])
@@ -278,7 +278,7 @@ class EventTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
         # Reduce the numbers of entries in the value list
         if len(self.variable_key_list[current_index]) > 0 and len([i for i in self.check_variables[current_index] if i]) > 0 and \
                 len(self.values[current_index][self.check_variables[current_index].index(True)]) > self.max_num_vals:
-            for var_index in range(len(self.variable_key_list[current_index])):  # skipcq: PTC-W0060
+            for var_index in range(len(self.variable_key_list[current_index])):
                 # Skips the variable if check_variable is False
                 if not self.check_variables[current_index][var_index]:
                     continue

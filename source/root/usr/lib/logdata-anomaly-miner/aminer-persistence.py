@@ -4,10 +4,10 @@ import os
 import re
 import argparse
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from aminer.AminerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR  # skipcq: FLK-E402
-from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
-from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
-from metadata import __version_string__  # skipcq: FLK-E402
+from aminer.AminerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR
+from aminer.util.StringUtil import colflame, flame, supports_color
+from aminer.util.PersistenceUtil import clear_persistence, copytree
+from metadata import __version_string__
 
 
 def main():
@@ -40,11 +40,9 @@ def main():
     config_file_name = args.config
     rc_response_string = 'Remote execution response: '
     if args.list:
-        # skipcq: BAN-B605, BAN-B607
         process = os.popen('sudo aminerremotecontrol --exec "list_backups(analysis_context)"')
         print(process.read().strip('\n').strip(rc_response_string))
     if args.backup:
-        # skipcq: BAN-B605, BAN-B607
         process = os.popen('sudo aminerremotecontrol --exec "create_backup(analysis_context)"')
         print(process.read().strip('\n').strip(rc_response_string))
     if args.restore is not None:

@@ -211,7 +211,7 @@ class AminerRemoteControlExecutionMethods:
             elif '.' in val:
                 try:
                     val = float(val)
-                except ValueError:  # skipcq: FLK-E722
+                except ValueError:
                     pass
         self.REMOTE_CONTROL_RESPONSE = f'"{property_name}": {val}'
 
@@ -383,7 +383,6 @@ class AminerRemoteControlExecutionMethods:
             msg = component.allowlist_event(f"Analysis.{component.__class__.__name__}", event_data, allowlisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
@@ -406,7 +405,6 @@ class AminerRemoteControlExecutionMethods:
             msg = component.blocklist_event(f"Analysis.{component.__class__.__name__}", event_data, blocklisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
@@ -429,7 +427,6 @@ class AminerRemoteControlExecutionMethods:
             msg = component.print_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
@@ -452,7 +449,6 @@ class AminerRemoteControlExecutionMethods:
             msg = component.add_to_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
@@ -475,7 +471,6 @@ class AminerRemoteControlExecutionMethods:
             msg = component.remove_from_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
@@ -642,7 +637,6 @@ class AminerRemoteControlExecutionMethods:
                     allowlisted_flag = True
                 except NotImplementedError:
                     result_string += f"FAIL {event_id}: component does not support allowlisting."
-                # skipcq: PYL-W0703
                 except Exception as wl_exception:
                     result_string += f"FAIL {event_id}: {str(wl_exception)}\n"
             elif event_type == 'Analysis.AllowlistViolationDetector':
@@ -726,6 +720,6 @@ def _reformat_attr(attr):
     if not isinstance(attr, (list, dict, tuple, set)) and not rep.startswith('"') and not rep.isdecimal():
         try:
             float(rep)
-        except ValueError:  # skipcq: FLK-E722
+        except ValueError:
             rep = f'"{rep}"'
     return rep

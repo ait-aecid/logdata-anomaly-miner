@@ -6,11 +6,11 @@ This is the main program of the "aminer" logfile miner tool.
 It does not import any local default site packages to decrease the attack surface due to manipulation of unused but available packages.
 
 CAVEAT: This process will keep running with current permissions, no matter what was specified in 'AminerUser' and 'AminerGroup'
-configuration properties. This is required to allow the aminer parent parent process to reopen log files, which might need the
+configuration properties. This is required to allow the aminer parent process to reopen log files, which might need the
 elevated privileges.
 
 NOTE: This tool is developed to allow secure operation even in hostile environment, e.g. when one directory, where aminer attempts
-to open logfiles is already under full control of an attacker. However it is not intended to be run as SUID-binary, this would
+to open logfiles is already under full control of an attacker. However, it is not intended to be run as SUID-binary, this would
 require code changes to protect also against standard SUID attacks.
 
 Parameters:
@@ -44,13 +44,13 @@ from logging.handlers import RotatingFileHandler
 
 # As site packages are not included, define from where we need to execute code before loading it.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-import aminer.AminerConfig as AminerConfig  # skipcq: FLK-E402
-from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string  # skipcq: FLK-E402
-from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
-from aminer.util import SecureOSFunctions  # skipcq: FLK-E402
-from aminer.AnalysisChild import AnalysisChild  # skipcq: FLK-E402
-from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource  # skipcq: FLK-E402
-from metadata import __version_string__, __version__  # skipcq: FLK-E402
+import aminer.AminerConfig as AminerConfig
+from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string
+from aminer.util.PersistenceUtil import clear_persistence, copytree
+from aminer.util import SecureOSFunctions
+from aminer.AnalysisChild import AnalysisChild
+from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource
+from metadata import __version_string__, __version__
 
 
 child_termination_triggered_flag = False
@@ -289,7 +289,7 @@ def main():
     clear_persistence_flag = args.clear
     remove_persistence_dirs = args.remove
     from_begin_flag = args.from_begin
-    global offline_mode  # skipcq: PYL-W0603
+    global offline_mode
     offline_mode = args.offline_mode
     if args.restore is not None and ('.' in args.restore or '/' in args.restore):
         parser.error(f"The restore path {args.restore} must not contain any . or /")
@@ -390,7 +390,7 @@ def main():
             child_user_id = getpwnam(child_user_name).pw_uid
         if child_group_name is not None:
             child_group_id = getgrnam(child_group_name).gr_gid
-    except:  # skipcq: FLK-E722
+    except:
         print(f"Failed to resolve {AminerConfig.KEY_AMINER_USER} or {AminerConfig.KEY_AMINER_GROUP}", file=sys.stderr)
         sys.exit(1)
 
@@ -582,7 +582,7 @@ def main():
             os.umask(0o177)
             remote_control_socket.bind(remote_control_socket_name)
             # Do not perform any cleanup, flushing of streams. Use _exit(0) to avoid interference with fork.
-            os._exit(0)  # skipcq: PYL-W0212
+            os._exit(0)
         os.waitpid(bind_child_pid, 0)
         remote_control_socket.listen(4)
 
@@ -592,34 +592,33 @@ def main():
         try:
             # Fork a child to make sure, we are not the process group leader already.
             child_pid = os.fork()
-        except Exception as fork_exception:  # skipcq: PYL-W0703
+        except Exception as fork_exception:
             msg = 'Failed to daemonize: %s' % fork_exception
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
         if child_pid != 0:
             # This is the parent.
-            os._exit(0)  # skipcq: PYL-W0212
+            os._exit(0)
         # This is the child. Create a new session and become process group leader. Here we get rid of the controlling tty.
         os.setsid()
         # Fork again to become an orphaned process not being session leader, hence not able to get a controlling tty again.
         try:
             child_pid = os.fork()
-        except Exception as fork_exception:  # skipcq: PYL-W0703
+        except Exception as fork_exception:
             msg = f"Failed to daemonize: {fork_exception}"
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
         if child_pid != 0:
             # This is the parent.
-            os._exit(0)  # skipcq: PYL-W0212
+            os._exit(0)
         # Move to root directory to avoid lingering in some cwd someone else might want to unmount.
         os.chdir('/')
-        # Change the umask here to clean all group/other mask bits so that accidentially created files are not accessible by other.
+        # Change the umask here to clean all group/other mask bits so that accidentially created files are not accessible by others.
         os.umask(0o77)
 
     # Install a signal handler catching common stop signals and relaying it to all children for sure.
-    # skipcq: PYL-W0603
     global child_termination_triggered_flag
     child_termination_triggered_flag = False
 
@@ -630,7 +629,6 @@ def main():
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).info(msg)
         # Just set the flag. It is likely, that child received same signal also so avoid multiple signaling, which could interrupt the
         # shutdown procedure again.
-        # skipcq: PYL-W0603
         global child_termination_triggered_flag
         child_termination_triggered_flag = True
 
@@ -677,7 +675,7 @@ def main():
                     aminer_user_id = getpwnam(tmp_username).pw_uid
                 if tmp_group is not None:
                     aminer_group_id = getgrnam(tmp_group).gr_gid
-            except:  # skipcq: FLK-E722
+            except:
                 print(f"Failed to resolve {AminerConfig.KEY_AMINER_USER} or {AminerConfig.KEY_AMINER_GROUP}", file=sys.stderr)
                 sys.exit(1)
 
@@ -703,7 +701,7 @@ def main():
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 # Flush stderr before exit without any cleanup.
                 sys.stderr.flush()
-                os._exit(1)  # skipcq: PYL-W0212
+                os._exit(1)
 
         # Now execute the very same program again, but user might have moved or renamed it meanwhile. This would be problematic with
         # SUID-binaries (which we do not yet support). Do NOT just fork but also exec to avoid child circumventing
@@ -716,12 +714,12 @@ def main():
             exec_args.append("--config-properties")
             for config_property in args.config_properties:
                 exec_args.append(config_property)
-        os.execv(sys.argv[0], exec_args)  # skipcq: BAN-B606
+        os.execv(sys.argv[0], exec_args)
         msg = 'Failed to execute child process'
         print(msg, file=sys.stderr)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
         sys.stderr.flush()
-        os._exit(1)  # skipcq: PYL-W0212
+        os._exit(1)
     child_socket.close()
 
     # Send all log resource information currently available to child process.

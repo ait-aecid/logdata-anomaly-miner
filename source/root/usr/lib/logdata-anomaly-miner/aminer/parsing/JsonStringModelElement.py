@@ -58,7 +58,6 @@ class JsonAccessObject:
         if islist > -1:
             for k in d:
                 if isinstance(k, dict):
-                    # skipcq: FLK-E228
                     self.levels.append(f"[{islist}]")
                     islist = islist+1
                     self.flatten(k)
@@ -68,7 +67,6 @@ class JsonAccessObject:
                 else:
                     if self.debug:
                         print(f"{ self.join_levels() }[{ islist }]: { k }")
-                    # skipcq: PYL-C0209
                     self.create_collection_entry("%s[%d]" % (self.join_levels(), islist), self.levels, k)
                     islist = islist + 1
         else:
@@ -90,7 +88,6 @@ class JsonAccessObject:
                         self.create_collection_entry(k, deque([k]), v)
                     else:
                         if islist > -1:
-                            # skipcq: FLK-E228
                             self.levels.append(f"{k}[{ islist}]")
                             islist = islist+1
                         else:
@@ -137,7 +134,7 @@ class JsonStringModelElement(ModelElementInterface):
         """Get the element ID."""
         return self.element_id
 
-    def get_child_elements(self):  # skipcq: PYL-R0201
+    def get_child_elements(self):
         """
         Get all possible child model elements of this element.
         @return None as there are no children of this element.

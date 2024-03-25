@@ -100,6 +100,11 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
+	runBandit)
+		cd $TESTDIR
+		./${1}.sh ${*:2}
+		exit $?
+		;;
 	runConfAvailableTest)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
@@ -113,6 +118,7 @@ case "$1" in
 	ALL)
 		cd $TESTDIR
 		./runMypy.sh
+		./runBandit.sh
 		./runReleaseStringCheck.sh
     ./runSuspendModeTest.sh
     ./runUnittests.sh
@@ -152,7 +158,7 @@ case "$1" in
 		echo "Usage: [ ALL | SHELL | runSuspendModeTest | runUnittests | runAminerDemo | runJsonDemo | runAminerJsonInputDemo"
 		echo "         runAminerXmlInputDemo | runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest"
 		echo "         runTryItOut | runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
-		echo "         runHowToMissingMatchPathValueDetector | runHowToEntropyDetector | runAminerEncodingDemo | runMypy"
+		echo "         runHowToMissingMatchPathValueDetector | runHowToEntropyDetector | runAminerEncodingDemo | runMypy | runBandit"
 		echo "         runConfAvailableTest | runReleaseStringCheck ] <options>"
 		exit 1
 		;;

@@ -75,7 +75,7 @@ class DecimalFloatValueModelElement(ModelElementInterface):
                 break
             match_len += 1
 
-        if match_len == 1:  # skipcq: PTC-W0048
+        if match_len == 1:
             if data[0] not in self.digits:
                 return None
         elif num_start_pos == match_len and match_len == 1:  # only return None if match_len is 1 to allow 00 with zero padding.

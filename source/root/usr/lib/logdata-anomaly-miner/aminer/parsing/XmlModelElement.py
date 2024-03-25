@@ -85,7 +85,7 @@ class XmlModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
 
-    def is_escaped_unicode(self, text: str):  # skipcq: PYL-R0201
+    def is_escaped_unicode(self, text: str):
         """Check if the text contains only ascii characters."""
         if all(ord(c) < 128 for c in text):  # is escaped unicode ascii?
             return True
@@ -311,7 +311,7 @@ class XmlModelElement(ModelElementInterface):
                     data = b"null"
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
-                if isinstance(val, dict):  # skipcq: PYL-R1723
+                if isinstance(val, dict):
                     matches += self.parse_dict(val, match_array[j], f"{current_path}/{split_key}", match_context)
                     if matches[-1] is None:
                         if len(value) - 1 == k:
@@ -359,7 +359,7 @@ class XmlModelElement(ModelElementInterface):
             match_context.update(match_context.match_data[:match_context.match_data.find(search_string) + len(search_string)])
         return None
 
-    def parse_object(self, xml_dict, xml_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
+    def parse_object(self, xml_dict, xml_match_data, key, split_key, current_path, match_context):
         """Parse a literal from the xml object."""
         current_path += "/" + key
         data = xml_match_data[split_key]

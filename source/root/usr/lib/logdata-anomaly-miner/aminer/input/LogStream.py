@@ -54,7 +54,6 @@ class FileLogDataResource(LogDataResource):
         self.total_consumed_length = 0
         # Create a hash for repositioning. There is no need to be cryptographically secure here: if upstream can manipulate the content,
         # to provoke hash collisions, correct positioning would not matter anyway.
-        # skipcq: PTC-W1003, BAN-B324
         self.repositioning_digest = hashlib.md5()
 
         if (log_stream_fd != -1) and (repositioning_data is not None):
@@ -67,7 +66,6 @@ class FileLogDataResource(LogDataResource):
                 logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                 print(msg, file=sys.stderr)
             else:
-                # skipcq: PTC-W1003, BAN-B324
                 hash_algo = hashlib.md5()
                 length = repositioning_data[1]
                 while length != 0:
@@ -180,7 +178,6 @@ class UnixSocketLogDataResource(LogDataResource):
     The characteristics of this type of resource is, that reopening works only after end of stream of was reached.
     """
 
-    # skipcq: PYL-W0231, PYL-W0613
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
         """
         Create a new unix socket type resource.
@@ -206,7 +203,7 @@ class UnixSocketLogDataResource(LogDataResource):
         @raise OSError when opening failed with unexpected error.
         @return True if the resource was really opened or False if opening was not yet possible but should be attempted again.
         """
-        if reopen_flag:  # skipcq: PTC-W0048
+        if reopen_flag:
             if self.log_stream_fd != -1:
                 return False
         elif self.log_stream_fd != -1:
@@ -252,7 +249,6 @@ class UnixSocketLogDataResource(LogDataResource):
         self.total_consumed_length += length
         self.buffer = self.buffer[length:]
 
-    # skipcq: PYL-R0201
     def get_repositioning_data(self):
         """Get the data for repositioning the stream. The returned structure has to be JSON serializable."""
         return None

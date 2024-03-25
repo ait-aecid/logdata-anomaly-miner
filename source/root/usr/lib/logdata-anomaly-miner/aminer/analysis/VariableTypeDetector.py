@@ -655,7 +655,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                         elif len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
                             tmp_type_val[0].append(1)
-                            for i in range(1, len(tmp_type_val)):  # skipcq: PTC-W0060
+                            for i in range(1, len(tmp_type_val)):
                                 tmp_type_val[i].append(0)
 
                         else:
@@ -679,7 +679,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                     tmp_max = 1
                     exceeded_thresh = False
-                    for type_index in range(1, len(var_val)):  # skipcq: PTC-W0060
+                    for type_index in range(1, len(var_val)):
                         # Continuous Distribution
                         if type_index in [self.var_type_history_list_order.index('cont'), self.var_type_history_list_order.index('range')]:
                             num_app = len([1 for x in var_val[type_index][1] if x != 0])
@@ -792,7 +792,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                         # Indices of the variables, which would have failed the indicator
                         indices_failed_tests = []
-                        for var_index in range(len(self.var_type[event_index])):  # skipcq: PTC-W0060
+                        for var_index in range(len(self.var_type[event_index])):
                             if indicator_list[var_index] >= self.indicator_thres:
                                 indices_failed_tests.append(var_index)
                                 self.failed_indicators[event_index][var_index].append(self.event_type_detector.num_event_lines[event_index])
@@ -2093,7 +2093,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 indicator_list.append(sum(diff_list))
         return indicator_list
 
-    def bt_min_successes(self, num_bt, p, alpha):  # skipcq: PYL-R0201
+    def bt_min_successes(self, num_bt, p, alpha):
         """
         Calculate the minimal number of successes for the BT with significance alpha.
         p is the probability of success and num_bt is the number of observed tests.
@@ -2120,7 +2120,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Calculate the min_successes normally for each value one by one
         tmp_list = []
-        for i in range(len(self.var_type[event_index][var_index][1])):  # skipcq: PTC-W0060
+        for i in range(len(self.var_type[event_index][var_index][1])):
             tmp_list.append(self.bt_min_successes(num_bt, p_list[i], alpha))
         tmp_list = np.array(tmp_list)
         return tmp_list

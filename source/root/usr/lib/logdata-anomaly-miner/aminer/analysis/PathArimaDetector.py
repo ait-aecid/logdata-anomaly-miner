@@ -262,7 +262,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                     self.result_list[event_index] = self.result_list[event_index][:count_index] +\
                             self.result_list[event_index][count_index + 1:]
 
-            # skipcq: PYL-C0209
             message = "Disabled the TSA for the target paths %s of event %s" % (
                     [self.event_type_detector.variable_key_list[event_index][count_index] for count_index in delete_indices],
                     self.event_type_detector.get_event_type(event_index))
@@ -296,7 +295,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                                     order=(self.period_length_list[event_index][count_index], 0, 0),
                                     seasonal_order=(0, 0, 0, self.period_length_list[event_index][count_index]))
                             self.arima_models[event_index][count_index] = model.fit()
-                        except:  # skipcq FLK-E722
+                        except:
                             self.arima_models[event_index][count_index] = None
                     if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
                         self.stop_learning_timestamp = max(

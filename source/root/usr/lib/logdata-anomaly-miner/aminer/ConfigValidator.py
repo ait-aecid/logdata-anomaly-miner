@@ -4,7 +4,7 @@ import logging
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
-from cerberus import Validator, TypeDefinition  # skipcq: FLK-E402
+from cerberus import Validator, TypeDefinition
 
 
 class ParserModelType:
@@ -45,7 +45,7 @@ class ParserModelType:
                     import copy
                     from aminer.AminerConfig import DEBUG_LOG_NAME
                     from aminer.YamlConfig import filter_config_errors, build_parsing_model
-                    with open(module) as yamlfile:  # skipcq: PTC-W6004
+                    with open(module) as yamlfile:
                         try:
                             yaml_data = yaml.safe_load(yamlfile)
                         except yaml.YAMLError as exception:
@@ -54,11 +54,9 @@ class ParserModelType:
 
                     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py',
                               'r') as sma:
-                        # skipcq: PYL-W0123
                         parser_normalisation_schema = eval(sma.read())
                     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py',
                               'r') as sma:
-                        # skipcq: PYL-W0123
                         parser_validation_schema = eval(sma.read())
                     normalisation_schema = {**parser_normalisation_schema}
                     validation_schema = {**parser_validation_schema}
@@ -196,27 +194,18 @@ class NormalisationValidator(ConfigValidator):
     types_mapping["analysistype"] = analysis_type
     types_mapping["eventhandlertype"] = event_handler_type
 
-    # we skip the following issue, otherwise an
-    # "must have self"-issue will pop up
-    # skipcq: PYL-R0201
     def _normalize_coerce_toparsermodel(self, value):
         """Create a ParserModelType from the string representation."""
         if isinstance(value, str):
             return ParserModelType(value)
         return None
 
-    # we skip the following issue, otherwise an
-    # "must have self"-issue will pop up
-    # skipcq: PYL-R0201
     def _normalize_coerce_toanalysistype(self, value):
         """Create a AnalysisType from the string representation."""
         if isinstance(value, str):
             return AnalysisType(value)
         return None
 
-    # we skip the following issue, otherwise an
-    # "must have self"-issue will pop up
-    # skipcq: PYL-R0201
     def _normalize_coerce_toeventhandlertype(self, value):
         """Create a EventHandlerType from the string representation."""
         if isinstance(value, str):

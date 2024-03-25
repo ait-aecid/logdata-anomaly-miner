@@ -162,7 +162,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             if log_event in self.idf_counts:
                 self.idf_counts[log_event].add(id_tuple)
             else:
-                self.idf_counts[log_event] = set([id_tuple])  # skipcq: PTC-W0018
+                self.idf_counts[log_event] = set([id_tuple])
 
         if id_tuple not in self.next_check_time:
             # First processed log atom, initialize next check time.

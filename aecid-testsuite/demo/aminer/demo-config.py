@@ -1,7 +1,7 @@
 # This is a template for the "aminer" logfile miner tool. Copy
 # it to "config.py" and define your ruleset.
 
-config_properties = {}  # skipcq: PY-W0072
+config_properties = {}
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
@@ -29,13 +29,13 @@ config_properties['AminerGroup'] = 'aminer'
 # for the child also.
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
-config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'  # skipcq: BAN-B108
+config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'
 # Read and store information to be used between multiple invocations
 # of aminer in this directory. The directory must only be accessible
 # to the 'AminerUser' but not group/world readable. On violation,
 # aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'  # skipcq: BAN-B108
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 config_properties['Core.PersistencePeriod'] = 600
 
 # Define a target e-mail address to send alerts to. When undefined,

@@ -50,7 +50,7 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         self.use_real_time = use_real_time
         self.continuous_timestamp_missing_warning = continuous_timestamp_missing_warning
 
-    def get_atomizer_for_resource(self, resource_name):  # skipcq: PYL-W0613
+    def get_atomizer_for_resource(self, resource_name):
         """
         Get an atomizer for a given resource.
         @param resource_name the resource name for atomizer selection is ignored in this type of factory.

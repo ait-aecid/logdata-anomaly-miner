@@ -9,7 +9,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test1hex_machine_valid_values(self):
         """Test the hex_machine with all valid four digit values from 0x0000 to 0xFFFF."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, i)
         for i in range(65536):
             string = str(format(i, '#06x')).encode()[2:]  # remove 0x
@@ -27,7 +27,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test2hex_machine_too_short_value(self):
         """Test the hex_machine with too short hex values."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, i)
         for i in range(4096):
             # converts the integer to the shortest possible hex string.
@@ -45,7 +45,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test3hex_machine_too_long_value(self):
         """Test the hex_machine with too long hex values. All values longer than 4 digits are stripped."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, i)
         # only 00FF is read.
         i = 255
@@ -73,7 +73,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test4hex_machine_boundary_values(self):
         """Test boundary values before and after 0-9, a-f, A-F."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, i)
         allowed_value_list = '0123456789abcdefABCDEF'
         forbidden_value_list = [int(hex(j), 16) for j in range(48)] + [int(hex(j), 16) for j in range(58, 65)] + [
@@ -92,9 +92,9 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test5hex_machine_started_from_string_machine(self):
         """Test if the hex_machine is started from the string_machine."""
-        def check_value(_data):  # skipcq: PY-D0003, PTC-W0049
+        def check_value(_data):
             pass
-        string = b"\u02FF"  # skipcq: PYL-W1402
+        string = b"\u02FF"
         state = string_machine(check_value)
         hex_machine_found = False
         for c in string:
@@ -104,7 +104,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         self.assertIsNone(state(ord(b'"')))
         self.assertTrue(hex_machine_found)
 
-        string = b"\uff02"  # skipcq: PYL-W1402
+        string = b"\uff02"
         state = string_machine(check_value)
         hex_machine_found = False
         for c in string:
@@ -119,7 +119,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         Test all allowed values for the utf8_machine with 2 byte values. Only every 4th value is checked to save time.
         This can be changed by changing the step variable. When checking every 4th value the boundary values are also checked.
         """
-        def check_value_hex2(data):  # skipcq: PY-D0003
+        def check_value_hex2(data):
             self.assertEqual(data, (i - 194)*64 + j)
         step = 4
         for i in range(192, 224):
@@ -131,7 +131,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test7utf8_machine_forbidden_2_byte_boundary_values(self):
         """Test all boundary values for 2 byte utf8 values."""
-        def raise_error(_):  # skipcq: PY-D0003
+        def raise_error(_):
             raise Exception("Valid UTF-8 value found in boundary test!")
         self.assertIsNone(utf8_machine(191, raise_error))
         self.assertIsNone(utf8_machine(192, raise_error)(127))
@@ -144,7 +144,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         Test all allowed values for the utf8_machine with 3 byte values. Only every 4th value is checked to save time.
         This can be changed by changing the step variable. When checking every 4th value the boundary values are also checked.
         """
-        def check_value_hex3(data):  # skipcq: PY-D0003
+        def check_value_hex3(data):
             self.assertEqual(data, (i - 224)*64*64 + (j - 128)*64 + k - 128)
         step = 4
         for i in range(224, 240):
@@ -158,7 +158,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test9utf8_machine_forbidden_3_byte_boundary_values(self):
         """Test all boundary values for 3 byte utf8 values."""
-        def raise_error(_):  # skipcq: PY-D0003
+        def raise_error(_):
             raise Exception("Valid UTF-8 value found in boundary test!")
         self.assertIsNone(utf8_machine(224, raise_error)(127))
         self.assertIsNone(utf8_machine(224, raise_error)(192))
@@ -172,7 +172,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         Test all allowed values for the utf8_machine with 4 byte values. Only every 4th value is checked to save time.
         This can be changed by changing the step variable. When checking every 4th value the boundary values are also checked.
         """
-        def check_value_hex4(data):  # skipcq: PY-D0003
+        def check_value_hex4(data):
             self.assertEqual(data, (i - 240)*64*64*64 + (j - 128)*64*64 + (k - 128)*64 + m - 128)
         step = 4
         for i in range(240, 248):
@@ -188,7 +188,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test11utf8_machine_forbidden_3_byte_boundary_values(self):
         """Test all boundary values for 4 byte utf8 values."""
-        def raise_error(_):  # skipcq: PY-D0003
+        def raise_error(_):
             raise Exception("Valid UTF-8 value found in boundary test!")
         self.assertIsNone(utf8_machine(240, raise_error)(127))
         self.assertIsNone(utf8_machine(240, raise_error)(192))
@@ -201,7 +201,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test12utf8_machine_started_from_string_machine(self):
         """Test if the utf8_machine is started from the string_machine."""
-        def check_value(_data):  # skipcq: PY-D0003, PTC-W0049
+        def check_value(_data):
             pass
         string = b"File pattern: file\x5f<file-nr>.txt"
         state = string_machine(check_value)
@@ -245,7 +245,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test13string_machine_valid_values(self):
         """Test the string_machine with all valid characters."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, allowed_chars)
         allowed_chars = "\n"
         for c in range(0x20, 0x80):
@@ -261,7 +261,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test14string_machine_invalid_values(self):
         """Test the string_machine with some invalid values."""
-        def raise_error(_):  # skipcq: PY-D0003
+        def raise_error(_):
             raise Exception("Invalid returned as valid.")
         for c in range(0x20):  # ascii control characters
             if c == 0xa:
@@ -275,7 +275,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test15string_machine_escaped_strings(self):
         """Test all allowed escape strings in the string_machine."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, compare_strings)
         escape_strings = b"bf\"\\/"
         compare_strings = "\b\f\"\\/"
@@ -288,7 +288,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test16constant_machine_valid_values(self):
         """Test all allowed values for the constant_machine. The first letter was already handled by the json_machine."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, value)
         TRUE = [0x72, 0x75, 0x65]
         FALSE = [0x61, 0x6c, 0x73, 0x65]
@@ -313,7 +313,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test17constant_machine_invalid_values(self):
         """Test if constant_machine fails. The first letter was already handled by the json_machine."""
-        def raise_error(_):  # skipcq: PY-D0003
+        def raise_error(_):
             raise Exception("Invalid returned as valid.")
         TRUE = [0x72, 0x75, 0x65]
         TRUE_UPPER = [0x52, 0x55, 0x45]
@@ -336,7 +336,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test18constant_machine_started_from_json_machine(self):
         """Test if the constant_machine is started from the json_machine. Due to changes in the json_machine all values must be objects."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, {'var': value})
         OBJECT_PREFIX = [0x7b, 0x22, 0x76, 0x61, 0x72, 0x22, 0x3a, 0x20]  # {"var":
         TRUE = [0x74, 0x72, 0x75, 0x65]
@@ -360,7 +360,7 @@ class ByteStreamLineAtomizerTest(TestBase):
             state = state(n)
         self.assertEqual(state(ord('}')).__name__, '_value')
 
-    def check_number_machine(self, check_int_value, value, end_sign):  # skipcq: PY-D0003
+    def check_number_machine(self, check_int_value, value, end_sign):
         state = number_machine(value[0], check_int_value)
         for c in value[1:]:
             state = state(c)
@@ -368,11 +368,11 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test19number_machine_valid_values(self):
         """Test valid values in the number_machine."""
-        def check_int_value(data, byte_data):  # skipcq: PY-D0003
+        def check_int_value(data, byte_data):
             self.assertEqual(data, int(value))
             self.assertEqual(end_sign, byte_data)
 
-        def check_float_value(data, byte_data):  # skipcq: PY-D0003
+        def check_float_value(data, byte_data):
             self.assertEqual(round(data, 10), float(value))
             self.assertEqual(end_sign, byte_data)
         end_sign = ord(',')
@@ -405,7 +405,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test20number_machine_end_signs(self):
         """Check if all non numerical signs end the number_machine."""
-        def check_int_value(data, byte_data):  # skipcq: PY-D0003
+        def check_int_value(data, byte_data):
             self.assertEqual(data, int(value))
             self.assertEqual(end_sign, byte_data)
         value = b'222'
@@ -424,7 +424,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test21number_machine_invalid_values(self):
         """Test invalid values in the number_machine."""
-        def raise_error(_data, _byte_data):  # skipcq: PY-D0003
+        def raise_error(_data, _byte_data):
             raise Exception("Invalid number treated as valid!")
         value = b'- 222'
         state = number_machine(value[0], raise_error)
@@ -451,7 +451,7 @@ class ByteStreamLineAtomizerTest(TestBase):
         value = b'.1'
         self.assertIsNone(number_machine(value[0], raise_error))
 
-    def check_number_machine_from_json_machine(self, check_int_value, value, end_sign):  # skipcq: PY-D0003
+    def check_number_machine_from_json_machine(self, check_int_value, value, end_sign):
         state = json_machine(check_int_value)
         for c in value:
             state = state(c)
@@ -459,10 +459,10 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test22number_machine_started_from_json_machine(self):
         """Test if the number_machine is started from the json_machine."""
-        def check_int_value(data):  # skipcq: PY-D0003
+        def check_int_value(data):
             self.assertEqual(data, {'value': int(value)})
 
-        def check_float_value(data):  # skipcq: PY-D0003
+        def check_float_value(data):
             data['value'] = round(data['value'], 10)
             self.assertEqual(data, {'value': float(value)})
         end_sign = ord('}')
@@ -508,7 +508,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test23array_machine_valid_array(self):
         """Test possible valid arrays."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, compare_value)
         value = b'"string", 22, 22.50, true, false, null]'
         compare_value = ['string', 22, 22.5, True, False, None]
@@ -532,7 +532,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test24array_machine_invalid_formats(self):
         """Test the array_machine with invalid formats."""
-        def raise_error(_):  # skipcq: PY-D0003
+        def raise_error(_):
             raise Exception("Invalid returned as valid.")
         value = b'"string" 22, 22.50, true, false, null]'
         state = array_machine(raise_error)
@@ -548,7 +548,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test25array_machine_started_from_json_machine(self):
         """Test if the array_machine is started from the json_machine."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, compare_value)
         value = b'{"values_array": ["string", 22, 22.50, true, false, null]}'
         compare_value = {'values_array': ['string', 22, 22.5, True, False, None]}
@@ -572,7 +572,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test26object_machine_valid_objects(self):
         """Check if the object_machine can handle different valid formats."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, compare_value)
         # single line, no spaces
         value = b'"string":"Hello World","integer":22,"float":22.23,"bool":true,"array":["Hello","World"]}'
@@ -597,7 +597,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test27object_machine_invalid_values(self):
         """Test the object_machine with invalid values."""
-        def raise_error(_):  # skipcq: PY-D0003
+        def raise_error(_):
             raise Exception("Invalid returned as valid.")
         # keys without "
         value = b'"string":"Hello World",integer:22,"float":22.23,"bool":true,"array":["Hello","World"]}'
@@ -621,7 +621,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test28object_machine_started_from_json_machine(self):
         """Test if the object_machine is started from the json_machine."""
-        def check_value(data):  # skipcq: PY-D0003
+        def check_value(data):
             self.assertEqual(data, compare_value)
         # single line, no spaces
         value = b'{"string":"Hello World","integer":22,"float":22.23,"bool":true,"array":["Hello","World"]}'
@@ -655,7 +655,7 @@ class ByteStreamLineAtomizerTest(TestBase):
 
     def test29json_machine_only_allow_objects_at_start(self):
         """The json_machine must only allow objects at the start."""
-        def raise_error(_):  # skipcq: PY-D0003
+        def raise_error(_):
             raise Exception("Invalid returned as valid.")
         forbidden_values = [0x22, 0x2b, 0x2d, 0x31, 0x5b, 0x74, 0x66, 0x6e]
         for value in forbidden_values:

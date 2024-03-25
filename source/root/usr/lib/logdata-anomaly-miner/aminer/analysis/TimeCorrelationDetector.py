@@ -226,29 +226,23 @@ class TimeCorrelationDetector(AtomHandlerInterface):
             trigger_count = feature.trigger_count
             result += f"{feature.rule} ({feature.index}) e = {trigger_count}:"
             stat_pos = (self.parallel_check_count * feature.index) << 1
-            for feature_pos in range(len(self.feature_list)):  # skipcq: PTC-W0060
+            for feature_pos in range(len(self.feature_list)):
                 event_count = self.event_count_table[stat_pos]
                 ratio = "-"
                 if trigger_count != 0:
-                    # skipcq: PYL-C0209
                     ratio = "%.2e" % (float(event_count) / trigger_count)
                 delta = "-"
                 if event_count != 0:
-                    # skipcq: PYL-C0209
                     delta = "%.2e" % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
-                # skipcq: PYL-C0209
                 result += "\n  %d: {c = %#6d r = %s dt = %s" % (feature_pos, event_count, ratio, delta)
                 stat_pos += 1
                 event_count = self.event_count_table[stat_pos]
                 ratio = "-"
                 if trigger_count != 0:
-                    # skipcq: PYL-C0209
                     ratio = "%.2e" % (float(event_count) / trigger_count)
                 delta = "-"
                 if event_count != 0:
-                    # skipcq: PYL-C0209
                     delta = "%.2e" % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
-                # skipcq: PYL-C0209
                 result += " c = %#6d r = %s dt = %s}" % (event_count, ratio, delta)
                 stat_pos += 1
             result += "\n"

@@ -660,7 +660,6 @@ class AnalysisChildRemoteControlHandler:
                 logging.getLogger(REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
                 logging.getLogger(DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
 
-                # skipcq: PYL-W0603
                 global suspended_flag
                 if json_request_data[0] in ('suspend_aminer()', 'suspend_aminer', 'suspend'):
                     suspended_flag = True
@@ -673,7 +672,6 @@ class AnalysisChildRemoteControlHandler:
                     json_remote_control_response = json.dumps(msg)
                     logging.getLogger(DEBUG_LOG_NAME).info(msg)
                 else:
-                    # skipcq: PYL-W0122
                     exec(json_request_data[0], {'__builtins__': None}, exec_locals)
                     json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
                     if methods.REMOTE_CONTROL_RESPONSE == '':
@@ -683,7 +681,6 @@ class AnalysisChildRemoteControlHandler:
                     else:
                         json_remote_control_response = json.dumps(
                             exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
-            # skipcq: FLK-E722
             except:
                 exception_data = traceback.format_exc()
                 logging.getLogger(DEBUG_LOG_NAME).debug('Remote control exception data: %s', str(exception_data))

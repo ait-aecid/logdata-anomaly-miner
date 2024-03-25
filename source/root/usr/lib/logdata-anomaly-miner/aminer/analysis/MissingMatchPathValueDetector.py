@@ -270,7 +270,7 @@ class MissingMatchPathValueDetector(
         if persistence_data is not None:
             for key in persistence_data:
                 value = persistence_data[key]
-                if self.target_path_list is not None:  # skipcq: PTC-W0048
+                if self.target_path_list is not None:
                     if (value[3] not in self.target_path_list and not self.combine_values) or (
                             value[3] != str(self.target_path_list) and self.combine_values and
                             not isinstance(self, MissingMatchPathListValueDetector)):

@@ -27,3 +27,8 @@ repos:
     hooks:
     - id: autopep8
       args: [--max-line-length=140, --diff]
+
+-   repo: https://github.com/PyCQA/bandit
+    rev: 1.7.8
+    hooks:
+    - id: bandit

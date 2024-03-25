@@ -2,9 +2,8 @@ import unittest
 import sys
 import os
 import socket
-from _io import StringIO
-# skipcq: BAN-B404
 import subprocess
+from _io import StringIO
 
 from aminer.util.SecureOSFunctions import secure_open_file, send_annotated_file_descriptor, receive_annoted_file_descriptor
 from aminer.util import SecureOSFunctions
@@ -45,10 +44,9 @@ class SecureOSFunctionsTestLocal(TestBase):
 
     def test4sendAnnotatedFileDescriptor(self):
         """A valid annotated file descriptor is to be sent by a socket."""
-        sock_name = '/tmp/test4unixSocket.sock'  # skipcq: BAN-B108
+        sock_name = '/tmp/test4unixSocket.sock'
         data = b'readmeStream' + b'\x00' + b'You should read these README instructions for better understanding.'
 
-        # skipcq: BAN-B607, BAN-B603
         proc = subprocess.Popen(['python3', 'unit/util/clientTest4.py'])
 
         if os.path.exists(sock_name):
@@ -86,10 +84,9 @@ class SecureOSFunctionsTestLocal(TestBase):
 
     def test6send_logstream_descriptor(self):
         """A valid logstream descriptor is to be sent."""
-        sock_name = '/tmp/test6unixSocket.sock'  # skipcq: BAN-B108
+        sock_name = '/tmp/test6unixSocket.sock'
         data = b'logstream' + b'\x00' + b'/var/log/syslog'
 
-        # skipcq: BAN-B607, BAN-B603
         subprocess.Popen(['python3', 'unit/util/clientTest6.py'])
 
         if os.path.exists(sock_name):
@@ -117,12 +114,11 @@ class SecureOSFunctionsTestLocal(TestBase):
 
     def test7receive_annotated_file_descriptor(self):
         """A valid annotated file descriptor is to be received by a socket."""
-        sock_name = '/tmp/test6unixSocket.sock'  # skipcq: BAN-B108
+        sock_name = '/tmp/test6unixSocket.sock'
         type_info = b'logstream'
         path = b'/var/log/syslog'
         data = (type_info, path)
 
-        # skipcq: BAN-B607, BAN-B603
         subprocess.Popen(['python3', 'unit/util/clientTest6.py'])
 
         if os.path.exists(sock_name):

@@ -21,12 +21,12 @@ import sys
 import argparse
 
 
-# Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
+# Get rid of the default sys path immediately. Otherwise, Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from aminer.AnalysisChild import AnalysisChildRemoteControlHandler  # skipcq: FLK-E402
-from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
-from metadata import __version_string__  # skipcq: FLK-E402
+from aminer.AnalysisChild import AnalysisChildRemoteControlHandler
+from aminer.util.StringUtil import colflame, flame, supports_color
+from metadata import __version_string__
 
 help_message = 'aminerremotecontrol\n'
 if supports_color():
@@ -96,7 +96,7 @@ for remote_control_code in command_list:
                 print(f"Remote execution response: {str(remote_data[1])}")
             else:
                 print(f"Remote execution response: {repr(remote_data[1])}")
-        except:  # skipcq: FLK-E722
+        except:
             print(f"Failed to process response {repr(request_data)}")
             traceback.print_exc()
     else:

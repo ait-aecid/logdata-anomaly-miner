@@ -69,7 +69,6 @@ try:
         binomial_test = stats.binomtest
     else:
         binomial_test = stats.binom_test
-# skipcq: FLK-E722
 except:
     pass
 
@@ -318,10 +317,8 @@ class HistogramData:
                 continue
             p_value = self.bin_definition.get_bin_p_value(bin_pos, base_element, count)
             if p_value is None:
-                # skipcq: PYL-C0209
                 result += "\n%s* %s: %d (ratio = %.2e)" % (indent, self.bin_names[bin_pos], count, float(count) / f_elements)
             else:
-                # skipcq: PYL-C0209
                 result += "\n%s* %s: %d (ratio = %.2e, p = %.2e)" % \
                           (indent, self.bin_names[bin_pos], count, float(count) / f_elements, p_value)
         return result
@@ -512,7 +509,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
             for mapped_path in histogram_mapping[0]:
                 try:
                     clone_set.remove(mapped_path)
-                # skipcq: FLK-E722
                 except:
                     if mapped_path != path:
                         missing_paths.add(mapped_path)
@@ -593,7 +589,6 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
                     bin_definition["TimeUnit"] = data_item.bin_definition.time_unit
                 d["BinDefinition"] = bin_definition
             d["PropertyPath"] = data_item.target_path
-            # skipcq: PYL-C0209
             report_str += os.linesep + 'Path values "%s":' % '", "'.join(histogram_mapping[0])
             if isinstance(histogram_mapping[2].match_element.match_string, bytes):
                 histogram_mapping[2].match_element.match_string = histogram_mapping[2].match_element.match_string.decode(

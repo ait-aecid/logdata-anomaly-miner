@@ -118,7 +118,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
         PersistenceUtil.add_persistable_component(self)
         self.load_persistence_data()
 
-    def receive_atom(self, log_atom):  # skipcq: PYL-W0613, PYL-R0201
+    def receive_atom(self, log_atom):
         """
         Receive the atom and return True.
         The log_atom doesn't need to be analyzed, because the counting and calls of the predictions is performed by the ETD.
@@ -160,7 +160,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                             self.num_event_lines_ref[0]) < self.num_sections_waiting_time:
 
                         # Expand the lists of self.num_event_lines_ref
-                        for j in range(len(self.num_event_lines_ref), len(self.event_type_detector.num_event_lines)):  # skipcq: PTC-W0060
+                        for j in range(len(self.num_event_lines_ref), len(self.event_type_detector.num_event_lines)):
                             self.num_event_lines_ref.append([0]*len(self.num_event_lines_ref[0]))
                         # Add the current number of event lines
                         for j, val in enumerate(self.event_type_detector.num_event_lines):
@@ -174,13 +174,12 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                     # Initialize the trigger for the time steps
                     else:
                         # Expand the lists of self.num_event_lines_ref
-                        for j in range(len(self.num_event_lines_ref), len(self.event_type_detector.num_event_lines)):  # skipcq: PTC-W0060
+                        for j in range(len(self.num_event_lines_ref), len(self.event_type_detector.num_event_lines)):
                             self.num_event_lines_ref.append([0]*len(self.num_event_lines_ref[0]))
                         # Add the current number of eventlines
                         for j, val in enumerate(self.event_type_detector.num_event_lines):
                             self.num_event_lines_ref[j].append(val-sum(self.num_event_lines_ref[j]))
 
-                        # skipcq: PTC-W0063
                         # Get the time step lengths. The first entry of the num_event_lines_ref states the number of log lines before the
                         # initialization and is therefore excluded
                         time_list = self.calculate_time_steps([val[1:] for val in self.num_event_lines_ref], log_atom)
@@ -203,7 +202,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                         # Run the update function for all trigger, which would already have been triggered
                         for k in range(1, num_added_trigger+1):
                             while log_atom.atom_time >= self.time_trigger_list[0][-k]:
-                                # skipcq: PTC-W0063
                                 self.test_num_appearance(self.time_trigger_list[1][-k], self.event_type_detector.num_event_lines[
                                                          self.time_trigger_list[1][-k]] - self.num_event_lines_ref[
                                                          self.time_trigger_list[1][-k]], log_atom)
@@ -214,7 +212,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                 # Trigger for a reoccurring time step
                 else:
                     while log_atom.atom_time >= self.time_trigger_list[0][indices[i]]:
-                        # skipcq: PTC-W0063
                         self.test_num_appearance(self.time_trigger_list[1][indices[i]], self.event_type_detector.num_event_lines[
                                                  self.time_trigger_list[1][indices[i]]]-self.num_event_lines_ref[
                                                  self.time_trigger_list[1][indices[i]]], log_atom)
@@ -255,7 +252,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
             self.num_event_lines_ref = persistence_data[5]
 
             self.arima_models = [None for _ in self.time_window_history]
-            # skipcq: PTC-W0060
             for event_index in range(len(self.arima_models)):
                 if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini * self.num_division_time_step:
                     try:
@@ -272,7 +268,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                                               sum(self.time_window_history[event_index][-self.num_division_time_step:])],
                                           order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                             self.arima_models[event_index] = model.fit()
-                    except:  # skipcq FLK-E722
+                    except:
                         self.arima_models[event_index] = None
                         self.time_window_history[event_index] = []
                 else:
@@ -390,7 +386,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                                 self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models[event_index] = model.fit()
-                    except:  # skipcq FLK-E722
+                    except:
                         self.arima_models[event_index] = None
                 else:
                     # Add the arima_model to the list
@@ -402,7 +398,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
                                 sum(self.time_window_history[event_index][-self.num_division_time_step:])],
                                 order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
                         self.arima_models[event_index] = model.fit()
-                    except:  # skipcq FLK-E722
+                    except:
                         self.arima_models[event_index] = None
                         self.time_window_history[event_index] = []
             if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
@@ -509,7 +505,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
         # return in the order: lower_limit, upper_limit
         return prediction[0][0], prediction[0][1]
 
-    def bt_min_successes(self, num_bt, p, alpha):  # skipcq: PYL-R0201
+    def bt_min_successes(self, num_bt, p, alpha):
         """
         Calculate the minimal number of successes for the BT with significance alpha.
         p is the probability of success and num_bt is the number of observed tests.
@@ -556,5 +552,4 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
             event_data = {"AnalysisComponent": analysis_component, "TotalRecords": self.event_type_detector.total_records,
                           "TypeInfo": {}}
         for listener in self.anomaly_event_handlers:
-            # skipcq: PYL-C0209, FLK-E501
             listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, log_atom, self)

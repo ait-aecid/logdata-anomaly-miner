@@ -59,7 +59,7 @@ class ZmqEventHandler(EventHandlerInterface):
             return True
         if self.zmq_imported is False:
             try:
-                self.context = zmq.Context()  # skipcq: PYL-E0110
+                self.context = zmq.Context()
                 self.producer = self.context.socket(zmq.PUB)
                 self.producer.bind(self.url)
                 logging.getLogger(DEBUG_LOG_NAME).info("Created socket on %s", self.url)

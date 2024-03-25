@@ -32,13 +32,12 @@ def load_yaml(config_file):
     and convert the date in right data types with coerce procedures.
     """
     # We might be able to remove this and us it like the config_properties
-    # skipcq: PYL-W0603
     global yaml_data
 
     import yaml
     from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
-    with open(config_file) as yamlfile:  # skipcq: PTC-W6004
+    with open(config_file) as yamlfile:
         try:
             yaml_data = yaml.safe_load(yamlfile)
             yamlfile.close()
@@ -47,26 +46,19 @@ def load_yaml(config_file):
             raise exception
 
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
         base_schema = eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
         parser_normalisation_schema = eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
         analysis_normalisation_schema = eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
         event_handler_normalisation_schema = eval(sma.read())
 
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
         parser_validation_schema = eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
         analysis_validation_schema = eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
         event_handler_validation_schema = eval(sma.read())
 
     normalisation_schema = {
@@ -159,7 +151,7 @@ def build_parsing_model(data=None):
             start = item
         if item['type'].is_model:
             if 'args' in item:
-                if isinstance(item['args'], list):  # skipcq: PTC-W0048
+                if isinstance(item['args'], list):
                     for i, value in enumerate(item["args"]):
                         if (isinstance(value, str) and value == "WHITESPACE") or (isinstance(value, bytes) and value == b"WHITESPACE"):
                             from aminer.parsing.FixedDataModelElement import FixedDataModelElement
@@ -606,7 +598,6 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
                                     learn_mode=learn, tuple_transformation_function=tuple_transformation_function,
                                     output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'])
-                # skipcq: PYL-W0603
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'].name == 'MatchFilter':
@@ -984,7 +975,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                             if key == "sasl_plain_username":
                                 continue
                             options[key] = int(val)
-                        except ValueError:  # skipcq: FLK-E722
+                        except ValueError:
                             pass
                     ctx = func(analysis_context, item['topic'], options)
                 if item['type'].name == 'ZmqEventHandler':

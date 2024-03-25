@@ -175,7 +175,6 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         if new_time > self.appeared_time_list[id_tuple][-1]:
             time_index = len(self.appeared_time_list[id_tuple])
         else:
-            # skipcq: PTC-W0063
             time_index = next(index for index, time in enumerate(self.appeared_time_list[id_tuple]) if time > new_time)
 
         # Insert the new time
