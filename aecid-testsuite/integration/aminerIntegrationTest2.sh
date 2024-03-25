@@ -10,10 +10,8 @@ AUTH=/tmp/auth.log
 
 
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
-sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 sudo rm $SYSLOG 2> /dev/null
 sudo rm $AUTH 2> /dev/null
@@ -41,6 +39,7 @@ DOWNLOAD_PID=$!
 #start aminer
 sudo aminer --config $CFG_PATH21 > $OUT &
 PID=$!
+for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 #Anomaly FixedDataModel HD Repair
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > $SYSLOG
@@ -109,10 +108,8 @@ echo ""
 #END
 
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
-sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 sudo rm $SYSLOG 2> /dev/null
 sudo rm $AUTH 2> /dev/null
@@ -122,54 +119,55 @@ wait $DOWNLOAD_PID
 tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
 $KAFKA_VERSIONSTRING/bin/zookeeper-server-start.sh $KAFKA_VERSIONSTRING/config/zookeeper.properties > /dev/null &
-sleep 1
+sleep 10
 $KAFKA_VERSIONSTRING/bin/kafka-server-start.sh $KAFKA_VERSIONSTRING/config/server.properties > /dev/null &
-sleep 1
+sleep 10
 
 COUNTER=0
 
 #start aminer
-sudo aminer -C --config $CFG_PATH22 -f > $OUT &
+sudo aminer --config $CFG_PATH22 > $OUT &
 PID=$!
-sleep 8
+for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 #Anomaly FixedDataModel HD Repair
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > $SYSLOG
-sleep 2
+for i in {1..60}; do grep "Original log line: System rebooted for hard disk upgrad" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 #New Path
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") > $AUTH
-sleep 2
+for i in {1..60}; do grep "Original log line: System rebooted for hard disk upgrade" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 #Known Path
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
-sleep 2
+sleep 3
 #Anomaly FixedDataModel HD Repair
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") >> $AUTH
-sleep 2
+sleep 3
 #Anomaly DateTimeModel
 ({ date '+%m.%Y %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
-sleep 2
+sleep 3
 #Known Path
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $AUTH
-sleep 2
+sleep 3
 #Known Path
 ({ date '+%Y-%m-%d %T' && echo 'fedora' && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
-sleep 2
+sleep 3
 #Root Home Path
 echo 'The Path of the home directory shown by pwd of the user root is: /root' >> $AUTH
-sleep 2
+for i in {1..60}; do grep "The Path of the home directory shown by pwd of the user root is: /root" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 #User Home Path
 echo 'The Path of the home directory shown by pwd of the user user is: /home/user' >> $SYSLOG
-sleep 2
+for i in {1..60}; do grep "The Path of the home directory shown by pwd of the user user is: /home/user" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 #Guest Home Path
 echo 'The Path of the home directory shown by pwd of the user guest is: /home/guest' >> $AUTH
+for i in {1..60}; do grep "The Path of the home directory shown by pwd of the user guest is: /home/guest" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 #ADD HERE
 
 #stop aminer
-sleep 12
+sleep 20
 sudo pkill -x aminer
 wait $PID
-sleep 3 # leave the kafka handler some time.
+sleep 15 # leave the kafka handler some time.
 
 result=0
 checkAllOutputs

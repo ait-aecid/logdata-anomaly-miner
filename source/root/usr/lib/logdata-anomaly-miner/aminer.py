@@ -73,7 +73,7 @@ def run_analysis_child(aminer_config, program_name):
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).critical(msg)
         sys.exit(1)
     import posix1e
-    # O_PATH is problematic when checking ACL. However it is possible to check the ACL using the file name.
+    # O_PATH is problematic when checking ACL. However, it is possible to check the ACL using the file name.
     try:
         if posix1e.has_extended(persistence_dir_name):
             msg = f"WARNING: SECURITY: Extended POSIX ACLs are set in {persistence_dir_name.decode()}, but not supported by the aminer. " \
