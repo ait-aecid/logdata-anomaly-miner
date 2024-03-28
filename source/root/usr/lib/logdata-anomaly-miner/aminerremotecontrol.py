@@ -1,10 +1,9 @@
 #!/usr/bin/python3 -BbbEIsSttW all
 # -*- coding: utf-8 -*-
-
-"""
-This tool allows to connect to a remote control socket, send requests and retrieve the responses.
-To allow remote use of this tool, e.g. via SSH forwarding, the remote control address can be set on the command line, no configuration is
-read.
+"""This tool allows to connect to a remote control socket, send requests and
+retrieve the responses. To allow remote use of this tool, e.g. via SSH
+forwarding, the remote control address can be set on the command line, no
+configuration is read.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -21,12 +20,12 @@ import sys
 import argparse
 
 
-# Get rid of the default sys path immediately. Otherwise Python also attempts to load the following imports from e.g. directory
+# Get rid of the default sys path immediately. Otherwise, Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from aminer.AnalysisChild import AnalysisChildRemoteControlHandler  # skipcq: FLK-E402
-from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
-from metadata import __version_string__  # skipcq: FLK-E402
+from aminer.AnalysisChild import AnalysisChildRemoteControlHandler  # noqa: E402
+from aminer.util.StringUtil import colflame, flame, supports_color  # noqa: E402
+from metadata import __version_string__  # noqa: E402
 
 help_message = 'aminerremotecontrol\n'
 if supports_color():
@@ -96,7 +95,7 @@ for remote_control_code in command_list:
                 print(f"Remote execution response: {str(remote_data[1])}")
             else:
                 print(f"Remote execution response: {repr(remote_data[1])}")
-        except:  # skipcq: FLK-E722
+        except Exception:
             print(f"Failed to process response {repr(request_data)}")
             traceback.print_exc()
     else:

@@ -7,8 +7,8 @@
 import math
 
 
-def json_machine(emit, next_func=None):  # skipcq: PY-D0003
-    def _value(byte_data):  # skipcq: PY-D0003
+def json_machine(emit, next_func=None):
+    def _value(byte_data):
         if not byte_data:
             return None
 
@@ -45,11 +45,11 @@ def json_machine(emit, next_func=None):  # skipcq: PY-D0003
 
         return next_func(byte_data)
 
-    def on_value(value):  # skipcq: PY-D0003, PTC-W0065
+    def on_value(value):
         emit(value)
         return next_func
 
-    def on_number(number, byte):  # skipcq: PY-D0003, PTC-W0065
+    def on_number(number, byte):
         emit(number)
         return _value(byte)
 
@@ -62,11 +62,11 @@ FALSE = [0x61, 0x6c, 0x73, 0x65]
 NULL = [0x75, 0x6c, 0x6c]
 
 
-def constant_machine(bytes_data, value, emit):  # skipcq: PY-D0003
+def constant_machine(bytes_data, value, emit):
     i = 0
     length = len(bytes_data)
 
-    def _constant(byte_data):  # skipcq: PY-D0003
+    def _constant(byte_data):
         nonlocal i
         if byte_data != bytes_data[i]:
             i += 1
@@ -80,10 +80,10 @@ def constant_machine(bytes_data, value, emit):  # skipcq: PY-D0003
     return _constant
 
 
-def string_machine(emit):  # skipcq: PY-D0003
+def string_machine(emit):
     string = ""
 
-    def _string(byte_data):  # skipcq: PY-D0003
+    def _string(byte_data):
         nonlocal string
 
         if byte_data == 0x22:  # "
@@ -101,7 +101,7 @@ def string_machine(emit):  # skipcq: PY-D0003
         string += chr(byte_data)
         return _string
 
-    def _escaped_string(byte_data):  # skipcq: PY-D0003, PTC-W0065
+    def _escaped_string(byte_data):
         nonlocal string
 
         if byte_data in (0x22, 0x5c, 0x2f):  # " \ /
@@ -133,7 +133,7 @@ def string_machine(emit):  # skipcq: PY-D0003
 
         return None
 
-    def on_char_code(char_code):  # skipcq: PY-D0003, PTC-W0065
+    def on_char_code(char_code):
         nonlocal string
         string += chr(char_code)
         return _string
@@ -142,11 +142,11 @@ def string_machine(emit):  # skipcq: PY-D0003
 
 
 # Nestable state machine for UTF-8 Decoding.
-def utf8_machine(byte_data, emit):  # skipcq: PY-D0003
+def utf8_machine(byte_data, emit):
     left = 0
     num = 0
 
-    def _utf8(byte_data):  # skipcq: PY-D0003
+    def _utf8(byte_data):
         nonlocal num, left
         if (byte_data & 0xc0) != 0x80:
             return None
@@ -177,11 +177,11 @@ def utf8_machine(byte_data, emit):  # skipcq: PY-D0003
 
 
 # Nestable state machine for hex escaped characters
-def hex_machine(emit):  # skipcq: PY-D0003
+def hex_machine(emit):
     left = 4
     num = 0
 
-    def _hex(byte_data):  # skipcq: PY-D0003
+    def _hex(byte_data):
         nonlocal num, left
 
         if 0x30 <= byte_data < 0x3a:
@@ -203,7 +203,7 @@ def hex_machine(emit):  # skipcq: PY-D0003
     return _hex
 
 
-def number_machine(byte_data, emit):  # skipcq: PY-D0003
+def number_machine(byte_data, emit):
     sign = 1
     number = 0
     decimal = 0
@@ -212,7 +212,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
     dividend = 10
     start_with_zero = False
 
-    def _mid(byte_data):  # skipcq: PY-D0003
+    def _mid(byte_data):
         if start_with_zero and byte_data not in (0x2e, 0x45, 0x65, 0x7d, 0x2c, 0xa, 0x20):  # . E e } , \n Space
             return None
 
@@ -221,7 +221,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
         return _later(byte_data)
 
-    def _number(byte_data):  # skipcq: PY-D0003
+    def _number(byte_data):
         nonlocal number
         if 0x30 <= byte_data < 0x3a:
             number = number * 10 + (byte_data - 0x30)
@@ -229,7 +229,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
         return _mid(byte_data)
 
-    def _start(byte_data):  # skipcq: PY-D0003
+    def _start(byte_data):
         nonlocal start_with_zero
         if byte_data == 0x30:
             start_with_zero = True
@@ -240,7 +240,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
         return None
 
-    def _decimal(byte_data):  # skipcq: PY-D0003
+    def _decimal(byte_data):
         nonlocal decimal
         nonlocal dividend
         if 0x30 <= byte_data < 0x3a:
@@ -250,13 +250,13 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
         return _later(byte_data)
 
-    def _later(byte_data):  # skipcq: PY-D0003, PTC-W0065
+    def _later(byte_data):
         if byte_data in (0x45, 0x65):  # E e
             return _esign
 
         return _done(byte_data)
 
-    def _esign(byte_data):  # skipcq: PY-D0003, PTC-W0065
+    def _esign(byte_data):
         nonlocal esign
         if byte_data == 0x2b:  # +
             return _exponent
@@ -267,7 +267,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
         return _exponent(byte_data)
 
-    def _exponent(byte_data):  # skipcq: PY-D0003
+    def _exponent(byte_data):
         nonlocal exponent
         if 0x30 <= byte_data < 0x3a:
             exponent = exponent * 10 + (byte_data - 0x30)
@@ -275,7 +275,7 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
 
         return _done(byte_data)
 
-    def _done(byte_data):  # skipcq: PY-D0003, PTC-W0065
+    def _done(byte_data):
         value = sign * (number + decimal)
         if exponent:
             value *= math.pow(10, esign * exponent)
@@ -292,19 +292,19 @@ def number_machine(byte_data, emit):  # skipcq: PY-D0003
     return _start(byte_data)
 
 
-def array_machine(emit):  # skipcq: PY-D0003
+def array_machine(emit):
     array_data = []
 
-    def _array(byte_data):  # skipcq: PY-D0003
+    def _array(byte_data):
         if byte_data == 0x5d:  # ]
             return emit(array_data)
 
         return json_machine(on_value, _comma)(byte_data)
 
-    def on_value(value):  # skipcq: PY-D0003
+    def on_value(value):
         array_data.append(value)
 
-    def _comma(byte_data):  # skipcq: PY-D0003
+    def _comma(byte_data):
         if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _comma  # Ignore whitespace
 
@@ -319,17 +319,17 @@ def array_machine(emit):  # skipcq: PY-D0003
     return _array
 
 
-def object_machine(emit):  # skipcq: PY-D0003
+def object_machine(emit):
     object_data = {}
     key = None
 
-    def _object(byte_data):  # skipcq: PY-D0003
+    def _object(byte_data):
         if byte_data == 0x7d:  #
             return emit(object_data)
 
         return _key(byte_data)
 
-    def _key(byte_data):  # skipcq: PY-D0003
+    def _key(byte_data):
         if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _object  # Ignore whitespace
 
@@ -338,12 +338,12 @@ def object_machine(emit):  # skipcq: PY-D0003
 
         return None
 
-    def on_key(result):  # skipcq: PY-D0003, PTC-W0065
+    def on_key(result):
         nonlocal key
         key = result
         return _colon
 
-    def _colon(byte_data):  # skipcq: PY-D0003
+    def _colon(byte_data):
         if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _colon  # Ignore whitespace
 
@@ -352,10 +352,10 @@ def object_machine(emit):  # skipcq: PY-D0003
 
         return None
 
-    def on_value(value):  # skipcq: PY-D0003, PTC-W0065
+    def on_value(value):
         object_data[key] = value
 
-    def _comma(byte_data):  # skipcq: PY-D0003
+    def _comma(byte_data):
         if byte_data in (0x09, 0x0a, 0x0d, 0x20):
             return _comma  # Ignore whitespace
 

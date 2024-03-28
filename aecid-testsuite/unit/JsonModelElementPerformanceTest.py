@@ -17,9 +17,9 @@ breakout = False
 data = None
 def found_json(_data):
     """Set the breakout variable if the JsonStateMachine finished."""
-    global breakout  # skipcq: PYL-W0603
+    global breakout
     breakout = True
-    global data  # skipcq: PYL-W0603
+    global data
     data = _data
 
 

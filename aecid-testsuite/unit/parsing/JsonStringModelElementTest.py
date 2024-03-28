@@ -26,7 +26,8 @@ class JsonStringModelElementTest(TestBase):
         self.assertEqual(json_me.get_id(), self.id_)
 
     def test2get_match_element_valid_match(self):
-        """Parses a json-file and compares if the configured ModelElements are parsed properly"""
+        """Parses a json-file and compares if the configured ModelElements are
+        parsed properly."""
         host = DummyFixedDataModelElement("host", b"www.google.com")
         user = DummyFixedDataModelElement("user", b"foobar")
 
@@ -41,7 +42,8 @@ class JsonStringModelElementTest(TestBase):
         self.assertEqual(b"foobar", match_element.children[1].get_match_object())
 
     def test3strict_mode(self):
-        """Parses a json-file and compares if the configured ModelElements are parsed properly with strict_mode"""
+        """Parses a json-file and compares if the configured ModelElements are
+        parsed properly with strict_mode."""
         host = DummyFixedDataModelElement("host", b"www.google.com")
         user = DummyFixedDataModelElement("user", b"foobar")
         path = DummyFixedDataModelElement("path", b"/index.html")
@@ -77,7 +79,8 @@ class JsonStringModelElementTest(TestBase):
         self.assertEqual(b"/index.html", match_element.children[2].get_match_object())
 
     def test4ignore_null(self):
-        """Parses a json-file with ignore_null and compares if the configured ModelElements are parsed properly"""
+        """Parses a json-file with ignore_null and compares if the configured
+        ModelElements are parsed properly."""
         host = DummyFixedDataModelElement("host", b"www.google.com")
         user = DummyFixedDataModelElement("user", b"foobar")
 
@@ -92,7 +95,7 @@ class JsonStringModelElementTest(TestBase):
         # Line must be parsed but without "user":
         self.assertEqual(1, len(match_element.children))
         self.assertEqual(b"www.google.com", match_element.children[0].get_match_object())
-        
+
         # set ignore_null to False and strict to False
         json_model_element = JsonStringModelElement(self.id_, key_parser_dict, False, False)
         # Set user to null
@@ -126,7 +129,7 @@ class JsonStringModelElementTest(TestBase):
         # Line must be parsed but without "user":
         self.assertEqual(1, len(match_element.children))
         self.assertEqual(b"www.google.com", match_element.children[0].get_match_object())
-        
+
         # set ignore_null to False and strict to True
         json_model_element = JsonStringModelElement(self.id_, key_parser_dict, True, False)
         # Set user to null
@@ -153,9 +156,9 @@ class JsonStringModelElementTest(TestBase):
 
 
 class JsonAccessObjectTest(TestBase):
-    
+
     def test1get_id(self):
-        """Parses a dictionary and see if everything is flattened properly"""
+        """Parses a dictionary and see if everything is flattened properly."""
         d = {'a': 'b', 'c': {'w': 'g', 'rata': 'mahatta', 'tic': {'tac': 'toe'}, 'brat': ['worst','wuast',{'key': ['wurst','fleisch'], 'food': 'veggie'},'blues'],'bist': 'narrisch'}, 'foo': 'bar'}
         """
         a: b
@@ -195,4 +198,3 @@ class JsonAccessObjectTest(TestBase):
         self.assertEqual("veggie",jao.collection["c.brat[2].food"]["value"])
         self.assertEqual("blues",jao.collection["c.brat[3]"]["value"])
         self.assertEqual("bar",jao.collection["foo"]["value"])
-

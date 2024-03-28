@@ -9,7 +9,7 @@ RAM_Used="32MB"
 Persistent_Memory_Type="SSD"
 
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
-t=`date +%d.%m.%Y_%H-%M-%S` 
+t=`date +%d.%m.%Y_%H-%M-%S`
 RESULTS_DIR=/tmp/results_$t
 RESULTS_PATH=/tmp/results.csv
 LOGFILE=/tmp/syslog
@@ -28,7 +28,7 @@ if ! test -f "$FILE"; then
 fi
 
 if [[ $# -lt 2 ]]; then
-	echo "Error, not enough parameters found!"	
+	echo "Error, not enough parameters found!"
 	echo "Please run the script with a parameter for the runtime in seconds and a parameter for the description."
 	echo "For example: ./aminerSystemPerformanceTest.sh 900 \"Low performance test with many outputs. (./multiplyLogFile.sh 400000 syslog_low_performance_many_outputs-template /tmp/syslog)\""
 	exit

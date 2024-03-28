@@ -92,7 +92,7 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
 
-    def is_ascii(self, text: str):  # skipcq: PYL-R0201
+    def is_ascii(self, text: str):
         """Check if the text contains only ascii characters."""
         try:
             text.encode("ascii")
@@ -352,7 +352,7 @@ class JsonModelElement(ModelElementInterface):
                     data = b"null"
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
-                if isinstance(val, dict):  # skipcq: PYL-R1723
+                if isinstance(val, dict):
                     matches += self.parse_json_dict(val, match_array[j], f"{current_path}/{split_key}", match_context)
                     if matches[-1] is None:
                         if len(value) - 1 == k:
@@ -414,7 +414,7 @@ class JsonModelElement(ModelElementInterface):
             match_context.update(match_context.match_data[:match_context.match_data.find(search_string) + len(search_string)])
         return None
 
-    def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
+    def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):
         """Parse a literal from the json object."""
         current_path += "/" + key
         data = json_match_data[split_key]

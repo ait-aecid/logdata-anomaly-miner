@@ -119,7 +119,7 @@ class HexStringModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
-    def test6performance(self):  # skipcq: PYL-R0201
+    def test6performance(self):
         """Test the performance of the implementation. Comment this test out in normal cases."""
         import_setup = """
 import copy

@@ -30,10 +30,10 @@ log_dir_path = None
 
 def secure_open_base_directory(directory_name=None, flags=0):
     """Open the base directory in a secure way."""
-    global base_dir_fd  # skipcq: PYL-W0603
-    global base_dir_path  # skipcq: PYL-W0603
-    global tmp_base_dir_fd  # skipcq: PYL-W0603
-    global tmp_base_dir_path  # skipcq: PYL-W0603
+    global base_dir_fd
+    global base_dir_path
+    global tmp_base_dir_fd
+    global tmp_base_dir_path
     if directory_name is not None and isinstance(directory_name, str):
         directory_name = directory_name.encode()
     if base_dir_path is None and (directory_name is None or not directory_name.startswith(b'/')):
@@ -55,9 +55,9 @@ def secure_open_base_directory(directory_name=None, flags=0):
 
 def close_base_directory():
     """Close the base directory at program shutdown."""
-    global base_dir_fd  # skipcq: PYL-W0603
-    global tmp_base_dir_fd  # skipcq: PYL-W0603
-    global base_dir_path  # skipcq: PYL-W0603
+    global base_dir_fd
+    global tmp_base_dir_fd
+    global base_dir_path
     try:
         if base_dir_fd is not None:
             os.close(base_dir_fd)
@@ -74,8 +74,8 @@ def close_base_directory():
 
 def secure_open_log_directory(log_directory_name=None, flags=0):
     """Open the base log directory in a secure way."""
-    global log_dir_fd  # skipcq: PYL-W0603
-    global log_dir_path  # skipcq: PYL-W0603
+    global log_dir_fd
+    global log_dir_path
     if log_directory_name is not None and isinstance(log_directory_name, str):
         log_directory_name = log_directory_name.encode()
     if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith(b'/')):
@@ -98,8 +98,8 @@ def secure_open_log_directory(log_directory_name=None, flags=0):
 
 def close_log_directory():
     """Close the base directory at program shutdown."""
-    global log_dir_fd  # skipcq: PYL-W0603
-    global log_dir_path  # skipcq: PYL-W0603
+    global log_dir_fd
+    global log_dir_path
     try:
         if log_dir_fd is not None:
             os.close(log_dir_fd)
@@ -129,8 +129,8 @@ def secure_open_file(file_name, flags):
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
-    global base_dir_path  # skipcq: PYL-W0603, PYL-W0602
-    global base_dir_fd  # skipcq: PYL-W0603, PYL-W0602
+    global base_dir_path
+    global base_dir_fd
     if base_dir_path is not None:
         if file_name.startswith(base_dir_path):
             base_name = file_name.replace(base_dir_path, b'').lstrip(b'/')

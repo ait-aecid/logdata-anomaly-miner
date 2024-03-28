@@ -9,7 +9,7 @@ Parser:
           type: VariableByteDataModelElement
           name: 'host'
           args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
-        
+
         - id: identity_model
           type: VariableByteDataModelElement
           name: 'ident'

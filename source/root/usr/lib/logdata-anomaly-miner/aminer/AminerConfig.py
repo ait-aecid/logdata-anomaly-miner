@@ -59,7 +59,6 @@ KEY_AMINER_ID = 'AminerId'
 def load_config(config_file_name):
     """Load the configuration file using the import module."""
     aminer_config = None
-    # skipcq: PYL-W0603
     global configFN
     configFN = config_file_name
     ymlext = ['.YAML', '.YML', '.yaml', '.yml']
@@ -74,7 +73,6 @@ def load_config(config_file_name):
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         if extension in ymlext:
-            # skipcq: FLK-E722
             aminer_config.load_yaml(yaml_config)
     except ValueError as e:
         logging.getLogger(DEBUG_LOG_NAME).error(e)

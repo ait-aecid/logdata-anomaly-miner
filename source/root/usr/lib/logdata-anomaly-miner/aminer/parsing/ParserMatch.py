@@ -50,7 +50,7 @@ class ParserMatch:
             match_list = stack.pop()
             counter_dict = {}
             for test_match in match_list:
-                if test_match.path in counter_dict.keys():  # skipcq: PYL-C0201
+                if test_match.path in counter_dict.keys():
                     counter_dict[test_match.path] = 0
                     result_dict[test_match.path] = []
                 else:
