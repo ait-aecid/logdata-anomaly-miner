@@ -200,6 +200,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                         listener.receive_event(f"Analysis.{self.__class__.__name__}", "No log events received in time window",
                                                [""], event_data, log_atom, self)
             for log_ev in self.counts:
+                if log_ev not in self.last_seen_log:
+                    # In case that the AMiner was restarted, it is possible that no instance of the event has been seen; use current log atom instead
+                    self.last_seen_log[log_ev] = log_atom
                 # Check if ranges should be initialised
                 if log_ev not in self.ranges:
                     self.ranges[log_ev] = None
