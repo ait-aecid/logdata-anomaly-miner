@@ -64,7 +64,7 @@ function runAminerUntilEnd() {
   REP_PATH=$3
   CFG_PATH=$4
   echo "$CFG_PATH"
-  sudo chmod g+rw
+  sudo chmod g+rw "$CFG_PATH"
   echo "$CFG_PATH"
   ls -la "$CFG_PATH"
   if [[ $CFG_PATH == *.py ]]; then
