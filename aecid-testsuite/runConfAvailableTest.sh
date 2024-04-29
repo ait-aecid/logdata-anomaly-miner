@@ -718,7 +718,7 @@ EOL
 
     runAminerUntilEnd "sudo aminer -C -c $CONFIG_PATH" "$LOGFILE" "/tmp/lib/aminer/AnalysisChild/RepositioningData" "$CONFIG_PATH" > $OUT 2>&1
     exit_code=$?
-    cat $OUTPUT
+    cat $OUT
 
     if [[ `grep -ic "VerboseUnparsedAtomHandler" $OUT` != 0 && $BN != "AminerParsingModel" ]] || [[ `grep -o '\bVerboseUnparsedAtomHandler\b' $OUT | wc -l` > 5 ]] || `grep -Fq "Traceback" $OUT` || `grep -Fq "{'Parser'" $OUT` || `grep -Fq "FATAL" $OUT` || `grep -Fq "Config-Error" $OUT`; then
       echo "Failed Test in $filename"
