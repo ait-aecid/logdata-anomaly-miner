@@ -18,6 +18,12 @@ repos:
     -   id: check-xml
     -   id: check-yaml
 
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+    -   id: python-check-blanket-noqa
+    -   id: python-no-log-warn
+
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.9.0
     hooks:
