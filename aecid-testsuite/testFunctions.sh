@@ -64,6 +64,8 @@ function runAminerUntilEnd() {
   REP_PATH=$3
   CFG_PATH=$4
   echo "$CFG_PATH"
+  sudo chmod g+rw
+  echo "$CFG_PATH"
   ls -la "$CFG_PATH"
   if [[ $CFG_PATH == *.py ]]; then
     echo "config_properties['Core.PersistencePeriod'] = 1" | sudo tee -a $CFG_PATH > /dev/null
