@@ -20,7 +20,7 @@ NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/messages/note/_+opt/opt: text
   /model/messages/note/to/to: Jani
   /model/messages/note/from/from: Tove
-  /model/messages/note/?heading/heading: Re:
+  /model/messages/note/?heading/heading: Re: 
   /model/messages/note/body/text1/text1: I will not
   /model/messages/note/body/text2/text2: I will not
 ['/model', '/model/messages/note/+id/id', '/model/messages/note/to/to', '/model/messages/note/from/from', '/model/messages/note/body/text1/text1', '/model/messages/note/body/text2/text2', '/model/messages/note/+id/id/0', '/model/messages/note/to/to/0', '/model/messages/note/from/from/0', '/model/messages/note/?heading', '/model/messages/note/body/text1/text1/0', '/model/messages/note/body/text2/text2/0', '/model/messages/note/+id/id/1', '/model/messages/note/_+opt/opt', '/model/messages/note/to/to/1', '/model/messages/note/from/from/1', '/model/messages/note/?heading/heading', '/model/messages/note/body/text1/text1/1', '/model/messages/note/body/text2/text2/1']
