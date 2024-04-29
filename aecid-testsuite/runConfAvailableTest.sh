@@ -651,47 +651,47 @@ EOL
             echo "ulogd[4655]: id=\"2001\" severity=\"info\" sys=\"SecureNet\" sub=\"packetfilter\" name=\"Packet dropped\" action=\"drop\" fwrule=\"60001\" initf=\"eth0\" srcmac=\"******xx\" dstmac=\"******x\" srcip=\"10.64.0.22\" dstip=\"10.64.0.10\" proto=\"6\" length=\"153\" tos=\"0x00\" prec=\"0x00\" ttl=\"128\" srcport=\"443\" dstport=\"56174\" tcpflags=\"ACK PSH FIN\"" >> $LOGFILE
             ;;
         DnsParsingModel)
-            echo "Jan 20 11:21:42 dnsmasq[3326]: started, version 2.79 cachesize 150"
-            echo "Jan 20 11:21:42 dnsmasq[3326]: compile time options: IPv6 GNU-getopt DBus i18n IDN DHCP DHCPv6 no-Lua TFTP conntrack ipset auth nettlehash DNSSEC loop-detect inotify"
-            echo "Jan 20 11:21:42 dnsmasq[3326]: using nameserver 8.8.8.8#53"
-            echo "Jan 20 11:21:42 dnsmasq[3326]: using nameserver 192.168.230.122#53 for domain email-19.kennedy-mendoza.info"
-            echo "Jan 20 11:21:42 dnsmasq[3326]: read /etc/hosts - 7 addresses"
-            echo "Jan 20 11:21:55 dnsmasq[3414]: query[SRV] _http._tcp.archive.ubuntu.com from 192.168.230.4"
-            echo "Jan 20 11:21:55 dnsmasq[3414]: forwarded _http._tcp.archive.ubuntu.com to 8.8.8.8"
-            echo "Jan 20 11:21:55 dnsmasq[3414]: reply archive.ubuntu.com is 91.189.88.152"
-            echo "Jan 20 11:23:40 dnsmasq[3326]: cached debian.map.fastlydns.net is 199.232.138.132"
-            echo "Jan 20 11:21:42 inet-dns dnsmasq[1969]: exiting on receipt of SIGTERM"
-            echo "Jan 20 13:47:14 dnsmasq[3326]: nameserver 127.0.0.1 refused to do a recursive query"
-            echo "Jan 21 07:05:20 dnsmasq[3468]: failed to access /etc/dnsmasq.d/dnsmasq-resolv.conf: No such file or directory"
-            echo "Jan 24 03:56:53 dnsmasq[15084]: config version.bind is <TXT>"
+            echo "Jan 20 11:21:42 dnsmasq[3326]: started, version 2.79 cachesize 150" > $LOGFILE
+            echo "Jan 20 11:21:42 dnsmasq[3326]: compile time options: IPv6 GNU-getopt DBus i18n IDN DHCP DHCPv6 no-Lua TFTP conntrack ipset auth nettlehash DNSSEC loop-detect inotify" >> $LOGFILE
+            echo "Jan 20 11:21:42 dnsmasq[3326]: using nameserver 8.8.8.8#53" >> $LOGFILE
+            echo "Jan 20 11:21:42 dnsmasq[3326]: using nameserver 192.168.230.122#53 for domain email-19.kennedy-mendoza.info" >> $LOGFILE
+            echo "Jan 20 11:21:42 dnsmasq[3326]: read /etc/hosts - 7 addresses" >> $LOGFILE
+            echo "Jan 20 11:21:55 dnsmasq[3414]: query[SRV] _http._tcp.archive.ubuntu.com from 192.168.230.4" >> $LOGFILE
+            echo "Jan 20 11:21:55 dnsmasq[3414]: forwarded _http._tcp.archive.ubuntu.com to 8.8.8.8" >> $LOGFILE
+            echo "Jan 20 11:21:55 dnsmasq[3414]: reply archive.ubuntu.com is 91.189.88.152" >> $LOGFILE
+            echo "Jan 20 11:23:40 dnsmasq[3326]: cached debian.map.fastlydns.net is 199.232.138.132" >> $LOGFILE
+            echo "Jan 20 11:21:42 inet-dns dnsmasq[1969]: exiting on receipt of SIGTERM" >> $LOGFILE
+            echo "Jan 20 13:47:14 dnsmasq[3326]: nameserver 127.0.0.1 refused to do a recursive query" >> $LOGFILE
+            echo "Jan 21 07:05:20 dnsmasq[3468]: failed to access /etc/dnsmasq.d/dnsmasq-resolv.conf: No such file or directory" >> $LOGFILE
+            echo "Jan 24 03:56:53 dnsmasq[15084]: config version.bind is <TXT>" >> $LOGFILE
             ;;
         OpenVpnParsingModel)
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 TLS: soft reset sec=3308/3308 bytes=45748/-1 pkts=649/0"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 VERIFY OK: depth=1, C=AT, ST=Vienna, L=Vienna, O=Some Organisation GmbH, CN=OpenVPN CA, emailAddress=admin@organisation.cyberrange.at"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 VERIFY KU OK"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 Validating certificate extended key usage"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 ++ Certificate has EKU (str) TLS Web Client Authentication, expects TLS Web Client Authentication"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_VER=2.4.4"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_PLAT=linux"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_PROTO=2"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_LZ4=1"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_COMP_STUB=1"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_TCPNL=1"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 Outgoing Data Channel: Cipher 'AES-256-CBC' initialized with 256 bit key"
-            echo "2022-01-21 03:49:44 jhall/192.168.230.165:46011 TLS: soft reset sec=3309/3308 bytes=45892/-1 pkts=651/0"
-            echo "2022-01-21 06:30:01 192.168.230.95:60795 TLS: Initial packet from [AF_INET]192.168.230.95:60795, sid=30d47335 8140d551"
-            echo "2022-01-21 06:30:01 192.168.230.95:60795 peer info: IV_NCP=2"
-            echo "2022-01-21 06:30:01 192.168.230.95:60795 [twhite] Peer Connection Initiated with [AF_INET]192.168.230.95:60795"
-            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI_sva: pool returned IPv4=10.9.0.6, IPv6=(Not enabled)"
-            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI: Learn: 10.9.0.6 -> twhite/192.168.230.95:60795"
-            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI: primary virtual IP for twhite/192.168.230.95:60795: 10.9.0.6"
-            echo "2022-01-21 06:30:03 twhite/192.168.230.95:60795 PUSH: Received control message: 'PUSH_REQUEST'"
-            echo "2022-01-21 06:30:03 twhite/192.168.230.95:60795 SENT CONTROL [twhite]: 'PUSH_REPLY,redirect-gateway def1,block-outside-dns,route 10.9.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.9.0.6 10.9.0.5,peer-id 0,cipher AES-256-CBC' (status=1)"
-            echo "2022-01-21 08:09:33 jhall/192.168.230.165:46011 [jhall] Inactivity timeout (--ping-restart), restarting"
-            echo "2022-01-21 08:09:33 jhall/192.168.230.165:46011 SIGUSR1[soft,ping-restart] received, client-instance restarting"
-            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)"
-            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS Error: TLS handshake failed"
-            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS: move_session: dest=TM_LAME_DUCK src=TM_ACTIVE reinit_src=1"
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 TLS: soft reset sec=3308/3308 bytes=45748/-1 pkts=649/0" > $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 VERIFY OK: depth=1, C=AT, ST=Vienna, L=Vienna, O=Some Organisation GmbH, CN=OpenVPN CA, emailAddress=admin@organisation.cyberrange.at" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 VERIFY KU OK" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 Validating certificate extended key usage" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 ++ Certificate has EKU (str) TLS Web Client Authentication, expects TLS Web Client Authentication" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_VER=2.4.4" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_PLAT=linux" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_PROTO=2" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_LZ4=1" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_COMP_STUB=1" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_TCPNL=1" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 Outgoing Data Channel: Cipher 'AES-256-CBC' initialized with 256 bit key" >> $LOGFILE
+            echo "2022-01-21 03:49:44 jhall/192.168.230.165:46011 TLS: soft reset sec=3309/3308 bytes=45892/-1 pkts=651/0" >> $LOGFILE
+            echo "2022-01-21 06:30:01 192.168.230.95:60795 TLS: Initial packet from [AF_INET]192.168.230.95:60795, sid=30d47335 8140d551" >> $LOGFILE
+            echo "2022-01-21 06:30:01 192.168.230.95:60795 peer info: IV_NCP=2" >> $LOGFILE
+            echo "2022-01-21 06:30:01 192.168.230.95:60795 [twhite] Peer Connection Initiated with [AF_INET]192.168.230.95:60795" >> $LOGFILE
+            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI_sva: pool returned IPv4=10.9.0.6, IPv6=(Not enabled)" >> $LOGFILE
+            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI: Learn: 10.9.0.6 -> twhite/192.168.230.95:60795" >> $LOGFILE
+            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI: primary virtual IP for twhite/192.168.230.95:60795: 10.9.0.6" >> $LOGFILE
+            echo "2022-01-21 06:30:03 twhite/192.168.230.95:60795 PUSH: Received control message: 'PUSH_REQUEST'" >> $LOGFILE
+            echo "2022-01-21 06:30:03 twhite/192.168.230.95:60795 SENT CONTROL [twhite]: 'PUSH_REPLY,redirect-gateway def1,block-outside-dns,route 10.9.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.9.0.6 10.9.0.5,peer-id 0,cipher AES-256-CBC' (status=1)" >> $LOGFILE
+            echo "2022-01-21 08:09:33 jhall/192.168.230.165:46011 [jhall] Inactivity timeout (--ping-restart), restarting" >> $LOGFILE
+            echo "2022-01-21 08:09:33 jhall/192.168.230.165:46011 SIGUSR1[soft,ping-restart] received, client-instance restarting" >> $LOGFILE
+            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)" >> $LOGFILE
+            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS Error: TLS handshake failed" >> $LOGFILE
+            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS: move_session: dest=TM_LAME_DUCK src=TM_ACTIVE reinit_src=1" >> $LOGFILE
             ;;
         *)
             echo "Unknown parser config '$BN' was found! Please extend these tests. Failing.."
