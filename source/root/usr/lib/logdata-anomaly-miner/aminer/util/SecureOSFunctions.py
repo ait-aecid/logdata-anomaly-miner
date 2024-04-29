@@ -1,5 +1,4 @@
-"""
-This module defines functions for secure file handling.
+"""This module defines functions for secure file handling.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -112,9 +111,11 @@ def close_log_directory():
 
 
 def secure_open_file(file_name, flags):
-    """
-    Secure opening of a file with given flags. This call will refuse to open files where any path component is a symlink.
-    As operating system does not provide any means to do that, open the file_name directory by directory. It also adds O_NOCTTY to the
+    """Secure opening of a file with given flags. This call will refuse to open
+    files where any path component is a symlink. As operating system does not
+    provide any means to do that, open the file_name directory by directory. It
+    also adds O_NOCTTY to the.
+
     flags as controlling TTY logics as this is just an additional risk and does not make sense for opening of log files.
     @param file_name is the file name as byte string
     """
@@ -166,13 +167,15 @@ def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_d
 
 
 def send_logstream_descriptor(send_socket, send_fd, send_file_name):
-    """Send a file descriptor to be used as standard log data stream source for the analysis pipeline."""
+    """Send a file descriptor to be used as standard log data stream source for
+    the analysis pipeline."""
     send_annotated_file_descriptor(send_socket, send_fd, b'logstream', send_file_name)
 
 
 def receive_annoted_file_descriptor(receive_socket):
-    """
-    Receive a single file descriptor and attached annotation information via SCM_RIGHTS via the given socket.
+    """Receive a single file descriptor and attached annotation information via
+    SCM_RIGHTS via the given socket.
+
     The method may raise an Exception when invoked on non-blocking sockets and no messages available.
     @return a tuple containing the received file descriptor, type information (see sendAnnotatedFileDescriptor) and the annotation
     information.

@@ -1,5 +1,5 @@
-"""
-This module defines a model element that takes any string up to a specific delimiter string.
+"""This module defines a model element that takes any string up to a specific
+delimiter string.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,8 @@ debug_log_prefix = "JsonModelElement: "
 
 
 def format_float(val):
-    """This function formats the float-value and parses the sign and the exponent."""
+    """This function formats the float-value and parses the sign and the
+    exponent."""
     exp = None
     if "e" in val:
         exp = "e"
@@ -54,8 +55,8 @@ class JsonModelElement(ModelElementInterface):
 
     def __init__(self, element_id: str, key_parser_dict: dict, optional_key_prefix: str = "optional_key_", nullable_key_prefix: str = "+",
                  allow_all_fields: bool = False):
-        """
-        Initialize the JsonModelElement.
+        """Initialize the JsonModelElement.
+
         @param element_id: The ID of the element.
         @param key_parser_dict: A dictionary of all keys with the according parsers. If a key should be optional, the associated parser must
                start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL". To allow only empty
@@ -110,7 +111,8 @@ class JsonModelElement(ModelElementInterface):
         return key
 
     def get_stripped_key(self, key):
-        """Return the key without optional_key_prefix and nullable_key_prefix."""
+        """Return the key without optional_key_prefix and
+        nullable_key_prefix."""
         if key.startswith(self.optional_key_prefix):
             key = key[len(self.optional_key_prefix):]
         if key.startswith(self.nullable_key_prefix):
@@ -125,8 +127,8 @@ class JsonModelElement(ModelElementInterface):
                 key.startswith(self.optional_key_prefix) and key[len(self.optional_key_prefix):].startswith(self.nullable_key_prefix))
 
     def get_match_element(self, path: str, match_context):
-        """
-        Try to parse all the match_context against JSON.
+        """Try to parse all the match_context against JSON.
+
         When a match is found, the match_context is updated accordingly.
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.

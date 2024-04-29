@@ -20,11 +20,12 @@ from aminer import AminerConfig
 
 
 class JsonConverterHandler(EventHandlerInterface):
-    """This class implements an event record listener, that will convert event data to JSON format."""
+    """This class implements an event record listener, that will convert event
+    data to JSON format."""
 
     def __init__(self, json_event_handlers, analysis_context, pretty_print=True):
-        """
-        Initialize the event handler.
+        """Initialize the event handler.
+
         @param json_event_handlers the event handlers to which the json converted data is sent.
         @param analysis_context the analysis context used to get the component.
         @param pretty_print if true, the json is printed pretty; otherwise the json is printed with less space needed.

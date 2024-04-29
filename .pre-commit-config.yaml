@@ -21,20 +21,28 @@ repos:
     hooks:
     - id: flake8
       args: [--max-line-length=140]
-      exclude: ^aecid-testsuite/
+      exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/
 
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v2.0.4
     hooks:
     - id: autopep8
       args: [--max-line-length=140, --diff]
+      exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/
 
 -   repo: https://github.com/PyCQA/docformatter
     rev: v1.7.5
     hooks:
     - id: docformatter
+      exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/
 
 -   repo: https://github.com/PyCQA/bandit
     rev: 1.7.8
     hooks:
     - id: bandit
+      exclude: ^aecid-testsuite/
+
+-   repo: https://github.com/jendrikseipp/vulture
+    rev: 'v2.11'
+    hooks:
+      - id: vulture

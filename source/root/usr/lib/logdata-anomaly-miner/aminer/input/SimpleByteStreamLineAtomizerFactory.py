@@ -1,5 +1,4 @@
-"""
-This module defines a factory for instanciating line atomizers.
+"""This module defines a factory for instanciating line atomizers.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,16 +17,18 @@ from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 
 
 class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
-    """
-    This factory just creates the same atomizer for each new resource.
-    All parsed and unparsed atoms are delivered via two lists of handlers.
+    """This factory just creates the same atomizer for each new resource.
+
+    All parsed and unparsed atoms are delivered via two lists of
+    handlers.
     """
 
     def __init__(self, parsing_model, atom_handler_list, event_handler_list, default_timestamp_path_list=None, eol_sep=b'\n',
                  json_format=False, xml_format=False, parser_model_dict=None, log_resources=None, use_real_time=False,
                  continuous_timestamp_missing_warning=True):
-        """
-        Create the factory to forward data and events to the given lists for each newly created atomizer.
+        """Create the factory to forward data and events to the given lists for
+        each newly created atomizer.
+
         @param default_timestamp_path_list if not empty list, the value of this timestamp field is extracted from parsed atoms and stored
         as default timestamp for that atom.
         """
@@ -51,8 +52,8 @@ class SimpleByteStreamLineAtomizerFactory(AtomizerFactory):
         self.continuous_timestamp_missing_warning = continuous_timestamp_missing_warning
 
     def get_atomizer_for_resource(self, resource_name):
-        """
-        Get an atomizer for a given resource.
+        """Get an atomizer for a given resource.
+
         @param resource_name the resource name for atomizer selection is ignored in this type of factory.
         @return a StreamAtomizer object
         """

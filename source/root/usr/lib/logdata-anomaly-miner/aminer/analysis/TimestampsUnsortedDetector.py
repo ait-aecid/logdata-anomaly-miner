@@ -1,5 +1,4 @@
-"""
-This module defines a detector for unsorted timestamps.
+"""This module defines a detector for unsorted timestamps.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -21,14 +20,15 @@ from aminer import AminerConfig
 
 
 class TimestampsUnsortedDetector(AtomHandlerInterface):
-    """
-    This class creates events when unsorted timestamps are detected.
-    This is useful mostly to detect algorithm malfunction or configuration errors, e.g. invalid timezone configuration.
+    """This class creates events when unsorted timestamps are detected.
+
+    This is useful mostly to detect algorithm malfunction or
+    configuration errors, e.g. invalid timezone configuration.
     """
 
     def __init__(self, aminer_config, anomaly_event_handlers, exit_on_error_flag=False, output_logline=True):
-        """
-        Initialize the detector.
+        """Initialize the detector.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param exit_on_error_flag exit the aminer forcefully if a log atom with a wrong timestamp is found.
@@ -41,8 +41,8 @@ class TimestampsUnsortedDetector(AtomHandlerInterface):
         self.last_timestamp = 0
 
     def receive_atom(self, log_atom):
-        """
-        Receive on parsed atom and the information about the parser match.
+        """Receive on parsed atom and the information about the parser match.
+
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match. Depending on this information, the caller
         may decide if it makes sense passing the parsed atom also to other handlers.

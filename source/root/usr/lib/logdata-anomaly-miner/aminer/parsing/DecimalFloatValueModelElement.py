@@ -1,5 +1,4 @@
-"""
-This module defines an model element for decimal number parsing as float.
+"""This module defines an model element for decimal number parsing as float.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,9 +15,11 @@ from aminer.parsing.MatchElement import MatchElement
 
 
 class DecimalFloatValueModelElement(ModelElementInterface):
-    """
-    This class defines a model to parse decimal values with optional signum, padding or exponent.
-    With padding, the signum has to be found before the padding characters.
+    """This class defines a model to parse decimal values with optional signum,
+    padding or exponent.
+
+    With padding, the signum has to be found before the padding
+    characters.
     """
 
     SIGN_TYPE_NONE = "none"
@@ -35,8 +36,8 @@ class DecimalFloatValueModelElement(ModelElementInterface):
 
     def __init__(self, element_id: str, value_sign_type: str = SIGN_TYPE_NONE, value_pad_type: str = PAD_TYPE_NONE,
                  exponent_type: str = EXP_TYPE_NONE):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param value_sign_type defines the possible start characters in the value. With the SIGN_TYPE_NONE only digits are allowed,
                with SIGN_TYPE_OPTIONAL digits and a minus sign are allowed and with SIGN_TYPE_MANDATORY the value must start with + or -.
@@ -49,8 +50,9 @@ class DecimalFloatValueModelElement(ModelElementInterface):
         self.digits = set(b"0123456789")
 
     def get_match_element(self, path: str, match_context):
-        """
-        Find the maximum number of bytes forming a decimal number according to the parameters specified.
+        """Find the maximum number of bytes forming a decimal number according
+        to the parameters specified.
+
         @param path to be printed in the MatchElement.
         @param match_context the match_context to be analyzed.
         @return a match when at least one byte being a digit was found

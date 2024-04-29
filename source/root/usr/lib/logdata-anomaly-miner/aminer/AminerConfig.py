@@ -1,4 +1,5 @@
-"""This module collects static configuration item keys and configuration loading and handling functions.
+"""This module collects static configuration item keys and configuration
+loading and handling functions.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -88,13 +89,15 @@ def load_config(config_file_name):
 
 
 def build_persistence_file_name(aminer_config, *args):
-    """Build the full persistence file name from persistence directory configuration and path parts."""
+    """Build the full persistence file name from persistence directory
+    configuration and path parts."""
     persistence_dir_name = aminer_config.config_properties.get(KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
     return os.path.join(persistence_dir_name, *args)
 
 
 def save_config(analysis_context, new_file):
-    """Save the current configuration to a file by using the aminerRemoteControl."""
+    """Save the current configuration to a file by using the
+    aminerRemoteControl."""
     register_component = 'register_component('
     VAR_ID = 0
     msg = ""

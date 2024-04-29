@@ -1,5 +1,5 @@
-"""
-This component counts occurring combinations of values and periodically sends the results as a report.
+"""This component counts occurring combinations of values and periodically
+sends the results as a report.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -31,8 +31,8 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, report_interval=60, target_label_list=None,
                  split_reports_flag=False, log_resource_ignore_list=None):
-        """
-        Initialize the ParserCount component.
+        """Initialize the ParserCount component.
+
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
                considered for value range generation.

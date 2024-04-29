@@ -1,5 +1,5 @@
-"""
-This module defines a model element that takes any string up to a specific delimiter string.
+"""This module defines a model element that takes any string up to a specific
+delimiter string.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -47,16 +47,22 @@ class XmlModelElement(ModelElementInterface):
 
     def __init__(self, element_id: str, key_parser_dict: dict, attribute_prefix: str = "+", optional_attribute_prefix: str = "_",
                  empty_allowed_prefix: str = "?", xml_header_expected: bool = False):
-        """
-        Initialize the XmlModelElement.
-        @param element_id: The ID of the element.
-        @param key_parser_dict: A dictionary of all keys with the according parsers (excluding the root element). If an attribute should be
-               optional, the associated key must start with the optional_attribute_prefix. To allow every child element in a XML document
-               use "key": "ALLOW_ALL". To allow empty elements the key must start with empty_allowed_prefix.
-        @param attribute_prefix: This prefix indicates that the element is an attribute of the previous element.
-        @param optional_attribute_prefix: If some attribute starts with this prefix it will be considered optional.
-        @param empty_allowed_prefix: If an element starts with this prefix, it may be empty.
-        @param xml_header_expected: True if the xml header is expected.
+        """Initialize the XmlModelElement.
+
+        @param element_id: The ID of the element. @param
+        key_parser_dict: A dictionary of all keys with the according
+        parsers (excluding the root element). If an attribute should be
+        optional, the associated key must start with the
+        optional_attribute_prefix. To allow every child element in a XML
+        document        use "key": "ALLOW_ALL". To allow empty elements
+        the key must start with empty_allowed_prefix. @param
+        attribute_prefix: This prefix indicates that the element is an
+        attribute of the previous element. @param
+        optional_attribute_prefix: If some attribute starts with this
+        prefix it will be considered optional. @param
+        empty_allowed_prefix: If an element starts with this prefix, it
+        may be empty. @param xml_header_expected: True if the xml header
+        is expected.
         """
         super().__init__(element_id, key_parser_dict=key_parser_dict, attribute_prefix=attribute_prefix,
                          optional_attribute_prefix=optional_attribute_prefix, empty_allowed_prefix=empty_allowed_prefix,
@@ -103,7 +109,8 @@ class XmlModelElement(ModelElementInterface):
         return key
 
     def get_stripped_key(self, key):
-        """Return the key without optional_key_prefix and nullable_key_prefix."""
+        """Return the key without optional_key_prefix and
+        nullable_key_prefix."""
         if key.startswith(self.optional_attribute_prefix):
             key = key[len(self.optional_attribute_prefix):]
         if key.startswith(self.attribute_prefix + self.optional_attribute_prefix):
@@ -121,8 +128,8 @@ class XmlModelElement(ModelElementInterface):
                 and key[len(self.attribute_prefix):].startswith(self.optional_attribute_prefix))
 
     def get_match_element(self, path: str, match_context):
-        """
-        Try to parse all the match_context against XML.
+        """Try to parse all the match_context against XML.
+
         When a match is found, the match_context is updated accordingly.
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.

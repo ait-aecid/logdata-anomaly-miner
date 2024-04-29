@@ -1,5 +1,4 @@
-"""
-This module defines an event handler that forwards anomalies to ZeroMQ.
+"""This module defines an event handler that forwards anomalies to ZeroMQ.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,11 +19,12 @@ import zmq
 
 
 class ZmqEventHandler(EventHandlerInterface):
-    """This class implements an event record listener, that will forward Json-objects to a ZeroMQ queue."""
+    """This class implements an event record listener, that will forward Json-
+    objects to a ZeroMQ queue."""
 
     def __init__(self, analysis_context, topic=None, url="ipc:///tmp/aminer"):
-        """
-        Initialize the event handler.
+        """Initialize the event handler.
+
         @param analysis_context the analysis context used to get the component.
         @param topic the topic used in the Zero Message Queue.
         @param url the internal inter process communication channel.
@@ -38,8 +38,8 @@ class ZmqEventHandler(EventHandlerInterface):
         logging.getLogger(DEBUG_LOG_NAME).info("ZmqEventHandler initialized")
 
     def receive_event(self, _event_type, _event_message, _sorted_loglines, event_data, _log_atom, event_source):
-        """
-        Receive information about a detected event in json format.
+        """Receive information about a detected event in json format.
+
         Receive information about a detected event in json format.
         @param _event_type is a string with the event type class this event belongs to. This information can be used to interpret
                type-specific event_data objects. Together with the eventMessage and sorted_loglines, this can be used to create generic log

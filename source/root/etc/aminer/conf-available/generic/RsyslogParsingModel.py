@@ -10,7 +10,8 @@ from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 
 
 def get_model():
-    """Return a model to parse a su session information message after any standard logging preamble, e.g. from syslog."""
+    """Return a model to parse a su session information message after any
+    standard logging preamble, e.g. from syslog."""
     type_children = [
         SequenceModelElement("gidchange", [
             FixedDataModelElement("s0", b"rsyslogd's groupid changed to "),

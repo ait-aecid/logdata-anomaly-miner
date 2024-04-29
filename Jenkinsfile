@@ -43,6 +43,11 @@ pipeline {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runBandit"
                     }
                 }
+                stage("Vulture"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runVulture"
+                    }
+                }
                 stage("Flake8"){
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runFlake8"
