@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -25,17 +25,12 @@ repos:
     -   id: python-no-log-warn
 
 -   repo: https://github.com/PeterMosmans/jenkinslint
-    rev: master
+    rev: v1.0.0
     hooks:
     -   id: jenkinslint
 
--   repo: https://github.com/regebro/pyroma
-    rev: "4.2"
-    hooks:
-    -   id: pyroma
-
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.9.0
+    rev: v1.10.0
     hooks:
     -   id: mypy
         additional_dependencies: [pydantic, types-PyYAML]
@@ -45,6 +40,8 @@ repos:
     rev: 7.0.0
     hooks:
     - id: flake8
+      exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/
+      args: [--statistics]
 
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v2.0.4
