@@ -140,7 +140,6 @@ RUN pip3 install orjson flake8 pycodestyle vulture
 RUN PACK=$(find /usr/local/lib/ -name orjson.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 USER aminer
-ENV USER=aminer
 WORKDIR /home/aminer/aecid-testsuite
 
 # The following volumes can be mounted

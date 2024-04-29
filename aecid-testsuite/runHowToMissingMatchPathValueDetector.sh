@@ -44,11 +44,11 @@ sudo rm -rf /var/lib/aminer/*
 exit_code=0
 
 # write config (1.)
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo -u $USER tee $CFG_PATH > /dev/null
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # adapt config (2.)
-sed "s?file:///var/log/apache2/access.log?file:///${LOG}?g" $CFG_PATH | sudo -u $USER tee $CFG_PATH > /dev/null
-echo "Core.PersistencePeriod: 1" | sudo -u $USER tee -a $CFG_PATH > /dev/null
+sed "s?file:///var/log/apache2/access.log?file:///${LOG}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
+echo "Core.PersistencePeriod: 1" | sudo tee -a $CFG_PATH > /dev/null
 
 # write log lines (3.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE | sed '/^```/ d' > $OUT
@@ -92,7 +92,7 @@ exit_code=$((exit_code | $?))
 #exit_code=$((exit_code | $?))
 
 # set LearnMode False (8.)
-sed "s/LearnMode: True/LearnMode: False/g" $CFG_PATH | sudo -u $USER tee $CFG_PATH > /dev/null
+sed "s/LearnMode: True/LearnMode: False/g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
 
 # run aminer CMD (9.)
 rm $LOG

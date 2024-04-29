@@ -41,11 +41,11 @@ cp files/entropy_test.log $LOG2
 cd ..
 
 # extract config (1.)
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo -u $USER tee $CFG_PATH > /dev/null
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # replace LogResourceList (2.)
-sed "s?file:///home/ubuntu/entropy/entropy_train.log?file:///${LOG1}?g" $CFG_PATH | sudo -u $USER tee $CFG_PATH > /dev/null
-sed "s?report_interval: 5?report_interval: 555555555?g" $CFG_PATH | sudo -u $USER tee $CFG_PATH > /dev/null
+sed "s?file:///home/ubuntu/entropy/entropy_train.log?file:///${LOG1}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
+sed "s?report_interval: 5?report_interval: 555555555?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
 
 # parse aminer CMD and run it (3.)
 awk '/^```$/ && ++n == 4, /^```$/ && n++ == 5' < $INPUT_FILE | sed '/^```/ d' > $OUT
@@ -140,10 +140,10 @@ compareStrings "$OUTPUT" "$IN" "Failed Test in 6."
 exit_code=$((exit_code | $?))
 
 # extract second config (7.)
-awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo -u $USER tee $CFG_PATH > /dev/null
+awk '/^```yaml$/ && ++n == 2, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # replace LogResourceList (8.)
-sed "s?file:///home/ubuntu/demo-detectors/entropy/entropy_test.log?file:///${LOG2}?g" $CFG_PATH | sudo -u $USER tee $CFG_PATH > /dev/null
+sed "s?file:///home/ubuntu/demo-detectors/entropy/entropy_test.log?file:///${LOG2}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
 
 # parse aminer CMD and run it (9.)
 awk '/^```$/ && ++n == 13, /^```$/ && n++ == 14' < $INPUT_FILE | sed '/^```/ d' > $OUT

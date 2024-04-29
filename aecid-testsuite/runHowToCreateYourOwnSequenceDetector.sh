@@ -126,7 +126,7 @@ CMD="${CMD#* }"
 $CMD 2> /dev/null
 
 # 8.) Read between 1st ```yaml and 9th ``` and store it in CFG_PATH.
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' | sudo -u $USER tee $CFG_PATH > /dev/null
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # 9.) Read CFG_PATH, replace the line with json: True and compare it with the 1st ```yaml in Getting-started-(tutorial).md.
 OUT1=$(sudo cat $CFG_PATH | sed -n '1,21p')
@@ -178,7 +178,7 @@ OUT2=$(tail -n 5 < $CFG_PATH)
 echo "$OUT1
 
 $IN1
-$OUT2" | sudo -u $USER tee $CFG_PATH > /dev/null
+$OUT2" | sudo tee $CFG_PATH > /dev/null
 
 # 14.) Check if line between 15th and 16th ``` can be found in /usr/lib/logdata-anomaly-miner/aminer/schemas/normalisation/AnalysisNormalisationSchema.py
 awk '/^```$/ && ++n == 15, /^```$/ && n++ == 16' < $INPUT > $OUT
@@ -263,7 +263,7 @@ OUT2=$(tail -n 5 $CFG_PATH)
 echo "$OUT1
 
 $IN1
-$OUT2" | sudo -u $USER tee $CFG_PATH > /dev/null
+$OUT2" | sudo tee $CFG_PATH > /dev/null
 
 # 24.) Run aminer CMD and check if the output is the same as between 32nd and 33th ```.
 runAminerUntilEnd "$CMD" "" "/var/lib/aminer/AnalysisChild/RepositioningData" "$CFG_PATH" "$OUT"

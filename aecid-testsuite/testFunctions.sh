@@ -63,6 +63,7 @@ function runAminerUntilEnd() {
   LOGFILE=$2
   REP_PATH=$3
   CFG_PATH=$4
+  USER=`stat -c "%U" $CFG_PATH`
   if [[ $CFG_PATH == *.py ]]; then
     echo "config_properties['Core.PersistencePeriod'] = 1" | sudo -u $USER tee -a $CFG_PATH > /dev/null
   elif [[ $CFG_PATH == *.yml ]]; then

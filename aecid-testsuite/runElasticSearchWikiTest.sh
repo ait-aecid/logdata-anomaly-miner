@@ -38,11 +38,11 @@ awk '/^```$/ && ++n == 3, /^```$/ && n++ == 4' < $INPUT | sed '/^```/ d' > $LOG
 sed -i '1d' $LOG
 
 # write the config to CFG_PATH (2.)
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' | sudo -u $USER tee $CFG_PATH > /dev/null
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
 # replace LogResourceList (3.)
-sed "s?unix:///var/lib/aelastic/aminer.sock?file:///${LOG}?g" $CFG_PATH | sudo -u $USER tee $CFG_PATH > /dev/null
-sed "s?report_interval: 5?report_interval: 555555555?g" $CFG_PATH | sudo -u $USER tee $CFG_PATH > /dev/null
+sed "s?unix:///var/lib/aelastic/aminer.sock?file:///${LOG}?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
+sed "s?report_interval: 5?report_interval: 555555555?g" $CFG_PATH | sudo tee $CFG_PATH > /dev/null
 
 # extract CMD (4.)
 awk '/^```$/ && ++n == 10, /^```$/ && n++ == 11' < $INPUT | sed '/^```/ d' > $OUT

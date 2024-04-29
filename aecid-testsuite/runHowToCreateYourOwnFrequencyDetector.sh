@@ -99,7 +99,7 @@ awk '/^```python$/ && ++n == 2, /^```$/' < $INPUT | sed '/^```/ d' >> $TMP_SCHEM
 sudo sed -i "                    /anomaly_threshold=item/r $TMP_SCHEMA" $YML_CONFIG
 
 # 6.) Write the config to CFG_PATH and replace LogResourceList to LOG.
-awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' | sudo -u $USER tee $CFG_PATH > /dev/null
+awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 sudo sed -i 's?file:///home/ubuntu/apache.log?file:///tmp/access.log?g' $CFG_PATH
 
 # 7.) Read CMD from the second line between the 1st ```bash to 10th ``` and run it with sudo.
