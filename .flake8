@@ -1,0 +1,3 @@
+[flake8]
+exclude = ^aecid-testsuite/unit/,^aecid-testsuite/system/,^aecid-testsuite/integration/
+max-line-length = 140
