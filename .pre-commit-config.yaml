@@ -24,6 +24,16 @@ repos:
     -   id: python-check-blanket-noqa
     -   id: python-no-log-warn
 
+-   repo: https://github.com/PeterMosmans/jenkinslint
+    rev: master
+    hooks:
+    -   id: jenkinslint
+
+-   repo: https://github.com/regebro/pyroma
+    rev: "4.2"
+    hooks:
+    -   id: pyroma
+
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.9.0
     hooks:
