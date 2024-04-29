@@ -69,6 +69,7 @@ CMD=$(sed -n '4p' < $OUT)
 CMD=${CMD#*$ }
 CFG_PATH=/${CMD#*/}
 
+ls -la /etc/aminer
 # write the yaml config. (4.)
 awk '/^```yaml$/ && ++n == 1, /^```$/' < $INPUT_FILE | sed '/^```/ d' | sudo tee $CFG_PATH > /dev/null
 
