@@ -1,0 +1,7 @@
+[tool.vulture]
+exclude = ["^aecid-testsuite/", "*Interfaces.py", "*Interface.py"]
+make_whitelist = true
+min_confidence = 80
+paths = ["source/root/usr/lib/logdata-anomaly-miner/"]
+sort_by_size = true
+verbose = false

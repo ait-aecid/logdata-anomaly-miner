@@ -7,8 +7,9 @@ tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
 
 $KAFKA_VERSIONSTRING/bin/zookeeper-server-start.sh $KAFKA_VERSIONSTRING/config/zookeeper.properties > /dev/null &
-sleep 1
+sleep 10
 $KAFKA_VERSIONSTRING/bin/kafka-server-start.sh $KAFKA_VERSIONSTRING/config/server.properties > /dev/null &
+sleep 10
 
 exit_code=0
 sudo python3 -bb -m unittest discover -s unit/analysis -p '*Test.py' > /dev/null &
