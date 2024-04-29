@@ -89,6 +89,7 @@ function runAminerUntilEnd() {
      IFS=',' read -ra ADDR <<< "$IN"
      CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
      CNTR=$((++CNTR))
+     echo $CURRENT_SIZE $FILE_SIZE $CNTR
   done
   sleep 3
   sudo sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
