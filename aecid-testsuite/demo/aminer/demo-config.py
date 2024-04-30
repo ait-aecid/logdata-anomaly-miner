@@ -91,6 +91,7 @@ def build_analysis_pipeline(analysis_context):
     cron = b' cron['
 
     # Build the parsing model:
+    import pytz
     from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
     from aminer.parsing.SequenceModelElement import SequenceModelElement
     from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
@@ -178,7 +179,7 @@ def build_analysis_pipeline(analysis_context):
             AnyByteDataModelElement('remainding_data')])]
 
     service_children_parsing_model_element = [
-        DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'),
+        DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S', pytz.timezone('UTC')),
         DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'),
         DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'),
         SequenceModelElement('se', [

@@ -85,10 +85,10 @@ class DateTimeModelElement(ModelElementInterface):
                available formats. Supported format specifiers are:
                  * %b: month name in current locale
                  * %d: day in month, can be space or zero padded when followed by separator or at end of string.
-                 * %f: fraction of seconds (the digits after the the ".")
+                 * %f: fraction of seconds (the digits after the ".")
                  * %H: hours from 00 to 23
                  * %M: minutes
-                 * %m: two digit month number
+                 * %m: two-digit month number
                  * %S: seconds
                  * %s: seconds since the epoch (1970-01-01)
                  * %Y: 4 digit year number
