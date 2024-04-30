@@ -414,7 +414,7 @@ Log.RemoteControlLogFile
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Type: string (path to the logfile)
-* Default: '/var/lib/aminer/log/aminerRemoteLog.txt'
+* Default: '/var/lib/aminer/log/aminerRemoteLog.log'
 
 Defines the path of the logfile for the RemoteControl.
 
@@ -2131,7 +2131,7 @@ This class creates events if event or value occurrence counts are outliers in PC
           learn_mode: true
 
 SlidingEventFrequencyDetector
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module defines a detector for event and value frequency exceedances with a sliding window approach.
 
@@ -2742,3 +2742,93 @@ The ZmqEventHandler writes its output to a `Zero Message-Queue <https://zeromq.o
         type: 'ZmqEventHandler'
         topic: 'aminer'
         url: 'tcp://*:5555' # tcp-port 5555 on all interfaces
+
+-------
+Schemas
+-------
+
+All analysis detectors, parsing models, and event handlers must be included in the validation and normalisation schemas for the YAML configurations.
+YamlConfig uses the ConfigValidator to normalize values and validate them against the validation schema.
+
+.. seealso::
+
+   :ref:`YamlConfig`
+   :ref:`ConfigValidator`
+
+.. _BaseSchema:
+
+BaseSchema
+~~~~~~~~~~
+
+This module defines general configurations and Input configurations of the aminer.
+
+.. _Normalization:
+
+Normalization
+~~~~~~~~~~~~~
+
+Define all possible parameters and normalisation strategies such as default values for the defined group of modules. These groups are separated in the following modules:
+
+* **AnalysisNormalisationSchema**
+* **EventHandlerNormalisationSchema**
+* **ParserNormalisationSchema**
+
+.. _Validation:
+
+Validation
+~~~~~~~~~~
+
+Define all possible parameters and valid values for each module within the defined group of modules. These groups are separated in the following modules:
+
+* **AnalysisValidationSchema**
+* **EventHandlerValidationSchema**
+* **ParserValidationSchema**
+
+------------
+AMiner Files
+------------
+
+This section explains the functionality of important files of the aminer.
+
+.. _Aminer:
+
+Aminer
+~~~~~~
+
+This is the main module which starts the aminer program. It parses all arguments, initializes loggers, and handles graceful shutdowns.
+These loggers are by default divided into the following files:
+* **aminer.log**: Logs regarding the aminer such as the different startup stages of the process. The verbosity can be set with the Log.DebugLevel configuration.
+* **statistics.log**: Logs specific statistics such as the number of successfully processed log lines for each analysis component.
+* **aminerRemoteLog.log**: Logs all information about the changes done with the remote control using aminerremotecontrol.py.
+The process is started with root privileges to run all necessary tasks and it only uses the minimal set of imports.
+A subprocess starting the AnalysisChild is used for the main processing of log data.
+
+.. _AnalysisChild:
+
+AnalysisChild
+~~~~~~~~~~~~~
+
+This module handles sockets of the log files, registers all components, and runs the main analysis loop.
+It also handles the remote control sockets to change the running configuration using the AminerRemoteControlExecutionMethods.
+
+.. _AminerConfig:
+
+AminerConfig
+~~~~~~~~~~~~
+
+This module handles the loading and saving of configurations. When loading YAML configurations the configuration file is processed in YamlConfig.
+
+.. _YamlConfig:
+
+YamlConfig
+~~~~~~~~~~
+
+This module handles the loading of YAML configurations. It uses the ConfigValidator to normalize and validate the modules.
+When adding new components, they have to be added in this file.
+
+.. _ConfigValidator:
+
+ConfigValidator
+~~~~~~~~~~~~~~~
+
+This module normalizes, validates, and imports the modules for YAML configurations.
