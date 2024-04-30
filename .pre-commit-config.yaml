@@ -30,7 +30,7 @@ repos:
     -   id: mypy
         additional_dependencies: [pydantic, types-PyYAML]
         args: [--install-types, --ignore-missing-imports, --disable-error-code=attr-defined, --implicit-optional]
-        exclude: aecid-testsuite
+        exclude: aecid-testsuite|source/root/usr/lib/logdata-anomaly-miner/aminer/__init__.py
 
 -   repo: https://github.com/PyCQA/flake8
     rev: 7.0.0

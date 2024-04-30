@@ -34,7 +34,6 @@ def get_model():
             """
             data = match_context.match_data
             match_len = 0
-            match_value = b""
             if data[0] == ord(b'"'):
                 match_len = data.find(b'"', 1)
                 if match_len == -1:
@@ -46,6 +45,7 @@ def get_model():
                 match_value = None
             else:
                 # Must be upper case hex encoded:
+                match_value = b""
                 next_value = -1
                 for d_byte in data:
                     if 0x30 <= d_byte <= 0x39:
