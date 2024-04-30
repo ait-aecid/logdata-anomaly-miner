@@ -5,18 +5,18 @@ repos:
     rev: v4.6.0
     hooks:
     -   id: trailing-whitespace
+        exclude: aecid-testsuite/runAminerXmlInputDemo.sh
     -   id: end-of-file-fixer
     -   id: check-yaml
+        exclude: aecid-testsuite/unit/data/configfiles/invalid_config.yml
     -   id: check-added-large-files
     -   id: check-ast
     -   id: check-docstring-first
     -   id: check-executables-have-shebangs
-    -   id: check-json
     -   id: check-shebang-scripts-are-executable
     -   id: check-symlinks
     -   id: check-toml
     -   id: check-xml
-    -   id: check-yaml
 
 -   repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
@@ -24,17 +24,13 @@ repos:
     -   id: python-check-blanket-noqa
     -   id: python-no-log-warn
 
--   repo: https://github.com/PeterMosmans/jenkinslint
-    rev: v1.0.0
-    hooks:
-    -   id: jenkinslint
-
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.0
     hooks:
     -   id: mypy
         additional_dependencies: [pydantic, types-PyYAML]
         args: [--install-types, --ignore-missing-imports, --disable-error-code=attr-defined, --implicit-optional]
+        exclude: aecid-testsuite
 
 -   repo: https://github.com/PyCQA/flake8
     rev: 7.0.0

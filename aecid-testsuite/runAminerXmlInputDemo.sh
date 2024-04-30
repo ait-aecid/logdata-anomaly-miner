@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cp demo/aminerXmlInputDemo/xml-input-demo-config.yml /tmp/xml-input-demo-config.yml
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo chmod +x demo/aminerXmlInputDemo/aminerXmlInputDemo.sh

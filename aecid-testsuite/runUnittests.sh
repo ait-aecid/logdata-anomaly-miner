@@ -1,3 +1,5 @@
+#!/bin/bash
+
 source config
 
 sudo cp unit/data/kafka-client.conf /etc/aminer/kafka-client.conf

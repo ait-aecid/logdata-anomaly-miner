@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [[ $# -lt 3 ]]; then
 	echo "Error, not enough parameters found!"
 	echo "Please run the script as follows: ./multiplyLogFile.sh numberOfCopies templateFile targetFile"
