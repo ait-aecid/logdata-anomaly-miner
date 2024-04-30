@@ -405,7 +405,7 @@ class DateTimeModelElement(ModelElementInterface):
                         tz_specifier_offset = sign * int(match_context.match_data[parse_pos-4-colon_shift:parse_pos-2-colon_shift]) * \
                                               3600 + int(match_context.match_data[parse_pos-2:parse_pos] * 60)
 
-            if match_context.match_data[parse_pos] == ord(b"Z"):
+            if parse_pos < len(match_context.match_data) and match_context.match_data[parse_pos] == ord(b"Z"):
                 parse_pos += 1
             if valid_tz_specifier:
                 date_str = match_context.match_data[:parse_pos]
