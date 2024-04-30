@@ -39,13 +39,6 @@ repos:
       exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/
       args: [--statistics]
 
--   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v2.0.4
-    hooks:
-    - id: autopep8
-      args: [--max-line-length=140, --diff]
-      exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/
-
 -   repo: https://github.com/PyCQA/docformatter
     rev: v1.7.5
     hooks:
@@ -62,3 +55,10 @@ repos:
     rev: 'v2.11'
     hooks:
       - id: vulture
+
+-   repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v2.0.4
+    hooks:
+    - id: autopep8
+      args: [--max-line-length=140, --diff]
+      exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/

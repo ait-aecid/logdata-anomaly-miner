@@ -93,9 +93,10 @@ config_properties['LogPrefix'] = 'Original log line: '
 
 
 def build_analysis_pipeline(analysis_context):
-    """
-    Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
+    """Define the function to create pipeline for parsing the log data.
+
+    It has also to define an AtomizerFactory to instruct aminer how to
+    process incoming data streams to create log atoms from them.
     """
     date_format_string = b'%Y-%m-%d %H:%M:%S'
     cron = b' cron['
@@ -339,7 +340,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(new_match_path_detector)
 
     def tuple_transformation_function(match_value_list):
-        """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10th element."""
+        """Only allow output of the EnhancedNewMatchPathValueComboDetector
+        after every 10th element."""
         extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list))
         if extra_data is not None:
             mod = 10
