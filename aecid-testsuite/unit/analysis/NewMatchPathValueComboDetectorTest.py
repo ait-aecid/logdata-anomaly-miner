@@ -139,9 +139,11 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         t = round(time.time(), 3)
         log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, nmpvcd)
         log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t, nmpvcd)
+        log_atom3 = LogAtom(self.match_element4.match_string, ParserMatch(self.match_element4), t, nmpvcd)
 
         self.assertTrue(nmpvcd.receive_atom(log_atom1))
         self.assertTrue(nmpvcd.receive_atom(log_atom2))
+        self.assertFalse(nmpvcd.receive_atom(log_atom3))
         self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537")})
         nmpvcd.do_persist()
         with open(nmpvcd.persistence_file_name, "r") as f:
@@ -150,6 +152,22 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         nmpvcd.known_values_set = set()
         nmpvcd.load_persistence_data()
         self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537")})
+
+        other = NewMatchPathValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler])
+        self.assertEqual(nmpvcd.known_values_set, other.known_values_set)
+
+        nmpvcd = NewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=True, output_logline=False, allow_missing_values_flag=True)
+        self.assertTrue(nmpvcd.receive_atom(log_atom1))
+        self.assertTrue(nmpvcd.receive_atom(log_atom2))
+        self.assertTrue(nmpvcd.receive_atom(log_atom3))
+        self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537"), (b"ddd ", None)})
+        nmpvcd.do_persist()
+        with open(nmpvcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), '[["bytes: pid=", "bytes:25537"], ["bytes:ddd ", null], ["bytes:ddd ", "bytes:25538"]]')
+
+        nmpvcd.known_values_set = set()
+        nmpvcd.load_persistence_data()
+        self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537"), (b"ddd ", None)})
 
         other = NewMatchPathValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler])
         self.assertEqual(nmpvcd.known_values_set, other.known_values_set)
