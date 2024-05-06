@@ -60,7 +60,7 @@ class SecureOSFunctionsTestLocal(TestBase):
     def test2secure_open_close_log_directory(self):
         self.assertRaises(ValueError, SecureOSFunctions.secure_open_log_directory)
         self.assertRaises(ValueError, SecureOSFunctions.secure_open_log_directory, "base/directory")
-        SecureOSFunctions.secure_open_log_directory("/tmp/lib/aminer/log")
+        SecureOSFunctions.secure_open_log_directory("/tmp/lib/aminer/util/log")
         self.assertIsNotNone(SecureOSFunctions.log_dir_fd)
         self.assertIsNotNone(SecureOSFunctions.log_dir_path)
         self.assertEqual(os.O_NOFOLLOW | os.O_DIRECTORY, fcntl.fcntl(SecureOSFunctions.log_dir_fd, fcntl.F_GETFL) & (os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY))  # os.O_NOCTTY is not included, because it is no terminal controlling device.
@@ -68,25 +68,25 @@ class SecureOSFunctionsTestLocal(TestBase):
         self.assertIsNone(SecureOSFunctions.log_dir_fd)
         self.assertIsNone(SecureOSFunctions.log_dir_path)
 
-        SecureOSFunctions.secure_open_base_directory("/tmp/lib/aminer")
-        SecureOSFunctions.secure_open_log_directory("/tmp/lib/aminer/log")
+        SecureOSFunctions.secure_open_base_directory("/tmp/lib/aminer/util")
+        SecureOSFunctions.secure_open_log_directory("/tmp/lib/aminer/util/log")
         SecureOSFunctions.close_log_directory()
         SecureOSFunctions.close_base_directory()
 
     def test3secure_open_file(self):
-        file = open("/tmp/lib/aminer/log/test.log", "w")
+        file = open("/tmp/lib/aminer/util/log/test.log", "w")
         file.close()
         self.assertRaises(ValueError, SecureOSFunctions.secure_open_file, "base/directory", os.O_NOFOLLOW | os.O_NOCTTY)
-        self.assertRaises(Exception, SecureOSFunctions.secure_open_file, "/tmp/lib/aminer/log", os.O_NOFOLLOW | os.O_NOCTTY)
-        fd = SecureOSFunctions.secure_open_file("/tmp/lib/aminer/log", os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
+        self.assertRaises(Exception, SecureOSFunctions.secure_open_file, "/tmp/lib/aminer/util/log", os.O_NOFOLLOW | os.O_NOCTTY)
+        fd = SecureOSFunctions.secure_open_file("/tmp/lib/aminer/util/log", os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
         self.assertEqual(os.O_NOFOLLOW | os.O_DIRECTORY, fcntl.fcntl(fd, fcntl.F_GETFL) & (os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY))  # os.O_NOCTTY is not included, because it is no terminal controlling device.
         os.close(fd)
-        fd = SecureOSFunctions.secure_open_file("/tmp/lib/aminer/log/test.log", os.O_NOFOLLOW | os.O_NOCTTY)
+        fd = SecureOSFunctions.secure_open_file("/tmp/lib/aminer/util/log/test.log", os.O_NOFOLLOW | os.O_NOCTTY)
         self.assertEqual(os.O_NOFOLLOW, fcntl.fcntl(fd, fcntl.F_GETFL) & (os.O_NOFOLLOW | os.O_NOCTTY))  # os.O_NOCTTY is not included, because it is no terminal controlling device.
         os.close(fd)
 
-        SecureOSFunctions.secure_open_base_directory("/tmp/lib/aminer")
-        fd = SecureOSFunctions.secure_open_file("/tmp/lib/aminer/log/test.log", os.O_NOFOLLOW | os.O_NOCTTY)
+        SecureOSFunctions.secure_open_base_directory("/tmp/lib/aminer/util")
+        fd = SecureOSFunctions.secure_open_file("/tmp/lib/aminer/util/log/test.log", os.O_NOFOLLOW | os.O_NOCTTY)
         self.assertEqual(os.O_NOFOLLOW, fcntl.fcntl(fd, fcntl.F_GETFL) & (os.O_NOFOLLOW | os.O_NOCTTY))  # os.O_NOCTTY is not included, because it is no terminal controlling device.
         os.close(fd)
         SecureOSFunctions.close_base_directory()
