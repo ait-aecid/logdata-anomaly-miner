@@ -156,8 +156,11 @@ class NewMatchPathValueComboDetector(
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.known_values_set),
-                                                                      key=lambda L: tuple(el or b'-' for el in L)))
+        try:
+            PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.known_values_set),
+                                                                          key=lambda L: tuple(el if el is not None else b'-' for el in L)))
+        except TypeError:
+            PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
