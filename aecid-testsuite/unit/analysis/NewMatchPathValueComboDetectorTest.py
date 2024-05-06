@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.input.LogAtom import LogAtom
 import time
@@ -23,6 +25,13 @@ class NewMatchPathValueComboDetectorTest(TestBase):
     seq2 = DummySequenceModelElement("seq", [fdme3, fdme4])
     match_element2 = seq2.get_match_element("", match_context)
     match_element3 = fdme3.get_match_element("/seq", match_context)
+
+    match_context = DummyMatchContext(b"ddd 25538ddd ")
+    fdme5 = DummyFixedDataModelElement("s1", b"ddd ")
+    fdme6 = OptionalMatchModelElement("o", DummyFixedDataModelElement("d1", b"25539"))
+    seq3 = DummySequenceModelElement("seq", [fdme5, fdme6])
+    match_element4 = seq3.get_match_element("", match_context)
+    match_element5 = fdme5.get_match_element("/seq", match_context)
 
     def test1receive_atom(self):
         """
