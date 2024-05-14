@@ -260,7 +260,7 @@ class JsonModelElement(ModelElementInterface):
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
 
-                if len(matches) == 0 or matches[-1] is None:
+                if (len(matches) == 0 and not key.startswith(self.optional_key_prefix)) or (len(matches) > 0 and matches[-1] is None):
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
                     return matches
             elif isinstance(value, list):
