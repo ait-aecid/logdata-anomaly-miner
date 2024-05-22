@@ -54,6 +54,7 @@ DEFAULT_LOG_LINE_PREFIX = ''
 CONFIG_KEY_ENCODING = 'Log.Encoding'
 ENCODING = 'utf-8'
 KEY_AMINER_ID = 'AminerId'
+KEY_AMINER_START_TIMESTAMP = 'AminerStartTimestamp'
 
 
 def load_config(config_file_name):

@@ -30,7 +30,7 @@ import shutil
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_STAT_PERIOD,\
     DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD,\
-    DEFAULT_PERSISTENCE_PERIOD
+    DEFAULT_PERSISTENCE_PERIOD, KEY_AMINER_START_TIMESTAMP
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.input.LogStream import LogStream
@@ -212,8 +212,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.log_streams_by_name = {}
         self.persistence_file_name = build_persistence_file_name(
             self.analysis_context.aminer_config, self.__class__.__name__ + '/RepositioningData')
-        self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
+        self.next_persist_time = self.aminer_config.config_properties.get(KEY_AMINER_START_TIMESTAMP, time.time()) + \
+            self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.repositioning_data_dict = {}
         self.master_control_socket = None
         self.remote_control_socket = None
@@ -292,7 +292,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         next_backup_time_trigger_time = None
         log_stat_period = self.analysis_context.aminer_config.config_properties.get(
             KEY_LOG_STAT_PERIOD, DEFAULT_STAT_PERIOD)
-        next_statistics_log_time = time.time() + log_stat_period
+        next_statistics_log_time = self.aminer_config.config_properties.get(KEY_AMINER_START_TIMESTAMP, time.time()) + log_stat_period
 
         delayed_return_status = 0
         while self.run_analysis_loop_flag:

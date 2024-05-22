@@ -18,7 +18,8 @@ import time
 import logging
 from io import IOBase
 
-from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
+from aminer.AminerConfig import STAT_LOG_NAME, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+    KEY_AMINER_START_TIMESTAMP
 from aminer.events.EventInterfaces import EventHandlerInterface
 from aminer import AminerConfig
 
@@ -263,8 +264,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             raise ValueError(msg)
 
         if hasattr(self, "aminer_config"):
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
+            self.next_persist_time = self.aminer_config.config_properties.get(KEY_AMINER_START_TIMESTAMP, time.time()) + \
+                                     self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         if hasattr(self, "anomaly_event_handlers") and (
                 not isinstance(self.anomaly_event_handlers, list) or
                 not all(isinstance(handler, EventHandlerInterface) for handler in self.anomaly_event_handlers)):
@@ -274,10 +275,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
         self.stop_learning_timestamp = None
         if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
+            self.stop_learning_timestamp = self.aminer_config.config_properties.get(KEY_AMINER_START_TIMESTAMP, time.time()) + \
+                                           stop_learning_time
         self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
         if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
+            self.stop_learning_timestamp = self.aminer_config.config_properties.get(KEY_AMINER_START_TIMESTAMP, time.time()) + \
+                                           stop_learning_no_anomaly_time
 
         if mutable_default_args is not None:
             for argument in mutable_default_args:

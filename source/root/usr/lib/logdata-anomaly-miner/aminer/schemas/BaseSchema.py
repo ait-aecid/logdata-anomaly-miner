@@ -153,6 +153,11 @@
             'type': 'string',
             'empty': False
         },
+        'AminerStartTimestamp': {
+            'required': False,
+            'type': 'integer',
+            'min': 0
+        },
         'Input': {
             'required': True,
             'type': 'dict',
