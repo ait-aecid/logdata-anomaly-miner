@@ -933,8 +933,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
                     num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
                     time_output_threshold=item['time_output_threshold'], log_resource_ignore_list=item['log_resource_ignore_list'],
-                    anomaly_threshold=item['anomaly_threshold'], stop_learning_time=item['stop_learning_time'],
-                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                    stop_learning_time=item['stop_learning_time'],
+                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], anomaly_threshold=item['anomaly_threshold'])
             elif item["type"].name in ("VerboseUnparsedAtomHandler", "SimpleUnparsedAtomHandler"):
                 has_unparsed_handler = True
                 stop_when_handled_flag = True
