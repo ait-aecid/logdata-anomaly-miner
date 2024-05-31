@@ -90,6 +90,17 @@
                     'key_parser_dict': {'type': 'dict', 'required': True},
                     'strict': {'type': 'boolean'},
                     'ignore_null': {'type': 'boolean'}
+                },
+                {
+                    'id': {'type': 'string', 'required': True, 'empty': False},
+                    'start': {'type': 'boolean'},
+                    'type': {'type': 'string', 'allowed': ['XmlModelElement'], 'required': True},
+                    'name': {'type': 'string', 'required': True, 'empty': False},
+                    'key_parser_dict': {'type': 'dict', 'required': True},
+                    'xml_header_expected': {'type': 'boolean'},
+                    'attribute_prefix': {'type': 'string', 'empty': False},
+                    'optional_attribute_prefix': {'type': 'string', 'empty': False},
+                    'empty_allowed_prefix': {'type': 'string', 'empty': False}
                 }
             ]
         }

@@ -1068,6 +1068,8 @@ Analysis:
             - "/model/IPAddresses/Username"
             - "/model/IPAddresses/IP"
           learn_mode: True
+          log_resource_ignore_list:
+            - 'file:///tmp/other_syslog'
         - type: NewMatchIdValueComboDetector
           id: NewMatchIdValueComboDetector
           paths:

@@ -30,7 +30,7 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, report_interval=60, target_label_list=None,
-                 split_reports_flag=False):
+                 split_reports_flag=False, log_resource_ignore_list=None):
         """
         Initialize the ParserCount component.
         @param aminer_config configuration from analysis_context.
@@ -44,9 +44,9 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # avoid "defined outside init" issue
         self.log_success, self.log_total = [None]*2
         super().__init__(
-            mutable_default_args=["target_path_list"], aminer_config=aminer_config, target_path_list=target_path_list,
-            anomaly_event_handlers=anomaly_event_handlers, report_interval=report_interval, target_label_list=target_label_list,
-            split_reports_flag=split_reports_flag
+            mutable_default_args=["target_path_list", "log_resource_ignore_list"], aminer_config=aminer_config,
+            target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers, report_interval=report_interval,
+            target_label_list=target_label_list, split_reports_flag=split_reports_flag, log_resource_ignore_list=log_resource_ignore_list
         )
         self.count_dict = {}
         self.next_report_time = None
@@ -67,6 +67,9 @@ class ParserCount(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return False
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         success_flag = False

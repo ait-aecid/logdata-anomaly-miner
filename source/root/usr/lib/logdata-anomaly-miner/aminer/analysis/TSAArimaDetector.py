@@ -19,7 +19,7 @@ from aminer import AminerConfig
 from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
     DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
@@ -29,7 +29,7 @@ from statsmodels.tsa.stattools import acf
 from scipy.signal import savgol_filter
 
 
-class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """This class is used for an arima time series analysis of the appearances of log lines to events."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -40,7 +40,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                  num_division_time_step=10, alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05,
                  acf_threshold=0.2, round_time_interval_threshold=0.02, force_period_length=False, set_period_length=604800,
                  min_log_lines_per_time_step=10, persistence_id="Default", target_path_list=None, ignore_list=None, output_logline=True,
-                 learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -81,7 +81,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "ignore_list"], aminer_config=aminer_config,
+            mutable_default_args=["target_path_list", "ignore_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector,
             acf_pause_interval_percentage=acf_pause_interval_percentage, acf_auto_pause_interval=acf_auto_pause_interval,
             acf_auto_pause_interval_num_min=acf_auto_pause_interval_num_min, build_sum_over_values=build_sum_over_values,
@@ -92,7 +92,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             min_log_lines_per_time_step=min_log_lines_per_time_step, waiting_time=waiting_time,
             num_sections_waiting_time=num_sections_waiting_time, persistence_id=persistence_id, target_path_list=target_path_list,
             ignore_list=ignore_list, output_logline=output_logline, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
 
         # Add the TSAArimaDetector-module to the list of the modules, which use the event_type_detector.
@@ -123,6 +123,9 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         Receive the atom and return True.
         The log_atom doesn't need to be analyzed, because the counting and calls of the predictions is performed by the ETD.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False

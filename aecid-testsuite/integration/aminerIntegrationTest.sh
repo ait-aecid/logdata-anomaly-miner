@@ -7,10 +7,8 @@
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
 LOGFILE=/tmp/syslog
 
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
-sudo chown -R $USER:$USER /tmp/lib/aminer 2> /dev/null
 sudo rm -r $AMINER_PERSISTENCE_PATH 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib/aminer 2> /dev/null
 
 echo "Integration test started.."

@@ -164,6 +164,7 @@
                 'eol_sep': {'type': 'string', 'required': False, 'default': '\n', 'empty': False},
                 'json_format': {'type': 'boolean', 'required': False, 'default': False},
                 'use_real_time': {'type': 'boolean', 'required': False, 'default': False},
+                'xml_format': {'type': 'boolean', 'required': False, 'default': False},
                 'continuous_timestamp_missing_warning': {'type': 'boolean', 'required': False, 'default': False}
             }
         }

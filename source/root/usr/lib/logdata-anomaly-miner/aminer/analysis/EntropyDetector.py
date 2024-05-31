@@ -21,19 +21,20 @@ from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LOG_NAME, CONFIG_KEY_LOG_LI
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when character pairs with low probabilities occur in values."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list, prob_thresh=0.05, default_freqs=False,
                  skip_repetitions=False, persistence_id="Default", learn_mode=False, output_logline=True,
-                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -55,11 +56,12 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
-            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, prob_thresh=prob_thresh,
-            default_freqs=default_freqs, skip_repetitions=skip_repetitions, persistence_id=persistence_id, learn_mode=learn_mode,
-            output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            mutable_default_args=["target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
+            prob_thresh=prob_thresh, default_freqs=default_freqs, skip_repetitions=skip_repetitions, persistence_id=persistence_id,
+            learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list,
+            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
+            log_resource_ignore_list=log_resource_ignore_list
         )
 
         self.value_set = set()
@@ -84,6 +86,9 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return False
         self.log_total += 1
         parser_match = log_atom.parser_match
 
@@ -112,6 +117,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                 matches.append(match)
             for match in matches:
                 value = match.match_object
+                if not isinstance(match.match_object, bytes):
+                    value = str(match.match_object).encode(AminerConfig.ENCODING)
                 if value is not None:
                     all_values_none = False
                 values.append(value)

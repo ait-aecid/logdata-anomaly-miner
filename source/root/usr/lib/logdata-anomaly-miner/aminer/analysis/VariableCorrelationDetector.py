@@ -7,12 +7,12 @@ from scipy.stats import chi2
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.EventTypeDetector import EventTypeDetector
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
 
-class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """
     This class first finds for each eventType a list of pairs of variables, which are afterwards tested if they are correlated.
     For this a couple of preselection methods can be used. (See self.used_presel_meth)
@@ -30,7 +30,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  percentage_random_cors=0.20, match_disc_vals_sim_tresh=0.7, exclude_due_distr_lower_limit=0.4,
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
                  validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, learn_mode=True, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None):
+                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -87,20 +87,21 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
-            anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector, persistence_id=persistence_id,
-            target_path_list=target_path_list, num_init=num_init, num_update=num_update, disc_div_thres=disc_div_thres,
-            num_steps_create_new_rules=num_steps_create_new_rules, num_upd_until_validation=num_upd_until_validation,
-            num_end_learning_phase=num_end_learning_phase, check_cor_thres=check_cor_thres, check_cor_prob_thres=check_cor_prob_thres,
-            check_cor_num_thres=check_cor_num_thres, min_values_cors_thres=min_values_cors_thres, new_vals_alarm_thres=new_vals_alarm_thres,
-            num_bt=num_bt, alpha_bt=alpha_bt, used_homogeneity_test=used_homogeneity_test, alpha_chisquare_test=alpha_chisquare_test,
-            max_dist_rule_distr=max_dist_rule_distr, used_presel_meth=used_presel_meth, intersect_presel_meth=intersect_presel_meth,
-            percentage_random_cors=percentage_random_cors, match_disc_vals_sim_tresh=match_disc_vals_sim_tresh,
-            exclude_due_distr_lower_limit=exclude_due_distr_lower_limit, match_disc_distr_threshold=match_disc_distr_threshold,
-            used_cor_meth=used_cor_meth, used_validate_cor_meth=used_validate_cor_meth,
-            validate_cor_cover_vals_thres=validate_cor_cover_vals_thres, validate_cor_distinct_thres=validate_cor_distinct_thres,
-            ignore_list=ignore_list, constraint_list=constraint_list, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            mutable_default_args=["target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector,
+            persistence_id=persistence_id, target_path_list=target_path_list, num_init=num_init, num_update=num_update,
+            disc_div_thres=disc_div_thres, num_steps_create_new_rules=num_steps_create_new_rules,
+            num_upd_until_validation=num_upd_until_validation, num_end_learning_phase=num_end_learning_phase,
+            check_cor_thres=check_cor_thres, check_cor_prob_thres=check_cor_prob_thres, check_cor_num_thres=check_cor_num_thres,
+            min_values_cors_thres=min_values_cors_thres, new_vals_alarm_thres=new_vals_alarm_thres, num_bt=num_bt, alpha_bt=alpha_bt,
+            used_homogeneity_test=used_homogeneity_test, alpha_chisquare_test=alpha_chisquare_test, max_dist_rule_distr=max_dist_rule_distr,
+            used_presel_meth=used_presel_meth, intersect_presel_meth=intersect_presel_meth, percentage_random_cors=percentage_random_cors,
+            match_disc_vals_sim_tresh=match_disc_vals_sim_tresh, exclude_due_distr_lower_limit=exclude_due_distr_lower_limit,
+            match_disc_distr_threshold=match_disc_distr_threshold, used_cor_meth=used_cor_meth,
+            used_validate_cor_meth=used_validate_cor_meth, validate_cor_cover_vals_thres=validate_cor_cover_vals_thres,
+            validate_cor_distinct_thres=validate_cor_distinct_thres, ignore_list=ignore_list, constraint_list=constraint_list,
+            learn_mode=learn_mode, stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
+            log_resource_ignore_list=log_resource_ignore_list
         )
         if not isinstance(self.event_type_detector, EventTypeDetector):
             msg = "event_type_detector must be an instance of EventTypeDetector."
@@ -194,6 +195,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         event_index = self.event_type_detector.current_index
         if event_index == -1:
             return False

@@ -38,7 +38,7 @@ class KafkaEventHandlerTest(TestBase):
     def setUpClass(cls):
         """Start a KafkaConsumer."""
         cls.consumer = KafkaConsumer(
-            cls.kafka_topic, bootstrap_servers=['localhost:9092'], enable_auto_commit=True, consumer_timeout_ms=10000,
+            cls.kafka_topic, bootstrap_servers=['localhost:9092'], enable_auto_commit=True, consumer_timeout_ms=60000,
             group_id=cls.kafka_group, value_deserializer=lambda x: x.decode(), api_version=(2, 0, 1), auto_offset_reset='earliest')
 
     @classmethod

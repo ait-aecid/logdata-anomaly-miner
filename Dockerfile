@@ -10,10 +10,13 @@
 #
 
 # Pull base image.
-FROM debian:bullseye
+FROM debian:bookworm
 ARG UNAME=aminer
 ARG UID=1000
 ARG GID=1000
+
+# allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Set local timezone
 ENV TZ=Europe/Vienna
@@ -41,8 +44,11 @@ RUN apt-get update && apt-get install -y \
     python3-pylibacl \
     python3-urllib3 \
     python3-statsmodels \
-    python3-pandas \
-    libacl1-dev
+    python3-patsy \
+    python3-numpy \
+    python3-defusedxml \
+    libacl1-dev \
+    rsyslog
 
 # Docs
 RUN apt-get update && apt-get install -y \
@@ -63,8 +69,10 @@ ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 
 # copy these files instead as symlinks would need absolute paths.
 ADD source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/ait-lds2/* /etc/aminer/conf-enabled/
 ADD source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/
 ADD source/root/etc/aminer/conf-available/ait-lds /etc/aminer/conf-available/ait-lds
+ADD source/root/etc/aminer/conf-available/ait-lds2 /etc/aminer/conf-available/ait-lds2
 ADD source/root/etc/aminer/conf-available/generic /etc/aminer/conf-available/generic
 
 # Entrypoint-wrapper
@@ -88,8 +96,8 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /usr/lib/logdata-anomaly-miner/urllib3 \
 	&& ln -s /usr/lib/python3/dist-packages/statsmodels /usr/lib/logdata-anomaly-miner/statsmodels \
 	&& ln -s /usr/lib/python3/dist-packages/packaging /usr/lib/logdata-anomaly-miner/packaging \
-	&& ln -s /usr/lib/python3/dist-packages/pandas /usr/lib/logdata-anomaly-miner/pandas \
 	&& ln -s /usr/lib/python3/dist-packages/patsy /etc/aminer/conf-enabled/patsy \
+	&& ln -s /usr/lib/python3/dist-packages/defusedxml /etc/aminer/conf-enabled/defusedxml \
 	&& groupadd -g $GID -o $UNAME && useradd -u $UID -g $GID -ms /usr/sbin/nologin $UNAME && mkdir -p /var/lib/aminer/logs \
     && chown $UID.$GID -R /var/lib/aminer \
     && chown $UID.$GID -R /docs \

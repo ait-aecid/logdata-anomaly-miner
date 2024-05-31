@@ -22,13 +22,13 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis.EventTypeDetector import EventTypeDetector
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 import aminer.analysis.VTDData as VTDData
 
 
-class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """
     This class tests each variable of the event_types for the implemented variable types.
     This module needs to run after the event type detector is initialized
@@ -45,7 +45,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  num_updates_until_var_reduction=20, var_reduction_thres=0.6, num_skipped_ind_for_weights=1, num_ind_for_weights=100,
                  used_multinomial_test='Chi', use_empiric_distr=True, used_range_test='MinMax', range_alpha=0.05, range_threshold=1,
                  num_reinit_range=100, range_limits_factor=1, dw_alpha=0.05, save_statistics=True, output_logline=True, ignore_list=None,
-                 constraint_list=None, learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 constraint_list=None, learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -115,7 +116,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["ignore_list", "constraint_list"], aminer_config=aminer_config,
+            mutable_default_args=["ignore_list", "constraint_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector, persistence_id=persistence_id,
             target_path_list=target_path_list, used_gof_test=used_gof_test, gof_alpha=gof_alpha, s_gof_alpha=s_gof_alpha,
             s_gof_bt_alpha=s_gof_bt_alpha, d_alpha=d_alpha, d_bt_alpha=d_bt_alpha, div_thres=div_thres, sim_thres=sim_thres,
@@ -131,7 +132,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             used_range_test=used_range_test, range_alpha=range_alpha, range_threshold=range_threshold, num_reinit_range=num_reinit_range,
             range_limits_factor=range_limits_factor, dw_alpha=dw_alpha, save_statistics=save_statistics, output_logline=output_logline,
             ignore_list=ignore_list, constraint_list=constraint_list, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
         if not isinstance(self.event_type_detector, EventTypeDetector):
             msg = "event_type_detector must be an instance of EventTypeDetector."
@@ -388,6 +389,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         event_index = self.event_type_detector.current_index
         if event_index == -1:
             return False

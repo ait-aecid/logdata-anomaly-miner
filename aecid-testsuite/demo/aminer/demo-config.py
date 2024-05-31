@@ -5,7 +5,7 @@ config_properties = {}  # skipcq: PY-W0072
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
-# will just result in a warning. However if they exist, they have
+# will just result in a warning. However, if they exist, they have
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
@@ -429,7 +429,7 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
         analysis_context.aminer_config, ['/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers,
-        output_logline=True, learn_mode=True)
+        output_logline=True, learn_mode=True, log_resource_ignore_list=['file:///tmp/other_syslog'])
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 

@@ -18,7 +18,10 @@
 #
 
 # Pull base image.
-FROM debian:bullseye
+FROM debian:bookworm
+
+# allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Set local timezone
 ENV TZ=Europe/Vienna
@@ -45,6 +48,8 @@ RUN apt-get update && apt-get install -y \
     python3-urllib3 \
     python3-statsmodels \
     python3-pandas \
+    python3-patsy \
+    python3-defusedxml \
     libacl1-dev \
     postfix \
     procps \
@@ -53,7 +58,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     postfix \
-    openjdk-11-jre \
+    openjdk-17-jre \
     locales \
     locales-all \
     rsyslog \
@@ -78,8 +83,10 @@ ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 
 # copy these files instead as symlinks would need absolute paths.
 ADD source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/ait-lds2/* /etc/aminer/conf-enabled/
 ADD source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/
 ADD source/root/etc/aminer/conf-available/ait-lds /etc/aminer/conf-available/ait-lds
+ADD source/root/etc/aminer/conf-available/ait-lds2 /etc/aminer/conf-available/ait-lds2
 ADD source/root/etc/aminer/conf-available/generic /etc/aminer/conf-available/generic
 
 # Entrypoint-wrapper
@@ -105,6 +112,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/packaging /etc/aminer/conf-enabled/packaging \
 	&& ln -s /usr/lib/python3/dist-packages/pandas /etc/aminer/conf-enabled/pandas \
 	&& ln -s /usr/lib/python3/dist-packages/patsy /etc/aminer/conf-enabled/patsy \
+	&& ln -s /usr/lib/python3/dist-packages/defusedxml /etc/aminer/conf-enabled/defusedxml \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
     && chown aminer.aminer -R /var/lib/aminer && chmod 0755 /etc/aminer
 
