@@ -172,6 +172,9 @@ class DateTimeModelElement(ModelElementInterface):
                 elif param_type_code == b"Y":
                     self.format_has_year_flag = True
                     new_element = (0, 4, int)
+                elif param_type_code == b"y":
+                    self.format_has_year_flag = True
+                    new_element = (0, 2, int)
                 elif param_type_code == b"z":
                     self.format_has_tz_specifier = True
                     scan_pos = next_param_pos
@@ -262,6 +265,10 @@ class DateTimeModelElement(ModelElementInterface):
 
         date_str = match_context.match_data[:parse_pos]
         result[7] /= self.timestamp_scale
+
+        # If two-digit year is used, assume that the data is generated in the years 2000-2100
+        if result[0] < 100:
+            result[0] += 2000
 
         # Now combine the values and build the final value.
         parsed_date_time = None
