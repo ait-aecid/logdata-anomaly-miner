@@ -814,7 +814,8 @@ This element parses dates using a custom, timezone and locale-aware implementati
          * '%H:%M:%S' e.g. for '11:40:23'
 
   2. time_zone:
-      time_zone the timezone for parsing the values. Default: **UTC**.
+      time_zone the timezone for parsing the values. Default: **UTC**. Within the yaml configuration, only values from
+      **pytz.all_timezones** are accepted as time_zone value.
 
   3. text_local:
       the locale to use for parsing the day and month names. Default: **system-locale**

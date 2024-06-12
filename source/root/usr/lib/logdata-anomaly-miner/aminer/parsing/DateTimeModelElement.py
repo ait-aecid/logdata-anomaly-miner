@@ -85,10 +85,10 @@ class DateTimeModelElement(ModelElementInterface):
                available formats. Supported format specifiers are:
                  * %b: month name in current locale
                  * %d: day in month, can be space or zero padded when followed by separator or at end of string.
-                 * %f: fraction of seconds (the digits after the the ".")
+                 * %f: fraction of seconds (the digits after the ".")
                  * %H: hours from 00 to 23
                  * %M: minutes
-                 * %m: two digit month number
+                 * %m: two-digit month number
                  * %S: seconds
                  * %s: seconds since the epoch (1970-01-01)
                  * %Y: 4 digit year number
@@ -405,6 +405,8 @@ class DateTimeModelElement(ModelElementInterface):
                         tz_specifier_offset = sign * int(match_context.match_data[parse_pos-4-colon_shift:parse_pos-2-colon_shift]) * \
                                               3600 + int(match_context.match_data[parse_pos-2:parse_pos] * 60)
 
+            if parse_pos < len(match_context.match_data) and match_context.match_data[parse_pos] == ord(b"Z"):
+                parse_pos += 1
             if valid_tz_specifier:
                 date_str = match_context.match_data[:parse_pos]
                 # the offset must be subtracted, because the timestamp should always be UTC.
@@ -493,7 +495,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         # The latest parsed timestamp value.
         self.latest_parsed_timestamp = None
 
-        # Restore previous locale settings. There seems to be no way in python to get back to the exact same state. Hence perform the
+        # Restore previous locale settings. There seems to be no way in python to get back to the exact same state. Hence, perform the
         # reset only when locale has changed. This would also change the locale from (None, None) to some system-dependent locale.
         if locale.getlocale() != default_locale:
             locale.resetlocale()

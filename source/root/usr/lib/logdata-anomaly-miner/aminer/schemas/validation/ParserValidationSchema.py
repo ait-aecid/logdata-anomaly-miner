@@ -51,7 +51,8 @@
                     'start_year': {'type': 'integer', 'nullable': True},
                     'text_locale': {'type': 'string', 'nullable': True},
                     'max_time_jump_seconds': {'type': 'integer', 'min': 1},
-                    'timestamp_scale': {'type': 'integer', 'min': 1}
+                    'timestamp_scale': {'type': 'integer', 'min': 1},
+                    'time_zone': {'type': 'string', 'nullable': True}
                 },
                 {
                     'id': {'type': 'string', 'required': True, 'empty': False},
