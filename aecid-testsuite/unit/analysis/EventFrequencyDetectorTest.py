@@ -321,7 +321,7 @@ class EventFrequencyDetectorTest(TestBase):
         efd.receive_atom(log_atom10)
         efd.do_persist()
         with open(efd.persistence_file_name, "r") as f:
-            self.assertEqual(f.read(), '[[["string:/value"], []]]')
+            self.assertEqual(f.read(), '[[["string:/value"], [], []]]')
 
         self.assertEqual(efd.counts, {("/value",): [10]})
         self.assertEqual(efd.scoring_value_list, {})
