@@ -124,6 +124,21 @@ class JsonModelElement(ModelElementInterface):
         return key.startswith(self.nullable_key_prefix) or (
                 key.startswith(self.optional_key_prefix) and key[len(self.optional_key_prefix):].startswith(self.nullable_key_prefix))
 
+    def get_unescaped_quotes(self, data):
+        quotes = [i for i in range(len(data)) if data.startswith(b"\"", i)]
+        result_quotes = []
+        for quote in quotes:
+            if bytes([data[quote - 1]]) != b"\\":
+                result_quotes.append(quote)
+        return result_quotes
+
+    def index_is_in_json_string(self, quotes, index):
+        """Check if index is in json string."""
+        for i in range(len(quotes)-1):
+            if quotes[i] < index < quotes[i+1] and i % 2 == 0:
+                return True
+        return False
+
     def get_match_element(self, path: str, match_context):
         """
         Try to parse all the match_context against JSON.
@@ -147,6 +162,7 @@ class JsonModelElement(ModelElementInterface):
                     except UnicodeDecodeError:
                         break
             index = 0
+            quotes = self.get_unescaped_quotes(match_context.match_data)
             while index != -1:
                 index = match_context.match_data.find(b"\\", index)
                 if index != -1 and len(match_context.match_data) - 1 > index and match_context.match_data[
@@ -155,11 +171,24 @@ class JsonModelElement(ModelElementInterface):
                     index += 2
                 elif index != -1:
                     index += 2
+            for num in b"\n\r\t":
+                index = 0
+                char = bytes([num])
+                while index != -1:
+                    index = match_context.match_data.find(char, index)
+                    if index != -1 and len(match_context.match_data) - 1 > index and self.index_is_in_json_string(quotes, index):
+                        escaped = (bytes([match_context.match_data[index]]).replace(b"\n", b"\\n").replace(b"\t", b"\\t"))
+                        match_context.match_data = match_context.match_data[:index] + escaped + match_context.match_data[index + 1:]
+                        index += 2
+                    elif index != -1:
+                        index += 2
+            logging.getLogger(DEBUG_LOG_NAME).debug(repr(match_context.match_data))
             json_match_data = json.loads(match_context.match_data, parse_float=format_float)
+
             if not isinstance(json_match_data, dict):
                 return None
         except JSONDecodeError as e:
-            logging.getLogger(debug_log_prefix + DEBUG_LOG_NAME).debug(e)
+            logging.getLogger(DEBUG_LOG_NAME).debug(e)
             return None
         self.dec_escapes = True
         if self.is_ascii(match_context.match_data.decode()):
@@ -231,7 +260,7 @@ class JsonModelElement(ModelElementInterface):
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
 
-                if len(matches) == 0 or matches[-1] is None:
+                if (len(matches) == 0 and not key.startswith(self.optional_key_prefix)) or (len(matches) > 0 and matches[-1] is None):
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
                     return matches
             elif isinstance(value, list):
