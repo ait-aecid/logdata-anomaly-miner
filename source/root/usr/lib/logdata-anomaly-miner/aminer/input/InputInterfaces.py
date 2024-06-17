@@ -101,7 +101,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_stat_stop_update", "num_updates_until_var_reduction", "var_reduction_thres", "num_skipped_ind_for_weights",
             "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr", "used_range_test", "range_alpha", "range_threshold",
             "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics", "idf", "norm", "add_normal", "check_empty_windows",
-            "unique_path_list", "default_freqs", "var_factor", "avg_factor", "log_resource_ignore_list"
+            "unique_path_list", "default_freqs", "var_factor", "avg_factor", "log_resource_ignore_list", "group_by_list",
+            "publisher_address", "subscriber_address", "publisher_topic", "subscriber_topic", "event_encoding"
         ]
         self.log_success = 0
         self.log_total = 0

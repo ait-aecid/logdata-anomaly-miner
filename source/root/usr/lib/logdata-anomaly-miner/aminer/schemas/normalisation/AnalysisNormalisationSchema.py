@@ -227,7 +227,7 @@
                 'publisher_address': {'type': 'string', 'default': "tcp://*:5559"},
                 'subscriber_address': {'type': 'string', 'default': "tcp://*:5560"},
                 'subscriber_topic': {'type': 'string', 'default': 'aminerdeep'},
-                'publisher_topic': {'type': 'string', 'default': 'aminer'}
+                'publisher_topic': {'type': 'string', 'default': 'aminer'},
                 'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None}
             }
         }

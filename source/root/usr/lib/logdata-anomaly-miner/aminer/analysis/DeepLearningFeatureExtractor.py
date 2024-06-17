@@ -24,13 +24,13 @@ from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_P
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import PersistenceUtil
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from collections import OrderedDict
 
 
 
-class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when new value sequences were found."""
     
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -61,18 +61,26 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
                it will push the log event only.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
-        self.aminer_config = aminer_config
-        self.anomaly_event_handlers = anomaly_event_handlers
-        self.target_path_list = target_path_list
-        self.ignore_list = ignore_list
-        self.group_by_path_list = group_by_list
-        self.window_size = window_size
+        super().__init__(
+            mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
+            ignore_list=ignore_list, group_by_list=group_by_list, window_size=window_size,
+            publisher_address=publisher_address, subscriber_address=subscriber_address, publisher_topic=publisher_topic,
+            subscriber_topic=subscriber_topic, event_encoding=event_encoding, persistence_id=persistence_id, learn_mode=learn_mode,
+            output_logline=output_logline
+        )
+        #self.aminer_config = aminer_config
+        #self.anomaly_event_handlers = anomaly_event_handlers
+        #self.target_path_list = target_path_list
+        #self.ignore_list = ignore_list
+        #self.group_by_path_list = group_by_list
+        #self.window_size = window_size
         self.persistence_id = persistence_id
         self.next_persist_time = None
-        self.learn_mode = learn_mode
-        self.output_logline = output_logline
-        self.publisher_address = publisher_address
-        self.subscriber_address = subscriber_address
+        #self.learn_mode = learn_mode
+        #self.output_logline = output_logline
+        #self.publisher_address = publisher_address
+        #self.subscriber_address = subscriber_address
         self.group_event_list = {}
         self.context = zmq.Context.instance()
         self.pub_socket = self.context.socket(zmq.PUB)
@@ -211,6 +219,10 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
         This trigger is used only for persistence, so real-time triggering is needed.
         """
         return AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
+
+    def load_persistence_data(self):
+        # TODO
+        return None
 
     def do_timer(self, trigger_time):
         """Check current ruleset should be persisted."""
