@@ -20,7 +20,7 @@ import zmq
 import json
 
 from aminer import AminerConfig
-from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX
+from aminer.AminerConfig import STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import PersistenceUtil
 from aminer.events.EventInterfaces import EventSourceInterface
@@ -73,9 +73,9 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
         self.group_event_list = {}
         self.context = zmq.Context.instance()
         self.pub_socket = self.context.socket(zmq.PUB)
-        self.pub_socket.connect(self.publisher_address)
+        self.pub_socket.bind(self.publisher_address)
         self.sub_socket = self.context.socket(zmq.SUB)
-        self.sub_socket.connect(self.subscriber_address)
+        self.sub_socket.bind(self.subscriber_address)
         self.sub_socket.setsockopt_string(zmq.SUBSCRIBE, subscriber_topic) 
         self.pub_top = publisher_topic 
         self.event_encoding_list = {}
@@ -181,8 +181,22 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
             self.group_event_list[id_tuple] = self.group_event_list[id_tuple][-self.window_size:]
             #print(str(id_tuple) + ': ' + str(self.group_event_list[id_tuple]))
             print('sending')
-            self.pub_socket.send_string("{}:{}:{}".format(self.pub_top, id_tuple, json.dumps(self.group_event_list[id_tuple])))
-            if self.learn_mode is False:
+            #try:
+            time.sleep(1)
+            #self.pub_socket.send_string("aminer test test test")
+            self.pub_socket.send_string("{}:{}:{}:{}".format(self.pub_top, id_tuple, self.learn_mode, json.dumps(self.group_event_list[id_tuple])))
+            time.sleep(1)
+            #context = zmq.Context()
+            #socket = context.socket(zmq.PUB)
+            #socket.bind("tcp://127.0.0.1:5556")
+            #time.sleep(1)
+            #socket.send_string("aminer Message x")
+            #time.sleep(1)
+            #except err:
+            #    print("Problem with ZMQ. Aborting.")
+            #    logging.getLogger(DEBUG_LOG_NAME).error("Problem with ZMQ. Aborting.")
+            #    self.pub_socket.close()
+            if False: # self.learn_mode is False:
                 print('waiting')
                 msg = self.sub_socket.recv_string()
                 print('done')
