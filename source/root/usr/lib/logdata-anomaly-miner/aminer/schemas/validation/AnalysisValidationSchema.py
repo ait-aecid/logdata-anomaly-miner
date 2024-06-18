@@ -21,7 +21,7 @@
                     'type': {'type': 'string', 'allowed': ['DeepLearningFeatureExtractor'], 'required': True},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
-                    'group_by_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
+                    'id_path_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
                     'window_size': {'type': 'integer', 'min': 1},
                     'persistence_id': {'type': 'string'},
                     'learn_mode': {'type': 'boolean'},
@@ -31,7 +31,7 @@
                     'subscriber_address': {'type': 'string', 'required': True},
                     'publisher_topic': {'type': 'string', 'required': True},
                     'subscriber_topic': {'type': 'string', 'required': True},
-                    'event_encoding': {'type': 'boolean'}
+                    'allow_missing_id': {'type': 'boolean'}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
