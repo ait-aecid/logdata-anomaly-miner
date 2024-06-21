@@ -91,6 +91,11 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
                     encode_elem_tuple.append(tuple(encode_elem))
                 self.event_encoding_list.add(tuple(encode_elem_tuple))
 
+        # Make sure that connection is established
+        time.sleep(1)
+        #while True:
+        #    self.pub_socket.send_string("{}:{}".format(self.pub_top, "connection_ack1")))
+
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
         for source in self.log_resource_ignore_list:
@@ -168,24 +173,26 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
                     else:
                         id_tuple += (match.match_object,)
 
-        if not id_tuple in self.group_event_list:
-            self.group_event_list[id_tuple] = [-1] * self.window_size
+        #if not id_tuple in self.group_event_list:
+        #    self.group_event_list[id_tuple] = [-1] * self.window_size
         if log_event not in self.event_encoding:
             self.event_encoding[log_event] = len(self.event_encoding)
-        self.group_event_list[id_tuple].append(self.event_encoding[log_event])
-        len_current_group = len(self.group_event_list[id_tuple])
-        if len(self.group_event_list[id_tuple]) < self.window_size:
-            # Do nothing since not enough events are available yet
-            pass
-        else:
-            self.group_event_list[id_tuple] = self.group_event_list[id_tuple][-self.window_size:]
+        #self.group_event_list[id_tuple].append(self.event_encoding[log_event])
+        #len_current_group = len(self.group_event_list[id_tuple])
+        #if len(self.group_event_list[id_tuple]) < self.window_size:
+        #    # Do nothing since not enough events are available yet
+        #    pass
+        #else:
+        if True:
+            #self.group_event_list[id_tuple] = self.group_event_list[id_tuple][-self.window_size:]
             #print(str(id_tuple) + ': ' + str(self.group_event_list[id_tuple]))
-            print('sending')
+            #print('sending')
             #try:
-            time.sleep(1)
+            #time.sleep(1)
             #self.pub_socket.send_string("aminer test test test")
-            self.pub_socket.send_string("{}:{}:{}:{}".format(self.pub_top, id_tuple, self.learn_mode, json.dumps(self.group_event_list[id_tuple])))
-            time.sleep(1)
+            #id_tuple needs to be replaced, may contain a : char
+            self.pub_socket.send_string("{}:{}:{}:{}".format(self.pub_top, id_tuple, int(self.learn_mode), self.event_encoding[log_event])) # json.dumps(self.group_event_list[id_tuple])))
+            #time.sleep(1)
             #context = zmq.Context()
             #socket = context.socket(zmq.PUB)
             #socket.bind("tcp://127.0.0.1:5556")
