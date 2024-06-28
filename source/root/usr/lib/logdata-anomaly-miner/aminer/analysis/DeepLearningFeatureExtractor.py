@@ -78,18 +78,15 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
         self.sub_socket.bind(self.subscriber_address)
         self.sub_socket.setsockopt_string(zmq.SUBSCRIBE, subscriber_topic) 
         self.pub_top = publisher_topic 
-        self.event_encoding_list = {}
     
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
 
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
-            for encode in persistence_data:
-                encode_elem_tuple = []
-                for encode_elem in encode:
-                    encode_elem_tuple.append(tuple(encode_elem))
-                self.event_encoding_list.add(tuple(encode_elem_tuple))
+            #print('Load persistence data')
+            for encoded_element in persistence_data:
+                self.event_encoding[tuple(encoded_element[0])] = encoded_element[1]
 
         # Make sure that connection is established
         time.sleep(1)
@@ -176,6 +173,7 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
         #if not id_tuple in self.group_event_list:
         #    self.group_event_list[id_tuple] = [-1] * self.window_size
         if log_event not in self.event_encoding:
+            #print('New log event: ' + str(log_event))
             self.event_encoding[log_event] = len(self.event_encoding)
         #self.group_event_list[id_tuple].append(self.event_encoding[log_event])
         #len_current_group = len(self.group_event_list[id_tuple])
@@ -203,10 +201,11 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
             #    print("Problem with ZMQ. Aborting.")
             #    logging.getLogger(DEBUG_LOG_NAME).error("Problem with ZMQ. Aborting.")
             #    self.pub_socket.close()
+            msg = self.sub_socket.recv_string()
             if False: # self.learn_mode is False:
-                print('waiting')
+                #print('waiting')
                 msg = self.sub_socket.recv_string()
-                print('done')
+                #print('done')
                 top, result = msg.split(":")
                 result = json.loads(result)
                 group, current_sequence, label, result = result
@@ -248,20 +247,11 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
             delta = 600
         return delta
 
-    def generate_event_encoding(self):
-        """
-        Define the encoding technique, that will be used by the detector
-        Hereby, simple ordinal encoding is defined.
-        """
-        if len(self.event_encoding_list) == 0:
-            return 0
-        else:
-            return len(self.event_encoding_list) + 1
-
     def do_persist(self):
         """Immediately write persistence data to storage."""
         if self.event_encoding:
-            PersistenceUtil.store_json(self.persistence_file_name, list(self.event_encoding_list))
+            #print('save '+  str(self.event_encoding))
+            PersistenceUtil.store_json(self.persistence_file_name, list(self.event_encoding.items()))
             self.next_persist_time = None
         pass
 
