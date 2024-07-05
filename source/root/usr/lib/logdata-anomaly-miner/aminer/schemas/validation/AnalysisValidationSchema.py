@@ -18,7 +18,7 @@
                 },
                 {
                     'id': {'type': 'string', 'nullable': True},
-                    'type': {'type': 'string', 'allowed': ['DeepLearningFeatureExtractor'], 'required': True},
+                    'type': {'type': 'string', 'allowed': ['ZmqDetector'], 'required': True},
                     'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},
                     'id_path_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True},

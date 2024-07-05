@@ -218,8 +218,9 @@ def get_model():
             SequenceModelElement("del", [
                 FixedDataModelElement("del", b"BLOCK* ask "),
                 DelimitedDataModelElement("ip1", b" "),
-                FixedDataModelElement("to", b" to delete "),
-                AnyByteDataModelElement("blk")
+                FixedDataModelElement("to", b" to delete  "),
+                VariableByteDataModelElement("blk", b"blk_-0123456789"),
+                OptionalMatchModelElement("opt", AnyByteDataModelElement("other_blk"))
                 ]),
             SequenceModelElement("cannot", [
                 DelimitedDataModelElement("ip1", b":DataXceiver:"),

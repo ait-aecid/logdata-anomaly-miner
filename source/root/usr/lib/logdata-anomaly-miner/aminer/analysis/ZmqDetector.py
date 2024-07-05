@@ -30,7 +30,7 @@ from collections import OrderedDict
 
 
 
-class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
+class ZmqDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when new value sequences were found."""
     
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -189,7 +189,7 @@ class DeepLearningFeatureExtractor(AtomHandlerInterface, TimeTriggeredComponentI
             #time.sleep(1)
             #self.pub_socket.send_string("aminer test test test")
             #id_tuple needs to be replaced, may contain a : char
-            self.pub_socket.send_string("{}:{}:{}:{}".format(self.pub_top, id_tuple, int(self.learn_mode), self.event_encoding[log_event])) # json.dumps(self.group_event_list[id_tuple])))
+            self.pub_socket.send_string("{}:{}:{}:{}:{}".format(self.pub_top, id_tuple, int(self.learn_mode), int(log_atom.atom_time), self.event_encoding[log_event])) # json.dumps(self.group_event_list[id_tuple])))
             #time.sleep(1)
             #context = zmq.Context()
             #socket = context.socket(zmq.PUB)
