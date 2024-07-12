@@ -11,8 +11,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-import time
 import os
 import logging
 import copy
@@ -21,7 +19,7 @@ from aminer import AminerConfig
 from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
     DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.util import PersistenceUtil
 
@@ -31,7 +29,7 @@ from statsmodels.tsa.stattools import acf
 from scipy.signal import savgol_filter
 
 
-class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """This class is used for an arima time series analysis of the appearances of log lines to events."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -41,8 +39,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                  acf_auto_pause_interval_num_min=10, build_sum_over_values=False, num_periods_tsa_ini=15,
                  num_division_time_step=10, alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05,
                  acf_threshold=0.2, round_time_interval_threshold=0.02, force_period_length=False, set_period_length=604800,
-                 min_log_lines_per_time_step=10, persistence_id='Default', target_path_list=None, ignore_list=None, output_logline=True,
-                 learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 min_log_lines_per_time_step=10, persistence_id="Default", target_path_list=None, ignore_list=None, output_logline=True,
+                 learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -83,7 +81,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "ignore_list"], aminer_config=aminer_config,
+            mutable_default_args=["target_path_list", "ignore_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector,
             acf_pause_interval_percentage=acf_pause_interval_percentage, acf_auto_pause_interval=acf_auto_pause_interval,
             acf_auto_pause_interval_num_min=acf_auto_pause_interval_num_min, build_sum_over_values=build_sum_over_values,
@@ -94,7 +92,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
             min_log_lines_per_time_step=min_log_lines_per_time_step, waiting_time=waiting_time,
             num_sections_waiting_time=num_sections_waiting_time, persistence_id=persistence_id, target_path_list=target_path_list,
             ignore_list=ignore_list, output_logline=output_logline, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
 
         # Add the TSAArimaDetector-module to the list of the modules, which use the event_type_detector.
@@ -114,91 +112,43 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         self.bt_min_suc = self.bt_min_successes(self.num_results_bt, self.alpha, self.alpha_bt)
         # Assumed occurring time steps in seconds. 1 minute: 60, 1 hour: 3600, 12 hours: 43200, 1 day: 86400, 1 week: 604800.
         self.assumed_time_steps = [60, 3600, 43200, 86400, 604800]
+        self.test_pause = None
 
-        # Load the persistence
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-
-        # Import the persistence
-        if persistence_data is not None:
-            self.time_window_history = persistence_data[0]
-            self.prediction_history = persistence_data[1]
-            self.time_history = persistence_data[2]
-            self.result_list = persistence_data[3]
-            self.time_trigger_list = persistence_data[4]
-            self.num_event_lines_ref = persistence_data[5]
-
-            self.arima_models = [None for _ in self.time_window_history]
-            # skipcq: PTC-W0060
-            for event_index in range(len(self.arima_models)):
-                if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
-                    try:
-                        if not self.build_sum_over_values:
-                            model = ARIMA(
-                                    self.time_window_history[event_index][-self.num_periods_tsa_ini*self.num_division_time_step:],
-                                    order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
-                            self.arima_models[event_index] = model.fit()
-                        else:
-                            model = ARIMA([sum(self.time_window_history[event_index][
-                                    -self.num_periods_tsa_ini*self.num_division_time_step+i:
-                                    -(self.num_periods_tsa_ini-1)*self.num_division_time_step+i]) for i in
-                                    range((self.num_periods_tsa_ini-1)*self.num_division_time_step)]+[
-                                    sum(self.time_window_history[event_index][-self.num_division_time_step:])],
-                                    order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
-                            self.arima_models[event_index] = model.fit()
-                    except:  # skipcq FLK-E722
-                        self.arima_models[event_index] = None
-                        self.time_window_history[event_index] = []
-                else:
-                    self.arima_models[event_index] = None
-                    self.time_window_history[event_index] = []
-
-            # List of the pauses of the tests to the event numbers. If an arima model was initialized with the persistence, the model must
-            # be trained before it can be used for forecasts. An integer states how many tests should be skipped before the next
-            # output to this event number. None if no model was initialized for this event number.
-            self.test_pause = [self.num_division_time_step if arima_models_statsmodel is not None else None for
-                               arima_models_statsmodel in self.arima_models]
-            # If all entries are None set the variable to None
-            if all(entry is None for entry in self.test_pause):
-                self.test_pause = None
-        else:
-            self.time_trigger_list[0].append(-1)
-            self.time_trigger_list[1].append(-1)
-            self.time_trigger_list[2].append(-1)
-            self.test_pause = None
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):  # skipcq: PYL-W0613, PYL-R0201
         """
         Receive the atom and return True.
         The log_atom doesn't need to be analyzed, because the counting and calls of the predictions is performed by the ETD.
         """
-        # Get current time
-        if log_atom.atom_time is not None:
-            current_time = log_atom.atom_time
-        else:
-            current_time = time.time()
-
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
+            self.learn_mode = False
         # Check if TSA should be initialized
         if -1 in self.time_trigger_list[0]:
             for i, val in enumerate(self.time_trigger_list[0]):
                 if val == -1:
                     # Initialize triggers for the time windows of the trainings phase
                     for j in range(1, self.num_sections_waiting_time):
-                        self.time_trigger_list[0].append(current_time + self.waiting_time * j / (
+                        self.time_trigger_list[0].append(log_atom.atom_time + self.waiting_time * j / (
                                 self.num_sections_waiting_time))
                         self.time_trigger_list[1].append(-1)
                         self.time_trigger_list[2].append(-1)
 
-                    self.time_trigger_list[0][i] = current_time + self.waiting_time
+                    self.time_trigger_list[0][i] = log_atom.atom_time + self.waiting_time
                     # Save the current event lines count
                     self.num_event_lines_ref = [[num] for num in self.event_type_detector.num_event_lines]
                     break
 
         # Check if a trigger was triggered
-        if len(self.time_trigger_list[0]) > 0 and any(current_time >= x for x in self.time_trigger_list[0]):
+        if len(self.time_trigger_list[0]) > 0 and any(log_atom.atom_time >= x for x in self.time_trigger_list[0]):
             # Get the indices of the triggered events
-            indices = [i for i, time_trigger in enumerate(self.time_trigger_list[0]) if current_time >= time_trigger]
+            indices = [i for i, time_trigger in enumerate(self.time_trigger_list[0]) if log_atom.atom_time >= time_trigger]
 
             # Execute the triggered functions of the TSA
             for i in range(len(indices)-1, -1, -1):
@@ -252,22 +202,22 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                         # Run the update function for all trigger, which would already have been triggered
                         for k in range(1, num_added_trigger+1):
-                            while current_time >= self.time_trigger_list[0][-k]:
+                            while log_atom.atom_time >= self.time_trigger_list[0][-k]:
                                 # skipcq: PTC-W0063
                                 self.test_num_appearance(self.time_trigger_list[1][-k], self.event_type_detector.num_event_lines[
                                                          self.time_trigger_list[1][-k]] - self.num_event_lines_ref[
-                                                         self.time_trigger_list[1][-k]], current_time, log_atom)
+                                                         self.time_trigger_list[1][-k]], log_atom)
                                 self.time_trigger_list[0][-k] += self.time_trigger_list[2][-k]
                                 self.num_event_lines_ref[self.time_trigger_list[1][-k]] = self.event_type_detector.num_event_lines[
                                     self.time_trigger_list[1][-k]]
 
                 # Trigger for a reoccurring time step
                 else:
-                    while current_time >= self.time_trigger_list[0][indices[i]]:
+                    while log_atom.atom_time >= self.time_trigger_list[0][indices[i]]:
                         # skipcq: PTC-W0063
                         self.test_num_appearance(self.time_trigger_list[1][indices[i]], self.event_type_detector.num_event_lines[
                                                  self.time_trigger_list[1][indices[i]]]-self.num_event_lines_ref[
-                                                 self.time_trigger_list[1][indices[i]]], current_time, log_atom)
+                                                 self.time_trigger_list[1][indices[i]]], log_atom)
                         self.time_trigger_list[0][indices[i]] += self.time_trigger_list[2][indices[i]]
                         self.num_event_lines_ref[self.time_trigger_list[1][indices[i]]] = self.event_type_detector.num_event_lines[
                             self.time_trigger_list[1][indices[i]]]
@@ -283,30 +233,64 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        persistence_data = [self.time_window_history,
-                            self.prediction_history,
-                            self.time_history,
-                            self.result_list,
-                            self.time_trigger_list,
-                            self.num_event_lines_ref]
-        PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
+        PersistenceUtil.store_json(self.persistence_file_name, [self.time_window_history, self.prediction_history, self.time_history,
+                                                                self.result_list, self.time_trigger_list, self.num_event_lines_ref])
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        # Import the persistence
+        if persistence_data is not None:
+            self.time_window_history = persistence_data[0]
+            self.prediction_history = persistence_data[1]
+            self.time_history = persistence_data[2]
+            self.result_list = persistence_data[3]
+            self.time_trigger_list = persistence_data[4]
+            self.num_event_lines_ref = persistence_data[5]
 
-    def allowlist_event(self, event_type, sorted_log_lines, event_data, allowlisting_data):  # skipcq: PYL-W0613
-        """
-        Allowlist an event generated by this source using the information emitted when generating the event.
-        @return a message with information about allowlisting
-        @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
-        """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            raise Exception('Event not from this source')
-        raise Exception('No allowlisting for algorithm malfunction or configuration errors')
+            self.arima_models = [None for _ in self.time_window_history]
+            # skipcq: PTC-W0060
+            for event_index in range(len(self.arima_models)):
+                if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini * self.num_division_time_step:
+                    try:
+                        if not self.build_sum_over_values:
+                            model = ARIMA(
+                                self.time_window_history[event_index][-self.num_periods_tsa_ini * self.num_division_time_step:],
+                                order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
+                            self.arima_models[event_index] = model.fit()
+                        else:
+                            model = ARIMA([sum(self.time_window_history[event_index][
+                                               -self.num_periods_tsa_ini * self.num_division_time_step + i:
+                                               -(self.num_periods_tsa_ini - 1) * self.num_division_time_step + i]) for i in
+                                           range((self.num_periods_tsa_ini - 1) * self.num_division_time_step)] + [
+                                              sum(self.time_window_history[event_index][-self.num_division_time_step:])],
+                                          order=(self.num_division_time_step, 0, 0), seasonal_order=(0, 0, 0, self.num_division_time_step))
+                            self.arima_models[event_index] = model.fit()
+                    except:  # skipcq FLK-E722
+                        self.arima_models[event_index] = None
+                        self.time_window_history[event_index] = []
+                else:
+                    self.arima_models[event_index] = None
+                    self.time_window_history[event_index] = []
+
+            # List of the pauses of the tests to the event numbers. If an arima model was initialized with the persistence, the model must
+            # be trained before it can be used for forecasts. An integer states how many tests should be skipped before the next
+            # output to this event number. None if no model was initialized for this event number.
+            self.test_pause = [self.num_division_time_step if arima_models_statsmodel is not None else None for
+                               arima_models_statsmodel in self.arima_models]
+            # If all entries are None set the variable to None
+            if all(entry is None for entry in self.test_pause):
+                self.test_pause = None
+        else:
+            self.time_trigger_list[0].append(-1)
+            self.time_trigger_list[1].append(-1)
+            self.time_trigger_list[2].append(-1)
 
     def calculate_time_steps(self, counts, log_atom):
         """Returns a list of the timestep lengths in seconds, if no timestep should be created the value is set to -1"""
@@ -368,20 +352,15 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 time_step_list[index] = -1
 
         # Print a message of the length of the time steps
-        message = f'Calculated the periods for the single event types in seconds: '\
+        message = f"Calculated the periods for the single event types in seconds: "\
                   f'{[time_step * self.num_division_time_step if time_step != -1 else "None" for time_step in time_step_list]}'
         affected_path = []
         self.print(message, log_atom, affected_path)
 
         return time_step_list
 
-    def test_num_appearance(self, event_index, count, current_time, log_atom):
+    def test_num_appearance(self, event_index, count, log_atom):
         """This function makes a one-step prediction and raises an alert if the count do not match the expected appearance"""
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
-            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
-            self.learn_mode = False
-
         # Append the list of time_window_history and arima_models if it is to short
         if len(self.time_window_history) <= event_index:
             self.time_window_history += [[] for _ in range(event_index + 1 - len(self.time_window_history))]
@@ -392,7 +371,6 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         # Initialize the arima_model if needed
         if self.learn_mode and self.arima_models[event_index] is None:
-
             # Add the new count to the history and shorten it, if necessary
             self.time_window_history[event_index].append(count)
             if len(self.time_window_history[event_index]) > 2 * self.num_periods_tsa_ini * self.num_division_time_step:
@@ -401,7 +379,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
             # Check if enough values have been stored to initialize the arima_model
             if len(self.time_window_history[event_index]) >= self.num_periods_tsa_ini*self.num_division_time_step:
-                message = f'Initializing the TSA for the event {self.event_type_detector.get_event_type(event_index)}'
+                message = f"Initializing the TSA for the event {self.event_type_detector.get_event_type(event_index)}"
                 affected_path = self.event_type_detector.variable_key_list[event_index]
                 self.print(message, log_atom, affected_path)
 
@@ -428,7 +406,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                         self.arima_models[event_index] = None
                         self.time_window_history[event_index] = []
             if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = current_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_timestamp = max(
+                    self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
         # Add the new value and make a one-step prediction
         elif self.arima_models[event_index] is not None:
             if not self.build_sum_over_values:
@@ -438,12 +417,12 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                     self.prediction_history[event_index][0].append(0)
                     self.prediction_history[event_index][1].append(count)
                     self.prediction_history[event_index][2].append(0)
-                    self.time_history[event_index].append(current_time)
+                    self.time_history[event_index].append(log_atom.atom_time)
                 else:
                     self.prediction_history[event_index][0].append(lower_limit)
                     self.prediction_history[event_index][1].append(count)
                     self.prediction_history[event_index][2].append(upper_limit)
-                    self.time_history[event_index].append(current_time)
+                    self.time_history[event_index].append(log_atom.atom_time)
                 # Shorten the lists if necessary
                 if len(self.time_history[event_index]) > self.num_max_time_history:
                     self.prediction_history[event_index][0] = self.prediction_history[event_index][0][-self.num_min_time_history:]
@@ -462,8 +441,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 else:
                     # Test if count is in boundaries
                     if count < lower_limit or count > upper_limit:
-                        message = f'Event: {self.event_type_detector.get_event_type(event_index)}, Lower: {lower_limit}, Count: {count}, '\
-                                  f'Upper: {upper_limit}'
+                        message = f"Event: {self.event_type_detector.get_event_type(event_index)}, Lower: {lower_limit}, Count: {count}, "\
+                                  f"Upper: {upper_limit}"
                         affected_path = self.event_type_detector.variable_key_list[event_index]
                         if count < lower_limit:
                             confidence = (lower_limit - count) / (upper_limit - count)
@@ -479,16 +458,16 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 # Discard or update the model, for the next step
                 if self.learn_mode and sum(self.result_list[event_index][-self.num_results_bt:]) < self.bt_min_suc:
-                    message = f'Discard the TSA model for the event {self.event_type_detector.get_event_type(event_index)}'
+                    message = f"Discard the TSA model for the event {self.event_type_detector.get_event_type(event_index)}"
                     affected_path = self.event_type_detector.variable_key_list[event_index]
                     self.print(message, log_atom, affected_path)
 
                     # Discard the trained model and reset the result_list
                     self.arima_models[event_index] = None
                     self.result_list[event_index] = [1]*self.num_results_bt
-
                     if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = current_time + self.stop_learning_no_anomaly_time
+                        self.stop_learning_timestamp = max(
+                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 else:
                     # Update the model
                     self.arima_models[event_index] = self.arima_models[event_index].append([count])
@@ -503,7 +482,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
                 self.prediction_history[event_index][0].append(lower_limit)
                 self.prediction_history[event_index][1].append(count_sum)
                 self.prediction_history[event_index][2].append(upper_limit)
-                self.time_history[event_index].append(current_time)
+                self.time_history[event_index].append(log_atom.atom_time)
                 # Shorten the lists if necessary
                 if len(self.time_history[event_index]) > self.num_max_time_history:
                     self.prediction_history[event_index][0] = self.prediction_history[event_index][0][-self.num_min_time_history:]
@@ -513,8 +492,8 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
                 # Test if count_sum is in boundaries
                 if count_sum < lower_limit or count_sum > upper_limit:
-                    message = f'Event: {self.event_type_detector.get_event_type(event_index)}, Lower: {lower_limit}, Count: {count_sum}, '\
-                              f'Upper: {upper_limit}'
+                    message = f"Event: {self.event_type_detector.get_event_type(event_index)}, Lower: {lower_limit}, Count: {count_sum}, "\
+                              f"Upper: {upper_limit}"
                     affected_path = self.event_type_detector.variable_key_list[event_index]
                     confidence = 1 - min(count_sum / lower_limit, upper_limit / count_sum)
                     self.print(message, log_atom, affected_path, confidence=confidence)
@@ -553,29 +532,29 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
 
         original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
         if original_log_line_prefix is None:
-            original_log_line_prefix = ''
+            original_log_line_prefix = ""
 
         if self.output_logline:
-            tmp_str = ''
+            tmp_str = ""
             for x in list(log_atom.parser_match.get_match_dictionary().keys()):
-                tmp_str += '  ' + x + os.linesep
-            tmp_str = tmp_str.lstrip('  ')
+                tmp_str += "  " + x + os.linesep
+            tmp_str = tmp_str.lstrip("  ")
             sorted_log_lines = [tmp_str + original_log_line_prefix + log_atom.raw_data.decode()]
-            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary().keys())}
+            analysis_component = {"AffectedLogAtomPaths": list(log_atom.parser_match.get_match_dictionary().keys())}
         else:
-            tmp_str = ''
+            tmp_str = ""
             for x in affected_path:
-                tmp_str += '  ' + x + os.linesep
-            tmp_str = tmp_str.lstrip('  ')
+                tmp_str += "  " + x + os.linesep
+            tmp_str = tmp_str.lstrip("  ")
             sorted_log_lines = [tmp_str + log_atom.raw_data.decode()]
-            analysis_component = {'AffectedLogAtomPaths': affected_path}
+            analysis_component = {"AffectedLogAtomPaths": affected_path}
 
         if confidence is not None:
-            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                          'TypeInfo': {'Confidence': confidence}}
+            event_data = {"AnalysisComponent": analysis_component, "TotalRecords": self.event_type_detector.total_records,
+                          "TypeInfo": {"Confidence": confidence}}
         else:
-            event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
-                          'TypeInfo': {}}
+            event_data = {"AnalysisComponent": analysis_component, "TotalRecords": self.event_type_detector.total_records,
+                          "TypeInfo": {}}
         for listener in self.anomaly_event_handlers:
             # skipcq: PYL-C0209, FLK-E501
-            listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)
+            listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, log_atom, self)

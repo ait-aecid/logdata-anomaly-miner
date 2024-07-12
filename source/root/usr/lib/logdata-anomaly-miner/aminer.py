@@ -73,7 +73,7 @@ def run_analysis_child(aminer_config, program_name):
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).critical(msg)
         sys.exit(1)
     import posix1e
-    # O_PATH is problematic when checking ACL. However it is possible to check the ACL using the file name.
+    # O_PATH is problematic when checking ACL. However, it is possible to check the ACL using the file name.
     try:
         if posix1e.has_extended(persistence_dir_name):
             msg = f"WARNING: SECURITY: Extended POSIX ACLs are set in {persistence_dir_name.decode()}, but not supported by the aminer. " \
@@ -489,38 +489,76 @@ def main():
 
     # Now create the management entries for each logfile.
     log_data_resource_dict = {}
-    for log_resource_name in log_sources_list:
-        # From here on log_resource_name is a byte array.
-        log_resource_name = decode_string_as_byte_string(log_resource_name)
-        log_resource = None
-        if log_resource_name.startswith(b'file://'):
-            log_resource = FileLogDataResource(log_resource_name, -1)
-        elif log_resource_name.startswith(b'unix://'):
-            log_resource = UnixSocketLogDataResource(log_resource_name, -1)
+    for resource in log_sources_list:
+        obj = {}
+        if isinstance(resource, str):
+            obj["url"] = decode_string_as_byte_string(resource)
+        elif isinstance(resource, dict):
+            for key, val in resource.items():
+                if key not in ("url", "json", "xml", "parser_id"):
+                    msg = f"Unknown argument in LogResourceList: {key}"
+                    print(msg, file=sys.stderr)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    sys.exit(1)
+                if key == "json" and not isinstance(val, bool):
+                    msg = "Argument json must be of type boolean!"
+                    print(msg, file=sys.stderr)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    sys.exit(1)
+                if key == "xml" and not isinstance(val, bool):
+                    msg = "Argument xml must be of type boolean!"
+                    print(msg, file=sys.stderr)
+                    logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+                    sys.exit(1)
+                obj[key] = val
         else:
-            msg = f"Unsupported schema in {AminerConfig.KEY_LOG_SOURCES_LIST}: {repr(log_resource_name)}"
+            msg = "LogResourceList must be of type dict or string"
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
             sys.exit(1)
-        if not os.path.exists(log_resource_name[7:].decode()):
-            msg = f"WARNING: file or socket '{log_resource_name[7:].decode()}' does not exist (yet)!"
+        if "json" in obj and "xml" in obj:
+            msg = "Log resources can not be in the json and xml format at the same time."
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if "json" not in obj:
+            obj["json"] = None
+        if "xml" not in obj:
+            obj["xml"] = None
+        if "parser_id" not in obj:
+            obj["parser_id"] = None
+        if isinstance(obj["url"], str):
+            obj["url"] = decode_string_as_byte_string(obj["url"])
+        url = obj["url"]
+        if url.startswith(b'file://'):
+            obj["log_resource"] = FileLogDataResource(url, -1)
+        elif url.startswith(b'unix://'):
+            obj["log_resource"] = UnixSocketLogDataResource(url, -1)
+        else:
+            msg = f"Unsupported schema in {AminerConfig.KEY_LOG_SOURCES_LIST}: {repr(obj)}"
+            print(msg, file=sys.stderr)
+            logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
+            sys.exit(1)
+        if obj["xml"]:
+            obj["log_resource"].default_buffer_size = 1 << 32
+        if not os.path.exists(url[7:].decode()):
+            msg = f"WARNING: file or socket '{url[7:].decode()}' does not exist (yet)!"
             print(msg, file=sys.stderr)
             logging.getLogger(AminerConfig.DEBUG_LOG_NAME).warning(msg)
         try:
-            log_resource.open()
+            obj["log_resource"].open()
         except OSError as open_os_error:
             if open_os_error.errno == errno.EACCES:
-                msg = f"{program_name}: no permission to access{repr(log_resource_name)}"
+                msg = f"{program_name}: no permission to access{repr(obj)}"
                 print(msg, file=sys.stderr)
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 sys.exit(1)
             else:
-                msg = f"{program_name}: unexpected error opening {repr(log_resource_name)}: {open_os_error.errno} " \
+                msg = f"{program_name}: unexpected error opening {repr(obj)}: {open_os_error.errno} " \
                       f"({os.strerror(open_os_error.errno)})"
                 print(msg, file=sys.stderr)
                 logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 sys.exit(1)
-        log_data_resource_dict[log_resource_name] = log_resource
+        log_data_resource_dict[url] = obj
 
     # Create the remote control socket, if any. Do this in privileged mode to allow binding it at arbitrary locations and support restricted
     # permissions of any type for current (privileged) uid.
@@ -687,9 +725,10 @@ def main():
     child_socket.close()
 
     # Send all log resource information currently available to child process.
-    for log_resource_name, log_resource in log_data_resource_dict.items():
+    for url, obj in log_data_resource_dict.items():
+        log_resource = obj["log_resource"]
         if (log_resource is not None) and (log_resource.get_file_descriptor() >= 0):
-            SecureOSFunctions.send_logstream_descriptor(parent_socket, log_resource.get_file_descriptor(), log_resource_name)
+            SecureOSFunctions.send_logstream_descriptor(parent_socket, log_resource.get_file_descriptor(), url)
             log_resource.close()
 
     # Send the remote control server socket, if any and close it afterwards. It is not needed any more on parent side.
@@ -726,9 +765,10 @@ def main():
             exit_status = 1
 
         # Child information handled, scan for rotated logfiles or other resources, where reopening might make sense.
-        for log_resouce_name, log_data_resource in log_data_resource_dict.items():
+        for log_resouce_name, obj in log_data_resource_dict.items():
+            log_resource = obj["log_resource"]
             try:
-                if not log_data_resource.open(reopen_flag=True):
+                if not log_resource.open(reopen_flag=True):
                     continue
             except OSError as open_os_error:
                 if open_os_error.errno == errno.EACCES:
@@ -742,8 +782,8 @@ def main():
                     logging.getLogger(AminerConfig.DEBUG_LOG_NAME).error(msg)
                 exit_status = 2
                 continue
-            SecureOSFunctions.send_logstream_descriptor(parent_socket, log_data_resource.get_file_descriptor(), log_resouce_name)
-            log_data_resource.close()
+            SecureOSFunctions.send_logstream_descriptor(parent_socket, log_resource.get_file_descriptor(), log_resouce_name)
+            log_resource.close()
         time.sleep(1)
     parent_socket.close()
     SecureOSFunctions.close_base_directory()

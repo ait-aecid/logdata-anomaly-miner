@@ -127,7 +127,7 @@ class TestBase(unittest.TestCase):
         if os.path.exists(persistence_dir_name):
             shutil.rmtree(persistence_dir_name)
         if not os.path.exists(persistence_dir_name):
-            os.makedirs(persistence_dir_name)
+            os.makedirs(os.path.join(persistence_dir_name, "log"))
         initialize_loggers(self.aminer_config, os.getuid(), os.getgid())
         if isinstance(persistence_dir_name, str):
             persistence_dir_name = persistence_dir_name.encode()
@@ -193,23 +193,26 @@ class DummyFixedDataModelElement(ModelElementInterface):
         self.element_id = element_id
         self.data = data
 
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):  # skipcq: PYL-R0201
-        """
-        Get all possible child model elements of this element.
-        @return None as there are no children of this element.
-        """
-        return None
-
     def get_match_element(self, path: str, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         if not match_context.match_data.startswith(self.data):
             return None
         match_context.update(self.data)
         return MatchElement("%s/%s" % (path, self.element_id), self.data, self.data, None)
+
+
+class DummyNumberModelElement(ModelElementInterface):
+    """Dummy class for any data."""
+
+    def get_match_element(self, path: str, match_context):
+        for i in range(len(match_context.match_data)):
+            if match_context.match_data[i:i+1] not in b"0123456789":
+                if i == 0:
+                    return None
+                match_data = match_context.match_data[:i]
+                match_context.update(match_data)
+                return MatchElement(f"{path}/{self.element_id}", match_data, int(match_data), None)
+        return MatchElement(f"{path}/{self.element_id}", match_context.match_data, int(match_context.match_data), None)
 
 
 class DummyFirstMatchModelElement(ModelElementInterface):
@@ -223,14 +226,6 @@ class DummyFirstMatchModelElement(ModelElementInterface):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
-    def get_id(self):
-        """Get the element ID."""
-        return self.element_id
-
-    def get_child_elements(self):
-        """Get all possible child model elements of this element."""
-        return self.children
-
     def get_match_element(self, path, match_context):
         """@return None when there is no match, MatchElement otherwise."""
         current_path = "%s/%s" % (path, self.element_id)
@@ -242,6 +237,40 @@ class DummyFirstMatchModelElement(ModelElementInterface):
                 return child_match
             match_context.match_data = match_data
         return None
+
+
+class DummySequenceModelElement(ModelElementInterface):
+    """This class defines an element to find matches that comprise matches of all given child model elements."""
+
+    def __init__(self, element_id, children):
+        self.element_id = element_id
+        self.children = children
+        if (children is None) or (None in children):
+            msg = 'Invalid children list'
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise Exception(msg)
+
+    def get_match_element(self, path, match_context):
+        """
+        Try to find a match on given data for this model element and all its children.
+        When a match is found, the matchContext is updated accordingly.
+        @param path the model path to the parent model element invoking this method.
+        @param match_context an instance of MatchContext class holding the data context to match against.
+        @return the matchElement or None if model did not match.
+        """
+        current_path = f"{path}/{self.element_id}"
+        start_data = match_context.match_data
+        matches = []
+        for child_element in self.children:
+            child_match = child_element.get_match_element(current_path, match_context)
+            if child_match is None:
+                match_context.match_data = start_data
+                return None
+            matches += [child_match]
+
+        return MatchElement(current_path, start_data[:len(start_data) - len(match_context.match_data)],
+                            start_data[:len(start_data) - len(match_context.match_data)], matches)
+
 
 
 if __name__ == "__main__":

@@ -47,6 +47,7 @@ class YamlConfigTest(TestBase):
     """Unittests for the YamlConfig."""
 
     sysp = sys.path
+    resource_name = b"testresource"
 
     def setUp(self):
         """Add the aminer syspath."""
@@ -417,6 +418,8 @@ class YamlConfigTest(TestBase):
         del yml_config_properties['Analysis']
         del yml_config_properties['EventHandlers']
         del yml_config_properties['LearnMode']
+        del yml_config_properties['LogResourceList'][0]['json']
+        del yml_config_properties['LogResourceList'][0]['xml']
 
         # remove SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler and NewMatchPathDetector as they are added by the YamlConfig.
         py_registered_components = copy.copy(py_context.registered_components)
@@ -483,15 +486,14 @@ class YamlConfigTest(TestBase):
         Check if the suppress property and SuppressNewMatchPathDetector are working as expected.
         This test only includes the StreamPrinterEventHandler.
         """
-        __expected_string1 = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n%s\n\n'
+        __expected_string1 = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n\n'
         t = time()
         fixed_dme = FixedDataModelElement('s1', b' pid=')
         match_context_fixed_dme = MatchContext(b' pid=')
         match_element_fixed_dme = fixed_dme.get_match_element("", match_context_fixed_dme)
-        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, 'DefaultNewMatchPathDetector')
+        log_atom_fixed_dme = LogAtom(fixed_dme.fixed_data, ParserMatch(match_element_fixed_dme), t, self)
         datetime_format_string = '%Y-%m-%d %H:%M:%S'
         match_path_s1 = "['/s1']"
-        pid = " pid="
         __expected_string2 = '%s New value combination(s) detected\n%s: "%s" (%d lines)\n%s\n\n'
         fixed_dme2 = FixedDataModelElement('s1', b'25537 uid=')
         decimal_integer_value_me = DecimalIntegerValueModelElement(
@@ -499,7 +501,7 @@ class YamlConfigTest(TestBase):
         match_context_sequence_me = MatchContext(b'25537 uid=2')
         seq = SequenceModelElement('seq', [fixed_dme2, decimal_integer_value_me])
         match_element_sequence_me = seq.get_match_element('first', match_context_sequence_me)
-        string2 = "  (b'25537 uid=', 2)\n25537 uid=2"
+        string2 = "  (b'25537 uid=', 2)"
 
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
@@ -515,7 +517,7 @@ class YamlConfigTest(TestBase):
         self.assertTrue(default_nmpd.receive_atom(log_atom_fixed_dme))
         self.assertEqual(self.output_stream.getvalue(), __expected_string1 % (
             datetime.fromtimestamp(t).strftime(datetime_format_string), default_nmpd.__class__.__name__, 'DefaultNewMatchPathDetector', 1,
-            match_path_s1, pid))
+            match_path_s1))
         self.reset_output_stream()
 
         context.aminer_config.yaml_data['Analysis'][2]['suppress'] = True
@@ -529,8 +531,7 @@ class YamlConfigTest(TestBase):
         self.reset_output_stream()
 
         value_combo_det = context.registered_components[1][0]
-        log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t,
-                                       value_combo_det)
+        log_atom_sequence_me = LogAtom(match_element_sequence_me.get_match_string(), ParserMatch(match_element_sequence_me), t, self)
         context.atomizer_factory.event_handler_list[0].stream = self.output_stream
         self.assertTrue(value_combo_det.receive_atom(log_atom_sequence_me))
         self.assertEqual(self.output_stream.getvalue(), __expected_string2 % (
@@ -728,6 +729,58 @@ class YamlConfigTest(TestBase):
 
         # ApacheAccessModel
         self.assertEqual(pm.children[3].element_id, "accesslog")
+
+    def test31_granular_log_resource_list(self):
+        """Test if granular configs of the LogResourceList work properly."""
+        spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
+        aminer_config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aminer_config)
+        aminer_config.load_yaml('unit/data/configfiles/granular_log_resource_list.yml')
+        context = AnalysisContext(aminer_config)
+        context.build_analysis_pipeline()
+        atomizer = context.atomizer_factory.get_atomizer_for_resource(b"file:///var/log/apache2/access.log")
+        self.assertEqual(atomizer.parsing_model.element_id, "accesslog")
+        self.assertFalse(atomizer.json_format)
+        atomizer = context.atomizer_factory.get_atomizer_for_resource(b"unix:///var/lib/akafka/aminer.sock")
+        self.assertEqual(atomizer.parsing_model.element_id, "model")
+        self.assertTrue(isinstance(atomizer.parsing_model, SequenceModelElement))
+        self.assertTrue(atomizer.json_format)
+
+    def test32_log_resource_ignore_list(self):
+        """Test if analysis components can ignore log resources properly."""
+        class Object(object):
+            pass
+        t = time()
+        a = Object()
+        source_a = Object()
+        setattr(a, "source", source_a)
+        setattr(source_a, "resource_name", b"file:///tmp/syslog_a")
+        b = Object()
+        source_b = Object()
+        setattr(b, "source", source_b)
+        setattr(source_b, "resource_name", b"file:///tmp/syslog_b")
+        fixed_dme_a = FixedDataModelElement('a', b'a')
+        fixed_dme_b = FixedDataModelElement('b', b'b')
+        match_context_a = MatchContext(b'a')
+        match_element_a = fixed_dme_a.get_match_element("", match_context_a)
+        log_atom1 = LogAtom(fixed_dme_a.fixed_data, ParserMatch(match_element_a), t, source_a)
+        match_context_b = MatchContext(b'b')
+        match_element_b = fixed_dme_b.get_match_element("", match_context_b)
+        log_atom2 = LogAtom(fixed_dme_b.fixed_data, ParserMatch(match_element_b), t+1, source_b)
+
+        nmpd1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, log_resource_ignore_list=["file:///tmp/syslog_b"])
+        self.analysis_context.register_component(nmpd1, "Detector1")
+        nmpd2 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, log_resource_ignore_list=["file:///tmp/syslog_a"])
+        self.analysis_context.register_component(nmpd2, "Detector2")
+        self.assertTrue(nmpd1.receive_atom(log_atom1))
+        self.assertFalse(nmpd1.receive_atom(log_atom2))
+        self.assertFalse(nmpd2.receive_atom(log_atom1))
+        self.assertTrue(nmpd2.receive_atom(log_atom2))
+        self.assertEqual(self.output_stream.getvalue(), datetime.fromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S') +
+                         " New path(es) detected\nNewMatchPathDetector: \"Detector1\" (1 lines)\n  /a: a\n['/a']\na\n\n" +
+                         datetime.fromtimestamp(t+1).strftime('%Y-%m-%d %H:%M:%S') +
+                         " New path(es) detected\nNewMatchPathDetector: \"Detector2\" (1 lines)\n  /b: b\n['/b']\nb\n\n")
+        self.reset_output_stream()
 
     def run_empty_components_tests(self, context):
         """Run the empty components tests."""

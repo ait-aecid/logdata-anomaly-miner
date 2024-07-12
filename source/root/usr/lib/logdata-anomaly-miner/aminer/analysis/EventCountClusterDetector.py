@@ -10,31 +10,28 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import time
 import os
 import logging
 import math
-import sys
-
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when dissimilar event or value count vectors occur."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, window_size=600, id_path_list=None,
                  num_windows=50, confidence_factor=0.33, idf=False, norm=False, add_normal=False, check_empty_windows=True,
-                 persistence_id='Default', learn_mode=False, output_logline=True,
-                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 persistence_id="Default", learn_mode=False, output_logline=True, ignore_list=None, constraint_list=None,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -48,7 +45,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @param idf when true, value counts are weighted higher when they occur with fewer id_paths (requires that id_path_list is set).
         @param norm when true, count vectors are normalized so that only relative occurrence frequencies matter for detection.
         @param add_normal when true, count vectors are also added to the model when they exceed the similarity threshold.
-        @param check_empty_windows when true, empty count vectors are generated for time windows without event occurrences.
+        @param check_empty_windows when true, empty count vectors generated for time windows without event occurrences.
         @param persistence_id name of persistence document.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
@@ -59,55 +56,30 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        super().__init__(
-            mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "id_path_list"],
-            aminer_config=aminer_config,
-            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, id_path_list=id_path_list,
-            window_size=window_size,  num_windows=num_windows, confidence_factor=confidence_factor,
-            persistence_id=persistence_id, learn_mode=learn_mode,
+        super().__init__(mutable_default_args=[
+            "target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "id_path_list", "log_resource_ignore_list"],
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
+            window_size=window_size, id_path_list=id_path_list,  num_windows=num_windows, confidence_factor=confidence_factor, idf=idf,
+            norm=norm, add_normal=add_normal, check_empty_windows=check_empty_windows, persistence_id=persistence_id, learn_mode=learn_mode,
             output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, idf=idf, norm=norm, add_normal=add_normal,
-            check_empty_windows=check_empty_windows
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
         self.next_check_time = {}
         self.counts = {}
         self.known_counts = {}
-        if self.idf and not self.id_path_list:
-            msg = 'Omitting IDF weighting as required id_path_list is not set.'
-            logging.getLogger(DEBUG_LOG_NAME).warning(msg)
-            print('WARNING: ' + msg, file=sys.stderr)
         self.idf_total = set()
         self.idf_counts = {}
         self.log_windows = 0
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-
-        # Persisted data contains known count vectors, i.e., [[[<id_1>, [[[<val_1>,1],[<val_2>,1]], [[<val_1>,2],[<val_3>,1]], ...]],
-        #                                                      [<id_2>,[[[<val_1>,1]]]]],
-        # 2) list of known id used for idf computation, i.e., [<id_1>,<id_2>],
-        # 3) list of id observed for each value, i.e., [[<val_1>,[<id_1>,<id_2>]],[<val_2>,[<id_1>]]]]
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is not None:
-            for elem in persistence_data[0]:
-                window_list = []
-                for log_ev_elem_list in elem[1]:
-                    elem_dict = {}
-                    for log_ev_elem in log_ev_elem_list:
-                        elem_dict[tuple(log_ev_elem[0])] = int(log_ev_elem[1])
-                    window_list.append(elem_dict)
-                self.known_counts[tuple(elem[0])] = window_list
-            for elem in persistence_data[1]:
-                self.idf_total.add(tuple(elem))
-            for elem in persistence_data[2]:
-                id_elem_set = set()
-                for id_elem in elem[1]:
-                    id_elem_set.add(tuple(id_elem))
-                self.idf_counts[tuple(elem[0])] = id_elem_set
-            logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return False
         parser_match = log_atom.parser_match
         self.log_total += 1
 
@@ -119,7 +91,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         # Skip paths from ignore list.
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary().keys():
-                return
+                return False
 
         if self.target_path_list is None or len(self.target_path_list) == 0:
             # Event is defined by the full path of log atom.
@@ -129,7 +101,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     constraint_path_flag = True
                     break
             if not constraint_path_flag and self.constraint_list != []:
-                return
+                return False
             log_event = tuple(parser_match.get_match_dictionary().keys())
         else:
             # Event is defined by value combos in target_path_list
@@ -153,7 +125,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                         all_values_none = False
                     values.append(value)
             if all_values_none is True:
-                return
+                return False
             log_event = tuple(values)
 
         # In case that id_path_list is set, use it to differentiate sequences by their id.
@@ -164,10 +136,10 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             if id_match is None:
                 if self.allow_missing_id is True:
                     # Insert placeholder for id_path that is not available
-                    id_tuple += ('',)
+                    id_tuple += ("",)
                 else:
                     # Omit log atom if one of the id paths is not found.
-                    return
+                    return False
             else:
                 matches = []
                 if isinstance(id_match, list):
@@ -219,6 +191,7 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         else:
             self.counts[id_tuple] = {log_event: 1}
         self.log_success += 1
+        return True
 
     def add_to_model(self, id_tuple, count_vector):
         """Adds a count vector to the model (a fifo list of count vectors)"""
@@ -248,19 +221,19 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             if self.output_logline:
                 original_log_line_prefix = self.aminer_config.config_properties.get(
                     CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + original_log_line_prefix +
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match("") + os.linesep + original_log_line_prefix +
                                     data]
             else:
                 sorted_log_lines = [data]
-            analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(count_vector.keys()),
-                                  'AffectedLogAtomFrequencies': list(count_vector.values())}
+            analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": list(count_vector.keys()),
+                                  "AffectedLogAtomFrequencies": list(count_vector.values())}
             if self.id_path_list is not None:
-                analysis_component['AffectedIdValues'] = list(id_tuple)
-            count_info = {'ConfidenceFactor': self.confidence_factor,
-                          'Confidence': score}
-            event_data = {'AnalysisComponent': analysis_component, 'CountData': count_info}
+                analysis_component["AffectedIdValues"] = list(id_tuple)
+            count_info = {"ConfidenceFactor": self.confidence_factor,
+                          "Confidence": score}
+            event_data = {"AnalysisComponent": analysis_component, "CountData": count_info}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Frequency anomaly detected', sorted_log_lines,
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency anomaly detected", sorted_log_lines,
                                        event_data, log_atom, self)
 
     def check(self, id_tuple, count_vector):
@@ -314,12 +287,11 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        print(self.known_counts)
         known_counts_data = []
         for id_tuple, vec_list in self.known_counts.items():
             id_tuple_data = []
@@ -327,17 +299,42 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 window_data = []
                 for log_ev, freq in vec_elem.items():
                     window_data.append((log_ev, freq))
-                id_tuple_data.append(window_data)
-            known_counts_data.append((id_tuple, id_tuple_data))
+                id_tuple_data.append(sorted(window_data))
+            known_counts_data.append((id_tuple, sorted(id_tuple_data)))
         idf_total_data = []
         idf_counts_data = []
         if self.idf and self.id_path_list:
             idf_total_data = list(self.idf_total)
             for log_ev, id_list in self.idf_counts.items():
-                idf_counts_data.append((log_ev, id_list))
-        persist_data = [known_counts_data, idf_total_data, idf_counts_data]
+                idf_counts_data.append((log_ev, sorted(id_list)))
+        persist_data = [sorted(known_counts_data), sorted(idf_total_data), sorted(idf_counts_data)]
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
-        logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        # Persisted data contains known count vectors, i.e., [[[<id_1>, [[[<val_1>,1],[<val_2>,1]], [[<val_1>,2],[<val_3>,1]], ...]],
+        #                                                      [<id_2>,[[[<val_1>,1]]]]],
+        # 2) list of known id used for idf computation, i.e., [<id_1>,<id_2>],
+        # 3) list of id observed for each value, i.e., [[<val_1>,[<id_1>,<id_2>]],[<val_2>,[<id_1>]]]]
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            for elem in persistence_data[0]:
+                window_list = []
+                for log_ev_elem_list in elem[1]:
+                    elem_dict = {}
+                    for log_ev_elem in log_ev_elem_list:
+                        elem_dict[tuple(log_ev_elem[0])] = int(log_ev_elem[1])
+                    window_list.append(elem_dict)
+                self.known_counts[tuple(elem[0])] = window_list
+            for elem in persistence_data[1]:
+                self.idf_total.add(tuple(elem))
+            for elem in persistence_data[2]:
+                id_elem_set = set()
+                for id_elem in elem[1]:
+                    id_elem_set.add(tuple(id_elem))
+                self.idf_counts[tuple(elem[0])] = id_elem_set
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """
@@ -345,17 +342,17 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
-            msg = 'Allowlisting data not understood by this detector'
+            msg = "Allowlisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
-        return f'Allowlisted path {event_data}.'
+        return f"Allowlisted path {event_data} in {event_type}."
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """
@@ -363,17 +360,17 @@ class EventCountClusterDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if blocklisting_data is not None:
-            msg = 'Blocklisting data not understood by this detector'
+            msg = "Blocklisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)
-        return f'Blocklisted path {event_data}.'
+        return f"Blocklisted path {event_data} in {event_type}."
 
     def log_statistics(self, component_name):
         """

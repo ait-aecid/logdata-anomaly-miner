@@ -10,15 +10,15 @@ read -r -d '' VAR << END
 New path(es) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model: {'menu': {'id': 'file', 'value': 'File', 'popup': {'menuitem': [{'value': 'New', 'onclick': 'CreateNewDoc()'}, {'value': 'Open', 'onclick': 'OpenDoc()'}, {'value': 'Close', 'onclick': 'CloseDoc()'}]}}}
-  /model/menu/id: file
-  /model/menu/value: File
-  /model/menu/popup/menuitem/buttonNames: 0
-  /model/menu/popup/menuitem/buttonOnclick: 0
-  /model/menu/popup/menuitem/buttonNames: 1
-  /model/menu/popup/menuitem/buttonOnclick: 1
-  /model/menu/popup/menuitem/buttonNames: 2
-  /model/menu/popup/menuitem/buttonOnclick: 2
-['/model', '/model/menu/popup/menuitem/buttonNames', '/model/menu/popup/menuitem/buttonOnclick', '/model/menu/id', '/model/menu/value', '/model/menu/popup/menuitem/buttonNames/0', '/model/menu/popup/menuitem/buttonOnclick/0', '/model/menu/popup/menuitem/buttonNames/1', '/model/menu/popup/menuitem/buttonOnclick/1', '/model/menu/popup/menuitem/buttonNames/2', '/model/menu/popup/menuitem/buttonOnclick/2']
+  /model/menu/id/id: file
+  /model/menu/value/value: File
+  /model/menu/popup/menuitem/value/buttonNames: 0
+  /model/menu/popup/menuitem/onclick/buttonOnclick: 0
+  /model/menu/popup/menuitem/value/buttonNames: 1
+  /model/menu/popup/menuitem/onclick/buttonOnclick: 1
+  /model/menu/popup/menuitem/value/buttonNames: 2
+  /model/menu/popup/menuitem/onclick/buttonOnclick: 2
+['/model', '/model/menu/popup/menuitem/value/buttonNames', '/model/menu/popup/menuitem/onclick/buttonOnclick', '/model/menu/id/id', '/model/menu/value/value', '/model/menu/popup/menuitem/value/buttonNames/0', '/model/menu/popup/menuitem/onclick/buttonOnclick/0', '/model/menu/popup/menuitem/value/buttonNames/1', '/model/menu/popup/menuitem/onclick/buttonOnclick/1', '/model/menu/popup/menuitem/value/buttonNames/2', '/model/menu/popup/menuitem/onclick/buttonOnclick/2']
 Original log line: {"menu": {
   "id": "file",
   "value": "File",
@@ -62,7 +62,7 @@ fi
 read -r -d '' VAR << END
 New value(s) detected
 NewMatchPathValueDetector: "NewMatchPathValue" (1 lines)
-  {'/model/menu/id': 'file'}
+  {'/model/menu/id/id': 'file'}
 END
 if [[ "$OUTPUT" != *"$VAR"* ]]; then
   echo "$VAR"
@@ -73,7 +73,7 @@ fi
 read -r -d '' VAR << END
 New value(s) detected
 NewMatchPathValueDetector: "NewMatchPathValue" (1 lines)
-  {'/model/menu/value': 'File'}
+  {'/model/menu/value/value': 'File'}
 END
 if [[ "$OUTPUT" != *"$VAR"* ]]; then
   echo "$VAR"

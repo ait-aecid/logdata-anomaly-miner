@@ -5,6 +5,7 @@ from aminer.parsing.JsonModelElement import JsonModelElement
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.MatchElement import MatchElement
 from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
+from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement, DummyFirstMatchModelElement
 
 
@@ -112,6 +113,10 @@ class JsonModelElementTest(TestBase):
         "id": DummyFixedDataModelElement("id", b"file")
     }}
     key_parser_dict_array_of_arrays = {"a": [[DummyFixedDataModelElement("abc", b"abc")]]}
+    key_parser_dict_newline_in_string = {"a":  AnyByteDataModelElement("id")}
+    key_parser_dict_nested_optional = {"optional_key_a": {
+        "optional_key_b": DummyFixedDataModelElement("id", b"file")
+    }}
 
     def test1get_match_element_valid_match(self):
         """Parse matching substring from MatchContext and check if the MatchContext was updated with all characters."""
@@ -184,7 +189,7 @@ class JsonModelElementTest(TestBase):
         json_model_element = JsonModelElement(self.id_, self.key_parser_dict_escaped)
         data = self.single_line_escaped_json.decode("unicode-escape").encode()
         value = json.loads(data)
-        match_context = DummyMatchContext(data)
+        match_context = DummyMatchContext(self.single_line_escaped_json)
         match_element = json_model_element.get_match_element(self.path, match_context)
         match_context.match_string = str(value).encode()
         match_context.match_data = data[len(match_context.match_string):]
@@ -197,6 +202,15 @@ class JsonModelElementTest(TestBase):
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
         match_context.match_string = str(json.loads(match_context.match_string)).encode()
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_newline_in_string)
+        data = b'{"a": "\n"}'
+        value = json.loads(data.replace(b"\n", b"\\n"))
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(match_context.match_string.replace(b"\n", b"\\n"))).encode()
         self.compare_match_results(
             data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
 
@@ -234,6 +248,31 @@ class JsonModelElementTest(TestBase):
 
         json_model_element = JsonModelElement(self.id_, self.empty_key_parser_dict)
         data = b'{"key": "another not matching value"}'
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        self.compare_no_match_results(data, match_element, match_context)
+
+        # nested optional keys
+        json_model_element = JsonModelElement(self.id_, self.key_parser_dict_nested_optional)
+        data = b'{"a": {"b": "file"}}'
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(data)).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = b'{}'
+        value = json.loads(data)
+        match_context = DummyMatchContext(data)
+        match_element = json_model_element.get_match_element(self.path, match_context)
+        match_context.match_string = str(json.loads(data)).encode()
+        match_context.match_data = data[len(match_context.match_string):]
+        self.compare_match_results(
+            data, match_element, match_context, self.id_, self.path, str(value).encode(), value, match_element.children)
+
+        data = b'{"a": {"b": "file1"}}'
         match_context = DummyMatchContext(data)
         match_element = json_model_element.get_match_element(self.path, match_context)
         self.compare_no_match_results(data, match_element, match_context)

@@ -10,8 +10,6 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-import time
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
@@ -19,12 +17,13 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class MissingMatchPathValueDetector(
+        AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """
     This class creates events when an expected value is not seen within a given timespan.
     For example because the service was deactivated or logging disabled unexpectedly. This is complementary to the function provided by
@@ -35,9 +34,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', learn_mode=False,
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", learn_mode=False,
                  default_interval=3600, realert_interval=86400, combine_values=True, output_logline=True, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None):
+                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -50,7 +49,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                not the system time. Hence, reports can be delayed when no data is received.
         @param realert_interval time in seconds before a value is reported missing for a second time. The parameter is applied to the
                parsed record data time, not the system time. Hence, reports can be delayed when no data is received.
-        @param combine_values if true the combined values are used as identifiers. When false, individual values are checked.
+        @param combine_values if true the combined values are identifiers. When false, individual values are checked.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
@@ -60,7 +59,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, learn_mode=learn_mode, default_interval=default_interval, realert_interval=realert_interval,
             output_logline=output_logline, combine_values=combine_values, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
+            mutable_default_args=["log_resource_ignore_list"]
         )
         # This timestamp is compared with timestamp values from log atoms for activation of alerting logic. The first timestamp from logs
         # above this value will trigger alerting.
@@ -69,25 +69,15 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.log_learned_values = 0
         self.log_new_learned_values = []
 
+        if not self.target_path_list:
+            msg = "target_path_list must not be None or empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.expected_values_dict = {}
-        if persistence_data is not None:
-            for key in persistence_data:
-                value = persistence_data[key]
-                if self.target_path_list is not None:  # skipcq: PTC-W0048
-                    if (value[3] not in self.target_path_list and not self.combine_values) or (
-                            value[3] != str(self.target_path_list) and self.combine_values):
-                        continue
-                elif self.target_path_list is not None and value[3] not in self.target_path_list:
-                    continue
-                if value[1] != default_interval:
-                    value[1] = default_interval
-                    value[2] = value[0] + default_interval
-                self.expected_values_dict[key] = value
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
-        self.analysis_string = 'Analysis.%s'
+        self.load_persistence_data()
+        self.analysis_string = "Analysis.%s"
 
     def receive_atom(self, log_atom):
         """
@@ -97,6 +87,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
                 at each source implementation sending log atoms.
         """
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return False
         self.log_total += 1
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
@@ -111,8 +104,6 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
             target_paths = [target_paths]
             value_list = [value_list]
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         for i, target_path in enumerate(target_paths):
             value = value_list[i]
             detector_info = self.expected_values_dict.get(value)
@@ -122,7 +113,8 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                 self.log_learned_values += 1
                 self.log_new_learned_values.append(value)
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
         self.check_timeouts(timestamp, log_atom)
 
@@ -207,6 +199,9 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                     detector_info[2] = self.last_seen_timestamp + self.realert_interval
                     self.expected_values_dict[value] = detector_info
             if missing_value_list:
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 message_part = []
                 affected_log_atom_values = []
                 for target_path_list, value, overdue_time, interval in missing_value_list:
@@ -227,44 +222,34 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
                                 data = repr(value)
                     except UnicodeError:
                         data = repr(value)
-                    if self.__class__.__name__ == 'MissingMatchPathValueDetector':
-                        e['TargetPathList'] = target_path_list
-                        message_part.append(f'  {target_path_list}: {data} overdue {overdue_time}s (interval {interval})\n')
+                    if self.__class__.__name__ == "MissingMatchPathValueDetector":
+                        e["TargetPathList"] = target_path_list
+                        message_part.append(f"  {target_path_list}: {data} overdue {overdue_time}s (interval {interval})\n")
                     else:
-                        target_paths = ''
+                        target_paths = ""
                         for target_path in self.target_path_list:
-                            target_paths += target_path + ', '
-                        e['TargetPathList'] = self.target_path_list
-                        message_part.append(f'  {target_paths[:-2]}: {data} overdue {overdue_time}s (interval {interval})\n')
-                    e['Value'] = str(value)
-                    e['OverdueTime'] = str(overdue_time)
-                    e['Interval'] = str(interval)
+                            target_paths += target_path + ", "
+                        e["TargetPathList"] = self.target_path_list
+                        message_part.append(f"  {target_paths[:-2]}: {data} overdue {overdue_time}s (interval {interval})\n")
+                    e["Value"] = str(value)
+                    e["OverdueTime"] = str(overdue_time)
+                    e["Interval"] = str(interval)
                     affected_log_atom_values.append(e)
                 affected_log_atom_paths = []
                 for path in log_atom.parser_match.get_match_dictionary().keys():
                     if path in self.target_path_list:
                         affected_log_atom_paths.append(path)
-                analysis_component = {'AffectedLogAtomPaths': affected_log_atom_paths,
-                                      'AffectedLogAtomValues': affected_log_atom_values}
-                event_data = {'AnalysisComponent': analysis_component}
+                analysis_component = {"AffectedLogAtomPaths": affected_log_atom_paths,
+                                      "AffectedLogAtomValues": affected_log_atom_values}
+                event_data = {"AnalysisComponent": analysis_component}
                 for listener in self.anomaly_event_handlers:
-                    self.send_event_to_handlers(listener, event_data, log_atom, [''.join(message_part).strip()])
+                    self.send_event_to_handlers(listener, event_data, log_atom, ["".join(message_part).strip()])
         return True
 
     def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
         """Send an event to the event handlers."""
-        anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__, 'Interval too large between values',
+        anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__, "Interval too large between values",
                                             message_part, event_data, log_atom, self)
-
-    def set_check_value(self, value, interval, target_path):
-        """Add or overwrite a value to be monitored by the detector."""
-        self.expected_values_dict[value] = [self.last_seen_timestamp, interval, 0, target_path]
-        self.next_check_timestamp = 0
-
-    def remove_check_value(self, value):
-        """Remove checks for given value."""
-        del self.expected_values_dict[value]
-        logging.getLogger(DEBUG_LOG_NAME).debug("%s removed check value %s.", self.__class__.__name__, str(value))
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -275,8 +260,28 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        PersistenceUtil.add_persistable_component(self)
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            for key in persistence_data:
+                value = persistence_data[key]
+                if self.target_path_list is not None:  # skipcq: PTC-W0048
+                    if (value[3] not in self.target_path_list and not self.combine_values) or (
+                            value[3] != str(self.target_path_list) and self.combine_values and
+                            not isinstance(self, MissingMatchPathListValueDetector)):
+                        continue
+                elif self.target_path_list is not None and value[3] not in self.target_path_list:
+                    continue
+                if value[1] != self.default_interval:
+                    value[1] = self.default_interval
+                    value[2] = value[0] + self.default_interval
+                self.expected_values_dict[key] = value
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
@@ -289,20 +294,23 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
         @return a message with information about allowlisting using given allowlisting_data was not possible.
         """
         if event_type != self.analysis_string % self.__class__.__name__:
-            msg = 'Event not from this source'
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if not isinstance(allowlisting_data, int):
-            msg = 'Allowlisting data has to integer with new interval, -1 to reset to defaults, other negative value to remove the entry'
+            msg = "Allowlisting data has to be an integer with new interval, -1 to reset to defaults, other negative value to remove the" \
+                  " entry"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         new_interval = allowlisting_data
         if new_interval == -1:
             new_interval = self.default_interval
         if new_interval < 0:
-            self.remove_check_value(event_data[0])
+            del self.expected_values_dict[event_data[0]]
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s removed check value %s.", self.__class__.__name__, str(event_data[0]))
         else:
-            self.set_check_value(event_data[0], new_interval, event_data[1])
+            self.expected_values_dict[event_data[0]] = [self.last_seen_timestamp, new_interval, 0, event_data[1]]
+            self.next_check_timestamp = 0
         return f"Updated '{event_data[0]}' in '{event_data[1]}' to new interval {new_interval}."
 
     def log_statistics(self, component_name):
@@ -327,7 +335,7 @@ class MissingMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponent
 class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
     """
     This detector works similar to the MissingMatchPathValueDetector.
-    It only can lookup values from a list of paths until one path really exists. It then uses this value as key to detect logAtoms
+    It only can look up values from a list of paths until one path really exists. It then uses this value as key to detect log atoms
     belonging to the same data stream. This is useful when e.g. due to different log formats, the hostname, servicename or any other
     relevant channel identifier has alternative paths.
     """
@@ -347,5 +355,5 @@ class MissingMatchPathListValueDetector(MissingMatchPathValueDetector):
 
     def send_event_to_handlers(self, anomaly_event_handler, event_data, log_atom, message_part):
         """Send an event to the event handlers."""
-        anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__, 'Interval too large between values',
+        anomaly_event_handler.receive_event(self.analysis_string % self.__class__.__name__, "Interval too large between values",
                                             message_part, event_data, log_atom, self)

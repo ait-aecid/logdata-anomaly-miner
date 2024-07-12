@@ -45,7 +45,7 @@ class TimeTriggeredComponentInterface(metaclass=abc.ABCMeta):
         Perform trigger actions and to determine the time for next invocation.
         The caller may decide to invoke this method earlier than requested during the previous call. Classes implementing this method have
         to handle such cases. Each class should try to limit the time spent in this method as it might delay trigger signals to other
-        components. For extensive compuational work or IO, a separate thread should be used.
+        components. For extensive computational work or IO, a separate thread should be used.
         @param trigger_time the time this trigger is invoked. This might be the current real time when invoked from real time
         timers or the forensic log timescale time value.
         @return the number of seconds when next invocation of this trigger is required.

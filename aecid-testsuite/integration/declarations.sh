@@ -38,7 +38,8 @@ read -r -d '' VAR << END
     "AnalysisComponentType": "SimpleUnparsedAtomHandler",
     "AnalysisComponentName": "UnparsedHandler",
     "Message": "Unparsed atom received",
-    "PersistenceFileName": null
+    "PersistenceFileName": null,
+    "LogResource": "file:///tmp/syslog"
   }
 }
 {
@@ -57,7 +58,8 @@ read -r -d '' VAR << END
       "/model/DiskUpgrade/UNameSpace2",
       "/model/DiskUpgrade/User",
       "/model/DiskUpgrade/HDRepair"
-    ]
+    ],
+    "LogResource": "file:///tmp/auth.log"
   },
   "LogData": {
     "RawLogData": [
@@ -122,7 +124,8 @@ read -r -d '' VAR << END
     "AnalysisComponentType": "SimpleUnparsedAtomHandler",
     "AnalysisComponentName": "UnparsedHandler",
     "Message": "Unparsed atom received",
-    "PersistenceFileName": null
+    "PersistenceFileName": null,
+    "LogResource": "file:///tmp/auth.log"
   }
 }
 {
@@ -151,7 +154,8 @@ read -r -d '' VAR << END
     "AnalysisComponentType": "SimpleUnparsedAtomHandler",
     "AnalysisComponentName": "UnparsedHandler",
     "Message": "Unparsed atom received",
-    "PersistenceFileName": null
+    "PersistenceFileName": null,
+    "LogResource": "file:///tmp/syslog"
   }
 }
 {
@@ -168,7 +172,8 @@ read -r -d '' VAR << END
       "/model/HomePath/Username",
       "/model/HomePath/Is",
       "/model/HomePath/Path"
-    ]
+    ],
+    "LogResource": "file:///tmp/auth.log"
   },
   "LogData": {
     "RawLogData": [
@@ -209,7 +214,8 @@ read -r -d '' VAR << END
     "AffectedLogAtomValues": [
       "root",
       "/root"
-    ]
+    ],
+    "LogResource": "file:///tmp/auth.log"
   },
   "LogData": {
     "RawLogData": [
@@ -250,7 +256,8 @@ read -r -d '' VAR << END
     "AffectedLogAtomValues": [
       "user",
       "/home/user"
-    ]
+    ],
+    "LogResource": "file:///tmp/syslog"
   },
   "LogData": {
     "RawLogData": [
@@ -291,7 +298,8 @@ read -r -d '' VAR << END
     "AffectedLogAtomValues": [
       "guest",
       "/home/guest"
-    ]
+    ],
+    "LogResource": "file:///tmp/auth.log"
   },
   "LogData": {
     "RawLogData": [
@@ -449,7 +457,7 @@ function isExpectedOutput() {
 		# At the end of an paragraph stop reading the file and go to return from the function.
   		if [ "$line" == "" ]; then
 			break
-		# When the current line contains the expected value at the expected position, 
+		# When the current line contains the expected value at the expected position,
 		# read until the following values do not match or the EXPECTED array ends.
 		elif [[ "$line" == *"${EXPECTED[$i - $before - $temp]}"* ]]; then
 			i=$((i + 1))
@@ -579,7 +587,7 @@ function checkAllMails() {
 	echo ""
 
 	i=1
-	while [ $i -lt $linecount ] 
+	while [ $i -lt $linecount ]
 	do
 		sudo echo p | mail > /tmp/out
 		input="/tmp/out"
@@ -619,7 +627,7 @@ function checkAllMails() {
 				i=$(($i-1))
 				break
 			fi
-			# If the time is lesser than the start time of the integration test, an old mail is found. 
+			# If the time is lesser than the start time of the integration test, an old mail is found.
 			if [[ "$searched" == *"Date: "* ]]; then
 				d="${searched:6}"
 				dat=`date -d "$d" +%s`
@@ -639,7 +647,7 @@ function checkAllMails() {
 		done < "$input"
 		i=$(($i+1))
 	done
-	
+
 	echo "finished waiting.."
 	return $res
 }
@@ -647,12 +655,12 @@ function checkAllMails() {
 # This function checks if the output of the Syslog is as expected.
 function checkAllSyslogs(){
 	sudo tail -n 1000 /var/log/syslog > /tmp/out
-	
+
 	lastLine=`tail -n 1 /tmp/output`
 	if [[ $lastLine == "" ]]; then
 		sudo sed -i "$ d" /tmp/output
 	fi
-	
+
 	cntr=0
 	input="/tmp/out"
 	i=0
@@ -663,7 +671,7 @@ function checkAllSyslogs(){
 		d="${searched:0:15}"
 		dat=`date -d "$d" +%s`
 		# Ignore all old syslogs and just process the current ones.
-		if [[ !($dat -lt $time) ]]; then			
+		if [[ !($dat -lt $time) ]]; then
 			expected="/tmp/output"
 			found=false
 			g=0
@@ -699,7 +707,7 @@ function checkAllSyslogs(){
 		fi
 	done < "$input"
 	echo "finished waiting.."
-	# $NUMBER_OF_LOG_LINES must always be the number of paragraphs in /tmp/output minus one, 
+	# $NUMBER_OF_LOG_LINES must always be the number of paragraphs in /tmp/output minus one,
 	# as there is no empty line before the first paragraph.
 	if [ $i == $NUMBER_OF_LOG_LINES ]; then
 		return 0
@@ -709,7 +717,7 @@ function checkAllSyslogs(){
 
 # This function checks if the output of the Kafka Topic is as expected.
 function checkKafkaTopic(){
-  out=$($KAFKA_VERSIONSTRING/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_topic --from-beginning --timeout-ms 3000)
+  out=$($KAFKA_VERSIONSTRING/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_topic --from-beginning --timeout-ms 60000)
   for t in "${JSON_OUTPUT[@]}"
   do
     if [[ $out != *"$t"* ]]; then

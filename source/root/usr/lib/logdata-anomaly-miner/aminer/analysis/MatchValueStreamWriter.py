@@ -28,7 +28,7 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, stream, target_path_list, separator, missing_value_string):
+    def __init__(self, stream, target_path_list, separator, missing_value_string, log_resource_ignore_list=None):
         """
         Initialize the writer.
         @param stream the stream on which the match results are written.
@@ -39,16 +39,22 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """
         # avoid "defined outside init" issue
         self.log_success, self.log_total = [None]*2
-        super().__init__(stream=stream, target_path_list=target_path_list, separator=separator, missing_value_string=missing_value_string)
+        super().__init__(stream=stream, target_path_list=target_path_list, separator=separator, missing_value_string=missing_value_string,
+                         log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"])
+        if self.target_path_list is None:
+            raise TypeError("target_path_list must not be None.")
 
     def receive_atom(self, log_atom):
         """Forward match value information to the stream."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         add_sep_flag = False
         contains_data = False
-        result = b''
-        for path in self.target_path_list:
+        result = b""
+        for i, path in enumerate(self.target_path_list):
             if add_sep_flag:
                 result += self.separator
             match = match_dict.get(path)
@@ -56,23 +62,36 @@ class MatchValueStreamWriter(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 result += self.missing_value_string
             else:
                 matches = []
+                cnt = self.target_path_list.count(path)
                 if isinstance(match, list):
-                    matches = match
+                    if cnt > 1:
+                        index = [j for j, x in enumerate(self.target_path_list) if x == path].index(i)
+                        if index < [x.path for x in match if x.path == path].count(path) and index < len(match):
+                            matches.append(match[index])
+                        else:
+                            matches.append(None)
+                    else:
+                        matches += match
+                elif cnt > 1 and i > self.target_path_list.index(path):
+                    matches.append(None)
                 else:
                     matches.append(match)
                 for match in matches:
-                    result += match.match_string + self.separator
-                    contains_data = True
+                    if match is None:
+                        result += self.missing_value_string + self.separator
+                    else:
+                        result += match.match_string + self.separator
+                        contains_data = True
                 if len(self.separator) > 0:
                     result = result[:-len(self.separator)]
             add_sep_flag = True
         if contains_data:
             if not isinstance(self.stream, _io.BytesIO):
-                self.stream.write(result.decode('ascii', 'ignore'))
-                self.stream.write('\n')
+                self.stream.write(result.decode("ascii", "ignore"))
+                self.stream.write("\n")
             else:
                 self.stream.write(result)
-                self.stream.write(b'\n')
+                self.stream.write(b"\n")
             self.log_success += 1
 
     def do_timer(self, _trigger_time):

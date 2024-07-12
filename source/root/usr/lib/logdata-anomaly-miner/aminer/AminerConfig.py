@@ -31,7 +31,7 @@ KEY_LOG_PREFIX = 'LogPrefix'
 KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
 REMOTE_CONTROL_LOG_NAME = 'REMOTE_CONTROL'
 KEY_REMOTE_CONTROL_LOG_FILE = 'Log.RemoteControlLogFile'
-DEFAULT_REMOTE_CONTROL_LOG_FILE = 'aminerRemoteLog.txt'
+DEFAULT_REMOTE_CONTROL_LOG_FILE = 'aminerRemoteLog.log'
 configFN = None
 STAT_LEVEL = 1
 STAT_LOG_NAME = 'STAT'
@@ -53,6 +53,7 @@ CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
 DEFAULT_LOG_LINE_PREFIX = ''
 CONFIG_KEY_ENCODING = 'Log.Encoding'
 ENCODING = 'utf-8'
+KEY_AMINER_ID = 'AminerId'
 
 
 def load_config(config_file_name):

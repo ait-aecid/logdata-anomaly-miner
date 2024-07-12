@@ -1,60 +1,117 @@
 import unittest
-from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
-from time import time
+import time
 from aminer.parsing.ParserMatch import ParserMatch
-from aminer.parsing.MatchContext import MatchContext
 from aminer.input.LogAtom import LogAtom
-from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
-from unit.TestBase import TestBase
+from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
+from unit.TestBase import TestBase, DummyFixedDataModelElement, DummyMatchContext, DummySequenceModelElement
+from datetime import datetime
 
 
 class SimpleUnparsedAtomHandlerTest(TestBase):
     """Unittests for the SimpleUnparsedAtomHandler."""
 
-    calculation = b'256 * 2 = 512'
+    datetime_format_string = "%Y-%m-%d %H:%M:%S"
+    calculation = b"256 * 2 = 512"
 
-    def test1_atom_is_unparsed(self):
-        """The atom in this test case has a ParserMatch."""
-        description = "Test1SimpleUnparsedAtomHandler"
-        any_byte_data_model_element = AnyByteDataModelElement('a1')
-        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
+    def test1receive_atom_SimpleUnparsedAtomHandler(self):
+        """Test if the SimpleUnparsedAtomHandler can handle matching log atoms and not matching log atoms."""
+        t = time.time()
+        fdme = DummyFixedDataModelElement("s1", self.calculation)
+        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
 
-        match_context = MatchContext(self.calculation)
-        match_element = any_byte_data_model_element.get_match_element('match', match_context)
-        log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), time(), new_match_path_detector1)
-
-        simple_unparsed_atom_handler = SimpleUnparsedAtomHandler([self.stream_printer_event_handler])
-        self.analysis_context.register_component(simple_unparsed_atom_handler, description)
-        self.assertTrue(not simple_unparsed_atom_handler.receive_atom(log_atom))
-
-    def test2_atom_is_parsed(self):
-        """The atom in this test case has no ParserMatch."""
-        description = "Test2SimpleUnparsedAtomHandler"
-        any_byte_data_model_element = AnyByteDataModelElement('a1')
-        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
-
-        match_context = MatchContext(self.calculation)
-        match_element = any_byte_data_model_element.get_match_element('match', match_context)
-        log_atom = LogAtom(match_element.match_object, None, time(), new_match_path_detector1)
+        # match exists
+        match_context = DummyMatchContext(self.calculation)
+        match_element = fdme.get_match_element("match", match_context)
+        log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, new_match_path_detector1)
 
         simple_unparsed_atom_handler = SimpleUnparsedAtomHandler([self.stream_printer_event_handler])
-        self.analysis_context.register_component(simple_unparsed_atom_handler, description)
+        self.assertFalse(simple_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), "")
+
+        # match does not exist
+        log_atom = LogAtom(match_element.match_object, None, t, new_match_path_detector1)
         self.assertTrue(simple_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(),
+                         f'{datetime.fromtimestamp(t).strftime(self.datetime_format_string)} Unparsed atom received\n'
+                         f'{simple_unparsed_atom_handler.__class__.__name__}: "None" (1 lines)\n  {self.calculation.decode()}\n\n')
+        self.reset_output_stream()
 
-    def test3_parser_match_is_other_element(self):
-        """In this test case the ParserMatch actually is no instance of ParserMatch. The atom should still be considered to be parsed."""
-        description = "Test3SimpleUnparsedAtomHandler"
-        any_byte_data_model_element = AnyByteDataModelElement('a1')
-        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], 'Default', False)
+        # the ParserMatch actually is no instance of ParserMatch, but the atom should still be considered to be parsed.
+        log_atom = LogAtom(match_element.match_object, fdme, t, new_match_path_detector1)
+        self.assertFalse(simple_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), "")
 
-        match_context = MatchContext(self.calculation)
-        match_element = any_byte_data_model_element.get_match_element('match', match_context)
-        log_atom = LogAtom(match_element.match_object, any_byte_data_model_element, time(), new_match_path_detector1)
+    def test2_receive_atom_VerboseUnparsedAtomHandler(self):
+        """Test if the VerboseUnparsedAtomHandler can handle matching log atoms and not matching log atoms."""
+        t = time.time()
+        fdme = DummyFixedDataModelElement("s1", self.calculation)
+        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
 
-        simple_unparsed_atom_handler = SimpleUnparsedAtomHandler([self.stream_printer_event_handler])
-        self.analysis_context.register_component(simple_unparsed_atom_handler, description)
-        self.assertTrue(not simple_unparsed_atom_handler.receive_atom(log_atom))
+        # match exists
+        match_context = DummyMatchContext(self.calculation)
+        match_element = fdme.get_match_element("match", match_context)
+        log_atom = LogAtom(match_element.match_object, ParserMatch(match_element), t, new_match_path_detector1)
+
+        verbose_unparsed_atom_handler = VerboseUnparsedAtomHandler([self.stream_printer_event_handler], fdme)
+        self.assertFalse(verbose_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), "")
+
+        # match does not exist
+        log_atom = LogAtom(match_element.match_object, None, t, new_match_path_detector1)
+        self.assertTrue(verbose_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(),
+                         f'{datetime.fromtimestamp(t).strftime(self.datetime_format_string)} Unparsed atom received\n'
+                         f'{verbose_unparsed_atom_handler.__class__.__name__}: "None" (1 lines)\n  Starting match update on "'
+                         f'{self.calculation.decode()}"\n  Removed: "{self.calculation.decode()}", remaining 0 bytes\n  Shortest unmatched '
+                         f'data: ""\n{self.calculation.decode()}\n\n')
+        self.reset_output_stream()
+
+        # the ParserMatch actually is no instance of ParserMatch, but the atom should still be considered to be parsed.
+        log_atom = LogAtom(match_element.match_object, fdme, t, new_match_path_detector1)
+        self.assertFalse(verbose_unparsed_atom_handler.receive_atom(log_atom))
+        self.assertEqual(self.output_stream.getvalue(), "")
+
+    def test3validate_parameters_SimpleUnparsedAtomHandler(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, ["default"])
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, None)
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, "")
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, b"Default")
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, True)
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, 123)
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, 123.3)
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, {"id": "Default"})
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, ())
+        self.assertRaises(TypeError, SimpleUnparsedAtomHandler, set())
+        SimpleUnparsedAtomHandler([self.stream_printer_event_handler])
+
+    def test4validate_parameters_VerboseUnparsedAtomHandler(self):
+        """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
+        parsing_model = DummySequenceModelElement("seq", [DummyFixedDataModelElement("s1", b"string"), DummyFixedDataModelElement("sp", b" ")])
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, ["default"], parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, None, parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, "", parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, b"Default", parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, True, parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, 123, parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, 123.3, parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, {"id": "Default"}, parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, (), parsing_model)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, set(), parsing_model)
+
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], [])
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], ["default"])
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], None)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], "")
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], b"Default")
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], True)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], 123)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], 123.3)
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], {"id": "Default"})
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], ())
+        self.assertRaises(TypeError, VerboseUnparsedAtomHandler, [self.stream_printer_event_handler], set())
+        VerboseUnparsedAtomHandler([self.stream_printer_event_handler], parsing_model)
 
 
 if __name__ == "__main__":

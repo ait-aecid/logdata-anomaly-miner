@@ -2,16 +2,15 @@ FILE=/tmp/demo-config.py
 CMD_PATH=/tmp/commands.txt
 sudo cp demo/aminerRemoteControl/demo-config.py $FILE
 sudo sed -i 's/StreamPrinterEventHandler(analysis_context)/StreamPrinterEventHandler(analysis_context, stream=open("\/tmp\/log.txt", "a"))/g' $FILE
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
-sudo mkdir /tmp/lib/aminer/log 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
+OUTPUT_FILE=/tmp/output.txt
 
-sudo aminer --config "$FILE" & > /dev/null
-sleep 1
+sudo aminer --config "$FILE" & > $OUTPUT_FILE
+for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 stdout=$(sudo aminerremotecontrol --exec-file $CMD_PATH)
 expected="File $CMD_PATH does not exist"
@@ -326,8 +325,8 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True), 'NewMatchPathDet')" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.atom_handler_list, learn_mode=True), 'NewMatchPathDet')")
+echo "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.event_handler_list, learn_mode=True), 'NewMatchPathDet')" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "add_handler_to_atom_filter_and_register_analysis_component(analysis_context, 'AtomFilter', NewMatchPathDetector(analysis_context.aminer_config, analysis_context.atomizer_factory.event_handler_list, learn_mode=True), 'NewMatchPathDet')")
 expected="$PREFIX\"Component 'NewMatchPathDet' added to 'AtomFilter' successfully.\""
 expected_list="${expected_list}${expected}
 "
@@ -432,9 +431,9 @@ if [[ "$stdout" != "$expected"* ]]; then
 fi
 
 timestamp=$(date +%s)
-echo "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,'/model/path'),allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,'/model/path'),allowlisting_data=None)")
-expected="${PREFIX}\"Allowlisted path(es) /model/DailyCron/UName, /model/DailyCron/JobNumber with ($timestamp, '/model/path').\""
+echo "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,('/model/path',1)),allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,('/model/path',1)),allowlisting_data=None)")
+expected="${PREFIX}\"Allowlisted path(es) /model/DailyCron/UName, /model/DailyCron/JobNumber with ($timestamp, ('/model/path', 1)).\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -471,9 +470,9 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector','/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path(es) /model/IPAddresses/Username, /model/IPAddresses/IP with /model/somepath.'"
+echo "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector',(b'value1',b'value2'),allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector',(b'value1',b'value2'),allowlisting_data=None)")
+expected="${PREFIX}\"Allowlisted path(es) /model/IPAddresses/Username, /model/IPAddresses/IP with (b'value1', b'value2').\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -484,9 +483,9 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector','/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path(es) /model/type/path/name, /model/type/syscall/syscall with /model/somepath.'"
+echo "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/id':1, '/model/type/syscall/id':1},allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/id':1, '/model/type/syscall/id':1},allowlisting_data=None)")
+expected="${PREFIX}\"Allowlisted path(es) /model/type/path/id, /model/type/syscall/id with {'/model/type/path/id': 1, '/model/type/syscall/id': 1}.\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -499,7 +498,7 @@ fi
 
 echo "allowlist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path /model/somepath.'"
+expected="${PREFIX}'Allowlisted path /model/somepath in Analysis.EventCorrelationDetector.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -510,8 +509,8 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "allowlist_event_in_component(analysis_context,'NewMatchPathValue','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValue','/model/somepath',allowlisting_data=None)")
+echo "allowlist_event_in_component(analysis_context,'NewMatchPathValue',b'/model/somepath',allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValue',b'/model/somepath',allowlisting_data=None)")
 expected="${PREFIX}'Allowlisted path(es) /model/DailyCron/Job Number, /model/IPAddresses/Username with /model/somepath.'"
 expected_list="${expected_list}${expected}
 "
@@ -525,7 +524,7 @@ fi
 
 echo "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)")
-expected="${PREFIX}'Blocklisted path /model/somepath.'"
+expected="${PREFIX}'Blocklisted path /model/somepath in Analysis.EventCorrelationDetector.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -538,7 +537,7 @@ fi
 
 echo "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "blocklist_event_in_component(analysis_context,'EventCorrelationDetector','/model/somepath',blocklisting_data=None)")
-expected="${PREFIX}'Blocklisted path /model/somepath.'"
+expected="${PREFIX}'Blocklisted path /model/somepath in Analysis.EventCorrelationDetector.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -580,14 +579,13 @@ expected_list="${expected_list}${stdout}
 
 sudo pkill -x aminer
 sleep 2 & wait $!
-sudo mkdir /tmp/lib 2> /dev/null
-sudo mkdir /tmp/lib/aminer 2> /dev/null
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
-sudo aminer --config "$FILE" & > /dev/null
-sleep 1
+sudo aminer --config "$FILE" & > $OUTPUT_FILE
+for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 START_TIME=$(date +%s)
 stdout=$(sudo aminerremotecontrol --exec-file $CMD_PATH)
@@ -606,6 +604,7 @@ EXEC_FILE_TIME=$(($(date +%s)-START_TIME))
 sudo pkill -x aminer
 sleep 2 & wait $!
 sudo rm $CMD_PATH
+sudo rm $OUTPUT_FILE
 echo "Command execution time with --exec ${EXEC_TIME}s"
 echo "Command execution time with --exec-file ${EXEC_FILE_TIME}s"
 exit $exit_code

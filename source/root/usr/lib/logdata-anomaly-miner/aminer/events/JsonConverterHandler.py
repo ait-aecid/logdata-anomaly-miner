@@ -101,9 +101,17 @@ class JsonConverterHandler(EventHandlerInterface):
                         continue
                     analysis_component[key] = detector_analysis_component.get(key)
 
+            log_resource = log_atom.source.resource_name
+            if log_resource is not None:
+                analysis_component['LogResource'] = log_resource.decode()
+
             if 'LogData' not in event_data:
                 event_data['LogData'] = log_data
             event_data['AnalysisComponent'] = analysis_component
+
+            aminer_id = self.analysis_context.aminer_config.config_properties.get(AminerConfig.KEY_AMINER_ID)
+            if aminer_id is not None:
+                event_data['AminerId'] = aminer_id
 
         if self.pretty_print is True:
             json_data = json.dumps(event_data, indent=2)

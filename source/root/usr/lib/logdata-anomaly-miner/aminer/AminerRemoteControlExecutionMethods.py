@@ -399,9 +399,8 @@ class AminerRemoteControlExecutionMethods:
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
-        if component.__class__.__name__ not in ["EventCorrelationDetector"]:
-            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component class '{component.__class__.__name__}' does not support blocklisting!" \
-                                            f" Only the following classes support blocklisting: EventCorrelationDetector."
+        if not hasattr(component, "blocklist_event"):
+            self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component class '{component.__class__.__name__}' does not support blocklisting!"
             return
         try:
             msg = component.blocklist_event(f"Analysis.{component.__class__.__name__}", event_data, blocklisting_data)
@@ -411,22 +410,20 @@ class AminerRemoteControlExecutionMethods:
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
-    def print_persistency_event_in_component(self, analysis_context, component_name, event_data):
+    def print_persistence_event_in_component(self, analysis_context, component_name, event_data):
         """
-        Prints the persistency specified in event_data of component_name.
+        Prints the persistence specified in event_data of component_name.
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
-        @param event_data the event_data for the print_persistency_event method.
+        @param event_data the event_data for the print_persistence_event method.
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
-        if component.__class__.__name__ not in ["EventFrequencyDetector", "MinimalTransitionTimeDetector",
-                                                "PathValueTimeIntervalDetector"]:
+        if not hasattr(component, "print_persistence_event"):
             self.REMOTE_CONTROL_RESPONSE += \
-                f"FAILURE: component class '{component.__class__.__name__}' does not support the print_persistency_event! Only the " \
-                f"following classes support it: EventFrequencyDetector, MinimalTransitionTimeDetector and PathValueTimeIntervalDetector."
+                f"FAILURE: component class '{component.__class__.__name__}' does not support the print_persistence_event!"
             return
         try:
             msg = component.print_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
@@ -436,23 +433,20 @@ class AminerRemoteControlExecutionMethods:
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
-    def add_to_persistency_event_in_component(self, analysis_context, component_name, event_data):
+    def add_to_persistence_event_in_component(self, analysis_context, component_name, event_data):
         """
-        Add information specified in event_data to the persistency of component_name.
+        Add information specified in event_data to the persistence of component_name.
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
-        @param event_data the event_data for the add_to_persistency_event method.
+        @param event_data the event_data for the add_to_persistence_event method.
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
-        if component.__class__.__name__ not in ["NewMatchPathValueComboDetector", "MinimalTransitionTimeDetector",
-                                                "PathValueTimeIntervalDetector"]:
+        if not hasattr(component, "add_to_persistence_event"):
             self.REMOTE_CONTROL_RESPONSE += \
-                f"FAILURE: component class '{component.__class__.__name__}' does not support the add_to_persistency_event! Only the " \
-                f"following classes support it: NewMatchPathValueComboDetector, MinimalTransitionTimeDetector and" \
-                f" PathValueTimeIntervalDetector."
+                f"FAILURE: component class '{component.__class__.__name__}' does not support the add_to_persistence_event!"
             return
         try:
             msg = component.add_to_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
@@ -462,21 +456,20 @@ class AminerRemoteControlExecutionMethods:
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
-    def remove_from_persistency_event_in_component(self, analysis_context, component_name, event_data):
+    def remove_from_persistence_event_in_component(self, analysis_context, component_name, event_data):
         """
-        Remove information specified in event_data from the persistency of component_name.
+        Remove information specified in event_data from the persistence of component_name.
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
-        @param event_data the event_data for the remove_from_persistency_event method.
+        @param event_data the event_data for the remove_from_persistence_event method.
         """
         component = analysis_context.get_component_by_name(component_name)
         if component is None:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: component '{component}' does not exist!"
             return
-        if component.__class__.__name__ not in ["MinimalTransitionTimeDetector", "PathValueTimeIntervalDetector"]:
+        if not hasattr(component, "remove_from_persistence_event"):
             self.REMOTE_CONTROL_RESPONSE += \
-                f"FAILURE: component class '{component.__class__.__name__}' does not support the remove_from_persistency_event! Only the " \
-                f"following classes support it: MinimalTransitionTimeDetector and PathValueTimeIntervalDetector."
+                f"FAILURE: component class '{component.__class__.__name__}' does not support the remove_from_persistence_event!"
             return
         try:
             msg = component.remove_from_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)

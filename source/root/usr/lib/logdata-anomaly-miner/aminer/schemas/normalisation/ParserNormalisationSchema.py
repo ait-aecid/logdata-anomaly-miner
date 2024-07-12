@@ -31,7 +31,12 @@
                 'text_locale': {'type': 'string', 'nullable': True, 'default': None},
                 'max_time_jump_seconds': {'type': 'integer', 'default': 86400},
                 'timestamp_scale': {'type': 'integer', 'default': 1},
-                'allow_all_fields': {'type': 'boolean', 'default': False}
+                'allow_all_fields': {'type': 'boolean', 'default': False},
+                'xml_header_expected': {'type': 'boolean', 'default': False},
+                'attribute_prefix': {'type': 'string', 'default': '+'},
+                'optional_attribute_prefix': {'type': 'string', 'default': '_'},
+                'empty_allowed_prefix': {'type': 'string', 'default': '?'},
+                'time_zone': {'type': 'string', 'nullable': True, 'default': 'UTC'},
             }
         }
     },

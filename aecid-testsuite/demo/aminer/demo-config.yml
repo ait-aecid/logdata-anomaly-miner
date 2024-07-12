@@ -7,7 +7,8 @@ Core.PersistenceDir: '/tmp/lib/aminer'
 Core.PersistencePeriod: 600
 
 LogResourceList:
-        - 'file:///tmp/syslog'
+        - url: 'file:///tmp/syslog'
+          parser_id: 'model'
 
 MailAlerting.TargetAddress: 'root@localhost'
 
@@ -32,6 +33,8 @@ Log.StatisticsPeriod: 3600
 Log.StatisticsLevel: 1
 
 Log.DebugLevel: 1
+
+AminerId: 'demo-aminer'
 
 Parser:
        - id: space
@@ -462,6 +465,7 @@ Parser:
          type: DateTimeModelElement
          name: 'DateTimeModelElement'
          date_format: 'Current DateTime: %d.%m.%Y %H:%M:%S'
+         time_zone: 'UTC'
 
        - id: decimalFloatValueModelElement
          type: DecimalFloatValueModelElement
@@ -887,6 +891,9 @@ Analysis:
           event_type_detector: EventTypeDetector
           ignore_list:
             - "/model/RandomTime"
+        - type: TSAArimaDetector
+          id: TSAArimaDetector
+          event_type_detector: EventTypeDetector
         - type: EventCorrelationDetector
           id: EventCorrelationDetector
           check_rules_flag: True
@@ -926,13 +933,13 @@ Analysis:
           learn_mode: True
         - type: ModuloTimeMatchRule
           id: "mt"
-          path: null
+          path: "mtmr"
           seconds_modulo: 3
           lower_limit: 0
           upper_limit: 3
         - type: ValueDependentModuloTimeMatchRule
           id: "vdmt"
-          path: null
+          path: "vdmtmr"
           seconds_modulo: 3
           paths:
             - "/model/ECD/g"
@@ -964,7 +971,6 @@ Analysis:
             (b"j",): "vdmt"
             (b"k",): "vdmt"
             (b"l",): "vdmt"
-            None: "mt"
           default_rule: "mt"
         - type: EventGenerationMatchAction
           id: "ip_match_action"
@@ -1063,6 +1069,8 @@ Analysis:
             - "/model/IPAddresses/Username"
             - "/model/IPAddresses/IP"
           learn_mode: True
+          log_resource_ignore_list:
+            - 'file:///tmp/other_syslog'
         - type: NewMatchIdValueComboDetector
           id: NewMatchIdValueComboDetector
           paths:

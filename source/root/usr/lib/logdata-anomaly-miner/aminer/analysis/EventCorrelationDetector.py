@@ -22,7 +22,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 from collections import deque
 import random
 import math
-import time
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
@@ -30,12 +29,12 @@ from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.events.EventInterfaces import EventSourceInterface
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class tries to find time correlation patterns between different log atom events."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -43,8 +42,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
-                 learn_mode=True, ignore_list=None, persistence_id='Default', output_logline=True, constraint_list=None,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None):
+                 learn_mode=True, ignore_list=None, persistence_id="Default", output_logline=True, constraint_list=None,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -71,20 +70,22 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                The default value is [] as None is not iterable.
         @param persistence_id name of persistence file.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
+        @param constraint_list list of paths that have to be present in the log atom to be analyzed.
         @param stop_learning_time switch the learn_mode to False after the time.
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
-            anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list, max_hypotheses=max_hypotheses,
-            hypothesis_max_delta_time=hypothesis_max_delta_time, generation_probability=generation_probability,
-            generation_factor=generation_factor, max_observations=max_observations, p0=p0, alpha=alpha, candidates_size=candidates_size,
-            hypotheses_eval_delta_time=hypotheses_eval_delta_time, delta_time_to_discard_hypothesis=delta_time_to_discard_hypothesis,
-            check_rules_flag=check_rules_flag, learn_mode=learn_mode, ignore_list=ignore_list, persistence_id=persistence_id,
-            output_logline=output_logline, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time
+            mutable_default_args=["target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
+            aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
+            max_hypotheses=max_hypotheses, hypothesis_max_delta_time=hypothesis_max_delta_time,
+            generation_probability=generation_probability, generation_factor=generation_factor, max_observations=max_observations, p0=p0,
+            alpha=alpha, candidates_size=candidates_size, hypotheses_eval_delta_time=hypotheses_eval_delta_time,
+            delta_time_to_discard_hypothesis=delta_time_to_discard_hypothesis, check_rules_flag=check_rules_flag, learn_mode=learn_mode,
+            ignore_list=ignore_list, persistence_id=persistence_id, output_logline=output_logline, constraint_list=constraint_list,
+            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
+            log_resource_ignore_list=log_resource_ignore_list
         )
         self.last_unhandled_match = None
         self.total_records = 0
@@ -118,39 +119,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        self.persistence_id = persistence_id
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.load_persistence_data()
 
-        if persistence_data is not None:
-            for record in persistence_data:
-                implication_direction = record[0]
-                trigger_event = tuple(record[1])
-                implied_event = tuple(record[2])
-                max_obs = record[3]
-                min_eval_t = record[4]
-                rule = Implication(trigger_event, implied_event, None, max_obs, min_eval_t)
-                rule.stable = 1
-                if implication_direction == 'back':
-                    if trigger_event in self.back_rules:
-                        self.back_rules[trigger_event].append(rule)
-                    else:
-                        self.back_rules[trigger_event] = [rule]
-                    if implied_event in self.back_rules_inv:
-                        self.back_rules_inv[implied_event].append(rule)
-                    else:
-                        self.back_rules_inv[implied_event] = [rule]
-                elif implication_direction == 'forward':
-                    if trigger_event in self.forward_rules:
-                        self.forward_rules[trigger_event].append(rule)
-                    else:
-                        self.forward_rules[trigger_event] = [rule]
-                    if implied_event in self.forward_rules_inv:
-                        self.forward_rules_inv[implied_event].append(rule)
-                    else:
-                        self.forward_rules_inv[implied_event] = [rule]
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
-
-    # skipcq: PYL-R1710
     def get_min_eval_true(self, max_observations, p0, alpha):
         """
         Compute the critical value (minimal amount of true evaluations) for a hypothesis.
@@ -175,12 +145,14 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     # Store common values for fast retrieval
                     self.min_eval_true_dict[(max_observations, p0, alpha)] = max_observations - i
                 return max_observations - i
+        return max_observations
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return False
         self.log_total += 1
-        if log_atom.get_timestamp() is None:
-            log_atom.atom_time = time.time()
 
         if self.learn_mode is True and self.stop_learning_timestamp is not None and \
                 self.stop_learning_timestamp < log_atom.atom_time:
@@ -193,7 +165,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         # Skip paths from ignore_list.
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary():
-                return
+                return False
         if self.target_path_list is None or len(self.target_path_list) == 0:
             # Event is defined by the full path of log atom.
             constraint_path_flag = False
@@ -202,7 +174,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     constraint_path_flag = True
                     break
             if not constraint_path_flag and self.constraint_list != []:
-                return
+                return False
             log_event = tuple(parser_match.get_match_dictionary())
         else:
             # Event is defined by value combos in target_path_list
@@ -226,7 +198,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         all_values_none = False
                     values.append(value)
             if all_values_none is True:
-                return
+                return False
             log_event = tuple(values)
 
         # Store last seen sample event to improve output.
@@ -248,14 +220,14 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     trigger_timestamp_index = -1
                     for trigger_timestamp in rule.rule_trigger_timestamps:
                         trigger_timestamp_index += 1
-                        if trigger_timestamp != 'obs':
+                        if trigger_timestamp != "obs":
                             break
                     if trigger_timestamp_index != -1 and \
-                            rule.rule_trigger_timestamps[trigger_timestamp_index] != 'obs' and \
+                            rule.rule_trigger_timestamps[trigger_timestamp_index] != "obs" and \
                             rule.rule_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - self.hypothesis_max_delta_time:
                         # Implication was triggered; append positive evaluation and mark as seen.
                         rule.add_rule_observation(1)
-                        rule.rule_trigger_timestamps[trigger_timestamp_index] = 'obs'
+                        rule.rule_trigger_timestamps[trigger_timestamp_index] = "obs"
 
             # Clean up triggered/resolved implications.
             while len(self.forward_rule_queue) > 0:
@@ -264,7 +236,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     # Triggered timestamp was already deleted somewhere else.
                     self.forward_rule_queue.popleft()
                     continue
-                if rule.rule_trigger_timestamps[0] == 'obs':
+                if rule.rule_trigger_timestamps[0] == "obs":
                     # Remove triggered timestamp.
                     rule.rule_trigger_timestamps.popleft()
                     self.forward_rule_queue.popleft()
@@ -275,17 +247,20 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     rule.rule_trigger_timestamps.popleft()
                     self.forward_rule_queue.popleft()
                     if not rule.evaluate_rule():
+                        if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                            self.stop_learning_timestamp = max(
+                                self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                         try:
                             data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                         except UnicodeError:
                             data = repr(log_atom.raw_data)
                         original_log_line_prefix = self.aminer_config.config_properties.get(
                             CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                        tmp_string = f'Rule: {str(rule.trigger_event)} -> {str(rule.implied_event)}\n  Expected: ' \
-                                     f'{str(rule.min_eval_true)}/{str(rule.max_observations)}\n  Observed: ' \
-                                     f'{str(sum(rule.rule_observations))}/{str(len(rule.rule_observations))}'
+                        tmp_string = f"Rule: {str(rule.trigger_event)} -> {str(rule.implied_event)}\n  Expected: " \
+                                     f"{str(rule.min_eval_true)}/{str(rule.max_observations)}\n  Observed: " \
+                                     f"{str(sum(rule.rule_observations))}/{str(len(rule.rule_observations))}"
                         if self.output_logline:
-                            sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + data]
+                            sorted_log_lines = [tmp_string + "\n" + original_log_line_prefix + data]
                         else:
                             sorted_log_lines = [tmp_string + data]
                         for listener in self.anomaly_event_handlers:
@@ -296,12 +271,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                             if rule.trigger_event in self.sample_events:
                                 trigger_event = self.sample_events[rule.trigger_event]
                             listener.receive_event(
-                                'analysis.EventCorrelationDetector',
-                                f'Correlation rule violated! Event {repr(implied_event)} is missing, but should follow event '
-                                f'{repr(trigger_event)}', sorted_log_lines,
-                                {'RuleInfo': {'Rule': str(rule.trigger_event) + '->' + str(rule.implied_event),
-                                              'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
-                                              'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}},
+                                "analysis.EventCorrelationDetector",
+                                f"Correlation rule violated! Event {repr(implied_event)} is missing, but should follow event "
+                                f"{repr(trigger_event)}", sorted_log_lines,
+                                {"RuleInfo": {"Rule": str(rule.trigger_event) + "->" + str(rule.implied_event),
+                                              "Expected": str(rule.min_eval_true) + "/" + str(rule.max_observations),
+                                              "Observed": str(sum(rule.rule_observations)) + "/" + str(len(rule.rule_observations))}},
                                 log_atom, self)
                         rule.rule_observations = deque([])
                     continue
@@ -320,27 +295,30 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     trigger_timestamp_index = -1
                     for trigger_timestamp in rule.rule_trigger_timestamps:
                         trigger_timestamp_index += 1
-                        if trigger_timestamp != 'obs':
+                        if trigger_timestamp != "obs":
                             break
                     if trigger_timestamp_index != -1 and \
-                            rule.rule_trigger_timestamps[trigger_timestamp_index] != 'obs' and \
+                            rule.rule_trigger_timestamps[trigger_timestamp_index] != "obs" and \
                             rule.rule_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - self.hypothesis_max_delta_time:
                         rule.add_rule_observation(1)
-                        rule.rule_trigger_timestamps[trigger_timestamp_index] = 'obs'
+                        rule.rule_trigger_timestamps[trigger_timestamp_index] = "obs"
                     else:
                         rule.add_rule_observation(0)
                         if not rule.evaluate_rule():
+                            if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                                self.stop_learning_timestamp = max(
+                                    self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                             try:
                                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
                             except UnicodeError:
                                 data = repr(log_atom.raw_data)
                             original_log_line_prefix = self.aminer_config.config_properties.get(
                                 CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                            tmp_string = f'Rule: {str(rule.implied_event)} <- {str(rule.trigger_event)}\n  Expected: ' \
-                                         f'{str(rule.min_eval_true)}/{str(rule.max_observations)}\n  Observed: ' \
-                                         f'{str(sum(rule.rule_observations))}/{str(len(rule.rule_observations))}'
+                            tmp_string = f"Rule: {str(rule.implied_event)} <- {str(rule.trigger_event)}\n  Expected: " \
+                                         f"{str(rule.min_eval_true)}/{str(rule.max_observations)}\n  Observed: " \
+                                         f"{str(sum(rule.rule_observations))}/{str(len(rule.rule_observations))}"
                             if self.output_logline:
-                                sorted_log_lines = [tmp_string + '\n' + original_log_line_prefix + data]
+                                sorted_log_lines = [tmp_string + "\n" + original_log_line_prefix + data]
                             else:
                                 sorted_log_lines = [tmp_string + data]
                             for listener in self.anomaly_event_handlers:
@@ -351,12 +329,12 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 if rule.trigger_event in self.sample_events:
                                     trigger_event = self.sample_events[rule.trigger_event]
                                 listener.receive_event(
-                                    'analysis.EventCorrelationDetector',
-                                    f'Correlation rule violated! Event {repr(implied_event)} is missing, but should precede event '
-                                    f'{repr(trigger_event)}', sorted_log_lines,
-                                    {'RuleInfo': {'Rule': str(rule.implied_event) + '<-' + str(rule.trigger_event),
-                                                  'Expected': str(rule.min_eval_true) + '/' + str(rule.max_observations),
-                                                  'Observed': str(sum(rule.rule_observations)) + '/' + str(len(rule.rule_observations))}},
+                                    "analysis.EventCorrelationDetector",
+                                    f"Correlation rule violated! Event {repr(implied_event)} is missing, but should precede event "
+                                    f"{repr(trigger_event)}", sorted_log_lines,
+                                    {"RuleInfo": {"Rule": str(rule.implied_event) + "<-" + str(rule.trigger_event),
+                                                  "Expected": str(rule.min_eval_true) + "/" + str(rule.max_observations),
+                                                  "Observed": str(sum(rule.rule_observations)) + "/" + str(len(rule.rule_observations))}},
                                     log_atom, self)
                             rule.rule_observations = deque([])
 
@@ -366,7 +344,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 if len(rule.rule_trigger_timestamps) == 0:
                     self.back_rule_queue.popleft()
                     continue
-                if rule.rule_trigger_timestamps[0] == 'obs':
+                if rule.rule_trigger_timestamps[0] == "obs":
                     rule.rule_trigger_timestamps.popleft()
                     self.back_rule_queue.popleft()
                     continue
@@ -397,16 +375,16 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     trigger_timestamp_index = -1
                     for trigger_timestamp in implication.hypothesis_trigger_timestamps:
                         trigger_timestamp_index += 1
-                        if trigger_timestamp != 'obs':
+                        if trigger_timestamp != "obs":
                             break
                     if trigger_timestamp_index != -1 and \
-                            str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != 'obs' and \
+                            str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != "obs" and \
                             implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - \
                             self.hypothesis_max_delta_time and \
                             implication.stable == 0:
                         implication.add_hypothesis_observation(1, log_atom.atom_time)
                         # Mark this timestamp as observed
-                        implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = 'obs'
+                        implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = "obs"
                         # Since only true observations occur here, check for instability not necessary.
                         if implication.compute_hypothesis_stability() == 1:
                             # Update p and min_eval_true according to the results in the sample.
@@ -441,7 +419,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                     # Triggered timestamp was already deleted somewhere else.
                     self.forward_hypotheses_queue.popleft()
                     continue
-                if implication.hypothesis_trigger_timestamps[0] == 'obs':
+                if implication.hypothesis_trigger_timestamps[0] == "obs":
                     # Remove triggered timestamp.
                     implication.hypothesis_trigger_timestamps.popleft()
                     self.forward_hypotheses_queue.popleft()
@@ -480,14 +458,14 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                         trigger_timestamp_index = -1
                         for trigger_timestamp in implication.hypothesis_trigger_timestamps:
                             trigger_timestamp_index += 1
-                            if trigger_timestamp != 'obs':
+                            if trigger_timestamp != "obs":
                                 break
                         if trigger_timestamp_index != -1 and \
-                                str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != 'obs' and \
+                                str(implication.hypothesis_trigger_timestamps[trigger_timestamp_index]) != "obs" and \
                                 implication.hypothesis_trigger_timestamps[trigger_timestamp_index] >= log_atom.atom_time - \
                                 self.hypothesis_max_delta_time:
                             implication.add_hypothesis_observation(1, log_atom.atom_time)
-                            implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = 'obs'
+                            implication.hypothesis_trigger_timestamps[trigger_timestamp_index] = "obs"
                             # Since only true observations occur here, check for instability not necessary.
                             if implication.compute_hypothesis_stability() == 1:
                                 # Update p and min_eval_true according to the results in the sample.
@@ -531,7 +509,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 if len(implication.hypothesis_trigger_timestamps) == 0:
                     self.back_hypotheses_queue.popleft()
                     continue
-                if implication.hypothesis_trigger_timestamps[0] == 'obs':
+                if implication.hypothesis_trigger_timestamps[0] == "obs":
                     implication.hypothesis_trigger_timestamps.popleft()
                     self.back_hypotheses_queue.popleft()
                     continue
@@ -617,7 +595,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 self.forward_hypotheses_inv[log_event] = [implication]
                             self.sum_unstable_unknown_hypotheses = self.sum_unstable_unknown_hypotheses + 1
                 if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = time.time() + self.stop_learning_no_anomaly_time
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
             # Periodically remove old or unstable hypotheses.
             if log_atom.atom_time >= self.last_hypotheses_eval_timestamp + self.hypotheses_eval_delta_time:
@@ -675,6 +654,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             if len(self.hypothesis_candidates) < self.candidates_size and random.uniform(0.0, 1.0) < self.generation_probability:
                 self.hypothesis_candidates.append((log_event, log_atom.atom_time))
         self.log_success += 1
+        return True
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -685,7 +665,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
 
     def do_persist(self):
@@ -694,13 +674,45 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         for event_a in self.back_rules:
             for implication in self.back_rules[event_a]:
                 known_path_set.add(
-                    ('back', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
+                    ("back", tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
         for event_a in self.forward_rules:
             for implication in self.forward_rules[event_a]:
                 known_path_set.add(
-                    ('forward', tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
-        PersistenceUtil.store_json(self.persistence_file_name, list(known_path_set))
+                    ("forward", tuple(event_a), tuple(implication.implied_event), implication.max_observations, implication.min_eval_true))
+        PersistenceUtil.store_json(self.persistence_file_name, sorted(list(known_path_set)))
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            for record in persistence_data:
+                implication_direction = record[0]
+                trigger_event = tuple(record[1])
+                implied_event = tuple(record[2])
+                max_obs = record[3]
+                min_eval_t = record[4]
+                rule = Implication(trigger_event, implied_event, None, max_obs, min_eval_t)
+                rule.stable = 1
+                if implication_direction == "back":
+                    if trigger_event in self.back_rules:
+                        self.back_rules[trigger_event].append(rule)
+                    else:
+                        self.back_rules[trigger_event] = [rule]
+                    if implied_event in self.back_rules_inv:
+                        self.back_rules_inv[implied_event].append(rule)
+                    else:
+                        self.back_rules_inv[implied_event] = [rule]
+                elif implication_direction == "forward":
+                    if trigger_event in self.forward_rules:
+                        self.forward_rules[trigger_event].append(rule)
+                    else:
+                        self.forward_rules[trigger_event] = [rule]
+                    if implied_event in self.forward_rules_inv:
+                        self.forward_rules_inv[implied_event].append(rule)
+                    else:
+                        self.forward_rules_inv[implied_event] = [rule]
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """
@@ -730,17 +742,17 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
-            msg = 'Allowlisting data not understood by this detector'
+            msg = "Allowlisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.constraint_list:
             self.constraint_list.append(event_data)
-        return f'Allowlisted path {event_data}.'
+        return f"Allowlisted path {event_data} in {event_type}."
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
         """
@@ -748,17 +760,17 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if blocklisting_data is not None:
-            msg = 'Blocklisting data not understood by this detector'
+            msg = "Blocklisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if event_data not in self.ignore_list:
             self.ignore_list.append(event_data)
-        return f'Blocklisted path {event_data}.'
+        return f"Blocklisted path {event_data} in {event_type}."
 
 
 class Implication:
@@ -815,18 +827,18 @@ class Implication:
         return (len(self.rule_observations) - ones) <= (self.max_observations - self.min_eval_true)
 
     def __repr__(self):
-        return str(self.trigger_event[-1]).split('/')[-1] + '->' + str(self.implied_event[-1]).split('/')[-1] + ', eval=' + str(
-            self.hypothesis_evaluated_true) + '/' + str(self.hypothesis_observations) + ', rule=' + str(
-            self.rule_observations) + ', ruletriggerts=' + str(self.rule_trigger_timestamps)
+        return str(self.trigger_event[-1]).split("/")[-1] + "->" + str(self.implied_event[-1]).split("/")[-1] + ", eval=" + str(
+            self.hypothesis_evaluated_true) + "/" + str(self.hypothesis_observations) + ", rule=" + str(
+            self.rule_observations) + ", ruletriggerts=" + str(self.rule_trigger_timestamps)
 
     def get_dictionary_repr(self):
         """Return the dictionary representation of an Implication."""
-        return {'trigger_event': self.trigger_event, 'implied_event': self.implied_event, 'stable': self.stable,
-                'max_observations': self.max_observations, 'min_eval_true': self.min_eval_true,
-                'most_recent_observation_timestamp': self.most_recent_observation_timestamp,
-                'hypothesis_trigger_timestamps': list(self.hypothesis_trigger_timestamps),
-                'rule_trigger_timestamps': list(self.rule_trigger_timestamps), 'rule_observations': list(self.rule_observations),
-                'hypothesis_observations': self.hypothesis_observations, 'hypothesis_evaluated_true': self.hypothesis_evaluated_true}
+        return {"trigger_event": self.trigger_event, "implied_event": self.implied_event, "stable": self.stable,
+                "max_observations": self.max_observations, "min_eval_true": self.min_eval_true,
+                "most_recent_observation_timestamp": self.most_recent_observation_timestamp,
+                "hypothesis_trigger_timestamps": list(self.hypothesis_trigger_timestamps),
+                "rule_trigger_timestamps": list(self.rule_trigger_timestamps), "rule_observations": list(self.rule_observations),
+                "hypothesis_observations": self.hypothesis_observations, "hypothesis_evaluated_true": self.hypothesis_evaluated_true}
 
 
 def set_random_seed(seed):

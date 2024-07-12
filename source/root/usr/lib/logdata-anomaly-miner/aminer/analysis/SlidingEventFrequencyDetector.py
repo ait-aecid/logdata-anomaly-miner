@@ -14,22 +14,18 @@ import os
 import logging
 from collections import deque
 
-from aminer.AminerConfig import STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
+from aminer.AminerConfig import STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, DEBUG_LOG_NAME
 from aminer import AminerConfig
-from aminer.AnalysisChild import AnalysisContext
-from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface
-from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface):
+class SlidingEventFrequencyDetector(AtomHandlerInterface):
     """This class creates events when event or value frequencies exceed the set limit."""
 
-    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-
-    def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, scoring_path_list=None, window_size=600,
-                 set_upper_limit=None, local_maximum_threshold=0.2, persistence_id='Default', learn_mode=False, output_logline=True,
-                 ignore_list=None, constraint_list=None):
+    def __init__(self, aminer_config, anomaly_event_handlers, set_upper_limit, target_path_list=None, scoring_path_list=None,
+                 window_size=600, local_maximum_threshold=0.2, persistence_id="Default", learn_mode=False, output_logline=True,
+                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 log_resource_ignore_list=None):
         """
         Initialize the detector.
         @param aminer_config configuration from analysis_context.
@@ -41,7 +37,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param window_size the length of the time window for counting in seconds.
         @param set_upper_limit sets the upper limit of the frequency test to the specified value.
         @param local_maximum_threshold sets the threshold for the detection of local maxima in the frequency analysis.
-               A local maximum occurrs if the last maximum of the anomaly is higher than local_maximum_threshold times the upper limit.
+               A local maximum occurs if the last maximum of the anomaly is higher than local_maximum_threshold times the upper limit.
         @param persistence_id name of persistence document.
         @param learn_mode specifies whether new frequency measurements override ground truth frequencies.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
@@ -52,12 +48,17 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
         # Avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
-            mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list"], aminer_config=aminer_config,
-            window_size=window_size, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
-            scoring_path_list=scoring_path_list, set_upper_limit=set_upper_limit, local_maximum_threshold=local_maximum_threshold,
-            persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list,
-            constraint_list=constraint_list
+            mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
+            aminer_config=aminer_config, window_size=window_size, anomaly_event_handlers=anomaly_event_handlers,
+            target_path_list=target_path_list, scoring_path_list=scoring_path_list, set_upper_limit=set_upper_limit,
+            local_maximum_threshold=local_maximum_threshold, persistence_id=persistence_id, learn_mode=learn_mode,
+            output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
+        if not self.set_upper_limit:
+            msg = "set_upper_limit must not be None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.counts = {}
         self.scoring_value_list = {}
         self.max_frequency = {}
@@ -69,13 +70,21 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
+            self.learn_mode = False
+
         parser_match = log_atom.parser_match
         self.log_total += 1
 
         # Skip paths from ignore list.
         for ignore_path in self.ignore_list:
             if ignore_path in parser_match.get_match_dictionary().keys():
-                return
+                return False
 
         # Get the log event and save it in log_event
         if self.target_path_list is None or len(self.target_path_list) == 0:
@@ -86,7 +95,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
                     constraint_path_flag = True
                     break
             if not constraint_path_flag and self.constraint_list != []:
-                return
+                return False
             log_event = tuple(parser_match.get_match_dictionary().keys())
         else:
             # Event is defined by value combos in target_path_list
@@ -110,10 +119,10 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
                         all_values_none = False
                     values.append(value)
             if all_values_none is True:
-                return
+                return False
             log_event = tuple(values)
 
-        # Initialize the needed variables at first event occurrance
+        # Initialize the needed variables at first event occurrence
         if log_event not in self.counts:
             # Initialize counts, max_frequency, max_frequency_time exceeded_frequency_range and self.exceeded_frequency_range_time
             self.counts[log_event] = deque()
@@ -149,7 +158,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
         current_frequency = self.get_current_frequency(log_atom, log_event)
 
         # Save the current frequency and time if it exceeded the max_frequency
-        if current_frequency > self.set_upper_limit and current_frequency > self.max_frequency[log_event]:
+        if current_frequency >= self.set_upper_limit and current_frequency >= self.max_frequency[log_event]:
             self.max_frequency[log_event] = current_frequency
             self.max_frequency_time[log_event] = log_atom.atom_time
             self.max_frequency_log_atom[log_event] = log_atom
@@ -183,6 +192,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
             # Reset variable exceeded_frequency_range if the current frequency is lower or equal to the upper limit
             if current_frequency <= self.set_upper_limit:
                 self.exceeded_frequency_range[log_event] = False
+        return True
 
     def print(self, log_event, frequency, first_exceeded_threshold=False):
         """Sends an event to the listeners. The event can be the first exceeding of the limits or a local maximum"""
@@ -193,53 +203,33 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
         if self.output_logline:
             original_log_line_prefix = self.aminer_config.config_properties.get(
                 CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-            sorted_log_lines = [self.max_frequency_log_atom[log_event].parser_match.match_element.annotate_match('') + os.linesep +
+            sorted_log_lines = [self.max_frequency_log_atom[log_event].parser_match.match_element.annotate_match("") + os.linesep +
                                 original_log_line_prefix + data]
         else:
             sorted_log_lines = [data]
-        analysis_component = {'AffectedLogAtomPaths': self.target_path_list, 'AffectedLogAtomValues': list(log_event)}
-        frequency_info = {'ExpectedLogAtomValuesFrequencyRange': [0, self.set_upper_limit],
-                          'LogAtomValuesFrequency': frequency,
-                          'WindowSize': self.window_size
+        analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": list(log_event)}
+        frequency_info = {"ExpectedLogAtomValuesFrequencyRange": [0, self.set_upper_limit],
+                          "LogAtomValuesFrequency": frequency,
+                          "WindowSize": self.window_size
                           }
         if not first_exceeded_threshold:
             # Calculate the confidence value
-            frequency_info['Confidence'] = 1 - self.set_upper_limit / frequency
+            frequency_info["Confidence"] = 1 - self.set_upper_limit / frequency
             # Local maximum timestamp
-            frequency_info['Local_maximum_timestamp'] = self.max_frequency_time[log_event]
+            frequency_info["Local_maximum_timestamp"] = self.max_frequency_time[log_event]
             # In case that scoring_path_list is set, give their values to the event handlers for further analysis.
             if len(self.scoring_path_list) > 0:
-                frequency_info['IdValues'] = list(self.scoring_value_list[log_event])[:self.max_frequency[log_event]]
+                frequency_info["IdValues"] = list(self.scoring_value_list[log_event])[:self.max_frequency[log_event]]
 
-        event_data = {'AnalysisComponent': analysis_component, 'FrequencyData': frequency_info}
+        event_data = {"AnalysisComponent": analysis_component, "FrequencyData": frequency_info}
         if first_exceeded_threshold:
-            message = 'Frequency exceeds range for the first time'
+            message = "Frequency exceeds range for the first time"
         else:
-            message = 'Frequency anomaly detected'
+            message = "Frequency anomaly detected"
 
         for listener in self.anomaly_event_handlers:
-            listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data,
+            listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data,
                                    self.max_frequency_log_atom[log_event], self)
-
-    # skipcq: PYL-R0201, PYL-W0613
-    def do_timer(self, trigger_time):
-        """Check if current ruleset should be persisted."""
-        return False
-
-    # skipcq: PYL-R0201
-    def do_persist(self):
-        """Immediately write persistence data to storage."""
-        return False
-
-    def allowlist_event(self, event_type, event_data, allowlisting_data):  # skipcq: PYL-W0613
-        """
-        Allowlist an event generated by this source using the information emitted when generating the event.
-        @return a message with information about allowlisting
-        @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
-        """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            raise Exception('Event not from this source')
-        raise Exception('No allowlisting for algorithm malfunction or configuration errors')
 
     def log_statistics(self, component_name):
         """
@@ -258,7 +248,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.log_total = 0
 
     def reset_counter(self, log_atom, log_event):
-        """Remove any timesfrom counts and scoring_value_list that fell out of the time window"""
+        """Remove any times from counts and scoring_value_list that fell out of the time window"""
         while len(self.counts[log_event]) > 0 and self.counts[log_event][0] < log_atom.atom_time - self.window_size:
             self.counts[log_event].popleft()
             if len(self.scoring_path_list) > 0:
@@ -271,11 +261,11 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponent
     def get_weight_analysis_field_path(self):
         """Return the path to the list in the output of the detector which is weighted by the ScoringEventHandler."""
         if self.scoring_path_list:
-            return ['FrequencyData', 'IdValues']
+            return ["FrequencyData", "IdValues"]
         return []
 
     def get_weight_output_field_path(self):
         """Return the path where the ScoringEventHandler adds the scorings in the output of the detector."""
         if self.scoring_path_list:
-            return ['FrequencyData', 'Scoring']
+            return ["FrequencyData", "Scoring"]
         return []

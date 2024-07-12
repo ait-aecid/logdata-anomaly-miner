@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 import sys
+import time
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.input.LogAtom import LogAtom
 from aminer.input.InputInterfaces import StreamAtomizer
@@ -46,7 +47,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
     COUNTER = 0
 
     def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_path_list, eol_sep=b'\n',
-                 json_format=False):
+                 json_format=False, xml_format=False, use_real_time=False, resource_name=None, continuous_timestamp_missing_warning=True):
         """
         Create the atomizer.
         @param event_handler_list when not None, send events to those handlers. The list might be empty at invocation and populated
@@ -65,6 +66,15 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             sys.exit(-1)
         self.eol_sep = eol_sep
         self.json_format = json_format
+        self.xml_format = xml_format
+        if json_format is True and xml_format is True:
+            msg = "json_format and xml_format can not be true at the same time."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        self.resource_name = resource_name
+        self.use_real_time = use_real_time
+        self.printed_warning = False
+        self.continuous_timestamp_missing_warning = continuous_timestamp_missing_warning
 
         self.in_overlong_line_flag = False
         # If consuming of data was already attempted but the downstream handlers refused to handle it, keep the data and the parsed
@@ -80,6 +90,12 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         # Loop until as much streamData as possible was processed and then return a result. The correct processing of endOfStreamFlag
         # is tricky: by default, even when all data was processed, do one more iteration to handle also the flag.
         consumed_length = 0
+        if self.xml_format:
+            if len(stream_data) == 0:
+                return -1
+            log_atom = self.parse_log_atom(stream_data)
+            if self.dispatch_atom(log_atom):
+                return len(stream_data)
         while True:
             if self.last_unconsumed_log_atom is not None:
                 # Keep length before dispatching: dispatch will reset the field.
@@ -150,17 +166,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
 
             # This is a normal line.
             line_data = stream_data[consumed_length:line_end]
-            log_atom = LogAtom(line_data, None, None, self)
-            if self.parsing_model is not None:
-                match_context = MatchContext(line_data)
-                match_element = self.parsing_model.get_match_element('', match_context)
-                if (match_element is not None) and not match_context.match_data:
-                    log_atom.parser_match = ParserMatch(match_element)
-                    for default_timestamp_path in self.default_timestamp_path_list:
-                        ts_match = log_atom.parser_match.get_match_dictionary().get(default_timestamp_path, None)
-                        if ts_match is not None:
-                            log_atom.set_timestamp(ts_match.match_object)
-                            break
+            log_atom = self.parse_log_atom(line_data)
             if self.dispatch_atom(log_atom):
                 consumed_length = line_end + len(self.eol_sep) - (
                         valid_json and stream_data[line_end:line_end+len(self.eol_sep)] != self.eol_sep)
@@ -170,6 +176,31 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 consumed_length = -1
             break
         return consumed_length
+
+    def parse_log_atom(self, parse_data):
+        """Parse a log atom."""
+        log_atom = LogAtom(parse_data, None, None, self)
+        if self.parsing_model is not None:
+            match_context = MatchContext(parse_data)
+            match_element = self.parsing_model.get_match_element('', match_context)
+            if (match_element is not None) and not match_context.match_data:
+                log_atom.parser_match = ParserMatch(match_element)
+                for default_timestamp_path in self.default_timestamp_path_list:
+                    ts_match = log_atom.parser_match.get_match_dictionary().get(default_timestamp_path, None)
+                    if ts_match is not None:
+                        log_atom.set_timestamp(ts_match.match_object)
+                        break
+        if log_atom.atom_time is None:
+            if self.use_real_time:
+                log_atom.atom_time = time.time()
+            elif not self.printed_warning or self.continuous_timestamp_missing_warning:
+                msg = "No timestamp was found for a log_atom. The timestamp_paths parameter is probably not set correctly in the" \
+                      " Input config which might lead to errors. Alternatively the use_real_time parameter might be used in the Input " \
+                       "config. To show this message only once, set continuous_timestamp_missing_warning to false in the Input config."
+                print("WARNING: " + msg, file=sys.stderr)
+                logging.getLogger(DEBUG_LOG_NAME).warning(msg)
+                self.printed_warning = True
+        return log_atom
 
     def dispatch_atom(self, log_atom):
         """Dispatch the data using the appropriate handlers. Also clean or set lastUnconsumed fields depending on outcome of dispatching."""

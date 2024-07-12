@@ -81,15 +81,17 @@ Analysis:
         - type: NewMatchPathValueComboDetector
           id: NewMatchPathValueCombo
           paths:
-            - "/model/menu/id"
-            - "/model/menu/value"
+            - "/model/menu/id/id"
+            - "/model/menu/value/value"
           learn_mode: True
+          output_logline: True
         - type: NewMatchPathValueDetector
           id: NewMatchPathValue
           paths:
-            - "/model/menu/id"
-            - "/model/menu/value"
+            - "/model/menu/id/id"
+            - "/model/menu/value/value"
           learn_mode: True
+          output_logline: True
         - type: SimpleUnparsedAtomHandler
           id: SimpleUnparsedAtomHandler
 

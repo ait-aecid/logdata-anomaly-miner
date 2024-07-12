@@ -83,7 +83,7 @@ function runAminerUntilEnd() {
   IFS=',' read -ra ADDR <<< "$IN"
   CURRENT_SIZE=`echo ${ADDR[1]} | sed 's/ *$//g'` # trim all whitespaces
   CNTR=0
-  while [[ ("$CURRENT_SIZE" != "$FILE_SIZE" || "$CURRENT_SIZE" == "") && $CNTR -lt 20 ]]; do
+  while [[ ("$CURRENT_SIZE" != "$FILE_SIZE" || "$CURRENT_SIZE" == "") && $CNTR -lt 120 ]]; do
      sleep 1
      IN=`cat $REP_PATH 2> /dev/null`
      IFS=',' read -ra ADDR <<< "$IN"

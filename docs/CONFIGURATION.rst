@@ -206,6 +206,8 @@ LogResourceList
 * Resource-Types: ``file://``, ``unix://``
 
 Define the list of log resources to read from: the resources named here do not need to exist when aminer is started. This will just result in a warning. However if they exist, they have to be readable by the aminer process!
+Every resource needs to define the ``url`` with the resource-type. Optionally every resource can define ``json`` parameter (boolean) to define if the resource input data is json and ``parser_id`` to define the parser which should process the log data from this resource.
+By default the ``json_format`` parameter in the ``input`` section is used to determine if the input data is json or not.
 
 Supported types are:
 
@@ -215,11 +217,15 @@ Supported types are:
 .. code-block:: yaml
 
    LogResourceList:
-       - 'file:///var/log/apache2/access.log'
-       - 'file:///home/ubuntu/data/mail.cup.com-train/daemon.log'
-       - 'file:///home/ubuntu/data/mail.cup.com-train/auth.log'
-       - 'file:///home/ubuntu/data/mail.cup.com-train/suricata/eve.json'
-       - 'file:///home/ubuntu/data/mail.cup.com-train/suricata/fast.log'
+       - url: 'file:///var/log/apache2/access.log'
+       - url: 'file:///home/ubuntu/data/mail.cup.com-train/daemon.log'
+         json: True
+         parser_id: 'syslog_parser'
+       - url: 'file:///home/ubuntu/data/mail.cup.com-train/auth.log'
+       - url: 'file:///home/ubuntu/data/mail.cup.com-train/suricata/eve.json'
+       - url: 'file:///home/ubuntu/data/mail.cup.com-train/suricata/fast.log'
+         json: True
+         parser_id: 'suricata_fastlog'
 
 Core.PersistenceDir
 ~~~~~~~~~~~~~~~~~~~
@@ -408,7 +414,7 @@ Log.RemoteControlLogFile
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Type: string (path to the logfile)
-* Default: '/var/lib/aminer/log/aminerRemoteLog.txt'
+* Default: '/var/lib/aminer/log/aminerRemoteLog.log'
 
 Defines the path of the logfile for the RemoteControl.
 
@@ -808,7 +814,8 @@ This element parses dates using a custom, timezone and locale-aware implementati
          * '%H:%M:%S' e.g. for '11:40:23'
 
   2. time_zone:
-      time_zone the timezone for parsing the values. Default: **UTC**.
+      time_zone the timezone for parsing the values. Default: **UTC**. Within the yaml configuration, only values from
+      **pytz.all_timezones** are accepted as time_zone value.
 
   3. text_local:
       the locale to use for parsing the day and month names. Default: **system-locale**
@@ -1286,6 +1293,70 @@ This model defines a string that is delimited by a white space.
          type: WhiteSpaceLimitedDataModelElement
          name: 'WhiteSpaceLimitedDataModelElement'
 
+XmlModelElement
+~~~~~~~~~~~~~~~~
+
+This model defines a xml-formatted log line. This model is usually used as a start element and with xml_format: True set in the Input section of the config.yml.
+
+* **key_parser_dict**: a dictionary of keys as defined in the xml-formatted logs and appropriate parser models as values
+
+* **attribute_prefix**: a string that marks the element as an attribute of an element in the xml schema. Default: "+"
+
+* **optional_attribute_prefix**: a string that can be used as a prefix for attributes that are optional in the xml schema. Default: "_"
+
+* **empty_allowed_prefix**: a string that can be used as a prefix for elements where empty values are allowed in the xml schema. Default: "?"
+
+* **xml_header_expected**: defines whether a xml-header is expected. Default: False
+
+.. code-block:: yaml
+
+     Parser:
+       - id: id
+         type: DecimalIntegerValueModelElement
+         name: 'id'
+
+       - id: opt
+         type: FixedDataModelElement
+         name: 'opt'
+         args: 'text'
+
+       - id: to
+         type: AnyByteDataModelElement
+         name: 'to'
+
+       - id: from
+         type: AnyByteDataModelElement
+         name: 'from'
+
+       - id: heading
+         type: AnyByteDataModelElement
+         name: 'heading'
+
+       - id: text1
+         type: AnyByteDataModelElement
+         name: 'text1'
+
+       - id: text2
+         type: AnyByteDataModelElement
+         name: 'text2'
+
+       - id: xml
+         start: True
+         type: XmlModelElement
+         name: 'model'
+         xml_header_expected: True
+         key_parser_dict:
+           messages:
+             - note:
+                 +id: id
+                 _+opt: opt
+                 to: to
+                 from: from
+                 ?heading: heading
+                 body:
+                   text1: text1
+                   text2: text2
+
 ---------
 Analysing
 ---------
@@ -1497,6 +1568,7 @@ This module defines a detector for event and value frequency deviations.
 * **early_exceeding_anomaly_output** states if a anomaly should be raised the first time the appearance count exceedes the range.
 * **set_lower_limit** sets the lower limit of the frequency test to the specified value.
 * **set_upper_limit** sets the upper limit of the frequency test to the specified value.
+* **season** the seasonality/periodicity of the time-series in seconds.
 * **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
 * **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
 * **ignore_list** list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted (list of strings, defaults to empty list).
@@ -1744,6 +1816,8 @@ This detector calculates the average of a given list of values to monitor. Repor
 * **paths**: List of match paths to analyze in this detector. List of strings( **required**)
 * **min_bin_elements**: Evaluate the latest bin only after at least that number of elements was added to it. Integer, min: 1 (**required**)
 * **min_bin_time**: Evaluate the latest bin only when the first element is received after min_bin_time has elapsed. Integer, min: 1 (**required**)
+* **avg_factor** the maximum allowed deviation for the average value before an anomaly is raised. Float, default: 1
+* **var_factor** the maximum allowed deviation for the variance of the value before an anomaly is raised. Float, default: 2
 * **debug_mode**: Enables debug output. Boolean(Default: False)
 * **persistence_id**: The name of the file where the learned models are stored. String
 * **output_logline**: Defines if logline should be added to the output. Boolean(Default: False)
@@ -1880,6 +1954,24 @@ This detector works similar to the NewMatchPathValueComboDetector, but allows to
           allow_missing_values: True
           learn_mode: True
 
+NewMatchPathDetector
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This class creates events when new data path was found in a parsed atom.
+
+* **output_event_handlers** for handling events, e.g., print events to stdout (list of strings, defaults to empty list).
+* **learn_mode** specifies whether newly observed value combinations should be added to the learned model (boolean).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to False).
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+* **persistence_id**: the name of the file where the learned models are stored (string, defaults to "Default").
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: NewMatchPathDetector
+          id: NewMatchPathDetector
+          learn_mode: True
+
 NewMatchPathValueComboDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1946,6 +2038,41 @@ This component counts occurring combinations of values and periodically sends th
             - "/model/type/syscall/syscall"
           report_interval: 10
 
+PathArimaDetector
+~~~~~~~~~~~~~~~~
+
+This detector uses a tsa-arima model to analyze the values of the chosen paths.
+
+* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
+* **event_type_detector** used to track the number of events in the time windows.
+* **persistence_id** name of persistency document.
+* **output_logline** specifies whether the full parsed log atom should be provided in the output.
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies.
+* **num_init** number of lines processed before the period length is calculated.
+* **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
+* **set_period_length** states how long the period length is if force_period_length is set to True.
+* **alpha** significance level of the estimated values.
+* **alpha_bt** significance level for the bt test.
+* **num_results_bt** number of results which are used in the binomial test.
+* **num_min_time_history** number of lines processed before the period length is calculated.
+* **num_max_time_history** maximum number of values of the time_history.
+* **num_periods_tsa_ini** number of periods used to initialize the Arima-model.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: "EventTypeDetector"
+          id: ETD
+
+        - type: 'PathArimaDetector'
+          id: PTSA
+          event_type_detector: ETD
+          paths: ["/model/model/val1", "/model/model/val2"]
+          num_init: 20
+          force_period_length: True
+          set_period_length: 15
+          num_periods_tsa_ini: 10
+
 PathValueTimeIntervalDetector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1998,99 +2125,14 @@ This class creates events if event or value occurrence counts are outliers in PC
           paths:
             - "/model/username"
             - "/model/service"
-          windows_size: 60
+          window_size: 60
           min_anomaly_score: 1.2
           min_variance: 0.95
           num_windows: 100
           learn_mode: true
 
-TSAArimaDetector
-~~~~~~~~~~~~~~~~
-
-This detector uses a tsa-arima model to track appearance frequencies of event lines.
-
-* **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
-* **event_type_detector** used to track the number of event lines in the time windows (string).
-* **waiting_time_for_tsa** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
-* **num_sections_waiting_time_for_tsa** number of sections of the initialization window (integer, defaults to 10).
-* **acf_pause_interval_percentage** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
-* **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
-* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 20).
-* **num_division_time_step** Number of divisions of the time window to calculate the time step (integer, defaults to 10).
-* **alpha** significance level of the estimated values (float, defaults to 0.05).
-* **num_min_time_history** minimal number of values of the time_history after it is initialized (integer, defaults to 20).
-* **num_max_time_history** maximal number of values of the time_history (integer, defaults to 30).
-* **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model (integer, defaults to 15).
-* **alpha_bt** significance level for the bt test (float, defaults to 0.05).
-* **round_time_interval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
-* **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
-* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
-* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
-* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
-* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
-* **acf_auto_pause_interval** states if the pause area is automatically set. If enabled, the variable acf_pause_interval_percentage loses its functionality.
-* **acf_auto_pause_interval_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not an outlier.
-* **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
-* **set_period_length** states how long the period length is if force_period_length is set to True.
-* **min_log_lines_per_time_step** states the minimal average number of log lines per time step to make a TSA.
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: 'EventTypeDetector'
-          id: ETD
-          save_values: False
-
-        - type: 'TSAArimaDetector'
-          id: TSA
-          event_type_detector: ETD
-          waiting_time_for_tsa: 1728000
-          num_sections_waiting_time_for_tsa: 1000
-          num_division_time_step: 10
-          alpha: 0.05
-          num_results_bt: 30
-          alpha_bt: 0.05
-          num_max_time_history: 30000
-          round_time_interval_threshold: 0.1
-          acf_threshold: 0.02
-
-PathArimaDetector
-~~~~~~~~~~~~~~~~
-
-This detector uses a tsa-arima model to analyze the values of the chosen paths.
-
-* **paths** parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined occurrences. When no paths are specified, the events given by the full path list are analyzed.
-* **event_type_detector** used to track the number of events in the time windows.
-* **persistence_id** name of persistency document.
-* **output_logline** specifies whether the full parsed log atom should be provided in the output.
-* **learn_mode** specifies whether new frequency measurements override ground truth frequencies.
-* **num_init** number of lines processed before the period length is calculated.
-* **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
-* **set_period_length** states how long the period length is if force_period_length is set to True.
-* **alpha** significance level of the estimated values.
-* **alpha_bt** significance level for the bt test.
-* **num_results_bt** number of results which are used in the binomial test.
-* **num_min_time_history** number of lines processed before the period length is calculated.
-* **num_max_time_history** maximum number of values of the time_history.
-* **num_periods_tsa_ini** number of periods used to initialize the Arima-model.
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: "EventTypeDetector"
-          id: ETD
-
-        - type: 'PathArimaDetector'
-          id: PTSA
-          event_type_detector: ETD
-          paths: ["/model/model/val1", "/model/model/val2"]
-          num_init: 20
-          force_period_length: True
-          set_period_length: 15
-          num_periods_tsa_ini: 10
-
 SlidingEventFrequencyDetector
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module defines a detector for event and value frequency exceedances with a sliding window approach.
 
@@ -2179,6 +2221,82 @@ configuration errors, e.g. invalid timezone configuration.
         - type: TimestampsUnsortedDetector
           id: TimestampsUnsortedDetector
 
+TSAArimaDetector
+~~~~~~~~~~~~~~~~
+
+This detector uses a tsa-arima model to track appearance frequencies of event lines.
+
+* **paths** at least one of the parser paths in this list needs to appear in the event to be analyzed (list of strings).
+* **event_type_detector** used to track the number of event lines in the time windows (string).
+* **waiting_time_for_tsa** time in seconds, until the time windows are being initialized (integer, defaults to 300 seconds).
+* **num_sections_waiting_time_for_tsa** number of sections of the initialization window (integer, defaults to 10).
+* **acf_pause_interval_percentage** states which area of the results of the ACF are not used to find the highest peak (float, defaults to 0.2).
+* **build_sum_over_values** states if the sum of a series of counts is built before applying the TSA (boolean, defaults to false).
+* **num_periods_tsa_ini** Number of periods used to initialize the Arima-model (integer, defaults to 20).
+* **num_division_time_step** Number of divisions of the time window to calculate the time step (integer, defaults to 10).
+* **alpha** significance level of the estimated values (float, defaults to 0.05).
+* **num_min_time_history** minimal number of values of the time_history after it is initialized (integer, defaults to 20).
+* **num_max_time_history** maximal number of values of the time_history (integer, defaults to 30).
+* **num_results_bt** number of results which are used in the binomial test, which is used before reinitializing the ARIMA model (integer, defaults to 15).
+* **alpha_bt** significance level for the bt test (float, defaults to 0.05).
+* **round_time_interval_threshold** Threshold for the rounding of the time_steps to the times in self.assumed_time_steps. The higher the threshold the easier the time is rounded to the next time in the list (float, defaults to 0.02).
+* **acf_threshold** threshold, which must be exceeded by the highest peak of the cdf function of the time series, to be analyzed (float, defaults to 0.2).
+* **persistence_id** the name of the file where the learned models are stored (string, defaults to "Default").
+* **ignore_list** list of paths that are not considered for correlation, i.e., events that contain one of these paths are omitted. The default value is [] as None is not iterable (list of strings, defaults to empty list).
+* **output_logline** specifies whether the full parsed log atom should be provided in the output (boolean, defaults to false).
+* **learn_mode** specifies whether new frequency measurements override ground truth frequencies (boolean).
+* **acf_auto_pause_interval** states if the pause area is automatically set. If enabled, the variable acf_pause_interval_percentage loses its functionality.
+* **acf_auto_pause_interval_num_min** states the number of values in which a local minima must be the minimum, to be considered a local minimum of the function and not an outlier.
+* **force_period_length** states if the period length is calculated through the ACF, or if the period length is forced to be set to set_period_length.
+* **set_period_length** states how long the period length is if force_period_length is set to True.
+* **min_log_lines_per_time_step** states the minimal average number of log lines per time step to make a TSA.
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'EventTypeDetector'
+          id: ETD
+          save_values: False
+
+        - type: 'TSAArimaDetector'
+          id: TSA
+          event_type_detector: ETD
+          waiting_time_for_tsa: 1728000
+          num_sections_waiting_time_for_tsa: 1000
+          num_division_time_step: 10
+          alpha: 0.05
+          num_results_bt: 30
+          alpha_bt: 0.05
+          num_max_time_history: 30000
+          round_time_interval_threshold: 0.1
+          acf_threshold: 0.02
+
+VerboseUnparsedAtomHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Creates verbose output for unparsed events.
+
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'VerboseUnparsedAtomHandler'
+          id: vuah
+
+SimpleUnparsedAtomHandler
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Creates basic output for unparsed events.
+
+* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
+
+.. code-block:: yaml
+
+     Analysis:
+        - type: 'SimpleUnparsedAtomHandler'
+          id: vuah
+
 ValueRangeDetector
 ~~~~~~~~~~~~~~~~~~
 
@@ -2254,33 +2372,6 @@ First, this detector finds a list of viable variables for each event type. Secon
           used_presel_meth: ['matchDiscDistr', 'excludeDueDistr']
           used_validate_cor_meth: ['distinctDistr', 'coverVals']
           used_cor_meth: ['WRel']
-
-VerboseUnparsedAtomHandler
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Creates verbose output for unparsed events.
-
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: 'VerboseUnparsedAtomHandler'
-          id: vuah
-
-SimpleUnparsedAtomHandler
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Creates basic output for unparsed events.
-
-* **suppress**: a boolean that suppresses anomaly output of that detector when set to True (boolean, defaults to False).
-
-.. code-block:: yaml
-
-     Analysis:
-        - type: 'SimpleUnparsedAtomHandler'
-          id: vuah
-
 
 VariableTypeDetector
 ~~~~~~~~~~~~~~~~~~~~
@@ -2652,3 +2743,93 @@ The ZmqEventHandler writes its output to a `Zero Message-Queue <https://zeromq.o
         type: 'ZmqEventHandler'
         topic: 'aminer'
         url: 'tcp://*:5555' # tcp-port 5555 on all interfaces
+
+-------
+Schemas
+-------
+
+All analysis detectors, parsing models, and event handlers must be included in the validation and normalisation schemas for the YAML configurations.
+YamlConfig uses the ConfigValidator to normalize values and validate them against the validation schema.
+
+.. seealso::
+
+   :ref:`YamlConfig`
+   :ref:`ConfigValidator`
+
+.. _BaseSchema:
+
+BaseSchema
+~~~~~~~~~~
+
+This module defines general configurations and Input configurations of the aminer.
+
+.. _Normalization:
+
+Normalization
+~~~~~~~~~~~~~
+
+Define all possible parameters and normalisation strategies such as default values for the defined group of modules. These groups are separated in the following modules:
+
+* **AnalysisNormalisationSchema**
+* **EventHandlerNormalisationSchema**
+* **ParserNormalisationSchema**
+
+.. _Validation:
+
+Validation
+~~~~~~~~~~
+
+Define all possible parameters and valid values for each module within the defined group of modules. These groups are separated in the following modules:
+
+* **AnalysisValidationSchema**
+* **EventHandlerValidationSchema**
+* **ParserValidationSchema**
+
+------------
+AMiner Files
+------------
+
+This section explains the functionality of important files of the aminer.
+
+.. _Aminer:
+
+Aminer
+~~~~~~
+
+This is the main module which starts the aminer program. It parses all arguments, initializes loggers, and handles graceful shutdowns.
+These loggers are by default divided into the following files:
+* **aminer.log**: Logs regarding the aminer such as the different startup stages of the process. The verbosity can be set with the Log.DebugLevel configuration.
+* **statistics.log**: Logs specific statistics such as the number of successfully processed log lines for each analysis component.
+* **aminerRemoteLog.log**: Logs all information about the changes done with the remote control using aminerremotecontrol.py.
+The process is started with root privileges to run all necessary tasks and it only uses the minimal set of imports.
+A subprocess starting the AnalysisChild is used for the main processing of log data.
+
+.. _AnalysisChild:
+
+AnalysisChild
+~~~~~~~~~~~~~
+
+This module handles sockets of the log files, registers all components, and runs the main analysis loop.
+It also handles the remote control sockets to change the running configuration using the AminerRemoteControlExecutionMethods.
+
+.. _AminerConfig:
+
+AminerConfig
+~~~~~~~~~~~~
+
+This module handles the loading and saving of configurations. When loading YAML configurations the configuration file is processed in YamlConfig.
+
+.. _YamlConfig:
+
+YamlConfig
+~~~~~~~~~~
+
+This module handles the loading of YAML configurations. It uses the ConfigValidator to normalize and validate the modules.
+When adding new components, they have to be added in this file.
+
+.. _ConfigValidator:
+
+ConfigValidator
+~~~~~~~~~~~~~~~
+
+This module normalizes, validates, and imports the modules for YAML configurations.

@@ -12,6 +12,7 @@ from unit.TestBase import TestBase
 class KafkaEventHandlerTest(TestBase):
     """Unittests for the KafkaEventHandler."""
 
+    resource_name = b"testresource"
     output_logline = True
     kafka_topic = 'test_topic'
     kafka_group = 'test_group'
@@ -29,7 +30,7 @@ class KafkaEventHandlerTest(TestBase):
     expected_string = '{\n  "AnalysisComponent": {\n    "AnalysisComponentIdentifier": 0,\n' \
                       '    "AnalysisComponentType": "%s",\n    "AnalysisComponentName": "%s",\n    "Message": "%s",\n' \
                       '    "PersistenceFileName": "%s",\n    "AffectedParserPaths": [\n      "test/path/1",\n' \
-                      '      "test/path/2"\n    ]\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
+                      '      "test/path/2"\n    ],\n    "LogResource": "testresource"\n  },\n  "LogData": {\n    "RawLogData": [\n      " pid="\n    ],\n    ' \
                       '"Timestamps": [\n      %s\n    ],\n    "DetectionTimestamp": %s,\n    "LogLinesCount": 5,\n' \
                       '    "AnnotatedMatchElement": {\n      "match/s1": " pid="\n    }\n  }%s\n}\n'
 
@@ -37,7 +38,7 @@ class KafkaEventHandlerTest(TestBase):
     def setUpClass(cls):
         """Start a KafkaConsumer."""
         cls.consumer = KafkaConsumer(
-            cls.kafka_topic, bootstrap_servers=['localhost:9092'], enable_auto_commit=True, consumer_timeout_ms=10000,
+            cls.kafka_topic, bootstrap_servers=['localhost:9092'], enable_auto_commit=True, consumer_timeout_ms=60000,
             group_id=cls.kafka_group, value_deserializer=lambda x: x.decode(), api_version=(2, 0, 1), auto_offset_reset='earliest')
 
     @classmethod

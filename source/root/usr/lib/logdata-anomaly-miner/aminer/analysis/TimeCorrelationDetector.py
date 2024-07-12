@@ -14,20 +14,17 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
 import random
-import time
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
 from aminer.analysis import Rules
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.History import get_log_int
-from aminer.util import PersistenceUtil
-from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class TimeCorrelationDetector(AtomHandlerInterface):
     """
     This class tries to find time correlation patterns between different log atoms.
     When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
@@ -36,9 +33,9 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id='Default',
+    def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id="Default",
                  record_count_before_event=10000, output_logline=True, use_path_match=True, use_value_match=True,
-                 min_rule_attributes=1, max_rule_attributes=5):
+                 min_rule_attributes=1, max_rule_attributes=5, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -57,35 +54,36 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, parallel_check_count=parallel_check_count,
             persistence_id=persistence_id, record_count_before_event=record_count_before_event, output_logline=output_logline,
             use_path_match=use_path_match, use_value_match=use_value_match, min_rule_attributes=min_rule_attributes,
-            max_rule_attributes=max_rule_attributes
+            max_rule_attributes=max_rule_attributes, log_resource_ignore_list=log_resource_ignore_list,
+            mutable_default_args=["log_resource_ignore_list"]
         )
         self.last_timestamp = 0.0
         self.last_unhandled_match = None
         self.total_records = 0
 
-        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is None:
-            self.feature_list = []
-            self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
-            self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
-        else:
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
+        if min_rule_attributes <= 0 or min_rule_attributes > max_rule_attributes:
+            msg = "min_rule_attributes must not be smaller than max_rule_attributes and bigger than or equal to zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        self.feature_list = []
+        self.event_count_table = [0] * parallel_check_count * parallel_check_count * 2
+        self.event_delta_table = [0] * parallel_check_count * parallel_check_count * 2
 
     def receive_atom(self, log_atom):
         """Receive a log atom from a source."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return False
         self.log_total += 1
         event_data = {}
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         if timestamp < self.last_timestamp:
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f'Analysis.{self.__class__.__name__}',
-                                       f'Logdata not sorted: last {self.last_timestamp}, current {timestamp}',
-                                       [log_atom.parser_match.match_element.annotate_match('')], event_data, log_atom, self)
-            return
+                listener.receive_event(
+                    f"Analysis.{self.__class__.__name__}", f"Logdata not sorted: last {self.last_timestamp}, current {timestamp}",
+                    [log_atom.parser_match.match_element.annotate_match("")], event_data, log_atom, self)
+            return False
         self.last_timestamp = timestamp
 
         self.total_records += 1
@@ -115,36 +113,39 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
             self.last_unhandled_match = log_atom
 
         if (self.total_records % self.record_count_before_event) == 0:
-            result = self.total_records * ['']
+            result = self.total_records * [""]
             result[0] = self.analysis_status_to_string()
-
-            analysis_component = {'AffectedLogAtomPaths': list(log_atom.parser_match.get_match_dictionary()),
-                                  'AffectedLogAtomValues': [log_atom.raw_data.decode(AminerConfig.ENCODING)]}
+            value = log_atom.raw_data
+            if isinstance(value, bytes):
+                value = value.decode(AminerConfig.ENCODING)
+            analysis_component = {"AffectedLogAtomPaths": list(log_atom.parser_match.get_match_dictionary()),
+                                  "AffectedLogAtomValues": [value]}
             if self.output_logline:
                 feature_list = []
                 for feature in self.feature_list:
                     tmp_list = {}
                     r = self.rule_to_dict(feature.rule)
-                    tmp_list['Rule'] = r
-                    tmp_list['Index'] = feature.index
-                    tmp_list['CreationTime'] = feature.creation_time
-                    tmp_list['LastTriggerTime'] = feature.last_trigger_time
-                    tmp_list['TriggerCount'] = feature.trigger_count
+                    tmp_list["Rule"] = r
+                    tmp_list["Index"] = feature.index
+                    tmp_list["CreationTime"] = feature.creation_time
+                    tmp_list["LastTriggerTime"] = feature.last_trigger_time
+                    tmp_list["TriggerCount"] = feature.trigger_count
                     feature_list.append(tmp_list)
-                analysis_component['FeatureList'] = feature_list
-            analysis_component['AnalysisStatus'] = result[0]
-            analysis_component['TotalRecords'] = self.total_records
+                analysis_component["FeatureList"] = feature_list
+            analysis_component["AnalysisStatus"] = result[0]
+            analysis_component["TotalRecords"] = self.total_records
 
-            event_data['AnalysisComponent'] = analysis_component
+            event_data["AnalysisComponent"] = analysis_component
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Correlation report', result, event_data, log_atom, self)
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", "Correlation report", result, event_data, log_atom, self)
             self.reset_statistics()
             logging.getLogger(DEBUG_LOG_NAME).debug("%s ran analysis.", self.__class__.__name__)
         self.log_success += 1
+        return True
 
     def rule_to_dict(self, rule):
         """Convert a rule to a dict structure."""
-        r = {'type': str(rule.__class__.__name__)}
+        r = {"type": str(rule.__class__.__name__)}
         for var in vars(rule):
             attr = getattr(rule, var, None)
             if attr is None:
@@ -153,28 +154,12 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                 tmp_list = []
                 for v in attr:
                     d = self.rule_to_dict(v)
-                    d['type'] = str(v.__class__.__name__)
+                    d["type"] = str(v.__class__.__name__)
                     tmp_list.append(d)
-                r['subRules'] = tmp_list
+                r["subRules"] = tmp_list
             else:
                 r[var] = attr
         return r
-
-    def do_timer(self, trigger_time):
-        """Check if current ruleset should be persisted."""
-        if self.next_persist_time is None:
-            return self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
-        delta = self.next_persist_time - trigger_time
-        if delta <= 0:
-            self.do_persist()
-            delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
-        return delta
-
-    def do_persist(self):
-        """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def create_random_rule(self, log_atom):
         """Create a random existing path rule or value match rule."""
@@ -195,21 +180,15 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
                 continue
 
             attribute_count -= 1
-            rule_type = 1  # default is value_match only if none specified
-            if self.use_path_match and not self.use_value_match:
-                rule_type = 0
-            if not self.use_path_match and self.use_value_match:
-                rule_type = 1
+            rule_type = 1  # default is value_match only
             if self.use_path_match and self.use_value_match:
                 rule_type = random.randint(0, 1)
+            elif self.use_path_match:
+                rule_type = 0
             if rule_type == 0:
                 sub_rules.append(Rules.PathExistsMatchRule(key_name))
-            elif rule_type == 1:
-                sub_rules.append(Rules.ValueMatchRule(key_name, key_value))
             else:
-                msg = 'Invalid rule type'
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                raise Exception(msg)
+                sub_rules.append(Rules.ValueMatchRule(key_name, key_value))
             if not all_keys:
                 break
 
@@ -242,37 +221,37 @@ class TimeCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterf
 
     def analysis_status_to_string(self):
         """Get a string representation of all features."""
-        result = ''
+        result = ""
         for feature in self.feature_list:
             trigger_count = feature.trigger_count
-            result += f'{feature.rule} ({feature.index}) e = {trigger_count}:'
+            result += f"{feature.rule} ({feature.index}) e = {trigger_count}:"
             stat_pos = (self.parallel_check_count * feature.index) << 1
             for feature_pos in range(len(self.feature_list)):  # skipcq: PTC-W0060
                 event_count = self.event_count_table[stat_pos]
-                ratio = '-'
+                ratio = "-"
                 if trigger_count != 0:
                     # skipcq: PYL-C0209
-                    ratio = '%.2e' % (float(event_count) / trigger_count)
-                delta = '-'
+                    ratio = "%.2e" % (float(event_count) / trigger_count)
+                delta = "-"
                 if event_count != 0:
                     # skipcq: PYL-C0209
-                    delta = '%.2e' % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
+                    delta = "%.2e" % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
                 # skipcq: PYL-C0209
-                result += '\n  %d: {c = %#6d r = %s dt = %s' % (feature_pos, event_count, ratio, delta)
+                result += "\n  %d: {c = %#6d r = %s dt = %s" % (feature_pos, event_count, ratio, delta)
                 stat_pos += 1
                 event_count = self.event_count_table[stat_pos]
-                ratio = '-'
+                ratio = "-"
                 if trigger_count != 0:
                     # skipcq: PYL-C0209
-                    ratio = '%.2e' % (float(event_count) / trigger_count)
-                delta = '-'
+                    ratio = "%.2e" % (float(event_count) / trigger_count)
+                delta = "-"
                 if event_count != 0:
                     # skipcq: PYL-C0209
-                    delta = '%.2e' % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
+                    delta = "%.2e" % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
                 # skipcq: PYL-C0209
-                result += ' c = %#6d r = %s dt = %s}' % (event_count, ratio, delta)
+                result += " c = %#6d r = %s dt = %s}" % (event_count, ratio, delta)
                 stat_pos += 1
-            result += '\n'
+            result += "\n"
         return result
 
     def reset_statistics(self):

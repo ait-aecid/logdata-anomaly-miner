@@ -5,11 +5,11 @@ config_properties = {}  # skipcq: PY-W0072
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
-# will just result in a warning. However if they exist, they have
+# will just result in a warning. However, if they exist, they have
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = ['file:///tmp/syslog']
+config_properties['LogResourceList'] = [{'url': b'file:///tmp/syslog', 'parser_id': 'model'}]
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
@@ -77,6 +77,7 @@ config_properties['Log.StatisticsLevel'] = 1
 config_properties['Log.DebugLevel'] = 1
 config_properties['Log.Rotation.BackupCount'] = 5
 config_properties['Log.Rotation.MaxBytes'] = 104857600  # 100 Megabytes
+config_properties['AminerId'] = 'demo-aminer'
 
 # Add your ruleset here:
 
@@ -90,6 +91,7 @@ def build_analysis_pipeline(analysis_context):
     cron = b' cron['
 
     # Build the parsing model:
+    import pytz
     from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
     from aminer.parsing.SequenceModelElement import SequenceModelElement
     from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
@@ -177,7 +179,7 @@ def build_analysis_pipeline(analysis_context):
             AnyByteDataModelElement('remainding_data')])]
 
     service_children_parsing_model_element = [
-        DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'),
+        DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S', pytz.timezone('UTC')),
         DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'),
         DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'),
         SequenceModelElement('se', [
@@ -256,7 +258,8 @@ def build_analysis_pipeline(analysis_context):
     # based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers, default_timestamp_path_list=["/model/DailyCron/DTM"])
+        parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers, default_timestamp_path_list=["/model/DailyCron/DTM"],
+        use_real_time=True)
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
@@ -317,6 +320,11 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(vtd, component_name="VariableCorrelationDetector")
     atom_filter.add_handler(vtd)
 
+    from aminer.analysis.TSAArimaDetector import TSAArimaDetector
+    tsaad = TSAArimaDetector(analysis_context.aminer_config, anomaly_event_handlers, etd)
+    analysis_context.register_component(tsaad, component_name="TSAArimaDetector")
+    atom_filter.add_handler(tsaad)
+
     from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
                                    hypothesis_max_delta_time=1.0, learn_mode=True)
@@ -369,14 +377,14 @@ def build_analysis_pipeline(analysis_context):
     ip_match_action = Rules.EventGenerationMatchAction(
         "Analysis.Rules.IPv4InRFC1918MatchRule", "Private IP address occurred!", anomaly_event_handlers)
 
-    vdmt = Rules.ValueDependentModuloTimeMatchRule(None, 3, ["/model/ECD/j", "/model/ECD/k", "/model/ECD/l"], {b"e": [0, 2.95]}, [0, 3])
-    mt = Rules.ModuloTimeMatchRule(None, 3, 0, 3, None)
+    vdmt = Rules.ValueDependentModuloTimeMatchRule("vdmtmr", 3, ["/model/ECD/j", "/model/ECD/k", "/model/ECD/l"], {b"e": [0, 2.95]}, [0, 3])
+    mt = Rules.ModuloTimeMatchRule("mtmr", 3, 0, 3, None)
     time_allowlist_rules = [
         Rules.AndMatchRule([
             Rules.ParallelMatchRule([
                 Rules.ValueDependentDelegatedMatchRule([
                     '/model/ECD/g', '/model/ECD/h', '/model/ECD/i', '/model/ECD/j', '/model/ECD/k', '/model/ECD/l'], {
-                        (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt, None: mt}, mt),
+                        (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt}, mt),
                 Rules.IPv4InRFC1918MatchRule("/model/ParsingME/se2/IpAddressDataModelElement", ip_match_action),
                 Rules.DebugHistoryMatchRule(debug_match_result=True)
             ]),
@@ -422,7 +430,7 @@ def build_analysis_pipeline(analysis_context):
     from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
     new_match_path_value_combo_detector = NewMatchPathValueComboDetector(
         analysis_context.aminer_config, ['/model/IPAddresses/Username', '/model/IPAddresses/IP'], anomaly_event_handlers,
-        output_logline=True, learn_mode=True)
+        output_logline=True, learn_mode=True, log_resource_ignore_list=['file:///tmp/other_syslog'])
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewMatchPathValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
 
@@ -462,7 +470,6 @@ def build_analysis_pipeline(analysis_context):
     rules = [Rules.PathExistsMatchRule('/model/CronAnnouncement/Run', a_class_selector),
              Rules.PathExistsMatchRule('/model/CronExecution/Job', b_class_selector)]
 
-    time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers,
-                                                                           output_logline=True)
+    time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers)
     analysis_context.register_component(time_correlation_violation_detector, component_name="TimeCorrelationViolationDetector")
     atom_filter.add_handler(time_correlation_violation_detector)

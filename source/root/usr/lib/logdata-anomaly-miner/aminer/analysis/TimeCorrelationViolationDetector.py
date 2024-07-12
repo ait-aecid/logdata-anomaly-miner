@@ -11,15 +11,12 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-import time
 import logging
 
-from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, build_persistence_file_name, DEBUG_LOG_NAME
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util.History import LogarithmicBackoffHistory
-from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 from aminer.analysis import Rules
 
@@ -32,22 +29,22 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, persistence_id='Default', output_logline=True):
+    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
         @param ruleset a list of MatchRule rules with appropriate CorrelationRules attached as actions.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
-        @param persistence_id name of persistence file.
-        @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
-        self.next_persist_time, self.log_success, self.log_total = [None]*3
-        super().__init__(
-            aminer_config=aminer_config, ruleset=ruleset, anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id,
-            output_logline=output_logline
-        )
-        self.last_log_atom = None
+        self.last_log_atom, self.next_persist_time, self.log_success, self.log_total = [None]*4
+        super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers,
+                         log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"])
 
+        self.ruleset = ruleset
+        if not isinstance(ruleset, list) or not all(isinstance(x, Rules.MatchRule) for x in ruleset):
+            msg = "ruleset must be a list of MatchRules."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         event_correlation_set = set()
         for rule in self.ruleset:
             if rule.match_action.artefact_a_rules is not None:
@@ -56,11 +53,11 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
                 event_correlation_set |= set(rule.match_action.artefact_b_rules)
         self.event_correlation_ruleset = list(event_correlation_set)
 
-        self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
-        PersistenceUtil.add_persistable_component(self)
-
     def receive_atom(self, log_atom):
         """Receive a parsed atom and evaluate all the classification rules and event triggering on violations."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name == source:
+                return
         self.log_total += 1
         self.last_log_atom = log_atom
         for rule in self.ruleset:
@@ -69,14 +66,6 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     def do_timer(self, trigger_time):
         """Check for any rule violations and if the current ruleset should be persisted."""
-        # Persist the state only quite infrequently: As most correlation rules react in timeline of seconds, the persisted data will most
-        # likely be unsuitable to catch lost events. So persistence is mostly to capture the correlation rule context, e.g. the history
-        # of loglines matched before.
-        if self.next_persist_time - trigger_time <= 0:
-            self.do_persist()
-            self.next_persist_time = time.time() + self.aminer_config.config_properties.get(
-                KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
         # Check all correlation rules, generate single events for each violated rule, possibly containing multiple records. As we might
         # be processing historic data, the timestamp last seen is unknown here. Hence, rules not receiving newer events might not notice
         # for a long time, that they hold information about correlation impossible to fulfil. Take the newest timestamp of any rule
@@ -90,25 +79,21 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
             if check_result is None:
                 continue
             self.last_log_atom.set_timestamp(trigger_time)
-            r = {'RuleId': rule.rule_id, 'MinTimeDelta': rule.min_time_delta, 'MaxTimeDelta': rule.max_time_delta,
-                 'ArtefactMatchParameters': rule.artefact_match_parameters, 'HistoryAEvents': rule.history_a_events,
-                 'HistoryBEvents': rule.history_b_events, 'LastTimestampSeen': rule.last_timestamp_seen}
-            history = {'MaxItems': rule.correlation_history.max_items}
+            r = {"RuleId": rule.rule_id, "MinTimeDelta": rule.min_time_delta, "MaxTimeDelta": rule.max_time_delta,
+                 "ArtefactMatchParameters": rule.artefact_match_parameters, "HistoryAEvents": rule.history_a_events,
+                 "HistoryBEvents": rule.history_b_events, "LastTimestampSeen": rule.last_timestamp_seen}
+            history = {"MaxItems": rule.correlation_history.max_items}
             h = []
             for item in rule.correlation_history.history:
                 h.append(repr(item))
-            history['History'] = h
-            r['correlation_history'] = history
-            analysis_component = {'Rule': r, 'CheckResult': check_result, 'NewestTimestamp': newest_timestamp}
-            event_data = {'AnalysisComponent': analysis_component}
+            history["History"] = h
+            r["correlation_history"] = history
+            analysis_component = {"Rule": r, "CheckResult": check_result, "NewestTimestamp": newest_timestamp}
+            event_data = {"AnalysisComponent": analysis_component}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f'Analysis.{self.__class__.__name__}', f'Correlation rule "{rule.rule_id}" violated',
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", f'Correlation rule "{rule.rule_id}" violated',
                                        [check_result[0]], event_data, self.last_log_atom, self)
         return 10.0
-
-    def do_persist(self):
-        """Immediately write persistence data to storage."""
-        logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def log_statistics(self, component_name):
         """
@@ -117,13 +102,34 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         """
         super().log_statistics(component_name)
         for i, rule in enumerate(self.ruleset):
-            rule.log_statistics(component_name + '.' + rule.__class__.__name__ + str(i))
+            rule.log_statistics(component_name + "." + rule.__class__.__name__ + str(i))
 
 
 class EventClassSelector(Rules.MatchAction):
     """This match action selects one event class by adding it to a MatchRule. It then triggers the appropriate CorrelationRules."""
 
     def __init__(self, action_id, artefact_a_rules, artefact_b_rules):
+        if not isinstance(action_id, str):
+            msg = "action_id must be a string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(action_id) == 0:
+            msg = "action_id must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not artefact_a_rules and not artefact_b_rules:
+            msg = "At least one of artefact_a_rules and artefact_b_rules must not be None or empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not artefact_a_rules and isinstance(artefact_a_rules, (list, type(None))):
+            artefact_a_rules = []
+        if not artefact_b_rules and isinstance(artefact_b_rules, (list, type(None))):
+            artefact_b_rules = []
+        if not isinstance(artefact_a_rules, list) or not isinstance(artefact_b_rules, list) or \
+                not all(isinstance(x, CorrelationRule) for x in artefact_a_rules + artefact_b_rules):
+            msg = "artefact_a_rules and artefact_b_rules must be lists of CorrelationRules."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.action_id = action_id
         self.artefact_a_rules = artefact_a_rules
         self.artefact_b_rules = artefact_b_rules
@@ -133,10 +139,10 @@ class EventClassSelector(Rules.MatchAction):
         Invoke if a rule has matched.
         @param log_atom the parser match_element that was also matching the rules.
         """
-        if self.artefact_a_rules is not None:
+        if self.artefact_a_rules:
             for a_rule in self.artefact_a_rules:
                 a_rule.update_artefact_a(self, log_atom)
-        if self.artefact_b_rules is not None:
+        if self.artefact_b_rules:
             for b_rule in self.artefact_b_rules:
                 b_rule.update_artefact_b(self, log_atom)
 
@@ -147,7 +153,7 @@ class CorrelationRule:
     A hidden event A* always triggers at least one artefact A and the hidden event B*, thus triggering also at least one artefact B.
     """
 
-    def __init__(self, rule_id, min_time_delta, max_time_delta, artefact_match_parameters=None):
+    def __init__(self, rule_id, min_time_delta, max_time_delta, artefact_match_parameters=None, max_violations=20):
         """
         Create the correlation rule.
         @param rule_id a unique identifier of the rule.
@@ -162,10 +168,41 @@ class CorrelationRule:
         self.min_time_delta = min_time_delta
         self.max_time_delta = max_time_delta
         self.artefact_match_parameters = artefact_match_parameters
+        self.max_violations = max_violations
         self.history_a_events = []
         self.history_b_events = []
         self.last_timestamp_seen = 0.0
         self.correlation_history = LogarithmicBackoffHistory(10)
+        if not isinstance(rule_id, str):
+            msg = "rule_id must be a string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(rule_id) == 0:
+            msg = "rule_id must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if isinstance(min_time_delta, bool) or not isinstance(min_time_delta, (int, float)):
+            msg = "min_time_delta must be integer or float."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if isinstance(max_time_delta, bool) or not isinstance(max_time_delta, (int, float)):
+            msg = "max_time_delta must be integer or float."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if min_time_delta >= max_time_delta or min_time_delta < 0:
+            msg = "min_time_delta must be smaller than max_time_delta and both values must be bigger than zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if artefact_match_parameters is not None and (
+                not isinstance(artefact_match_parameters, list) or
+                not all(isinstance(x, tuple) and all(isinstance(y, str) for y in x) for x in artefact_match_parameters)):
+            msg = "artefact_match_parameters must be a list of tuples of strings."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if isinstance(max_violations, bool) or not isinstance(max_violations, int):
+            msg = "max_violations must be integer."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
 
     def update_artefact_a(self, selector, log_atom):
         """Append entry to the event history A."""
@@ -179,13 +216,13 @@ class CorrelationRule:
         # Check if event B could be discarded immediately.
         self.history_b_events.append(history_entry)
 
-    def check_status(self, newest_timestamp, max_violations=20):
+    def check_status(self, newest_timestamp):
         """@return None if status is OK. Return a tuple containing a descriptive message and a list of violating log data lines on error."""
-        # This part of code would be good target to be implemented as native library with optimized algorithm in future.
+        # This part of code would be good target to be implemented as native library with optimized algorithm in the future.
         a_pos = 0
         check_range = len(self.history_a_events)
         violation_logs = []
-        violation_message = ''
+        violation_message = ""
         num_violations = 0
         while a_pos < check_range:
             deleted = False
@@ -208,9 +245,9 @@ class CorrelationRule:
                         violation_line = a_event[3].match_element.match_string
                         if isinstance(violation_line, bytes):
                             violation_line = violation_line.decode()
-                            if num_violations <= max_violations:
-                                violation_message += f'FAIL: B-Event for \"{violation_line}\" ({a_event[2].action_id}) was found too' \
-                                                     f' early!\n'
+                            if num_violations < self.max_violations:
+                                violation_message += f"FAIL: B-Event for \"{violation_line}\" ({a_event[2].action_id}) was found too" \
+                                                     f" early!\n"
                             violation_logs.append(violation_line)
                             del self.history_a_events[a_pos]
                             del self.history_b_events[b_pos]
@@ -224,9 +261,9 @@ class CorrelationRule:
                     violation_line = a_event[3].match_element.match_string
                     if isinstance(violation_line, bytes):
                         violation_line = violation_line.decode()
-                        if num_violations <= max_violations:
-                            violation_message += f'FAIL: B-Event for \"{violation_line}\" ({ a_event[2].action_id}) was not found in' \
-                                                 f' time!\n'
+                        if num_violations < self.max_violations:
+                            violation_message += f"FAIL: B-Event for \"{violation_line}\" ({ a_event[2].action_id}) was not found in" \
+                                                 f" time!\n"
                         violation_logs.append(violation_line)
                         del self.history_a_events[a_pos]
                         del self.history_b_events[b_pos]
@@ -236,14 +273,14 @@ class CorrelationRule:
                     break
                 # So time range is OK, see if match parameters are also equal.
                 violation_found = False
-                for check_pos in range(4, len(a_event)):  # skipcq: PTC-W0060
+                for check_pos in range(4, len(a_event)):
                     if a_event[check_pos] != b_event[check_pos]:
                         violation_line = a_event[3].match_element.match_string
                         if isinstance(violation_line, bytes):
                             violation_line = violation_line.decode()
-                            if num_violations <= max_violations:
-                                violation_message += f'FAIL: \"{violation_line}\" ({a_event[2].action_id}) {a_event[check_pos]} is not' \
-                                                     f' equal {b_event[check_pos]}\n'
+                            if num_violations < self.max_violations:
+                                violation_message += f"FAIL: \"{violation_line}\" ({a_event[2].action_id}) {a_event[check_pos]} is not" \
+                                                     f" equal {b_event[check_pos]}\n"
                             violation_logs.append(violation_line)
                             del self.history_a_events[a_pos]
                             del self.history_b_events[b_pos]
@@ -252,7 +289,6 @@ class CorrelationRule:
                             num_violations = num_violations + 1
                             violation_found = True
                         break
-                check_pos = check_pos + 1
                 if violation_found:
                     continue
 
@@ -277,8 +313,8 @@ class CorrelationRule:
                 violation_line = a_event[3].match_element.match_string
                 if isinstance(violation_line, bytes):
                     violation_line = violation_line.decode()
-                    if num_violations <= max_violations:
-                        violation_message += f'FAIL: B-Event for \"{violation_line}\" ({a_event[2].action_id}) was not found in time!\n'
+                    if num_violations <= self.max_violations:
+                        violation_message += f"FAIL: B-Event for \"{violation_line}\" ({a_event[2].action_id}) was not found in time!\n"
                     violation_logs.append(violation_line)
                     del self.history_a_events[a_pos]
                     deleted = True
@@ -286,10 +322,10 @@ class CorrelationRule:
                     num_violations = num_violations + 1
                 break
 
-        if num_violations > max_violations:
-            violation_message += f'... ({num_violations - max_violations} more)\n'
+        if num_violations > self.max_violations:
+            violation_message += f"... ({num_violations - self.max_violations} more)\n"
         if num_violations != 0 and len(self.correlation_history.get_history()) > 0:
-            violation_message += 'Historic examples:\n'
+            violation_message += "Historic examples:\n"
             for record in self.correlation_history.get_history():
                 violation_message += f'  "{record[0].decode()}" ({record[1]}) ==> "{record[2].decode()}" ({record[3]})\n'
 
@@ -301,8 +337,6 @@ class CorrelationRule:
         """Return a history entry for a parser match."""
         parser_match = log_atom.parser_match
         timestamp = log_atom.get_timestamp()
-        if timestamp is None:
-            timestamp = time.time()
         length = 4
         if self.artefact_match_parameters is not None:
             length += len(self.artefact_match_parameters)
@@ -313,7 +347,7 @@ class CorrelationRule:
         result[3] = parser_match
 
         if result[0] < self.last_timestamp_seen:
-            msg = 'Timestamps unsorted!'
+            msg = "Timestamps unsorted!"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.last_timestamp_seen = result[0]

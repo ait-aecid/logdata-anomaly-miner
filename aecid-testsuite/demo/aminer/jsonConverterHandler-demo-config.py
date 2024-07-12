@@ -247,8 +247,8 @@ def build_analysis_pipeline(analysis_context):
 
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
-    analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(parsing_model, [simple_monotonic_timestamp_adjust],
-                                                                            anomaly_event_handlers)
+    analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
+        parsing_model, [simple_monotonic_timestamp_adjust], anomaly_event_handlers, use_real_time=True)
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler, VerboseUnparsedAtomHandler
@@ -360,14 +360,14 @@ def build_analysis_pipeline(analysis_context):
     ip_match_action = Rules.EventGenerationMatchAction(
         "Analysis.Rules.IPv4InRFC1918MatchRule", "Private IP address occurred!", anomaly_event_handlers)
 
-    vdmt = Rules.ValueDependentModuloTimeMatchRule(None, 3, ["/model/ECD/j", "/model/ECD/k", "/model/ECD/l"], {b"e": [0, 2.95]}, [0, 3])
-    mt = Rules.ModuloTimeMatchRule(None, 3, 0, 3, None)
+    vdmt = Rules.ValueDependentModuloTimeMatchRule("vdmtmr", 3, ["/model/ECD/j", "/model/ECD/k", "/model/ECD/l"], {b"e": [0, 2.95]}, [0, 3])
+    mt = Rules.ModuloTimeMatchRule("mtmr", 3, 0, 3, None)
     time_allowlist_rules = [
         Rules.AndMatchRule([
             Rules.ParallelMatchRule([
                 Rules.ValueDependentDelegatedMatchRule([
                     '/model/ECD/g', '/model/ECD/h', '/model/ECD/i', '/model/ECD/j', '/model/ECD/k', '/model/ECD/l'], {
-                        (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt, None: mt}, mt),
+                        (b"a",): mt, (b"b",): mt, (b"c",): mt, (b"d",): vdmt, (b"e",): vdmt, (b"f",): vdmt}, mt),
                 Rules.IPv4InRFC1918MatchRule("/model/ParsingME/se2/IpAddressDataModelElement", ip_match_action),
                 Rules.DebugHistoryMatchRule(debug_match_result=True)
             ]),
@@ -453,7 +453,6 @@ def build_analysis_pipeline(analysis_context):
     rules = [Rules.PathExistsMatchRule('/model/CronAnnouncement/Run', a_class_selector),
              Rules.PathExistsMatchRule('/model/CronExecution/Job', b_class_selector)]
 
-    time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers,
-                                                                           output_logline=True)
+    time_correlation_violation_detector = TimeCorrelationViolationDetector(analysis_context.aminer_config, rules, anomaly_event_handlers)
     analysis_context.register_component(time_correlation_violation_detector, component_name="TimeCorrelationViolationDetector")
     atom_filter.add_handler(time_correlation_violation_detector)

@@ -12,18 +12,17 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import time
 import os
 import logging
 
 from aminer.AminerConfig import build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME
 from aminer.AnalysisChild import AnalysisContext
-from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
 
-class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface):
+class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
     """
     This detector calculates the average of a given list of values to monitor.
     Reports are generated if the average of the latest diverges significantly from the values observed before.
@@ -32,7 +31,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, target_path_list, min_bin_elements, min_bin_time,
-                 debug_mode=False, persistence_id='Default', output_logline=True):
+                 debug_mode=False, persistence_id="Default", output_logline=True, learn_mode=False, avg_factor=1, var_factor=2,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """
         Initialize the detector. This will also trigger reading or creation of persistence storage location.
         @param aminer_config configuration from analysis_context.
@@ -40,48 +40,47 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         @param timestamp_path if not None, use this path value for timestamp based bins.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
                considered for value range generation.
+        @param learn_mode specifies whether new statistics should be learned.
         @param min_bin_elements evaluate the latest bin only after at least that number of elements was added to it.
         @param min_bin_time evaluate the latest bin only when the first element is received after min_bin_time has elapsed.
+        @param avg_factor the maximum allowed deviation for the average value before an anomaly is raised.
+        @param var_factor the maximum allowed deviation for the variance of the value before an anomaly is raised.
         @param debug_mode if true, generate an analysis report even when average of last bin was within expected range.
         @param persistence_id name of persistence file.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         """
         # avoid "defined outside init" issue
-        self.next_persist_time, self.log_success, self.log_total = [None] * 3
+        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, timestamp_path=timestamp_path,
             target_path_list=target_path_list, min_bin_elements=min_bin_elements, min_bin_time=min_bin_time, debug_mode=debug_mode,
-            persistence_id=persistence_id, output_logline=output_logline
+            persistence_id=persistence_id, output_logline=output_logline, avg_factor=avg_factor, var_factor=var_factor,
+            learn_mode=learn_mode, stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
+            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
         )
+        if not self.target_path_list:
+            msg = "target_path_list must not be empty or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         self.stat_data = []
-        for path in target_path_list:
-            self.stat_data.append((path, [],))
-        if persistence_data is not None:
-            for val in persistence_data:
-                if isinstance(val, str):
-                    val = val.strip('[').strip(']').split(',', 2)
-                    path = val[0].strip('"')
-                    values = val[1].strip(' ').strip('[').strip(']')
-                else:
-                    path = val[0]
-                    values = val[1]
-                index = 0
-                for p, _ in self.stat_data:
-                    if p == path:
-                        break
-                    index += 1
-                for value in values:
-                    self.stat_data[index][1].append(value)
+        self.load_persistence_data()
 
     def receive_atom(self, log_atom):
         """Send summary to all event handlers."""
+        for source in self.log_resource_ignore_list:
+            if log_atom.source.resource_name.decode() == source:
+                return
         self.log_total += 1
         parser_match = log_atom.parser_match
         value_dict = parser_match.get_match_dictionary()
+
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
+                self.stop_learning_timestamp < log_atom.atom_time:
+            logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
+            self.learn_mode = False
 
         timestamp_value = log_atom.get_timestamp()
         if self.timestamp_path is not None:
@@ -89,53 +88,56 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             if match_value is None:
                 return
             timestamp_value = match_value.match_object
-            event_data = {'MatchValue': match_value.match_object}
+            event_data = {"MatchValue": match_value.match_object}
 
-        analysis_summary = ''
+        analysis_summary = ""
         ready_for_analysis_flag = True
         for (path, stat_data) in self.stat_data:
             match = value_dict.get(path)
             if match is None:
-                ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, None))
+                ready_for_analysis_flag = (self.update(stat_data, timestamp_value, None) and ready_for_analysis_flag)
             else:
+                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_timestamp = max(
+                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 if isinstance(match, list):
                     data = []
                     for m in match:
                         data.append(m.match_object)
                 else:
                     data = match.match_object
-                ready_for_analysis_flag = (ready_for_analysis_flag and self.update(stat_data, timestamp_value, data))
+                ready_for_analysis_flag = (self.update(stat_data, timestamp_value, data) and ready_for_analysis_flag)
 
         if ready_for_analysis_flag:
             anomaly_scores = []
             for (path, stat_data) in self.stat_data:
                 analysis_data = self.analyze(stat_data)
                 if analysis_data is not None:
-                    d = {'Path': path}
+                    d = {"Path": path}
                     a = {}
-                    new = {'N': analysis_data[1], 'Avg': analysis_data[2], 'Var': analysis_data[3]}
-                    old = {'N': analysis_data[4], 'Avg': analysis_data[5], 'Var': analysis_data[6]}
-                    a['New'] = new
-                    a['Old'] = old
-                    d['AnalysisData'] = a
-                    if analysis_summary == '':
+                    new = {"N": analysis_data[1], "Avg": analysis_data[2], "Var": analysis_data[3]}
+                    old = {"N": analysis_data[4], "Avg": analysis_data[5], "Var": analysis_data[6]}
+                    a["New"] = new
+                    a["Old"] = old
+                    d["AnalysisData"] = a
+                    if analysis_summary == "":
                         analysis_summary += f'"{path}": {analysis_data[0]}'
                     else:
                         analysis_summary += os.linesep
                         analysis_summary += f'  "{path}": {analysis_data[0]}'
                     anomaly_scores.append(d)
-            analysis_component = {'AffectedLogAtomPaths': list(value_dict),
-                                  'AnomalyScores': anomaly_scores,
-                                  'MinBinElements': self.min_bin_elements,
-                                  'MinBinTime': self.min_bin_time,
-                                  'DebugMode': self.debug_mode}
-            event_data = {'AnalysisComponent': analysis_component}
+            analysis_component = {"AffectedLogAtomPaths": list(value_dict),
+                                  "AnomalyScores": anomaly_scores,
+                                  "MinBinElements": self.min_bin_elements,
+                                  "MinBinTime": self.min_bin_time,
+                                  "DebugMode": self.debug_mode}
+            event_data = {"AnalysisComponent": analysis_component}
 
         if analysis_summary:
-            res = [''] * stat_data[2][0]
+            res = [""] * stat_data[2][0]
             res[0] = analysis_summary
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'Statistical data report', res, event_data, log_atom, self)
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", "Statistical data report", res, event_data, log_atom, self)
         self.log_success += 1
 
     def do_timer(self, trigger_time):
@@ -147,8 +149,32 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         if delta <= 0:
             self.do_persist()
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-            self.next_persist_time = time.time() + delta
+            self.next_persist_time = trigger_time + delta
         return delta
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        for path in self.target_path_list:
+            self.stat_data.append((path, [],))
+
+        def replace_brackets(val):
+            """replace lists with tuples."""
+            if isinstance(val, list):
+                val = tuple(val)
+            return val
+
+        if persistence_data is not None:
+            for val in persistence_data:
+                values = replace_brackets(val[1])
+                index = 0
+                for p, _ in self.stat_data:
+                    if p == val[0]:
+                        break
+                    index += 1
+                for value in values:
+                    value = replace_brackets(value)
+                    self.stat_data[index][1].append(value)
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
@@ -199,19 +225,21 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             stat_data[2] = (current_bin[0], current_bin[1], current_bin[2], current_average, current_variance,)
             stat_data[3] = (0, 0.0, 0.0)
             if self.debug_mode:
-                return f'Initial: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}'
+                return [f"Initial: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}"] + [None]*10
         else:
             total_n = old_bin[0] + current_bin[0]
             total_sum = old_bin[1] + current_bin[1]
             total_sum2 = old_bin[2] + current_bin[2]
 
-            stat_data[2] = (
-                total_n, total_sum, total_sum2, total_sum / total_n, (total_sum2 - (total_sum * total_sum) / total_n) / (total_n - 1))
+            if self.learn_mode:
+                stat_data[2] = (
+                    total_n, total_sum, total_sum2, total_sum / total_n, (total_sum2 - (total_sum * total_sum) / total_n) / (total_n - 1))
             stat_data[3] = (0, 0.0, 0.0)
 
-            if (current_variance > 2 * old_bin[4]) or (abs(current_average - old_bin[3]) > old_bin[4]) or self.debug_mode:
-                res = [f'Change: new: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}; old: n = '
-                       f'{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = { old_bin[4]}', current_bin[0],
+            if (current_variance > self.var_factor * old_bin[4]) or (abs(current_average - old_bin[3]) > self.avg_factor * old_bin[4]) or \
+               self.debug_mode:
+                res = [f"Change: new: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}; old: n = "
+                       f"{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = { old_bin[4]}", current_bin[0],
                        current_average + stat_data[1], current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]]
                 return res
         return None

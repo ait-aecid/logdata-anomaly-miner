@@ -18,7 +18,10 @@
 #
 
 # Pull base image.
-FROM debian:bullseye
+FROM debian:bookworm
+
+# allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Set local timezone
 ENV TZ=Europe/Vienna
@@ -28,9 +31,9 @@ LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 
 # Install necessary debian packages
 ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get update && apt-get install -y \
     python3 \
-    python3-pip \
     python3-pip \
     python3-tz \
     python3-scipy \
@@ -38,13 +41,15 @@ RUN apt-get update && apt-get install -y \
     python3-setuptools \
     python3-dateutil \
     python3-six \
-    python3-scipy \
     python3-kafka \
     python3-cerberus \
     python3-yaml \
     python3-pylibacl \
     python3-urllib3 \
     python3-statsmodels \
+    python3-pandas \
+    python3-patsy \
+    python3-defusedxml \
     libacl1-dev \
     postfix \
     procps \
@@ -53,7 +58,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     postfix \
-    openjdk-11-jre \
+    openjdk-17-jre \
     locales \
     locales-all \
     rsyslog \
@@ -78,8 +83,10 @@ ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
 
 # copy these files instead as symlinks would need absolute paths.
 ADD source/root/etc/aminer/conf-available/ait-lds/* /etc/aminer/conf-enabled/
+ADD source/root/etc/aminer/conf-available/ait-lds2/* /etc/aminer/conf-enabled/
 ADD source/root/etc/aminer/conf-available/generic/* /etc/aminer/conf-enabled/
 ADD source/root/etc/aminer/conf-available/ait-lds /etc/aminer/conf-available/ait-lds
+ADD source/root/etc/aminer/conf-available/ait-lds2 /etc/aminer/conf-available/ait-lds2
 ADD source/root/etc/aminer/conf-available/generic /etc/aminer/conf-available/generic
 
 # Entrypoint-wrapper
@@ -102,6 +109,10 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/six.py /etc/aminer/conf-enabled/six.py \
 	&& ln -s /usr/lib/python3/dist-packages/urllib3 /etc/aminer/conf-enabled/urllib3 \
 	&& ln -s /usr/lib/python3/dist-packages/statsmodels /etc/aminer/conf-enabled/statsmodels \
+	&& ln -s /usr/lib/python3/dist-packages/packaging /etc/aminer/conf-enabled/packaging \
+	&& ln -s /usr/lib/python3/dist-packages/pandas /etc/aminer/conf-enabled/pandas \
+	&& ln -s /usr/lib/python3/dist-packages/patsy /etc/aminer/conf-enabled/patsy \
+	&& ln -s /usr/lib/python3/dist-packages/defusedxml /etc/aminer/conf-enabled/defusedxml \
 	&& useradd -ms /usr/sbin/nologin aminer && mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
     && chown aminer.aminer -R /var/lib/aminer && chmod 0755 /etc/aminer
 

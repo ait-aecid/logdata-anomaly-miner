@@ -6,7 +6,9 @@ This tool parses log data and allows to define analysis pipelines for anomaly de
 
 ## Requirements
 
-In order to install logdata-anomaly-miner a **Linux system** with **python >= 3.6** is required. **Debian-based** distributions are currently recommended. 
+In order to install logdata-anomaly-miner a **Linux system** with **python >= 3.6** is required. All **Ubuntu** and **Debian** versions that we have in the tests are currently recommended.
+There is only experimental support for **Fedora**.
+More specifically the tested systems include Debian Buster, Debian Bullseye, Debian Bookworm, Ubuntu 20.04, Ubuntu 22.04, Fedora (docker image fedora:latest), and RedHat (docker image redhat/ubi9).
 
 _See [requirements.txt](https://github.com/ait-aecid/logdata-anomaly-miner/requirements.txt) for further module dependencies_
 
@@ -15,8 +17,7 @@ _See [requirements.txt](https://github.com/ait-aecid/logdata-anomaly-miner/requi
 
 ### Debian
 
-There are Debian packages for logdata-anomaly-miner in the official Debian/Ubuntu
-repositories.
+There are Debian packages for logdata-anomaly-miner in the official Debian/Ubuntu repositories.
 
 ```
 apt-get update && apt-get install logdata-anomaly-miner
@@ -49,9 +50,10 @@ Here are some resources to read in order to get started with configurations:
 
 Publications and talks:
 
-* Wurzenberger M., Skopik F., Settanni G., Fiedler R. (2018): [AECID: A Self-learning Anomaly Detection Approach Based on Light-weight Log Parser Models](http://www.scitepress.org/DigitalLibrary/Link.aspx?doi=10.5220/0006643003860397). [4th International Conference on Information Systems Security and Privacy (ICISSP 2018)](http://www.icissp.org/), January 22-24, 2018, Funchal, Madeira - Portugal. INSTICC. \[[PDF](https://www.markuswurzenberger.com/wp-content/uploads/2020/05/2018_icissp.pdf)\]
-* Wurzenberger M., Landauer M., Skopik F., Kastner W. (2019): AECID-PG: [AECID-PG: A Tree-Based Log Parser Generator To Enable Log Analysis](https://ieeexplore.ieee.org/document/8717887). [4th IEEE/IFIP International Workshop on Analytics for Network and Service Management (AnNet 2019)](https://annet2019.moogsoft.com/) in conjunction with the [IFIP/IEEE International Symposium on Integrated Network Management (IM)](https://im2019.ieee-im.org/), April 8, 2019, Washington D.C., USA. IEEE. \[[PDF](https://www.markuswurzenberger.com/wp-content/uploads/2020/05/2019_annet.pdf)\]
-* Landauer M., Skopik F., Wurzenberger M., Hotwagner W., Rauber A. (2019): [A Framework for Cyber Threat Intelligence Extraction from Raw Log Data](https://ieeexplore.ieee.org/document/9006328). [International Workshop on Big Data Analytics for Cyber Threat Hunting (CyberHunt 2019)](https://securitylab.no/cyberhunt2019/) in conjunction with the [IEEE International Conference on Big Data 2019](http://bigdataieee.org/BigData2019/), December 9-12, 2019, Los Angeles, CA, USA. IEEE. \[[PDF](https://www.markuswurzenberger.com/wp-content/uploads/2020/05/2019_cyberhunt.pdf)\]
+* Landauer M., Wurzenberger M., Skopik F., Hotwagner W., Höld G. (2023): [AMiner: A Modular Log Data Analysis Pipeline for Anomaly-based Intrusion Detection](https://dl.acm.org/doi/full/10.1145/3567675). [Digital Threats: Research and Practice](https://dl.acm.org/toc/dtrap/2023/4/1), Volume 4, Issue 1. March 2023, pp. 1–16, ACM. \[[PDF](https://dl.acm.org/doi/pdf/10.1145/3567675)\]
+* Wurzenberger M., Skopik F., Settanni G., Fiedler R. (2018): [AECID: A Self-learning Anomaly Detection Approach Based on Light-weight Log Parser Models](http://www.scitepress.org/DigitalLibrary/Link.aspx?doi=10.5220/0006643003860397). [4th International Conference on Information Systems Security and Privacy (ICISSP 2018)](http://www.icissp.org/), January 22-24, 2018, Funchal, Madeira - Portugal. INSTICC. \[[PDF](https://pdfs.semanticscholar.org/cd58/8e51d7a1d7f02f95ef2127623b21e2cd02c6.pdf)\]
+* Wurzenberger M., Landauer M., Skopik F., Kastner W. (2019): AECID-PG: [AECID-PG: A Tree-Based Log Parser Generator To Enable Log Analysis](https://ieeexplore.ieee.org/document/8717887). [4th IEEE/IFIP International Workshop on Analytics for Network and Service Management (AnNet 2019)](https://annet2019.moogsoft.com/) in conjunction with the [IFIP/IEEE International Symposium on Integrated Network Management (IM)](https://im2019.ieee-im.org/), April 8, 2019, Washington D.C., USA. IEEE. \[[PDF](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8717887)\]
+* Landauer M., Skopik F., Wurzenberger M., Hotwagner W., Rauber A. (2019): [A Framework for Cyber Threat Intelligence Extraction from Raw Log Data](https://ieeexplore.ieee.org/document/9006328). [International Workshop on Big Data Analytics for Cyber Threat Hunting (CyberHunt 2019)](https://securitylab.no/cyberhunt2019/) in conjunction with the [IEEE International Conference on Big Data 2019](http://bigdataieee.org/BigData2019/), December 9-12, 2019, Los Angeles, CA, USA. IEEE. \[[PDF](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9006328)\]
 
 A complete list of publications can be found at [https://aecid.ait.ac.at/further-information/](https://aecid.ait.ac.at/further-information/).
 

@@ -2,8 +2,9 @@ import sys
 import os
 import logging
 
-from cerberus import Validator
-from cerberus import TypeDefinition
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
+from cerberus import Validator, TypeDefinition  # skipcq: FLK-E402
 
 
 class ParserModelType:
@@ -73,7 +74,7 @@ class ParserModelType:
                     else:
                         logging.getLogger(DEBUG_LOG_NAME).error(v.errors)
                         raise ValueError(v.errors)
-                    self.func = build_parsing_model(yaml_data)
+                    self.func, _ = build_parsing_model(yaml_data)
                     if callable(self.func):
                         self.func = self.func()
                 else:
