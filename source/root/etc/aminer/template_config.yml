@@ -110,7 +110,7 @@ Parser:
           start: True
           type: SequenceModelElement
           name: 'model'
-          args: 
+          args:
             - apacheModel
 
 Input:

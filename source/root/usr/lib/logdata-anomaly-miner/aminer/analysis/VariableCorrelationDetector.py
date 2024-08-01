@@ -1,4 +1,5 @@
-"""This module defines a detector for correlations between discrete variables."""
+"""This module defines a detector for correlations between discrete
+variables."""
 import numpy as np
 import logging
 import sys
@@ -13,11 +14,13 @@ from aminer.util import PersistenceUtil
 
 
 class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """
-    This class first finds for each eventType a list of pairs of variables, which are afterwards tested if they are correlated.
-    For this a couple of preselection methods can be used. (See self.used_presel_meth)
-    Thereafter the correlations are checked, with the selected methods. (See self.used_cor_meth)
-    This module builds upon the event_type_detector.
+    """This class first finds for each eventType a list of pairs of variables,
+    which are afterwards tested if they are correlated.
+
+    For this a couple of preselection methods can be used. (See
+    self.used_presel_meth) Thereafter the correlations are checked, with
+    the selected methods. (See self.used_cor_meth) This module builds
+    upon the event_type_detector.
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -31,8 +34,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
                  validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, learn_mode=True, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param event_type_detector used to track the number of occurring events.
@@ -189,10 +193,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         # Imports the persistence if self.event_type_detector.load_persistence_data is True
         self.load_persistence_data()
 
-    # skipcq: PYL-W0613
     def receive_atom(self, log_atom):
-        """
-        Receive an parsed atom and the information about the parser match.
+        """Receive an parsed atom and the information about the parser match.
+
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
@@ -285,7 +288,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
 
     def load_persistence_data(self):
-        """Extract the persistence data and appends various lists to create a consistent state."""
+        """Extract the persistence data and appends various lists to create a
+        consistent state."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             self.pos_var_cor = persistence_data[0]
@@ -304,7 +308,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     self.initialized[event_index] = True
 
     def init_cor(self, event_index):
-        """Initialise the possible correlations and runs the init-functions for the methods in self.used_cor_meth."""
+        """Initialise the possible correlations and runs the init-functions for
+        the methods in self.used_cor_meth."""
         # Append the supporting lists if necessary
         if len(self.pos_var_cor) < event_index+1:
             for i in range(event_index + 1 - len(self.pos_var_cor)):
@@ -320,7 +325,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         if len(self.discrete_indices[event_index]) == 0:
             # If the var_typeD is linked, append the discrete fields
             if self.variable_type_detector is not None:
-                for i in range(len(self.event_type_detector.variable_key_list[event_index])):  # skipcq: PTC-W0060
+                for i in range(len(self.event_type_detector.variable_key_list[event_index])):
                     if len(self.variable_type_detector.var_type[event_index][i]) > 0 and \
                             self.variable_type_detector.var_type[event_index][i][0] == "d" and (
                             self.target_path_list == [] or
@@ -334,7 +339,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         var_index for var_index in range(len(self.event_type_detector.variable_key_list[event_index])) if
                         self.target_path_list == [] or
                         self.event_type_detector.variable_key_list[event_index][var_index] in self.target_path_list]
-                for i in range(len(self.event_type_detector.values[event_index]) - 1, -1, -1):  # skipcq: PTC-W0060
+                for i in range(len(self.event_type_detector.values[event_index]) - 1, -1, -1):
                     tmp_list = list(set(self.event_type_detector.values[event_index][i][-self.num_init:]))
                     if len(tmp_list) == 1 or (len(tmp_list) > self.disc_div_thres * self.num_init):
                         del self.discrete_indices[event_index][i]
@@ -356,8 +361,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 for meth in self.used_presel_meth:
                     tmp_pos_var_cor = []  # List of the possible correlations for one preselection method
                     if self.variable_type_detector is None:
-                        variable_values = [[] for _ in range(len(self.discrete_indices[event_index]))]  # skipcq: PTC-W0060
-                        variable_distributions = [[] for _ in range(len(self.discrete_indices[event_index]))]  # skipcq: PTC-W0060
+                        variable_values = [[] for _ in range(len(self.discrete_indices[event_index]))]
+                        variable_distributions = [[] for _ in range(len(self.discrete_indices[event_index]))]
                         for i, val in enumerate(self.discrete_indices[event_index]):
                             for j in range(-1, -self.num_init-1, -1):
                                 if self.event_type_detector.values[event_index][val][j] not in variable_values[i]:
@@ -378,7 +383,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                     # Add the index to the list of useable indices if it is not excluded
                                     useable_indices.append(i)
                         else:
-                            for i in range(len(self.discrete_indices[event_index])):  # skipcq: PTC-W0060
+                            for i in range(len(self.discrete_indices[event_index])):
                                 if self.pick_cor_exclude_due_distr(variable_distributions[i]):
                                     # Add the index to the list of useable indices if it is not excluded
                                     useable_indices.append(i)
@@ -387,15 +392,15 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     elif meth == "matchDiscDistr":
                         if self.variable_type_detector is not None:
                             for i, val in enumerate(self.discrete_indices[event_index]):
-                                for j in range(i+1, len(val)):  # skipcq: PTC-W0060
+                                for j in range(i+1, len(val)):
                                     if self.pick_cor_match_disc_distr(self.variable_type_detector.var_type[event_index][
                                         val][2], self.variable_type_detector.var_type[event_index][
                                             self.discrete_indices[event_index][j]][2]):
                                         # If self.pick_cor_match_disc_distr returned True the indices are being appended
                                         tmp_pos_var_cor.append([i, j])
                         else:
-                            for i in range(len(self.discrete_indices[event_index])):  # skipcq: PTC-W0060
-                                for j in range(i+1, len(self.discrete_indices[event_index])):  # skipcq: PTC-W0060
+                            for i in range(len(self.discrete_indices[event_index])):
+                                for j in range(i+1, len(self.discrete_indices[event_index])):
                                     if self.pick_cor_match_disc_distr(variable_distributions[i], variable_distributions[j]):
                                         # If self.pick_cor_match_disc_distr returned True the indices are being appended
                                         tmp_pos_var_cor.append([i, j])
@@ -403,15 +408,15 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     elif meth == "matchDiscVals":
                         if self.variable_type_detector is not None:
                             for i, val in enumerate(self.discrete_indices[event_index]):
-                                for j in range(i+1, len(self.discrete_indices[event_index])):  # skipcq: PTC-W0060
+                                for j in range(i+1, len(self.discrete_indices[event_index])):
                                     if self.pick_cor_match_disc_vals(self.variable_type_detector.var_type[event_index][
                                         val][1], self.variable_type_detector.var_type[event_index][
                                             self.discrete_indices[event_index][j]][1]):
                                         # If self.pick_cor_match_disc_vals returned True the indices are being appended
                                         tmp_pos_var_cor.append([i, j])
                         else:
-                            for i in range(len(self.discrete_indices[event_index])):  # skipcq: PTC-W0060
-                                for j in range(i+1, len(self.discrete_indices[event_index])):  # skipcq: PTC-W0060
+                            for i in range(len(self.discrete_indices[event_index])):
+                                for j in range(i+1, len(self.discrete_indices[event_index])):
                                     if self.pick_cor_match_disc_vals(variable_values[i], variable_values[j]):
                                         # If self.pick_cor_match_disc_vals returned True the indices are being appended
                                         tmp_pos_var_cor.append([i, j])
@@ -426,7 +431,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         self.pos_var_cor[event_index] = tmp_pos_var_cor
                     # Intercept self.pos_var_cor
                     elif self.intersect_presel_meth:
-                        for i in range(len(self.pos_var_cor[event_index]) - 1, -1, -1):  # skipcq: PTC-W0060
+                        for i in range(len(self.pos_var_cor[event_index]) - 1, -1, -1):
                             if self.pos_var_cor[event_index][i] not in tmp_pos_var_cor:
                                 del self.pos_var_cor[event_index][i]
                     # Append self.pos_var_cor
@@ -449,7 +454,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             for i in range(event_index + 1 - len(self.rel_list)):
                 self.rel_list.append([])
         if len(self.rel_list[event_index]) == 0:
-            for i in range(len(self.pos_var_cor[event_index])):  # skipcq: PTC-W0060
+            for i in range(len(self.pos_var_cor[event_index])):
                 self.rel_list[event_index].append([{}, {}])
 
         # Only calculate the correlations once, because the used method allows to efficiently calculate both directions in parallel
@@ -504,19 +509,20 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     self.rel_list[event_index][pos_var_cor_index][1][j_val][i_val] += 1
 
     def init_cor_w_rel(self, event_index):
-        """Initialize w_rel_list and runs init_single_cor_w_rel for the chosen indices."""
+        """Initialize w_rel_list and runs init_single_cor_w_rel for the chosen
+        indices."""
         # Append the w_rel_list and w_rel_num_ll_to_vals if necessary
         if len(self.w_rel_list) < event_index+1:
             for _ in range(event_index + 1 - len(self.w_rel_list)):
                 self.w_rel_list.append([])
                 self.w_rel_num_ll_to_vals.append([])
         if len(self.w_rel_list[event_index]) == 0:
-            for _ in range(len(self.pos_var_cor[event_index])):  # skipcq: PTC-W0060
+            for _ in range(len(self.pos_var_cor[event_index])):
                 self.w_rel_list[event_index].append([{}, {}])
                 self.w_rel_num_ll_to_vals[event_index].append([{}, {}])
 
         # Only initialize the correlations once, because the used method allows to efficiently calculate both directions in parallel
-        for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):  # skipcq: PTC-W0060
+        for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):
             self.init_single_cor_w_rel(event_index, pos_var_cor_index)
 
     def init_single_cor_w_rel(self, event_index, pos_var_cor_index):
@@ -560,7 +566,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
         # Removes the entries of w_rel_list[event_index][pos_var_cor_index] which can not be considered possible correlations
         # Generate the list of entries in i, which should be deleted
-        delete_i_vals = [i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if not(
+        delete_i_vals = [i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if not (
             self.check_cor_w_rel(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values(), len(
                 self.pos_var_val[event_index][j])))]
 
@@ -570,7 +576,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             del self.w_rel_num_ll_to_vals[event_index][pos_var_cor_index][0][i_val]
 
         # Generate the list of entries in j, which should be deleted
-        delete_j_vals = [j_val for j_val in self.w_rel_list[event_index][pos_var_cor_index][1] if not(
+        delete_j_vals = [j_val for j_val in self.w_rel_list[event_index][pos_var_cor_index][1] if not (
             self.check_cor_w_rel(self.w_rel_list[event_index][pos_var_cor_index][1][j_val].values(), len(
                 self.pos_var_val[event_index][i])))]
 
@@ -580,7 +586,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             del self.w_rel_num_ll_to_vals[event_index][pos_var_cor_index][1][j_val]
 
     def update_or_test_cor(self, event_index):
-        """Update or test the possible correlations and removes the false ones."""
+        """Update or test the possible correlations and removes the false
+        ones."""
         for meth in self.used_cor_meth:
             if meth == "Rel":
                 self.update_or_test_cor_rel(event_index)
@@ -626,7 +633,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             pos_var_cor_index][0][i_val]:
                         if not self.generate_rules[event_index] or i_val not in new_i_vals:
                             sorted_log_lines.append(
-                                # skipcq: PYL-C0209
                                 "New value occurred in correlation of the paths %s = %s -> %s = old value: %s / New appeared value: %s" % (
                                     self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                         pos_var_cor_val[0]]], repr(i_val),
@@ -655,7 +661,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             pos_var_cor_index][1][j_val]:
                         if not self.generate_rules[event_index] or j_val not in new_j_vals:
                             sorted_log_lines.append(
-                                # skipcq: PYL-C0209
                                 "New value occurred in correlation of the paths %s = %s -> %s = old value: %s / New appeared value: %s" % (
                                     self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                         pos_var_cor_val[1]]], repr(j_val),
@@ -737,7 +742,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                 # Print the message of the reported values
                 for i_val in reported_values_ij:
-                    # skipcq: PYL-C0209
                     message = "Correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line" % (
                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                             pos_var_cor_val[0]]], repr(i_val),
@@ -767,7 +771,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                 # Print the message of the reported values
                 for j_val in reported_values_ji:
-                    # skipcq: PYL-C0209
                     message = "Correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line" % (
                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                             pos_var_cor_val[1]]], repr(j_val),
@@ -849,7 +852,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
         if self.generate_rules[event_index]:
             # generates new rules or appends new values to existing rules
-            for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):  # skipcq: PTC-W0060
+            for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):
                 # Only consider the possible correlations which have been initialized
                 if current_appearance_list[pos_var_cor_index] != [{}, {}]:
                     # Check correlations i=i_val -> j=j_val and decide if the rules should be deleted, extended or updated,
@@ -1072,14 +1075,12 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 if len(current_appearance_list[pos_var_cor_index][0][i_val]) / len(self.w_rel_list[event_index][
                                         pos_var_cor_index][0][i_val]) >= self.new_vals_alarm_thres:
                                     sorted_log_lines.append(
-                                        # skipcq: PYL-C0209
                                         "Alarm: New value occurred in correlation of the paths %s = %s -> %s =" % (
                                                 self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                                     pos_var_cor_val[0]]], repr(i_val),
                                                 self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                                     pos_var_cor_val[1]]]))
                                 else:
-                                    # skipcq: PYL-C0209
                                     sorted_log_lines.append("New value occurred in correlation of the paths %s = %s -> %s =" % (
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             pos_var_cor_val[0]]], repr(i_val),
@@ -1112,14 +1113,12 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                     pos_var_cor_index][1][j_val]):
                                 if len(current_appearance_list[pos_var_cor_index][1][j_val]) / len(self.w_rel_list[event_index][
                                         pos_var_cor_index][1][j_val]) >= self.new_vals_alarm_thres:
-                                    # skipcq: PYL-C0209
                                     sorted_log_lines.append("Alarm: New value occurred in correlation of the paths %s = %s -> %s =" % (
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             pos_var_cor_val[1]]],  repr(j_val),
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             pos_var_cor_val[0]]]))
                                 else:
-                                    # skipcq: PYL-C0209
                                     sorted_log_lines.append("New value occurred in correlation of the paths %s = %s -> %s =" % (
                                         self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                                             pos_var_cor_val[1]]], repr(j_val),
@@ -1203,7 +1202,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 self.w_rel_ht_results[event_index][pos_var_cor_index][1][j_val] = [1] * self.num_bt
                                 self.w_rel_confidences[event_index][pos_var_cor_index][1][j_val] = []
 
-    # skipcq: PYL-R0201
     def homogeneity_test(self, occurrences1, occurrences2, event_index, pos_var_cor_index, cor_direction, value1):
         """Make a two sample test of homogeneity of the given occurrences."""
         if self.used_homogeneity_test == "Chi":
@@ -1238,9 +1236,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     return False
         return True
 
-    # skipcq: PYL-R0201
     def pick_cor_match_disc_distr(self, prob_list1, prob_list2):
-        """Check if the the two discrete distribution could have a possible correlation."""
+        """Check if the the two discrete distribution could have a possible
+        correlation."""
         list1 = prob_list1.copy()
         list2 = prob_list2.copy()
         list1.sort(reverse=True)
@@ -1251,10 +1249,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 return False
         return True
 
-    # skipcq: PYL-R0201
     def pick_cor_exclude_due_distr(self, prob_list):
-        """
-        Check if the the discrete distribution can be expected to have possible correlation.
+        """Check if the the discrete distribution can be expected to have
+        possible correlation.
+
         Returns True for possible correlation and False to be excluded.
         """
         # Assigning epsilon
@@ -1265,9 +1263,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 return False
         return True
 
-    # skipcq: PYL-R0201
     def pick_cor_match_disc_vals(self, val_list1, val_list2):
-        """Check through the values of the two discrete distributions if they could have a possible correlation."""
+        """Check through the values of the two discrete distributions if they
+        could have a possible correlation."""
         if len([val for val in val_list1 if val in val_list2]) > self.match_disc_vals_sim_tresh*min(
                 len(val_list1), len(val_list2)):
             return True
@@ -1307,9 +1305,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         return [[i, j] for i in range(len(self.discrete_indices[event_index])) for j in range(i + 1, len(self.discrete_indices[
             event_index])) if [i, j] not in tmp_list]
 
-    # skipcq: PYL-R0201
     def check_cor_w_rel(self, probability_list, total_pos_val):
-        """Check if the probabilities can be considered a possible correlation."""
+        """Check if the probabilities can be considered a possible
+        correlation."""
         if (self.check_cor_thres * total_pos_val < len(probability_list)) and (
                 total_pos_val > self.check_cor_num_thres or max(probability_list) - min(probability_list) < (
                     self.check_cor_prob_thres * sum(probability_list) / len(probability_list))):
@@ -1317,7 +1315,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         return True
 
     def validate_cor(self):
-        """Validate the found correlations and removes the ones, which fail the requirements."""
+        """Validate the found correlations and removes the ones, which fail the
+        requirements."""
         for meth in self.used_validate_cor_meth:
             if meth == "coverVals":
                 self.validate_cor_cover_vals()
@@ -1325,14 +1324,16 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 self.validate_cor_distinct_distr()
 
     def validate_cor_cover_vals(self):
-        """
-        Rate all found relation in regards to their coverage of the values in the first variable.
-        It removes the ones, which have a low rating and therefore can not considered real relations.
+        """Rate all found relation in regards to their coverage of the values
+        in the first variable.
+
+        It removes the ones, which have a low rating and therefore can
+        not considered real relations.
         """
         for meth in self.used_cor_meth:
             if meth == "Rel":
                 for event_index, event_val in enumerate(self.rel_list):
-                    for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):  # skipcq: PTC-W0060
+                    for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):
                         # Check if the correlations i=i_val -> j=j_val have a high enough score
                         tmp_sum = sum(sum(event_val[pos_var_cor_index][0][i_val].values()) for i_val in event_val[pos_var_cor_index][0])
 
@@ -1347,7 +1348,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
             elif meth == "WRel":
                 for event_index, event_val in enumerate(self.w_rel_list):
-                    for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):  # skipcq: PTC-W0060
+                    for pos_var_cor_index in range(len(self.pos_var_cor[event_index])):
                         # Check if the correlations i=i_val -> j=j_val have a high enough score
                         tmp_sum = sum(sum(event_val[pos_var_cor_index][0][i_val].values()) for i_val in event_val[pos_var_cor_index][0])
 
@@ -1361,9 +1362,10 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             event_val[pos_var_cor_index][1] = {}
 
     def validate_cor_distinct_distr(self):
-        """
-        Compare the right hand sides of the found relations.
-        It removes the correlations, which are too similar to the distribution of the variable type.
+        """Compare the right hand sides of the found relations.
+
+        It removes the correlations, which are too similar to the
+        distribution of the variable type.
         """
         for meth in self.used_cor_meth:
             if meth == "WRel":
@@ -1371,7 +1373,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                     for pos_var_cor_index, pos_var_cor_val in enumerate(self.pos_var_cor[event_index]):
                         # Check if the correlations i=i_val -> j=j_val are distinct enough to be considered independent
                         # List in which the distributions of the single corrs are saved.
-                        distribution_list = [[] for _ in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]]))]  # skipcq: PTC-W0060
+                        distribution_list = [[] for _ in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]]))]
                         # The probabilities can be read out with: distribution_list[j_val][i_val]
                         frequency_list = []  # List which stores the appearance of the single correlations
                         for i_val in event_val[pos_var_cor_index][0]:
@@ -1394,7 +1396,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         # Variance of the correlations
                         variance_list = [0 for _ in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]]))]
                         # Calculate the variance of the single values
-                        for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]])):  # skipcq: PTC-W0060
+                        for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[1]])):
                             variance_list[i] = sum((distribution_list[i][j] - mean_list[i])**2 * frequency_list[j] / total_frequency for j
                                                    in range(len(frequency_list)))
 
@@ -1404,7 +1406,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                         # Check if the correlations j=j_val -> i=i_val are distinct enough to be considered independent
                         # List in which the distributions of the single corrs are saved.
-                        distribution_list = [[] for _ in range(len(self.pos_var_val[event_index][pos_var_cor_val[0]]))]  # skipcq: PTC-W0060
+                        distribution_list = [[] for _ in range(len(self.pos_var_val[event_index][pos_var_cor_val[0]]))]
                         # The probabilities can be read out with: distribution_list[i_val][j_val]
                         frequency_list = []  # List which stores the appearance of the single correlations
                         for j_val in event_val[pos_var_cor_index][1]:
@@ -1429,7 +1431,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         variance_list = [0 for _ in range(len(self.pos_var_val[event_index][pos_var_cor_val[0]]))]
 
                         # Calculate the variance of the single values
-                        for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[0]])):  # skipcq: PTC-W0060
+                        for i in range(len(self.pos_var_val[event_index][pos_var_cor_val[0]])):
                             variance_list[i] = sum((distribution_list[i][j] - mean_list[i])**2 * frequency_list[j] / total_frequency for j
                                                    in range(len(frequency_list)))
 
@@ -1440,7 +1442,6 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
     def print_ini_rel(self, event_index):
         """Print the generated correlations for the method "relations"."""
         message = f"Initialisation of the method relations of the event {self.event_type_detector.get_event_type(event_index)}"
-        # skipcq: PYL-C0209
         message += "\n%s rules have been generated for this event type" % (
                 sum(len(self.rel_list[event_index][pos_var_cor_index][0]) for pos_var_cor_index in range(len(
                     self.rel_list[event_index])) if self.rel_list[event_index][pos_var_cor_index] != [{}, {}]) + sum(len(
@@ -1457,10 +1458,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                 for i_val in pos_var_cor_val[0]:  # Var i=i_val -> Var j=j_val
                     if len(pos_var_cor_val[0][i_val]) > 0 and sum(pos_var_cor_val[0][i_val].values()) > self.min_values_cors_thres:
-                        # skipcq: PYL-C0209
                         sorted_log_lines.append("x) VarPath %s = %s" % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][i]], repr(i_val)))
-                        # skipcq: PYL-C0209
                         sorted_log_lines.append(" ->VarPath %s = %s" % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][j]],
                             [[j_val, pos_var_cor_val[0][i_val][j_val]] for j_val in pos_var_cor_val[0][i_val].keys()]))
@@ -1474,10 +1473,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
 
                 for j_val in pos_var_cor_val[1]:  # Var j=j_val -> Var i=i_val
                     if len(pos_var_cor_val[1][j_val]) > 0 and sum(pos_var_cor_val[1][j_val].values()) > self.min_values_cors_thres:
-                        # skipcq: PYL-C0209
                         sorted_log_lines.append("x) VarPath %s = %s" % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][j]], repr(j_val)))
-                        # skipcq: PYL-C0209
                         sorted_log_lines.append(" ->VarPath %s = %s" % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][i]],
                             [[i_val, pos_var_cor_val[1][j_val][i_val]] for i_val in pos_var_cor_val[1][j_val].keys()]))
@@ -1496,9 +1493,9 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, self.log_atom, self)
 
     def print_ini_w_rel(self, event_index):
-        """Print the generated correlations for the method "weighted relations"."""
+        """Print the generated correlations for the method "weighted
+        relations"."""
         message = f"Initialisation of the method weighted relations of the event {self.event_type_detector.get_event_type(event_index)}"
-        # skipcq: PYL-C0209
         message += "\n%s rules have been generated for this event type" % (
                 sum(len([i_val for i_val in self.w_rel_list[event_index][pos_var_cor_index][0] if len(self.w_rel_list[event_index][
                     pos_var_cor_index][0][i_val]) > 0 and sum(self.w_rel_list[event_index][pos_var_cor_index][0][i_val].values()) >
@@ -1519,10 +1516,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 for i_val in pos_var_cor_val[0]:  # Var i = i_val -> Var j = j_val
                     if len(pos_var_cor_val[0][i_val]) > 0 and sum(pos_var_cor_val[0][i_val].values()) > 50:
                         tmp_sum = sum(pos_var_cor_val[0][i_val].values())
-                        # skipcq: PYL-C0209
                         sorted_log_lines.append("x) VarPath %s = %s" % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][i]], repr(i_val),))
-                        # skipcq: PYL-C0209
                         sorted_log_lines.append(" ->VarPath %s = %s" % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][j]],
                             [[j_val, pos_var_cor_val[0][i_val][j_val] / tmp_sum] for j_val in pos_var_cor_val[0][i_val].keys()]))
@@ -1537,10 +1532,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 for j_val in pos_var_cor_val[1]:  # Var j = j_val -> Var i = i_val
                     if len(pos_var_cor_val[1][j_val]) > 0 and sum(pos_var_cor_val[1][j_val].values()) > 50:
                         tmp_sum = sum(pos_var_cor_val[1][j_val].values())
-                        # skipcq: PYL-C0209
                         sorted_log_lines.append("x) VarPath %s = %s" % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][j]], repr(j_val)))
-                        # skipcq: PYL-C0209
                         sorted_log_lines.append(" ->VarPath %s = %s" % (
                             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][i]],
                             [[i_val, pos_var_cor_val[1][j_val][i_val] / tmp_sum] for i_val in pos_var_cor_val[1][j_val].keys()]))
@@ -1560,12 +1553,12 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, self.log_atom, self)
 
     def print_failed_wrel_test(self, event_index, pos_var_cor_index, cor_direction, value1):
-        """Print the correlations which failed in a test step for the method "weighted relations"."""
+        """Print the correlations which failed in a test step for the method
+        "weighted relations"."""
         cor_direction_neg = 0
         if cor_direction == 0:
             cor_direction_neg = 1
 
-        # skipcq: PYL-C0209
         message = "Correlation of the paths %s = %s -> %s = %s would be rejected after the %s-th line" % (
             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                 self.pos_var_cor[event_index][pos_var_cor_index][cor_direction]]], repr(value1),
@@ -1596,12 +1589,12 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                 f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, self.log_atom, self)
 
     def print_failed_wrel_update(self, event_index, pos_var_cor_index, cor_direction, value1):
-        """Print the correlations which failed in an update step for the method "weighted relations"."""
+        """Print the correlations which failed in an update step for the method
+        "weighted relations"."""
         cor_direction_neg = 0
         if cor_direction == 0:
             cor_direction_neg = 1
 
-        # skipcq: PYL-C0209
         message = "Correlation of the target_path_list %s = %s -> %s = %s has been rejected after the %s-th line" % (
             self.event_type_detector.variable_key_list[event_index][self.discrete_indices[event_index][
                 self.pos_var_cor[event_index][pos_var_cor_index][cor_direction]]], repr(value1),
@@ -1631,11 +1624,12 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             listener.receive_event(
                 f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, self.log_atom, self)
 
-    # skipcq: PYL-R0201
     def bt_min_successes(self, num_BT, p, alpha):
-        """
-        Calculate the minimal number of successes for the BT with significance alpha.
-        p is the probability of success and num_BT is the number of observed tests.
+        """Calculate the minimal number of successes for the BT with
+        significance alpha.
+
+        p is the probability of success and num_BT is the number of
+        observed tests.
         """
         tmp_sum = 0.0
         max_observations_factorial = np.math.factorial(num_BT)

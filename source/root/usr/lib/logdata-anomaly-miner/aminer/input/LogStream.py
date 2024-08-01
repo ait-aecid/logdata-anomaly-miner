@@ -1,5 +1,5 @@
-"""
-This module contains interfaces and classes for logdata resource handling and combining them to resumable virtual LogStream objects.
+"""This module contains interfaces and classes for logdata resource handling
+and combining them to resumable virtual LogStream objects.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -28,14 +28,16 @@ from aminer.input.InputInterfaces import LogDataResource
 
 
 class FileLogDataResource(LogDataResource):
-    """
-    This class defines a single log data resource using an underlying file accessible via the file descriptor.
-    The characteristics of this type of resource is, that reopening and repositioning of the stream has to be possible.
+    """This class defines a single log data resource using an underlying file
+    accessible via the file descriptor.
+
+    The characteristics of this type of resource is, that reopening and
+    repositioning of the stream has to be possible.
     """
 
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
-        """
-        Create a new file type resource.
+        """Create a new file type resource.
+
         @param log_resource_name the unique name of this source as bytes array, has to start with "file://" before the file path.
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
         @param repositioning_data if not None, attempt to position the stream using the given data.
@@ -54,8 +56,7 @@ class FileLogDataResource(LogDataResource):
         self.total_consumed_length = 0
         # Create a hash for repositioning. There is no need to be cryptographically secure here: if upstream can manipulate the content,
         # to provoke hash collisions, correct positioning would not matter anyway.
-        # skipcq: PTC-W1003, BAN-B324
-        self.repositioning_digest = hashlib.md5()
+        self.repositioning_digest = hashlib.md5()  # nosec B303
 
         if (log_stream_fd != -1) and (repositioning_data is not None):
             if repositioning_data[0] != self.stat_data.st_ino:
@@ -67,8 +68,7 @@ class FileLogDataResource(LogDataResource):
                 logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                 print(msg, file=sys.stderr)
             else:
-                # skipcq: PTC-W1003, BAN-B324
-                hash_algo = hashlib.md5()
+                hash_algo = hashlib.md5()  # nosec B303
                 length = repositioning_data[1]
                 while length != 0:
                     block = None
@@ -100,8 +100,8 @@ class FileLogDataResource(LogDataResource):
                     os.lseek(self.log_file_fd, 0, os.SEEK_SET)
 
     def open(self, reopen_flag=False):
-        """
-        Open the given resource.
+        """Open the given resource.
+
         @param reopen_flag when True, attempt to reopen the same resource and check if it differs from the previously opened one.
         @raise Exception if valid log_stream_fd was already provided, is still open and reopen_flag is False.
         @raise OSError when opening failed with unexpected error.
@@ -150,8 +150,9 @@ class FileLogDataResource(LogDataResource):
         return self.log_file_fd
 
     def fill_buffer(self):
-        """
-        Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
+        """Fill the buffer data of this resource.
+
+        The repositioning information is not updated, update_position() has to be used.
         @return the number of bytes read or -1 on error or end.
         """
         data = os.read(self.log_file_fd, self.default_buffer_size)
@@ -159,13 +160,17 @@ class FileLogDataResource(LogDataResource):
         return len(data)
 
     def update_position(self, length):
-        """Update the positioning information and discard the buffer data afterwards."""
+        """Update the positioning information and discard the buffer data
+        afterwards."""
         self.repositioning_digest.update(self.buffer[:length])
         self.total_consumed_length += length
         self.buffer = self.buffer[length:]
 
     def get_repositioning_data(self):
-        """Get the data for repositioning the stream. The returned structure has to be JSON serializable."""
+        """Get the data for repositioning the stream.
+
+        The returned structure has to be JSON serializable.
+        """
         return [self.stat_data.st_ino, self.total_consumed_length, base64.b64encode(self.repositioning_digest.digest())]
 
     def close(self):
@@ -175,15 +180,16 @@ class FileLogDataResource(LogDataResource):
 
 
 class UnixSocketLogDataResource(LogDataResource):
-    """
-    This class defines a single log data resource connecting to a local UNIX socket.
-    The characteristics of this type of resource is, that reopening works only after end of stream of was reached.
+    """This class defines a single log data resource connecting to a local UNIX
+    socket.
+
+    The characteristics of this type of resource is, that reopening
+    works only after end of stream of was reached.
     """
 
-    # skipcq: PYL-W0231, PYL-W0613
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
-        """
-        Create a new unix socket type resource.
+        """Create a new unix socket type resource.
+
         @param log_resource_name the unique name of this source as byte array, has to start with "unix://" before the file path.
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
         @param repositioning_data has to be None for this type of resource.
@@ -199,14 +205,14 @@ class UnixSocketLogDataResource(LogDataResource):
         self.total_consumed_length = 0
 
     def open(self, reopen_flag=False):
-        """
-        Open the given resource.
+        """Open the given resource.
+
         @param reopen_flag when True, attempt to reopen the same resource and check if it differs from the previously opened one.
         @raise Exception if valid log_stream_fd was already provided, is still open and reopenFlag is False.
         @raise OSError when opening failed with unexpected error.
         @return True if the resource was really opened or False if opening was not yet possible but should be attempted again.
         """
-        if reopen_flag:  # skipcq: PTC-W0048
+        if reopen_flag:
             if self.log_stream_fd != -1:
                 return False
         elif self.log_stream_fd != -1:
@@ -239,8 +245,9 @@ class UnixSocketLogDataResource(LogDataResource):
         return self.log_stream_fd
 
     def fill_buffer(self):
-        """
-        Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
+        """Fill the buffer data of this resource.
+
+        The repositioning information is not updated, update_position() has to be used.
         @return the number of bytes read or -1 on error or end.
         """
         data = os.read(self.log_stream_fd, self.default_buffer_size)
@@ -248,13 +255,16 @@ class UnixSocketLogDataResource(LogDataResource):
         return len(data)
 
     def update_position(self, length):
-        """Update the positioning information and discard the buffer data afterwards."""
+        """Update the positioning information and discard the buffer data
+        afterwards."""
         self.total_consumed_length += length
         self.buffer = self.buffer[length:]
 
-    # skipcq: PYL-R0201
     def get_repositioning_data(self):
-        """Get the data for repositioning the stream. The returned structure has to be JSON serializable."""
+        """Get the data for repositioning the stream.
+
+        The returned structure has to be JSON serializable.
+        """
         return None
 
     def close(self):
@@ -264,14 +274,16 @@ class UnixSocketLogDataResource(LogDataResource):
 
 
 class LogStream:
-    """
-    This class defines a continuous stream of logging data from a given source.
-    This class also handles rollover from one file descriptor to a new one.
+    """This class defines a continuous stream of logging data from a given
+    source.
+
+    This class also handles rollover from one file descriptor to a new
+    one.
     """
 
     def __init__(self, log_data_resource, stream_atomizer):
-        """
-        Create a new logstream with an initial logDataResource.
+        """Create a new logstream with an initial logDataResource.
+
         @param stream_atomizer the atomizer to forward data to.
         """
         # The resource currently processed. Might also be None when previous
@@ -284,9 +296,11 @@ class LogStream:
         self.next_resources = []
 
     def add_next_resource(self, next_log_data_resource):
-        """
-        Roll over from one fd to another one pointing to the newer version of the same file.
-        This will also change reading behaviour of current resource to await EOF or stop as soon as first blocking read does not return
+        """Roll over from one fd to another one pointing to the newer version
+        of the same file.
+
+        This will also change reading behaviour of current resource to
+        await EOF or stop as soon as first blocking read does not return
         any data.
         """
         # Just append the resource to the list of next resources. The next read operation without any input from the primary resource
@@ -297,8 +311,8 @@ class LogStream:
             self.next_resources.append(next_log_data_resource)
 
     def handle_stream(self):
-        """
-        Handle data from this stream by forwarding it to the atomizer.
+        """Handle data from this stream by forwarding it to the atomizer.
+
         @return the file descriptor to monitoring for new input or -1 if there is no new data or atomizer was not yet ready to
         consume data. Handling should be tried again later on.
         """
@@ -331,8 +345,8 @@ class LogStream:
         return self.log_data_resource.get_file_descriptor()
 
     def roll_over(self):
-        """
-        End reading of the current resource and switch to the next.
+        """End reading of the current resource and switch to the next.
+
         This method does not handle last_consume_state, that has to be done outside.
         @return state in same manner as handle_stream()
         """
@@ -363,13 +377,15 @@ class LogStream:
         return self.log_data_resource.get_file_descriptor()
 
     def get_current_fd(self):
-        """Get the file descriptor for reading the currently active log_data resource."""
+        """Get the file descriptor for reading the currently active log_data
+        resource."""
         if self.log_data_resource is None:
             return -1
         return self.log_data_resource.get_file_descriptor()
 
     def get_repositioning_data(self):
-        """Get the repositioning information from the currently active underlying log_data resource."""
+        """Get the repositioning information from the currently active
+        underlying log_data resource."""
         if self.log_data_resource is None:
             return None
         return self.log_data_resource.get_repositioning_data()

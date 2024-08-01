@@ -11,4 +11,3 @@ test -e aminercfg/conf-enabled/ApacheAccessModel.py || cp source/root/etc/aminer
 sed -i "s+#        - 'unix+        - 'unix+g" aminercfg/config.yml
 sed -i "s+        - 'file:///var/log/apache2/access.log'+#        - 'file:///logs/access.log'+g" aminercfg/config.yml
 sed -i "s+# RemoteControlSocket: '/var/lib/aminer/log/remcontrol.sock'+RemoteControlSocket: '/var/lib/aminer/log/remcontrol.sock'+g" aminercfg/config.yml
-

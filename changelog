@@ -70,7 +70,7 @@ logdata-anomaly-miner (2.6.0) unstable; urgency=low
   * added unique path param for EFD
   * added check so EXP_TYPE_MANDATORY is enforced.
   * replace raw data output with last log of event type rather than end of time window
-  * added event count cluster detector 
+  * added event count cluster detector
   * added experimental jsonstringparser
   * improved parameter consistency
   * added ScoringEventHandler
@@ -172,7 +172,7 @@ logdata-anomaly-miner (2.4.1) unstable; urgency=low
   * Fixed ValueError in DTME
   * Fixed error with parsing floats in scientific notation with the JsonModelElement.
   * Fixed issue with paths in JsonModelElement
-  * Fixed error with \x encoded json 
+  * Fixed error with \x encoded json
   * Fixed error where EMPTY_ARRAY and EMPTY_OBJECT could not be parsed from the yaml config
   * Fixed a bug in the TSA when encountering a new event type
   * Fixed systemd script
@@ -348,7 +348,7 @@ logdata-anomaly-miner (2.0.1) unstable; urgency=low
   * Updated debian files
   * Added copyright headers
   * Added executable bit to AMiner
-  
+
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Wed,  24 Jun 2020 17:00:00 +0000
 
 logdata-anomaly-miner (2.0.0) bionic; urgency=low
@@ -384,7 +384,7 @@ logdata-anomaly-miner (2.0.0) bionic; urgency=low
  -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at>  Fri,  29 May 2020 17:00:00 +0000
 
 logdata-anomaly-miner (1.0.0) bionic; urgency=low
-  
+
   Changes:
   * Ported code to Python 3
   * Code cleanup using pylint

@@ -17,7 +17,7 @@ import os
 import logging
 import sys
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, \
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -29,9 +29,11 @@ import aminer.analysis.VTDData as VTDData
 
 
 class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """
-    This class tests each variable of the event_types for the implemented variable types.
-    This module needs to run after the event type detector is initialized
+    """This class tests each variable of the event_types for the implemented
+    variable types.
+
+    This module needs to run after the event type detector is
+    initialized
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -47,8 +49,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  num_reinit_range=100, range_limits_factor=1, dw_alpha=0.05, save_statistics=True, output_logline=True, ignore_list=None,
                  constraint_list=None, learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None,
                  log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param event_type_detector used to track the number of occurring events.
@@ -111,7 +114,6 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                assigned to the variable instead of continuous.
         @param save_statistics used to track the indicators and changed variable types.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
-
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
@@ -385,8 +387,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.num_init + self.num_update + 1) * 1000 + 0.5) / 1000)]
 
     def receive_atom(self, log_atom):
-        """
-        Receive an parsed atom and the information about the parser match. Initializes Variables for new eventTypes.
+        """Receive an parsed atom and the information about the parser match.
+        Initializes Variables for new eventTypes.
+
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
         """
@@ -483,7 +486,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         logging.getLogger(DEBUG_LOG_NAME).debug('%s persisted data.', self.__class__.__name__)
 
     def load_persistence_data(self):
-        """Extract the persistence data and appends various lists to create a consistent state."""
+        """Extract the persistence data and appends various lists to create a
+        consistent state."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             # Import the lists of the persistence
@@ -522,7 +526,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             logging.getLogger(DEBUG_LOG_NAME).debug('%s loaded persistence data.', self.__class__.__name__)
 
     def process_ll(self, event_index, log_atom):
-        """Process the log line. Extracts and appends the values of the log line to the values-list."""
+        """Process the log line.
+
+        Extracts and appends the values of the log line to the values-
+        list.
+        """
         # Return if no variable is tracked in the VTD
         if len(self.event_type_detector.variable_key_list[event_index]) == 0 or (
                 self.target_path_list is not None and self.variable_path_num[event_index] == []):
@@ -662,7 +670,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                         elif len(tmp_type_val) >= 1 and isinstance(tmp_type_val[0], list):
                             tmp_type_val[0].append(1)
-                            for i in range(1, len(tmp_type_val)):  # skipcq: PTC-W0060
+                            for i in range(1, len(tmp_type_val)):
                                 tmp_type_val[i].append(0)
 
                         else:
@@ -686,7 +694,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                     tmp_max = 1
                     exceeded_thresh = False
-                    for type_index in range(1, len(var_val)):  # skipcq: PTC-W0060
+                    for type_index in range(1, len(var_val)):
                         # Continuous Distribution
                         if type_index in [self.var_type_history_list_order.index('cont'), self.var_type_history_list_order.index('range')]:
                             num_app = len([1 for x in var_val[type_index][1] if x != 0])
@@ -799,7 +807,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
                         # Indices of the variables, which would have failed the indicator
                         indices_failed_tests = []
-                        for var_index in range(len(self.var_type[event_index])):  # skipcq: PTC-W0060
+                        for var_index in range(len(self.var_type[event_index])):
                             if indicator_list[var_index] >= self.indicator_thres:
                                 indices_failed_tests.append(var_index)
                                 self.failed_indicators[event_index][var_index].append(self.event_type_detector.num_event_lines[event_index])
@@ -892,7 +900,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
     def detect_var_type(self, event_index, var_index):
-        """Give back the assumed variable type of the variable with the in self.event_type_detector stored values."""
+        """Give back the assumed variable type of the variable with the in
+        self.event_type_detector stored values."""
         # Values which are being tested
         values = self.event_type_detector.values[event_index][var_index][-self.num_init:]
         # Unique values
@@ -974,8 +983,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return var_type
 
     def detect_continuous_shape(self, values):
-        """
-        Detect if the sample follows one of the checked continuous distribution and returns the found type in a fitting format.
+        """Detect if the sample follows one of the checked continuous
+        distribution and returns the found type in a fitting format.
+
         ['d'] if none fit.
         """
         # List of the p-values of the distributions
@@ -1171,7 +1181,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return ['d']
 
     def calculate_value_range(self, values):
-        """Calculate the lower and upper limit of the expected values through the mean and standard deviation of the given values."""
+        """Calculate the lower and upper limit of the expected values through
+        the mean and standard deviation of the given values."""
         if self.used_range_test == 'MeanSD':
             # Calculate the mean and standard deviation of the test sample
             [ev, sigma] = norm.fit(values)
@@ -1204,7 +1215,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return ['range', lower_limit, upper_limit, 0]
 
     def update_var_type(self, event_index, var_index, log_atom):
-        """Test if the new num_update values fit the detected var type and updates the var type if the test fails."""
+        """Test if the new num_update values fit the detected var type and
+        updates the var type if the test fails."""
         # Getting the new values and saving the old distribution for printing-purposes if the test fails
         new_values = self.event_type_detector.values[event_index][var_index][-self.num_update:]
         VT_old = copy.deepcopy(self.var_type[event_index][var_index])
@@ -1563,7 +1575,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 self.var_type[event_index][var_index][1] += 1
 
     def s_gof_get_quantiles(self, event_index, var_index):
-        """Generate the needed quantiles of the distribution for the sliding gof-test."""
+        """Generate the needed quantiles of the distribution for the sliding
+        gof-test."""
         if self.var_type[event_index][var_index][0] == 'emp':
             # Get a list of almost equidistant indices
             indices = [int(i) for i in [self.num_init * j / (2 * self.num_s_gof_values) for j in
@@ -1610,8 +1623,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             return
 
     def s_gof_test(self, event_index, var_index, first_distr):
-        """
-        Make a gof-test.
+        """Make a gof-test.
+
         @return a list with the first entry True/False and as the second entry the maximal value of the step functions
         """
         num_distr_val = 2 * self.num_s_gof_values
@@ -1850,7 +1863,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return [True, 0.0]
 
     def d_test(self, event_index, var_index):
-        """Make a test if the new variables follow the discrete distribution and append the result to the BT."""
+        """Make a test if the new variables follow the discrete distribution
+        and append the result to the BT."""
         if self.used_multinomial_test == 'MT':
             # Count the appearance of the values
             values_app = [0] * len(self.var_type[event_index][var_index][1])
@@ -2005,7 +2019,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                             tmp_type_val.append(0)
 
     def get_indicator(self, event_index):
-        """Calculate and returns a indicator for a change in the system behaviour based on the analysis of VTD."""
+        """Calculate and returns a indicator for a change in the system
+        behaviour based on the analysis of VTD."""
         # List which stores the single indicators for the variables
         indicator_list = []
 
@@ -2100,10 +2115,12 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                 indicator_list.append(sum(diff_list))
         return indicator_list
 
-    def bt_min_successes(self, num_bt, p, alpha):  # skipcq: PYL-R0201
-        """
-        Calculate the minimal number of successes for the BT with significance alpha.
-        p is the probability of success and num_bt is the number of observed tests.
+    def bt_min_successes(self, num_bt, p, alpha):
+        """Calculate the minimal number of successes for the BT with
+        significance alpha.
+
+        p is the probability of success and num_bt is the number of
+        observed tests.
         """
         tmp_sum = 0.0
         max_observations_factorial = np.math.factorial(num_bt)
@@ -2117,9 +2134,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         return 0
 
     def bt_min_successes_multi_p(self, num_bt, p_list, alpha, event_index, var_index):
-        """
-        Calculate the minimal number of successes for the BT with significance alpha.
-        p_list is a list of probabilities of successes and num_bt is the number of observed tests.
+        """Calculate the minimal number of successes for the BT with
+        significance alpha.
+
+        p_list is a list of probabilities of successes and num_bt is the
+        number of observed tests.
         """
         if f'num_bt = {num_bt}, alpha = {alpha}' in self.bt_min_succ_data:
             # Here the min_successes are not being generated, but instead the right Indices are searched for in the bt_min_succ_data-list
@@ -2127,7 +2146,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         # Calculate the min_successes normally for each value one by one
         tmp_list = []
-        for i in range(len(self.var_type[event_index][var_index][1])):  # skipcq: PTC-W0060
+        for i in range(len(self.var_type[event_index][var_index][1])):
             tmp_list.append(self.bt_min_successes(num_bt, p_list[i], alpha))
         tmp_list = np.array(tmp_list)
         return tmp_list
@@ -2290,8 +2309,9 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         if AminerConfig.STAT_LEVEL == 1:
@@ -2311,7 +2331,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
 
 def convert_to_floats(list_in):
-    """Give back false if one entry of the list is no float and returns the list of floats otherwise."""
+    """Give back false if one entry of the list is no float and returns the
+    list of floats otherwise."""
     num_list = []
     for item in list_in:
         try:
@@ -2322,7 +2343,10 @@ def convert_to_floats(list_in):
 
 
 def consists_of_floats(list_in):
-    """Give back false if one entry of the list is no float or integer. True otherwise."""
+    """Give back false if one entry of the list is no float or integer.
+
+    True otherwise.
+    """
     return all(isinstance(x, (float, int)) for x in list_in)
 
 
@@ -2332,7 +2356,8 @@ def consists_of_ints(list_in):
 
 
 def get_vt_string(vt):
-    """Return a string which states the variable type with selected parameters."""
+    """Return a string which states the variable type with selected
+    parameters."""
     if vt[0] == 'stat':
         return_string = f'{vt[0]} {vt[1]}'
     elif vt[0] == 'd':

@@ -115,36 +115,36 @@ EOL
             echo "02/29/2020-00:00:13.674931  [**] [1:2012887:3] ET POLICY Http Client Body contains pass= in cleartext [**] [Classification: Potential Corporate Privacy Violation] [Priority: 1] {TCP} 192.168.10.190:39438 -> 192.168.10.154:80" > $LOGFILE
             ;;
         SyslogParsingModel)
-            echo "Feb 29 00:01:41 mail-0 dovecot: imap(kelsey): Logged out in=79 out=875" > $LOGFILE
+            echo "Feb 28 00:01:41 mail-0 dovecot: imap(kelsey): Logged out in=79 out=875" > $LOGFILE
             echo "Mar  1 06:25:38 mail dovecot: imap(lino): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:38]" >> $LOGFILE
-            echo "Feb 29 00:01:44 mail-0 dovecot: imap(della): Error: file_dotlock_create(/var/mail/della) failed: Permission denied (euid=1013(della) egid=1013(della) missing +w perm: /var/mail, we're not in group 8(mail), dir owned by 0:8 mode=0775) (set mail_privileged_group=mail)" >> $LOGFILE
+            echo "Feb 28 00:01:44 mail-0 dovecot: imap(della): Error: file_dotlock_create(/var/mail/della) failed: Permission denied (euid=1013(della) egid=1013(della) missing +w perm: /var/mail, we're not in group 8(mail), dir owned by 0:8 mode=0775) (set mail_privileged_group=mail)" >> $LOGFILE
             echo "Mar  1 06:25:41 mail dovecot: imap(idella): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:41]" >> $LOGFILE
             echo "Mar  4 14:14:36 mail dovecot: imap-login: Disconnected (auth failed, 2 attempts in 12 secs): user=<violet>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, secured, session=<fEeWCQigUph/AAAB>" >> $LOGFILE
             echo "Mar  4 18:43:05 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=192.168.10.185, lip=192.168.10.177, session=<cjd4ygugaJTAqAq5>" >> $LOGFILE
             echo "Mar  4 13:51:48 mail dovecot: imap-login: Disconnected (disconnected before auth was ready, waited 0 secs): user=<>, rip=192.168.10.18, lip=192.168.10.21, session=<+KO9uAeg4sPAqAoS>" >> $LOGFILE
             echo "Mar  4 18:43:59 mail dovecot: imap-login: Login: user=<sadye>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, mpid=11475, secured, session=<8ZitzQugnrh/AAAB>" >> $LOGFILE
-            echo "Feb 29 11:39:45 mail-0 dovecot: imap-login: Error: anvil: Anvil queries timed out after 5 secs - aborting queries" >> $LOGFILE
-            echo "Feb 29 09:15:59 mail-1 dovecot: imap-login: Warning: Auth process not responding, delayed sending initial response (greeting): user=<>, rip=127.0.0.1, lip=127.0.0.1, secured, session=<dVUEZ7OfnLl/AAAB>" >> $LOGFILE
-            echo "Feb 29 11:39:35 mail-2 dovecot: auth: Error: auth worker: Aborted PASSV request for marjory: Worker process died unexpectedly" >> $LOGFILE
-            echo "Feb 29 11:39:35 mail-2 dovecot: auth-worker(2233): Fatal: Error reading configuration: Timeout reading config from /var/run/dovecot/config" >> $LOGFILE
-            echo "Feb 29 11:39:35 mail-2 dovecot: master: Error: service(auth-worker): command startup failed, throttling for 2 secs" >> $LOGFILE
-            echo 'Feb 29 11:39:46 mail-2 HORDE: [imp] Login success for marjory (192.168.10.18) to {imap://localhost/} [pid 1764 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOGFILE
-            echo 'Feb 29 17:18:23 mail-2 HORDE: [imp] Message sent to marcelle@mail.insect.com, merlene@mail.insect.com from les (192.168.10.18) [pid 9596 on line 970 of "/var/www/mail.insect.com/imp/lib/Compose.php"]' >> $LOGFILE
-            echo 'Feb 29 20:01:48 mail-2 HORDE: [imp] FAILED LOGIN for violet (192.168.10.18) to {imap://localhost/} [pid 14794 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOGFILE
+            echo "Feb 28 11:39:45 mail-0 dovecot: imap-login: Error: anvil: Anvil queries timed out after 5 secs - aborting queries" >> $LOGFILE
+            echo "Feb 28 09:15:59 mail-1 dovecot: imap-login: Warning: Auth process not responding, delayed sending initial response (greeting): user=<>, rip=127.0.0.1, lip=127.0.0.1, secured, session=<dVUEZ7OfnLl/AAAB>" >> $LOGFILE
+            echo "Feb 28 11:39:35 mail-2 dovecot: auth: Error: auth worker: Aborted PASSV request for marjory: Worker process died unexpectedly" >> $LOGFILE
+            echo "Feb 28 11:39:35 mail-2 dovecot: auth-worker(2233): Fatal: Error reading configuration: Timeout reading config from /var/run/dovecot/config" >> $LOGFILE
+            echo "Feb 28 11:39:35 mail-2 dovecot: master: Error: service(auth-worker): command startup failed, throttling for 2 secs" >> $LOGFILE
+            echo 'Feb 28 11:39:46 mail-2 HORDE: [imp] Login success for marjory (192.168.10.18) to {imap://localhost/} [pid 1764 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOGFILE
+            echo 'Feb 28 17:18:23 mail-2 HORDE: [imp] Message sent to marcelle@mail.insect.com, merlene@mail.insect.com from les (192.168.10.18) [pid 9596 on line 970 of "/var/www/mail.insect.com/imp/lib/Compose.php"]' >> $LOGFILE
+            echo 'Feb 28 20:01:48 mail-2 HORDE: [imp] FAILED LOGIN for violet (192.168.10.18) to {imap://localhost/} [pid 14794 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOGFILE
             echo 'Mar  1 06:25:38 mail HORDE: [imp] [status] Could not open mailbox "INBOX". [pid 999 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOGFILE
             echo 'Mar  1 06:27:56 mail HORDE: [imp] [getSyncToken] IMAP error reported by server. [pid 1127 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOGFILE
-            echo 'Feb 29 12:12:54 mail-2 HORDE: [horde] Login success for dorie to horde (192.168.10.18) [pid 2272 on line 163 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
-            echo 'Feb 29 12:13:00 mail-2 HORDE: [horde] User marjory logged out of Horde (192.168.10.18) [pid 2988 on line 106 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
-            echo 'Feb 29 17:07:07 mail-2 HORDE: [horde] FAILED LOGIN for marcelle to horde (192.168.10.98) [pid 8517 on line 198 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
+            echo 'Feb 28 12:12:54 mail-2 HORDE: [horde] Login success for dorie to horde (192.168.10.18) [pid 2272 on line 163 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
+            echo 'Feb 28 12:13:00 mail-2 HORDE: [horde] User marjory logged out of Horde (192.168.10.18) [pid 2988 on line 106 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
+            echo 'Feb 28 17:07:07 mail-2 HORDE: [horde] FAILED LOGIN for marcelle to horde (192.168.10.98) [pid 8517 on line 198 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
             echo 'Mar  1 18:22:40 mail HORDE: [imp] [login] Authentication failed. [pid 12890 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOGFILE
             echo 'Mar  4 18:55:05 mail HORDE: [turba] PHP ERROR: finfo_file(): Empty filename or path [pid 11642 on line 166 of "/usr/share/php/Horde/Mime/Magic.php"]' >> $LOGFILE
             echo 'Mar  4 18:50:51 mail HORDE: [horde] PHP ERROR: Cannot modify header information - headers already sent [pid 11019 on line 0 of "Unknown"]' >> $LOGFILE
             echo 'Mar  4 18:01:23 mail HORDE: Guest user is not authorized for Horde (Host: 192.168.10.81). [pid 4815 on line 324 of "/usr/share/php/Horde/Registry.php"]' >> $LOGFILE
             echo 'Mar  4 18:10:08 mail HORDE: PHP ERROR: rawurlencode() expects parameter 1 to be string, array given [pid 6556 on line 302 of "/usr/share/php/Horde/Url.php"]' >> $LOGFILE
             # missing model/service/horde/horde/free_msg - no log found!
-            echo "Feb 29 12:39:02 mail-0 CRON[11260]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)" >> $LOGFILE
-            echo "Feb 29 06:25:01 mail-1 CRON[27486]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOGFILE
-            echo "Feb 29 15:42:36 mail-1 auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=marcelino rhost=127.0.0.1  user=marcelino" >> $LOGFILE
+            echo "Feb 28 12:39:02 mail-0 CRON[11260]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)" >> $LOGFILE
+            echo "Feb 28 06:25:01 mail-1 CRON[27486]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOGFILE
+            echo "Feb 28 15:42:36 mail-1 auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=marcelino rhost=127.0.0.1  user=marcelino" >> $LOGFILE
             echo "Mar  1 03:09:18 mail-0 systemd[1]: Starting Clean php session files..." >> $LOGFILE
             echo "Mar  1 03:09:19 mail-0 systemd[1]: Started Clean php session files." >> $LOGFILE
             echo "Mar  1 18:26:18 mail systemd[1]: Starting Cleanup of Temporary Directories..." >> $LOGFILE
@@ -159,11 +159,11 @@ EOL
             echo "Mar  4 06:29:05 mail systemd[1]: Stopped Security Auditing Service." >> $LOGFILE
             echo "Mar  5 06:25:35 mail systemd[1]: Reloading The Apache HTTP Server." >> $LOGFILE
             echo "Mar  5 06:25:35 mail systemd[1]: Reloaded The Apache HTTP Server." >> $LOGFILE
-            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounting Arbitrary Executable File Formats File System..." >> $LOGFILE
-            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounted Arbitrary Executable File Formats File System." >> $LOGFILE
-            echo "Feb 29 13:56:59 mail-2 systemd[1]: apt-daily.timer: Adding 6h 4min 46.743459s random time." >> $LOGFILE
+            echo "Feb 28 11:52:32 mail-2 systemd[1]: Mounting Arbitrary Executable File Formats File System..." >> $LOGFILE
+            echo "Feb 27 11:52:32 mail-2 systemd[1]: Mounted Arbitrary Executable File Formats File System." >> $LOGFILE
+            echo "Feb 28 13:56:59 mail-2 systemd[1]: apt-daily.timer: Adding 6h 4min 46.743459s random time." >> $LOGFILE
             # missing model/service/systemd/service - no log found!
-            echo "Feb 29 07:24:02 mail-0 kernel: [47678.309129]  [<ffffffff92e1e577>] ? ret_from_fork+0x57/0x70" >> $LOGFILE
+            echo "Feb 28 07:24:02 mail-0 kernel: [47678.309129]  [<ffffffff92e1e577>] ? ret_from_fork+0x57/0x70" >> $LOGFILE
             echo "Mar  5 06:29:07 mail augenrules[17378]: backlog_wait_time 0" >> $LOGFILE
             echo "Mar  5 06:29:07 mail auditd[17377]: dispatch error reporting limit reached - ending report notification." >> $LOGFILE
             echo "Mar  5 06:29:07 mail auditd: audit log is not writable by owner" >> $LOGFILE
@@ -172,7 +172,7 @@ EOL
             echo "Mar  1 09:25:16 mail freshclam[22090]: Sun Mar  1 09:25:16 2020 -> bytecode.cvd is up to date (version: 331, sigs: 94, f-level: 63, builder: anvilleg)" >> $LOGFILE
             echo "Mar  1 07:26:09 mail dhclient[418]: DHCPREQUEST of 192.168.10.21 on eth0 to 192.168.10.2 port 67" >> $LOGFILE
             echo "Mar  1 00:59:38 mail-2 dhclient[387]: DHCPACK of 192.168.10.21 from 192.168.10.2" >> $LOGFILE
-            echo "Feb 29 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOGFILE
+            echo "Feb 28 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOGFILE
             ;;
         SyslogParsingModelAIT-LDSv1)
             echo "Feb 29 00:01:41 mail-0 dovecot: imap(kelsey): Logged out in=79 out=875" > $LOGFILE
@@ -235,36 +235,36 @@ EOL
             echo "Feb 29 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOGFILE
             ;;
         SyslogParsingModelAIT-LDSv2)
-            echo "Feb 29 00:01:41 mail-0 dovecot: imap(kelsey): Logged out in=79 out=875" > $LOGFILE
+            echo "Feb 28 00:01:41 mail-0 dovecot: imap(kelsey): Logged out in=79 out=875" > $LOGFILE
             echo "Mar  1 06:25:38 mail dovecot: imap(lino): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:38]" >> $LOGFILE
-            echo "Feb 29 00:01:44 mail-0 dovecot: imap(della): Error: file_dotlock_create(/var/mail/della) failed: Permission denied (euid=1013(della) egid=1013(della) missing +w perm: /var/mail, we're not in group 8(mail), dir owned by 0:8 mode=0775) (set mail_privileged_group=mail)" >> $LOGFILE
+            echo "Feb 28 00:01:44 mail-0 dovecot: imap(della): Error: file_dotlock_create(/var/mail/della) failed: Permission denied (euid=1013(della) egid=1013(della) missing +w perm: /var/mail, we're not in group 8(mail), dir owned by 0:8 mode=0775) (set mail_privileged_group=mail)" >> $LOGFILE
             echo "Mar  1 06:25:41 mail dovecot: imap(idella): Error: Failed to autocreate mailbox INBOX: Internal error occurred. Refer to server log for more information. [2020-03-01 06:25:41]" >> $LOGFILE
             echo "Mar  4 14:14:36 mail dovecot: imap-login: Disconnected (auth failed, 2 attempts in 12 secs): user=<violet>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, secured, session=<fEeWCQigUph/AAAB>" >> $LOGFILE
             echo "Mar  4 18:43:05 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=192.168.10.185, lip=192.168.10.177, session=<cjd4ygugaJTAqAq5>" >> $LOGFILE
             echo "Mar  4 13:51:48 mail dovecot: imap-login: Disconnected (disconnected before auth was ready, waited 0 secs): user=<>, rip=192.168.10.18, lip=192.168.10.21, session=<+KO9uAeg4sPAqAoS>" >> $LOGFILE
             echo "Mar  4 18:43:59 mail dovecot: imap-login: Login: user=<sadye>, method=PLAIN, rip=127.0.0.1, lip=127.0.0.1, mpid=11475, secured, session=<8ZitzQugnrh/AAAB>" >> $LOGFILE
-            echo "Feb 29 11:39:45 mail-0 dovecot: imap-login: Error: anvil: Anvil queries timed out after 5 secs - aborting queries" >> $LOGFILE
-            echo "Feb 29 09:15:59 mail-1 dovecot: imap-login: Warning: Auth process not responding, delayed sending initial response (greeting): user=<>, rip=127.0.0.1, lip=127.0.0.1, secured, session=<dVUEZ7OfnLl/AAAB>" >> $LOGFILE
-            echo "Feb 29 11:39:35 mail-2 dovecot: auth: Error: auth worker: Aborted PASSV request for marjory: Worker process died unexpectedly" >> $LOGFILE
-            echo "Feb 29 11:39:35 mail-2 dovecot: auth-worker(2233): Fatal: Error reading configuration: Timeout reading config from /var/run/dovecot/config" >> $LOGFILE
-            echo "Feb 29 11:39:35 mail-2 dovecot: master: Error: service(auth-worker): command startup failed, throttling for 2 secs" >> $LOGFILE
-            echo 'Feb 29 11:39:46 mail-2 HORDE: [imp] Login success for marjory (192.168.10.18) to {imap://localhost/} [pid 1764 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOGFILE
-            echo 'Feb 29 17:18:23 mail-2 HORDE: [imp] Message sent to marcelle@mail.insect.com, merlene@mail.insect.com from les (192.168.10.18) [pid 9596 on line 970 of "/var/www/mail.insect.com/imp/lib/Compose.php"]' >> $LOGFILE
-            echo 'Feb 29 20:01:48 mail-2 HORDE: [imp] FAILED LOGIN for violet (192.168.10.18) to {imap://localhost/} [pid 14794 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOGFILE
+            echo "Feb 28 11:39:45 mail-0 dovecot: imap-login: Error: anvil: Anvil queries timed out after 5 secs - aborting queries" >> $LOGFILE
+            echo "Feb 28 09:15:59 mail-1 dovecot: imap-login: Warning: Auth process not responding, delayed sending initial response (greeting): user=<>, rip=127.0.0.1, lip=127.0.0.1, secured, session=<dVUEZ7OfnLl/AAAB>" >> $LOGFILE
+            echo "Feb 28 11:39:35 mail-2 dovecot: auth: Error: auth worker: Aborted PASSV request for marjory: Worker process died unexpectedly" >> $LOGFILE
+            echo "Feb 28 11:39:35 mail-2 dovecot: auth-worker(2233): Fatal: Error reading configuration: Timeout reading config from /var/run/dovecot/config" >> $LOGFILE
+            echo "Feb 28 11:39:35 mail-2 dovecot: master: Error: service(auth-worker): command startup failed, throttling for 2 secs" >> $LOGFILE
+            echo 'Feb 28 11:39:46 mail-2 HORDE: [imp] Login success for marjory (192.168.10.18) to {imap://localhost/} [pid 1764 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOGFILE
+            echo 'Feb 28 17:18:23 mail-2 HORDE: [imp] Message sent to marcelle@mail.insect.com, merlene@mail.insect.com from les (192.168.10.18) [pid 9596 on line 970 of "/var/www/mail.insect.com/imp/lib/Compose.php"]' >> $LOGFILE
+            echo 'Feb 28 20:01:48 mail-2 HORDE: [imp] FAILED LOGIN for violet (192.168.10.18) to {imap://localhost/} [pid 14794 on line 156 of "/var/www/mail.insect.com/imp/lib/Auth.php"]' >> $LOGFILE
             echo 'Mar  1 06:25:38 mail HORDE: [imp] [status] Could not open mailbox "INBOX". [pid 999 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOGFILE
             echo 'Mar  1 06:27:56 mail HORDE: [imp] [getSyncToken] IMAP error reported by server. [pid 1127 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOGFILE
-            echo 'Feb 29 12:12:54 mail-2 HORDE: [horde] Login success for dorie to horde (192.168.10.18) [pid 2272 on line 163 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
-            echo 'Feb 29 12:13:00 mail-2 HORDE: [horde] User marjory logged out of Horde (192.168.10.18) [pid 2988 on line 106 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
-            echo 'Feb 29 17:07:07 mail-2 HORDE: [horde] FAILED LOGIN for marcelle to horde (192.168.10.98) [pid 8517 on line 198 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
+            echo 'Feb 28 12:12:54 mail-2 HORDE: [horde] Login success for dorie to horde (192.168.10.18) [pid 2272 on line 163 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
+            echo 'Feb 28 12:13:00 mail-2 HORDE: [horde] User marjory logged out of Horde (192.168.10.18) [pid 2988 on line 106 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
+            echo 'Feb 28 17:07:07 mail-2 HORDE: [horde] FAILED LOGIN for marcelle to horde (192.168.10.98) [pid 8517 on line 198 of "/var/www/mail.insect.com/login.php"]' >> $LOGFILE
             echo 'Mar  1 18:22:40 mail HORDE: [imp] [login] Authentication failed. [pid 12890 on line 730 of "/var/www/mail.onion.com/imp/lib/Imap.php"]' >> $LOGFILE
             echo 'Mar  4 18:55:05 mail HORDE: [turba] PHP ERROR: finfo_file(): Empty filename or path [pid 11642 on line 166 of "/usr/share/php/Horde/Mime/Magic.php"]' >> $LOGFILE
             echo 'Mar  4 18:50:51 mail HORDE: [horde] PHP ERROR: Cannot modify header information - headers already sent [pid 11019 on line 0 of "Unknown"]' >> $LOGFILE
             echo 'Mar  4 18:01:23 mail HORDE: Guest user is not authorized for Horde (Host: 192.168.10.81). [pid 4815 on line 324 of "/usr/share/php/Horde/Registry.php"]' >> $LOGFILE
             echo 'Mar  4 18:10:08 mail HORDE: PHP ERROR: rawurlencode() expects parameter 1 to be string, array given [pid 6556 on line 302 of "/usr/share/php/Horde/Url.php"]' >> $LOGFILE
             # missing model/service/horde/horde/free_msg - no log found!
-            echo "Feb 29 12:39:02 mail-0 CRON[11260]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)" >> $LOGFILE
-            echo "Feb 29 06:25:01 mail-1 CRON[27486]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOGFILE
-            echo "Feb 29 15:42:36 mail-1 auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=marcelino rhost=127.0.0.1  user=marcelino" >> $LOGFILE
+            echo "Feb 28 12:39:02 mail-0 CRON[11260]: (root) CMD (  [ -x /usr/lib/php/sessionclean ] && if [ ! -d /run/systemd/system ]; then /usr/lib/php/sessionclean; fi)" >> $LOGFILE
+            echo "Feb 28 06:25:01 mail-1 CRON[27486]: pam_unix(cron:session): session opened for user root by (uid=0)" >> $LOGFILE
+            echo "Feb 28 15:42:36 mail-1 auth: pam_unix(dovecot:auth): authentication failure; logname= uid=0 euid=0 tty=dovecot ruser=marcelino rhost=127.0.0.1  user=marcelino" >> $LOGFILE
             echo "Mar  1 03:09:18 mail-0 systemd[1]: Starting Clean php session files..." >> $LOGFILE
             echo "Mar  1 03:09:19 mail-0 systemd[1]: Started Clean php session files." >> $LOGFILE
             echo "Mar  1 18:26:18 mail systemd[1]: Starting Cleanup of Temporary Directories..." >> $LOGFILE
@@ -279,11 +279,11 @@ EOL
             echo "Mar  4 06:29:05 mail systemd[1]: Stopped Security Auditing Service." >> $LOGFILE
             echo "Mar  5 06:25:35 mail systemd[1]: Reloading The Apache HTTP Server." >> $LOGFILE
             echo "Mar  5 06:25:35 mail systemd[1]: Reloaded The Apache HTTP Server." >> $LOGFILE
-            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounting Arbitrary Executable File Formats File System..." >> $LOGFILE
-            echo "Feb 29 11:52:32 mail-2 systemd[1]: Mounted Arbitrary Executable File Formats File System." >> $LOGFILE
-            echo "Feb 29 13:56:59 mail-2 systemd[1]: apt-daily.timer: Adding 6h 4min 46.743459s random time." >> $LOGFILE
+            echo "Feb 28 11:52:32 mail-2 systemd[1]: Mounting Arbitrary Executable File Formats File System..." >> $LOGFILE
+            echo "Feb 28 11:52:32 mail-2 systemd[1]: Mounted Arbitrary Executable File Formats File System." >> $LOGFILE
+            echo "Feb 28 13:56:59 mail-2 systemd[1]: apt-daily.timer: Adding 6h 4min 46.743459s random time." >> $LOGFILE
             # missing model/service/systemd/service - no log found!
-            echo "Feb 29 07:24:02 mail-0 kernel: [47678.309129]  [<ffffffff92e1e577>] ? ret_from_fork+0x57/0x70" >> $LOGFILE
+            echo "Feb 28 07:24:02 mail-0 kernel: [47678.309129]  [<ffffffff92e1e577>] ? ret_from_fork+0x57/0x70" >> $LOGFILE
             echo "Mar  5 06:29:07 mail augenrules[17378]: backlog_wait_time 0" >> $LOGFILE
             echo "Mar  5 06:29:07 mail auditd[17377]: dispatch error reporting limit reached - ending report notification." >> $LOGFILE
             echo "Mar  5 06:29:07 mail auditd: audit log is not writable by owner" >> $LOGFILE
@@ -292,7 +292,7 @@ EOL
             echo "Mar  1 09:25:16 mail freshclam[22090]: Sun Mar  1 09:25:16 2020 -> bytecode.cvd is up to date (version: 331, sigs: 94, f-level: 63, builder: anvilleg)" >> $LOGFILE
             echo "Mar  1 07:26:09 mail dhclient[418]: DHCPREQUEST of 192.168.10.21 on eth0 to 192.168.10.2 port 67" >> $LOGFILE
             echo "Mar  1 00:59:38 mail-2 dhclient[387]: DHCPACK of 192.168.10.21 from 192.168.10.2" >> $LOGFILE
-            echo "Feb 29 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOGFILE
+            echo "Feb 28 21:12:42 mail-2 dhclient[418]: bound to 192.168.10.21 -- renewal in 36807 seconds." >> $LOGFILE
             ;;
         AminerParsingModel)
             sudo cp ./demo/aminer/jsonConverterHandler-demo-config.py /tmp/demo-config.py
@@ -651,47 +651,47 @@ EOL
             echo "ulogd[4655]: id=\"2001\" severity=\"info\" sys=\"SecureNet\" sub=\"packetfilter\" name=\"Packet dropped\" action=\"drop\" fwrule=\"60001\" initf=\"eth0\" srcmac=\"******xx\" dstmac=\"******x\" srcip=\"10.64.0.22\" dstip=\"10.64.0.10\" proto=\"6\" length=\"153\" tos=\"0x00\" prec=\"0x00\" ttl=\"128\" srcport=\"443\" dstport=\"56174\" tcpflags=\"ACK PSH FIN\"" >> $LOGFILE
             ;;
         DnsParsingModel)
-            echo "Jan 20 11:21:42 dnsmasq[3326]: started, version 2.79 cachesize 150"
-            echo "Jan 20 11:21:42 dnsmasq[3326]: compile time options: IPv6 GNU-getopt DBus i18n IDN DHCP DHCPv6 no-Lua TFTP conntrack ipset auth nettlehash DNSSEC loop-detect inotify"
-            echo "Jan 20 11:21:42 dnsmasq[3326]: using nameserver 8.8.8.8#53"
-            echo "Jan 20 11:21:42 dnsmasq[3326]: using nameserver 192.168.230.122#53 for domain email-19.kennedy-mendoza.info"
-            echo "Jan 20 11:21:42 dnsmasq[3326]: read /etc/hosts - 7 addresses"
-            echo "Jan 20 11:21:55 dnsmasq[3414]: query[SRV] _http._tcp.archive.ubuntu.com from 192.168.230.4"
-            echo "Jan 20 11:21:55 dnsmasq[3414]: forwarded _http._tcp.archive.ubuntu.com to 8.8.8.8"
-            echo "Jan 20 11:21:55 dnsmasq[3414]: reply archive.ubuntu.com is 91.189.88.152"
-            echo "Jan 20 11:23:40 dnsmasq[3326]: cached debian.map.fastlydns.net is 199.232.138.132"
-            echo "Jan 20 11:21:42 inet-dns dnsmasq[1969]: exiting on receipt of SIGTERM"
-            echo "Jan 20 13:47:14 dnsmasq[3326]: nameserver 127.0.0.1 refused to do a recursive query"
-            echo "Jan 21 07:05:20 dnsmasq[3468]: failed to access /etc/dnsmasq.d/dnsmasq-resolv.conf: No such file or directory"
-            echo "Jan 24 03:56:53 dnsmasq[15084]: config version.bind is <TXT>"
+            echo "Jan 20 11:21:42 dnsmasq[3326]: started, version 2.79 cachesize 150" > $LOGFILE
+            echo "Jan 20 11:21:42 dnsmasq[3326]: compile time options: IPv6 GNU-getopt DBus i18n IDN DHCP DHCPv6 no-Lua TFTP conntrack ipset auth nettlehash DNSSEC loop-detect inotify" >> $LOGFILE
+            echo "Jan 20 11:21:42 dnsmasq[3326]: using nameserver 8.8.8.8#53" >> $LOGFILE
+            echo "Jan 20 11:21:42 dnsmasq[3326]: using nameserver 192.168.230.122#53 for domain email-19.kennedy-mendoza.info" >> $LOGFILE
+            echo "Jan 20 11:21:42 dnsmasq[3326]: read /etc/hosts - 7 addresses" >> $LOGFILE
+            echo "Jan 20 11:21:55 dnsmasq[3414]: query[SRV] _http._tcp.archive.ubuntu.com from 192.168.230.4" >> $LOGFILE
+            echo "Jan 20 11:21:55 dnsmasq[3414]: forwarded _http._tcp.archive.ubuntu.com to 8.8.8.8" >> $LOGFILE
+            echo "Jan 20 11:21:55 dnsmasq[3414]: reply archive.ubuntu.com is 91.189.88.152" >> $LOGFILE
+            echo "Jan 20 11:23:40 dnsmasq[3326]: cached debian.map.fastlydns.net is 199.232.138.132" >> $LOGFILE
+            echo "Jan 20 11:21:42 inet-dns dnsmasq[1969]: exiting on receipt of SIGTERM" >> $LOGFILE
+            echo "Jan 20 13:47:14 dnsmasq[3326]: nameserver 127.0.0.1 refused to do a recursive query" >> $LOGFILE
+            echo "Jan 21 07:05:20 dnsmasq[3468]: failed to access /etc/dnsmasq.d/dnsmasq-resolv.conf: No such file or directory" >> $LOGFILE
+            echo "Jan 24 03:56:53 dnsmasq[15084]: config version.bind is <TXT>" >> $LOGFILE
             ;;
         OpenVpnParsingModel)
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 TLS: soft reset sec=3308/3308 bytes=45748/-1 pkts=649/0"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 VERIFY OK: depth=1, C=AT, ST=Vienna, L=Vienna, O=Some Organisation GmbH, CN=OpenVPN CA, emailAddress=admin@organisation.cyberrange.at"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 VERIFY KU OK"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 Validating certificate extended key usage"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 ++ Certificate has EKU (str) TLS Web Client Authentication, expects TLS Web Client Authentication"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_VER=2.4.4"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_PLAT=linux"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_PROTO=2"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_LZ4=1"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_COMP_STUB=1"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_TCPNL=1"
-            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 Outgoing Data Channel: Cipher 'AES-256-CBC' initialized with 256 bit key"
-            echo "2022-01-21 03:49:44 jhall/192.168.230.165:46011 TLS: soft reset sec=3309/3308 bytes=45892/-1 pkts=651/0"
-            echo "2022-01-21 06:30:01 192.168.230.95:60795 TLS: Initial packet from [AF_INET]192.168.230.95:60795, sid=30d47335 8140d551"
-            echo "2022-01-21 06:30:01 192.168.230.95:60795 peer info: IV_NCP=2"
-            echo "2022-01-21 06:30:01 192.168.230.95:60795 [twhite] Peer Connection Initiated with [AF_INET]192.168.230.95:60795"
-            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI_sva: pool returned IPv4=10.9.0.6, IPv6=(Not enabled)"
-            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI: Learn: 10.9.0.6 -> twhite/192.168.230.95:60795"
-            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI: primary virtual IP for twhite/192.168.230.95:60795: 10.9.0.6"
-            echo "2022-01-21 06:30:03 twhite/192.168.230.95:60795 PUSH: Received control message: 'PUSH_REQUEST'"
-            echo "2022-01-21 06:30:03 twhite/192.168.230.95:60795 SENT CONTROL [twhite]: 'PUSH_REPLY,redirect-gateway def1,block-outside-dns,route 10.9.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.9.0.6 10.9.0.5,peer-id 0,cipher AES-256-CBC' (status=1)"
-            echo "2022-01-21 08:09:33 jhall/192.168.230.165:46011 [jhall] Inactivity timeout (--ping-restart), restarting"
-            echo "2022-01-21 08:09:33 jhall/192.168.230.165:46011 SIGUSR1[soft,ping-restart] received, client-instance restarting"
-            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)"
-            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS Error: TLS handshake failed"
-            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS: move_session: dest=TM_LAME_DUCK src=TM_ACTIVE reinit_src=1"
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 TLS: soft reset sec=3308/3308 bytes=45748/-1 pkts=649/0" > $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 VERIFY OK: depth=1, C=AT, ST=Vienna, L=Vienna, O=Some Organisation GmbH, CN=OpenVPN CA, emailAddress=admin@organisation.cyberrange.at" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 VERIFY KU OK" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 Validating certificate extended key usage" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 ++ Certificate has EKU (str) TLS Web Client Authentication, expects TLS Web Client Authentication" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_VER=2.4.4" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_PLAT=linux" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_PROTO=2" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_LZ4=1" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_COMP_STUB=1" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 peer info: IV_TCPNL=1" >> $LOGFILE
+            echo "2022-01-21 00:09:11 jhall/192.168.230.165:46011 Outgoing Data Channel: Cipher 'AES-256-CBC' initialized with 256 bit key" >> $LOGFILE
+            echo "2022-01-21 03:49:44 jhall/192.168.230.165:46011 TLS: soft reset sec=3309/3308 bytes=45892/-1 pkts=651/0" >> $LOGFILE
+            echo "2022-01-21 06:30:01 192.168.230.95:60795 TLS: Initial packet from [AF_INET]192.168.230.95:60795, sid=30d47335 8140d551" >> $LOGFILE
+            echo "2022-01-21 06:30:01 192.168.230.95:60795 peer info: IV_NCP=2" >> $LOGFILE
+            echo "2022-01-21 06:30:01 192.168.230.95:60795 [twhite] Peer Connection Initiated with [AF_INET]192.168.230.95:60795" >> $LOGFILE
+            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI_sva: pool returned IPv4=10.9.0.6, IPv6=(Not enabled)" >> $LOGFILE
+            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI: Learn: 10.9.0.6 -> twhite/192.168.230.95:60795" >> $LOGFILE
+            echo "2022-01-21 06:30:01 twhite/192.168.230.95:60795 MULTI: primary virtual IP for twhite/192.168.230.95:60795: 10.9.0.6" >> $LOGFILE
+            echo "2022-01-21 06:30:03 twhite/192.168.230.95:60795 PUSH: Received control message: 'PUSH_REQUEST'" >> $LOGFILE
+            echo "2022-01-21 06:30:03 twhite/192.168.230.95:60795 SENT CONTROL [twhite]: 'PUSH_REPLY,redirect-gateway def1,block-outside-dns,route 10.9.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.9.0.6 10.9.0.5,peer-id 0,cipher AES-256-CBC' (status=1)" >> $LOGFILE
+            echo "2022-01-21 08:09:33 jhall/192.168.230.165:46011 [jhall] Inactivity timeout (--ping-restart), restarting" >> $LOGFILE
+            echo "2022-01-21 08:09:33 jhall/192.168.230.165:46011 SIGUSR1[soft,ping-restart] received, client-instance restarting" >> $LOGFILE
+            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)" >> $LOGFILE
+            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS Error: TLS handshake failed" >> $LOGFILE
+            echo "2022-01-23 14:54:54 jhall/192.168.230.165:59814 TLS: move_session: dest=TM_LAME_DUCK src=TM_ACTIVE reinit_src=1" >> $LOGFILE
             ;;
         *)
             echo "Unknown parser config '$BN' was found! Please extend these tests. Failing.."

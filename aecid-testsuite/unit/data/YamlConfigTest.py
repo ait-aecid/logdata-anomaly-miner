@@ -447,7 +447,7 @@ class YamlConfigTest(TestBase):
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
         # there actually is no easy way to compare aminer components as they do not implement the __eq__ method.
         self.assertEqual(len(yml_registered_components), len(py_registered_components))
-        for i in range(2, len(yml_registered_components)):  # skipcq: PTC-W0060
+        for i in range(2, len(yml_registered_components)):
             self.assertEqual(type(yml_registered_components[i]), type(py_registered_components[i]))
         self.assertEqual(yml_registered_components_by_name.keys(), py_registered_components_by_name.keys())
         for name in yml_registered_components_by_name.keys():
@@ -478,7 +478,7 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')  # skipcq: BAN-B108
+        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
 
     def test20_suppress_output(self):
@@ -598,7 +598,6 @@ class YamlConfigTest(TestBase):
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_email.yml')
 
         with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.py', 'r') as sma:
-            # skipcq: PYL-W0123
             base_schema = eval(sma.read())
         self.assertEqual(base_schema['MailAlerting.TargetAddress']['regex'], base_schema['MailAlerting.FromAddress']['regex'])
 

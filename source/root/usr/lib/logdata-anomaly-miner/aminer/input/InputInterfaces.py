@@ -1,6 +1,7 @@
-"""
-This file contains interface definition useful implemented by classes in this directory and for use from code outside this directory.
-All classes are defined in separate files, only the namespace references are added here to simplify the code.
+"""This file contains interface definition useful implemented by classes in
+this directory and for use from code outside this directory. All classes are
+defined in separate files, only the namespace references are added here to
+simplify the code.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -11,7 +12,6 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
-
 """
 import abc
 import time
@@ -24,31 +24,37 @@ from aminer import AminerConfig
 
 
 class AtomizerFactory(metaclass=abc.ABCMeta):
-    """
-    This is the common interface of all factories to create atomizers for new data sources.
-    These atomizers are integrated into the downstream processing pipeline.
+    """This is the common interface of all factories to create atomizers for
+    new data sources.
+
+    These atomizers are integrated into the downstream processing
+    pipeline.
     """
 
     @abc.abstractmethod
     def get_atomizer_for_resource(self, resource_name):
-        """
-        Get an atomizer for a given resource.
+        """Get an atomizer for a given resource.
+
         @return a StreamAtomizer object
         """
 
 
 class StreamAtomizer(metaclass=abc.ABCMeta):
-    """
-    This is the common interface of all binary stream atomizers.
-    Atomizers in general should be good detecting and reporting malformed atoms but continue to function by attempting error correction or
-    resynchronization with the stream after the bad atom. This type of atomizer also signals a stream source when the stream data cannot be
-    handled at the moment to throttle reading  of the underlying stream.
+    """This is the common interface of all binary stream atomizers.
+
+    Atomizers in general should be good detecting and reporting
+    malformed atoms but continue to function by attempting error
+    correction or resynchronization with the stream after the bad atom.
+    This type of atomizer also signals a stream source when the stream
+    data cannot be handled at the moment to throttle reading  of the
+    underlying stream.
     """
 
     @abc.abstractmethod
     def consume_data(self, stream_data, end_of_stream_flag=False):
-        """
-        Consume data from the underlying stream for atomizing. Data should only be consumed after splitting of an atom.
+        """Consume data from the underlying stream for atomizing. Data should
+        only be consumed after splitting of an atom.
+
         The caller has to keep unconsumed data till the next invocation.
         @param stream_data the data offered to be consumed or zero length data when endOfStreamFlag is True (see below).
         @param end_of_stream_flag this flag is used to indicate, that the streamData offered is the last from the input stream.
@@ -63,12 +69,17 @@ class StreamAtomizer(metaclass=abc.ABCMeta):
 
 
 class AtomHandlerInterface(metaclass=abc.ABCMeta):
-    """This is the common interface of all handlers suitable for receiving log atoms."""
+    """This is the common interface of all handlers suitable for receiving log
+    atoms."""
 
     output_event_handlers = None
 
     def __init__(self, mutable_default_args=None, learn_mode=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, **kwargs):
-        """Initialize the parameters of analysis components. See the classes of the analysis components for parameter descriptions."""
+        """Initialize the parameters of analysis components.
+
+        See the classes of the analysis components for parameter
+        descriptions.
+        """
         allowed_kwargs = [
             "mutable_default_args", "aminer_config", "anomaly_event_handlers", "learn_mode", "persistence_id", "id_path_list",
             "stop_learning_time", "stop_learning_no_anomaly_time", "output_logline", "target_path_list", "constraint_list", "ignore_list",
@@ -385,8 +396,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def receive_atom(self, log_atom):
-        """
-        Receive a log atom from a source.
+        """Receive a log atom from a source.
+
         @param log_atom binary raw atom data
         @return True if this handler was really able to handle and process the atom. Depending on this information, the caller
         may decide if it makes sense passing the atom also to other handlers or to retry later. This behaviour has to be documented
@@ -394,8 +405,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         """
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         if AminerConfig.STAT_LEVEL > 0:
@@ -407,7 +419,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
 
 
 class PersistableComponentInterface(metaclass=abc.ABCMeta):
-    """This is the common interface of all handlers suitable for persisting data."""
+    """This is the common interface of all handlers suitable for persisting
+    data."""
 
     @abc.abstractmethod
     def __init__(self):
@@ -423,18 +436,23 @@ class PersistableComponentInterface(metaclass=abc.ABCMeta):
 
 
 class LogDataResource(metaclass=abc.ABCMeta):
-    """
-    This is the superinterface of each logdata resource monitored by aminer.
-    The interface is designed in a way, that instances of same subclass can be used both on aminer parent process side for keeping track of
-    the resources and forwarding the file descriptors to the child, but also on child side for the same purpose. The only difference is,
-    that on child side, the stream reading and read continuation features are used also. After creation on child side, this is the sole
-    place for reading and closing the streams. An external process may use the file descriptor only to wait for input via select.
+    """This is the superinterface of each logdata resource monitored by aminer.
+
+    The interface is designed in a way, that instances of same subclass
+    can be used both on aminer parent process side for keeping track of
+    the resources and forwarding the file descriptors to the child, but
+    also on child side for the same purpose. The only difference is,
+    that on child side, the stream reading and read continuation
+    features are used also. After creation on child side, this is the
+    sole place for reading and closing the streams. An external process
+    may use the file descriptor only to wait for input via select.
     """
 
     @abc.abstractmethod
     def __init__(self, log_resource_name, log_stream_fd, default_buffer_size=1 << 16, repositioning_data=None):
-        """
-        Create a new LogDataResource. Object creation must not touch the logStreamFd or read any data, unless repositioning_data  was given.
+        """Create a new LogDataResource. Object creation must not touch the
+        logStreamFd or read any data, unless repositioning_data  was given.
+
         In the later case, the stream has to support seek operation to reread data.
         @param log_resource_name the unique encoded name of this source as byte array.
         @param log_stream_fd the stream for reading the resource or -1 if not yet opened.
@@ -443,8 +461,8 @@ class LogDataResource(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def open(self, reopen_flag=False):
-        """
-        Open the given resource.
+        """Open the given resource.
+
         @param reopen_flag when True, attempt to reopen the same resource and check if it differs from the previously opened one.
         @raise Exception if valid logStreamFd was already provided, is still open and reopenFlag is False.
         @raise OSError when opening failed with unexpected error.
@@ -461,19 +479,27 @@ class LogDataResource(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def fill_buffer(self):
-        """
-        Fill the buffer data of this resource. The repositioning information is not updated, update_position() has to be used.
+        """Fill the buffer data of this resource.
+
+        The repositioning information is not updated, update_position() has to be used.
         @return the number of bytes read or -1 on error or end.
         """
 
     @abc.abstractmethod
     def update_position(self, length):
-        """Update the positioning information and discard the buffer data afterwards."""
+        """Update the positioning information and discard the buffer data
+        afterwards."""
 
     @abc.abstractmethod
     def get_repositioning_data(self):
-        """Get the data for repositioning the stream. The returned structure has to be JSON serializable."""
+        """Get the data for repositioning the stream.
+
+        The returned structure has to be JSON serializable.
+        """
 
     @abc.abstractmethod
     def close(self):
-        """Close this logdata resource. Data access methods will not work any more afterwards."""
+        """Close this logdata resource.
+
+        Data access methods will not work any more afterwards.
+        """

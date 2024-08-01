@@ -1,5 +1,5 @@
-"""
-This module defines a model element that takes any string up to the next white space.
+"""This module defines a model element that takes any string up to the next
+white space.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,11 +16,13 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class WhiteSpaceLimitedDataModelElement(ModelElementInterface):
-    """This class defines a model element that represents a variable amount of characters delimited by a white space."""
+    """This class defines a model element that represents a variable amount of
+    characters delimited by a white space."""
 
     def get_match_element(self, path: str, match_context):
-        """
-        Find the maximum number of bytes before encountering whitespace or end of data.
+        """Find the maximum number of bytes before encountering whitespace or
+        end of data.
+
         @return a match when at least one byte was found.
         """
         data = match_context.match_data

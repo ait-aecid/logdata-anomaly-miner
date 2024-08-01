@@ -1,5 +1,4 @@
-"""
-This module contains a datetime parser and helper classes for parsing.
+"""This module contains a datetime parser and helper classes for parsing.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -68,18 +67,20 @@ for idx in range(65, 91):
 
 
 class DateTimeModelElement(ModelElementInterface):
-    """
-    This class defines a model element to parse date or datetime values.
-    The element is similar to the strptime function but does not use it due to the numerous problems associated with it, e.g. no leap year
-    support for semiqualified years, no %s (seconds since epoch) format in Python strptime, no %f support in libc strptime, no support to
+    """This class defines a model element to parse date or datetime values.
+
+    The element is similar to the strptime function but does not use it
+    due to the numerous problems associated with it, e.g. no leap year
+    support for semiqualified years, no %s (seconds since epoch) format
+    in Python strptime, no %f support in libc strptime, no support to
     determine the length of the parsed string.
     """
 
-    # skipcq: PYL-W0613
     def __init__(self, element_id: str, date_format: bytes, time_zone: timezone = None, text_locale: Union[str, tuple] = None,
                  start_year: int = None, max_time_jump_seconds: int = 86400, timestamp_scale: int = 1):
-        """
-        Create a DateTimeModelElement to parse dates using a custom, timezone and locale-aware implementation similar to strptime.
+        """Create a DateTimeModelElement to parse dates using a custom,
+        timezone and locale-aware implementation similar to strptime.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
                available formats. Supported format specifiers are:
@@ -200,8 +201,9 @@ class DateTimeModelElement(ModelElementInterface):
         self.date_format_parts = date_format_parts
 
     def get_match_element(self, path: str, match_context):
-        """
-        Try to find a match on given data for this model element and all its children.
+        """Try to find a match on given data for this model element and all its
+        children.
+
         When a match is found, the match_context is updated accordingly.
         @param path to be printed in the MatchElement.
         @param match_context the match_context to be analyzed.
@@ -266,7 +268,7 @@ class DateTimeModelElement(ModelElementInterface):
         # Now combine the values and build the final value.
         parsed_date_time = None
         total_seconds = result[7]
-        if total_seconds != 0:  # skipcq: PTC-W0048
+        if total_seconds != 0:
             total_seconds += result[6]
         # For epoch second formats, the datetime value usually is not important. So stay with parsed_date_time to none.
         else:
@@ -440,8 +442,8 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
     """
 
     def __init__(self, element_id: str, date_formats: list, start_year: int = None, max_time_jump_seconds: int = 86400):
-        """
-        Create a new MultiLocaleDateTimeModelElement object.
+        """Create a new MultiLocaleDateTimeModelElement object.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param date_formats this parameter is a list of tuples, each tuple containing information about one date format to support.
                The tuple structure is (format_string, format_timezone, format_locale). The format_string may contain the same elements as
@@ -507,8 +509,9 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         self.last_parsed_seconds = 0
 
     def get_match_element(self, path: str, match_context):
-        """
-        Check if the data to match within the content is suitable to be parsed by any of the supplied date formats.
+        """Check if the data to match within the content is suitable to be
+        parsed by any of the supplied date formats.
+
         @param path to be printed in the MatchElement.
         @param match_context the match_context to be analyzed.
         @return On match return a match_object containing a tuple of the datetime object and the seconds since 1970. When not matching,

@@ -1,5 +1,4 @@
-"""
-This module defines the event handler for reporting via emails.
+"""This module defines the event handler for reporting via emails.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -35,10 +34,11 @@ Subject: %s
 
 
 class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredComponentInterface):
-    """
-    This class implements an event record listener.
-    It will pool received events, reduce the amount of events below the maximum number allowed per timeframe, create text representation
-    of received events and send them via "sendmail" transport.
+    """This class implements an event record listener.
+
+    It will pool received events, reduce the amount of events below the
+    maximum number allowed per timeframe, create text representation of
+    received events and send them via "sendmail" transport.
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -52,8 +52,8 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
     CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE = 'MailAlerting.MaxEventsPerMessage'
 
     def __init__(self, analysis_context):
-        """
-        Initialize the event handler.
+        """Initialize the event handler.
+
         @param analysis_context used to get the aminer config and the config_properties.
         """
         self.analysis_context = analysis_context
@@ -150,7 +150,8 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             self.send_notification(current_time)
 
     def do_timer(self, trigger_time):
-        """Check exit status of previous mail sending procedures and check if alerts should be sent."""
+        """Check exit status of previous mail sending procedures and check if
+        alerts should be sent."""
         if (self.next_alert_time != 0) and (trigger_time >= self.next_alert_time):
             self.send_notification(trigger_time)
         return 10

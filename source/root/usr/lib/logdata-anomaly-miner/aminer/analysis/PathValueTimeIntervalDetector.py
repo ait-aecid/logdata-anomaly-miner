@@ -1,5 +1,5 @@
-"""
-This module defines a detector for time intervals of the appearance of log lines.
+"""This module defines a detector for time intervals of the appearance of log
+lines.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -15,7 +15,7 @@ import os
 import logging
 
 from aminer import AminerConfig
-from aminer.AminerConfig import DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, CONFIG_KEY_LOG_LINE_PREFIX,\
+from aminer.AminerConfig import DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, CONFIG_KEY_LOG_LINE_PREFIX, \
     DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
@@ -24,9 +24,10 @@ from aminer.util import PersistenceUtil
 
 
 class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """
-    This class analyzes the time intervals of the appearance of log_atoms.
-    The considered time intervals depend on the combination of values in the target_paths of target_path_list.
+    """This class analyzes the time intervals of the appearance of log_atoms.
+
+    The considered time intervals depend on the combination of values in
+    the target_paths of target_path_list.
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -35,8 +36,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                  allow_missing_values_flag=True, ignore_list=None, output_logline=True, learn_mode=False, time_period_length=86400,
                  max_time_diff=360, num_reduce_time_list=10, stop_learning_time=None, stop_learning_no_anomaly_time=None,
                  log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param persistence_id name of persistence file.
@@ -86,8 +88,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         self.load_persistence_data()
 
     def receive_atom(self, log_atom):
-        """
-        Analyze if the time of the log_atom appeared in the time interval of a previously appeared times.
+        """Analyze if the time of the log_atom appeared in the time interval of
+        a previously appeared times.
+
         The considered time intervals originate of events with the same combination of values in the target_paths of target_path_list.
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
@@ -174,7 +177,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         return True
 
     def insert_and_reduce_time_intervals(self, id_tuple, new_time):
-        """Add the new time to the time list and reduce the time list after num_reduce_time_list of times have been appended."""
+        """Add the new time to the time list and reduce the time list after
+        num_reduce_time_list of times have been appended."""
         # Increase the counter of new times since last reduction
         self.counter_reduce_time_intervals[id_tuple] += 1
 
@@ -182,7 +186,6 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         if new_time > self.appeared_time_list[id_tuple][-1]:
             time_index = len(self.appeared_time_list[id_tuple])
         else:
-            # skipcq: PTC-W0063
             time_index = next(index for index, time in enumerate(self.appeared_time_list[id_tuple]) if time > new_time)
 
         # Insert the new time
@@ -248,8 +251,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def print_persistence_event(self, event_type, event_data):
-        """
-        Print the persistence of component_name. Event_data specifies what information is output.
+        """Print the persistence of component_name. Event_data specifies what
+        information is output.
+
         @return a message with information about the persistence.
         @throws Exception when the output for the event_data was not possible.
         """
@@ -310,8 +314,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         return string
 
     def add_to_persistence_event(self, event_type, event_data):
-        """
-        Add or overwrite the information of event_data to the persistence of component_name.
+        """Add or overwrite the information of event_data to the persistence of
+        component_name.
+
         @return a message with information about the addition to the persistence.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """
@@ -347,8 +352,9 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         return msg
 
     def remove_from_persistence_event(self, event_type, event_data):
-        """
-        Add or overwrite the information of event_data to the persistence of component_name.
+        """Add or overwrite the information of event_data to the persistence of
+        component_name.
+
         @return a message with information about the addition to the persistence.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """

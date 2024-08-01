@@ -1,3 +1,5 @@
+#!/bin/bash
+
 FILE=/tmp/demo-config.py
 CMD_PATH=/tmp/commands.txt
 sudo cp demo/aminerRemoteControl/demo-config.py $FILE
