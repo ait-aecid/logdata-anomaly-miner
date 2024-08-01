@@ -35,7 +35,7 @@ if [[ $md5_result == "$SUSPEND_FILE: OK" ]]; then
 	exit_code=1
 fi
 
-find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test1.md5 > /dev/null
+find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.log" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test1.md5 > /dev/null
 
 md5sum $SUSPEND_FILE > $SUSPEND_FILE_MD5 2> /dev/null
 sudo aminerremotecontrol --exec "suspend" > /dev/null
@@ -47,7 +47,7 @@ if [[ $md5_result != "$SUSPEND_FILE: OK" ]]; then
 	exit_code=1
 fi
 
-find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test2.md5 > /dev/null
+find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.log" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test2.md5 > /dev/null
 
 sudo aminerremotecontrol --exec "activate" > /dev/null
 for i in {1..60}; do grep "Original log line:  Current Disk Data is: Filesystem     Type  Size  Used Avail Use%   %" $SUSPEND_FILE > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
@@ -59,7 +59,7 @@ fi
 
 for i in {1..60}; do test -f /tmp/lib/aminer/AnalysisChild/RepositioningData; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
-find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.txt" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test3.md5 > /dev/null
+find /tmp/lib/aminer -type f ! -path "/tmp/lib/aminer/log/aminerRemoteLog.log" ! -path "/tmp/lib/aminer/log/aminer.log" ! -path "/tmp/lib/aminer/log/statistics.log" -exec md5sum {} \; | tee /tmp/test3.md5 > /dev/null
 
 suspend_diff=`diff /tmp/test1.md5 /tmp/test2.md5`
 activate_diff=`diff /tmp/test2.md5 /tmp/test3.md5`

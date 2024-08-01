@@ -126,7 +126,7 @@ class TestBase(unittest.TestCase):
         if os.path.exists(persistence_dir_name):
             shutil.rmtree(persistence_dir_name)
         if not os.path.exists(persistence_dir_name):
-            os.makedirs(persistence_dir_name)
+            os.makedirs(os.path.join(persistence_dir_name, "log"))
         initialize_loggers(self.aminer_config, os.getuid(), os.getgid())
         if isinstance(persistence_dir_name, str):
             persistence_dir_name = persistence_dir_name.encode()

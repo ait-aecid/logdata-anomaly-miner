@@ -198,8 +198,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 log_atom.atom_time = time.time()
             elif not self.printed_warning or self.continuous_timestamp_missing_warning:
                 msg = "No timestamp was found for a log_atom. The timestamp_paths parameter is probably not set correctly in the" \
-                      " Input config which might lead to errors. Alternatively the use_real_time parameter might be used in the" \
-                      " Input config."
+                      " Input config which might lead to errors. Alternatively the use_real_time parameter might be used in the Input " \
+                       "config. To show this message only once, set continuous_timestamp_missing_warning to false in the Input config."
                 print("WARNING: " + msg, file=sys.stderr)
                 logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                 self.printed_warning = True

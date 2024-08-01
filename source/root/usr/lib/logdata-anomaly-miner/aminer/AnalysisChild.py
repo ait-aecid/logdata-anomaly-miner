@@ -473,7 +473,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         be nonblocking and to return data.
         """
         # We cannot fail with None here as the socket was in the readList.
-        (received_fd, received_type_info, annotation_data) = SecureOSFunctions.receive_annoted_file_descriptor(self.master_control_socket)
+        (received_fd, received_type_info, annotation_data) = SecureOSFunctions.receive_annotated_file_descriptor(self.master_control_socket)
         if received_type_info == b'logstream':
             repositioning_data = self.repositioning_data_dict.get(annotation_data, None)
             if repositioning_data is not None:

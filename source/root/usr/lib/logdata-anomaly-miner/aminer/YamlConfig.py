@@ -14,6 +14,7 @@ import sys
 import logging
 import copy
 import ast
+import pytz
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.util.StringUtil import decode_string_as_byte_string
 
@@ -187,8 +188,11 @@ def build_parsing_model(data=None):
                     branch_model_dict[key] = parser_model_dict.get(model)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1].decode(), branch_model_dict)
             elif item['type'].name == 'DateTimeModelElement':
+                time_zone = item['time_zone']
+                if time_zone is not None:
+                    time_zone = pytz.timezone(time_zone)
                 parser_model_dict[item['id']] = item['type'].func(
-                    item['name'], item['date_format'].encode(), None, item['text_locale'], item['start_year'],
+                    item['name'], item['date_format'].encode(), time_zone, item['text_locale'], item['start_year'],
                     item['max_time_jump_seconds'])
             elif item['type'].name == 'MultiLocaleDateTimeModelElement':
                 date_formats = []

@@ -266,9 +266,9 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
         self.event_count_vector and return an array."""
         vector = []
         for event in self.event_count_vector.values():
-            for feature, value in event.items():
-                if feature in self.feature_list:
-                    vector.append(value)
+            for key in self.feature_list:
+                if key in event.keys():
+                    vector.append(event[key])
         return np.array(vector)
 
     def get_n_comp(self, eigen_values):

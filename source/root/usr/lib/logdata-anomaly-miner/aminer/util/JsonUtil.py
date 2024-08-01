@@ -25,13 +25,12 @@ def dump_as_json(input_object):
 
 
 def load_json(input_string):
-    """Load an string encoded as object structure."""
+    """Load a string encoded as object structure."""
     return decode_object(json.loads(input_string))
 
 
 def encode_object(term):
     """@param term return an object encoded as string."""
-    encoded_object = ''
     if isinstance(term, str):
         encoded_object = 'string:' + term
     elif isinstance(term, bytes):
@@ -58,7 +57,6 @@ def encode_object(term):
 
 def decode_object(term):
     """@param term return a string decoded as object structure."""
-    decoded_object = ''
     if isinstance(term, str) and term.startswith('string:'):
         decoded_object = term[7:]
     elif isinstance(term, str) and term.startswith('bytes:'):

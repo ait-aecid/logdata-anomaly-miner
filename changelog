@@ -1,3 +1,47 @@
+logdata-anomaly-miner (2.7.0) unstable; urgency=low
+  Bugfixes:
+  * Fix broken links to python-modules
+  * Fix initalization time index in EFD
+  * Fix correct time index when learn mode is off
+  * Fix edge case where confidence is divided by 0 in EventFrequencyDetector
+  * Fix time until learn_mode is switched automatically
+  * Fix issue where numerical values could not be used in CharsetDetector and EntropyDetector
+  * Fix feature list order in PCA detector
+  * Fix time index persistence in EFD
+  * Fix last seen log in EFD
+  * Fix newline parsing in json string values.
+  * Fix issue of nested optional json dictionaries not parsing.
+
+  Changes:
+  * Implemented mechanism to allow granular configuration of LogResources.
+  * Add seasonality to EFD
+  * Add atom time in reset counter method
+  * Add output_event_handlers parameter to the unparsed event handlers.
+  * Add stop_learning_time and stop_learning_no_anomaly_time to schemas
+  * Change id_path_list parameter to be optional in ValueRangeDetector.
+  * Imporove JsonModelElement parser
+  * Add learn mode and detection thresholds in MatchValueAverageChangeDetector
+  * Implement AminerId config property
+  * Add LogResource to the json output of anomalies
+  * Add use_real_time parameter to yaml config
+  * Move manpages to Debian independent directory
+  * Add ignore_log_resource parameter to analysis components.
+  * Improved performance of JsonModelElement
+  * Add XmlModelElement
+  * Implement stop_learning_time parameters in MatchValueAverageChangeDetector.
+  * Add support for Debian Bookworm
+  * Updated to urllib 1.26.19
+  * Updated scipy to 1.10.0
+  * Extend missing timestamp warning in ByteStreamLineAtomizer.
+  * Enhance timezones in DateTimeModelElement
+  * Increase default persistence time
+  * Add support for Redhat based Linux
+  * Improved documenation
+  
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at> Thu,  11 Jul 2024 12:00:00 +0000
+
+
 logdata-anomaly-miner (2.6.1) unstable; urgency=low
   Changes:
   * minor refactoring

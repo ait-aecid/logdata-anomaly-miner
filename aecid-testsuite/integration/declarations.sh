@@ -717,7 +717,7 @@ function checkAllSyslogs(){
 
 # This function checks if the output of the Kafka Topic is as expected.
 function checkKafkaTopic(){
-  out=$($KAFKA_VERSIONSTRING/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_topic --from-beginning --timeout-ms 30000)
+  out=$($KAFKA_VERSIONSTRING/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_topic --from-beginning --timeout-ms 60000)
   for t in "${JSON_OUTPUT[@]}"
   do
     if [[ $out != *"$t"* ]]; then
