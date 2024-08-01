@@ -40,13 +40,13 @@ config_properties['RemoteControlSocket'] = '/var/run/aminer-remote.socket'
 # for the child also.
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
-config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'  # skipcq: BAN-B108
+config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'
 # Read and store information to be used between multiple invocations
 # of aminer in this directory. The directory must only be accessible
 # to the 'AminerUser' but not group/world readable. On violation,
 # aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'  # skipcq: BAN-B108
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
@@ -87,9 +87,10 @@ config_properties['LogPrefix'] = 'Original log line: '
 
 
 def build_analysis_pipeline(analysis_context):
-    """
-    Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
+    """Define the function to create pipeline for parsing the log data.
+
+    It has also to define an AtomizerFactory to instruct aminer how to
+    process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
 
@@ -158,7 +159,7 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(simple_monotonic_timestamp_adjust, component_name="SimpleMonotonicTimestampAdjust")
 
     from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-    stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)  # skipcq: BAN-B108
+    stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
     from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory
     volatile_logarithmic_backoff_event_history = VolatileLogarithmicBackoffEventHistory(100)
     anomaly_event_handlers = [stream_printer_event_handler, volatile_logarithmic_backoff_event_history]
@@ -215,7 +216,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filters.add_handler(new_match_path_detector)
 
     def tuple_transformation_function(match_value_list):
-        """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10000th element."""
+        """Only allow output of the EnhancedNewMatchPathValueComboDetector
+        after every 10000th element."""
         extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list))
         if extra_data is not None:
             mod = 10000

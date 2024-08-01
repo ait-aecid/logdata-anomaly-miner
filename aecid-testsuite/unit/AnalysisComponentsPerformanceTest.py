@@ -42,7 +42,7 @@ import random
 from time import process_time
 from _io import StringIO
 import timeit
-import pickle  # skipcq: BAN-B403
+import pickle
 
 
 class AnalysisComponentsPerformanceTest(TestBase):
@@ -944,25 +944,25 @@ class AnalysisComponentsPerformanceTest(TestBase):
     def run_event_type_detector(self, number_of_paths):
         """Run the performance tests for EventTypeDetector."""
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
-            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+            nor_data_list = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
-            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+            beta1_data_list = pickle.load(f)
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
@@ -1003,25 +1003,25 @@ class AnalysisComponentsPerformanceTest(TestBase):
     def run_variable_type_detector(self, number_of_paths):
         """Run the performance tests for VariableTypeDetector."""
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
-            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+            nor_data_list = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
-            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+            beta1_data_list = pickle.load(f)
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
@@ -1064,25 +1064,25 @@ class AnalysisComponentsPerformanceTest(TestBase):
     def run_variable_correlation_detector(self, number_of_paths):
         """Run the performance tests for VariableCorrelationDetector."""
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
-            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+            nor_data_list = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
-            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+            beta1_data_list = pickle.load(f)
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\

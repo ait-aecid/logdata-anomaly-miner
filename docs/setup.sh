@@ -6,7 +6,7 @@ case "$1" in
 		ln -s ../README.md
 		ln -s ../SECURITY.md
 		ln -s ../LICENSE LICENSE.md
-		
+
 		git clone https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git ../Wiki
                 ;;
 

@@ -1,5 +1,5 @@
-"""
-This module contains classes for execution of py child process main analysis loop.
+"""This module contains classes for execution of py child process main analysis
+loop.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -28,8 +28,8 @@ import logging
 from datetime import datetime
 import shutil
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_STAT_PERIOD,\
-    DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD,\
+from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_STAT_PERIOD, \
+    DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD, \
     DEFAULT_PERSISTENCE_PERIOD
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.events.JsonConverterHandler import JsonConverterHandler
@@ -42,7 +42,8 @@ from aminer.AminerRemoteControlExecutionMethods import AminerRemoteControlExecut
 
 
 class AnalysisContext:
-    """This class collects information about the current analysis context to access it during analysis or remote management."""
+    """This class collects information about the current analysis context to
+    access it during analysis or remote management."""
 
     TIME_TRIGGER_CLASS_REALTIME = 1
     TIME_TRIGGER_CLASS_ANALYSISTIME = 2
@@ -88,9 +89,10 @@ class AnalysisContext:
             'Called %s for the component %s', 'add_time_triggered_component', component.__class__.__name__)
 
     def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
-        """
-        Register a new component.
-        A component implementing the TimeTriggeredComponentInterface will also be added to the appropriate lists unless
+        """Register a new component. A component implementing the
+        TimeTriggeredComponentInterface will also be added to the appropriate
+        lists unless.
+
         registerTimeTriggerClassOverride is specified.
         @param component the component to be registered.
         @param component_name an optional name assigned to the component when registering. When no name is specified, the detector class
@@ -127,8 +129,8 @@ class AnalysisContext:
         return self.registered_components.keys()
 
     def get_component_by_id(self, id_string):
-        """
-        Get a component by ID.
+        """Get a component by ID.
+
         @return None if not found.
         """
         component_info = self.registered_components.get(id_string)
@@ -141,15 +143,15 @@ class AnalysisContext:
         return list(self.registered_components_by_name.keys())
 
     def get_component_by_name(self, name):
-        """
-        Get a component by name.
+        """Get a component by name.
+
         @return None if not found.
         """
         return self.registered_components_by_name.get(name)
 
     def get_name_by_component(self, component):
-        """
-        Get the name of a component.
+        """Get the name of a component.
+
         @return None if not found.
         """
         for component_name, component_iter in self.registered_components_by_name.items():
@@ -158,8 +160,8 @@ class AnalysisContext:
         return None
 
     def get_id_by_component(self, component):
-        """
-        Get the name of a component.
+        """Get the name of a component.
+
         @return None if not found.
         """
         for component_id, component_iter in self.registered_components.items():
@@ -196,9 +198,10 @@ suspended_flag = False
 
 
 class AnalysisChild(TimeTriggeredComponentInterface):
-    """
-    This class defines the child performing the complete analysis workflow.
-    When splitting privileges between analysis and monitor  process, this class should only be initialized within the analysis process!
+    """This class defines the child performing the complete analysis workflow.
+
+    When splitting privileges between analysis and monitor  process,
+    this class should only be initialized within the analysis process!
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -243,8 +246,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.analysis_context.add_time_triggered_component(self)
 
     def run_analysis(self, master_fd):
-        """
-        Run the analysis thread.
+        """Run the analysis thread.
+
         @param master_fd the main communication socket to the parent to receive logfile updates from the parent.
         @return 0 on success, e.g. normal termination via signal or 1 on error.
         """
@@ -463,9 +466,11 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         return delayed_return_status
 
     def handle_master_control_socket_receive(self):
-        """
-        Receive information from the parent process via the master control socket.
-        This method may only be invoked when receiving is guaranteed to be nonblocking and to return data.
+        """Receive information from the parent process via the master control
+        socket.
+
+        This method may only be invoked when receiving is guaranteed to
+        be nonblocking and to return data.
         """
         # We cannot fail with None here as the socket was in the readList.
         (received_fd, received_type_info, annotation_data) = SecureOSFunctions.receive_annotated_file_descriptor(self.master_control_socket)
@@ -509,10 +514,12 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             raise Exception(msg)
 
     def do_timer(self, trigger_time):
-        """
-        Perform trigger actions and to determine the time for next invocation.
-        The caller may decide to invoke this method earlier than requested during the previous call. Classes implementing this method have
-        to handle such cases. Each class should try to limit the time spent in this method as it might delay trigger signals to other
+        """Perform trigger actions and to determine the time for next
+        invocation. The caller may decide to invoke this method earlier than
+        requested during the previous call. Classes implementing this method
+        have to handle such cases. Each class should try to limit the time
+        spent in this method as it might delay trigger signals to other.
+
         components. For extensive compuational work or IO, a separate thread should be used.
         @param trigger_time the time this trigger is invoked. This might be the current real time when invoked from real time
         timers or the forensic log timescale time value.
@@ -533,8 +540,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
 
 class AnalysisChildRemoteControlHandler:
-    """
-    This class stores information about one open remote control connection.
+    """This class stores information about one open remote control connection.
+
     The handler can be in 3 different states:
     * receive request: the control request was not completely received. The main process may use select() to wait for input data without
       blocking or polling.
@@ -604,10 +611,10 @@ class AnalysisChildRemoteControlHandler:
                         json_request_data[1] = json_request_data[1].decode()
                 methods = AminerRemoteControlExecutionMethods()
                 from aminer.analysis import EnhancedNewMatchPathValueComboDetector, EventCorrelationDetector, EventTypeDetector, \
-                    EventFrequencyDetector, EventSequenceDetector, HistogramAnalysis, MatchFilter, MatchValueAverageChangeDetector,\
-                    MatchValueStreamWriter, MissingMatchPathValueDetector, NewMatchIdValueComboDetector, NewMatchPathDetector,\
-                    NewMatchPathValueComboDetector, NewMatchPathValueDetector, ParserCount, Rules, TimeCorrelationDetector,\
-                    TimeCorrelationViolationDetector, TimestampCorrectionFilters, TimestampsUnsortedDetector, VariableTypeDetector,\
+                    EventFrequencyDetector, EventSequenceDetector, HistogramAnalysis, MatchFilter, MatchValueAverageChangeDetector, \
+                    MatchValueStreamWriter, MissingMatchPathValueDetector, NewMatchIdValueComboDetector, NewMatchPathDetector, \
+                    NewMatchPathValueComboDetector, NewMatchPathValueDetector, ParserCount, Rules, TimeCorrelationDetector, \
+                    TimeCorrelationViolationDetector, TimestampCorrectionFilters, TimestampsUnsortedDetector, VariableTypeDetector, \
                     AllowlistViolationDetector, EventCountClusterDetector
                 exec_locals = {
                     'analysis_context': analysis_context, 'remote_control_data': json_request_data[1],
@@ -660,7 +667,6 @@ class AnalysisChildRemoteControlHandler:
                 logging.getLogger(REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
                 logging.getLogger(DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
 
-                # skipcq: PYL-W0603
                 global suspended_flag
                 if json_request_data[0] in ('suspend_aminer()', 'suspend_aminer', 'suspend'):
                     suspended_flag = True
@@ -673,8 +679,7 @@ class AnalysisChildRemoteControlHandler:
                     json_remote_control_response = json.dumps(msg)
                     logging.getLogger(DEBUG_LOG_NAME).info(msg)
                 else:
-                    # skipcq: PYL-W0122
-                    exec(json_request_data[0], {'__builtins__': None}, exec_locals)
+                    exec(json_request_data[0], {'__builtins__': None}, exec_locals)  # nosec B102
                     json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
                     if methods.REMOTE_CONTROL_RESPONSE == '':
                         methods.REMOTE_CONTROL_RESPONSE = None
@@ -683,8 +688,7 @@ class AnalysisChildRemoteControlHandler:
                     else:
                         json_remote_control_response = json.dumps(
                             exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
-            # skipcq: FLK-E722
-            except:
+            except Exception:
                 exception_data = traceback.format_exc()
                 logging.getLogger(DEBUG_LOG_NAME).debug('Remote control exception data: %s', str(exception_data))
             # This is little dirty but avoids having to pass over remoteControlResponse dumping again.
@@ -718,8 +722,8 @@ class AnalysisChildRemoteControlHandler:
             raise Exception(msg)
 
     def may_get(self):
-        """
-        Check if a call to do_get would make sense.
+        """Check if a call to do_get would make sense.
+
         @return True if the input buffer already contains a complete wellformed packet or definitely malformed one.
         """
         if len(self.input_buffer) < 4:
@@ -728,8 +732,8 @@ class AnalysisChildRemoteControlHandler:
         return (request_length <= len(self.input_buffer)) or (request_length >= self.max_control_packet_size)
 
     def do_get(self):
-        """
-        Get the next packet from the input buffer and remove it.
+        """Get the next packet from the input buffer and remove it.
+
         @return the packet data including the length preamble or None when request not yet complete.
         """
         if len(self.input_buffer) < 4:
@@ -747,9 +751,10 @@ class AnalysisChildRemoteControlHandler:
         return request_data
 
     def do_receive(self):
-        """
-        Receive data from the remote side and add it to the input buffer.
-        This method call expects to read at least one byte of data. A zero byte read indicates EOF and will cause normal handler termination
+        """Receive data from the remote side and add it to the input buffer.
+        This method call expects to read at least one byte of data. A zero byte
+        read indicates EOF and will cause normal handler termination.
+
         when all input and output buffers are empty. Any other state or error causes handler termination before reporting the error.
         @return True if read was successful, false if EOF is reached without reading any data and all buffers are empty.
         @throws Exception when unexpected errors occured while receiving or shuting down the connection.
@@ -760,8 +765,8 @@ class AnalysisChildRemoteControlHandler:
             self.terminate()
 
     def do_send(self):
-        """
-        Send data from the output buffer to the remote side.
+        """Send data from the output buffer to the remote side.
+
         @return True if output buffer was emptied.
         """
         send_length = os.write(self.remote_control_fd, self.output_buffer)
@@ -772,8 +777,8 @@ class AnalysisChildRemoteControlHandler:
         return False
 
     def put_request(self, request_type, request_data):
-        """
-        Add a request of given type to the send queue.
+        """Add a request of given type to the send queue.
+
         @param request_type is a byte string denoting the type of the request. Currently only 'EEEE' is supported.
         @param request_data is a byte string denoting the content of the request.
         """
@@ -801,7 +806,8 @@ class AnalysisChildRemoteControlHandler:
         self.put_request(b'EEEE', remote_control_data.encode())
 
     def add_select_fds(self, input_select_fd_list, output_select_fd_list):
-        """Update the file descriptor lists for selecting on read and write file descriptors."""
+        """Update the file descriptor lists for selecting on read and write
+        file descriptors."""
         if self.output_buffer:
             output_select_fd_list.append(self.remote_control_fd)
         else:

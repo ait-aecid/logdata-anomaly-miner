@@ -1,12 +1,12 @@
-"""
-This module defines an evaluator and generator for event rules.
-The overall idea of generation is
-1) For each processed event A, randomly select another event B occurring within queue_delta_time.
-2) If B chronologically occurs after A, create the hypothesis A => B (observing event A implies that event B must be observed within
-current_time+queue_delta_time). If B chronologically occurs before A, create the hypothesis B <= A (observing event A implies that event B
-must be observed within currentTime-queueDeltaTime).
-3) Observe for a long time (max_observations) whether the hypothesis holds.
-4) If the hypothesis holds, transform it to a rule. Otherwise, discard the hypothesis.
+"""This module defines an evaluator and generator for event rules. The overall
+idea of generation is 1) For each processed event A, randomly select another
+event B occurring within queue_delta_time. 2) If B chronologically occurs after
+A, create the hypothesis A => B (observing event A implies that event B must be
+observed within current_time+queue_delta_time). If B chronologically occurs
+before A, create the hypothesis B <= A (observing event A implies that event B
+must be observed within currentTime-queueDeltaTime). 3) Observe for a long time
+(max_observations) whether the hypothesis holds. 4) If the hypothesis holds,
+transform it to a rule. Otherwise, discard the hypothesis.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -24,7 +24,7 @@ import random
 import math
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, \
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -35,7 +35,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
-    """This class tries to find time correlation patterns between different log atom events."""
+    """This class tries to find time correlation patterns between different log
+    atom events."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -44,8 +45,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                  hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
                  learn_mode=True, ignore_list=None, persistence_id="Default", output_logline=True, constraint_list=None,
                  stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
@@ -122,9 +124,10 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.load_persistence_data()
 
     def get_min_eval_true(self, max_observations, p0, alpha):
-        """
-        Compute the critical value (minimal amount of true evaluations) for a hypothesis.
-        The form of the hypothesis is <eventA> implies <eventB> with at least probability p0 to be accepted.
+        """Compute the critical value (minimal amount of true evaluations) for
+        a hypothesis. The form of the hypothesis is <eventA> implies <eventB>
+        with at least probability p0 to be accepted.
+
         This method tries to be efficient by
         - Storing already computed critical values in a dictionary
         - Swapping (1 - p0) and p0 and replace alpha with (1 - alpha) to reduce loops
@@ -520,8 +523,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 break
 
             # Generate new hypotheses
-            if len(self.hypothesis_candidates) > 0 and random.uniform(0.0, 1.0) < self.generation_factor:
-                implication_direction = random.randint(0, 1)
+            if len(self.hypothesis_candidates) > 0 and random.uniform(0.0, 1.0) < self.generation_factor:  # nosec B311
+                implication_direction = random.randint(0, 1)  # nosec B311
                 if self.sum_unstable_unknown_hypotheses >= self.max_hypotheses:
                     # If too many hypotheses exist, do nothing.
                     implication_direction = -1
@@ -651,7 +654,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                 break
 
             # Add new hypothesis candidates
-            if len(self.hypothesis_candidates) < self.candidates_size and random.uniform(0.0, 1.0) < self.generation_probability:
+            rand_prob = random.uniform(0.0, 1.0)  # nosec B311
+            if len(self.hypothesis_candidates) < self.candidates_size and rand_prob < self.generation_probability:
                 self.hypothesis_candidates.append((log_event, log_atom.atom_time))
         self.log_success += 1
         return True
@@ -715,8 +719,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
             logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         if AminerConfig.STAT_LEVEL == 1:
@@ -737,8 +742,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         self.log_new_back_rules = []
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
-        """
-        Allowlist an event generated by this source using the information emitted when generating the event.
+        """Allowlist an event generated by this source using the information
+        emitted when generating the event.
+
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
@@ -755,8 +761,9 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         return f"Allowlisted path {event_data} in {event_type}."
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
-        """
-        Blocklist an event generated by this source using the information emitted when generating the event.
+        """Blocklist an event generated by this source using the information
+        emitted when generating the event.
+
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """

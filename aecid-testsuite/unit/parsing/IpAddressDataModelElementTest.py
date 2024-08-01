@@ -209,7 +209,7 @@ class IpAddressDataModelElementTest(TestBase):
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, ())
         self.assertRaises(AttributeError, model_element.get_match_element, self.path, model_element)
 
-    def test8performance(self):  # skipcq: PYL-R0201
+    def test8performance(self):
         """Test the performance of the implementation."""
         import_setup = """
 import copy

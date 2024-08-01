@@ -1,5 +1,4 @@
-"""
-This module defines a log atom.
+"""This module defines a log atom.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -24,27 +23,29 @@ class LogAtom:
         self.source = source
 
     def get_parser_match(self):
-        """
-        Get the parser match associated with this LogAtom.
+        """Get the parser match associated with this LogAtom.
+
         @return the match or None for (yet) unparsed LogAtoms.
         """
         return self.parser_match
 
     def set_timestamp(self, timestamp):
-        """
-        Update the default timestamp value associated with this LogAtom.
-        The method can be called more than once to allow correction of fine-adjusting of timestamps by analysis filters after initial
+        """Update the default timestamp value associated with this LogAtom.
+
+        The method can be called more than once to allow correction of
+        fine-adjusting of timestamps by analysis filters after initial
         parsing procedure.
         """
         self.atom_time = timestamp
 
     def get_timestamp(self):
-        """
-        Get the default timestamp value for this LogAtom.
+        """Get the default timestamp value for this LogAtom.
+
         @return the timestamp as number of seconds since 1970.
         """
         return self.atom_time
 
     def is_parsed(self):
-        """Check if this atom is parsed by checking if parserMatch object is attached."""
+        """Check if this atom is parsed by checking if parserMatch object is
+        attached."""
         return self.parser_match is not None

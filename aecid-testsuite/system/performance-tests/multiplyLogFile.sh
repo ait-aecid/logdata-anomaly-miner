@@ -1,5 +1,7 @@
+#!/bin/bash
+
 if [[ $# -lt 3 ]]; then
-	echo "Error, not enough parameters found!"	
+	echo "Error, not enough parameters found!"
 	echo "Please run the script as follows: ./multiplyLogFile.sh numberOfCopies templateFile targetFile"
 	echo "For example: ./multiplyLogFile.sh 2700000 syslog-template /tmp/syslog"
 	exit
@@ -18,9 +20,7 @@ while [ $i -lt $iterations ]; do
 	if [ $i -eq 0 ]; then
 		printf "%s\n" "${srcArray[@]}" > $target
 	else
-		printf "%s\n" "${srcArray[@]}" >> $target	
+		printf "%s\n" "${srcArray[@]}" >> $target
 	fi
 	i=$((i + 1))
 done
-
-

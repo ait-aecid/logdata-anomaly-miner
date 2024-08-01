@@ -1,5 +1,4 @@
-"""
-This module defines a model element for a variable amount of bytes.
+"""This module defines a model element for a variable amount of bytes.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,19 +15,20 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class VariableByteDataModelElement(ModelElementInterface):
-    """This class defines a model element  that takes any string that only contains characters of a given alphabet."""
+    """This class defines a model element  that takes any string that only
+    contains characters of a given alphabet."""
 
     def __init__(self, element_id: str, alphabet: bytes):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param alphabet the allowed letters to match data.
         """
         super().__init__(element_id, alphabet=alphabet)
 
     def get_match_element(self, path, match_context):
-        """
-        Find the maximum number of bytes matching the given alphabet.
+        """Find the maximum number of bytes matching the given alphabet.
+
         @return a match when at least one byte was found within alphabet.
         """
         data = match_context.match_data

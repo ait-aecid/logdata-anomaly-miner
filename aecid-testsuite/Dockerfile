@@ -50,6 +50,7 @@ RUN apt-get update && apt-get install -y \
     python3-pandas \
     python3-patsy \
     python3-defusedxml \
+    python3-bandit \
     libacl1-dev \
     postfix \
     procps \
@@ -135,7 +136,7 @@ ADD scripts/testingwrapper.sh /testingwrapper.sh
 ADD source /home/aminer/source
 ADD docs /home/aminer/docs
 
-RUN pip3 install orjson
+RUN pip3 install orjson flake8 pycodestyle vulture
 RUN PACK=$(find /usr/local/lib/ -name orjson.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 USER aminer

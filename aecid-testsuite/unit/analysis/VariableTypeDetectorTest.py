@@ -7,7 +7,7 @@ from unit.TestBase import TestBase
 from aminer.AminerConfig import DEFAULT_PERSISTENCE_PERIOD
 
 import time
-import pickle  # skipcq: BAN-B403
+import pickle
 import random
 
 
@@ -70,19 +70,19 @@ class VariableTypeDetectorTest(TestBase):
 
         # load data
         with open("unit/data/vtd_data/uni_data_test3", "rb") as f:
-            [uni_data_list, uni_result_shapes_ks, uni_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list, uni_result_shapes_ks, uni_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/nor_data_test3", "rb") as f:
-            [nor_data_list, nor_result_shapes_ks, nor_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list, nor_result_shapes_ks, nor_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta1_data_test3", "rb") as f:
-            [beta1_data_list, beta1_result_shapes_ks, beta1_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list, beta1_result_shapes_ks, beta1_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta2_data_test3", "rb") as f:
-            [beta2_data_list, beta2_result_shapes_ks, beta2_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list, beta2_result_shapes_ks, beta2_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta3_data_test3", "rb") as f:
-            [beta3_data_list, beta3_result_shapes_ks, beta3_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list, beta3_result_shapes_ks, beta3_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta4_data_test3", "rb") as f:
-            [beta4_data_list, beta4_result_shapes_ks, beta4_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list, beta4_result_shapes_ks, beta4_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta5_data_test3", "rb") as f:
-            [beta5_data_list, beta5_result_shapes_ks, beta5_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list, beta5_result_shapes_ks, beta5_result_shapes_cm] = pickle.load(f)
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd_ks = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size,
@@ -267,7 +267,7 @@ class VariableTypeDetectorTest(TestBase):
         """This unittest tests possible scenarios of the detect_var_type method."""
         # Load list of an uniformal distributed sample which consists of integers
         with open("unit/data/vtd_data/uni_data_test4", "rb") as f:
-            uni_data_list_int = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list_int = pickle.load(f)
 
         num_init = 100
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
@@ -419,11 +419,11 @@ class VariableTypeDetectorTest(TestBase):
         """
         # load data
         with open("unit/data/vtd_data/nor_data_test6", "rb") as f:
-            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+            nor_data_list = pickle.load(f)
         with open("unit/data/vtd_data/beta1_data_test6", "rb") as f:
-            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+            beta1_data_list = pickle.load(f)
         with open("unit/data/vtd_data/uni_data_test6", "rb") as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list = pickle.load(f)
 
         nor_data_list = nor_data_list*10
         beta1_data_list = beta1_data_list*10
@@ -656,19 +656,19 @@ class VariableTypeDetectorTest(TestBase):
 
         # load data
         with open("unit/data/vtd_data/uni_data_test7", "rb") as f:
-            [uni_data_list_ini, uni_data_list_upd, uni_result_shapes_ks, uni_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, uni_result_shapes_ks, uni_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/nor_data_test7", "rb") as f:
-            [nor_data_list_ini, nor_data_list_upd, nor_result_shapes_ks, nor_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, nor_result_shapes_ks, nor_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta1_data_test7", "rb") as f:
-            [beta1_data_list_ini, beta1_data_list_upd, beta1_result_shapes_ks, beta1_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, beta1_result_shapes_ks, beta1_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta2_data_test7", "rb") as f:
-            [beta2_data_list_ini, beta2_data_list_upd, beta2_result_shapes_ks, beta2_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, beta2_result_shapes_ks, beta2_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta3_data_test7", "rb") as f:
-            [beta3_data_list_ini, beta3_data_list_upd, beta3_result_shapes_ks, beta3_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, beta3_result_shapes_ks, beta3_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta4_data_test7", "rb") as f:
-            [beta4_data_list_ini, beta4_data_list_upd, beta4_result_shapes_ks, beta4_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, beta4_result_shapes_ks, beta4_result_shapes_cm] = pickle.load(f)
         with open("unit/data/vtd_data/beta5_data_test7", "rb") as f:
-            [beta5_data_list_ini, beta5_data_list_upd, beta5_result_shapes_ks, beta5_result_shapes_cm] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, beta5_result_shapes_ks, beta5_result_shapes_cm] = pickle.load(f)
 
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vtd_ks = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=dataset_size_ini,
@@ -967,7 +967,7 @@ class VariableTypeDetectorTest(TestBase):
         """Test the do_persist and load_persistence_data methods."""
         # load data
         with open("unit/data/vtd_data/uni_data_test6", "rb") as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list = pickle.load(f)
         init = 100
         update = 100
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])

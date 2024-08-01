@@ -209,7 +209,7 @@ python3 -m unittest AnalysisComponentsPerformanceTest.py
   ```
 
 ## System Performance Testing:
-The goal of these performance tests is to simulate different scenarious of available computing power and memory. For this purpose a virtual machine is configured with more or less CPU's and RAM. 
+The goal of these performance tests is to simulate different scenarious of available computing power and memory. For this purpose a virtual machine is configured with more or less CPU's and RAM.
 
 The **first config (performance-config.py)** is very simple with very little output. It consists of following components:
 #### Analysis
@@ -237,7 +237,7 @@ The **second config (performance-config1.py)** is very similar to the demo-confi
 
 		/model/Login Details does not exist
 * NewMatchDetector
-* EnhancedNewMatchPathValueComboDetector 
+* EnhancedNewMatchPathValueComboDetector
 		two attributes and output after 10000 data elements were collected
 * HistogramAnalysis
 		two different PathDependentHistogramAnalysis instances

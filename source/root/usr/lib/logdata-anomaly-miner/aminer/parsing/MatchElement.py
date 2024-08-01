@@ -1,5 +1,5 @@
-"""
-This module provides only the MatchElement class to store results from parser element matching process.
+"""This module provides only the MatchElement class to store results from
+parser element matching process.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,11 +18,12 @@ from aminer import AminerConfig
 
 
 class MatchElement:
-    """This class allows storage and handling of data related to a match found by a model element."""
+    """This class allows storage and handling of data related to a match found
+    by a model element."""
 
     def __init__(self, path: Union[str, None], match_string: bytes, match_object: Any, children: Union[List["MatchElement"], None]):
-        """
-        Initialize the MatchElement.
+        """Initialize the MatchElement.
+
         @param path when None, this element is anonymous. Hence, it cannot be added to the result data and cannot have children.
         @param match_string the part of the input bytes string covered by the given match.
         @param match_object the matchString converted to an object for matchers detecting more complex data types, e.g., integer
@@ -79,8 +80,9 @@ class MatchElement:
         return self.children
 
     def annotate_match(self, indent_str: Union[str, None]):
-        """
-        Annotate a given match element showing the match path elements and the parsed values.
+        """Annotate a given match element showing the match path elements and
+        the parsed values.
+
         @param indent_str if None, all elements are separated just with a single space, no matter how deep the nesting level
                of those elements is. If not None, all elements are put into an own line, that is prefixed by the given indent_str and
                indenting is increased by two spaces for each level.
@@ -111,9 +113,10 @@ class MatchElement:
         return result
 
     def serialize_object(self):
-        """
-        Create a serialization of this match element and all the children.
-        With sane and unique path elements, the serialized object will also be unique.
+        """Create a serialization of this match element and all the children.
+
+        With sane and unique path elements, the serialized object will
+        also be unique.
         """
         children = []
         if self.children:
@@ -122,7 +125,8 @@ class MatchElement:
         return {"path": self.path, "match_object": self.match_object, "match_string": self.match_string, "children": children}
 
     def __str__(self):
-        """Get a string representation of this match element excluding the children."""
+        """Get a string representation of this match element excluding the
+        children."""
         num_children = 0
         if self.children is not None:
             num_children = len(self.children)

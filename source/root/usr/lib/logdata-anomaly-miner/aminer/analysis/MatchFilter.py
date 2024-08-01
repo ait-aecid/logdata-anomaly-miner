@@ -9,7 +9,6 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
-
 """
 
 import logging
@@ -24,8 +23,8 @@ class MatchFilter(AtomHandlerInterface):
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, target_value_list=None, output_logline=True,
                  log_resource_ignore_list=None):
-        """
-        Initialize the detector.
+        """Initialize the detector.
+
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
                occurrences. When no paths are specified, the events given by the full path list are analyzed.
@@ -46,7 +45,8 @@ class MatchFilter(AtomHandlerInterface):
             raise ValueError(msg)
 
     def receive_atom(self, log_atom):
-        """Forward all log atoms that involve specified path and optionally value."""
+        """Forward all log atoms that involve specified path and optionally
+        value."""
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name.decode() == source:
                 return
