@@ -36,6 +36,7 @@
                 'attribute_prefix': {'type': 'string', 'default': '+'},
                 'optional_attribute_prefix': {'type': 'string', 'default': '_'},
                 'empty_allowed_prefix': {'type': 'string', 'default': '?'},
+                'time_zone': {'type': 'string', 'nullable': True, 'default': 'UTC'},
             }
         }
     },

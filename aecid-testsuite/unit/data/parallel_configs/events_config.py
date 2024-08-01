@@ -35,6 +35,7 @@ config_properties['AminerGroup'] = 'aminer'
 # py will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
 config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer/events'  # skipcq: BAN-B108
+config_properties['Core.LogDir'] = '/tmp/lib/aminer/events/log'
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
