@@ -157,6 +157,8 @@ class NewMatchPathValueComboDetector(
     def do_persist(self):
         """Immediately write persistence data to storage."""
         try:
+            # Sort the known_values_set before storing as json. This improves the deterministic behavior / reproducible results.
+            # The Lambda function is only used to allow sorting of tuple values which contain None.
             PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.known_values_set),
                                                                           key=lambda L: tuple(el if el is not None else b'-' for el in L)))
         except TypeError:
