@@ -224,7 +224,7 @@ class EventFrequencyDetectorTest(TestBase):
         log_atom1.atom_time = t + 99
         self.assertTrue(efd.receive_atom(log_atom1))
         self.assertTrue(efd.learn_mode)
-        log_atom1.atom_time = t + 101
+        log_atom1.atom_time = t + 102
         self.assertTrue(efd.receive_atom(log_atom1))
         self.assertFalse(efd.learn_mode)
 

@@ -191,7 +191,7 @@ class SlidingEventFrequencyDetectorTest(TestBase):
         log_atom1.atom_time = t + 99
         self.assertTrue(sefd.receive_atom(log_atom1))
         self.assertTrue(sefd.learn_mode)
-        log_atom1.atom_time = t + 101
+        log_atom1.atom_time = t + 102
         self.assertTrue(sefd.receive_atom(log_atom1))
         self.assertFalse(sefd.learn_mode)
 
