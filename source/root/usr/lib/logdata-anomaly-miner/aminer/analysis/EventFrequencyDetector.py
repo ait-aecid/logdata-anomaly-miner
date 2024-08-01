@@ -176,12 +176,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         # Store copy of last seen instance of raw log event to correctly show affected event type when anomaly occurs.
         self.last_seen_log[log_event] = log_atom
 
+        if self.season is not None and log_event not in self.time_index:
+            self.time_index[log_event] = [math.floor((log_atom.atom_time % self.season) / self.window_size)]
         if self.next_check_time is None:
             # First processed log atom, initialize next check time.
             self.next_check_time = log_atom.atom_time + self.window_size
             self.log_windows += 1
-            if self.season is not None:
-                self.time_index[log_event] = [math.floor((log_atom.atom_time % self.season) / self.window_size)]
         elif log_atom.atom_time >= self.next_check_time:
             # Log atom exceeded next check time; time window is complete.
             self.next_check_time += self.window_size
@@ -200,6 +200,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                         listener.receive_event(f"Analysis.{self.__class__.__name__}", "No log events received in time window",
                                                [""], event_data, log_atom, self)
             for log_ev in self.counts:
+                if log_ev not in self.last_seen_log:
+                    # In case that the AMiner was restarted, it is possible that no instance of the event has been seen; use current log atom instead
+                    self.last_seen_log[log_ev] = log_atom
                 # Check if ranges should be initialised
                 if log_ev not in self.ranges:
                     self.ranges[log_ev] = None
@@ -347,6 +350,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             # Update seasonal index of value to be predicted
             if log_event in self.time_index:
                 self.time_index[log_event].append((self.time_index[log_event][-1] + 1) % self.lookback)
+                # Align length of self.time_index to self.counts
+                self.time_index[log_event] = self.time_index[log_event][-len(self.counts[log_event]):]
             else:
                 self.time_index[log_event] = [math.floor((log_atom.atom_time % self.season) / self.window_size)]
         # Reset scoring_value_list
@@ -410,20 +415,28 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         persist_data = []
         for log_ev, freqs in self.counts.items():
             # Skip last count as the time window may not be complete yet and count thus too low
-            persist_data.append((log_ev, freqs[:-1]))
+            time_ind = []
+            if log_ev in self.time_index:
+                time_ind = self.time_index[log_ev][:-1]
+            persist_data.append((log_ev, freqs[:-1], time_ind))
         PersistenceUtil.store_json(self.persistence_file_name, persist_data)
         logging.getLogger(DEBUG_LOG_NAME).debug(str(self.__class__.__name__) + " persisted data.")
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
-        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev>, [<freq1, freq2>]], [<ev>, [<freq1, freq2>]], ...]
+        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev>, [<freq1, freq2>], [<ti1, ti2>]], [<ev>, [<freq1, freq2>], [<ti1, ti2>]], ...]
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             for entry in persistence_data:
                 log_event = entry[0]
                 freqs = entry[1]
+                time_ind = entry[2]
                 # In case that num_windows differ, only take as many as possible
                 self.counts[tuple(log_event)] = freqs[max(0, len(freqs) - self.num_windows - 1):] + [0]
+                if len(time_ind) > 0:
+                    self.time_index[tuple(log_event)] = time_ind[max(0, len(freqs) - self.num_windows - 1):]
+                    # Add another time index to fit new length of self.counts
+                    self.time_index[tuple(log_event)].append((self.time_index[tuple(log_event)][-1] + 1) % self.lookback)
                 if len(self.scoring_path_list) > 0:
                     self.scoring_value_list[tuple(log_event)] = []
             logging.getLogger(DEBUG_LOG_NAME).debug(str(self.__class__.__name__) + " loaded persistence data.")
