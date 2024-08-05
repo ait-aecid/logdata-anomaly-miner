@@ -1,5 +1,7 @@
 import unittest
 from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.MatchElement import MatchElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
 from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComboDetector
 from aminer.input.LogAtom import LogAtom
 import time
@@ -23,6 +25,13 @@ class NewMatchPathValueComboDetectorTest(TestBase):
     seq2 = DummySequenceModelElement("seq", [fdme3, fdme4])
     match_element2 = seq2.get_match_element("", match_context)
     match_element3 = fdme3.get_match_element("/seq", match_context)
+
+    match_context = DummyMatchContext(b"ddd 25538ddd ")
+    fdme5 = DummyFixedDataModelElement("s1", b"ddd ")
+    fdme6 = OptionalMatchModelElement("o", DummyFixedDataModelElement("d1", b"25539"))
+    seq3 = DummySequenceModelElement("seq", [fdme5, fdme6])
+    match_element4 = seq3.get_match_element("", match_context)
+    match_element5 = fdme5.get_match_element("/seq", match_context)
 
     def test1receive_atom(self):
         """
@@ -139,9 +148,11 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         t = round(time.time(), 3)
         log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, nmpvcd)
         log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t, nmpvcd)
+        log_atom3 = LogAtom(self.match_element4.match_string, ParserMatch(self.match_element4), t, nmpvcd)
 
         self.assertTrue(nmpvcd.receive_atom(log_atom1))
         self.assertTrue(nmpvcd.receive_atom(log_atom2))
+        self.assertFalse(nmpvcd.receive_atom(log_atom3))
         self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537")})
         nmpvcd.do_persist()
         with open(nmpvcd.persistence_file_name, "r") as f:
@@ -150,6 +161,23 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         nmpvcd.known_values_set = set()
         nmpvcd.load_persistence_data()
         self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537")})
+
+        other = NewMatchPathValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler])
+        self.assertEqual(nmpvcd.known_values_set, other.known_values_set)
+
+        nmpvcd = NewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=True, output_logline=False, allow_missing_values_flag=True)
+        self.assertTrue(nmpvcd.receive_atom(log_atom1))
+        self.assertTrue(nmpvcd.receive_atom(log_atom2))
+        self.assertTrue(nmpvcd.receive_atom(log_atom3))
+        self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537"), (b"ddd ", None)})
+        nmpvcd.known_values_set = {(b"ddd ", b"25538"), (b" pid=", b"25537"), (b"ddd ", None)}
+        nmpvcd.do_persist()
+        with open(nmpvcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), '[["bytes: pid=", "bytes:25537"], ["bytes:ddd ", null], ["bytes:ddd ", "bytes:25538"]]')
+
+        nmpvcd.known_values_set = set()
+        nmpvcd.load_persistence_data()
+        self.assertEqual(nmpvcd.known_values_set, {(b"ddd ", b"25538"), (b" pid=", b"25537"), (b"ddd ", None)})
 
         other = NewMatchPathValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler])
         self.assertEqual(nmpvcd.known_values_set, other.known_values_set)
