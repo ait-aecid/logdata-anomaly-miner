@@ -91,7 +91,7 @@ class ZmqEventHandler(EventHandlerInterface):
             msg = str(err)
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             print("Error: " + msg, file=sys.stderr)
-            self.producer.disconnect()
+            self.producer.close()
             self.producer = None
             self.zmq_imported = False
             return False
