@@ -1064,7 +1064,7 @@ def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
 
 
 def parse_json_yaml(json_dict, parser_model_dict):
-    """Parse an yaml configuration for json."""
+    """Parse a yaml configuration for json."""
     key_parser_dict = {}
     for key in json_dict.keys():
         value = json_dict[key]
