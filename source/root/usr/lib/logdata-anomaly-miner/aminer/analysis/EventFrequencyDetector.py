@@ -209,7 +209,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                                [""], event_data, log_atom, self)
             for log_ev in self.counts:
                 if log_ev not in self.last_seen_log:
-                    # In case that the AMiner was restarted, it is possible that no instance of the event has been seen; use current log atom instead
+                    # In case that the AMiner was restarted, it is possible that no instance of the event has been seen;
+                    # use current log atom instead
                     self.last_seen_log[log_ev] = log_atom
                 # Check if ranges should be initialised
                 if log_ev not in self.ranges:
@@ -432,7 +433,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
-        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev>, [<freq1, freq2>], [<ti1, ti2>]], [<ev>, [<freq1, freq2>], [<ti1, ti2>]], ...]
+        # Persisted data contains lists of event-frequency pairs, i.e.,
+        # [[<ev>, [<freq1, freq2>], [<ti1, ti2>]], [<ev>, [<freq1, freq2>], [<ti1, ti2>]], ...]
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             for entry in persistence_data:
