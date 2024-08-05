@@ -87,7 +87,7 @@ class ScoringEventHandler(EventHandlerInterface):
 
             # Calculate the absolute confidence
             confidence_absolut = sum(self.get_weight(val) for val in analyis_list)
-            # Add the the absolute and mean confidence to the message
+            # Add the absolute and mean confidence to the message
             event_data_confidence[output_field_path[-1]] = {'confidence_absolut': confidence_absolut,
                                                             'confidence_mean': confidence_absolut / len(analyis_list)}
 

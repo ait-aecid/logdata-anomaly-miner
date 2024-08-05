@@ -67,6 +67,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_timestamp_initialized = None
         super().__init__(
             mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
@@ -109,6 +110,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 return False
         parser_match = log_atom.parser_match
         self.log_total += 1
+        if not self.stop_learning_timestamp_initialized:
+            self.stop_learning_timestamp_initialized = True
+            if self.stop_learning_timestamp is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+            elif self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
         # Skip paths from ignore list.
         for ignore_path in self.ignore_list:
@@ -202,7 +209,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                                [""], event_data, log_atom, self)
             for log_ev in self.counts:
                 if log_ev not in self.last_seen_log:
-                    # In case that the AMiner was restarted, it is possible that no instance of the event has been seen; use current log atom instead
+                    # In case that the AMiner was restarted, it is possible that no instance of the event has been seen;
+                    # use current log atom instead
                     self.last_seen_log[log_ev] = log_atom
                 # Check if ranges should be initialised
                 if log_ev not in self.ranges:
@@ -425,7 +433,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
-        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev>, [<freq1, freq2>], [<ti1, ti2>]], [<ev>, [<freq1, freq2>], [<ti1, ti2>]], ...]
+        # Persisted data contains lists of event-frequency pairs, i.e.,
+        # [[<ev>, [<freq1, freq2>], [<ti1, ti2>]], [<ev>, [<freq1, freq2>], [<ti1, ti2>]], ...]
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             for entry in persistence_data:

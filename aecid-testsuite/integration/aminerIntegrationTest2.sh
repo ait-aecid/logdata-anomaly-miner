@@ -7,6 +7,7 @@ NUMBER_OF_LOG_LINES=7
 OUT=/tmp/output
 SYSLOG=/tmp/syslog
 AUTH=/tmp/auth.log
+ZMQ=/tmp/zmq
 
 
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
@@ -125,6 +126,9 @@ sleep 10
 
 COUNTER=0
 
+
+python3 /tmp/zmq_subscriber.py &
+ZMQ_PID=$!
 #start aminer
 sudo aminer --config $CFG_PATH22 > $OUT &
 PID=$!
@@ -168,6 +172,7 @@ sleep 20
 sudo pkill -x aminer
 wait $PID
 sleep 15 # leave the kafka handler some time.
+sudo kill $ZMQ_PID
 
 result=0
 checkAllOutputs
@@ -178,9 +183,16 @@ if [ $? == 0 ]; then
 		if [ $? == 0 ]; then
 			checkKafkaTopic
 			if [ $? == 0 ]; then
-				echo ""
-				echo "all kafka outputs were found!"
-				echo "finished test successfully.."
+			    checkZmqTopic
+			    if [ $? == 0 ]; then
+				    echo ""
+				    echo "all zmq outputs were found!"
+				    echo "finished test successfully.."
+				else
+				    echo ""
+				    echo "test failed at checking zmq topic.."
+				    result=1
+			    fi
 			else
 				echo ""
 				echo "test failed at checking kafka topic.."
@@ -209,4 +221,6 @@ sudo rm -r $KAFKA_VERSIONSTRING/
 sudo rm -r /tmp/zookeeper
 sudo rm -r /tmp/kafka-logs
 sudo rm /etc/aminer/kafka-client.conf
+sudo rm /tmp/zmq
+sudo rm /tmp/aminer
 exit $result

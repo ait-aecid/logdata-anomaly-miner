@@ -60,13 +60,13 @@ class EventSourceInterface(metaclass=abc.ABCMeta):
         """
 
     @staticmethod
-    def get_weight_analysis_field_path(self):
+    def get_weight_analysis_field_path():
         """Return the path to the list in the output of the detector which is
         weighted by the ScoringEventHandler."""
         return []
 
     @staticmethod
-    def get_weight_output_field_path(self):
+    def get_weight_output_field_path():
         """Return the path where the ScoringEventHandler adds the scorings in
         the output of the detector."""
         return []

@@ -32,6 +32,7 @@ from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY
     DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD, \
     DEFAULT_PERSISTENCE_PERIOD
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.events.ZmqEventHandler import ZmqEventHandler
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.input.LogStream import LogStream
 from aminer.util import PersistenceUtil
@@ -190,6 +191,17 @@ class AnalysisContext:
                     logging.getLogger(DEBUG_LOG_NAME).critical(msg)
                     print(msg, file=sys.stderr)
                     sys.exit(1)
+            elif isinstance(event_handler, ZmqEventHandler):
+                # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
+                if event_handler.producer is not None:
+                    try:
+                        event_handler.producer.close()
+                        event_handler.producer = None
+                    except IOError as e:
+                        msg = f"Error when closing or opening stream with the name {event_handler.stream.name}, shutting down.\n{e}"
+                        logging.getLogger(DEBUG_LOG_NAME).critical(msg)
+                        print(msg, file=sys.stderr)
+                        sys.exit(1)
             elif isinstance(event_handler, JsonConverterHandler):
                 self.close_event_handler_streams(event_handler.json_event_handlers)
 
@@ -216,7 +228,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.persistence_file_name = build_persistence_file_name(
             self.analysis_context.aminer_config, self.__class__.__name__ + '/RepositioningData')
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
         self.repositioning_data_dict = {}
         self.master_control_socket = None
         self.remote_control_socket = None
@@ -293,8 +304,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         next_real_time_trigger_time = None
         next_analysis_time_trigger_time = None
         next_backup_time_trigger_time = None
-        log_stat_period = self.analysis_context.aminer_config.config_properties.get(
-            KEY_LOG_STAT_PERIOD, DEFAULT_STAT_PERIOD)
+        log_stat_period = self.analysis_context.aminer_config.config_properties.get(KEY_LOG_STAT_PERIOD, DEFAULT_STAT_PERIOD)
         next_statistics_log_time = time.time() + log_stat_period
 
         delayed_return_status = 0
@@ -518,9 +528,10 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         invocation. The caller may decide to invoke this method earlier than
         requested during the previous call. Classes implementing this method
         have to handle such cases. Each class should try to limit the time
-        spent in this method as it might delay trigger signals to other.
+        spent in this method as it might delay trigger signals to other
+        components.
 
-        components. For extensive compuational work or IO, a separate thread should be used.
+        For extensive computational work or IO, a separate thread should be used.
         @param trigger_time the time this trigger is invoked. This might be the current real time when invoked from real time
         timers or the forensic log timescale time value.
         @return the number of seconds when next invocation of this trigger is required.

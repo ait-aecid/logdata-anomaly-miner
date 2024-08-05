@@ -47,6 +47,7 @@ RUN apt-get update && apt-get install -y \
     python3-patsy \
     python3-numpy \
     python3-defusedxml \
+    python3-zmq \
     libacl1-dev \
     rsyslog
 
@@ -98,6 +99,7 @@ RUN ln -s /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py /usr/bin/aminerr
 	&& ln -s /usr/lib/python3/dist-packages/packaging /usr/lib/logdata-anomaly-miner/packaging \
 	&& ln -s /usr/lib/python3/dist-packages/patsy /etc/aminer/conf-enabled/patsy \
 	&& ln -s /usr/lib/python3/dist-packages/defusedxml /etc/aminer/conf-enabled/defusedxml \
+	&& ln -s /usr/lib/python3/dist-packages/zmq /etc/aminer/conf-enabled/zmq \
 	&& groupadd -g $GID -o $UNAME && useradd -u $UID -g $GID -ms /usr/sbin/nologin $UNAME && mkdir -p /var/lib/aminer/logs \
     && chown $UID.$GID -R /var/lib/aminer \
     && chown $UID.$GID -R /docs \
