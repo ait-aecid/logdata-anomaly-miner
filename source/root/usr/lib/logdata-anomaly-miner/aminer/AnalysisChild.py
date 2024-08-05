@@ -216,7 +216,6 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.persistence_file_name = build_persistence_file_name(
             self.analysis_context.aminer_config, self.__class__.__name__ + '/RepositioningData')
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
-
         self.repositioning_data_dict = {}
         self.master_control_socket = None
         self.remote_control_socket = None
@@ -293,8 +292,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         next_real_time_trigger_time = None
         next_analysis_time_trigger_time = None
         next_backup_time_trigger_time = None
-        log_stat_period = self.analysis_context.aminer_config.config_properties.get(
-            KEY_LOG_STAT_PERIOD, DEFAULT_STAT_PERIOD)
+        log_stat_period = self.analysis_context.aminer_config.config_properties.get(KEY_LOG_STAT_PERIOD, DEFAULT_STAT_PERIOD)
         next_statistics_log_time = time.time() + log_stat_period
 
         delayed_return_status = 0
@@ -518,9 +516,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         invocation. The caller may decide to invoke this method earlier than
         requested during the previous call. Classes implementing this method
         have to handle such cases. Each class should try to limit the time
-        spent in this method as it might delay trigger signals to other.
-
-        components. For extensive compuational work or IO, a separate thread should be used.
+        spent in this method as it might delay trigger signals to other
+        components. For extensive computational work or IO, a separate thread should be used.
         @param trigger_time the time this trigger is invoked. This might be the current real time when invoked from real time
         timers or the forensic log timescale time value.
         @return the number of seconds when next invocation of this trigger is required.
