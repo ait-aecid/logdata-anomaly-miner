@@ -107,6 +107,7 @@ class JsonConverterHandler(EventHandlerInterface):
                 analysis_component['LogResource'] = log_resource.decode()
 
             if 'LogData' not in event_data:
+                event_data["LineNumber"] = log_atom.log_idx
                 event_data['LogData'] = log_data
             event_data['AnalysisComponent'] = analysis_component
 
