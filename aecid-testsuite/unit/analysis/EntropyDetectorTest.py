@@ -299,7 +299,7 @@ class EntropyDetectorTest(TestBase):
         log_atom1.atom_time = t + 99
         self.assertTrue(ed.receive_atom(log_atom1))
         self.assertTrue(ed.learn_mode)
-        log_atom1.atom_time = t + 101
+        log_atom1.atom_time = t + 102
         self.assertTrue(ed.receive_atom(log_atom1))
         self.assertFalse(ed.learn_mode)
 

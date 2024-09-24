@@ -284,11 +284,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             raise TypeError(msg)
 
         self.stop_learning_timestamp = None
-        if stop_learning_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_time
+        self.stop_learning_timestamp_initialized = False
+        self.stop_learning_timestamp = stop_learning_time
         self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
-        if stop_learning_no_anomaly_time is not None:
-            self.stop_learning_timestamp = time.time() + stop_learning_no_anomaly_time
 
         if mutable_default_args is not None:
             for argument in mutable_default_args:

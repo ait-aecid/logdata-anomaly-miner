@@ -124,6 +124,7 @@ ADD source/root/etc/aminer /etc/aminer
 
 # Copy the testsuite
 ADD aecid-testsuite /home/aminer/aecid-testsuite
+ADD .flake8 /home/aminer/aecid-testsuite/.flake8
 
 RUN chown aminer.aminer -R /home/aminer \
     && ln -s /usr/lib/logdata-anomaly-miner/aminer /home/aminer/aecid-testsuite/aminer \
