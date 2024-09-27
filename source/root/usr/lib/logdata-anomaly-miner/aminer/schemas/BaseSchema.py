@@ -153,6 +153,11 @@
             'type': 'string',
             'empty': False
         },
+        'UniqueLogLineIdentifier': {
+            'required': False,
+            'type': 'boolean',
+            'default': False
+        },
         'Input': {
             'required': True,
             'type': 'dict',

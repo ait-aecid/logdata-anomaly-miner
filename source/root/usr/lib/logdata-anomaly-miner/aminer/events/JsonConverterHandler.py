@@ -107,6 +107,8 @@ class JsonConverterHandler(EventHandlerInterface):
                 analysis_component['LogResource'] = log_resource.decode()
 
             if 'LogData' not in event_data:
+                if self.analysis_context.aminer_config.config_properties.get(AminerConfig.KEY_UNIQUE_LOG_LINE_IDENTIFIER):
+                    event_data["LogLineIdentifier"] = log_atom.log_line_idx
                 event_data['LogData'] = log_data
             event_data['AnalysisComponent'] = analysis_component
 

@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 class LogAtom:
     """This class defines a log atom used for parsing."""
+    idCounter = -1
 
     def __init__(self, raw_data, parser_match, atom_time, source):
         """Create a log atom from scratch."""
@@ -21,6 +22,8 @@ class LogAtom:
         self.parser_match = parser_match
         self.atom_time = atom_time
         self.source = source
+        LogAtom.idCounter += 1
+        self.log_line_identifier = LogAtom.idCounter
 
     def get_parser_match(self):
         """Get the parser match associated with this LogAtom.
