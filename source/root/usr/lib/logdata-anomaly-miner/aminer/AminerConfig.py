@@ -55,7 +55,7 @@ DEFAULT_LOG_LINE_PREFIX = ''
 CONFIG_KEY_ENCODING = 'Log.Encoding'
 ENCODING = 'utf-8'
 KEY_AMINER_ID = 'AminerId'
-KEY_UNIQUE_LOG_LINE_IDENTIFIER = 'UniqueLogLineIdentifier'
+KEY_LOG_LINE_IDENTIFIER = 'LogLineIdentifier'
 
 def load_config(config_file_name):
     """Load the configuration file using the import module."""

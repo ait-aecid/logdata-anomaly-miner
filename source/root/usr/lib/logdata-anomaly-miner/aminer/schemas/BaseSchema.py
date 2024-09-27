@@ -153,7 +153,7 @@
             'type': 'string',
             'empty': False
         },
-        'UniqueLogLineIdentifier': {
+        'LogLineIdentifier': {
             'required': False,
             'type': 'boolean',
             'default': False
