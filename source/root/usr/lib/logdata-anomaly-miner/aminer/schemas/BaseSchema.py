@@ -153,11 +153,6 @@
             'type': 'string',
             'empty': False
         },
-        'LogLineIdentifier': {
-            'required': False,
-            'type': 'boolean',
-            'default': False
-        },
         'Input': {
             'required': True,
             'type': 'dict',
@@ -172,5 +167,10 @@
                 'xml_format': {'type': 'boolean', 'required': False, 'default': False},
                 'continuous_timestamp_missing_warning': {'type': 'boolean', 'required': False, 'default': False}
             }
+        },
+        'LogLineIdentifier': {
+            'required': False,
+            'type': 'boolean',
+            'default': False
         }
 }
