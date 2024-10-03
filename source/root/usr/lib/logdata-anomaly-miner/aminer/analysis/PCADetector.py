@@ -1,9 +1,8 @@
-"""
-This module defines a PCA-detector for event and value counts.
-The component detects anomalies by creating an Event-Count-Matrix for given
-time-windows to calculate an anomaly score for new time windows afterwards by
-using the reconstruction error from the inverse-transformation with restricted
-components of the Principal-Component-Analysis (PCA).
+"""This module defines a PCA-detector for event and value counts. The component
+detects anomalies by creating an Event-Count-Matrix for given time-windows to
+calculate an anomaly score for new time windows afterwards by using the
+reconstruction error from the inverse-transformation with restricted components
+of the Principal-Component-Analysis (PCA).
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,7 +19,7 @@ import numpy as np
 import logging
 import os
 from aminer import AminerConfig
-from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX,\
+from aminer.AminerConfig import DEBUG_LOG_NAME, STAT_LEVEL, STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, \
     KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
 from aminer.AnalysisChild import AnalysisContext
 from aminer.util import PersistenceUtil
@@ -29,15 +28,17 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """This class creates events if event or value occurrence counts are outliers in PCA space."""
+    """This class creates events if event or value occurrence counts are
+    outliers in PCA space."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size, min_anomaly_score, min_variance, num_windows,
                  persistence_id="Default", learn_mode=False, output_logline=True, ignore_list=None, constraint_list=None,
                  stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed as separate
                dimensions. When no paths are specified, the events given by the full path list are analyzed (one dimension).
@@ -58,6 +59,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_timestamp_initialized = None
         super().__init__(
             mutable_default_args=["ignore_list", "constraint_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers, window_size=window_size,
@@ -97,10 +99,16 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name.decode() == source:
                 return False
+        if not self.stop_learning_timestamp_initialized:
+            self.stop_learning_timestamp_initialized = True
+            if self.stop_learning_timestamp is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+            elif self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+
         parser_match = log_atom.parser_match
         self.log_total += 1
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -261,16 +269,18 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
         return loss
 
     def vector2array(self):
-        """Extract only the values which were learned before from current self.event_count_vector and return an array."""
+        """Extract only the values which were learned before from current
+        self.event_count_vector and return an array."""
         vector = []
         for event in self.event_count_vector.values():
-            for feature, value in event.items():
-                if feature in self.feature_list:
-                    vector.append(value)
+            for key in self.feature_list:
+                if key in event.keys():
+                    vector.append(event[key])
         return np.array(vector)
 
     def get_n_comp(self, eigen_values):
-        """Return the number of components, which describe the variance threshold."""
+        """Return the number of components, which describe the variance
+        threshold."""
         # Calculate the explained variance on each of components
         variance_explained = []
         for i in eigen_values[::-1]:
@@ -283,7 +293,8 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
         return None
 
     def repair_dict(self):
-        """Check if any new values were added in current event_count_vector and repair self.event_count_matrix when necessary."""
+        """Check if any new values were added in current event_count_vector and
+        repair self.event_count_matrix when necessary."""
         for ecv in self.event_count_matrix:
             for key, value in self.event_count_vector.items():
                 if key not in ecv.keys():
@@ -331,8 +342,9 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
                 self.event_count_vector = {"": {}}
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
-        """
-        Allowlist an event generated by this source using the information emitted when generating the event.
+        """Allowlist an event generated by this source using the information
+        emitted when generating the event.
+
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
@@ -349,8 +361,9 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
         return f"Allowlisted path {event_data} in {event_type}."
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
-        """
-        Blocklist an event generated by this source using the information emitted when generating the event.
+        """Blocklist an event generated by this source using the information
+        emitted when generating the event.
+
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
@@ -367,8 +380,9 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
         return f"Blocklisted path {event_data} in {event_type}."
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         if STAT_LEVEL == 1:

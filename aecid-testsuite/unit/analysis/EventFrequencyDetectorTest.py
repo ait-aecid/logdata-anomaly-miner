@@ -224,7 +224,7 @@ class EventFrequencyDetectorTest(TestBase):
         log_atom1.atom_time = t + 99
         self.assertTrue(efd.receive_atom(log_atom1))
         self.assertTrue(efd.learn_mode)
-        log_atom1.atom_time = t + 101
+        log_atom1.atom_time = t + 102
         self.assertTrue(efd.receive_atom(log_atom1))
         self.assertFalse(efd.learn_mode)
 
@@ -321,7 +321,7 @@ class EventFrequencyDetectorTest(TestBase):
         efd.receive_atom(log_atom10)
         efd.do_persist()
         with open(efd.persistence_file_name, "r") as f:
-            self.assertEqual(f.read(), '[[["string:/value"], []]]')
+            self.assertEqual(f.read(), '[[["string:/value"], [], []]]')
 
         self.assertEqual(efd.counts, {("/value",): [10]})
         self.assertEqual(efd.scoring_value_list, {})

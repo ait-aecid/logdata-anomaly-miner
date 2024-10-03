@@ -1,11 +1,10 @@
 import unittest
-from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource, LogStream
 import os
 import base64
 import socket
 import hashlib
-# skipcq: BAN-B404
 import subprocess
+from aminer.input.LogStream import FileLogDataResource, UnixSocketLogDataResource, LogStream
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.input.ByteStreamLineAtomizer import ByteStreamLineAtomizer
 from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
@@ -65,16 +64,15 @@ class LogStreamTest(TestBase):
         In this case the logStreamFd is > 0 and repositioningData is not None.
         The stream should be repositioned to the right position.
         """
-        fd = os.open('/tmp/log.txt', os.O_RDONLY)  # skipcq: BAN-B108
+        fd = os.open('/tmp/log.txt', os.O_RDONLY)
         length = 65536
         data = os.read(fd, length)
-        # skipcq: BAN-B324, PTC-W1003
         md5 = hashlib.md5()
         md5.update(data)
         hash_digest = md5.digest()
         os.close(fd)
 
-        fd = os.open('/tmp/log.txt', os.O_RDONLY)  # skipcq: BAN-B108
+        fd = os.open('/tmp/log.txt', os.O_RDONLY)
         file_log_data_resource = FileLogDataResource(self.file + self.logfile, fd, 65536,
                                                      [os.fstat(fd).st_ino, length, base64.b64encode(hash_digest)])
         file_log_data_resource.fill_buffer()
@@ -88,11 +86,10 @@ class LogStreamTest(TestBase):
     def test5unix_socket_log_data_resource(self):
         """
         In this case the log_stream_fd is -1. The next step is to open the stream successfully.
-        Therefor a server socket is set up listen to data to the server. Afterwards the buffer object is filled with data and the position
+        Therefor a server socket is set up listen to data to the server. Afterwards, the buffer object is filled with data and the position
         is updated.
         """
         sockName = b'/tmp/test5unixSocket.sock'
-        # skipcq: BAN-B607, BAN-B603
         proc = subprocess.Popen(['python3', 'unit/input/client.py'])
 
         if os.path.exists(sockName):

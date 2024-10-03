@@ -1,5 +1,5 @@
-"""
-This module defines a model element that takes any string up to a specific delimiter string.
+"""This module defines a model element that takes any string up to a specific
+delimiter string.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,8 @@ debug_log_prefix = "JsonModelElement: "
 
 
 def format_float(val):
-    """This function formats the float-value and parses the sign and the exponent."""
+    """This function formats the float-value and parses the sign and the
+    exponent."""
     exp = None
     if "e" in val:
         exp = "e"
@@ -54,8 +55,8 @@ class JsonModelElement(ModelElementInterface):
 
     def __init__(self, element_id: str, key_parser_dict: dict, optional_key_prefix: str = "optional_key_", nullable_key_prefix: str = "+",
                  allow_all_fields: bool = False):
-        """
-        Initialize the JsonModelElement.
+        """Initialize the JsonModelElement.
+
         @param element_id: The ID of the element.
         @param key_parser_dict: A dictionary of all keys with the according parsers. If a key should be optional, the associated parser must
                start with the OptionalMatchModelElement. To allow every key in a JSON object use "key": "ALLOW_ALL". To allow only empty
@@ -92,7 +93,7 @@ class JsonModelElement(ModelElementInterface):
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise TypeError(msg)
 
-    def is_ascii(self, text: str):  # skipcq: PYL-R0201
+    def is_ascii(self, text: str):
         """Check if the text contains only ascii characters."""
         try:
             text.encode("ascii")
@@ -110,7 +111,8 @@ class JsonModelElement(ModelElementInterface):
         return key
 
     def get_stripped_key(self, key):
-        """Return the key without optional_key_prefix and nullable_key_prefix."""
+        """Return the key without optional_key_prefix and
+        nullable_key_prefix."""
         if key.startswith(self.optional_key_prefix):
             key = key[len(self.optional_key_prefix):]
         if key.startswith(self.nullable_key_prefix):
@@ -124,9 +126,24 @@ class JsonModelElement(ModelElementInterface):
         return key.startswith(self.nullable_key_prefix) or (
                 key.startswith(self.optional_key_prefix) and key[len(self.optional_key_prefix):].startswith(self.nullable_key_prefix))
 
+    def get_unescaped_quotes(self, data):
+        quotes = [i for i in range(len(data)) if data.startswith(b"\"", i)]
+        result_quotes = []
+        for quote in quotes:
+            if bytes([data[quote - 1]]) != b"\\":
+                result_quotes.append(quote)
+        return result_quotes
+
+    def index_is_in_json_string(self, quotes, index):
+        """Check if index is in json string."""
+        for i in range(len(quotes)-1):
+            if quotes[i] < index < quotes[i+1] and i % 2 == 0:
+                return True
+        return False
+
     def get_match_element(self, path: str, match_context):
-        """
-        Try to parse all the match_context against JSON.
+        """Try to parse all the match_context against JSON.
+
         When a match is found, the match_context is updated accordingly.
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.
@@ -147,6 +164,7 @@ class JsonModelElement(ModelElementInterface):
                     except UnicodeDecodeError:
                         break
             index = 0
+            quotes = self.get_unescaped_quotes(match_context.match_data)
             while index != -1:
                 index = match_context.match_data.find(b"\\", index)
                 if index != -1 and len(match_context.match_data) - 1 > index and match_context.match_data[
@@ -155,11 +173,24 @@ class JsonModelElement(ModelElementInterface):
                     index += 2
                 elif index != -1:
                     index += 2
+            for num in b"\n\r\t":
+                index = 0
+                char = bytes([num])
+                while index != -1:
+                    index = match_context.match_data.find(char, index)
+                    if index != -1 and len(match_context.match_data) - 1 > index and self.index_is_in_json_string(quotes, index):
+                        escaped = (bytes([match_context.match_data[index]]).replace(b"\n", b"\\n").replace(b"\t", b"\\t"))
+                        match_context.match_data = match_context.match_data[:index] + escaped + match_context.match_data[index + 1:]
+                        index += 2
+                    elif index != -1:
+                        index += 2
+            logging.getLogger(DEBUG_LOG_NAME).debug(repr(match_context.match_data))
             json_match_data = json.loads(match_context.match_data, parse_float=format_float)
+
             if not isinstance(json_match_data, dict):
                 return None
         except JSONDecodeError as e:
-            logging.getLogger(debug_log_prefix + DEBUG_LOG_NAME).debug(e)
+            logging.getLogger(DEBUG_LOG_NAME).debug(e)
             return None
         self.dec_escapes = True
         if self.is_ascii(match_context.match_data.decode()):
@@ -231,7 +262,7 @@ class JsonModelElement(ModelElementInterface):
                     matches.append(match_element)
                     match_context.update(match_context.match_data[:index])
 
-                if len(matches) == 0 or matches[-1] is None:
+                if (len(matches) == 0 and not key.startswith(self.optional_key_prefix)) or (len(matches) > 0 and matches[-1] is None):
                     logging.getLogger(DEBUG_LOG_NAME).debug(debug_log_prefix + "No match found for key " + split_key)
                     return matches
             elif isinstance(value, list):
@@ -352,7 +383,7 @@ class JsonModelElement(ModelElementInterface):
                     data = b"null"
                 elif not isinstance(data, bytes):
                     data = str(data).encode()
-                if isinstance(val, dict):  # skipcq: PYL-R1723
+                if isinstance(val, dict):
                     matches += self.parse_json_dict(val, match_array[j], f"{current_path}/{split_key}", match_context)
                     if matches[-1] is None:
                         if len(value) - 1 == k:
@@ -414,7 +445,7 @@ class JsonModelElement(ModelElementInterface):
             match_context.update(match_context.match_data[:match_context.match_data.find(search_string) + len(search_string)])
         return None
 
-    def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):  # skipcq: PYL-R0201
+    def parse_json_object(self, json_dict, json_match_data, key, split_key, current_path, match_context):
         """Parse a literal from the json object."""
         current_path += "/" + key
         data = json_match_data[split_key]

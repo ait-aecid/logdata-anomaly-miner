@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('.'))
 project = 'logdata-anomaly-miner'
 copyright = '2023, Florian Skopik, Markus Wurzenberger, Max Landauer, Roman Fiedler, Wolfgang Hotwagner, Ernst Leierzopf, Georg Hoeld'
 author = 'Florian Skopik, Markus Wurzenberger, Max Landauer, Georg Hoeld, Roman Fiedler, Wolfgang Hotwagner, Ernst Leierzopf'
-release = '2.6.1'
+release = '2.7.0-126-g7618331c'
 
 # -- General configuration ---------------------------------------------------
 

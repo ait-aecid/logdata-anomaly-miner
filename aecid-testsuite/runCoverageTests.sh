@@ -1,3 +1,5 @@
+#!/bin/bash
+
 source config
 
 curl $KAFKA_URL --output kafka.tgz

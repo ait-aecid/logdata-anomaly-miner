@@ -1,6 +1,6 @@
-"""
-This file defines the basic NewMatchPathValueComboDetector detector.
-It extracts values from LogAtoms and check, if the value combination was already seen before.
+"""This file defines the basic NewMatchPathValueComboDetector detector. It
+extracts values from LogAtoms and check, if the value combination was already
+seen before.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,7 +16,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, \
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -28,15 +28,17 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 class NewMatchPathValueComboDetector(
         AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
-    """This class creates events when a new value combination for a given list of match data paths were found."""
+    """This class creates events when a new value combination for a given list
+    of match data paths were found."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", allow_missing_values_flag=False,
                  learn_mode=False, output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None,
                  log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
                considered for value range generation.
@@ -52,6 +54,7 @@ class NewMatchPathValueComboDetector(
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_timestamp_initialized = None
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode,
@@ -80,8 +83,8 @@ class NewMatchPathValueComboDetector(
             logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def receive_atom(self, log_atom):
-        """
-        Receive on parsed atom and the information about the parser match.
+        """Receive on parsed atom and the information about the parser match.
+
         @return True if a value combination was extracted and checked against the list of known combinations, no matter if the checked
         values were new or not.
         """
@@ -89,8 +92,14 @@ class NewMatchPathValueComboDetector(
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
+        if not self.stop_learning_timestamp_initialized:
+            self.stop_learning_timestamp_initialized = True
+            if self.stop_learning_timestamp is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+            elif self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
         match_dict = log_atom.parser_match.get_match_dictionary()
@@ -156,12 +165,19 @@ class NewMatchPathValueComboDetector(
 
     def do_persist(self):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.known_values_set)))
+        try:
+            # Sort the known_values_set before storing as json. This improves the deterministic behavior / reproducible results.
+            # The Lambda function is only used to allow sorting of tuple values which contain None.
+            PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.known_values_set),
+                                                                          key=lambda L: tuple(el if el is not None else b'-' for el in L)))
+        except TypeError:
+            PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
-        """
-        Allowlist an event generated by this source using the information emitted when generating the event.
+        """Allowlist an event generated by this source using the information
+        emitted when generating the event.
+
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
@@ -185,8 +201,9 @@ class NewMatchPathValueComboDetector(
         return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data}."
 
     def add_to_persistency_event(self, event_type, event_data):
-        """
-        Add or overwrite the information of event_data to the persistence of component_name.
+        """Add or overwrite the information of event_data to the persistence of
+        component_name.
+
         @return a message with information about the addition to the persistence.
         @throws Exception when the addition of this special event using given event_data was not possible.
         """
@@ -220,8 +237,9 @@ class NewMatchPathValueComboDetector(
         return f"Added values [{', '.join(event_data)}] of paths [{', '.join(self.target_path_list)}] to the persistence."
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         if AminerConfig.STAT_LEVEL == 1:

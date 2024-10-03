@@ -1,5 +1,4 @@
-"""
-This file loads and parses a config-file in yaml format.
+"""This file loads and parses a config-file in yaml format.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -15,6 +14,7 @@ import sys
 import logging
 import copy
 import ast
+import pytz
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.util.StringUtil import decode_string_as_byte_string
 
@@ -25,20 +25,20 @@ enhanced_new_match_path_value_combo_detector_reference = None
 
 
 def load_yaml(config_file):
-    """
-    Load the yaml configuration from files. Basically there are two schema types: validation schemas and normalisation schemas.
+    """Load the yaml configuration from files.
+
+    Basically there are two schema types: validation schemas and normalisation schemas.
     The validation schemas validate together with the BaseSchema all inputs as specifically as possible. Due to the limitations of
     oneof_schemas and the not functional normalisation in the validation schemas, the normalisation schemas are used to set default values
     and convert the date in right data types with coerce procedures.
     """
     # We might be able to remove this and us it like the config_properties
-    # skipcq: PYL-W0603
     global yaml_data
 
     import yaml
     from aminer.ConfigValidator import ConfigValidator, NormalisationValidator
     import os
-    with open(config_file) as yamlfile:  # skipcq: PTC-W6004
+    with open(config_file) as yamlfile:
         try:
             yaml_data = yaml.safe_load(yamlfile)
             yamlfile.close()
@@ -47,27 +47,20 @@ def load_yaml(config_file):
             raise exception
 
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/BaseSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
-        base_schema = eval(sma.read())
+        base_schema = ast.literal_eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/ParserNormalisationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
-        parser_normalisation_schema = eval(sma.read())
+        parser_normalisation_schema = ast.literal_eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/AnalysisNormalisationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
-        analysis_normalisation_schema = eval(sma.read())
+        analysis_normalisation_schema = ast.literal_eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/normalisation/EventHandlerNormalisationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
-        event_handler_normalisation_schema = eval(sma.read())
+        event_handler_normalisation_schema = ast.literal_eval(sma.read())
 
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/ParserValidationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
-        parser_validation_schema = eval(sma.read())
+        parser_validation_schema = ast.literal_eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/AnalysisValidationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
-        analysis_validation_schema = eval(sma.read())
+        analysis_validation_schema = ast.literal_eval(sma.read())
     with open(os.path.dirname(os.path.abspath(__file__)) + '/' + 'schemas/validation/EventHandlerValidationSchema.py', 'r') as sma:
-        # skipcq: PYL-W0123
-        event_handler_validation_schema = eval(sma.read())
+        event_handler_validation_schema = ast.literal_eval(sma.read())
 
     normalisation_schema = {
         **base_schema, **parser_normalisation_schema, **analysis_normalisation_schema, **event_handler_normalisation_schema}
@@ -126,9 +119,10 @@ def filter_config_errors(filtered_errors, key_name, errors, schema):
 
 # Add your ruleset here:
 def build_analysis_pipeline(analysis_context):
-    """
-    Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
+    """Define the function to create pipeline for parsing the log data.
+
+    It has also to define an AtomizerFactory to instruct aminer how to
+    process incoming data streams to create log atoms from them.
     """
     parsing_model, parser_model_dict = build_parsing_model()
     anomaly_event_handlers, atom_filter = build_input_pipeline(analysis_context, parsing_model, parser_model_dict)
@@ -159,7 +153,7 @@ def build_parsing_model(data=None):
             start = item
         if item['type'].is_model:
             if 'args' in item:
-                if isinstance(item['args'], list):  # skipcq: PTC-W0048
+                if isinstance(item['args'], list):
                     for i, value in enumerate(item["args"]):
                         if (isinstance(value, str) and value == "WHITESPACE") or (isinstance(value, bytes) and value == b"WHITESPACE"):
                             from aminer.parsing.FixedDataModelElement import FixedDataModelElement
@@ -194,8 +188,11 @@ def build_parsing_model(data=None):
                     branch_model_dict[key] = parser_model_dict.get(model)
                 parser_model_dict[item['id']] = item['type'].func(item['name'], value_model, item['args'][1].decode(), branch_model_dict)
             elif item['type'].name == 'DateTimeModelElement':
+                time_zone = item['time_zone']
+                if time_zone is not None:
+                    time_zone = pytz.timezone(time_zone)
                 parser_model_dict[item['id']] = item['type'].func(
-                    item['name'], item['date_format'].encode(), None, item['text_locale'], item['start_year'],
+                    item['name'], item['date_format'].encode(), time_zone, item['text_locale'], item['start_year'],
                     item['max_time_jump_seconds'])
             elif item['type'].name == 'MultiLocaleDateTimeModelElement':
                 date_formats = []
@@ -423,7 +420,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             if item['type'].name == 'NewMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], output_logline=item['output_logline'],
-                                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'MatchPathFilter':
                 parsed_atom_handler_lookup_list = []
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
@@ -464,44 +463,60 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     min_anomaly_score=item['min_anomaly_score'], min_variance=item['min_variance'],
                                     num_windows=item['num_windows'], learn_mode=learn, output_logline=item['output_logline'],
                                     ignore_list=item['ignore_list'], constraint_list=item['constraint_list'],
-                                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
-                                    output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'MissingMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], combine_values=item['combine_values'],
-                                    output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'MissingMatchPathListValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], combine_values=item['combine_values'],
-                                    output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'EventSequenceDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], seq_len=item['seq_len'],
                                     learn_mode=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
-                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'ValueRangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], learn_mode=learn,
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
-                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'CharsetDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], learn_mode=learn,
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
-                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'EntropyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     prob_thresh=item['prob_thresh'], default_freqs=item['default_freqs'],
                                     skip_repetitions=item['skip_repetitions'],
                                     persistence_id=item['persistence_id'], learn_mode=learn,
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
-                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     scoring_path_list=item['scoring_path_list'], unique_path_list=item['unique_path_list'],
@@ -512,7 +527,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     set_lower_limit=item['set_lower_limit'], set_upper_limit=item['set_upper_limit'],
                                     learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'], season=item['season'],
-                                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'EventCountClusterDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], id_path_list=item['id_path_list'],
@@ -520,7 +537,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     confidence_factor=item['confidence_factor'], idf=item['idf'], norm=item['norm'],
                                     add_normal=item['add_normal'], check_empty_windows=item['check_empty_windows'],
                                     learn_mode=learn, output_logline=item['output_logline'], ignore_list=item['ignore_list'],
-                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'TimeCorrelationDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['parallel_check_count'],
                                     persistence_id=item['persistence_id'], record_count_before_event=item['record_count_before_event'],
@@ -552,20 +571,25 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'], constraint_list=item['constraint_list'],
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'], check_rules_flag=item['check_rules_flag'],
                     learn_mode=learn, ignore_list=item['ignore_list'], persistence_id=item['persistence_id'],
-                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                    log_resource_ignore_list=item['log_resource_ignore_list'], stop_learning_time=item['stop_learning_time'],
+                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     id_path_list=item['id_path_list'], min_allowed_time_diff=item['min_allowed_time_diff'],
                                     learn_mode=learn, persistence_id=item['persistence_id'],
                                     allow_missing_values_flag=item['allow_missing_values'], output_logline=item['output_logline'],
-                                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'SlidingEventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     scoring_path_list=item['scoring_path_list'], persistence_id=item['persistence_id'],
                                     window_size=item['window_size'], set_upper_limit=item['set_upper_limit'],
                                     local_maximum_threshold=item['local_maximum_threshold'], learn_mode=learn,
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
-                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
                     msg = f'The {item["type"].name} must have an id!'
@@ -612,8 +636,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
                                     learn_mode=learn, tuple_transformation_function=tuple_transformation_function,
-                                    output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'])
-                # skipcq: PYL-W0603
+                                    output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'].name == 'MatchFilter':
@@ -624,7 +649,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     item['min_bin_elements'], item['min_bin_time'], debug_mode=item['debug_mode'],
                                     persistence_id=item['persistence_id'], output_logline=item['output_logline'],
                                     avg_factor=item['avg_factor'], var_factor=item['var_factor'], learn_mode=learn,
-                                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
@@ -636,7 +663,9 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
             elif item['type'].name == 'NewMatchPathDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                                     learn_mode=learn, output_logline=item['output_logline'],
-                                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    log_resource_ignore_list=item['log_resource_ignore_list'],
+                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif 'MatchAction' in item['type'].name:
                 if comp_name is None:
                     msg = f'The {item["type"].name} must have an id!'
@@ -829,7 +858,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     range_threshold=item['range_threshold'], range_limits_factor=item['range_limits_factor'],
                     num_reinit_range=item['num_reinit_range'], dw_alpha=item['dw_alpha'], output_logline=item['output_logline'],
                     ignore_list=item['ignore_list'], constraint_list=item['constraint_list'], learn_mode=learn,
-                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                    log_resource_ignore_list=item['log_resource_ignore_list'], stop_learning_time=item['stop_learning_time'],
+                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -853,7 +883,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     used_validate_cor_meth=item['used_validate_cor_meth'],
                     validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
                     validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'],
-                    constraint_list=item['constraint_list'], learn_mode=learn, log_resource_ignore_list=item['log_resource_ignore_list'])
+                    constraint_list=item['constraint_list'], learn_mode=learn, log_resource_ignore_list=item['log_resource_ignore_list'],
+                    stop_learning_time=item['stop_learning_time'], stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'PathValueTimeIntervalDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
@@ -861,7 +892,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     allow_missing_values_flag=item['allow_missing_values'],
                     output_logline=item['output_logline'], time_period_length=item['time_period_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], learn_mode=learn,
-                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                    log_resource_ignore_list=item['log_resource_ignore_list'], stop_learning_time=item['stop_learning_time'],
+                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'PathArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -874,7 +906,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_init=item['num_init'], force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     alpha=item['alpha'], alpha_bt=item['alpha_bt'], num_results_bt=item['num_results_bt'],
                     num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
-                    num_periods_tsa_ini=item['num_periods_tsa_ini'], log_resource_ignore_list=item['log_resource_ignore_list'])
+                    num_periods_tsa_ini=item['num_periods_tsa_ini'], log_resource_ignore_list=item['log_resource_ignore_list'],
+                    stop_learning_time=item['stop_learning_time'], stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'TSAArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -894,7 +927,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     round_time_interval_threshold=item['round_time_interval_threshold'],
                     force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
                     min_log_lines_per_time_step=item['min_log_lines_per_time_step'], output_logline=item['output_logline'],
-                    ignore_list=item['ignore_list'], learn_mode=learn, log_resource_ignore_list=item['log_resource_ignore_list'])
+                    ignore_list=item['ignore_list'], learn_mode=learn, log_resource_ignore_list=item['log_resource_ignore_list'],
+                    stop_learning_time=item['stop_learning_time'], stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'MinimalTransitionTimeDetector':
                 tmp_analyser = func(
                     analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
@@ -902,7 +936,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
                     num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
                     time_output_threshold=item['time_output_threshold'], log_resource_ignore_list=item['log_resource_ignore_list'],
-                    anomaly_threshold=item['anomaly_threshold'])
+                    stop_learning_time=item['stop_learning_time'],
+                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], anomaly_threshold=item['anomaly_threshold'])
             elif item["type"].name in ("VerboseUnparsedAtomHandler", "SimpleUnparsedAtomHandler"):
                 has_unparsed_handler = True
                 stop_when_handled_flag = True
@@ -925,7 +960,8 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
 
 def add_default_analysis_components(analysis_context, anomaly_event_handlers, atom_filter, has_new_match_path_handler, has_unparsed_handler,
                                     parsing_model):
-    """Add the default unparsed atom handler and/or NewMatchPathDetector if none is configured."""
+    """Add the default unparsed atom handler and/or NewMatchPathDetector if
+    none is configured."""
     if not has_unparsed_handler:
         from aminer.analysis.UnparsedAtomHandlers import VerboseUnparsedAtomHandler
         atom_filter.add_handler(VerboseUnparsedAtomHandler(anomaly_event_handlers, parsing_model), stop_when_handled_flag=True)
@@ -991,7 +1027,7 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
                             if key == "sasl_plain_username":
                                 continue
                             options[key] = int(val)
-                        except ValueError:  # skipcq: FLK-E722
+                        except ValueError:
                             pass
                     ctx = func(analysis_context, item['topic'], options)
                 if item['type'].name == 'ZmqEventHandler':
@@ -1022,7 +1058,8 @@ def build_event_handlers(analysis_context, anomaly_event_handlers):
 
 
 def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
-    """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10th element."""
+    """Only allow output of the EnhancedNewMatchPathValueComboDetector after
+    every 10th element."""
     extra_data = enhanced_new_match_path_value_combo_detector_reference.known_values_dict.get(tuple(match_value_list), None)
     if extra_data is not None:
         mod = 10
@@ -1034,7 +1071,7 @@ def tuple_transformation_function_demo_print_every_10th_value(match_value_list):
 
 
 def parse_json_yaml(json_dict, parser_model_dict):
-    """Parse an yaml configuration for json."""
+    """Parse a yaml configuration for json."""
     key_parser_dict = {}
     for key in json_dict.keys():
         value = json_dict[key]

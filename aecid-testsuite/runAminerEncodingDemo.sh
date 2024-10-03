@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ERR=/tmp/err.txt
 if [[ $1 == *.py ]]; then
     cp $1 /tmp/demo-config.py

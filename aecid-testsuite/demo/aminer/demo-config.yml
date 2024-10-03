@@ -465,6 +465,7 @@ Parser:
          type: DateTimeModelElement
          name: 'DateTimeModelElement'
          date_format: 'Current DateTime: %d.%m.%Y %H:%M:%S'
+         time_zone: 'UTC'
 
        - id: decimalFloatValueModelElement
          type: DecimalFloatValueModelElement

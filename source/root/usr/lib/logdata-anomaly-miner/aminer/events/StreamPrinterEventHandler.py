@@ -1,5 +1,4 @@
-"""
-This module defines an event handler that prints data to a stream.
+"""This module defines an event handler that prints data to a stream.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -19,14 +18,15 @@ from aminer.events.EventData import EventData
 
 
 class StreamPrinterEventHandler(EventHandlerInterface):
-    """
-    This class implements an event record listener, that will just print out data about the event to a stream.
+    """This class implements an event record listener, that will just print out
+    data about the event to a stream.
+
     By default this is stdout.
     """
 
     def __init__(self, analysis_context, stream=sys.stdout):
-        """
-        Initialize the event handler.
+        """Initialize the event handler.
+
         @param analysis_context the analysis context used to get the component.
         @param stream the output stream of the event handler.
         """

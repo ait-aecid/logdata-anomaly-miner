@@ -1,8 +1,8 @@
-"""
-This module defines an event handler that adds a confidence score to the anomaly output.
-The score is calculated through analysis of a list of strings defined in the detector through the function get_weight_analysis_field_path
-and weights the single strings based on the weights dictionary.
-The weights can optionally be automatically calculated.
+"""This module defines an event handler that adds a confidence score to the
+anomaly output. The score is calculated through analysis of a list of strings
+defined in the detector through the function get_weight_analysis_field_path and
+weights the single strings based on the weights dictionary. The weights can
+optionally be automatically calculated.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,8 @@ from aminer.events.EventInterfaces import EventSourceInterface
 
 
 class ScoringEventHandler(EventHandlerInterface):
-    """This class implements an event record listener, that will add a confidence score to the anomaly output."""
+    """This class implements an event record listener, that will add a
+    confidence score to the anomaly output."""
 
     def __init__(self, event_handlers, analysis_context, weights=None, auto_weights=False, auto_weights_history_length=1000):
         """

@@ -1,5 +1,4 @@
-"""
-This module defines a handler that synchronizes different streams.
+"""This module defines a handler that synchronizes different streams.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,11 +16,14 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
 class SimpleMultisourceAtomSync(AtomHandlerInterface):
-    """
-    This class synchronizes different atom streams by forwarding the atoms only from the source delivering the oldest ones.
-    This is done using the atom timestamp value. Atoms without a timestamp are forwarded immediately. When no atoms are received from a
-    source for some time, no more atoms are expected from that source. This will allow forwarding of blocked atoms from
-    other sources afterwards.
+    """This class synchronizes different atom streams by forwarding the atoms
+    only from the source delivering the oldest ones.
+
+    This is done using the atom timestamp value. Atoms without a
+    timestamp are forwarded immediately. When no atoms are received from
+    a source for some time, no more atoms are expected from that source.
+    This will allow forwarding of blocked atoms from other sources
+    afterwards.
     """
 
     def __init__(self, atom_handler_list, sync_wait_time=5):

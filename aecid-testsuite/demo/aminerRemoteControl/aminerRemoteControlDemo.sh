@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #removes the 'LogPrefix'
 sudo aminerremotecontrol --exec "change_config_property(analysis_context, 'LogPrefix', '')"
 

@@ -1,5 +1,4 @@
-"""
-This module defines an event handler that forwards Json-objects to Kafka.
+"""This module defines an event handler that forwards Json-objects to Kafka.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -19,11 +18,12 @@ from aminer.events.EventInterfaces import EventHandlerInterface
 
 
 class KafkaEventHandler(EventHandlerInterface):
-    """This class implements an event record listener, that will forward Json-objects to a Kafka queue."""
+    """This class implements an event record listener, that will forward Json-
+    objects to a Kafka queue."""
 
     def __init__(self, analysis_context, topic, options):
-        """
-        Initialize the event handler.
+        """Initialize the event handler.
+
         @param analysis_context the analysis context used to get the component.
         @param topic the Kafka topic to which the data is sent.
         @param options Kafka specific options.

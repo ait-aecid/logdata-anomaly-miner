@@ -1,5 +1,5 @@
-"""
-This module defines a model element that allows branches depending on the value of the previous model value.
+"""This module defines a model element that allows branches depending on the
+value of the previous model value.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,12 +20,13 @@ from typing import Union
 
 
 class ElementValueBranchModelElement(ModelElementInterface):
-    """This class defines an element that selects a branch path based on a previous model value."""
+    """This class defines an element that selects a branch path based on a
+    previous model value."""
 
     def __init__(self, element_id: str, value_model: ModelElementInterface, value_path: Union[str, None], branch_model_dict: dict,
                  default_branch: Union[str, int] = None):
-        """
-        Create the branch model element.
+        """Create the branch model element.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param value_model the ModelElement which has to match the data.
         @param value_path the relative path to the target value from the value_model element on. When the path does not resolve
@@ -39,8 +40,9 @@ class ElementValueBranchModelElement(ModelElementInterface):
             element_id, value_model=value_model, value_path=value_path, branch_model_dict=branch_model_dict, default_branch=default_branch)
 
     def get_match_element(self, path: str, match_context):
-        """
-        Try to find a match on given data for the test model and the selected branch.
+        """Try to find a match on given data for the test model and the
+        selected branch.
+
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.
         @return the matchElement or None if the test model did not match, no branch was selected or the branch did not match.

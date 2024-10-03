@@ -1,5 +1,4 @@
-"""
-This module defines a detector that reports diverges from an average.
+"""This module defines a detector that reports diverges from an average.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -23,9 +22,11 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """
-    This detector calculates the average of a given list of values to monitor.
-    Reports are generated if the average of the latest diverges significantly from the values observed before.
+    """This detector calculates the average of a given list of values to
+    monitor.
+
+    Reports are generated if the average of the latest diverges
+    significantly from the values observed before.
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -33,8 +34,9 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, target_path_list, min_bin_elements, min_bin_time,
                  debug_mode=False, persistence_id="Default", output_logline=True, learn_mode=False, avg_factor=1, var_factor=2,
                  stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param timestamp_path if not None, use this path value for timestamp based bins.
@@ -51,6 +53,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_timestamp_initialized = None
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, timestamp_path=timestamp_path,
             target_path_list=target_path_list, min_bin_elements=min_bin_elements, min_bin_time=min_bin_time, debug_mode=debug_mode,
@@ -76,9 +79,14 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         self.log_total += 1
         parser_match = log_atom.parser_match
         value_dict = parser_match.get_match_dictionary()
+        if not self.stop_learning_timestamp_initialized:
+            self.stop_learning_timestamp_initialized = True
+            if self.stop_learning_timestamp is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+            elif self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -159,7 +167,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             self.stat_data.append((path, [],))
 
         def replace_brackets(val):
-            """replace lists with tuples."""
+            """Replace lists with tuples."""
             if isinstance(val, list):
                 val = tuple(val)
             return val
@@ -182,8 +190,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def update(self, stat_data, timestamp_value, value):
-        """
-        Update the collected statistics data.
+        """Update the collected statistics data.
+
         @param value if value not None, check only conditions if current bin is full enough.
         @return true if the bin is full enough to perform an analysis.
         """
@@ -209,8 +217,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
         return True
 
     def analyze(self, stat_data):
-        """
-        Perform the analysis and progress from the last bin to the next one.
+        """Perform the analysis and progress from the last bin to the next one.
+
         @return None when statistical data was as expected and debugging is disabled.
         """
         logging.getLogger(DEBUG_LOG_NAME).debug("%s performs analysis.", self.__class__.__name__)

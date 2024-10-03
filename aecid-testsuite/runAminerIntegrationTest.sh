@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo localhost | sudo tee /etc/hostname > /dev/null
 cd integration
 script=$1

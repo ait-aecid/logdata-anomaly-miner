@@ -13,7 +13,8 @@ from aminer.parsing.AnyByteDataModelElement import AnyByteDataModelElement
 
 
 def get_model(user_name_model=None):
-    """Return a model to parse a sshd information message after any standard logging preamble, e.g. from syslog."""
+    """Return a model to parse a sshd information message after any standard
+    logging preamble, e.g. from syslog."""
     if user_name_model is None:
         user_name_model = VariableByteDataModelElement("user", b"0123456789abcdefghijklmnopqrstuvwxyz.-")
 

@@ -1,7 +1,7 @@
 # This is a template for the "aminer" logfile miner tool. Copy
 # it to "config.py" and define your ruleset.
 
-config_properties = {}  # skipcq: PY-W0072
+config_properties = {}
 
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
@@ -29,13 +29,13 @@ config_properties['AminerGroup'] = 'aminer'
 # for the child also.
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
-config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'  # skipcq: BAN-B108
+config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'
 # Read and store information to be used between multiple invocations
 # of aminer in this directory. The directory must only be accessible
 # to the 'AminerUser' but not group/world readable. On violation,
 # aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'  # skipcq: BAN-B108
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 config_properties['Core.PersistencePeriod'] = 600
 
 # Define a target e-mail address to send alerts to. When undefined,
@@ -83,14 +83,16 @@ config_properties['AminerId'] = 'demo-aminer'
 
 
 def build_analysis_pipeline(analysis_context):
-    """
-    Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
+    """Define the function to create pipeline for parsing the log data.
+
+    It has also to define an AtomizerFactory to instruct aminer how to
+    process incoming data streams to create log atoms from them.
     """
     date_format_string = b'%Y-%m-%d %H:%M:%S'
     cron = b' cron['
 
     # Build the parsing model:
+    import pytz
     from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
     from aminer.parsing.SequenceModelElement import SequenceModelElement
     from aminer.parsing.DecimalFloatValueModelElement import DecimalFloatValueModelElement
@@ -178,7 +180,7 @@ def build_analysis_pipeline(analysis_context):
             AnyByteDataModelElement('remainding_data')])]
 
     service_children_parsing_model_element = [
-        DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S'),
+        DateTimeModelElement('DateTimeModelElement', b'Current DateTime: %d.%m.%Y %H:%M:%S', pytz.timezone('UTC')),
         DecimalFloatValueModelElement('DecimalFloatValueModelElement', value_sign_type='optional'),
         DecimalIntegerValueModelElement('DecimalIntegerValueModelElement', value_sign_type='optional', value_pad_type='blank'),
         SequenceModelElement('se', [
@@ -355,7 +357,8 @@ def build_analysis_pipeline(analysis_context):
     atom_filter.add_handler(new_match_path_detector)
 
     def tuple_transformation_function(match_value_list):
-        """Only allow output of the EnhancedNewMatchPathValueComboDetector after every 10th element."""
+        """Only allow output of the EnhancedNewMatchPathValueComboDetector
+        after every 10th element."""
         extra_data = enhanced_new_match_path_value_combo_detector.known_values_dict.get(tuple(match_value_list))
         if extra_data is not None:
             mod = 10

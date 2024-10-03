@@ -37,4 +37,3 @@ if [[ "$version" != "$release" ]]; then
   fi
   exit 1
 fi
-

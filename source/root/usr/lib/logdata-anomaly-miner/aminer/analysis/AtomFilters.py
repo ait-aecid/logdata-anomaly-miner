@@ -1,5 +1,5 @@
-"""
-This file collects various classes useful to filter log atoms and pass them to different handlers.
+"""This file collects various classes useful to filter log atoms and pass them
+to different handlers.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,7 +16,8 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
 class SubhandlerFilter(AtomHandlerInterface):
-    """Handlers of this class pass the received atoms to a list of atom handlers."""
+    """Handlers of this class pass the received atoms to a list of atom
+    handlers."""
 
     def __init__(self, subhandler_list, stop_when_handled_flag=False):
         """
@@ -28,16 +29,16 @@ class SubhandlerFilter(AtomHandlerInterface):
             mutable_default_args=["subhandler_list"], subhandler_list=subhandler_list, stop_when_handled_flag=stop_when_handled_flag)
 
     def add_handler(self, atom_handler, stop_when_handled_flag=False):
-        """
-        Add a handler to the list of handlers.
+        """Add a handler to the list of handlers.
+
         @param atom_handler an object implementing the AtomHandlerInterface.
         @param stop_when_handled_flag True, if the atom handler processing should stop after successfully receiving the log atom.
         """
         self.subhandler_list.append((atom_handler, stop_when_handled_flag))
 
     def receive_atom(self, log_atom):
-        """
-        Receive a parsed atom and the information about the parser match.
+        """Receive a parsed atom and the information about the parser match.
+
         @return False when no subhandler was able to handle the atom.
         """
         result = False
@@ -53,7 +54,8 @@ class SubhandlerFilter(AtomHandlerInterface):
 
 
 class MatchPathFilter(AtomHandlerInterface):
-    """This class just splits incoming matches according to existence of paths in the match."""
+    """This class just splits incoming matches according to existence of paths
+    in the match."""
 
     def __init__(self, parsed_atom_handler_lookup_list, default_parsed_atom_handler=None):
         """
@@ -67,8 +69,8 @@ class MatchPathFilter(AtomHandlerInterface):
             parsed_atom_handler_lookup_list=parsed_atom_handler_lookup_list, default_parsed_atom_handler=default_parsed_atom_handler)
 
     def receive_atom(self, log_atom):
-        """
-        Receive a parsed atom and the information about the parser match.
+        """Receive a parsed atom and the information about the parser match.
+
         @return False when log_atom did not contain match data or was not forwarded to any handler, True otherwise.
         """
         self.log_total += 1
@@ -89,11 +91,12 @@ class MatchPathFilter(AtomHandlerInterface):
 
 
 class MatchValueFilter(AtomHandlerInterface):
-    """This class just splits incoming matches using a given match value and forward them to different handlers."""
+    """This class just splits incoming matches using a given match value and
+    forward them to different handlers."""
 
     def __init__(self, target_path, parsed_atom_handler_dict, default_parsed_atom_handler=None):
-        """
-        Initialize the splitter.
+        """Initialize the splitter.
+
         @param target_path the path to be analyzed in the parser match of the log atom.
         @param parsed_atom_handler_dict a dictionary of match value to atom handler.
         @param default_parsed_atom_handler invoke this default handler when no value handler was found or do not invoke any handler

@@ -1,5 +1,6 @@
-"""
-This module defines a detector for event and value frequency exceedances with a sliding window approach.
+"""This module defines a detector for event and value frequency exceedances
+with a sliding window approach.
+
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -20,14 +21,15 @@ from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
 class SlidingEventFrequencyDetector(AtomHandlerInterface):
-    """This class creates events when event or value frequencies exceed the set limit."""
+    """This class creates events when event or value frequencies exceed the set
+    limit."""
 
     def __init__(self, aminer_config, anomaly_event_handlers, set_upper_limit, target_path_list=None, scoring_path_list=None,
                  window_size=600, local_maximum_threshold=0.2, persistence_id="Default", learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
                  log_resource_ignore_list=None):
-        """
-        Initialize the detector.
+        """Initialize the detector.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
@@ -47,6 +49,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface):
         """
         # Avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_timestamp_initialized = None
         super().__init__(
             mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, window_size=window_size, anomaly_event_handlers=anomaly_event_handlers,
@@ -73,8 +76,14 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface):
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name == source:
                 return False
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
+        if not self.stop_learning_timestamp_initialized:
+            self.stop_learning_timestamp_initialized = True
+            if self.stop_learning_timestamp is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+            elif self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+
+        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
             self.learn_mode = False
 
@@ -195,7 +204,11 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface):
         return True
 
     def print(self, log_event, frequency, first_exceeded_threshold=False):
-        """Sends an event to the listeners. The event can be the first exceeding of the limits or a local maximum"""
+        """Sends an event to the listeners.
+
+        The event can be the first exceeding of the limits or a local
+        maximum
+        """
         try:
             data = self.max_frequency_log_atom[log_event].raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:
@@ -232,8 +245,9 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface):
                                    self.max_frequency_log_atom[log_event], self)
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         if AminerConfig.STAT_LEVEL == 1:
@@ -248,7 +262,8 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface):
         self.log_total = 0
 
     def reset_counter(self, log_atom, log_event):
-        """Remove any times from counts and scoring_value_list that fell out of the time window"""
+        """Remove any times from counts and scoring_value_list that fell out of
+        the time window."""
         while len(self.counts[log_event]) > 0 and self.counts[log_event][0] < log_atom.atom_time - self.window_size:
             self.counts[log_event].popleft()
             if len(self.scoring_path_list) > 0:
@@ -259,13 +274,15 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface):
         return len([None for timestamp in self.counts[log_event] if timestamp >= log_atom.atom_time - self.window_size])
 
     def get_weight_analysis_field_path(self):
-        """Return the path to the list in the output of the detector which is weighted by the ScoringEventHandler."""
+        """Return the path to the list in the output of the detector which is
+        weighted by the ScoringEventHandler."""
         if self.scoring_path_list:
             return ["FrequencyData", "IdValues"]
         return []
 
     def get_weight_output_field_path(self):
-        """Return the path where the ScoringEventHandler adds the scorings in the output of the detector."""
+        """Return the path where the ScoringEventHandler adds the scorings in
+        the output of the detector."""
         if self.scoring_path_list:
             return ["FrequencyData", "Scoring"]
         return []

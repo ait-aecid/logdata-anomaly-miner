@@ -329,7 +329,7 @@ class VariableCorrelationDetectorTest(TestBase):
         for rel in rel_list[0]:
             for r in rel:
                 step = 2
-                for i in range(len(r)):  # skipcq: PTC-W0060
+                for i in range(len(r)):
                     key = (i % 20 >= 10)*10 + ((i % 10) * step)
                     # search for the key k in the relation r or convert key to float if applicable.
                     for k in r:
@@ -367,7 +367,7 @@ class VariableCorrelationDetectorTest(TestBase):
                     cnt_half += 1
                 else:
                     cnt_double += 1
-                for i in range(len(r)):  # skipcq: PTC-W0060
+                for i in range(len(r)):
                     key = (i % 20 >= 10)*10 + ((i % 10) * step)
                     value = r[key]
                     # there is no difference between the first half and the second half of the data, when value = 0.

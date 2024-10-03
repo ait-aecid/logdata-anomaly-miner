@@ -1,5 +1,4 @@
-"""
-This module defines a model element for parsing json strings
+"""This module defines a model element for parsing json strings.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -23,8 +22,9 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class JsonAccessObject:
-    """
-    The JsonAccessObject transforms a dictionary. It takes a dictionary "d" and
+    """The JsonAccessObject transforms a dictionary.
+
+    It takes a dictionary "d" and
     flattens the dictionary to: key.another_key.somelist[0].foo = bar
     During the flatten()-process, it will create a self.collection dictionary with
     the format: collection[flattened-key]{levels[],value}
@@ -38,7 +38,7 @@ class JsonAccessObject:
         self.flatten(d)
 
     def join_levels(self):
-        """joins levels using a specific delimiter"""
+        """Joins levels using a specific delimiter."""
         ret = ""
         for i in self.levels:
             if not i.startswith("[") and len(ret) != 0:
@@ -47,18 +47,17 @@ class JsonAccessObject:
         return ret
 
     def create_collection_entry(self, index: str, levels: deque, value):
-        """adds entry to the collection"""
+        """Adds entry to the collection."""
         subentry = {}
         subentry['levels'] = levels.copy()
         subentry['value'] = value
         self.collection[index] = subentry
 
     def flatten(self, d: Any, islist=-1):
-        """recursive function for flattening a dictionary"""
+        """Recursive function for flattening a dictionary."""
         if islist > -1:
             for k in d:
                 if isinstance(k, dict):
-                    # skipcq: FLK-E228
                     self.levels.append(f"[{islist}]")
                     islist = islist+1
                     self.flatten(k)
@@ -68,7 +67,6 @@ class JsonAccessObject:
                 else:
                     if self.debug:
                         print(f"{ self.join_levels() }[{ islist }]: { k }")
-                    # skipcq: PYL-C0209
                     self.create_collection_entry("%s[%d]" % (self.join_levels(), islist), self.levels, k)
                     islist = islist + 1
         else:
@@ -90,7 +88,6 @@ class JsonAccessObject:
                         self.create_collection_entry(k, deque([k]), v)
                     else:
                         if islist > -1:
-                            # skipcq: FLK-E228
                             self.levels.append(f"{k}[{ islist}]")
                             islist = islist+1
                         else:
@@ -102,7 +99,8 @@ class JsonAccessObject:
 
 
 class JsonStringModelElement(ModelElementInterface):
-    """This class parses json-strings and matches the keys with a given key_parser_dict."""
+    """This class parses json-strings and matches the keys with a given
+    key_parser_dict."""
 
     def __init__(self, element_id: str, key_parser_dict: dict, strict_mode: bool = False, ignore_null: bool = True):
         self.children: list = []
@@ -129,7 +127,7 @@ class JsonStringModelElement(ModelElementInterface):
                          ignore_null=ignore_null)
 
     def fill_children(self):
-        """creates list of children from config-json"""
+        """Creates list of children from config-json."""
         for entry in self.jao.collection.values():
             self.children.append(entry['value'])
 
@@ -137,9 +135,9 @@ class JsonStringModelElement(ModelElementInterface):
         """Get the element ID."""
         return self.element_id
 
-    def get_child_elements(self):  # skipcq: PYL-R0201
-        """
-        Get all possible child model elements of this element.
+    def get_child_elements(self):
+        """Get all possible child model elements of this element.
+
         @return None as there are no children of this element.
         """
         return self.children

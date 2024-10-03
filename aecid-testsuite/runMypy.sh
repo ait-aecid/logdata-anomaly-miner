@@ -1,3 +1,5 @@
+#!/bin/bash
+
 exit_code=0
 mypy /usr/lib/logdata-anomaly-miner/aminer/analysis/ --ignore-missing-imports --disable-error-code attr-defined --implicit-optional
 exit_code=$(($exit_code + $?))

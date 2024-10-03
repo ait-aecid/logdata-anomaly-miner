@@ -2,20 +2,16 @@
 # it to "config.py" and define your ruleset. For more examples of component
 # usage see aecid-testsuite/demo/aminer/demo-config.py.
 
-config_properties = {}
-
 # Define the list of log resources to read from: the resources
 # named here do not need to exist when aminer is started. This
-# will just result in a warning. However if they exist, they have
+# will just result in a warning. However, if they exist, they have
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = ['file:///tmp/syslog']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
-config_properties['AminerUser'] = 'aminer'
-config_properties['AminerGroup'] = 'aminer'
+config_properties = {'LogResourceList': ['file:///tmp/syslog'], 'AminerUser': 'aminer', 'AminerGroup': 'aminer'}
 
 learn_mode = True
 
@@ -33,9 +29,10 @@ learn_mode = True
 
 
 def build_analysis_pipeline(analysis_context):
-    """
-    Define the function to create pipeline for parsing the log data.
-    It has also to define an AtomizerFactory to instruct aminer how to process incoming data streams to create log atoms from them.
+    """Define the function to create pipeline for parsing the log data.
+
+    It has also to define an AtomizerFactory to instruct aminer how to
+    process incoming data streams to create log atoms from them.
     """
     # Build the parsing model:
     from aminer.parsing.SequenceModelElement import SequenceModelElement

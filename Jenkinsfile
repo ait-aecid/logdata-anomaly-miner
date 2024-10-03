@@ -38,6 +38,26 @@ pipeline {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runMypy"
                     }
                 }
+                stage("Bandit"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runBandit"
+                    }
+                }
+                stage("Vulture"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runVulture"
+                    }
+                }
+                stage("Flake8"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runFlake8"
+                    }
+                }
+                stage("Mccabe"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runMccabe"
+                    }
+                }
                 stage("Release String Check"){
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runReleaseStringCheck"

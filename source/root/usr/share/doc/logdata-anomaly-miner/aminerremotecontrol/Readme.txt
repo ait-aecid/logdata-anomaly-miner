@@ -1,4 +1,4 @@
-This document contains step by step instructions on what needs to be done 
+This document contains step by step instructions on what needs to be done
 to fully support a new Detector in the aminerRemoteControl.
 
 - add the Detector class to the exec_locals in the AnalysisChildRemoteControlHandler class.

@@ -100,7 +100,7 @@ class PCADetectorTest(TestBase):
         log_atom2.atom_time = t + 99
         self.assertTrue(pcad.receive_atom(log_atom2))
         self.assertTrue(pcad.learn_mode)
-        log_atom1.atom_time = t + 101
+        log_atom1.atom_time = t + 102
         self.assertTrue(pcad.receive_atom(log_atom1))
         self.assertFalse(pcad.learn_mode)
 

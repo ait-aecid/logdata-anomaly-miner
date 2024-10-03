@@ -1,13 +1,12 @@
 import unittest
 import sys
+import subprocess
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.FixedDataModelElement import FixedDataModelElement
 from time import time, sleep
 from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
-# skipcq: BAN-B404
-import subprocess
 from unit.TestBase import TestBase
 from datetime import datetime
 
@@ -55,9 +54,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
             self.test % self.__class__.__name__, 'New value for pathes %s, %s: %s' % (
                 'match/s1', 'match/s2', repr(match_element.match_object)), [log_atom.raw_data, log_atom.raw_data], None, log_atom, self)
         sleep(2)
-        # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
-        # skipcq: PYL-W1510, BAN-B602
         subprocess.run(self.mail_delete_call, shell=True, stdout=subprocess.PIPE)
 
         if datetime.fromtimestamp(t - 600).strftime(self.datetime_format_string) not in str(result.stdout, 'utf-8'):
@@ -96,7 +93,6 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
 
         t = 0
         default_mail_notification_event_handler.do_timer(t)
-        # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
 
         self.assertFalse(self.__expected_string % (
@@ -107,7 +103,6 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         default_mail_notification_event_handler.next_alert_time = t + 500
         default_mail_notification_event_handler.do_timer(t)
 
-        # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
         self.assertFalse(self.__expected_string % (
             match_element.get_path(), repr(match_element.get_match_object()), self.__class__.__name__, description, 1,
@@ -117,9 +112,7 @@ class DefaultMailNotificationEventHandlerTest(TestBase):
         default_mail_notification_event_handler.do_timer(t)
 
         sleep(2)
-        # skipcq: PYL-W1510, BAN-B602
         result = subprocess.run(self.mail_call, shell=True, stdout=subprocess.PIPE)
-        # skipcq: PYL-W1510, BAN-B602
         subprocess.run(self.mail_delete_call, shell=True, stdout=subprocess.PIPE)
 
         if datetime.fromtimestamp(t).strftime(self.datetime_format_string) not in str(result.stdout, 'utf-8'):

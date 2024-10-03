@@ -1,4 +1,3 @@
-# skipcq: FLK-D400
 """
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -63,7 +62,7 @@ class EventData:
         else:
             indent = ""
         for line in self.sorted_log_lines:
-            if isinstance(line, bytes):  # skipcq: PTC-W0048
+            if isinstance(line, bytes):
                 if line != b"":
                     message += indent + line.decode(AminerConfig.ENCODING) + "\n"
             else:

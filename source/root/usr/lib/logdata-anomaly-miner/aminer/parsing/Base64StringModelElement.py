@@ -1,5 +1,4 @@
-"""
-This module provides base64 string matching.
+"""This module provides base64 string matching.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -19,19 +18,21 @@ from aminer.parsing.MatchElement import MatchElement
 
 
 class Base64StringModelElement(ModelElementInterface):
-    """This class just tries to strip off as many base64 bytes as possible from a given data string."""
+    """This class just tries to strip off as many base64 bytes as possible from
+    a given data string."""
 
     def __init__(self, element_id: str):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         """
         super().__init__(element_id)
         self.regex = re.compile(b"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?")
 
     def get_match_element(self, path: str, match_context):
-        """
-        Find the maximum number of bytes forming an integer number according to the parameters specified.
+        """Find the maximum number of bytes forming an integer number according
+        to the parameters specified.
+
         @param path to be printed in the MatchElement.
         @param match_context the match_context to be analyzed.
         @return a match when at least one byte being a digit was found.

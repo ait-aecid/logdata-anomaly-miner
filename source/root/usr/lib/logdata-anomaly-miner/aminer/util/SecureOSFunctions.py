@@ -1,5 +1,4 @@
-"""
-This module defines functions for secure file handling.
+"""This module defines functions for secure file handling.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -30,21 +29,17 @@ log_dir_path = None
 
 def secure_open_base_directory(directory_name=None, flags=0):
     """Open the base directory in a secure way."""
-    global base_dir_fd  # skipcq: PYL-W0603
-    global base_dir_path  # skipcq: PYL-W0603
-    global tmp_base_dir_fd  # skipcq: PYL-W0603
-    global tmp_base_dir_path  # skipcq: PYL-W0603
+    global base_dir_fd
+    global base_dir_path
+    global tmp_base_dir_fd
+    global tmp_base_dir_path
     if directory_name is not None and isinstance(directory_name, str):
         directory_name = directory_name.encode()
     if base_dir_path is None and (directory_name is None or not directory_name.startswith(b'/')):
-        msg = 'Secure open on relative path not supported'
+        msg = 'Secure open on relative path not supported and an empty directory_name is not allowed when calling this function for'\
+              ' the first time.'
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
-        raise Exception(msg)
-    if base_dir_path is None and (flags & os.O_DIRECTORY) == 0:
-        msg = 'Opening directory but O_DIRECTORY flag missing'
-        logging.getLogger(DEBUG_LOG_NAME).error(msg)
-        raise Exception(msg)
-
+        raise ValueError(msg)
     if base_dir_fd is None:
         base_dir_fd = os.open(directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
         base_dir_path = directory_name
@@ -55,9 +50,9 @@ def secure_open_base_directory(directory_name=None, flags=0):
 
 def close_base_directory():
     """Close the base directory at program shutdown."""
-    global base_dir_fd  # skipcq: PYL-W0603
-    global tmp_base_dir_fd  # skipcq: PYL-W0603
-    global base_dir_path  # skipcq: PYL-W0603
+    global base_dir_fd
+    global tmp_base_dir_fd
+    global base_dir_path
     try:
         if base_dir_fd is not None:
             os.close(base_dir_fd)
@@ -74,21 +69,19 @@ def close_base_directory():
 
 def secure_open_log_directory(log_directory_name=None, flags=0):
     """Open the base log directory in a secure way."""
-    global log_dir_fd  # skipcq: PYL-W0603
-    global log_dir_path  # skipcq: PYL-W0603
+    global log_dir_fd
+    global log_dir_path
     if log_directory_name is not None and isinstance(log_directory_name, str):
         log_directory_name = log_directory_name.encode()
     if log_dir_path is None and (log_directory_name is None or not log_directory_name.startswith(b'/')):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
-        raise Exception(msg)
-    if log_dir_path is None and (flags & os.O_DIRECTORY) == 0:
-        msg = 'Opening directory but O_DIRECTORY flag missing'
-        logging.getLogger(DEBUG_LOG_NAME).error(msg)
-        raise Exception(msg)
+        raise ValueError(msg)
     if log_dir_fd is None:
-        if base_dir_path is not None and base_dir_path.startswith(os.path.split(log_directory_name)[0]):
-            log_dir_fd = os.open(log_directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY, dir_fd=base_dir_fd)
+        if base_dir_path is not None and log_directory_name.startswith(base_dir_path):
+            # dir_fd is ignored with absolute paths.
+            base_name = log_directory_name.replace(base_dir_path, b'').lstrip(b'/')
+            log_dir_fd = os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY, dir_fd=base_dir_fd)
             log_dir_path = log_directory_name
         else:
             log_dir_fd = os.open(log_directory_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
@@ -98,8 +91,8 @@ def secure_open_log_directory(log_directory_name=None, flags=0):
 
 def close_log_directory():
     """Close the base directory at program shutdown."""
-    global log_dir_fd  # skipcq: PYL-W0603
-    global log_dir_path  # skipcq: PYL-W0603
+    global log_dir_fd
+    global log_dir_path
     try:
         if log_dir_fd is not None:
             os.close(log_dir_fd)
@@ -112,9 +105,11 @@ def close_log_directory():
 
 
 def secure_open_file(file_name, flags):
-    """
-    Secure opening of a file with given flags. This call will refuse to open files where any path component is a symlink.
-    As operating system does not provide any means to do that, open the file_name directory by directory. It also adds O_NOCTTY to the
+    """Secure opening of a file with given flags. This call will refuse to open
+    files where any path component is a symlink. As operating system does not
+    provide any means to do that, open the file_name directory by directory. It
+    also adds O_NOCTTY to the.
+
     flags as controlling TTY logics as this is just an additional risk and does not make sense for opening of log files.
     @param file_name is the file name as byte string
     """
@@ -123,24 +118,24 @@ def secure_open_file(file_name, flags):
     if not file_name.startswith(b'/'):
         msg = 'Secure open on relative path not supported'
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
-        raise Exception(msg)
-    if (file_name.endswith(b'/')) and ((flags & os.O_DIRECTORY) == 0):
+        raise ValueError(msg)
+    if (file_name.endswith(b'/') or os.path.isdir(file_name)) and ((flags & os.O_DIRECTORY) == 0):
         msg = 'Opening directory but O_DIRECTORY flag missing'
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
-    global base_dir_path  # skipcq: PYL-W0603, PYL-W0602
-    global base_dir_fd  # skipcq: PYL-W0603, PYL-W0602
+    global base_dir_path
+    global base_dir_fd
     if base_dir_path is not None:
         if file_name.startswith(base_dir_path):
             base_name = file_name.replace(base_dir_path, b'').lstrip(b'/')
         else:
             base_name = file_name
-        return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=base_dir_fd)
+        return os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=base_dir_fd)  # dir_fd is ignored with absolute paths.
     dir_name = os.path.dirname(file_name)
     base_name = os.path.basename(file_name)
     dir_fd = os.open(dir_name, flags | os.O_NOFOLLOW | os.O_NOCTTY | os.O_DIRECTORY)
-    ret_fd = os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)
+    ret_fd = os.open(base_name, flags | os.O_NOFOLLOW | os.O_NOCTTY, dir_fd=dir_fd)  # dir_fd is ignored with absolute paths.
     os.close(dir_fd)
     return ret_fd
 
@@ -166,11 +161,12 @@ def send_annotated_file_descriptor(send_socket, send_fd, type_info, annotation_d
 
 
 def send_logstream_descriptor(send_socket, send_fd, send_file_name):
-    """Send a file descriptor to be used as standard log data stream source for the analysis pipeline."""
+    """Send a file descriptor to be used as standard log data stream source for
+    the analysis pipeline."""
     send_annotated_file_descriptor(send_socket, send_fd, b'logstream', send_file_name)
 
 
-def receive_annoted_file_descriptor(receive_socket):
+def receive_annotated_file_descriptor(receive_socket):
     """
     Receive a single file descriptor and attached annotation information via SCM_RIGHTS via the given socket.
     The method may raise an Exception when invoked on non-blocking sockets and no messages available.
