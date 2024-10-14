@@ -32,9 +32,12 @@ class ZmqEventHandler(EventHandlerInterface):
         self.analysis_context = analysis_context
         self.url = url
         self.topic = topic
-        self.producer = None
-        self.context = None
-        self.zmq_imported = False
+        self.context = zmq.Context()
+        self.producer = self.context.socket(zmq.PUB)
+        self.producer.bind(self.url)
+        import time
+        time.sleep(1)
+        #self.zmq_imported = False
         logging.getLogger(DEBUG_LOG_NAME).info("ZmqEventHandler initialized")
 
     def receive_event(self, _event_type, _event_message, _sorted_loglines, event_data, _log_atom, event_source):
@@ -57,18 +60,18 @@ class ZmqEventHandler(EventHandlerInterface):
         component_name = self.analysis_context.get_name_by_component(event_source)
         if component_name in self.analysis_context.suppress_detector_list:
             return True
-        if self.zmq_imported is False:
-            try:
-                self.context = zmq.Context()
-                self.producer = self.context.socket(zmq.PUB)
-                self.producer.bind(self.url)
-                logging.getLogger(DEBUG_LOG_NAME).info("Created socket on %s", self.url)
-                self.zmq_imported = True
-            except ImportError:
-                msg = 'ZeroMQ module not found.'
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                print('ERROR: ' + msg, file=sys.stderr)
-                return False
+        # if self.zmq_imported is False:
+        #     try:
+        #         self.context = zmq.Context()
+        #         self.producer = self.context.socket(zmq.PUB)
+        #         self.producer.bind(self.url)
+        #         logging.getLogger(DEBUG_LOG_NAME).info("Created socket on %s", self.url)
+        #         self.zmq_imported = True
+        #     except ImportError:
+        #         msg = 'ZeroMQ module not found.'
+        #         logging.getLogger(DEBUG_LOG_NAME).error(msg)
+        #         print('ERROR: ' + msg, file=sys.stderr)
+        #         return False
         if not isinstance(event_data, str) and not isinstance(event_data, bytes):
             msg = 'ZmqEventHandler received non-string event data. Use the JsonConverterHandler to serialize it first.'
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
@@ -87,6 +90,6 @@ class ZmqEventHandler(EventHandlerInterface):
             print("Error: " + msg, file=sys.stderr)
             self.producer.disconnect()
             self.producer = None
-            self.zmq_imported = False
+            #self.zmq_imported = False
             return False
         return True
