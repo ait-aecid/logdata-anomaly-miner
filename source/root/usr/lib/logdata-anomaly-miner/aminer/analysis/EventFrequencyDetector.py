@@ -66,8 +66,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         @param season the seasonality/periodicity of the time-series in seconds.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_timestamp_initialized = None
+        self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_time_initialized = None
         super().__init__(
             mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
@@ -110,12 +110,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 return False
         parser_match = log_atom.parser_match
         self.log_total += 1
-        if not self.stop_learning_timestamp_initialized:
-            self.stop_learning_timestamp_initialized = True
-            if self.stop_learning_timestamp is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+        if not self.stop_learning_time_initialized:
+            self.stop_learning_time_initialized = True
+            if self.stop_learning_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
         # Skip paths from ignore list.
         for ignore_path in self.ignore_list:
@@ -257,9 +257,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency anomaly detected", sorted_log_lines,
                                                event_data, self.last_seen_log[log_ev], self)
-                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = max(
-                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                     # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
                     self.exceeded_range_frequency[log_ev] = False
 
@@ -306,9 +305,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency exceeds range for the first time",
                                            sorted_log_lines, event_data, log_atom, self)
-                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = max(
-                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
         # Get the id list if the scoring_path_list is set and save it for the anomaly message
         if len(self.scoring_path_list) > 0:
@@ -340,8 +338,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_success += 1
 
         # Switching the learn mode is placed at the end of receive_atom to ensure that last time window before switching is added to model
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
             self.learn_mode = False
         return True

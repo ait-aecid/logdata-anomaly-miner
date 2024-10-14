@@ -59,8 +59,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_timestamp_initialized = None
+        self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_time_initialized = None
         super().__init__(
             mutable_default_args=["ignore_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id, target_path_list=target_path_list,
@@ -100,14 +100,14 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                 return False
         if log_atom.atom_time is None:
             return False
-        if not self.stop_learning_timestamp_initialized:
-            self.stop_learning_timestamp_initialized = True
-            if self.stop_learning_timestamp is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+        if not self.stop_learning_time_initialized:
+            self.stop_learning_time_initialized = True
+            if self.stop_learning_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -146,9 +146,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             self.print(msg, log_atom=log_atom, affected_path=self.target_path_list, additional_information=additional_information)
             self.appeared_time_list[id_tuple] = [log_atom.atom_time % self.time_period_length]
             self.counter_reduce_time_intervals[id_tuple] = 0
-            if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = max(
-                    self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+            if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
         else:
             # Checks if the time has already been observed
             if log_atom.atom_time % self.time_period_length not in self.appeared_time_list[id_tuple]:
@@ -169,9 +168,8 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
                     self.print(msg, log_atom=log_atom, affected_path=self.target_path_list, additional_information=additional_information)
                     if not self.learn_mode:
                         return True
-                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = max(
-                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 # Add the new time to the time list and reduces the time list after num_reduce_time_list of times have been appended
                 self.insert_and_reduce_time_intervals(id_tuple, log_atom.atom_time % self.time_period_length)
         return True
