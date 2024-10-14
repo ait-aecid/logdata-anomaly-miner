@@ -418,6 +418,7 @@ class YamlConfigTest(TestBase):
         del yml_config_properties['Analysis']
         del yml_config_properties['EventHandlers']
         del yml_config_properties['LearnMode']
+        del yml_config_properties['LogLineIdentifier']
         del yml_config_properties['LogResourceList'][0]['json']
         del yml_config_properties['LogResourceList'][0]['xml']
 
