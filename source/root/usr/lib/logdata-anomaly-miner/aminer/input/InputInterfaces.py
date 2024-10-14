@@ -283,9 +283,9 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
 
-        self.stop_learning_timestamp = None
-        self.stop_learning_timestamp_initialized = False
-        self.stop_learning_timestamp = stop_learning_time
+        self.stop_learning_time = None
+        self.stop_learning_time_initialized = False
+        self.stop_learning_time = stop_learning_time
         self.stop_learning_no_anomaly_time = stop_learning_no_anomaly_time
 
         if mutable_default_args is not None:

@@ -57,8 +57,8 @@ class MissingMatchPathValueDetector(
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_timestamp_initialized = None
+        self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_time_initialized = None
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, learn_mode=learn_mode, default_interval=default_interval, realert_interval=realert_interval,
@@ -95,14 +95,14 @@ class MissingMatchPathValueDetector(
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
-        if not self.stop_learning_timestamp_initialized:
-            self.stop_learning_timestamp_initialized = True
-            if self.stop_learning_timestamp is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+        if not self.stop_learning_time_initialized:
+            self.stop_learning_time_initialized = True
+            if self.stop_learning_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -122,9 +122,8 @@ class MissingMatchPathValueDetector(
                 self.next_check_timestamp = min(self.next_check_timestamp, timestamp + self.default_interval)
                 self.log_learned_values += 1
                 self.log_new_learned_values.append(value)
-                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = max(
-                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
         self.check_timeouts(timestamp, log_atom)
 
@@ -210,9 +209,8 @@ class MissingMatchPathValueDetector(
                     detector_info[2] = self.last_seen_timestamp + self.realert_interval
                     self.expected_values_dict[value] = detector_info
             if missing_value_list:
-                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = max(
-                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 message_part = []
                 affected_log_atom_values = []
                 for target_path_list, value, overdue_time, interval in missing_value_list:

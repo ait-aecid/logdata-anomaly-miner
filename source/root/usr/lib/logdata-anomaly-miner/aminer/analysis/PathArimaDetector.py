@@ -67,8 +67,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_timestamp_initialized = None
+        self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_time_initialized = None
         super().__init__(
             mutable_default_args=["target_path_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector, persistence_id=persistence_id,
@@ -155,15 +155,15 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name.decode() == source:
                 return False
-        if not self.stop_learning_timestamp_initialized:
-            self.stop_learning_timestamp_initialized = True
-            if self.stop_learning_timestamp is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+        if not self.stop_learning_time_initialized:
+            self.stop_learning_time_initialized = True
+            if self.stop_learning_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
         event_index = self.event_type_detector.current_index
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -309,9 +309,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                             self.arima_models[event_index][count_index] = model.fit()
                         except Exception:
                             self.arima_models[event_index][count_index] = None
-                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = max(
-                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
             # Make a one-step prediction with the new values
             elif self.arima_models[event_index][count_index] is not None:
@@ -372,9 +371,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                     # Discard the trained model and reset the result_list
                     self.arima_models[event_index][count_index] = None
                     self.result_list[event_index][count_index] = []
-                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = max(
-                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 else:
                     # Update the model
                     self.arima_models[event_index][count_index] = self.arima_models[event_index][count_index].append([count])
