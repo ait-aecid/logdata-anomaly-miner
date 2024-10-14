@@ -731,3 +731,20 @@ function checkKafkaTopic(){
   done
   return 0
 }
+
+# This function checks if the output of the ZMQ Topic is as expected.
+function checkZmqTopic(){
+  out=$(cat /tmp/zmq)
+  for t in "${JSON_OUTPUT[@]}"
+  do
+    if [[ $out != *"$t"* ]]; then
+      echo "searched: $t"
+      echo
+      echo "remaining output: $out"
+      return 1
+    fi
+    # cut the output string to remove timestamps and datetimes.
+    out=${out#*$t}
+  done
+  return 0
+}

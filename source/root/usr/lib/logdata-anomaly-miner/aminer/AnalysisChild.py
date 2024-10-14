@@ -32,6 +32,7 @@ from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY
     DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD, \
     DEFAULT_PERSISTENCE_PERIOD
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
+from aminer.events.ZmqEventHandler import ZmqEventHandler
 from aminer.events.JsonConverterHandler import JsonConverterHandler
 from aminer.input.LogStream import LogStream
 from aminer.util import PersistenceUtil
@@ -190,6 +191,17 @@ class AnalysisContext:
                     logging.getLogger(DEBUG_LOG_NAME).critical(msg)
                     print(msg, file=sys.stderr)
                     sys.exit(1)
+            elif isinstance(event_handler, ZmqEventHandler):
+                # Can not rotate sys.stdout. Consider using the copytruncate option of logrotate instead.
+                if event_handler.producer is not None:
+                    try:
+                        event_handler.producer.close()
+                        event_handler.producer = None
+                    except IOError as e:
+                        msg = f"Error when closing or opening stream with the name {event_handler.stream.name}, shutting down.\n{e}"
+                        logging.getLogger(DEBUG_LOG_NAME).critical(msg)
+                        print(msg, file=sys.stderr)
+                        sys.exit(1)
             elif isinstance(event_handler, JsonConverterHandler):
                 self.close_event_handler_streams(event_handler.json_event_handlers)
 
