@@ -67,7 +67,7 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
         self.assertIsNotNone(aminer_config.yaml_data)
 
-    def test2_load_notexistent_yaml_file(self):
+    def test2_load_nonexistent_yaml_file(self):
         """Tries to load a nonexistent yaml file. A FileNotFoundError is expected."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
@@ -92,7 +92,7 @@ class YamlConfigTest(TestBase):
             aminer_config.load_yaml('unit/data/configfiles/invalid_schema.yml')
 
     def test5_analysis_pipeline_working_config(self):
-        """This test builds a analysis_pipeline from a valid yaml-file."""
+        """This test builds an analysis pipeline from a valid yaml-file."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
