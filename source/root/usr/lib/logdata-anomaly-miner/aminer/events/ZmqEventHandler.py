@@ -13,9 +13,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import logging
+import zmq
+import time
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.events.EventInterfaces import EventHandlerInterface
-import zmq
 
 
 class ZmqEventHandler(EventHandlerInterface):
@@ -65,6 +66,7 @@ class ZmqEventHandler(EventHandlerInterface):
         #         self.context = zmq.Context()
         #         self.producer = self.context.socket(zmq.PUB)
         #         self.producer.bind(self.url)
+        #         time.sleep(1)
         #         logging.getLogger(DEBUG_LOG_NAME).info("Created socket on %s", self.url)
         #         self.zmq_imported = True
         #     except ImportError:
@@ -77,6 +79,10 @@ class ZmqEventHandler(EventHandlerInterface):
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
             print('WARNING: ' + msg, file=sys.stderr)
             return False
+        if isinstance(event_data, str):
+            event_data += '\n'
+        else:
+            event_data += b'\n'
         try:
             if self.topic:
                 self.producer.send_string(self.topic, flags=zmq.SNDMORE)
@@ -88,7 +94,7 @@ class ZmqEventHandler(EventHandlerInterface):
             msg = str(err)
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             print("Error: " + msg, file=sys.stderr)
-            self.producer.disconnect()
+            self.producer.close()
             self.producer = None
             #self.zmq_imported = False
             return False

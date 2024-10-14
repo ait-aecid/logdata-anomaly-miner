@@ -50,8 +50,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_timestamp_initialized = None
+        self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_time_initialized = None
         super().__init__(
             mutable_default_args=["id_path_list", "target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, id_path_list=id_path_list,
@@ -80,15 +80,15 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
             if log_atom.source.resource_name == source:
                 return
         self.log_total += 1
-        if not self.stop_learning_timestamp_initialized:
-            self.stop_learning_timestamp_initialized = True
-            if self.stop_learning_timestamp is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_timestamp
+        if not self.stop_learning_time_initialized:
+            self.stop_learning_time_initialized = True
+            if self.stop_learning_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
         parser_match = log_atom.parser_match
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -168,9 +168,8 @@ class ValueRangeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, 
                 self.ranges["max"][id_event] = max(self.ranges["max"][id_event], max(values))
             else:
                 self.ranges["max"][id_event] = max(values)
-            if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_timestamp = max(
-                    self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+            if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
         self.log_success += 1
 
     def do_timer(self, trigger_time):
