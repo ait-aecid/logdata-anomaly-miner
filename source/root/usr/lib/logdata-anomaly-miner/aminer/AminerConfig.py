@@ -57,6 +57,7 @@ ENCODING = 'utf-8'
 KEY_AMINER_ID = 'AminerId'
 KEY_LOG_LINE_IDENTIFIER = 'LogLineIdentifier'
 
+
 def load_config(config_file_name):
     """Load the configuration file using the import module."""
     aminer_config = None
