@@ -5,28 +5,26 @@ program=$(basename $0)
 
 case "$program" in
 	aminer)
-	  python3 -c "import sys;print(sys.path)"
-	  source $AMINERDIR/.venv/bin/activate
-	  python3 -c "import sys;print(sys.path)"
-	  echo "path $PATH"
-	  echo "pythonpath $PYTHONPATH"
-	  python3 -c "import zmq"
-	  ls $AMINERDIR/.venv/lib/python3.11/site-packages
 	  echo "program $program"
 	  echo "0 $0"
 	  echo "1 $1"
+	  echo "2 $2"
+	  echo "3 $3"
+	  echo "EEE ${*:1}"
 		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer.py ${*:1}
-		deactivate
 		;;
 	aminerremotecontrol)
-	  source $AMINERDIR/.venv/bin/activate
+	  echo "program $program"
+	  echo "0 $0"
+	  echo "1 $1"
+	  echo "2 $2"
+	  echo "3 $3"
+	  echo "EEE ${*:1}"
+	  echo ${*:1}
 		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminerremotecontrol.py ${*:1}
-		deactivate
 		;;
   aminer-persistence)
-	  source $AMINERDIR/.venv/bin/activate
 		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer-persistence.py ${*:1}
-		deactivate
 		;;
 	supervisor)
 		/usr/bin/supervisord

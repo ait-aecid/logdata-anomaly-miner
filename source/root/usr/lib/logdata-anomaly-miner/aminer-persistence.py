@@ -5,6 +5,10 @@ import os
 import re
 import argparse
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+venv_path = "/usr/lib/logdata-anomaly-miner/.venv/lib"
+if os.path.exists(venv_path):
+    python_version = os.listdir(venv_path)[0]
+    sys.path += [os.path.join(venv_path, python_version, "site-packages")]
 from aminer.AminerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR  # noqa: E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # noqa: E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # noqa: E402
