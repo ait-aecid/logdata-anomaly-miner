@@ -11,7 +11,7 @@ case "$program" in
 	  echo "2 $2"
 	  echo "3 $3"
 	  echo "EEE ${*:1}"
-		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer.py ${*:1}
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer.py "${@:1}"
 		;;
 	aminerremotecontrol)
 	  echo "program $program"
@@ -21,10 +21,10 @@ case "$program" in
 	  echo "3 $3"
 	  echo "EEE ${*:1}"
 	  echo ${*:1}
-		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminerremotecontrol.py ${*:1}
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminerremotecontrol.py "${@:1}"
 		;;
   aminer-persistence)
-		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer-persistence.py ${*:1}
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer-persistence.py "${@:1}"
 		;;
 	supervisor)
 		/usr/bin/supervisord
