@@ -169,7 +169,7 @@ case "$1" in
     exit $?
 		;;
 	SHELL)
-		bash
+		bash ${*:2}
 		exit 0
 		;;
 	*)

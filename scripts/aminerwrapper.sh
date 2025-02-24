@@ -5,17 +5,17 @@ program=$(basename $0)
 
 case "$program" in
 	aminer)
-	  $AMINERDIR/.venv/bin/activate
+	  source $AMINERDIR/.venv/bin/activate
 		$AMINERDIR/aminer.py ${*:1}
 		deactivate
 		;;
 	aminerremotecontrol)
-	  $AMINERDIR/.venv/bin/activate
+	  source $AMINERDIR/.venv/bin/activate
 		$AMINERDIR/aminerremotecontrol.py ${*:1}
 		deactivate
 		;;
-    aminer-persistence)
-	  $AMINERDIR/.venv/bin/activate
+  aminer-persistence)
+	  source $AMINERDIR/.venv/bin/activate
 		$AMINERDIR/aminer-persistence.py ${*:1}
 		deactivate
 		;;
@@ -28,6 +28,7 @@ case "$program" in
 		;;
 	*)
 		echo "Usage: [ aminer | aminerremotecontrol | aminer-persistence | supervisor | mkdocs ] <options>"
+		echo "$program"
 		exit 1
 		;;
 
