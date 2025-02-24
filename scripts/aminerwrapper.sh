@@ -5,7 +5,9 @@ program=$(basename $0)
 
 case "$program" in
 	aminer)
+	  python3 -c "import sys;print(sys.path)"
 	  source $AMINERDIR/.venv/bin/activate
+	  python3 -c "import sys;print(sys.path)"
 	  echo "path $PATH"
 	  echo "pythonpath $PYTHONPATH"
 	  python3 -c "import zmq"
