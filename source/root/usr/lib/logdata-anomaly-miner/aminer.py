@@ -42,7 +42,9 @@ from grp import getgrnam
 from logging.handlers import RotatingFileHandler
 
 # As site packages are not included, define from where we need to execute code before loading it.
+print(sys.path)
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+print(sys.path)
 import aminer.AminerConfig as AminerConfig  # noqa: E402
 from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string  # noqa: E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # noqa: E402
