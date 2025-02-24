@@ -1,21 +1,22 @@
 #!/bin/bash
 
 AMINERDIR=/usr/lib/logdata-anomaly-miner
+program=$(basename $0)
 
-case "$1" in
+case "$program" in
 	aminer)
 	  $AMINERDIR/.venv/bin/activate
-		$AMINERDIR/aminer.py ${*:2}
+		$AMINERDIR/aminer.py ${*:1}
 		deactivate
 		;;
 	aminerremotecontrol)
 	  $AMINERDIR/.venv/bin/activate
-		$AMINERDIR/aminerremotecontrol.py ${*:2}
+		$AMINERDIR/aminerremotecontrol.py ${*:1}
 		deactivate
 		;;
     aminer-persistence)
 	  $AMINERDIR/.venv/bin/activate
-		$AMINERDIR/aminer-persistence.py ${*:2}
+		$AMINERDIR/aminer-persistence.py ${*:1}
 		deactivate
 		;;
 	supervisor)
