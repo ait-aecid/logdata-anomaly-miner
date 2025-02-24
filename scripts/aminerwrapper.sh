@@ -6,6 +6,13 @@ program=$(basename $0)
 case "$program" in
 	aminer)
 	  source $AMINERDIR/.venv/bin/activate
+	  echo "path $PATH"
+	  echo "pythonpath $PYTHONPATH"
+	  python3 -c "import zmq"
+	  ls $AMINERDIR/.venv/lib/python3.11/site-packages
+	  echo "program $program"
+	  echo "0 $0"
+	  echo "1 $1"
 		$AMINERDIR/aminer.py ${*:1}
 		deactivate
 		;;
