@@ -15,17 +15,17 @@ case "$program" in
 	  echo "program $program"
 	  echo "0 $0"
 	  echo "1 $1"
-		python3 $AMINERDIR/aminer.py ${*:1}
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer.py ${*:1}
 		deactivate
 		;;
 	aminerremotecontrol)
 	  source $AMINERDIR/.venv/bin/activate
-		python3 $AMINERDIR/aminerremotecontrol.py ${*:1}
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminerremotecontrol.py ${*:1}
 		deactivate
 		;;
   aminer-persistence)
 	  source $AMINERDIR/.venv/bin/activate
-		python3 $AMINERDIR/aminer-persistence.py ${*:1}
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer-persistence.py ${*:1}
 		deactivate
 		;;
 	supervisor)
