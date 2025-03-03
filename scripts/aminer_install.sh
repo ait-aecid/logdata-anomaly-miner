@@ -6,7 +6,7 @@ DELDIR=1
 BRANCH="main"
 URL="https://github.com/ait-aecid/logdata-anomaly-miner.git"
 AMINERDST=`mktemp -d`
-AMINERSRC=0
+AMINERSRC="0"
 DISON=0
 
 help() {
@@ -72,7 +72,7 @@ else
 	exit 1
 fi
 
-if [ $AMINERSRC -eq 0 ]
+if [ "$AMINERSRC" = "0" ]
 then
 	git clone -b $BRANCH $URL $AMINERDST
 else
