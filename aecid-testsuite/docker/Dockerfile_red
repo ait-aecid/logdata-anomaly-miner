@@ -40,7 +40,7 @@ RUN localedef --force -i en_US -f UTF-8 en_US.UTF-8
 
 ADD . /home/aminer/logdata-anomaly-miner
 RUN sed -i "s?sudo ansible-playbook playbook.yml?sudo /usr/local/bin/ansible-playbook playbook.yml?g" /home/aminer/logdata-anomaly-miner/scripts/aminer_install.sh
-RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b $varbranch
+RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b $varbranch -s /home/aminer/logdata-anomaly-miner
 
 ADD scripts/distritest.sh /distritest.sh
 RUN chmod 755 /distritest.sh

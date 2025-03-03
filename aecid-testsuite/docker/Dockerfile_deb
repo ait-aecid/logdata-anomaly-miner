@@ -43,7 +43,7 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 ADD . /home/aminer/logdata-anomaly-miner
-RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b $varbranch
+RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b $varbranch -s /home/aminer/logdata-anomaly-miner
 
 ADD scripts/distritest.sh /distritest.sh
 RUN chmod 755 /distritest.sh
