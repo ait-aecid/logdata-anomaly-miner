@@ -8,11 +8,10 @@ sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
-ln -s $PWD/../source/root/usr/lib/logdata-anomaly-miner/aminerremotecontrol.py $PWD/aminerremotecontrol
 
 FILE=/tmp/demo-config.py
 if ! test -f "$FILE"; then
-    echo "$FILE does not exist!"
+  echo "$FILE does not exist!"
 	exit 1
 fi
 
@@ -78,7 +77,7 @@ if [[ $activate_diff == "" ]]; then
 	exit_code=1
 fi
 
-sudo pkill -x aminer
+sudo pkill -x aminer.py
 sleep 3
 wait $PID
 if [[ $? != 0 ]]; then
@@ -90,7 +89,6 @@ sudo rm /tmp/suspend_output.txt
 sudo rm /tmp/syslog
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo rm /tmp/suspend.md5
-sudo rm aminerremotecontrol
 sudo rm /tmp/test1.md5
 sudo rm /tmp/test2.md5
 sudo rm /tmp/test3.md5

@@ -65,7 +65,7 @@ touch $RESULTS_PATH
 sudo chown -R aminer:aminer $RESULTS_PATH
 #stop aminer and python3
 sleep 3 & wait $!
-sudo pkill -x aminer
+sudo pkill -x aminer.py
 KILL_PID=$!
 sleep 3
 wait $KILL_PID

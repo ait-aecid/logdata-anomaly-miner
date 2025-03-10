@@ -79,7 +79,7 @@ awk '/^```$/ && ++n == 2, /^```$/ && n++ == 3' < $INPUT | sed '/^```/ d' > $LOG
 #$CMD > $OUT &
 #PID=$!
 #sleep 5
-#sudo pkill -x aminer
+#sudo pkill -x aminer.py
 #wait $PID
 #OUT2=`cat $OUT`
 #compareStrings "$OUT1" "$OUT2" "Failed Test in 2."
