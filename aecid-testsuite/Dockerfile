@@ -23,8 +23,6 @@ FROM debian:bookworm
 # allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
 ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
-ADD . /home/aminer/logdata-anomaly-miner
-
 # Set local timezone
 ENV TZ=Europe/Vienna
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -62,6 +60,7 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
+ADD . /home/aminer/logdata-anomaly-miner
 RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b development -s /home/aminer/logdata-anomaly-miner
 
 # Copy logdata-anomaly-miner-sources

@@ -127,7 +127,7 @@ sleep 10
 COUNTER=0
 
 
-python3 /tmp/zmq_subscriber.py &
+/usr/lib/logdata-anomaly-miner/.venv/bin/python3 /tmp/zmq_subscriber.py &
 ZMQ_PID=$!
 #start aminer
 sudo aminer --config $CFG_PATH22 > $OUT &
