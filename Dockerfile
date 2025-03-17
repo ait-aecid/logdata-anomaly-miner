@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
     make
 
 ADD . /home/aminer/logdata-anomaly-miner
-RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -s /home/aminer/logdata-anomaly-miner
+RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b development -s /home/aminer/logdata-anomaly-miner
 
 # For Docs
 ADD docs /docs
