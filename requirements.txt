@@ -1,7 +1,7 @@
 orjson
 pyzmq
 cerberus
-kafka-python
+kafka-python==2.0.6
 patsy
 statsmodels
 importlib-metadata

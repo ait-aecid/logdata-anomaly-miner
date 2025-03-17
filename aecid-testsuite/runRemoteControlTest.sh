@@ -579,6 +579,7 @@ stdout=$(echo "$stdout" | sed -e "s/\"next_persist_time\".*,//")
 expected_list="${expected_list}${stdout}
 "
 
+sudo pkill -x aminer
 sudo pkill -x aminer.py
 sleep 2 & wait $!
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
@@ -603,6 +604,7 @@ if [[ "$stdout" != "$expected_list" ]]; then
 fi
 EXEC_FILE_TIME=$(($(date +%s)-START_TIME))
 
+sudo pkill -x aminer
 sudo pkill -x aminer.py
 sleep 2 & wait $!
 sudo rm $CMD_PATH
