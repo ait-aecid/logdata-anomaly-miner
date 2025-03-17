@@ -15,6 +15,9 @@ ARG UNAME=aminer
 ARG UID=1000
 ARG GID=1000
 
+ARG varbranch="main"
+ENV BRANCH=$varbranch
+
 # Set local timezone
 ENV TZ=Europe/Vienna
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -40,7 +43,7 @@ RUN apt-get update && apt-get install -y \
     make
 
 ADD . /home/aminer/logdata-anomaly-miner
-RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b development -s /home/aminer/logdata-anomaly-miner
+RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b $BRANCH -s /home/aminer/logdata-anomaly-miner
 
 # For Docs
 ADD docs /docs
