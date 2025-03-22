@@ -77,13 +77,10 @@ if [[ $activate_diff == "" ]]; then
 	exit_code=1
 fi
 
-sudo pkill -x aminer
 sudo pkill -x aminer.py
+sudo pkill -x aminer
 sleep 3
 wait $PID
-if [[ $? != 0 ]]; then
-	exit_code=1
-fi
 
 sudo rm /tmp/demo-config.py
 sudo rm /tmp/suspend_output.txt

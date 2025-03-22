@@ -172,6 +172,7 @@ while [[ ("$CURRENT_SIZE" != "$FILE_SIZE" || "$CURRENT_SIZE" == "") && $CNTR -lt
 done
 sleep 8
 sudo pkill -x aminer.py
+sudo pkill -x aminer
 wait $PID
 
 awk '/^```$/ && ++n == 24, /^```$/ && n++ == 25' < $INPUT_FILE | sed '/^```/ d' > $OUT

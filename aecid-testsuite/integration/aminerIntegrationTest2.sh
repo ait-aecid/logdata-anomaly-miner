@@ -76,8 +76,8 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 
 #stop aminer
 sleep 3
-sudo pkill -x aminer
 sudo pkill -x aminer.py
+sudo pkill -x aminer
 wait $PID
 
 checkAllOutputs
@@ -170,8 +170,8 @@ for i in {1..60}; do grep "The Path of the home directory shown by pwd of the us
 
 #stop aminer
 sleep 20
-sudo pkill -x aminer
 sudo pkill -x aminer.py
+sudo pkill -x aminer
 wait $PID
 sleep 15 # leave the kafka handler some time.
 sudo kill $ZMQ_PID

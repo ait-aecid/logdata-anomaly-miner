@@ -269,6 +269,7 @@ echo "$text" >> $LOGFILE
 
 #stop aminer
 sleep 3 & wait $!
+sudo pkill -x aminer
 sudo pkill -x aminer.py
 wait $PID
 RES=$?
