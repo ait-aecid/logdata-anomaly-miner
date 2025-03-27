@@ -94,7 +94,8 @@ function runAminerUntilEnd() {
   sleep 3
   sudo sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
   if [ $# -lt 6 ]; then
-    sudo pkill aminer
+    sudo pkill -x aminer.py
+    sudo pkill -x aminer
     wait $PID
     RES=$?
     return $RES
