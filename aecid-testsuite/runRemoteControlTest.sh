@@ -12,6 +12,7 @@ touch /tmp/syslog
 OUTPUT_FILE=/tmp/output.txt
 
 sudo aminer --config "$FILE" & > $OUTPUT_FILE
+PID=$!
 for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 stdout=$(sudo aminerremotecontrol --exec-file $CMD_PATH)
@@ -579,15 +580,15 @@ stdout=$(echo "$stdout" | sed -e "s/\"next_persist_time\".*,//")
 expected_list="${expected_list}${stdout}
 "
 
-sudo pkill -x aminer.py
-sudo pkill -x aminer
-sleep 2 & wait $!
+sudo pkill aminer
+sleep 2 & wait $PID
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
 sudo aminer --config "$FILE" & > $OUTPUT_FILE
+PID=$!
 for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
 START_TIME=$(date +%s)
@@ -604,9 +605,8 @@ if [[ "$stdout" != "$expected_list" ]]; then
 fi
 EXEC_FILE_TIME=$(($(date +%s)-START_TIME))
 
-sudo pkill -x aminer.py
-sudo pkill -x aminer
-sleep 2 & wait $!
+sudo pkill aminer
+sleep 2 & wait $PID
 sudo rm $CMD_PATH
 sudo rm $OUTPUT_FILE
 echo "Command execution time with --exec ${EXEC_TIME}s"

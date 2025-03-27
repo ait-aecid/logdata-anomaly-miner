@@ -77,8 +77,7 @@ if [[ $activate_diff == "" ]]; then
 	exit_code=1
 fi
 
-sudo pkill -x aminer.py
-sudo pkill -x aminer
+sudo pkill aminer
 sleep 3
 wait $PID
 
