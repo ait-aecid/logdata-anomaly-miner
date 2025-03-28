@@ -581,7 +581,7 @@ expected_list="${expected_list}${stdout}
 
 sudo pkill -x aminer.py
 sudo pkill -x aminer
-sleep 4
+sleep 3
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
@@ -606,7 +606,7 @@ EXEC_FILE_TIME=$(($(date +%s)-START_TIME))
 
 sudo pkill -x aminer.py
 sudo pkill -x aminer
-sleep 4
+sleep 3
 sudo rm $CMD_PATH
 sudo rm $OUTPUT_FILE
 echo "Command execution time with --exec ${EXEC_TIME}s"
