@@ -1,16 +1,17 @@
 #!/bin/bash
 
 AMINERDIR=/usr/lib/logdata-anomaly-miner
+program=$(basename $0)
 
-case "$1" in
+case "$program" in
 	aminer)
-		$AMINERDIR/aminer.py ${*:2}
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer.py "${@:1}"
 		;;
 	aminerremotecontrol)
-		$AMINERDIR/aminerremotecontrol.py ${*:2}
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminerremotecontrol.py "${@:1}"
 		;;
-        aminer-persistence)
-		$AMINERDIR/aminer-persistence.py ${*:2}
+  aminer-persistence)
+		$AMINERDIR/.venv/bin/python3 $AMINERDIR/aminer-persistence.py "${@:1}"
 		;;
 	supervisor)
 		/usr/bin/supervisord
@@ -21,6 +22,7 @@ case "$1" in
 		;;
 	*)
 		echo "Usage: [ aminer | aminerremotecontrol | aminer-persistence | supervisor | mkdocs ] <options>"
+		echo "$program"
 		exit 1
 		;;
 

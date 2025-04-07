@@ -1,4 +1,4 @@
 [flake8]
-exclude = ^aecid-testsuite/unit/,^aecid-testsuite/system/,^aecid-testsuite/integration/
+exclude = aecid-testsuite/unit,aecid-testsuite/system,aecid-testsuite/integration,.venv,/usr/lib/logdata-anomaly-miner/aecid-testsuite/unit,/usr/lib/logdata-anomaly-miner/aecid-testsuite/system,/usr/lib/logdata-anomaly-miner/aecid-testsuite/integration,/usr/lib/logdata-anomaly-miner/.venv
 max-line-length = 140
 statistics = True

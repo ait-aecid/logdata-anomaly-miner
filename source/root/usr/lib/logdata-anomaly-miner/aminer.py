@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -BbbEIsSttW all
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """This is the main program of the "aminer" logfile miner tool. It does not
 import any local default site packages to decrease the attack surface due to
@@ -42,7 +42,11 @@ from grp import getgrnam
 from logging.handlers import RotatingFileHandler
 
 # As site packages are not included, define from where we need to execute code before loading it.
-sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+sys.path = sys.path[1:] + ["/usr/lib/logdata-anomaly-miner", "/etc/aminer/conf-enabled"]
+venv_path = "/usr/lib/logdata-anomaly-miner/.venv/lib"
+if os.path.exists(venv_path):
+    python_version = os.listdir(venv_path)[0]
+    sys.path += [os.path.join(venv_path, python_version, "site-packages")]
 import aminer.AminerConfig as AminerConfig  # noqa: E402
 from aminer.util.StringUtil import colflame, flame, supports_color, decode_string_as_byte_string  # noqa: E402
 from aminer.util.PersistenceUtil import clear_persistence, copytree  # noqa: E402
