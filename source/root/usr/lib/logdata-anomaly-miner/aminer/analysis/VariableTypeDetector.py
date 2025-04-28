@@ -16,6 +16,7 @@ from scipy.stats import kstest, ks_2samp, norm, multinomial, distributions, chis
 import os
 import logging
 import sys
+import math
 
 from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, \
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
@@ -2120,11 +2121,11 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         observed tests.
         """
         tmp_sum = 0.0
-        max_observations_factorial = np.math.factorial(num_bt)
+        max_observations_factorial = math.factorial(num_bt)
         i_factorial = 1
         for i in range(num_bt + 1):
             i_factorial = i_factorial * max(i, 1)
-            tmp_sum = tmp_sum + max_observations_factorial / (i_factorial * np.math.factorial(num_bt - i)) * ((1 - p) ** i) * (
+            tmp_sum = tmp_sum + max_observations_factorial / (i_factorial * math.factorial(num_bt - i)) * ((1 - p) ** i) * (
                 p ** (num_bt - i))
             if tmp_sum > alpha:
                 return num_bt - i
@@ -2226,7 +2227,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             listener.receive_event(
                 f'Analysis.{self.__class__.__name__}',
                 f"Variable type of path '{self.event_type_detector.variable_key_list[event_index][var_index]}' of event "
-                f"{self.event_type_detector.get_event_type(event_index)} changed from { vt_old_string} to {vt_new_string} after the "
+                f"{self.event_type_detector.get_event_type(event_index)} changed from {vt_old_string} to {vt_new_string} after the "
                 f"{self.event_type_detector.num_event_lines[event_index]}-th analysed line", sorted_log_lines, event_data, log_atom, self)
 
     def print_reject_var_type(self, event_index, vt, var_index, log_atom):
