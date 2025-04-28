@@ -12,6 +12,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import random
 import abc
+import logging
+from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
@@ -65,6 +67,14 @@ class LogarithmicBackoffHistory(ObjectHistory):
     """
 
     def __init__(self, max_items, initial_list=None):
+        if isinstance(max_items, bool) or not isinstance(max_items, int):
+            msg = "The max_items variable has to be an integer."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if max_items <= 0:
+            msg = "The max_items variable has to be greater than zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.max_items = max_items
         if initial_list is None:
             initial_list = []
