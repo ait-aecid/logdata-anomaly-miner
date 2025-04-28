@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1
+# check=skip=InvalidDefaultArgInFrom
+
 # Pull base image.
 ARG vardistri
 
@@ -5,9 +8,6 @@ FROM $vardistri
 ARG varbranch
 
 ENV BRANCH=$varbranch
-
-# allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
-ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Set local timezone
 ENV TZ=Europe/Vienna
@@ -38,19 +38,15 @@ RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
     update-locale LANG=en_US.UTF-8
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
+ADD . /home/aminer/logdata-anomaly-miner
+RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b $varbranch -s /home/aminer/logdata-anomaly-miner
 
 ADD scripts/distritest.sh /distritest.sh
-ADD . /opt/logdata-anomaly-miner
-
 RUN chmod 755 /distritest.sh
-RUN mkdir -p /opt/logdata-anomaly-miner/roles/aminer
-RUN echo varbranch $varbranch
-RUN cd /opt/logdata-anomaly-miner/roles && git clone -b $varbranch https://github.com/ait-aecid/aminer-ansible.git aminer
-RUN cd /opt/logdata-anomaly-miner && sed -e "s+{{SOURCEDIR}}+$PWD+g" /opt/logdata-anomaly-miner/.playbook.yml > /opt/logdata-anomaly-miner/playbook.yml
-RUN cd /opt/logdata-anomaly-miner && ansible-playbook playbook.yml
 RUN git clone -b $varbranch https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git /opt/wiki
 RUN awk '/^```yaml$/ && ++n == 1, /^```$/' < /opt/wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' | sed '/^```python/ d' > /home/aminer/gettingStarted-config.yml
 RUN ln -s /etc/aminer/conf-available/generic/ApacheAccessModel.py /etc/aminer/conf-enabled/
