@@ -41,10 +41,8 @@ endTime=$(($before+$waitingTime))
 echo ""
 echo "calculating the MD5 sum of the logfile.."
 MD5=`md5sum $LOGFILE | awk '{ print $1 }'`
-#MD5=""
 echo "counting the lines of the logfile.."
 LINE_NUMBER=`wc -l < $LOGFILE | tr -d "\n"`
-#LINE_NUMBER=""
 
 python3 -c "import psutil"
 if [ $? -gt 0 ]; then
@@ -58,17 +56,17 @@ python3 generateSystemLogdata.py $((waitingTime+10)) 2> /tmp/error.log &
 
 #start aminer
 sudo -H -u aminer bash -c 'aminer --config '$FILE' & #2> /dev/null & #> /tmp/output &'
+PID=$!
 
 sleep $waitingTime
 
 touch $RESULTS_PATH
 sudo chown -R aminer:aminer $RESULTS_PATH
 #stop aminer and python3
-sleep 3 & wait $!
-sudo pkill -x aminer
-KILL_PID=$!
 sleep 3
-wait $KILL_PID
+sudo pkill -x aminer.py
+sudo pkill -x aminer
+wait $PID
 
 sudo chown -R $USER:$USER $RESULTS_PATH 2> /dev/null
 printf " in $waitingTime seconds.\nThe source file contains $LINE_NUMBER log lines.\n\nmachine name, CPU name, #CPUs used, RAM used, persistent memory type\n$MACHINE_NAME, $CPU_NAME, $CPU_Number, $RAM_Used, $Persistent_Memory_Type\n\nConfig File,config_$t.py\nMD5-Hash Logfile,$MD5\nTest description,$description\n\n" >> $RESULTS_PATH

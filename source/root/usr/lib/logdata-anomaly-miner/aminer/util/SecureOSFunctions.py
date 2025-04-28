@@ -124,8 +124,6 @@ def secure_open_file(file_name, flags):
         logging.getLogger(DEBUG_LOG_NAME).error(msg)
         raise Exception(msg)
 
-    global base_dir_path
-    global base_dir_fd
     if base_dir_path is not None:
         if file_name.startswith(base_dir_path):
             base_name = file_name.replace(base_dir_path, b'').lstrip(b'/')
@@ -167,8 +165,9 @@ def send_logstream_descriptor(send_socket, send_fd, send_file_name):
 
 
 def receive_annotated_file_descriptor(receive_socket):
-    """
-    Receive a single file descriptor and attached annotation information via SCM_RIGHTS via the given socket.
+    """Receive a single file descriptor and attached annotation information via
+    SCM_RIGHTS via the given socket.
+
     The method may raise an Exception when invoked on non-blocking sockets and no messages available.
     @return a tuple containing the received file descriptor, type information (see sendAnnotatedFileDescriptor) and the annotation
     information.
