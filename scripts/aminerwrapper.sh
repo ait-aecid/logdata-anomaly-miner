@@ -2,7 +2,7 @@
 
 AMINERDIR=/usr/lib/logdata-anomaly-miner
 program=$(basename $0)
-if [ "$program" == "aminerwrapper" ]; then
+if [ "$program" == "aminerwrapper.sh" ]; then
   program=$(basename $1)
 fi
 
