@@ -76,6 +76,7 @@ echo 'The Path of the home directory shown by pwd of the user guest is: /home/gu
 
 #stop aminer
 sleep 3
+sudo pkill -x aminer.py
 sudo pkill -x aminer
 wait $PID
 
@@ -127,7 +128,7 @@ sleep 10
 COUNTER=0
 
 
-python3 /tmp/zmq_subscriber.py &
+/usr/lib/logdata-anomaly-miner/.venv/bin/python3 /tmp/zmq_subscriber.py &
 ZMQ_PID=$!
 #start aminer
 sudo aminer --config $CFG_PATH22 > $OUT &
@@ -136,10 +137,10 @@ for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log 
 
 #Anomaly FixedDataModel HD Repair
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrad") > $SYSLOG
-for i in {1..60}; do grep "Original log line: System rebooted for hard disk upgrad" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
+for i in {1..60}; do grep "System rebooted for hard disk upgrad" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 #New Path
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") > $AUTH
-for i in {1..60}; do grep "Original log line: System rebooted for hard disk upgrade" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
+for i in {1..60}; do grep "System rebooted for hard disk upgrade" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 #Known Path
 ({ date '+%Y-%m-%d %T' && cat /etc/hostname && id -u -n | tr -d "\n" && echo :; } | tr "\n" " " && echo "System rebooted for hard disk upgrade") >> $SYSLOG
 sleep 3
@@ -169,6 +170,7 @@ for i in {1..60}; do grep "The Path of the home directory shown by pwd of the us
 
 #stop aminer
 sleep 20
+sudo pkill -x aminer.py
 sudo pkill -x aminer
 wait $PID
 sleep 15 # leave the kafka handler some time.

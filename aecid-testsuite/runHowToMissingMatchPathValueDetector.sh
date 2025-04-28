@@ -171,6 +171,7 @@ while [[ ("$CURRENT_SIZE" != "$FILE_SIZE" || "$CURRENT_SIZE" == "") && $CNTR -lt
   CNTR=$((++CNTR))
 done
 sleep 8
+sudo pkill -x aminer.py
 sudo pkill -x aminer
 wait $PID
 
