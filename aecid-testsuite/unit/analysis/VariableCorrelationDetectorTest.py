@@ -464,16 +464,16 @@ class VariableCorrelationDetectorTest(TestBase):
         etd = EventTypeDetector(self.aminer_config, [self.stream_printer_event_handler])
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=["distinctDistr"], validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
         # init and validate
-        similar_data1 = ["a"]*50 + ["b"]*20 + ["c"]*25 + ["d"]*5
-        similar_data2 = ["a"]*45 + ["b"]*25 + ["c"]*15 + ["d"]*10 + ["e"]*5
-        similar_data3 = ["a"]*55 + ["b"]*15 + ["c"]*20 + ["d"]*10
-        unsimilar_data1 = ["a"]*50 + ["b"]*20 + ["c"]*25 + ["d"]*5
-        unsimilar_data2 = ["a"]*10 + ["b"]*15 + ["c"]*15 + ["d"]*10 + ["e"]*50
-        unsimilar_data3 = ["a"]*25 + ["b"]*15 + ["c"]*50 + ["d"]*10
+        similar_data1 = [b"a"]*50 + [b"b"]*20 + [b"c"]*25 + [b"d"]*5
+        similar_data2 = [b"a"]*45 + [b"b"]*25 + [b"c"]*15 + [b"d"]*10 + [b"e"]*5
+        similar_data3 = [b"a"]*55 + [b"b"]*15 + [b"c"]*20 + [b"d"]*10
+        unsimilar_data1 = [b"a"]*50 + [b"b"]*20 + [b"c"]*25 + [b"d"]*5
+        unsimilar_data2 = [b"a"]*10 + [b"b"]*15 + [b"c"]*15 + [b"d"]*10 + [b"e"]*50
+        unsimilar_data3 = [b"a"]*25 + [b"b"]*15 + [b"c"]*50 + [b"d"]*10
 
         for i in range(self.dataset_size):
-            children = [MatchElement(str(1), similar_data2[i].encode(), similar_data2[i].encode(), None), MatchElement(str(2), similar_data3[i].encode(), similar_data3[i].encode(), None)]
-            log_atom = LogAtom(similar_data1, ParserMatch(MatchElement("/", similar_data1[i].encode(), similar_data1[i].encode(), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(1), similar_data2[i], similar_data2[i], None), MatchElement(str(2), similar_data3[i], similar_data3[i], None)]
+            log_atom = LogAtom(str(similar_data1).encode(), ParserMatch(MatchElement("/", similar_data1[i], similar_data1[i], children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
         vcd.init_cor(0)
         old_w_rel_list = deepcopy(vcd.w_rel_list[0])
@@ -504,8 +504,8 @@ class VariableCorrelationDetectorTest(TestBase):
         vtd = VariableTypeDetector(self.aminer_config, [self.stream_printer_event_handler], etd, num_init=self.dataset_size, div_thres=0.1, test_gof_int=True, sim_thres=0.1, gof_alpha=self.significance_niveau)
         vcd = VariableCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], etd, disc_div_thres=0.1, used_validate_cor_meth=["distinctDistr"], validate_cor_distinct_thres=0.05, num_init=self.dataset_size)
         for i in range(self.dataset_size):
-            children = [MatchElement(str(1), unsimilar_data2[i].encode(), unsimilar_data2[i].encode(), None), MatchElement(str(2), unsimilar_data3[i].encode(), unsimilar_data3[i].encode(), None)]
-            log_atom = LogAtom(unsimilar_data1[i], ParserMatch(MatchElement("/", unsimilar_data1[i].encode(), unsimilar_data1[i].encode(), children)), t, self.__class__.__name__)
+            children = [MatchElement(str(1), unsimilar_data2[i], unsimilar_data2[i], None), MatchElement(str(2), unsimilar_data3[i], unsimilar_data3[i], None)]
+            log_atom = LogAtom(unsimilar_data1[i], ParserMatch(MatchElement("/", unsimilar_data1[i], unsimilar_data1[i], children)), t, self.__class__.__name__)
             etd.receive_atom(log_atom)
             vtd.receive_atom(log_atom)
         vcd.init_cor(0)

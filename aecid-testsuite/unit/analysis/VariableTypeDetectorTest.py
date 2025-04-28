@@ -452,8 +452,9 @@ class VariableTypeDetectorTest(TestBase):
 
             # static -> uni
             for uni_data in uni_data_list[2*update:4*update]:
-                log_atom = LogAtom(uni_data, ParserMatch(MatchElement(self.path, str(uni_data).encode(), str(uni_data), None)), t,
-                                   self.__class__.__name__)
+                uni_data = str(uni_data)
+                encoded_data = uni_data.encode()
+                log_atom = LogAtom(encoded_data, ParserMatch(MatchElement(self.path, encoded_data, uni_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -494,8 +495,9 @@ class VariableTypeDetectorTest(TestBase):
 
             # discrete to others with new values
             for uni_data in [i / update for i in range(update)]:
-                log_atom = LogAtom(uni_data, ParserMatch(MatchElement(self.path, str(uni_data).encode(), str(uni_data), None)), t,
-                                   self.__class__.__name__)
+                uni_data = str(uni_data)
+                encoded_data = uni_data.encode()
+                log_atom = LogAtom(encoded_data, ParserMatch(MatchElement(self.path, encoded_data, uni_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -595,8 +597,9 @@ class VariableTypeDetectorTest(TestBase):
 
             # static -> nor
             for nor_data in nor_data_list[update:3*update]:
-                log_atom = LogAtom(nor_data, ParserMatch(MatchElement(self.path, str(nor_data).encode(), str(nor_data), None)), t,
-                                   self.__class__.__name__)
+                nor_data = str(nor_data)
+                encoded_data = str(nor_data).encode()
+                log_atom = LogAtom(encoded_data, ParserMatch(MatchElement(self.path, encoded_data, nor_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -605,8 +608,9 @@ class VariableTypeDetectorTest(TestBase):
 
             # nor -> beta1
             for beta1_data in beta1_data_list[:2*update]:
-                log_atom = LogAtom(beta1_data, ParserMatch(MatchElement(self.path, str(beta1_data).encode(), str(beta1_data), None)), t,
-                                   self.__class__.__name__)
+                beta1_data = str(beta1_data)
+                encoded_data = beta1_data.encode()
+                log_atom = LogAtom(encoded_data, ParserMatch(MatchElement(self.path, encoded_data, beta1_data, None)), t, self.__class__.__name__)
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -623,7 +627,7 @@ class VariableTypeDetectorTest(TestBase):
             log_atom = LogAtom(stat_data, ParserMatch(MatchElement(self.path, stat_data, stat_data, None)), t,
                                self.__class__.__name__)
             # initialize data
-            for i in range(init):
+            for _ in range(init):
                 self.assertTrue(etd.receive_atom(log_atom))
                 vtd.receive_atom(log_atom)
             result = vtd.var_type[0][0]
@@ -992,8 +996,9 @@ class VariableTypeDetectorTest(TestBase):
 
         # static -> uni
         for uni_data in uni_data_list[2 * update:4 * update]:
-            log_atom = LogAtom(uni_data, ParserMatch(MatchElement(self.path, str(uni_data).encode(), str(uni_data), None)), t,
-                               self.__class__.__name__)
+            uni_data = str(uni_data)
+            encoded_data = uni_data.encode()
+            log_atom = LogAtom(encoded_data, ParserMatch(MatchElement(self.path, encoded_data, uni_data, None)), t, self.__class__.__name__)
             self.assertTrue(etd.receive_atom(log_atom))
             vtd.receive_atom(log_atom)
         result = vtd.var_type[0][0]

@@ -122,9 +122,9 @@ class HistogramAnalysisTest(TestBase):
         histogram_data = HistogramData("match", mtbd)
         histogram_analysis = HistogramAnalysis(self.aminer_config, [(histogram_data.property_path, mtbd)], 604800, [self.stream_printer_event_handler])
         match_element_start = MatchElement("match", str(start_time).encode(), start_time, None)
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t, histogram_analysis)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t, histogram_analysis)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t + diff, histogram_analysis)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t + diff, histogram_analysis)
 
         histogram_analysis.receive_atom(log_atom_start)
         histogram_analysis.receive_atom(log_atom_end)
@@ -143,9 +143,9 @@ class HistogramAnalysisTest(TestBase):
         histogram_data.reset()
         histogram_analysis = HistogramAnalysis(self.aminer_config, [(histogram_data.property_path, mtbd)], 604800, [self.stream_printer_event_handler])
         match_element_start = MatchElement("match", str(start_time).encode(), start_time, None)
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t, histogram_analysis)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t, histogram_analysis)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t + diff, histogram_analysis)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t + diff, histogram_analysis)
         histogram_analysis.receive_atom(log_atom_start)
         histogram_analysis.receive_atom(log_atom_end)
 
@@ -158,9 +158,9 @@ class HistogramAnalysisTest(TestBase):
         t1 = t + diff
         start_time += 3600
         end_time += 3600
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t1, histogram_analysis)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t1, histogram_analysis)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t1 + diff, histogram_analysis)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t1 + diff, histogram_analysis)
         histogram_analysis.receive_atom(log_atom_start)
         histogram_analysis.receive_atom(log_atom_end)
 
@@ -176,9 +176,9 @@ class HistogramAnalysisTest(TestBase):
         histogram_data.reset()
         histogram_analysis = HistogramAnalysis(self.aminer_config, [(histogram_data.property_path, mtbd)], 604800, [self.stream_printer_event_handler], reset_after_report_flag=False)
         match_element_start = MatchElement("match", str(start_time).encode(), start_time, None)
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t1, histogram_analysis)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t1, histogram_analysis)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t1 + diff, histogram_analysis)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t1 + diff, histogram_analysis)
         histogram_analysis.receive_atom(log_atom_start)
         histogram_analysis.receive_atom(log_atom_end)
 
@@ -192,9 +192,9 @@ class HistogramAnalysisTest(TestBase):
         t2 = t1 + diff
         start_time += 3600
         end_time += 3600
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t2, histogram_analysis)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t2, histogram_analysis)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t2 + diff, histogram_analysis)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t2 + diff, histogram_analysis)
         histogram_analysis.receive_atom(log_atom_start)
         histogram_analysis.receive_atom(log_atom_end)
 
@@ -217,9 +217,9 @@ class HistogramAnalysisTest(TestBase):
         histogram_data = HistogramData("match", mtbd)
         pdha = PathDependentHistogramAnalysis(self.aminer_config, histogram_data.property_path, mtbd, 604800, [self.stream_printer_event_handler], True)
         match_element_start = MatchElement("match", str(start_time).encode(), start_time, None)
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t, pdha)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t, pdha)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t + diff, pdha)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t + diff, pdha)
 
         pdha.receive_atom(log_atom_start)
         pdha.receive_atom(log_atom_end)
@@ -238,9 +238,9 @@ class HistogramAnalysisTest(TestBase):
         histogram_data.reset()
         pdha = PathDependentHistogramAnalysis(self.aminer_config, histogram_data.property_path, mtbd, 604800, [self.stream_printer_event_handler], True)
         match_element_start = MatchElement("match", str(start_time).encode(), start_time, None)
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t, pdha)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t, pdha)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t + diff, pdha)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t + diff, pdha)
         pdha.receive_atom(log_atom_start)
         pdha.receive_atom(log_atom_end)
 
@@ -253,9 +253,9 @@ class HistogramAnalysisTest(TestBase):
         t1 = t + diff
         start_time += 3600
         end_time += 3600
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t1, pdha)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t1, pdha)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t1 + diff, pdha)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t1 + diff, pdha)
         pdha.receive_atom(log_atom_start)
         pdha.receive_atom(log_atom_end)
 
@@ -271,9 +271,9 @@ class HistogramAnalysisTest(TestBase):
         histogram_data.reset()
         pdha = PathDependentHistogramAnalysis(self.aminer_config, histogram_data.property_path, mtbd, 604800, [self.stream_printer_event_handler], reset_after_report_flag=False)
         match_element_start = MatchElement("match", str(start_time).encode(), start_time, None)
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t1, pdha)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t1, pdha)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t1 + diff, pdha)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t1 + diff, pdha)
         pdha.receive_atom(log_atom_start)
         pdha.receive_atom(log_atom_end)
 
@@ -288,9 +288,9 @@ class HistogramAnalysisTest(TestBase):
         t2 = t1 + diff
         start_time += 3600
         end_time += 3600
-        log_atom_start = LogAtom(histogram_data.bin_data, ParserMatch(match_element_start), t2, pdha)
+        log_atom_start = LogAtom(match_element_start.match_string, ParserMatch(match_element_start), t2, pdha)
         match_element_end = MatchElement("match", str(end_time).encode(), end_time, None)
-        log_atom_end = LogAtom(histogram_data.bin_data, ParserMatch(match_element_end), t2 + diff, pdha)
+        log_atom_end = LogAtom(match_element_end.match_string, ParserMatch(match_element_end), t2 + diff, pdha)
         pdha.receive_atom(log_atom_start)
         pdha.receive_atom(log_atom_end)
 

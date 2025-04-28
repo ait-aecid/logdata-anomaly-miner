@@ -10,6 +10,9 @@ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 """
+import logging
+from aminer.AminerConfig import DEBUG_LOG_NAME
+from aminer.parsing.ParserMatch import ParserMatch
 
 
 class LogAtom:
@@ -18,8 +21,24 @@ class LogAtom:
 
     def __init__(self, raw_data, parser_match, atom_time, source):
         """Create a log atom from scratch."""
+        if not isinstance(raw_data, bytes):
+            msg = "raw_data must be of type bytes."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if len(raw_data) == 0:
+            msg = "raw_data must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.raw_data = raw_data
+        if parser_match is not None and not isinstance(parser_match, ParserMatch):
+            msg = "parser_match must be of type ParserMatch."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.parser_match = parser_match
+        if atom_time is not None and (not isinstance(atom_time, (int, float)) or isinstance(atom_time, bool)):
+            msg = "atom_time must be of type integer or float."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.atom_time = atom_time
         self.source = source
         LogAtom.idCounter += 1

@@ -6,7 +6,6 @@ from aminer.input.LogAtom import LogAtom
 from aminer.parsing.ParserMatch import ParserMatch
 from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler
 from unit.TestBase import TestBase, DummyFixedDataModelElement, DummyMatchContext
-from unit.TestBase import TestBase
 from datetime import datetime
 
 

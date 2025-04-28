@@ -41,7 +41,7 @@ class ParserCountTest(TestBase):
 
         # multiple paths matching
         parser_count = ParserCount(self.aminer_config, ["fixed/seq", "fixed/seq/m1", "fixed/seq/m2", "fixed/m3"], [self.stream_printer_event_handler])
-        log_atom = LogAtom(match_context_seq.match_data, ParserMatch(match_element_seq), t, parser_count)
+        log_atom = LogAtom(match_element_seq.match_string, ParserMatch(match_element_seq), t, parser_count)
         old_count_dict = dict(parser_count.count_dict)
         old_count_dict["fixed/seq"][current_processed_lines_str] = 1
         old_count_dict["fixed/seq"][total_processed_lines_str] = 1
@@ -55,7 +55,7 @@ class ParserCountTest(TestBase):
         # multiple paths matching without having target_paths specified
         parser_count = ParserCount(self.aminer_config, None, [self.stream_printer_event_handler])
         t = time.time()
-        log_atom = LogAtom(match_context_seq.match_data, ParserMatch(match_element_seq), t, parser_count)
+        log_atom = LogAtom(match_element_seq.match_string, ParserMatch(match_element_seq), t, parser_count)
         old_count_dict = dict(parser_count.count_dict)
         old_count_dict["fixed/seq"] = {current_processed_lines_str: 1, total_processed_lines_str: 1}
         parser_count.receive_atom(log_atom)

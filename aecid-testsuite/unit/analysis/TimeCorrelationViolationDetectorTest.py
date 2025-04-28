@@ -66,19 +66,19 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         tcvd = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
         iterations = 30
         for i in range(iterations):
-            log_atom = LogAtom(match_context1.match_data, ParserMatch(match_element1), t, self)
+            log_atom = LogAtom(match_element1.match_string, ParserMatch(match_element1), t, self)
             tcvd.receive_atom(log_atom)
         for i in range(iterations):
-            log_atom = LogAtom(match_context2.match_data, ParserMatch(match_element2), t + 2 + i * 0.1, self)
+            log_atom = LogAtom(match_element2.match_string, ParserMatch(match_element2), t + 2 + i * 0.1, self)
             tcvd.receive_atom(log_atom)
         self.assertEqual(self.output_stream.getvalue(), "")
 
         # too early
         cr, ecsa, ecsb, rules = setup()
         tcvd = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
-        log_atom1 = LogAtom(match_context1.match_data, ParserMatch(match_element1), t, self)
+        log_atom1 = LogAtom(match_element1.match_string, ParserMatch(match_element1), t, self)
         tcvd.receive_atom(log_atom1)
-        log_atom2 = LogAtom(match_context2.match_data, ParserMatch(match_element2), t + 1, self)
+        log_atom2 = LogAtom(match_element2.match_string, ParserMatch(match_element2), t + 1, self)
         tcvd.receive_atom(log_atom2)
         tcvd.do_timer(t)
         self.assertEqual(self.output_stream.getvalue(), expected_string_too_early % (datetime.fromtimestamp(t).strftime(dtf), cr.rule_id, 1,
@@ -88,9 +88,9 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         # too late
         cr, ecsa, ecsb, rules = setup()
         tcvd = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
-        log_atom1 = LogAtom(match_context1.match_data, ParserMatch(match_element1), t, self)
+        log_atom1 = LogAtom(match_element1.match_string, ParserMatch(match_element1), t, self)
         tcvd.receive_atom(log_atom1)
-        log_atom2 = LogAtom(match_context2.match_data, ParserMatch(match_element2), t + 10.1, self)
+        log_atom2 = LogAtom(match_element2.match_string, ParserMatch(match_element2), t + 10.1, self)
         tcvd.receive_atom(log_atom2)
         tcvd.do_timer(t)
         self.assertEqual(self.output_stream.getvalue(), expected_string_too_late % (datetime.fromtimestamp(t).strftime(dtf), cr.rule_id, 1,
@@ -102,10 +102,10 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         tcvd = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
         iterations = 30
         for i in range(iterations):
-            log_atom = LogAtom(match_context1.match_data, ParserMatch(match_element1), t, self)
+            log_atom = LogAtom(match_element1.match_string, ParserMatch(match_element1), t, self)
             tcvd.receive_atom(log_atom)
         for i in range(iterations):
-            log_atom = LogAtom(match_context2.match_data, ParserMatch(match_element2), t + 11 + i * 0.1, self)
+            log_atom = LogAtom(match_element2.match_string, ParserMatch(match_element2), t + 11 + i * 0.1, self)
             tcvd.receive_atom(log_atom)
         tcvd.do_timer(t)
         self.assertEqual(self.output_stream.getvalue(), expected_string % (datetime.fromtimestamp(t).strftime(dtf), cr.rule_id, 1) +
@@ -118,9 +118,9 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         ecsb = EventClassSelector("Selector2", None, [cr])
         rules = [Rules.PathExistsMatchRule("/model/sequence1/Value2Key", ecsa), Rules.PathExistsMatchRule("/model/sequence2/Value3Key", ecsb)]
         tcvd = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
-        log_atom1 = LogAtom(match_context1.match_data, ParserMatch(match_element1), t, self)
+        log_atom1 = LogAtom(match_element1.match_string, ParserMatch(match_element1), t, self)
         tcvd.receive_atom(log_atom1)
-        log_atom2 = LogAtom(match_context3.match_data, ParserMatch(match_element3), t + 2, self)
+        log_atom2 = LogAtom(match_element3.match_string, ParserMatch(match_element3), t + 2, self)
         tcvd.receive_atom(log_atom2)
         tcvd.do_timer(t)
         self.assertEqual(self.output_stream.getvalue(), expected_string_different_attributes % (
@@ -133,9 +133,9 @@ class TimeCorrelationViolationDetectorTest(TestBase):
         ecsb = EventClassSelector("Selector2", None, [cr])
         rules = [Rules.PathExistsMatchRule("/model/sequence1/Value2Key", ecsa), Rules.PathExistsMatchRule("/model/sequence2/Value3Key", ecsb)]
         tcvd = TimeCorrelationViolationDetector(self.analysis_context.aminer_config, rules, [self.stream_printer_event_handler])
-        log_atom1 = LogAtom(match_context1.match_data, ParserMatch(match_element1), t, self)
+        log_atom1 = LogAtom(match_element1.match_string, ParserMatch(match_element1), t, self)
         tcvd.receive_atom(log_atom1)
-        log_atom2 = LogAtom(match_context4.match_data, ParserMatch(match_element4), t + 2, self)
+        log_atom2 = LogAtom(match_element4.match_string, ParserMatch(match_element4), t + 2, self)
         tcvd.receive_atom(log_atom2)
         tcvd.do_timer(t)
         self.assertEqual(self.output_stream.getvalue(), "")
