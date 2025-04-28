@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TESTDIR=/home/aminer/aecid-testsuite
+TESTDIR=/home/aminer/logdata-anomaly-miner/aecid-testsuite
 
 if [ $# -gt 0 ]
 then
@@ -169,7 +169,7 @@ case "$1" in
     exit $?
 		;;
 	SHELL)
-		bash
+		bash ${*:2}
 		exit 0
 		;;
 	*)

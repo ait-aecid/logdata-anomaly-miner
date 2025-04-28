@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -BbbEIsSttW all
+#!/usr/bin/python3 -BbbW all
 # -*- coding: utf-8 -*-
 """This tool allows to connect to a remote control socket, send requests and
 retrieve the responses. To allow remote use of this tool, e.g. via SSH
@@ -23,6 +23,10 @@ import argparse
 # Get rid of the default sys path immediately. Otherwise, Python also attempts to load the following imports from e.g. directory
 # where this binary resides.
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
+venv_path = "/usr/lib/logdata-anomaly-miner/.venv/lib"
+if os.path.exists(venv_path):
+    python_version = os.listdir(venv_path)[0]
+    sys.path += [os.path.join(venv_path, python_version, "site-packages")]
 from aminer.AnalysisChild import AnalysisChildRemoteControlHandler  # noqa: E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # noqa: E402
 from metadata import __version_string__  # noqa: E402

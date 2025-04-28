@@ -13,8 +13,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 LABEL maintainer="wolfgang.hotwagner@ait.ac.at"
 
-RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm python3-pip -y
-RUN pip3 install ansible
+RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm python3-pip sudo -y
+RUN sudo pip3 install ansible
+ENV PATH="$PATH:/usr/local/bin"
 
 # Install necessary dnf packages
 RUN dnf install -y --allowerasing \
@@ -26,26 +27,23 @@ RUN dnf install -y --allowerasing \
         exim \
         postfix \
         rsyslog \
-        sudo \
         curl \
         httpd \
         glibc-locale-source \
-        glibc-langpack-en
+        glibc-langpack-en \
+        python3-pylibacl
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 RUN localedef --force -i en_US -f UTF-8 en_US.UTF-8
 
-ADD scripts/distritest.sh /distritest.sh
-ADD . /opt/logdata-anomaly-miner
+ADD . /home/aminer/logdata-anomaly-miner
+RUN sed -i "s?sudo ansible-playbook playbook.yml?sudo /usr/local/bin/ansible-playbook playbook.yml?g" /home/aminer/logdata-anomaly-miner/scripts/aminer_install.sh
+RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b $varbranch -s /home/aminer/logdata-anomaly-miner
 
+ADD scripts/distritest.sh /distritest.sh
 RUN chmod 755 /distritest.sh
-RUN mkdir -p /opt/logdata-anomaly-miner/roles/aminer
-RUN echo varbranch $varbranch
-RUN cd /opt/logdata-anomaly-miner/roles && git clone -b $varbranch https://github.com/ait-aecid/aminer-ansible.git aminer
-RUN cd /opt/logdata-anomaly-miner && sed -e "s+{{SOURCEDIR}}+$PWD+g" /opt/logdata-anomaly-miner/.playbook.yml > /opt/logdata-anomaly-miner/playbook.yml
-RUN cd /opt/logdata-anomaly-miner && ansible-playbook playbook.yml
 RUN git clone -b $varbranch https://github.com/ait-aecid/logdata-anomaly-miner.wiki.git /opt/wiki
 RUN awk '/^```yaml$/ && ++n == 1, /^```$/' < /opt/wiki/Getting-started-\(tutorial\).md | sed '/^```/ d' | sed '/^```python/ d' > /home/aminer/gettingStarted-config.yml
 RUN ln -s /etc/aminer/conf-available/generic/ApacheAccessModel.py /etc/aminer/conf-enabled/

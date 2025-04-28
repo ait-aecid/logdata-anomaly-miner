@@ -3,6 +3,7 @@ variables."""
 import numpy as np
 import logging
 import sys
+import math
 from scipy.stats import chi2
 
 from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD
@@ -1632,11 +1633,11 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         observed tests.
         """
         tmp_sum = 0.0
-        max_observations_factorial = np.math.factorial(num_BT)
+        max_observations_factorial = math.factorial(num_BT)
         i_factorial = 1
         for i in range(num_BT + 1):
             i_factorial = i_factorial * max(i, 1)
-            tmp_sum = tmp_sum + max_observations_factorial / (i_factorial * np.math.factorial(num_BT - i)) * ((1-p) ** i) * (p ** (
+            tmp_sum = tmp_sum + max_observations_factorial / (i_factorial * math.factorial(num_BT - i)) * ((1-p) ** i) * (p ** (
                     num_BT - i))
             if tmp_sum > alpha:
                 return num_BT-i

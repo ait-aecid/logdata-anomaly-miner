@@ -1,3 +1,9 @@
+[project]
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
 [tool.vulture]
 exclude = ["^aecid-testsuite/", "*Interfaces.py", "*Interface.py"]
 make_whitelist = true

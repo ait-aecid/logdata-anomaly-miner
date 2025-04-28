@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 import logging
 import copy
+import math
 
 from aminer import AminerConfig
 from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, \
@@ -524,11 +525,11 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
         observed tests.
         """
         tmp_sum = 0.0
-        max_observations_factorial = np.math.factorial(num_bt)
+        max_observations_factorial = math.factorial(num_bt)
         i_factorial = 1
         for i in range(num_bt + 1):
             i_factorial = i_factorial * max(i, 1)
-            tmp_sum = tmp_sum + max_observations_factorial / (i_factorial * np.math.factorial(num_bt - i)) * ((1 - p) ** i) * (
+            tmp_sum = tmp_sum + max_observations_factorial / (i_factorial * math.factorial(num_bt - i)) * ((1 - p) ** i) * (
                 p ** (num_bt - i))
             if tmp_sum > alpha:
                 return i
