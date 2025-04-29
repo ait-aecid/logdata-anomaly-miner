@@ -161,6 +161,7 @@ echo 'The Path of the home directory shown by pwd of the user root is: /root' >>
 for i in {1..60}; do grep "The Path of the home directory shown by pwd of the user root is: /root" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 #User Home Path
 echo 'The Path of the home directory shown by pwd of the user user is: /home/user' >> $SYSLOG
+echo 'The Path of the home directory shown by pwd of the user user is: /home/user' >> $SYSLOG
 for i in {1..60}; do grep "The Path of the home directory shown by pwd of the user user is: /home/user" $OUT > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 #Guest Home Path
 echo 'The Path of the home directory shown by pwd of the user guest is: /home/guest' >> $AUTH

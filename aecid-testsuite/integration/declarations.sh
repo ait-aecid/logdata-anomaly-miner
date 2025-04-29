@@ -327,6 +327,40 @@ read -r -d '' VAR << END
 }
 END
 JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+{
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 3,
+    "AnalysisComponentType": "SlidingEventFrequencyDetector",
+    "AnalysisComponentName": "SlidingEventFrequencyDetector",
+    "Message": "Frequency exceeds range for the first time",
+    "PersistenceFileName": "Default",
+    "TrainingMode": true,
+    "AffectedLogAtomPaths": [],
+    "AffectedLogAtomValues": [
+      "/model/HomePath",
+      "/model/HomePath/Pwd",
+      "/model/HomePath/Username",
+      "/model/HomePath/Is",
+      "/model/HomePath/Path"
+    ],
+    "LogResource": "file:///tmp/auth.log"
+  },
+  "FrequencyData": {
+    "ExpectedLogAtomValuesFrequencyRange": [
+      0,
+      1
+    ],
+    "LogAtomValuesFrequency": 2,
+    "WindowSize": 2
+  },
+  "LogData": {
+    "RawLogData": [
+      "The Path of the home directory shown by pwd of the user guest is: /home/guest"
+    ],
+    "Timestamps": [
+END
+JSON_OUTPUT+=("$VAR")
 
 # These strings are used in the isExpectedOutput()-function to identify the next array to be compared with.
 NEW_PATH_HD_REPAIR="new_path_hd_repair"

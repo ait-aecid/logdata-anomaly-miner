@@ -18,12 +18,15 @@ from collections import deque
 from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.AminerConfig import STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX, DEBUG_LOG_NAME
 from aminer import AminerConfig
+from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface
 
 
 class SlidingEventFrequencyDetector(AtomHandlerInterface, EventSourceInterface):
     """This class creates events when event or value frequencies exceed the set
     limit."""
+
+    time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, set_upper_limit, target_path_list=None, scoring_path_list=None,
                  window_size=600, local_maximum_threshold=0.2, persistence_id="Default", learn_mode=False, output_logline=True,
@@ -267,7 +270,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, EventSourceInterface):
         the time window."""
         while len(self.counts[log_event]) > 0 and self.counts[log_event][0] < log_atom.atom_time - self.window_size:
             self.counts[log_event].popleft()
-            if len(self.scoring_path_list) > 0:
+            if len(self.scoring_path_list) > 0 and len(self.scoring_value_list[log_event]) > 0:
                 self.scoring_value_list[log_event].popleft()
 
     def get_current_frequency(self, log_atom, log_event):

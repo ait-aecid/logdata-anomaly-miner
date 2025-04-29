@@ -117,7 +117,9 @@ def build_analysis_pipeline(analysis_context):
     zmq_event_handler = ZmqEventHandler(analysis_context, 'test_topic')
     from aminer.events.JsonConverterHandler import JsonConverterHandler
     json_converter_handler = JsonConverterHandler([kafka_event_handler, zmq_event_handler], analysis_context)
-    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler, json_converter_handler]
+    from aminer.events.ScoringEventHandler import ScoringEventHandler
+    scoring_event_handler = ScoringEventHandler([json_converter_handler], analysis_context)
+    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler, json_converter_handler, scoring_event_handler]
 
     from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
     simple_multisource_atom_sync = SimpleMultisourceAtomSync([atom_filter], 9)
@@ -126,7 +128,8 @@ def build_analysis_pipeline(analysis_context):
     # based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_path_list=['model/DiskUpgrade/Date'])
+        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_path_list=['model/DiskUpgrade/DTM'],
+        use_real_time=True)
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
@@ -144,6 +147,12 @@ def build_analysis_pipeline(analysis_context):
         '/model/HomePath/Username', '/model/HomePath/Path'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
+
+    from aminer.analysis.SlidingEventFrequencyDetector import SlidingEventFrequencyDetector
+    sefd = SlidingEventFrequencyDetector(aminer_config=analysis_context.aminer_config, anomaly_event_handlers=[scoring_event_handler],
+        window_size=2, set_upper_limit=1, learn_mode=True, output_logline=False, scoring_path_list=["/model/HomePath/Username"])
+    analysis_context.register_component(sefd, component_name="SlidingEventFrequencyDetector")
+    atom_filter.add_handler(sefd)
 
     # Include the e-mail notification handler only if the configuration parameter was set.
     from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler

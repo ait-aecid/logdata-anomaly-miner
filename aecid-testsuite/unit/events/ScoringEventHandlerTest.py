@@ -48,12 +48,12 @@ class ScoringEventHandlerTest(TestBase):
         self.analysis_context.register_component(self, self.description)
         event_data = {'AnalysisComponent': {'AffectedParserPaths': ['test/path/1', 'test/path/2']}}
         json_converter_handler = JsonConverterHandler([self.stream_printer_event_handler], self.analysis_context)
-        scoring_eventh_handler = ScoringEventHandler([json_converter_handler], self.analysis_context)
-        scoring_eventh_handler.receive_event(self.test_detector, "Frequency exceeds range for the first time", self.sorted_log_lines, event_data, log_atom, self)
+        scoring_event_handler = ScoringEventHandler([json_converter_handler], self.analysis_context)
+        scoring_event_handler.receive_event(self.test_detector, "Frequency exceeds range for the first time", self.sorted_log_lines, event_data, log_atom, self)
         self.reset_output_stream()
 
         t = time.time()
-        sefd = SlidingEventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[scoring_eventh_handler],
+        sefd = SlidingEventFrequencyDetector(aminer_config=self.aminer_config, anomaly_event_handlers=[scoring_event_handler],
                                              window_size=10, set_upper_limit=2, learn_mode=True, output_logline=False, scoring_path_list=["/value"])
         sefd_name = "SlidingEventFrequencyDetector"
         self.analysis_context.register_component(sefd, sefd_name)
