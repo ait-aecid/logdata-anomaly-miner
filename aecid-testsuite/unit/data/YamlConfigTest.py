@@ -487,7 +487,7 @@ class YamlConfigTest(TestBase):
         Check if the suppress property and SuppressNewMatchPathDetector are working as expected.
         This test only includes the StreamPrinterEventHandler.
         """
-        __expected_string1 = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n\n'
+        __expected_string1 = '%s New path(s) detected\n%s: "%s" (%d lines)\n  %s\n\n'
         t = time()
         fixed_dme = FixedDataModelElement('s1', b' pid=')
         match_context_fixed_dme = MatchContext(b' pid=')
@@ -777,9 +777,9 @@ class YamlConfigTest(TestBase):
         self.assertFalse(nmpd2.receive_atom(log_atom1))
         self.assertTrue(nmpd2.receive_atom(log_atom2))
         self.assertEqual(self.output_stream.getvalue(), datetime.fromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S') +
-                         " New path(es) detected\nNewMatchPathDetector: \"Detector1\" (1 lines)\n  /a: a\n['/a']\na\n\n" +
+                         " New path(s) detected\nNewMatchPathDetector: \"Detector1\" (1 lines)\n  /a: a\n['/a']\na\n\n" +
                          datetime.fromtimestamp(t+1).strftime('%Y-%m-%d %H:%M:%S') +
-                         " New path(es) detected\nNewMatchPathDetector: \"Detector2\" (1 lines)\n  /b: b\n['/b']\nb\n\n")
+                         " New path(s) detected\nNewMatchPathDetector: \"Detector2\" (1 lines)\n  /b: b\n['/b']\nb\n\n")
         self.reset_output_stream()
 
     def run_empty_components_tests(self, context):

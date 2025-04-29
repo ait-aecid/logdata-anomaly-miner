@@ -38,7 +38,7 @@ class NewMatchIdValueComboDetector(
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, min_allowed_time_diff,
-                 persistence_id='Default', allow_missing_values_flag=False, learn_mode=False, output_logline=True,
+                 persistence_id="Default", allow_missing_values_flag=False, learn_mode=False, output_logline=True,
                  stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
@@ -190,20 +190,20 @@ class NewMatchIdValueComboDetector(
                 if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
                     self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
-            analysis_component = {'AffectedLogAtomValues': [str(i) for i in list(id_dict_entry.values())]}
-            event_data = {'AnalysisComponent': analysis_component}
+            analysis_component = {"AffectedLogAtomValues": [str(i) for i in list(id_dict_entry.values())]}
+            event_data = {"AnalysisComponent": analysis_component}
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             if self.output_logline:
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match('') + os.linesep + repr(
+                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match("") + os.linesep + repr(
                     id_dict_entry) + os.linesep + original_log_line_prefix + data]
             else:
                 sorted_log_lines = [repr(id_dict_entry)]
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f'Analysis.{self.__class__.__name__}', 'New value combination(s) detected', sorted_log_lines,
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New value combination(s) detected", sorted_log_lines,
                                        event_data, log_atom, self)
 
     def do_timer(self, trigger_time):
@@ -240,12 +240,12 @@ class NewMatchIdValueComboDetector(
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
-        if event_type != f'Analysis.{self.__class__.__name__}':
-            msg = 'Event not from this source'
+        if event_type != f"Analysis.{self.__class__.__name__}":
+            msg = "Event not from this source"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if allowlisting_data is not None:
-            msg = 'Allowlisting data not understood by this detector'
+            msg = "Allowlisting data not understood by this detector"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if not isinstance(event_data, dict) or len(event_data) != len(self.target_path_list) or \
@@ -260,7 +260,7 @@ class NewMatchIdValueComboDetector(
             raise TypeError(msg)
         if event_data not in self.known_values:
             self.known_values.append(event_data)
-        return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data}."
+        return f"Allowlisted path(s) {', '.join(self.target_path_list)} with {event_data}."
 
     def log_statistics(self, component_name):
         """Log statistics of an AtomHandler.

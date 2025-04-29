@@ -180,7 +180,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         self.known_values_set.add(event_data)
-        return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data.decode()}."
+        return f"Allowlisted path(s) {', '.join(self.target_path_list)} with {event_data.decode()}."
 
     def log_statistics(self, component_name):
         """Log statistics of an AtomHandler.

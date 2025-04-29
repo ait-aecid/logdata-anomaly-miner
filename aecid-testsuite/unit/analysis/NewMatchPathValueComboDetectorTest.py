@@ -131,7 +131,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
 
         # This test case checks in which cases an event is triggered and compares with expected results.
         self.assertEqual(nmpvcd.allowlist_event(analysis % nmpvcd.__class__.__name__, (value, value2), None),
-            "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (value, value2)))
+            "Allowlisted path(s) %s with %s." % ("/seq/s1, /seq/d1", (value, value2)))
         self.assertEqual(nmpvcd.known_values_set, {(b" pid=", b"25537"), (value, value2)})
 
         self.assertRaises(TypeError, nmpvcd.allowlist_event, analysis % nmpvcd.__class__.__name__, (value, None), None)
@@ -139,7 +139,7 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         # allow_missing_values_flag = True
         nmpvcd.allow_missing_values_flag = True
         self.assertEqual(nmpvcd.allowlist_event(analysis % nmpvcd.__class__.__name__, (value, None), None),
-            "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (value, None)))
+            "Allowlisted path(s) %s with %s." % ("/seq/s1, /seq/d1", (value, None)))
         self.assertEqual(nmpvcd.known_values_set, {(b" pid=", b"25537"), (value, value2), (value, None)})
 
     def test4persistence(self):

@@ -198,7 +198,7 @@ class NewMatchPathValueComboDetector(
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         self.known_values_set.add(event_data)
-        return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data}."
+        return f"Allowlisted path(s) {', '.join(self.target_path_list)} with {event_data}."
 
     def add_to_persistency_event(self, event_type, event_data):
         """Add or overwrite the information of event_data to the persistence of

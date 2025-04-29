@@ -19,11 +19,17 @@ class TimestampCorrectionFiltersTest(TestBase):
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False, output_logline=False)
         smta = SimpleMonotonicTimestampAdjust([nmpd], False)
 
-        # the atom time should be set automatically if None.
+        # the atom time should not be set automatically if None.
         log_atom = LogAtom(fdme.data, ParserMatch(match_element), None, nmpd)
         self.assertEqual(smta.receive_atom(log_atom), True)
         self.assertEqual(smta.latest_timestamp_seen, 0)
-        self.assertNotEqual(log_atom.atom_time, None)
+        self.assertEqual(log_atom.atom_time, None)
+
+        t = 100
+        log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)
+        self.assertEqual(smta.receive_atom(log_atom), True)
+        self.assertEqual(smta.latest_timestamp_seen, t)
+        self.assertEqual(log_atom.atom_time, t)
         t = log_atom.atom_time + 100
 
         log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)

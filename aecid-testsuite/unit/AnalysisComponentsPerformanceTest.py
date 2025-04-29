@@ -53,7 +53,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
     iterations = 2
     waiting_time = 1
     integerd = 'integer/d'
-    different_paths = '%d different path(es).'
+    different_paths = '%d different path(s).'
     different_attributes = '%d different attribute(s).'
 
     @classmethod
@@ -560,7 +560,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             simple_monotonic_timestamp_adjust.__class__.__name__, avg, results,
-            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_paths))
+            'a %s and %d different path(s).' % (new_match_path_detector.__class__.__name__, number_of_paths))
 
     def run_timestamps_unsorted_detector(self, reset_factor):
         """Run the performance tests for TimestampsUnsortedDetector."""
@@ -939,7 +939,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             match_filter.__class__.__name__, avg, results,
-            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_paths))
+            'a %s and %d different path(s).' % (new_match_path_detector.__class__.__name__, number_of_paths))
 
     def run_event_type_detector(self, number_of_paths):
         """Run the performance tests for EventTypeDetector."""
@@ -998,7 +998,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         if number_of_paths == 1000000:
             number_of_paths = 'all'
         type(self).result = self.result + self.result_string % (
-            event_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
+            event_type_detector.__class__.__name__, avg, results, '%s different path(s).' % (str(number_of_paths)))
 
     def run_variable_type_detector(self, number_of_paths):
         """Run the performance tests for VariableTypeDetector."""
@@ -1059,7 +1059,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         if number_of_paths == 1000000:
             number_of_paths = 'all'
         type(self).result = self.result + self.result_string % (
-            variable_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
+            variable_type_detector.__class__.__name__, avg, results, '%s different path(s).' % (str(number_of_paths)))
 
     def run_variable_correlation_detector(self, number_of_paths):
         """Run the performance tests for VariableCorrelationDetector."""
@@ -1120,7 +1120,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         if number_of_paths == 1000000:
             number_of_paths = 'all'
         type(self).result = self.result + self.result_string % (
-            variable_correlation_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
+            variable_correlation_detector.__class__.__name__, avg, results, '%s different path(s).' % (str(number_of_paths)))
 
     def run_event_frequency_detector(self, number_of_paths):
         """Run the performance tests for EventFrequencyDetector."""
@@ -1160,7 +1160,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             efd.__class__.__name__, avg, results,
-            'a %s and %s different path(es).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
+            'a %s and %s different path(s).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
 
     def run_event_sequence_detector(self, number_of_paths):
         """Run the performance tests for EventFrequencyDetector."""
@@ -1200,7 +1200,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             esd.__class__.__name__, avg, results,
-            'a %s and %s different path(es).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
+            'a %s and %s different path(s).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
 
     def test01atom_filters(self):
         """Start performance tests for AtomFilters."""

@@ -9,7 +9,7 @@ exit_code=$?
 OUTPUT=$(cat /tmp/out.txt)
 
 read -r -d '' VAR << END
-New path(es) detected
+New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model: {'messages': [{'note': {'+id': '501', 'to': 'Tove', 'from': 'Jani', 'heading': None, 'body': {'text1': "Don't forget me this weekend!", 'text2': "Don't forget me this weekend!"}}}, {'note': {'+id': '502', '+opt': 'text', 'to': 'Jani', 'from': 'Tove', 'heading': 'Re: ', 'body': {'text1': 'I will not', 'text2': 'I will not'}}}]}
   /model/messages/note/+id/id: 501

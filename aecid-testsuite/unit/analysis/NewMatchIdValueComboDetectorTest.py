@@ -127,7 +127,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         self.assertRaises(Exception, nmivcd.allowlist_event, analysis % nmivcd.__class__.__name__, self.output_stream.getvalue(), ["random", "Data"])
 
         # This test case checks in which cases an event is triggered and compares with expected results.
-        self.assertEqual(nmivcd.allowlist_event(analysis % nmivcd.__class__.__name__, {"/seq/s1": value, "/seq/d1": value2}, None), "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", {"/seq/s1": value, "/seq/d1": value2}))
+        self.assertEqual(nmivcd.allowlist_event(analysis % nmivcd.__class__.__name__, {"/seq/s1": value, "/seq/d1": value2}, None), "Allowlisted path(s) %s with %s." % ("/seq/s1, /seq/d1", {"/seq/s1": value, "/seq/d1": value2}))
         self.assertEqual(nmivcd.known_values, [{"/seq/s1": " pid=", "/seq/d1": "25537"},  {"/seq/s1": value, "/seq/d1": value2}])
 
         self.assertRaises(TypeError, nmivcd.allowlist_event, analysis % nmivcd.__class__.__name__, {"/seq/s1": None, "/seq/d1": value2}, None)
@@ -136,7 +136,7 @@ class NewMatchIdValueComboDetectorTest(TestBase):
 
         # allow_missing_values_flag = True
         nmivcd.allow_missing_values_flag = True
-        self.assertEqual(nmivcd.allowlist_event(analysis % nmivcd.__class__.__name__,  {"/seq/s1": None, "/seq/d1": value2}, None), "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", {"/seq/s1": None, "/seq/d1": value2}))
+        self.assertEqual(nmivcd.allowlist_event(analysis % nmivcd.__class__.__name__,  {"/seq/s1": None, "/seq/d1": value2}, None), "Allowlisted path(s) %s with %s." % ("/seq/s1, /seq/d1", {"/seq/s1": None, "/seq/d1": value2}))
         self.assertEqual(nmivcd.known_values, [{"/seq/s1": " pid=", "/seq/d1": "25537"},  {"/seq/s1": value, "/seq/d1": value2}, {"/seq/s1": None, "/seq/d1": value2}])
 
     def test4persistence(self):

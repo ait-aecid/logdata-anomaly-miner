@@ -37,7 +37,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
     Due to the additional features, this detector is slower than the basic detector.
     """
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id='Default', allow_missing_values_flag=False,
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", allow_missing_values_flag=False,
                  learn_mode=False, tuple_transformation_function=None, output_logline=True, stop_learning_time=None,
                  stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
@@ -215,7 +215,7 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             raise TypeError(msg)
         current_timestamp = event_data[0]
         self.known_values_dict[event_data[1]] = [current_timestamp, current_timestamp, 1]
-        return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data}."
+        return f"Allowlisted path(s) {', '.join(self.target_path_list)} with {event_data}."
 
     def log_statistics(self, component_name):
         """Log statistics of an AtomHandler.

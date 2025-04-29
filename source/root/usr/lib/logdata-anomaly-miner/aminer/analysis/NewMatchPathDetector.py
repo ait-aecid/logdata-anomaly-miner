@@ -107,7 +107,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             analysis_component = {"AffectedLogAtomPaths": list(unknown_path_list)}
             event_data = {"AnalysisComponent": analysis_component}
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New path(es) detected", sorted_log_lines, event_data,
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New path(s) detected", sorted_log_lines, event_data,
                                        log_atom, self)
         self.log_success += 1
         return True
@@ -156,7 +156,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         self.known_path_set.add(event_data)
-        return f"Allowlisted path(es) {event_data} in {event_type}."
+        return f"Allowlisted path(s) {event_data} in {event_type}."
 
     def log_statistics(self, component_name):
         """Log statistics of an AtomHandler.
