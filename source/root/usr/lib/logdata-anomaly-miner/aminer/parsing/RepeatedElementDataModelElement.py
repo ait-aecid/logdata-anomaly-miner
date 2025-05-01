@@ -18,8 +18,8 @@ class RepeatedElementDataModelElement(ModelElementInterface):
     """Objects of this class match on repeats of a given element."""
 
     def __init__(self, element_id: str, repeated_element: ModelElementInterface, min_repeat: int = 1, max_repeat: int = 0x100000):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param repeated_element the MatchElement to be repeated in the data.
         @param min_repeat the minimum number of repeated matches of the repeated_element.

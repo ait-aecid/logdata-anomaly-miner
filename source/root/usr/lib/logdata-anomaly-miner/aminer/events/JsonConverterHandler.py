@@ -14,23 +14,41 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import json
 import time
 import copy
+import logging
 
 from aminer.events.EventInterfaces import EventHandlerInterface
-from aminer import AminerConfig
+from aminer.AminerConfig import DEBUG_LOG_NAME, ENCODING, KEY_LOG_LINE_IDENTIFIER, KEY_AMINER_ID
 
 
 class JsonConverterHandler(EventHandlerInterface):
-    """This class implements an event record listener, that will convert event data to JSON format."""
+    """This class implements an event record listener, that will convert event
+    data to JSON format."""
 
     def __init__(self, json_event_handlers, analysis_context, pretty_print=True):
-        """
-        Initialize the event handler.
+        """Initialize the event handler.
+
         @param json_event_handlers the event handlers to which the json converted data is sent.
         @param analysis_context the analysis context used to get the component.
         @param pretty_print if true, the json is printed pretty; otherwise the json is printed with less space needed.
         """
+        if not isinstance(json_event_handlers, list) or any(not isinstance(x, EventHandlerInterface) for x in json_event_handlers):
+            msg = "json_event_handlers must be a list of event handlers implementing the EventHandlerInterface."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not json_event_handlers:
+            msg = "json_event_handlers must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(json_event_handlers, list) or any(not isinstance(x, EventHandlerInterface) for x in json_event_handlers):
+            msg = "json_event_handlers must be a list of event handlers implementing the EventHandlerInterface."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.json_event_handlers = json_event_handlers
         self.analysis_context = analysis_context
+        if not isinstance(pretty_print, bool):
+            msg = "pretty_print must be a boolean value."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.pretty_print = pretty_print
 
     def receive_event(self, event_type, event_message, sorted_loglines, event_data, log_atom, event_source):
@@ -46,55 +64,55 @@ class JsonConverterHandler(EventHandlerInterface):
         @param log_atom the log atom which produced the event.
         @param event_source reference to detector generating the event.
         """
-        if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
+        if hasattr(event_source, "output_event_handlers") and event_source.output_event_handlers is not None and self not in \
                 event_source.output_event_handlers:
-            return
+            return True
         component_name = self.analysis_context.get_name_by_component(event_source)
         if component_name in self.analysis_context.suppress_detector_list:
-            return
-        if 'StatusInfo' in event_data:
+            return True
+        if "StatusInfo" in event_data:
             # No anomaly; do nothing on purpose
             pass
         else:
             log_data = {}
             try:
-                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+                data = log_atom.raw_data.decode(ENCODING)
             except UnicodeError:
                 data = repr(log_atom.raw_data)
-            log_data['RawLogData'] = [data]
+            log_data["RawLogData"] = [data]
             if log_atom.get_timestamp() is None:
                 log_atom.set_timestamp(time.time())
-            log_data['Timestamps'] = [round(log_atom.atom_time, 2)]
-            log_data['DetectionTimestamp'] = round(time.time(), 2)
-            log_data['LogLinesCount'] = len(sorted_loglines)
-            if log_atom.parser_match is not None and hasattr(event_source, 'output_logline') and event_source.output_logline:
-                log_data['AnnotatedMatchElement'] = {}
+            log_data["Timestamps"] = [round(log_atom.atom_time, 2)]
+            log_data["DetectionTimestamp"] = round(time.time(), 2)
+            log_data["LogLinesCount"] = len(sorted_loglines)
+            if log_atom.parser_match is not None and hasattr(event_source, "output_logline") and event_source.output_logline:
+                log_data["AnnotatedMatchElement"] = {}
                 for path, match in log_atom.parser_match.get_match_dictionary().items():
                     if isinstance(match, list):
                         for match_element_id, match_element in enumerate(match):
                             if isinstance(match_element.match_object, bytes):
-                                log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = match_element.match_object.decode(
-                                    AminerConfig.ENCODING)
+                                log_data["AnnotatedMatchElement"][path + "/" + str(match_element_id)] = match_element.match_object.decode(
+                                    ENCODING)
                             else:
-                                log_data['AnnotatedMatchElement'][path + '/' + str(match_element_id)] = str(match_element.match_object)
+                                log_data["AnnotatedMatchElement"][path + "/" + str(match_element_id)] = str(match_element.match_object)
                     elif isinstance(match.match_object, bytes):
-                        log_data['AnnotatedMatchElement'][path] = match.match_object.decode(AminerConfig.ENCODING)
+                        log_data["AnnotatedMatchElement"][path] = match.match_object.decode(ENCODING)
                     else:
-                        log_data['AnnotatedMatchElement'][path] = str(match.match_object)
+                        log_data["AnnotatedMatchElement"][path] = str(match.match_object)
 
-            analysis_component = {'AnalysisComponentIdentifier': self.analysis_context.get_id_by_component(event_source)}
-            if event_source.__class__.__name__ == 'ExtractedData_class':
-                analysis_component['AnalysisComponentType'] = 'DistributionDetector'
+            analysis_component = {"AnalysisComponentIdentifier": self.analysis_context.get_id_by_component(event_source)}
+            if event_source.__class__.__name__ == "ExtractedData_class":
+                analysis_component["AnalysisComponentType"] = "DistributionDetector"
             else:
-                analysis_component['AnalysisComponentType'] = str(event_source.__class__.__name__)
-            analysis_component['AnalysisComponentName'] = self.analysis_context.get_name_by_component(event_source)
-            analysis_component['Message'] = event_message
+                analysis_component["AnalysisComponentType"] = str(event_source.__class__.__name__)
+            analysis_component["AnalysisComponentName"] = self.analysis_context.get_name_by_component(event_source)
+            analysis_component["Message"] = event_message
             if hasattr(event_source, "persistence_id"):
-                analysis_component['PersistenceFileName'] = event_source.persistence_id
-            if hasattr(event_source, 'learn_mode'):
-                analysis_component['TrainingMode'] = event_source.learn_mode
+                analysis_component["PersistenceFileName"] = event_source.persistence_id
+            if hasattr(event_source, "learn_mode"):
+                analysis_component["TrainingMode"] = event_source.learn_mode
 
-            detector_analysis_component = event_data.get('AnalysisComponent')
+            detector_analysis_component = event_data.get("AnalysisComponent")
             if detector_analysis_component is not None:
                 for key in detector_analysis_component:
                     if key in analysis_component:
@@ -103,21 +121,23 @@ class JsonConverterHandler(EventHandlerInterface):
 
             log_resource = log_atom.source.resource_name
             if log_resource is not None:
-                analysis_component['LogResource'] = log_resource.decode()
+                analysis_component["LogResource"] = log_resource.decode()
 
-            if 'LogData' not in event_data:
-                event_data['LogData'] = log_data
-            event_data['AnalysisComponent'] = analysis_component
+            if "LogData" not in event_data:
+                if self.analysis_context.aminer_config.config_properties.get(KEY_LOG_LINE_IDENTIFIER):
+                    event_data["LogLineIdentifier"] = log_atom.log_line_identifier
+                event_data["LogData"] = log_data
+            event_data["AnalysisComponent"] = analysis_component
 
-            aminer_id = self.analysis_context.aminer_config.config_properties.get(AminerConfig.KEY_AMINER_ID)
+            aminer_id = self.analysis_context.aminer_config.config_properties.get(KEY_AMINER_ID)
             if aminer_id is not None:
-                event_data['AminerId'] = aminer_id
+                event_data["AminerId"] = aminer_id
 
         if self.pretty_print is True:
             json_data = json.dumps(event_data, indent=2)
         else:
             json_data = json.dumps(event_data)
-        res = [''] * len(sorted_loglines)
+        res = [""] * len(sorted_loglines)
         res[0] = str(json_data)
 
         for listener in self.json_event_handlers:
@@ -126,3 +146,4 @@ class JsonConverterHandler(EventHandlerInterface):
                 event_source = copy.copy(event_source)
                 event_source.output_event_handlers.append(listener)
             listener.receive_event(event_type, None, res, json_data, log_atom, event_source)
+        return True

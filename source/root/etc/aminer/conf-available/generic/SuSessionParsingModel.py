@@ -11,7 +11,8 @@ from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelEle
 
 
 def get_model(user_name_model=None):
-    """Return a model to parse a su session information message after any standard logging preamble, e.g. from syslog."""
+    """Return a model to parse a su session information message after any
+    standard logging preamble, e.g. from syslog."""
     if user_name_model is None:
         user_name_model = VariableByteDataModelElement("user", b"0123456789abcdefghijklmnopqrstuvwxyz.-")
     srcuser_name_model = VariableByteDataModelElement("srcuser", b"0123456789abcdefghijklmnopqrstuvwxyz.-")

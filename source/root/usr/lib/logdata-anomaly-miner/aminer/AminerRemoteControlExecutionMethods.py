@@ -1,4 +1,5 @@
-"""This module contains methods which can be executed from the aminerRemoteControl class.
+"""This module contains methods which can be executed from the
+aminerRemoteControl class.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -21,7 +22,7 @@ import re
 from aminer.input.InputInterfaces import AtomHandlerInterface
 from aminer.util import PersistenceUtil
 from aminer import AnalysisChild, AminerConfig
-from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_LEVEL, KEY_LOG_DEBUG_LEVEL, KEY_LOG_STAT_PERIOD,\
+from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_LEVEL, KEY_LOG_DEBUG_LEVEL, KEY_LOG_STAT_PERIOD, \
     KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_PREFIX, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, KEY_LOG_SOURCES_LIST, DEBUG_LOG_NAME
 
 attr_str = '"%s": %s,\n'
@@ -156,8 +157,8 @@ class AminerRemoteControlExecutionMethods:
         return 1
 
     def change_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute, value):
-        """
-        Change a specific attribute of a registered component.
+        """Change a specific attribute of a registered component.
+
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
         @param attribute the name of the attribute to be printed.
@@ -173,8 +174,9 @@ class AminerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: property '{component_name}.{attribute}' must be of type {type(attr)}!"
 
     def rename_registered_analysis_component(self, analysis_context, old_component_name, new_component_name):
-        """
-        Rename an analysis component by removing and readding it to the analysis_context.
+        """Rename an analysis component by removing and readding it to the
+        analysis_context.
+
         @param analysis_context the analysis context of the aminer.
         @param old_component_name the current name of the component.
         @param new_component_name the new name of the component.
@@ -193,8 +195,8 @@ class AminerRemoteControlExecutionMethods:
                 logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def print_config_property(self, analysis_context, property_name):
-        """
-        Print a specific config property.
+        """Print a specific config property.
+
         @param analysis_context the analysis context of the aminer.
         @param property_name the name of the property to be printed.
         """
@@ -211,13 +213,13 @@ class AminerRemoteControlExecutionMethods:
             elif '.' in val:
                 try:
                     val = float(val)
-                except ValueError:  # skipcq: FLK-E722
+                except ValueError:
                     pass
         self.REMOTE_CONTROL_RESPONSE = f'"{property_name}": {val}'
 
     def print_attribute_of_registered_analysis_component(self, analysis_context, component_name, attribute):
-        """
-        Print a specific attribute of a registered component.
+        """Print a specific attribute of a registered component.
+
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
         @param attribute the name of the attribute to be printed.
@@ -260,8 +262,8 @@ class AminerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the component '{component_name}' does not have an attribute named '{attribute}'."
 
     def print_current_config(self, analysis_context):
-        """
-        Print the entire aminer config.
+        """Print the entire aminer config.
+
         @param analysis_context the analysis context of the aminer.
         """
         for config_property in analysis_context.aminer_config.config_properties:
@@ -319,8 +321,8 @@ class AminerRemoteControlExecutionMethods:
         return False
 
     def save_current_config(self, analysis_context, destination_file):
-        """
-        Save the current live config into a file.
+        """Save the current live config into a file.
+
         @param analysis_context the analysis context of the aminer.
         @param destination_file the path to the file in which the config is saved.
         """
@@ -359,8 +361,9 @@ class AminerRemoteControlExecutionMethods:
         self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace("'", '"')
 
     def allowlist_event_in_component(self, analysis_context, component_name, event_data, allowlisting_data=None):
-        """
-        Allowlists one or multiple specific events from the history in the component it occurred in.
+        """Allowlists one or multiple specific events from the history in the
+        component it occurred in.
+
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
         @param event_data the event_data for the allowlist_event method.
@@ -383,13 +386,13 @@ class AminerRemoteControlExecutionMethods:
             msg = component.allowlist_event(f"Analysis.{component.__class__.__name__}", event_data, allowlisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
     def blocklist_event_in_component(self, analysis_context, component_name, event_data, blocklisting_data=None):
-        """
-        Blocklists one or multiple specific events from the history in the component it occurred in.
+        """Blocklists one or multiple specific events from the history in the
+        component it occurred in.
+
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
         @param event_data the event_data for the allowlist_event method.
@@ -406,13 +409,12 @@ class AminerRemoteControlExecutionMethods:
             msg = component.blocklist_event(f"Analysis.{component.__class__.__name__}", event_data, blocklisting_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
     def print_persistence_event_in_component(self, analysis_context, component_name, event_data):
-        """
-        Prints the persistence specified in event_data of component_name.
+        """Prints the persistence specified in event_data of component_name.
+
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
         @param event_data the event_data for the print_persistence_event method.
@@ -429,13 +431,13 @@ class AminerRemoteControlExecutionMethods:
             msg = component.print_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
     def add_to_persistence_event_in_component(self, analysis_context, component_name, event_data):
-        """
-        Add information specified in event_data to the persistence of component_name.
+        """Add information specified in event_data to the persistence of
+        component_name.
+
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
         @param event_data the event_data for the add_to_persistence_event method.
@@ -452,13 +454,13 @@ class AminerRemoteControlExecutionMethods:
             msg = component.add_to_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
     def remove_from_persistence_event_in_component(self, analysis_context, component_name, event_data):
-        """
-        Remove information specified in event_data from the persistence of component_name.
+        """Remove information specified in event_data from the persistence of
+        component_name.
+
         @param analysis_context the analysis context of the aminer.
         @param component_name the name to be registered in the analysis_context.
         @param event_data the event_data for the remove_from_persistence_event method.
@@ -475,13 +477,12 @@ class AminerRemoteControlExecutionMethods:
             msg = component.remove_from_persistence_event(f"Analysis.{component.__class__.__name__}", event_data)
             self.REMOTE_CONTROL_RESPONSE += msg
             logging.getLogger(DEBUG_LOG_NAME).info(msg)
-        # skipcq: PYL-W0703
         except Exception as e:
             self.REMOTE_CONTROL_RESPONSE += "Exception: " + repr(e)
 
     def add_handler_to_atom_filter_and_register_analysis_component(self, analysis_context, atom_handler, component, component_name):
-        """
-        Add a new component to the analysis_context.
+        """Add a new component to the analysis_context.
+
         @param analysis_context the analysis context of the aminer.
         @param atom_handler the registered name of the atom_handler component to add the new component to.
         @param component the component to be added.
@@ -504,8 +505,8 @@ class AminerRemoteControlExecutionMethods:
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def dump_events_from_history(self, analysis_context, history_component_name, dump_event_id):
-        """
-        Detailed print of a specific event from the history.
+        """Detailed print of a specific event from the history.
+
         @param analysis_context the analysis context of the aminer.
         @param history_component_name the registered name of the history component.
         @param dump_event_id a numeric id of the events to be printed.
@@ -542,8 +543,9 @@ class AminerRemoteControlExecutionMethods:
             logging.getLogger(DEBUG_LOG_NAME).info(result_string)
 
     def ignore_events_from_history(self, analysis_context, history_component_name, event_ids):
-        """
-        Ignore one or multiple specific events from the history. These ignores do not affect the components itself.
+        """Ignore one or multiple specific events from the history. These
+        ignores do not affect the components itself.
+
         @param analysis_context the analysis context of the aminer.
         @param history_component_name the registered name of the history component.
         @param event_ids a list of numeric ids of the events to be ignored.
@@ -578,8 +580,8 @@ class AminerRemoteControlExecutionMethods:
         logging.getLogger(DEBUG_LOG_NAME).info(msg)
 
     def list_events_from_history(self, analysis_context, history_component_name, max_event_count=None):
-        """
-        List the latest events of a specific history component.
+        """List the latest events of a specific history component.
+
         @param analysis_context the analysis context of the aminer.
         @param history_component_name the registered name of the history component.
         @param max_event_count the number of the newest events to be listed.
@@ -598,8 +600,9 @@ class AminerRemoteControlExecutionMethods:
             self.REMOTE_CONTROL_RESPONSE = result_string
 
     def allowlist_events_from_history(self, analysis_context, history_component_name, id_spec_list, allowlisting_data=None):
-        """
-        Allowlists one or multiple specific events from the history in the component it occurred in.
+        """Allowlists one or multiple specific events from the history in the
+        component it occurred in.
+
         @param analysis_context the analysis context of the aminer.
         @param history_component_name the registered name of the history component.
         @param id_spec_list a list of numeric ids of the events to be allowlisted.
@@ -642,7 +645,6 @@ class AminerRemoteControlExecutionMethods:
                     allowlisted_flag = True
                 except NotImplementedError:
                     result_string += f"FAIL {event_id}: component does not support allowlisting."
-                # skipcq: PYL-W0703
                 except Exception as wl_exception:
                     result_string += f"FAIL {event_id}: {str(wl_exception)}\n"
             elif event_type == 'Analysis.AllowlistViolationDetector':
@@ -670,8 +672,9 @@ class AminerRemoteControlExecutionMethods:
 
 
 def _repr_recursive(attr):
-    """
-    Return a valid JSON representation of an config attribute with the types list, dict, set or tuple.
+    """Return a valid JSON representation of an config attribute with the types
+    list, dict, set or tuple.
+
     @param attr the attribute to be represented.
     """
     if attr is None:
@@ -703,8 +706,8 @@ def _repr_recursive(attr):
 
 
 def _reformat_attr(attr):
-    """
-    Return a valid JSON representation of an config attribute with any type.
+    """Return a valid JSON representation of an config attribute with any type.
+
     If the type is list, dict, set or tuple _repr_recursive is called.
     @param attr the attribute to be represented.
     """
@@ -726,6 +729,6 @@ def _reformat_attr(attr):
     if not isinstance(attr, (list, dict, tuple, set)) and not rep.startswith('"') and not rep.isdecimal():
         try:
             float(rep)
-        except ValueError:  # skipcq: FLK-E722
+        except ValueError:
             rep = f'"{rep}"'
     return rep

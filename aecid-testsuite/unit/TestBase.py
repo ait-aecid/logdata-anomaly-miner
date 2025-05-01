@@ -105,7 +105,6 @@ def initialize_loggers(aminer_config, aminer_user_id, aminer_grp_id):
     debug_logger.addHandler(debug_file_handler)
 
 
-# skipcq: PTC-W0046
 class TestBase(unittest.TestCase):
     """This is the base class for all unittests."""
 

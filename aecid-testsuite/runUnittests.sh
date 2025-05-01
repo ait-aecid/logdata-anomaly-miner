@@ -1,3 +1,5 @@
+#!/bin/bash
+
 source config
 
 sudo cp unit/data/kafka-client.conf /etc/aminer/kafka-client.conf
@@ -7,21 +9,22 @@ tar xvf kafka.tgz > /dev/null
 rm kafka.tgz
 
 $KAFKA_VERSIONSTRING/bin/zookeeper-server-start.sh $KAFKA_VERSIONSTRING/config/zookeeper.properties > /dev/null &
-sleep 1
+sleep 10
 $KAFKA_VERSIONSTRING/bin/kafka-server-start.sh $KAFKA_VERSIONSTRING/config/server.properties > /dev/null &
+sleep 10
 
 exit_code=0
-sudo python3 -bb -m unittest discover -s unit/analysis -p '*Test.py' > /dev/null &
+sudo /usr/lib/logdata-anomaly-miner/.venv/bin/python3 -bb -m unittest discover -s unit/analysis -p '*Test.py' > /dev/null &
 ANALYSIS_PID=$!
-sudo python3 -bb -m unittest discover -s unit/events -p '*Test.py' > /dev/null &
+sudo /usr/lib/logdata-anomaly-miner/.venv/bin/python3 -bb -m unittest discover -s unit/events -p '*Test.py' > /dev/null &
 EVENTS_PID=$!
-sudo python3 -bb -m unittest discover -s unit/input -p '*Test.py' > /dev/null &
+sudo /usr/lib/logdata-anomaly-miner/.venv/bin/python3 -bb -m unittest discover -s unit/input -p '*Test.py' > /dev/null &
 INPUT_PID=$!
-sudo python3 -bb -m unittest discover -s unit/parsing -p '*Test.py' > /dev/null &
+sudo /usr/lib/logdata-anomaly-miner/.venv/bin/python3 -bb -m unittest discover -s unit/parsing -p '*Test.py' > /dev/null &
 PARSING_PID=$!
-sudo python3 -bb -m unittest discover -s unit/util -p '*Test.py' > /dev/null &
+sudo /usr/lib/logdata-anomaly-miner/.venv/bin/python3 -bb -m unittest discover -s unit/util -p '*Test.py' > /dev/null &
 UTIL_PID=$!
-sudo python3 -bb -m unittest discover -s unit/data -p '*Test.py' > /dev/null &
+sudo /usr/lib/logdata-anomaly-miner/.venv/bin/python3 -bb -m unittest discover -s unit/data -p '*Test.py' > /dev/null &
 DATA_PID=$!
 wait $ANALYSIS_PID
 if [[ $? -ne 0 ]]; then

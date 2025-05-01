@@ -77,7 +77,8 @@ def get_systemd_model():
 
 
 def get_logind_model(user_name_model=None):
-    """Return a model to parse a systemd logind daemon message after any standard logging preamble, e.g. from syslog."""
+    """Return a model to parse a systemd logind daemon message after any
+    standard logging preamble, e.g. from syslog."""
     if user_name_model is None:
         user_name_model = VariableByteDataModelElement("user", b"0123456789abcdefghijklmnopqrstuvwxyz-_")
 
@@ -113,7 +114,8 @@ def get_logind_model(user_name_model=None):
 
 
 def get_tmp_files_model():
-    """Return a model to parse a systemd tmpfiles daemon message after any standard logging preamble, e.g. from syslog."""
+    """Return a model to parse a systemd tmpfiles daemon message after any
+    standard logging preamble, e.g. from syslog."""
     type_children = [
         SequenceModelElement("duplicate", [
             FixedDataModelElement("s0", b'[/usr/lib/tmpfiles.d/var.conf:14] Duplicate line for path "'),

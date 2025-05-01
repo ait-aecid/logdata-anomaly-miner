@@ -123,7 +123,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
 
         # This test case checks in which cases an event is triggered and compares with expected results.
         self.assertEqual(enmpvcd.allowlist_event(analysis % enmpvcd.__class__.__name__, (t, (value, value2)), None),
-            "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (t, (value, value2))))
+            "Allowlisted path(s) %s with %s." % ("/seq/s1, /seq/d1", (t, (value, value2))))
         self.assertEqual(enmpvcd.known_values_dict, {(b' pid=', b'25537'): [t, t, 1], (value, value2): [t, t, 1]})
 
         self.assertRaises(TypeError, enmpvcd.allowlist_event, analysis % enmpvcd.__class__.__name__, (value, None), None)
@@ -131,7 +131,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         # allow_missing_values_flag = True
         enmpvcd.allow_missing_values_flag = True
         self.assertEqual(enmpvcd.allowlist_event(analysis % enmpvcd.__class__.__name__, (t, (value, None)), None),
-            "Allowlisted path(es) %s with %s." % ("/seq/s1, /seq/d1", (t, (value, None))))
+            "Allowlisted path(s) %s with %s." % ("/seq/s1, /seq/d1", (t, (value, None))))
         self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"): [t, t, 1], (value, value2): [t, t, 1], (value, None): [t, t, 1]})
 
     def test4persistence(self):

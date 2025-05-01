@@ -80,7 +80,7 @@ class MatchValueStreamWriterTest(TestBase):
         mvsw.receive_atom(log_atom)
         other_sme = DummySequenceModelElement("sequence", [fdme_number, fdme_sp, fdme_sp])
         match_element = other_sme.get_match_element("match", match_context)
-        other_log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, mvsw)
+        other_log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, mvsw)
         mvsw.receive_atom(other_log_atom)
 
         self.assertEqual(self.output_stream.getvalue(), "25537; ;Euro; ;-\n"*3 + "25537; ;-; ;-\n")
@@ -91,7 +91,7 @@ class MatchValueStreamWriterTest(TestBase):
         match_context = MatchContext(b"25537\x80 ")
         other_sme = DummySequenceModelElement("sequence", [fdme_number, fdme_euro_char, fdme_sp])
         match_element = other_sme.get_match_element("match", match_context)
-        other_log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, mvsw)
+        other_log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, mvsw)
         mvsw.receive_atom(other_log_atom)
 
         self.assertEqual(self.output_stream.getvalue(), "25537;; \n")

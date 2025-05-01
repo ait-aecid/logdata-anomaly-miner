@@ -2,8 +2,8 @@ import unittest
 import sys
 import os
 import socket
-from _io import StringIO
 import subprocess
+from _io import StringIO
 import fcntl
 
 from aminer.util import SecureOSFunctions
@@ -121,7 +121,7 @@ class SecureOSFunctionsTestLocal(TestBase):
 
     def test6send_logstream_descriptor(self):
         """A valid logstream descriptor is to be sent."""
-        sock_name = '/tmp/test6unixSocket.sock'  # skipcq: BAN-B108
+        sock_name = '/tmp/test6unixSocket.sock'
         data = b'logstream' + b'\x00' + b'/var/log/syslog'
         proc = subprocess.Popen(['python3', 'unit/util/clientTest6.py'])
         if os.path.exists(sock_name):
@@ -142,7 +142,7 @@ class SecureOSFunctionsTestLocal(TestBase):
 
     def test7receive_annotated_file_descriptor(self):
         """A valid annotated file descriptor is to be received by a socket."""
-        sock_name = '/tmp/test6unixSocket.sock'  # skipcq: BAN-B108
+        sock_name = '/tmp/test6unixSocket.sock'
         type_info = b'logstream'
         path = b'/var/log/syslog'
         data = (type_info, path)

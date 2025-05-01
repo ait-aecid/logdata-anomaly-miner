@@ -1,5 +1,5 @@
-"""
-This module defines a model element that represents a hex string of arbitrary length.
+"""This module defines a model element that represents a hex string of
+arbitrary length.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,19 +17,21 @@ from aminer import AminerConfig
 
 
 class HexStringModelElement(ModelElementInterface):
-    """This class just tries to strip off as many hex bytes as possible from a given data string."""
+    """This class just tries to strip off as many hex bytes as possible from a
+    given data string."""
 
     def __init__(self, element_id: str, upper_case: bool = False):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param upper_case if True, the letters of the hex alphabet are uppercase, otherwise they are lowercase.
         """
         super().__init__(element_id, upper_case=upper_case)
 
     def get_match_element(self, path: str, match_context):
-        """
-        Find the maximum number of bytes forming a integer number according to the parameters specified.
+        """Find the maximum number of bytes forming a integer number according
+        to the parameters specified.
+
         @return a match when at least one byte being a digit was found
         """
         m = self.hex_regex.match(match_context.match_data)

@@ -26,7 +26,7 @@ class AllowlistViolationDetectorTest(TestBase):
         fixed_dme = FixedDataModelElement("s1", fixed_string)
         match_context = MatchContext(fixed_string)
         match_element = fixed_dme.get_match_element("match", match_context)
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, allowlist_violation_detector)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, allowlist_violation_detector)
 
         self.assertTrue(allowlist_violation_detector.receive_atom(log_atom))
         self.assertEqual(self.output_stream.getvalue(), "")

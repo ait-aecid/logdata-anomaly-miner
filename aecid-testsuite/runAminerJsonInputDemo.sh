@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cp demo/aminerJsonInputDemo/json-input-demo-config.yml /tmp/json-input-demo-config.yml
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo chmod +x demo/aminerJsonInputDemo/aminerJsonInputDemo.sh
@@ -7,7 +9,7 @@ exit_code=$?
 OUTPUT=$(cat /tmp/out.txt)
 
 read -r -d '' VAR << END
-New path(es) detected
+New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model: {'menu': {'id': 'file', 'value': 'File', 'popup': {'menuitem': [{'value': 'New', 'onclick': 'CreateNewDoc()'}, {'value': 'Open', 'onclick': 'OpenDoc()'}, {'value': 'Close', 'onclick': 'CloseDoc()'}]}}}
   /model/menu/id/id: file

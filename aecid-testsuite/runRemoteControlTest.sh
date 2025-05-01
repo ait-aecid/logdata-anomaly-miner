@@ -1,3 +1,5 @@
+#!/bin/bash
+
 FILE=/tmp/demo-config.py
 CMD_PATH=/tmp/commands.txt
 sudo cp demo/aminerRemoteControl/demo-config.py $FILE
@@ -433,7 +435,7 @@ fi
 timestamp=$(date +%s)
 echo "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,('/model/path',1)),allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'EnhancedNewValueCombo',($timestamp,('/model/path',1)),allowlisting_data=None)")
-expected="${PREFIX}\"Allowlisted path(es) /model/DailyCron/UName, /model/DailyCron/JobNumber with ($timestamp, ('/model/path', 1)).\""
+expected="${PREFIX}\"Allowlisted path(s) /model/DailyCron/UName, /model/DailyCron/JobNumber with ($timestamp, ('/model/path', 1)).\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -459,7 +461,7 @@ fi
 
 echo "allowlist_event_in_component(analysis_context,'NewMatchPath','/model/somepath',allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPath','/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path(es) /model/somepath in Analysis.NewMatchPathDetector.'"
+expected="${PREFIX}'Allowlisted path(s) /model/somepath in Analysis.NewMatchPathDetector.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -472,7 +474,7 @@ fi
 
 echo "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector',(b'value1',b'value2'),allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValueComboDetector',(b'value1',b'value2'),allowlisting_data=None)")
-expected="${PREFIX}\"Allowlisted path(es) /model/IPAddresses/Username, /model/IPAddresses/IP with (b'value1', b'value2').\""
+expected="${PREFIX}\"Allowlisted path(s) /model/IPAddresses/Username, /model/IPAddresses/IP with (b'value1', b'value2').\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -485,7 +487,7 @@ fi
 
 echo "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/id':1, '/model/type/syscall/id':1},allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/id':1, '/model/type/syscall/id':1},allowlisting_data=None)")
-expected="${PREFIX}\"Allowlisted path(es) /model/type/path/id, /model/type/syscall/id with {'/model/type/path/id': 1, '/model/type/syscall/id': 1}.\""
+expected="${PREFIX}\"Allowlisted path(s) /model/type/path/id, /model/type/syscall/id with {'/model/type/path/id': 1, '/model/type/syscall/id': 1}.\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -511,7 +513,7 @@ fi
 
 echo "allowlist_event_in_component(analysis_context,'NewMatchPathValue',b'/model/somepath',allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValue',b'/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path(es) /model/DailyCron/Job Number, /model/IPAddresses/Username with /model/somepath.'"
+expected="${PREFIX}'Allowlisted path(s) /model/DailyCron/Job Number, /model/IPAddresses/Username with /model/somepath.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -577,8 +579,9 @@ stdout=$(echo "$stdout" | sed -e "s/\"next_persist_time\".*,//")
 expected_list="${expected_list}${stdout}
 "
 
+sudo pkill -x aminer.py
 sudo pkill -x aminer
-sleep 2 & wait $!
+sleep 3
 sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
@@ -601,8 +604,9 @@ if [[ "$stdout" != "$expected_list" ]]; then
 fi
 EXEC_FILE_TIME=$(($(date +%s)-START_TIME))
 
+sudo pkill -x aminer.py
 sudo pkill -x aminer
-sleep 2 & wait $!
+sleep 3
 sudo rm $CMD_PATH
 sudo rm $OUTPUT_FILE
 echo "Command execution time with --exec ${EXEC_TIME}s"

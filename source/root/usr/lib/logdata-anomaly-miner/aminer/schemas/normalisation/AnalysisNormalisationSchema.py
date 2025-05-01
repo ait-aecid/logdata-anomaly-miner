@@ -77,7 +77,6 @@
                 'min_bin_elements': {'type': 'integer'},
                 'min_bin_time': {'type': 'integer'},
                 'debug_mode': {'type': 'boolean', 'default': False},
-                # skipcq: PYL-W0511
                 # TODO check which streams should be allowed
                 'stream': {'type': 'string', 'allowed': ['sys.stdout', 'sys.stderr']},
                 'separator': {'type': 'string'},

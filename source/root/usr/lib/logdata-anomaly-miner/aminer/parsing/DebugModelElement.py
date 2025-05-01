@@ -1,5 +1,5 @@
-"""
-This module defines a debug model element that can be used to check whether a specific position in the parsing tree is reached by log atoms.
+"""This module defines a debug model element that can be used to check whether
+a specific position in the parsing tree is reached by log atoms.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,15 +20,18 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class DebugModelElement(ModelElementInterface):
-    """
-    This class defines a model element matching any data of length zero at any position.
-    Thus, it can never fail to match and can be inserted at any position in the parsing tree, where matching itself does not alter parsing
-    flow (see e.g. FirstMatchModelElement). It will immediately write the current state of the match to stderr for inspection.
+    """This class defines a model element matching any data of length zero at
+    any position.
+
+    Thus, it can never fail to match and can be inserted at any position
+    in the parsing tree, where matching itself does not alter parsing
+    flow (see e.g. FirstMatchModelElement). It will immediately write
+    the current state of the match to stderr for inspection.
     """
 
     def __init__(self, element_id: str):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         """
         super().__init__(element_id)

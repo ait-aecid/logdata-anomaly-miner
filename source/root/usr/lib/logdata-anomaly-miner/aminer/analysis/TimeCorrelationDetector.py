@@ -1,5 +1,4 @@
-"""
-This module defines a detector for time correlation between atoms.
+"""This module defines a detector for time correlation between atoms.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -25,10 +24,13 @@ from aminer.util.History import get_log_int
 
 
 class TimeCorrelationDetector(AtomHandlerInterface):
-    """
-    This class tries to find time correlation patterns between different log atoms.
-    When a possible correlation rule is detected, it creates an event including the rules. This is useful to implement checks as depicted
-    in http://dx.doi.org/10.1016/j.cose.2014.09.006.
+    """This class tries to find time correlation patterns between different log
+    atoms.
+
+    When a possible correlation rule is detected, it creates an event
+    including the rules. This is useful to implement checks as depicted
+    in
+    http://dx.doi.org/10.1016/j.cose.2014.09.006.
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
@@ -36,8 +38,9 @@ class TimeCorrelationDetector(AtomHandlerInterface):
     def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id="Default",
                  record_count_before_event=10000, output_logline=True, use_path_match=True, use_value_match=True,
                  min_rule_attributes=1, max_rule_attributes=5, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param parallel_check_count number of rule detection checks to run in parallel.
@@ -96,7 +99,7 @@ class TimeCorrelationDetector(AtomHandlerInterface):
                 features_found_list.append(feature)
 
         if len(self.feature_list) < self.parallel_check_count:
-            if (random.randint(0, 1) != 0) and (self.last_unhandled_match is not None):
+            if (random.randint(0, 1) != 0) and (self.last_unhandled_match is not None):  # nosec B311
                 log_atom = self.last_unhandled_match
             new_rule = self.create_random_rule(log_atom)
             if new_rule is not None:
@@ -169,7 +172,7 @@ class TimeCorrelationDetector(AtomHandlerInterface):
         attribute_count = self.min_rule_attributes + get_log_int(self.max_rule_attributes - self.min_rule_attributes)
 
         while attribute_count > 0:
-            key_pos = random.randint(0, len(all_keys) - 1)
+            key_pos = random.randint(0, len(all_keys) - 1)  # nosec B311
             key_name = all_keys[key_pos]
             all_keys = all_keys[:key_pos] + all_keys[key_pos + 1:]
             key_value = parser_match.get_match_dictionary().get(key_name).match_object
@@ -182,7 +185,7 @@ class TimeCorrelationDetector(AtomHandlerInterface):
             attribute_count -= 1
             rule_type = 1  # default is value_match only
             if self.use_path_match and self.use_value_match:
-                rule_type = random.randint(0, 1)
+                rule_type = random.randint(0, 1)  # nosec B311
             elif self.use_path_match:
                 rule_type = 0
             if rule_type == 0:
@@ -199,9 +202,11 @@ class TimeCorrelationDetector(AtomHandlerInterface):
         return None
 
     def update_tables_for_feature(self, target_feature, timestamp):
-        """
-        Assume that this event was the effect of a previous cause-related event.
-        Loop over all cause-related features (rows) to search for matches.
+        """Assume that this event was the effect of a previous cause-related
+        event.
+
+        Loop over all cause-related features (rows) to search for
+        matches.
         """
         feature_table_pos = (target_feature.index << 1)
         for feature in self.feature_list:
@@ -226,29 +231,23 @@ class TimeCorrelationDetector(AtomHandlerInterface):
             trigger_count = feature.trigger_count
             result += f"{feature.rule} ({feature.index}) e = {trigger_count}:"
             stat_pos = (self.parallel_check_count * feature.index) << 1
-            for feature_pos in range(len(self.feature_list)):  # skipcq: PTC-W0060
+            for feature_pos in range(len(self.feature_list)):
                 event_count = self.event_count_table[stat_pos]
                 ratio = "-"
                 if trigger_count != 0:
-                    # skipcq: PYL-C0209
                     ratio = "%.2e" % (float(event_count) / trigger_count)
                 delta = "-"
                 if event_count != 0:
-                    # skipcq: PYL-C0209
                     delta = "%.2e" % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
-                # skipcq: PYL-C0209
                 result += "\n  %d: {c = %#6d r = %s dt = %s" % (feature_pos, event_count, ratio, delta)
                 stat_pos += 1
                 event_count = self.event_count_table[stat_pos]
                 ratio = "-"
                 if trigger_count != 0:
-                    # skipcq: PYL-C0209
                     ratio = "%.2e" % (float(event_count) / trigger_count)
                 delta = "-"
                 if event_count != 0:
-                    # skipcq: PYL-C0209
                     delta = "%.2e" % (float(self.event_delta_table[stat_pos]) * 0.001 / event_count)
-                # skipcq: PYL-C0209
                 result += " c = %#6d r = %s dt = %s}" % (event_count, ratio, delta)
                 stat_pos += 1
             result += "\n"

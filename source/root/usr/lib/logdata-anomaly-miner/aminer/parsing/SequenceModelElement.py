@@ -1,5 +1,5 @@
-"""
-This module defines a model element that consists of a sequence of model elements that all have to match.
+"""This module defines a model element that consists of a sequence of model
+elements that all have to match.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,19 +17,21 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class SequenceModelElement(ModelElementInterface):
-    """This class defines an element to find matches that comprise matches of all given child model elements."""
+    """This class defines an element to find matches that comprise matches of
+    all given child model elements."""
 
     def __init__(self, element_id: str, children: List["ModelElementInterface"]):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param children a list of child elements to be iterated through.
         """
         super().__init__(element_id, children=children)
 
     def get_match_element(self, path, match_context):
-        """
-        Try to find a match on given data for this model element and all its children.
+        """Try to find a match on given data for this model element and all its
+        children.
+
         When a match is found, the matchContext is updated accordingly.
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.

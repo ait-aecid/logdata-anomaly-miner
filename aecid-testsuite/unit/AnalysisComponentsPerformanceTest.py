@@ -42,7 +42,7 @@ import random
 from time import process_time
 from _io import StringIO
 import timeit
-import pickle  # skipcq: BAN-B403
+import pickle
 
 
 class AnalysisComponentsPerformanceTest(TestBase):
@@ -53,7 +53,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
     iterations = 2
     waiting_time = 1
     integerd = 'integer/d'
-    different_paths = '%d different path(es).'
+    different_paths = '%d different path(s).'
     different_attributes = '%d different attribute(s).'
 
     @classmethod
@@ -560,7 +560,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             simple_monotonic_timestamp_adjust.__class__.__name__, avg, results,
-            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_paths))
+            'a %s and %d different path(s).' % (new_match_path_detector.__class__.__name__, number_of_paths))
 
     def run_timestamps_unsorted_detector(self, reset_factor):
         """Run the performance tests for TimestampsUnsortedDetector."""
@@ -939,30 +939,30 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             match_filter.__class__.__name__, avg, results,
-            'a %s and %d different path(es).' % (new_match_path_detector.__class__.__name__, number_of_paths))
+            'a %s and %d different path(s).' % (new_match_path_detector.__class__.__name__, number_of_paths))
 
     def run_event_type_detector(self, number_of_paths):
         """Run the performance tests for EventTypeDetector."""
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
-            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+            nor_data_list = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
-            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+            beta1_data_list = pickle.load(f)
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
@@ -998,30 +998,30 @@ class AnalysisComponentsPerformanceTest(TestBase):
         if number_of_paths == 1000000:
             number_of_paths = 'all'
         type(self).result = self.result + self.result_string % (
-            event_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
+            event_type_detector.__class__.__name__, avg, results, '%s different path(s).' % (str(number_of_paths)))
 
     def run_variable_type_detector(self, number_of_paths):
         """Run the performance tests for VariableTypeDetector."""
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
-            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+            nor_data_list = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
-            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+            beta1_data_list = pickle.load(f)
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
@@ -1059,30 +1059,30 @@ class AnalysisComponentsPerformanceTest(TestBase):
         if number_of_paths == 1000000:
             number_of_paths = 'all'
         type(self).result = self.result + self.result_string % (
-            variable_type_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
+            variable_type_detector.__class__.__name__, avg, results, '%s different path(s).' % (str(number_of_paths)))
 
     def run_variable_correlation_detector(self, number_of_paths):
         """Run the performance tests for VariableCorrelationDetector."""
         with open('unit/data/vtd_data/uni_data_test6', 'rb') as f:
-            uni_data_list = pickle.load(f)  # skipcq: BAN-B301
+            uni_data_list = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test6', 'rb') as f:
-            nor_data_list = pickle.load(f)  # skipcq: BAN-B301
+            nor_data_list = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test6', 'rb') as f:
-            beta1_data_list = pickle.load(f)  # skipcq: BAN-B301
+            beta1_data_list = pickle.load(f)
         with open('unit/data/vtd_data/uni_data_test7', 'rb') as f:
-            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [uni_data_list_ini, uni_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/nor_data_test7', 'rb') as f:
-            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [nor_data_list_ini, nor_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta1_data_test7', 'rb') as f:
-            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta1_data_list_ini, beta1_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta2_data_test7', 'rb') as f:
-            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta2_data_list_ini, beta2_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta3_data_test7', 'rb') as f:
-            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta3_data_list_ini, beta3_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta4_data_test7', 'rb') as f:
-            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta4_data_list_ini, beta4_data_list_upd, _, _] = pickle.load(f)
         with open('unit/data/vtd_data/beta5_data_test7', 'rb') as f:
-            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)  # skipcq: BAN-B301
+            [beta5_data_list_ini, beta5_data_list_upd, _, _] = pickle.load(f)
 
         data = uni_data_list + nor_data_list + beta1_data_list + uni_data_list_ini + uni_data_list_upd + nor_data_list_ini +\
             nor_data_list_upd + beta1_data_list_ini + beta1_data_list_upd + beta2_data_list_ini + beta2_data_list_upd + beta3_data_list_ini\
@@ -1120,7 +1120,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         if number_of_paths == 1000000:
             number_of_paths = 'all'
         type(self).result = self.result + self.result_string % (
-            variable_correlation_detector.__class__.__name__, avg, results, '%s different path(es).' % (str(number_of_paths)))
+            variable_correlation_detector.__class__.__name__, avg, results, '%s different path(s).' % (str(number_of_paths)))
 
     def run_event_frequency_detector(self, number_of_paths):
         """Run the performance tests for EventFrequencyDetector."""
@@ -1160,7 +1160,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             efd.__class__.__name__, avg, results,
-            'a %s and %s different path(es).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
+            'a %s and %s different path(s).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
 
     def run_event_sequence_detector(self, number_of_paths):
         """Run the performance tests for EventFrequencyDetector."""
@@ -1200,7 +1200,7 @@ class AnalysisComponentsPerformanceTest(TestBase):
         avg = avg / self.iterations
         type(self).result = self.result + self.result_string % (
             esd.__class__.__name__, avg, results,
-            'a %s and %s different path(es).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
+            'a %s and %s different path(s).' % (new_match_path_detector.__class__.__name__, str(number_of_paths)))
 
     def test01atom_filters(self):
         """Start performance tests for AtomFilters."""

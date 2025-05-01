@@ -1,5 +1,4 @@
-"""
-This module defines a model element representing a fixed string.
+"""This module defines a model element representing a fixed string.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,14 +16,15 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 class FixedDataModelElement(ModelElementInterface):
-    """
-    This class defines a model element of a fixed string.
-    The model element is considered a match if the fixed string is found at this position in the log atom.
+    """This class defines a model element of a fixed string.
+
+    The model element is considered a match if the fixed string is found
+    at this position in the log atom.
     """
 
     def __init__(self, element_id: str, fixed_data: bytes):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param fixed_data a non-escaped delimiter string to search for.
         """

@@ -154,7 +154,7 @@ class EventSequenceDetectorTest(TestBase):
         log_atom1.atom_time = t + 99
         self.assertTrue(esd.receive_atom(log_atom1))
         self.assertTrue(esd.learn_mode)
-        log_atom1.atom_time = t + 101
+        log_atom1.atom_time = t + 102
         self.assertTrue(esd.receive_atom(log_atom1))
         self.assertFalse(esd.learn_mode)
 

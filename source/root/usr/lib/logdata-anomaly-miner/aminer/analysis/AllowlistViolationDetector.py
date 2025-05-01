@@ -1,5 +1,5 @@
-"""
-This module defines a detector for log atoms not matching any allowlisted rule.
+"""This module defines a detector for log atoms not matching any allowlisted
+rule.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,15 +20,17 @@ from aminer.analysis.Rules import MatchRule
 
 
 class AllowlistViolationDetector(AtomHandlerInterface):
-    """
-    Objects of this class handle a list of allowlist rules.
-    They ensure, that each received log-atom is at least covered by a single allowlist rule. To avoid traversing the complete rule tree
-    more than once, the allowlist rules may have match actions attached that set off an alarm by themselves.
+    """Objects of this class handle a list of allowlist rules.
+
+    They ensure, that each received log-atom is at least covered by a
+    single allowlist rule. To avoid traversing the complete rule tree
+    more than once, the allowlist rules may have match actions attached
+    that set off an alarm by themselves.
     """
 
     def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_logline=True, log_resource_ignore_list=None):
-        """
-        Initialize the detector.
+        """Initialize the detector.
+
         @param allowlist_rules list of rules executed until the first rule matches.
         """
         super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, output_logline=output_logline,
@@ -45,8 +47,8 @@ class AllowlistViolationDetector(AtomHandlerInterface):
                 raise TypeError(msg)
 
     def receive_atom(self, log_atom):
-        """
-        Receive a parsed atom and the information about the parser match.
+        """Receive a parsed atom and the information about the parser match.
+
         @param log_atom atom with parsed data to check
         @return a boolean value if the log atom matches one of the rules.
         """
@@ -73,8 +75,9 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         return False
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         super().log_statistics(component_name)

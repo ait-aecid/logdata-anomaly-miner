@@ -1,5 +1,4 @@
-"""
-This module defines a matching parser model element.
+"""This module defines a matching parser model element.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,14 +17,15 @@ from collections import deque
 
 
 class ParserMatch:
-    """
-    Objects of this class store information about a complete model match.
-    Unlike the MatchElement, this class also provides fields to store information commonly used when dealing with the match.
+    """Objects of this class store information about a complete model match.
+
+    Unlike the MatchElement, this class also provides fields to store
+    information commonly used when dealing with the match.
     """
 
     def __init__(self, match_element: MatchElement):
-        """
-        Initialize the match.
+        """Initialize the match.
+
         @param match_element the root MatchElement from the parsing process.
         """
         if not isinstance(match_element, MatchElement):
@@ -50,7 +50,7 @@ class ParserMatch:
             match_list = stack.pop()
             counter_dict = {}
             for test_match in match_list:
-                if test_match.path in counter_dict.keys():  # skipcq: PYL-C0201
+                if test_match.path in counter_dict.keys():
                     counter_dict[test_match.path] = 0
                     result_dict[test_match.path] = []
                 else:

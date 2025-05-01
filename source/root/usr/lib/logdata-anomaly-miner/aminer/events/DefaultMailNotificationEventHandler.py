@@ -1,5 +1,4 @@
-"""
-This module defines the event handler for reporting via emails.
+"""This module defines the event handler for reporting via emails.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -26,70 +25,115 @@ from aminer.events.EventInterfaces import EventHandlerInterface
 from aminer.events.EventData import EventData
 
 
-_message_str = """From: %s
-To: %s
-Subject: %s
-
-%s
-"""
-
-
 class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredComponentInterface):
-    """
-    This class implements an event record listener.
-    It will pool received events, reduce the amount of events below the maximum number allowed per timeframe, create text representation
-    of received events and send them via "sendmail" transport.
+    """This class implements an event record listener.
+
+    It will pool received events, reduce the amount of events below the
+    maximum number allowed per timeframe, create text representation of
+    received events and send them via "sendmail" transport.
     """
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
-    CONFIG_KEY_MAIL_TARGET_ADDRESS = 'MailAlerting.TargetAddress'
-    CONFIG_KEY_MAIL_FROM_ADDRESS = 'MailAlerting.FromAddress'
-    CONFIG_KEY_MAIL_SUBJECT_PREFIX = 'MailAlerting.SubjectPrefix'
-    CONFIG_KEY_MAIL_ALERT_GRACE_TIME = 'MailAlerting.AlertGraceTime'
-    CONFIG_KEY_EVENT_COLLECT_TIME = 'MailAlerting.EventCollectTime'
-    CONFIG_KEY_ALERT_MIN_GAP = 'MailAlerting.MinAlertGap'
-    CONFIG_KEY_ALERT_MAX_GAP = 'MailAlerting.MaxAlertGap'
-    CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE = 'MailAlerting.MaxEventsPerMessage'
+    CONFIG_KEY_MAIL_TARGET_ADDRESS = "MailAlerting.TargetAddress"
+    CONFIG_KEY_MAIL_FROM_ADDRESS = "MailAlerting.FromAddress"
+    CONFIG_KEY_MAIL_SUBJECT_PREFIX = "MailAlerting.SubjectPrefix"
+    CONFIG_KEY_MAIL_ALERT_GRACE_TIME = "MailAlerting.AlertGraceTime"
+    CONFIG_KEY_EVENT_COLLECT_TIME = "MailAlerting.EventCollectTime"
+    CONFIG_KEY_ALERT_MIN_GAP = "MailAlerting.MinAlertGap"
+    CONFIG_KEY_ALERT_MAX_GAP = "MailAlerting.MaxAlertGap"
+    CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE = "MailAlerting.MaxEventsPerMessage"
 
     def __init__(self, analysis_context):
-        """
-        Initialize the event handler.
+        """Initialize the event handler.
+
         @param analysis_context used to get the aminer config and the config_properties.
         """
+        handler = DefaultMailNotificationEventHandler
         self.analysis_context = analysis_context
-        aminer_config = analysis_context.aminer_config
+        cp = analysis_context.aminer_config.config_properties
         # @see https://emailregex.com/
         is_email = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+$)|^[a-zA-Z0-9]+@localhost$")
-        self.recipient_address = shlex.quote(
-            aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_TARGET_ADDRESS))
+        self.recipient_address = shlex.quote(cp.get(handler.CONFIG_KEY_MAIL_TARGET_ADDRESS))
         if self.recipient_address is None:
-            msg = 'Cannot create e-mail notification listener without target address'
+            msg = "Cannot create e-mail notification listener without target address"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise Exception(msg)
-        self.sender_address = shlex.quote(
-            aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_FROM_ADDRESS))
-        if not is_email.match(self.recipient_address) or not is_email.match(self.sender_address):
-            msg = 'MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!'
-            logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            raise Exception(msg)
+            raise ValueError(msg)
 
-        self.subject_prefix = shlex.quote(
-            aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, 'aminer Alerts:'))
-        self.alert_grace_time_end = aminer_config.config_properties.get(
-            DefaultMailNotificationEventHandler.CONFIG_KEY_MAIL_ALERT_GRACE_TIME, 0)
-        self.event_collect_time = aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_EVENT_COLLECT_TIME, 10)
-        self.min_alert_gap = aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MIN_GAP, 600)
-        self.max_alert_gap = aminer_config.config_properties.get(DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MAX_GAP, 600)
-        self.max_events_per_message = aminer_config.config_properties.get(
-            DefaultMailNotificationEventHandler.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, 1000)
+        self.sender_address = shlex.quote(cp.get(handler.CONFIG_KEY_MAIL_FROM_ADDRESS))
+        if not is_email.match(self.recipient_address) or not is_email.match(self.sender_address):
+            msg = "MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        prefix = cp.get(handler.CONFIG_KEY_MAIL_SUBJECT_PREFIX, "AMiner Alerts:")
+        if not isinstance(prefix, str):
+            msg = "MailAlerting.SubjectPrefix must be of type string!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        self.subject_prefix = shlex.quote(prefix)
+
+        self.alert_grace_time_end = cp.get(handler.CONFIG_KEY_MAIL_ALERT_GRACE_TIME, 0)
+        if isinstance(self.alert_grace_time_end, bool) or not isinstance(self.alert_grace_time_end, (int, float)):
+            msg = "MailAlerting.AlertGraceTime must be of type int or float!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if self.alert_grace_time_end < 0:
+            msg = "MailAlerting.AlertGraceTime must be greater than zero!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         if self.alert_grace_time_end > 0:
             self.alert_grace_time_end += time.time()
+
+        self.event_collect_time = cp.get(handler.CONFIG_KEY_EVENT_COLLECT_TIME, 10)
+        if isinstance(self.event_collect_time, bool) or not isinstance(self.event_collect_time, (int, float)):
+            msg = "MailAlerting.EventCollectTime must be of type int or float!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if self.event_collect_time < 0:
+            msg = "MailAlerting.EventCollectTime must be greater than zero!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        self.min_alert_gap = cp.get(handler.CONFIG_KEY_ALERT_MIN_GAP, 600)
+        if isinstance(self.min_alert_gap, bool) or not isinstance(self.min_alert_gap, (int, float)):
+            msg = "MailAlerting.MinAlertGap must be of type int or float!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if self.min_alert_gap < 0:
+            msg = "MailAlerting.MinAlertGap must be greater than zero!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        self.max_alert_gap = cp.get(handler.CONFIG_KEY_ALERT_MAX_GAP, 600)
+        if isinstance(self.max_alert_gap, bool) or not isinstance(self.max_alert_gap, (int, float)):
+            msg = "MailAlerting.MaxAlertGap must be of type int or float!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if self.max_alert_gap < 0:
+            msg = "MailAlerting.MaxAlertGap must be greater than zero!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if self.max_alert_gap < self.min_alert_gap:
+            msg = "MailAlerting.MaxAlertGap must be greater than MailAlerting.MinAlertGap!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
+        self.max_events_per_message = cp.get(handler.CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, 1000)
+        if isinstance(self.max_events_per_message, bool) or not isinstance(self.max_events_per_message, (int, float)):
+            msg = "MailAlerting.MaxEventsPerMessage must be of type int or float!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if self.max_events_per_message < 1:
+            msg = "MailAlerting.MaxEventsPerMessage must be greater than zero!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+
         self.events_collected = 0
         self.event_collection_start_time = 0
         self.last_alert_time = 0
         self.next_alert_time = 0
         self.current_alert_gap = self.min_alert_gap
-        self.current_message = ''
+        self.current_message = ""
 
     def receive_event(self, event_type, event_message, sorted_loglines, event_data, log_atom, event_source):
         """
@@ -104,17 +148,17 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         @param log_atom the log atom which produced the event.
         @param event_source reference to detector generating the event.
         """
-        if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
+        if hasattr(event_source, "output_event_handlers") and event_source.output_event_handlers is not None and self not in \
                 event_source.output_event_handlers:
-            return
+            return True
         if self.alert_grace_time_end != 0:
             if self.alert_grace_time_end >= time.time():
-                return
+                return True
             self.alert_grace_time_end = 0
 
         component_name = self.analysis_context.get_name_by_component(event_source)
         if component_name in self.analysis_context.suppress_detector_list:
-            return
+            return True
 
         # Avoid too many calls to the operating system time()
         current_time = time.time()
@@ -148,9 +192,11 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
 
         if (self.next_alert_time != 0) and (current_time >= self.next_alert_time):
             self.send_notification(current_time)
+        return True
 
     def do_timer(self, trigger_time):
-        """Check exit status of previous mail sending procedures and check if alerts should be sent."""
+        """Check exit status of previous mail sending procedures and check if
+        alerts should be sent."""
         if (self.next_alert_time != 0) and (trigger_time >= self.next_alert_time):
             self.send_notification(trigger_time)
         return 10
@@ -159,14 +205,15 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         """Really send out the message."""
         if self.events_collected == 0:
             return
-        subject_text = f'{self.subject_prefix} Collected Events'
+        subject_text = f"{self.subject_prefix} Collected Events"
         if self.last_alert_time != 0:
-            subject_text += f' in the last {trigger_time - self.last_alert_time} seconds'
-        message = _message_str % (self.sender_address, self.recipient_address, subject_text, self.current_message)
+            subject_text += f" in the last {trigger_time - self.last_alert_time} seconds"
+        message = "From: %s\nTo: %s\nSubject: %s\n\n%s\n" % (
+            self.sender_address, self.recipient_address, subject_text, self.current_message)
         try:
             # timeout explicitly needs to be set None, because in python version < 3.7 socket.settimeout() sets the socket type
             # SOCK_NONBLOCKING and the code fails.
-            smtp_obj = SMTP('127.0.0.1', port=25, timeout=5)
+            smtp_obj = SMTP("127.0.0.1", port=25, timeout=5)
             smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
             smtp_obj.quit()
         except SMTPException as e:
@@ -174,6 +221,6 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             logging.getLogger(DEBUG_LOG_NAME).error(e)
         self.last_alert_time = trigger_time
         self.events_collected = 0
-        self.current_message = ''
+        self.current_message = ""
         self.next_alert_time = 0
         logging.getLogger(DEBUG_LOG_NAME).debug("%s sent notification.", self.__class__.__name__)

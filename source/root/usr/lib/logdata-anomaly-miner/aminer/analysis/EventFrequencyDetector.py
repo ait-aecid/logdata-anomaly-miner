@@ -1,5 +1,5 @@
-"""
-This module defines a detector for event and value frequency deviations.
+"""This module defines a detector for event and value frequency deviations.
+
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -15,7 +15,7 @@ import logging
 import numpy as np
 import math
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, \
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -35,8 +35,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                  set_lower_limit=None, set_upper_limit=None, persistence_id='Default', learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, season=None,
                  log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that values are analyzed by their combined
                occurrences. When no paths are specified, the events given by the full path list are analyzed.
@@ -65,7 +66,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         @param season the seasonality/periodicity of the time-series in seconds.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_time_initialized = None
         super().__init__(
             mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
@@ -108,6 +110,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 return False
         parser_match = log_atom.parser_match
         self.log_total += 1
+        if not self.stop_learning_time_initialized:
+            self.stop_learning_time_initialized = True
+            if self.stop_learning_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+            elif self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
 
         # Skip paths from ignore list.
         for ignore_path in self.ignore_list:
@@ -201,7 +209,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                                [""], event_data, log_atom, self)
             for log_ev in self.counts:
                 if log_ev not in self.last_seen_log:
-                    # In case that the AMiner was restarted, it is possible that no instance of the event has been seen; use current log atom instead
+                    # In case that the AMiner was restarted, it is possible that no instance of the event has been seen;
+                    # use current log atom instead
                     self.last_seen_log[log_ev] = log_atom
                 # Check if ranges should be initialised
                 if log_ev not in self.ranges:
@@ -248,9 +257,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency anomaly detected", sorted_log_lines,
                                                event_data, self.last_seen_log[log_ev], self)
-                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = max(
-                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                     # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
                     self.exceeded_range_frequency[log_ev] = False
 
@@ -297,9 +305,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency exceeds range for the first time",
                                            sorted_log_lines, event_data, log_atom, self)
-                if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_timestamp = max(
-                        self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                    self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
         # Get the id list if the scoring_path_list is set and save it for the anomaly message
         if len(self.scoring_path_list) > 0:
@@ -331,14 +338,13 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_success += 1
 
         # Switching the learn mode is placed at the end of receive_atom to ensure that last time window before switching is added to model
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the " + str(self.__class__.__name__) + ".")
             self.learn_mode = False
         return True
 
     def reset_counter(self, log_event, log_atom):
-        """Create count index for new time window"""
+        """Create count index for new time window."""
         if self.learn_mode is True:
             if len(self.counts[log_event]) <= self.num_windows + 1:
                 self.counts[log_event].append(0)
@@ -424,7 +430,8 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
-        # Persisted data contains lists of event-frequency pairs, i.e., [[<ev>, [<freq1, freq2>], [<ti1, ti2>]], [<ev>, [<freq1, freq2>], [<ti1, ti2>]], ...]
+        # Persisted data contains lists of event-frequency pairs, i.e.,
+        # [[<ev>, [<freq1, freq2>], [<ti1, ti2>]], [<ev>, [<freq1, freq2>], [<ti1, ti2>]], ...]
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
         if persistence_data is not None:
             for entry in persistence_data:
@@ -442,8 +449,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             logging.getLogger(DEBUG_LOG_NAME).debug(str(self.__class__.__name__) + " loaded persistence data.")
 
     def print_persistence_event(self, event_type, event_data):
-        """
-        Prints the persistency of component_name. Event_data specifies what information is outputed.
+        """Prints the persistency of component_name. Event_data specifies what
+        information is outputed.
+
         @return a message with information about the persistency.
         @throws Exception when the output for the event_data was not possible.
         """
@@ -491,8 +499,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         return string
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
-        """
-        Allowlist an event generated by this source using the information emitted when generating the event.
+        """Allowlist an event generated by this source using the information
+        emitted when generating the event.
+
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
@@ -509,8 +518,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         return f"Allowlisted path {event_data} in {event_type}."
 
     def blocklist_event(self, event_type, event_data, blocklisting_data):
-        """
-        Blocklist an event generated by this source using the information emitted when generating the event.
+        """Blocklist an event generated by this source using the information
+        emitted when generating the event.
+
         @return a message with information about blocklisting
         @throws Exception when blocklisting of this special event using given blocklisting_data was not possible.
         """
@@ -527,8 +537,9 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         return f"Blocklisted path {event_data} in {event_type}."
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         if AminerConfig.STAT_LEVEL == 1:
@@ -544,13 +555,15 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
         self.log_windows = 0
 
     def get_weight_analysis_field_path(self):
-        """Return the path to the list in the output of the detector which is weighted by the ScoringEventHandler."""
+        """Return the path to the list in the output of the detector which is
+        weighted by the ScoringEventHandler."""
         if self.scoring_path_list:
             return ["FrequencyData", "IdValues"]
         return []
 
     def get_weight_output_field_path(self):
-        """Return the path where the ScoringEventHandler adds the scorings in the output of the detector."""
+        """Return the path where the ScoringEventHandler adds the scorings in
+        the output of the detector."""
         if self.scoring_path_list:
             return ["FrequencyData", "Scoring"]
         return []

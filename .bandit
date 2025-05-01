@@ -1,0 +1,3 @@
+[bandit]
+exclude = aecid-testsuite/unit,.venv,/usr/lib/logdata-anomaly-miner/aecid-testsuite/unit,/usr/lib/logdata-anomaly-miner/.venv
+skips = B108

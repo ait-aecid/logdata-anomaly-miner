@@ -1,9 +1,7 @@
-"""
-This package contains various classes to build check rulesets.
-The ruleset also supports parallel rule evaluation, e.g. the two
-rules "A and B and C" and "A and B and D" will only peform the
-checks for A and B once, then performs check C and D and trigger
-a match action.
+"""This package contains various classes to build check rulesets. The ruleset
+also supports parallel rule evaluation, e.g. the two rules "A and B and C" and
+"A and B and D" will only peform the checks for A and B once, then performs
+check C and D and trigger a match action.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -38,14 +36,15 @@ class MatchAction(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def match_action(self, log_atom):
-        """
-        Invoke this method if a rule has matched.
+        """Invoke this method if a rule has matched.
+
         @param log_atom the LogAtom matching the rules.
         """
 
 
 class EventGenerationMatchAction(MatchAction):
-    """This generic match action forwards information about a rule match on parsed data to a list of event handlers."""
+    """This generic match action forwards information about a rule match on
+    parsed data to a list of event handlers."""
 
     def __init__(self, event_type, event_message, event_handlers):
         self.event_type = event_type
@@ -73,8 +72,8 @@ class EventGenerationMatchAction(MatchAction):
             raise ValueError(msg)
 
     def match_action(self, log_atom):
-        """
-        Invoke this method if a rule has matched.
+        """Invoke this method if a rule has matched.
+
         @param log_atom the LogAtom matching the rules.
         """
         event_data = {}
@@ -84,14 +83,15 @@ class EventGenerationMatchAction(MatchAction):
 
 
 class AtomFilterMatchAction(MatchAction, SubhandlerFilter):
-    """This generic match rule forwards all rule matches to a list of AtomHandlerInterface instances using the SubhandlerFilter."""
+    """This generic match rule forwards all rule matches to a list of
+    AtomHandlerInterface instances using the SubhandlerFilter."""
 
     def __init__(self, subhandler_list, stop_when_handled_flag=False):
         SubhandlerFilter.__init__(self, subhandler_list, stop_when_handled_flag)
 
     def match_action(self, log_atom):
-        """
-        Invoke this method if a rule has matched.
+        """Invoke this method if a rule has matched.
+
         @param log_atom the LogAtom matching the rules.
         """
         return self.receive_atom(log_atom)
@@ -105,10 +105,17 @@ class MatchRule(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
 
     def log_statistics(self, rule_id):
-        """Log statistics of an MatchRule. Override this method for more sophisticated statistics output of the MatchRule."""
+        """Log statistics of an MatchRule.
+
+        Override this method for more sophisticated statistics output of
+        the MatchRule.
+        """
         if AminerConfig.STAT_LEVEL > 0:
             logging.getLogger(STAT_LOG_NAME).info("Rule '%s' processed %d out of %d log atoms successfully in the last 60 minutes.",
                                                   rule_id, self.log_success, self.log_total)
@@ -131,8 +138,8 @@ class AndMatchRule(MatchRule):
     """This class provides a rule to match all subRules (logical and)."""
 
     def __init__(self, sub_rules, match_action=None):
-        """
-        Create the rule.
+        """Create the rule.
+
         @param match_action if None, no action is performed.
         """
         self.sub_rules = sub_rules
@@ -151,8 +158,9 @@ class AndMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """
-        Check if this rule matches. Rule evaluation will stop when the first match fails.
+        """Check if this rule matches. Rule evaluation will stop when the first
+        match fails.
+
         If a matchAction is attached to this rule, it will be invoked at the end of all checks.
         @return True when all subrules matched.
         """
@@ -178,8 +186,8 @@ class OrMatchRule(MatchRule):
     """This class provides a rule to match any subRules (logical or)."""
 
     def __init__(self, sub_rules, match_action=None):
-        """
-        Create the rule.
+        """Create the rule.
+
         @param match_action if None, no action is performed.
         """
         self.sub_rules = sub_rules
@@ -198,8 +206,9 @@ class OrMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """
-        Check if this rule matches. Rule evaluation will stop when the first match succeeds.
+        """Check if this rule matches. Rule evaluation will stop when the first
+        match succeeds.
+
         If a matchAction is attached to this rule, it will be invoked after the first match.
         @return True when any subrule matched.
         """
@@ -222,15 +231,17 @@ class OrMatchRule(MatchRule):
 
 
 class ParallelMatchRule(MatchRule):
-    """
-    This class is a rule testing all the subrules in parallel.
-    From the behaviour it is similar to the OrMatchRule, returning true if any subrule matches. The difference is that matching will not
-    stop after the first positive match. This does only make sense when all subrules have match actions associated.
+    """This class is a rule testing all the subrules in parallel.
+
+    From the behaviour it is similar to the OrMatchRule, returning true
+    if any subrule matches. The difference is that matching will not
+    stop after the first positive match. This does only make sense when
+    all subrules have match actions associated.
     """
 
     def __init__(self, sub_rules, match_action=None):
-        """
-        Create the rule.
+        """Create the rule.
+
         @param match_action if None, no action is performed.
         """
         self.sub_rules = sub_rules
@@ -249,8 +260,9 @@ class ParallelMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """
-        Check if any of the subrules rule matches. The matching procedure will not stop after the first positive match.
+        """Check if any of the subrules rule matches. The matching procedure
+        will not stop after the first positive match.
+
         If a matchAction is attached to this rule, it will be invoked at the end of all checks.
         @return True when any subrule matched.
         """
@@ -275,9 +287,11 @@ class ParallelMatchRule(MatchRule):
 
 
 class ValueDependentDelegatedMatchRule(MatchRule):
-    """
-    This class is a rule delegating rule checking to subrules depending on values found within the parser_match.
-    The result of this rule is the result of the selected delegation rule.
+    """This class is a rule delegating rule checking to subrules depending on
+    values found within the parser_match.
+
+    The result of this rule is the result of the selected delegation
+    rule.
     """
 
     def __init__(self, target_path_list, rule_lookup_dict, default_rule=None, match_action=None):
@@ -317,8 +331,8 @@ class ValueDependentDelegatedMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """
-        Try to locate a rule for delegation or use the default rule.
+        """Try to locate a rule for delegation or use the default rule.
+
         @return True when selected delegation rule matched.
         """
         self.log_total += 1
@@ -348,7 +362,8 @@ class ValueDependentDelegatedMatchRule(MatchRule):
 
 
 class NegationMatchRule(MatchRule):
-    """Match elements of this class return true when the subrule did not match."""
+    """Match elements of this class return true when the subrule did not
+    match."""
 
     def __init__(self, sub_rule, match_action=None):
         self.sub_rule = sub_rule
@@ -363,7 +378,10 @@ class NegationMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         if self.sub_rule.match(log_atom):
             return False
@@ -377,7 +395,8 @@ class NegationMatchRule(MatchRule):
 
 
 class PathExistsMatchRule(MatchRule):
-    """Match elements of this class return true when the given target_path was found in the parsed match data."""
+    """Match elements of this class return true when the given target_path was
+    found in the parsed match data."""
 
     def __init__(self, target_path, match_action=None):
         self.target_path = target_path
@@ -396,7 +415,10 @@ class PathExistsMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         if self.target_path in log_atom.parser_match.get_match_dictionary():
             if self.match_action is not None:
@@ -410,7 +432,8 @@ class PathExistsMatchRule(MatchRule):
 
 
 class ValueMatchRule(MatchRule):
-    """Match elements of this class return true when the given target_path exists and has exactly the given parsed value."""
+    """Match elements of this class return true when the given target_path
+    exists and has exactly the given parsed value."""
 
     def __init__(self, target_path, value, match_action=None):
         self.target_path = target_path
@@ -434,7 +457,10 @@ class ValueMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if test_value is not None:
@@ -459,7 +485,8 @@ class ValueMatchRule(MatchRule):
 
 
 class ValueListMatchRule(MatchRule):
-    """Match elements of this class return true when the given path exists and has exactly one of the values included in the value list."""
+    """Match elements of this class return true when the given path exists and
+    has exactly one of the values included in the value list."""
 
     def __init__(self, target_path, target_value_list, match_action=None):
         self.target_path = target_path
@@ -488,7 +515,10 @@ class ValueListMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path)
         if (test_value is not None) and (test_value.match_object in self.target_value_list):
@@ -503,7 +533,8 @@ class ValueListMatchRule(MatchRule):
 
 
 class ValueRangeMatchRule(MatchRule):
-    """Match elements of this class return true when the given target_path exists and the value is included in [lower, upper] range."""
+    """Match elements of this class return true when the given target_path
+    exists and the value is included in [lower, upper] range."""
 
     def __init__(self, target_path, lower_limit, upper_limit, match_action=None):
         self.target_path = target_path
@@ -536,7 +567,10 @@ class ValueRangeMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
         if test_value is None:
@@ -554,7 +588,8 @@ class ValueRangeMatchRule(MatchRule):
 
 
 class StringRegexMatchRule(MatchRule):
-    """Elements of this class return true when the given path exists and the string repr of the value matches the regular expression."""
+    """Elements of this class return true when the given path exists and the
+    string repr of the value matches the regular expression."""
 
     def __init__(self, target_path, match_regex, match_action=None):
         self.target_path = target_path
@@ -578,7 +613,10 @@ class StringRegexMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         # Use the class object as marker for nonexisting entries
         test_value = log_atom.parser_match.get_match_dictionary().get(self.target_path, None)
@@ -594,10 +632,12 @@ class StringRegexMatchRule(MatchRule):
 
 
 class ModuloTimeMatchRule(MatchRule):
-    """
-    Match elements of this class return true when the following conditions are met.
-    The given target_path exists, denotes a datetime object and the seconds since 1970 from that date modulo the given value are included in
-    [lower, upper] range.
+    """Match elements of this class return true when the following conditions
+    are met.
+
+    The given target_path exists, denotes a datetime object and the
+    seconds since 1970 from that date modulo the given value are
+    included in [lower, upper] range.
     """
 
     def __init__(self, target_path, seconds_modulo, lower_limit, upper_limit, match_action=None, tzinfo=None):
@@ -663,7 +703,10 @@ class ModuloTimeMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         test_value = None
         if self.target_path is None:
@@ -686,9 +729,11 @@ class ModuloTimeMatchRule(MatchRule):
 
 
 class ValueDependentModuloTimeMatchRule(MatchRule):
-    """
-    Match elements of this class return true when the following conditions are met.
-    The given path exists, denotes a datetime object and the seconds since 1970 rom that date modulo the given value are included in a
+    """Match elements of this class return true when the following conditions
+    are met.
+
+    The given path exists, denotes a datetime object and the seconds
+    since 1970 rom that date modulo the given value are included in a
     [lower, upper] range selected by values from the match.
     """
 
@@ -760,7 +805,10 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         match_dict = log_atom.parser_match.get_match_dictionary()
         value_list = []
@@ -795,9 +843,11 @@ class ValueDependentModuloTimeMatchRule(MatchRule):
 
 
 class IPv4InRFC1918MatchRule(MatchRule):
-    """
-    Match elements of this class return true when the path matches and contains a valid IPv4 address from the RFC1918 private IP ranges.
-    This could also be done by distinct range match elements, but as this kind of matching is common, have an own element for it.
+    """Match elements of this class return true when the path matches and
+    contains a valid IPv4 address from the RFC1918 private IP ranges.
+
+    This could also be done by distinct range match elements, but as
+    this kind of matching is common, have an own element for it.
     """
 
     def __init__(self, target_path, match_action=None):
@@ -817,7 +867,10 @@ class IPv4InRFC1918MatchRule(MatchRule):
             raise TypeError(msg)
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         match_element = log_atom.parser_match.get_match_dictionary().get(self.target_path)
         if (match_element is None) or not isinstance(match_element.match_object, int):
@@ -835,10 +888,12 @@ class IPv4InRFC1918MatchRule(MatchRule):
 
 
 class DebugMatchRule(MatchRule):
-    """
-    This rule can be inserted into a normal ruleset just to see when a match attempt is made.
-    It just prints out the current log_atom that is evaluated. The match action is always invoked when defined, no matter which match
-    result is returned.
+    """This rule can be inserted into a normal ruleset just to see when a match
+    attempt is made.
+
+    It just prints out the current log_atom that is evaluated. The match
+    action is always invoked when defined, no matter which match result
+    is returned.
     """
 
     def __init__(self, debug_match_result=False, match_action=None):
@@ -846,7 +901,10 @@ class DebugMatchRule(MatchRule):
         self.match_action = match_action
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         print(f'Rules.DebugMatchRule: triggered while handling "{repr(log_atom.parser_match.match_element.match_string)}"',
               file=sys.stderr)
@@ -860,14 +918,15 @@ class DebugMatchRule(MatchRule):
 
 
 class DebugHistoryMatchRule(MatchRule):
-    """
-    This rule can be inserted into a normal ruleset just to see when a match attempt is made.
+    """This rule can be inserted into a normal ruleset just to see when a match
+    attempt is made.
+
     It just adds the evaluated log_atom to a ObjectHistory.
     """
 
     def __init__(self, object_history=None, debug_match_result=False, match_action=None):
-        """
-        Create a DebugHistoryMatchRule object.
+        """Create a DebugHistoryMatchRule object.
+
         @param object_history use this ObjectHistory to collect the LogAtoms. When None, a default LogarithmicBackoffHistory for 10 items.
         """
         if object_history is None:
@@ -881,7 +940,10 @@ class DebugHistoryMatchRule(MatchRule):
         self.match_action = match_action
 
     def match(self, log_atom):
-        """Check if this rule matches. On match an optional match_action could be triggered."""
+        """Check if this rule matches.
+
+        On match an optional match_action could be triggered.
+        """
         self.log_total += 1
         self.object_history.add_object(log_atom)
         if self.match_action is not None:

@@ -110,28 +110,28 @@ class RuleTest(TestBase):
         match_context = DummyMatchContext(b"192.168.0.0")
         match_element = fdme_v4.get_match_element("match", match_context)
         match_element.match_object = 3232235520
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, amr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, amr)
         self.assertTrue(amr.match(log_atom))
 
         amr = AndMatchRule([pemr_ipv6, ipv4mr])
         match_context = DummyMatchContext(b"192.168.0.0")
         match_element = fdme_v4.get_match_element("match", match_context)
         match_element.match_object = 3232235520
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, amr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, amr)
         self.assertFalse(amr.match(log_atom))
 
         amr = AndMatchRule([pemr_ipv6, ipv4mr])
         match_context = DummyMatchContext(b"2001:4860:4860::8888")
         match_element = fdme_v6.get_match_element("match", match_context)
         match_element.match_object = 301989888
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, amr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, amr)
         self.assertFalse(amr.match(log_atom))
 
         amr = AndMatchRule([pemr_ipv4, ipv4mr])
         match_context = DummyMatchContext(b"2001:4860:4860::8888")
         match_element = fdme_v6.get_match_element("match", match_context)
         match_element.match_object = 301989888
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, amr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, amr)
         self.assertFalse(amr.match(log_atom))
 
         self.assertRaises(ValueError, AndMatchRule, [pemr_ipv6])
@@ -174,28 +174,28 @@ class RuleTest(TestBase):
         match_context = DummyMatchContext(b"192.168.0.0")
         match_element = fdme_v4.get_match_element("match", match_context)
         match_element.match_object = 3232235520
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, omr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, omr)
         self.assertTrue(omr.match(log_atom))
 
         omr = OrMatchRule([pemr_ipv6, ipv4mr])
         match_context = DummyMatchContext(b"192.168.0.0")
         match_element = fdme_v4.get_match_element("match", match_context)
         match_element.match_object = 3232235520
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, omr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, omr)
         self.assertTrue(omr.match(log_atom))
 
         omr = OrMatchRule([pemr_ipv6, ipv4mr])
         match_context = DummyMatchContext(b"2001:4860:4860::8888")
         match_element = fdme_v6.get_match_element("match", match_context)
         match_element.match_object = 301989888
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, omr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, omr)
         self.assertTrue(omr.match(log_atom))
 
         omr = OrMatchRule([pemr_ipv4, ipv4mr])
         match_context = DummyMatchContext(b"2001:4860:4860::8888")
         match_element = fdme_v6.get_match_element("match", match_context)
         match_element.match_object = 301989888
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, omr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, omr)
         self.assertFalse(omr.match(log_atom))
 
         self.assertRaises(ValueError, OrMatchRule, [pemr_ipv6])
@@ -238,28 +238,28 @@ class RuleTest(TestBase):
         match_context = DummyMatchContext(b"192.168.0.0")
         match_element = fdme_v4.get_match_element("match", match_context)
         match_element.match_object = 3232235520
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, omr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, omr)
         self.assertTrue(omr.match(log_atom))
 
         omr = ParallelMatchRule([pemr_ipv6, ipv4mr])
         match_context = DummyMatchContext(b"192.168.0.0")
         match_element = fdme_v4.get_match_element("match", match_context)
         match_element.match_object = 3232235520
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, omr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, omr)
         self.assertTrue(omr.match(log_atom))
 
         omr = ParallelMatchRule([pemr_ipv6, ipv4mr])
         match_context = DummyMatchContext(b"2001:4860:4860::8888")
         match_element = fdme_v6.get_match_element("match", match_context)
         match_element.match_object = 301989888
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, omr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, omr)
         self.assertTrue(omr.match(log_atom))
 
         omr = ParallelMatchRule([pemr_ipv4, ipv4mr])
         match_context = DummyMatchContext(b"2001:4860:4860::8888")
         match_element = fdme_v6.get_match_element("match", match_context)
         match_element.match_object = 301989888
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), t, omr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), t, omr)
         self.assertFalse(omr.match(log_atom))
 
         self.assertRaises(ValueError, ParallelMatchRule, [pemr_ipv6])
@@ -305,24 +305,24 @@ class RuleTest(TestBase):
 
         match_context = DummyMatchContext(alphabet)
         match_element = fdme1.get_match_element("match", match_context)
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, vddmr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, vddmr)
         self.assertTrue(vddmr.match(log_atom))
 
         match_context = DummyMatchContext(b"192.168.0.0")
         match_element = fdme3.get_match_element("match", match_context)
         match_element.match_object = 3232235520
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, vddmr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, vddmr)
         self.assertTrue(vddmr.match(log_atom))
 
         match_context = DummyMatchContext(b".There are 26 letters in the english alphabet")
         match_element = fdme2.get_match_element("match", match_context)
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, vddmr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, vddmr)
         self.assertFalse(vddmr.match(log_atom))
 
         match_context = DummyMatchContext(b"192.168.0.1")
         match_element = fdme4.get_match_element("match", match_context)
         match_element.match_object = 3232235521
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, vddmr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, vddmr)
         self.assertFalse(vddmr.match(log_atom))
 
         self.assertRaises(ValueError, ValueDependentDelegatedMatchRule, [], {(alphabet,): srmr})
@@ -382,7 +382,7 @@ class RuleTest(TestBase):
 
         match_context = DummyMatchContext(fixed_string)
         match_element = fdme.get_match_element("match", match_context)
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, pemr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, pemr)
         self.assertTrue(pemr.match(log_atom))
         self.assertFalse(nmr.match(log_atom))
 
@@ -421,12 +421,12 @@ class RuleTest(TestBase):
 
         match_context = DummyMatchContext(data)
         match_element = fdme1.get_match_element("match", match_context)
-        log_atom1 = LogAtom(match_context.match_data, ParserMatch(match_element), t, pemr)
+        log_atom1 = LogAtom(match_element.match_string, ParserMatch(match_element), t, pemr)
         self.assertTrue(pemr.match(log_atom1))
 
         match_context = DummyMatchContext(data)
         match_element = fdme2.get_match_element("match", match_context)
-        log_atom2 = LogAtom(match_context.match_data, ParserMatch(match_element), t, pemr)
+        log_atom2 = LogAtom(match_element.match_string, ParserMatch(match_element), t, pemr)
         self.assertFalse(pemr.match(log_atom2))
 
         self.assertRaises(ValueError, PathExistsMatchRule, "")
@@ -462,12 +462,12 @@ class RuleTest(TestBase):
 
         match_context = DummyMatchContext(data1)
         match_element = fdme1.get_match_element("match", match_context)
-        log_atom1 = LogAtom(match_context.match_data, ParserMatch(match_element), 1, vmr)
+        log_atom1 = LogAtom(match_element.match_string, ParserMatch(match_element), 1, vmr)
         self.assertTrue(vmr.match(log_atom1))
 
         match_context = DummyMatchContext(data2)
         match_element = fdme2.get_match_element("match", match_context)
-        log_atom2 = LogAtom(match_context.match_data, ParserMatch(match_element), 1, vmr)
+        log_atom2 = LogAtom(match_element.match_string, ParserMatch(match_element), 1, vmr)
         self.assertFalse(vmr.match(log_atom2))
 
         self.assertRaises(ValueError, ValueMatchRule, "", b"value")
@@ -615,12 +615,12 @@ class RuleTest(TestBase):
 
         match_context = DummyMatchContext(alphabet)
         match_element = fdme1.get_match_element("match", match_context)
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, srmr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, srmr)
         self.assertTrue(srmr.match(log_atom))
 
         match_context = DummyMatchContext(b"--> There are 26 letters in the english alphabet")
         match_element = fdme2.get_match_element("match", match_context)
-        log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, srmr)
+        log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, srmr)
         self.assertFalse(srmr.match(log_atom))
 
         self.assertRaises(ValueError, StringRegexMatchRule, "", regex)
@@ -867,7 +867,7 @@ class RuleTest(TestBase):
             match_element = fdme.get_match_element("match", match_context)
             x = [int(x.decode()) for x in ip.split(b".")]
             match_element.match_object = int(x[0] * math.pow(256, 3) + x[1] * math.pow(256, 2) + x[2] * math.pow(256, 1) + x[3])
-            log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, ipv4mr)
+            log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, ipv4mr)
             self.assertTrue(ipv4mr.match(log_atom))
 
         for ip in public_addresses:
@@ -876,7 +876,7 @@ class RuleTest(TestBase):
             match_element = fdme.get_match_element("match", match_context)
             x = [int(x.decode()) for x in ip.split(b".")]
             match_element.match_object = int(x[0] * math.pow(256, 3) + x[1] * math.pow(256, 2) + x[2] * math.pow(256, 1) + x[3])
-            log_atom = LogAtom(match_context.match_data, ParserMatch(match_element), 1, ipv4mr)
+            log_atom = LogAtom(match_element.match_string, ParserMatch(match_element), 1, ipv4mr)
             self.assertFalse(ipv4mr.match(log_atom))
 
         self.assertRaises(ValueError, IPv4InRFC1918MatchRule, "")

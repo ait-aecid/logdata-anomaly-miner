@@ -1,5 +1,4 @@
-"""
-This module defines a model element that represents an IP address.
+"""This module defines a model element that represents an IP address.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,8 +19,8 @@ class IpAddressDataModelElement(ModelElementInterface):
     """This class defines a model element that matches an IP address."""
 
     def __init__(self, element_id: str, ipv6: bool = False):
-        """
-        Create an element to match IP addresses.
+        """Create an element to match IP addresses.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param ipv6 if True, IPv6 addresses are parsed, IPv4 addresses are parsed otherwise.
         """
@@ -46,8 +45,9 @@ class IpAddressDataModelElement(ModelElementInterface):
             self.extract = extract_ipv6_address
 
     def get_match_element(self, path: str, match_context):
-        """
-        Read an IP address at the current data position. When found, the match_object will be.
+        """Read an IP address at the current data position.
+
+        When found, the match_object will be.
         Allowed formats for IPv6 addresses are defined in RFC4291 section 2.2.
         However, trailing IPv4 addresses (for example ::FFFF:129.144.52.38) are not allowed.
         """

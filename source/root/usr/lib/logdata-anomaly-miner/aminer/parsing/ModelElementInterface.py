@@ -1,4 +1,5 @@
-"""This module defines various interfaces for log atom parsing and namespace shortcuts to the ModelElements.
+"""This module defines various interfaces for log atom parsing and namespace
+shortcuts to the ModelElements.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -9,7 +10,6 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
-
 """
 
 import abc
@@ -35,8 +35,8 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
     """This is the superinterface of all model elements."""
 
     def __init__(self, element_id, **kwargs):
-        """
-        Initialize the ModelElement.
+        """Initialize the ModelElement.
+
         @param element_id an identifier for the ModelElement which is shown in the path.
         @param date_format, is a byte string that represents the date format for parsing, see Python strptime specification for
                available formats. Supported format specifiers are:
@@ -493,8 +493,9 @@ class ModelElementInterface(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_match_element(self, path, match_context):
-        """
-        Try to find a match on given data for this model element and all its children.
+        """Try to find a match on given data for this model element and all its
+        children.
+
         When a match is found, the matchContext is updated accordingly.
         @param path the model path to the parent model element invoking this method.
         @param match_context an instance of MatchContext class holding the data context to match against.

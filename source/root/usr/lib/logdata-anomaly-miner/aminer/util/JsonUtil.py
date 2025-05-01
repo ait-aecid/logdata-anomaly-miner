@@ -1,5 +1,5 @@
-"""
-This module converts json strings to object structures also supporting byte array structures.
+"""This module converts json strings to object structures also supporting byte
+array structures.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software

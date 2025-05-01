@@ -829,6 +829,7 @@ Parser:
 Input:
         timestamp_paths: ["/model/DailyCron/DTM"]
         adjust_timestamps: True
+        use_real_time: True
 
 Analysis:
         - type: TimestampsUnsortedDetector

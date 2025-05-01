@@ -1,8 +1,8 @@
-"""
-This module defines an event handler that adds a confidence score to the anomaly output.
-The score is calculated through analysis of a list of strings defined in the detector through the function get_weight_analysis_field_path
-and weights the single strings based on the weights dictionary.
-The weights can optionally be automatically calculated.
+"""This module defines an event handler that adds a confidence score to the
+anomaly output. The score is calculated through analysis of a list of strings
+defined in the detector through the function get_weight_analysis_field_path and
+weights the single strings based on the weights dictionary. The weights can
+optionally be automatically calculated.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -16,13 +16,17 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import copy
+import logging
 
 from aminer.events.EventInterfaces import EventHandlerInterface
 from aminer.events.EventInterfaces import EventSourceInterface
+from aminer.AminerConfig import DEBUG_LOG_NAME
+from aminer.AnalysisChild import AnalysisContext
 
 
 class ScoringEventHandler(EventHandlerInterface):
-    """This class implements an event record listener, that will add a confidence score to the anomaly output."""
+    """This class implements an event record listener, that will add a
+    confidence score to the anomaly output."""
 
     def __init__(self, event_handlers, analysis_context, weights=None, auto_weights=False, auto_weights_history_length=1000):
         """
@@ -35,6 +39,34 @@ class ScoringEventHandler(EventHandlerInterface):
         @param auto_weights_history_length integer value that specifies the number of values that are considered in the calculation of the
         weights.
         """
+        if not event_handlers:
+            msg = "event_handlers must not be empty or None."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(event_handlers, list) or any(not isinstance(x, EventHandlerInterface) for x in event_handlers):
+            msg = "event_handlers must be a list of EventHandlerInterface."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(analysis_context, AnalysisContext):
+            msg = "analysis_child must be of type AnalysisChild."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if weights is not None and (not isinstance(weights, dict) or any(not isinstance(x, (int, float)) for x in list(weights.values()))):
+            msg = "weights must be a dictionary with numerical values."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if not isinstance(auto_weights, bool):
+            msg = "auto_weights must be of type boolean."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if isinstance(auto_weights_history_length, bool) or not isinstance(auto_weights_history_length, int):
+            msg = "auto_weights must be of type boolean."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if auto_weights_history_length < 1:
+            msg = "auto_weights must be greater than zero."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.analysis_context = analysis_context
         self.event_handlers = event_handlers
         self.weights = weights
@@ -47,10 +79,7 @@ class ScoringEventHandler(EventHandlerInterface):
 
     def receive_event(self, event_type, event_message, sorted_log_lines, event_data, log_atom, event_source):
         """Receive information about a detected event."""
-        # Initialize path_valid variable that states if the path to the analysis field is valid
         path_valid = True
-
-        # Get the path to the analysis and output fields from the event_source or set the paths to empty lists if not
         if isinstance(event_source, EventSourceInterface):
             analysis_field_path = event_source.get_weight_analysis_field_path()
             output_field_path = event_source.get_weight_output_field_path()
@@ -58,41 +87,34 @@ class ScoringEventHandler(EventHandlerInterface):
             analysis_field_path = []
             output_field_path = []
 
-        # Check if the analysis field path is not empty and get the analyis list or set path_valid to False
-        if analysis_field_path == []:
+        if not analysis_field_path:
             path_valid = False
         else:
-            analyis_list = event_data
-            # Traverse the path of the analysis_field_path in event_data
+            analysis_list = event_data
             for path in analysis_field_path:
-                if path in analyis_list:
-                    # Go a step in the event_data
-                    analyis_list = analyis_list[path]
+                if path in analysis_list:
+                    analysis_list = analysis_list[path]
                 else:
-                    # Set path_valid to False and stop if the path does not match the structure of event_data
                     path_valid = False
                     break
 
         # Calculate and add the confidence to the output if the path is valid
         if path_valid:
             event_data_confidence = event_data
-            # Traverse the path of the output_field_path in event_data
             for path in output_field_path[:-1]:
-                # Create a new dictionary if the path does not exist
                 if path not in event_data_confidence:
                     event_data_confidence[path] = {}
-                # Go a step in the event_data
                 event_data_confidence = event_data_confidence[path]
 
             # Calculate the absolute confidence
-            confidence_absolut = sum(self.get_weight(val) for val in analyis_list)
-            # Add the the absolute and mean confidence to the message
+            confidence_absolut = sum(self.get_weight(val) for val in analysis_list)
+            # Add the absolute and mean confidence to the message
             event_data_confidence[output_field_path[-1]] = {'confidence_absolut': confidence_absolut,
-                                                            'confidence_mean': confidence_absolut / len(analyis_list)}
+                                                            'confidence_mean': confidence_absolut / len(analysis_list)}
 
             # Update the history list and increase the count index
             if self.auto_weights:
-                self.history_list[self.history_list_index] = analyis_list
+                self.history_list[self.history_list_index] = analysis_list
                 self.history_list_index += 1
                 if self.history_list_index >= self.auto_weights_history_length:
                     self.history_list_index %= self.auto_weights_history_length
@@ -111,7 +133,7 @@ class ScoringEventHandler(EventHandlerInterface):
             # Return the specified weight if the value is in the weight list
             return self.weights[value]
         if not self.auto_weights:
-            # Return 0.5 if the value is not in the weigth list and the weights are not automatically calculated
+            # Return 0.5 if the value is not in the weight list and the weights are not automatically calculated
             return 0.5
         # Else calculate the weight through 10 / (10 + number of value appearances)
         return 10 / (10 + sum(value in value_list for value_list in self.history_list))

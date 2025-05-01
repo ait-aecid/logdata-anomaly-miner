@@ -34,7 +34,7 @@ config_properties['AminerGroup'] = 'aminer'
 # to the 'AminerUser' but not group/world readable. On violation,
 # py will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'  # skipcq: BAN-B108
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
@@ -113,7 +113,7 @@ def build_analysis_pipeline(analysis_context):
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_path_list=[''])
+        parsing_model, [atom_filter], anomaly_event_handlers, default_timestamp_path_list=[''], use_real_time=True)
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler

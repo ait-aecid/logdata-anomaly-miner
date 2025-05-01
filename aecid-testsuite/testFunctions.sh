@@ -63,10 +63,11 @@ function runAminerUntilEnd() {
   LOGFILE=$2
   REP_PATH=$3
   CFG_PATH=$4
+  USER=`stat -c '%U' $CFG_PATH`
   if [[ $CFG_PATH == *.py ]]; then
-    echo "config_properties['Core.PersistencePeriod'] = 1" | sudo tee -a $CFG_PATH > /dev/null
+    echo "config_properties['Core.PersistencePeriod'] = 1" | sudo -u $USER tee -a $CFG_PATH > /dev/null
   elif [[ $CFG_PATH == *.yml ]]; then
-    echo "Core.PersistencePeriod: 1" | sudo tee -a $CFG_PATH > /dev/null
+    echo "Core.PersistencePeriod: 1" | sudo -u $USER tee -a $CFG_PATH > /dev/null
   else
     return 2
   fi
@@ -93,7 +94,7 @@ function runAminerUntilEnd() {
   sleep 3
   sudo sed -i '$d' $CFG_PATH # delete PersistencePeriod config in file.
   if [ $# -lt 6 ]; then
-    sudo pkill -x aminer
+    sudo pkill -x aminer.py
     wait $PID
     RES=$?
     return $RES

@@ -10,6 +10,7 @@ void setBuildStatus(String message, String state) {
 
 def  ubuntu20image = false
 def  ubuntu22image = false
+def  ubuntu24image = false
 def  debianbusterimage = false
 def  debianbullseyeimage = false
 def  debianbookwormimage = false
@@ -36,6 +37,26 @@ pipeline {
                 stage("Mypy"){
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runMypy"
+                    }
+                }
+                stage("Bandit"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runBandit"
+                    }
+                }
+                stage("Vulture"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runVulture"
+                    }
+                }
+                stage("Flake8"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runFlake8"
+                    }
+                }
+                stage("Mccabe"){
+                    steps {
+                        sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runMccabe"
                     }
                 }
                 stage("Release String Check"){
@@ -220,7 +241,7 @@ pipeline {
                         script {
                             productionimage = true
                         }
-                        sh "docker build -f Dockerfile -t aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
+                        sh "docker build -f Dockerfile -t aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development ."
                         sh "mkdir -p /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
                         sh "cp aecid-testsuite/demo/aminer/access.log /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
                         sh "cp -r source/root/etc/aminer /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
@@ -229,6 +250,26 @@ pipeline {
                         sh "cd /tmp/production-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
+                }
+                stage("Ubuntu 24.04 Docker") {
+                    when {
+                        expression {
+                            BRANCH_NAME == "main" || BRANCH_NAME == "development"
+                        }
+                    }
+                    steps {
+                        script {
+                            ubuntu24image = true
+                        }
+                        sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-ubuntu-2404:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=ubuntu:24.04 ."
+                        sh "mkdir -p /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
+                        sh "cp aecid-testsuite/demo/aminer/access.log /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
+                        sh "cp -r source/root/etc/aminer /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
+                        sh "cp /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
+                        sh "cp /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "cd /tmp/ubuntu-2404-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                        sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-ubuntu-2404:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
+                   }
                 }
                 stage("Ubuntu 22.04 Docker") {
                     when {

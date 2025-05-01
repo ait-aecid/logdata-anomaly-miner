@@ -9,7 +9,7 @@
 
 ## Reporting a Vulnerability
 
-Please email reports about any security related issues you find to aecid@ait.ac.at. This mail is delivered to a small developer team. Your email will be acknowledged within one business day, and you'll receive a more detailed response to your email within 7 days indicating the next steps in handling your report. 
+Please email reports about any security related issues you find to aecid@ait.ac.at. This mail is delivered to a small developer team. Your email will be acknowledged within one business day, and you'll receive a more detailed response to your email within 7 days indicating the next steps in handling your report.
 
 Please use a descriptive subject line for your report email. After the initial reply to your report, our team will endeavor to keep you informed of the progress being made towards a fix and announcement.
 

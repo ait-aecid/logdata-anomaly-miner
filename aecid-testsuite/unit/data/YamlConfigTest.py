@@ -67,7 +67,7 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
         self.assertIsNotNone(aminer_config.yaml_data)
 
-    def test2_load_notexistent_yaml_file(self):
+    def test2_load_nonexistent_yaml_file(self):
         """Tries to load a nonexistent yaml file. A FileNotFoundError is expected."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
@@ -92,7 +92,7 @@ class YamlConfigTest(TestBase):
             aminer_config.load_yaml('unit/data/configfiles/invalid_schema.yml')
 
     def test5_analysis_pipeline_working_config(self):
-        """This test builds a analysis_pipeline from a valid yaml-file."""
+        """This test builds an analysis pipeline from a valid yaml-file."""
         spec = importlib.util.spec_from_file_location('aminer_config', '/usr/lib/logdata-anomaly-miner/aminer/YamlConfig.py')
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
@@ -418,6 +418,7 @@ class YamlConfigTest(TestBase):
         del yml_config_properties['Analysis']
         del yml_config_properties['EventHandlers']
         del yml_config_properties['LearnMode']
+        del yml_config_properties['LogLineIdentifier']
         del yml_config_properties['LogResourceList'][0]['json']
         del yml_config_properties['LogResourceList'][0]['xml']
 
@@ -447,7 +448,7 @@ class YamlConfigTest(TestBase):
         self.assertEqual(yml_config_properties, py_context.aminer_config.config_properties)
         # there actually is no easy way to compare aminer components as they do not implement the __eq__ method.
         self.assertEqual(len(yml_registered_components), len(py_registered_components))
-        for i in range(2, len(yml_registered_components)):  # skipcq: PTC-W0060
+        for i in range(2, len(yml_registered_components)):
             self.assertEqual(type(yml_registered_components[i]), type(py_registered_components[i]))
         self.assertEqual(yml_registered_components_by_name.keys(), py_registered_components_by_name.keys())
         for name in yml_registered_components_by_name.keys():
@@ -478,7 +479,7 @@ class YamlConfigTest(TestBase):
         aminer_config.load_yaml('unit/data/configfiles/template_config.yml')
         context = AnalysisContext(aminer_config)
         context.build_analysis_pipeline()
-        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')  # skipcq: BAN-B108
+        self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.name, '/tmp/streamPrinter.txt')
         self.assertEqual(context.atomizer_factory.event_handler_list[0].stream.mode, 'w+')
 
     def test20_suppress_output(self):
@@ -486,7 +487,7 @@ class YamlConfigTest(TestBase):
         Check if the suppress property and SuppressNewMatchPathDetector are working as expected.
         This test only includes the StreamPrinterEventHandler.
         """
-        __expected_string1 = '%s New path(es) detected\n%s: "%s" (%d lines)\n  %s\n\n'
+        __expected_string1 = '%s New path(s) detected\n%s: "%s" (%d lines)\n  %s\n\n'
         t = time()
         fixed_dme = FixedDataModelElement('s1', b' pid=')
         match_context_fixed_dme = MatchContext(b' pid=')
@@ -598,7 +599,6 @@ class YamlConfigTest(TestBase):
         self.assertRaises(ValueError, aminer_config.load_yaml, 'unit/data/configfiles/wrong_email.yml')
 
         with open('/usr/lib/logdata-anomaly-miner/aminer/schemas/BaseSchema.py', 'r') as sma:
-            # skipcq: PYL-W0123
             base_schema = eval(sma.read())
         self.assertEqual(base_schema['MailAlerting.TargetAddress']['regex'], base_schema['MailAlerting.FromAddress']['regex'])
 
@@ -777,9 +777,9 @@ class YamlConfigTest(TestBase):
         self.assertFalse(nmpd2.receive_atom(log_atom1))
         self.assertTrue(nmpd2.receive_atom(log_atom2))
         self.assertEqual(self.output_stream.getvalue(), datetime.fromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S') +
-                         " New path(es) detected\nNewMatchPathDetector: \"Detector1\" (1 lines)\n  /a: a\n['/a']\na\n\n" +
+                         " New path(s) detected\nNewMatchPathDetector: \"Detector1\" (1 lines)\n  /a: a\n['/a']\na\n\n" +
                          datetime.fromtimestamp(t+1).strftime('%Y-%m-%d %H:%M:%S') +
-                         " New path(es) detected\nNewMatchPathDetector: \"Detector2\" (1 lines)\n  /b: b\n['/b']\nb\n\n")
+                         " New path(s) detected\nNewMatchPathDetector: \"Detector2\" (1 lines)\n  /b: b\n['/b']\nb\n\n")
         self.reset_output_stream()
 
     def run_empty_components_tests(self, context):

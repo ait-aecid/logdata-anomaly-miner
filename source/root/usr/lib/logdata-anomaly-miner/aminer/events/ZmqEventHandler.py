@@ -1,5 +1,4 @@
-"""
-This module defines an event handler that forwards anomalies to ZeroMQ.
+"""This module defines an event handler that forwards anomalies to ZeroMQ.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -14,32 +13,51 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import logging
+import zmq
+import time
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.events.EventInterfaces import EventHandlerInterface
-import zmq
 
 
 class ZmqEventHandler(EventHandlerInterface):
-    """This class implements an event record listener, that will forward Json-objects to a ZeroMQ queue."""
+    """This class implements an event record listener, that will forward Json-
+    objects to a ZeroMQ queue."""
 
     def __init__(self, analysis_context, topic=None, url="ipc:///tmp/aminer"):
-        """
-        Initialize the event handler.
+        """Initialize the event handler.
+
         @param analysis_context the analysis context used to get the component.
         @param topic the topic used in the Zero Message Queue.
         @param url the internal inter process communication channel.
         """
+        if not isinstance(url, (str, bytes)):
+            msg = "url has to be of the type string or bytes."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if url is not None and len(url) == 0:
+            msg = "url must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if not isinstance(topic, str):
+            msg = "topic has to be of the type string."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if topic is not None and len(topic) == 0:
+            msg = "topic must not be empty."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.analysis_context = analysis_context
         self.url = url
         self.topic = topic
-        self.producer = None
-        self.context = None
-        self.zmq_imported = False
+        self.context = zmq.Context()
+        self.producer = self.context.socket(zmq.PUB)
+        self.producer.bind(self.url)
+        time.sleep(1)
         logging.getLogger(DEBUG_LOG_NAME).info("ZmqEventHandler initialized")
 
     def receive_event(self, _event_type, _event_message, _sorted_loglines, event_data, _log_atom, event_source):
-        """
-        Receive information about a detected event in json format.
+        """Receive information about a detected event in json format.
+
         Receive information about a detected event in json format.
         @param _event_type is a string with the event type class this event belongs to. This information can be used to interpret
                type-specific event_data objects. Together with the eventMessage and sorted_loglines, this can be used to create generic log
@@ -51,29 +69,21 @@ class ZmqEventHandler(EventHandlerInterface):
         @param _log_atom the log atom which produced the event.
         @param event_source reference to detector generating the event.
         """
-        if hasattr(event_source, 'output_event_handlers') and event_source.output_event_handlers is not None and self not in \
+        if hasattr(event_source, "output_event_handlers") and event_source.output_event_handlers is not None and self not in \
                 event_source.output_event_handlers:
             return True
         component_name = self.analysis_context.get_name_by_component(event_source)
         if component_name in self.analysis_context.suppress_detector_list:
             return True
-        if self.zmq_imported is False:
-            try:
-                self.context = zmq.Context()  # skipcq: PYL-E0110
-                self.producer = self.context.socket(zmq.PUB)
-                self.producer.bind(self.url)
-                logging.getLogger(DEBUG_LOG_NAME).info("Created socket on %s", self.url)
-                self.zmq_imported = True
-            except ImportError:
-                msg = 'ZeroMQ module not found.'
-                logging.getLogger(DEBUG_LOG_NAME).error(msg)
-                print('ERROR: ' + msg, file=sys.stderr)
-                return False
         if not isinstance(event_data, str) and not isinstance(event_data, bytes):
-            msg = 'ZmqEventHandler received non-string event data. Use the JsonConverterHandler to serialize it first.'
+            msg = "ZmqEventHandler received non-string event data. Use the JsonConverterHandler to serialize it first."
             logging.getLogger(DEBUG_LOG_NAME).warning(msg)
-            print('WARNING: ' + msg, file=sys.stderr)
+            print("WARNING: " + msg, file=sys.stderr)
             return False
+        if isinstance(event_data, str):
+            event_data += "\n"
+        else:
+            event_data += b"\n"
         try:
             if self.topic:
                 self.producer.send_string(self.topic, flags=zmq.SNDMORE)
@@ -85,8 +95,7 @@ class ZmqEventHandler(EventHandlerInterface):
             msg = str(err)
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             print("Error: " + msg, file=sys.stderr)
-            self.producer.disconnect()
+            self.producer.close()
             self.producer = None
-            self.zmq_imported = False
             return False
         return True

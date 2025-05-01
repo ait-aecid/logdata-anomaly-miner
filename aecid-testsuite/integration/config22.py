@@ -26,13 +26,13 @@ config_properties['AminerGroup'] = 'aminer'
 # for the child also.
 # config_properties['AnalysisConfigFile'] = 'analysis.py'
 
-config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'  # skipcq: BAN-B108
+config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'
 # Read and store information to be used between multiple invocations
 # of aminer in this directory. The directory must only be accessible
 # to the 'AminerUser' but not group/world readable. On violation,
 # aminer will refuse to start. When undefined, '/var/lib/aminer'
 # is used.
-config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'  # skipcq: BAN-B108
+config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
@@ -113,9 +113,13 @@ def build_analysis_pipeline(analysis_context):
     from aminer.events.KafkaEventHandler import KafkaEventHandler
     kafka_event_handler = KafkaEventHandler(analysis_context, 'test_topic', {
         'bootstrap_servers': ['localhost:9092'], 'api_version': (2, 0, 1)})
+    from aminer.events.ZmqEventHandler import ZmqEventHandler
+    zmq_event_handler = ZmqEventHandler(analysis_context, 'test_topic')
     from aminer.events.JsonConverterHandler import JsonConverterHandler
-    json_converter_handler = JsonConverterHandler([kafka_event_handler], analysis_context)
-    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler, json_converter_handler]
+    json_converter_handler = JsonConverterHandler([kafka_event_handler, zmq_event_handler], analysis_context)
+    from aminer.events.ScoringEventHandler import ScoringEventHandler
+    scoring_event_handler = ScoringEventHandler([json_converter_handler], analysis_context)
+    anomaly_event_handlers = [stream_printer_event_handler, syslog_writer_event_handler, json_converter_handler, scoring_event_handler]
 
     from aminer.input.SimpleMultisourceAtomSync import SimpleMultisourceAtomSync
     simple_multisource_atom_sync = SimpleMultisourceAtomSync([atom_filter], 9)
@@ -124,7 +128,8 @@ def build_analysis_pipeline(analysis_context):
     # based one is usually sufficient.
     from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLineAtomizerFactory
     analysis_context.atomizer_factory = SimpleByteStreamLineAtomizerFactory(
-        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_path_list=['model/DiskUpgrade/Date'])
+        parsing_model, [simple_multisource_atom_sync], anomaly_event_handlers, default_timestamp_path_list=['model/DiskUpgrade/DTM'],
+        use_real_time=True)
 
     # Just report all unparsed atoms to the event handlers.
     from aminer.analysis.UnparsedAtomHandlers import SimpleUnparsedAtomHandler
@@ -142,6 +147,12 @@ def build_analysis_pipeline(analysis_context):
         '/model/HomePath/Username', '/model/HomePath/Path'], anomaly_event_handlers, learn_mode=True)
     analysis_context.register_component(new_match_path_value_combo_detector, component_name="NewValueCombo")
     atom_filter.add_handler(new_match_path_value_combo_detector)
+
+    from aminer.analysis.SlidingEventFrequencyDetector import SlidingEventFrequencyDetector
+    sefd = SlidingEventFrequencyDetector(aminer_config=analysis_context.aminer_config, anomaly_event_handlers=[scoring_event_handler],
+        window_size=2, set_upper_limit=1, learn_mode=True, output_logline=False, scoring_path_list=["/model/HomePath/Username"])
+    analysis_context.register_component(sefd, component_name="SlidingEventFrequencyDetector")
+    atom_filter.add_handler(sefd)
 
     # Include the e-mail notification handler only if the configuration parameter was set.
     from aminer.events.DefaultMailNotificationEventHandler import DefaultMailNotificationEventHandler

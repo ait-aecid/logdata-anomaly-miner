@@ -1,5 +1,5 @@
-"""
-This module is a detector which uses a tsa-arima model to analyze the values of the paths in target_path_list.
+"""This module is a detector which uses a tsa-arima model to analyze the values
+of the paths in target_path_list.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -15,9 +15,10 @@ import logging
 import numpy as np
 import statsmodels
 import statsmodels.api as sm
+import math
 
 from aminer import AminerConfig
-from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX,\
+from aminer.AminerConfig import KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, DEBUG_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, \
     DEFAULT_LOG_LINE_PREFIX
 from aminer.AnalysisChild import AnalysisContext
 from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
@@ -33,7 +34,8 @@ else:
 
 
 class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, PersistableComponentInterface):
-    """This class is used for an arima time series analysis of the values of the paths in target_path_list."""
+    """This class is used for an arima time series analysis of the values of
+    the paths in target_path_list."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
@@ -41,8 +43,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                  output_logline=True, learn_mode=False, num_init=50, force_period_length=False, set_period_length=10, alpha=0.05,
                  alpha_bt=0.05, num_results_bt=15, num_min_time_history=20, num_max_time_history=30, num_periods_tsa_ini=20,
                  stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param event_type_detector used to track the number of events in the time windows.
@@ -65,7 +68,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_time_initialized = None
         super().__init__(
             mutable_default_args=["target_path_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, event_type_detector=event_type_detector, persistence_id=persistence_id,
@@ -142,8 +146,9 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
             self.prediction_history = persistence_data[2]
 
     def receive_atom(self, log_atom):
-        """
-        Receive a parsed atom and the information about the parser match. Tests if the event type includes paths of target_path_list and
+        """Receive a parsed atom and the information about the parser match.
+        Tests if the event type includes paths of target_path_list and.
+
         analyzes their values with an TSA Arima model.
         @param log_atom the parsed log atom
         @return True if this handler was really able to handle and process the match.
@@ -151,9 +156,15 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
         for source in self.log_resource_ignore_list:
             if log_atom.source.resource_name.decode() == source:
                 return False
+        if not self.stop_learning_time_initialized:
+            self.stop_learning_time_initialized = True
+            if self.stop_learning_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+            elif self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+
         event_index = self.event_type_detector.current_index
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -184,7 +195,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
         return True
 
     def calculate_period_length(self, event_index, counts, log_atom):
-        """Returns a list of the period length, if no period was found the value is set to -1"""
+        """Returns a list of the period length, if no period was found the
+        value is set to -1."""
         if self.force_period_length:
             # Check if the period length should be forced
             self.period_length_list[event_index] = [self.set_period_length for _ in counts]
@@ -217,7 +229,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
         self.print(message, log_atom, affected_path)
 
     def test_num_appearance(self, event_index, log_atom):
-        """This function makes a one-step prediction and raises an alert if the count do not match the expected appearance"""
+        """This function makes a one-step prediction and raises an alert if the
+        count do not match the expected appearance."""
         # Return, if not TSA should be calculated for this ET
         if self.period_length_list[event_index] and all(period is None for period in self.period_length_list[event_index]):
             return
@@ -262,7 +275,6 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                     self.result_list[event_index] = self.result_list[event_index][:count_index] +\
                             self.result_list[event_index][count_index + 1:]
 
-            # skipcq: PYL-C0209
             message = "Disabled the TSA for the target paths %s of event %s" % (
                     [self.event_type_detector.variable_key_list[event_index][count_index] for count_index in delete_indices],
                     self.event_type_detector.get_event_type(event_index))
@@ -296,11 +308,10 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                                     order=(self.period_length_list[event_index][count_index], 0, 0),
                                     seasonal_order=(0, 0, 0, self.period_length_list[event_index][count_index]))
                             self.arima_models[event_index][count_index] = model.fit()
-                        except:  # skipcq FLK-E722
+                        except Exception:
                             self.arima_models[event_index][count_index] = None
-                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = max(
-                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
             # Make a one-step prediction with the new values
             elif self.arima_models[event_index][count_index] is not None:
@@ -361,15 +372,14 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
                     # Discard the trained model and reset the result_list
                     self.arima_models[event_index][count_index] = None
                     self.result_list[event_index][count_index] = []
-                    if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_timestamp = max(
-                            self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                        self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
                 else:
                     # Update the model
                     self.arima_models[event_index][count_index] = self.arima_models[event_index][count_index].append([count])
 
     def one_step_prediction(self, event_index, count_index):
-        """Make a one-step prediction with the Arima model"""
+        """Make a one-step prediction with the Arima model."""
         prediction = self.arima_models[event_index][count_index].get_forecast(1)
         prediction = prediction.conf_int(alpha=self.alpha)
 
@@ -378,16 +388,18 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
 
     @staticmethod
     def bt_min_successes(num_bt, p, alpha):
-        """
-        Calculate the minimal number of successes for the BT with significance alpha.
-        p is the probability of success and num_bt is the number of observed tests.
+        """Calculate the minimal number of successes for the BT with
+        significance alpha.
+
+        p is the probability of success and num_bt is the number of
+        observed tests.
         """
         tmp_sum = 0.0
-        max_observations_factorial = np.math.factorial(num_bt)
+        max_observations_factorial = math.factorial(num_bt)
         i_factorial = 1
         for i in range(num_bt + 1):
             i_factorial = i_factorial * max(i, 1)
-            tmp_sum = tmp_sum + max_observations_factorial / (i_factorial * np.math.factorial(num_bt - i)) * ((1 - p) ** i) * (
+            tmp_sum = tmp_sum + max_observations_factorial / (i_factorial * math.factorial(num_bt - i)) * ((1 - p) ** i) * (
                 p ** (num_bt - i))
             if tmp_sum > alpha:
                 return i

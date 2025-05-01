@@ -1,5 +1,4 @@
-"""
-This module defines a detector for new values in a data path.
+"""This module defines a detector for new values in a data path.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -15,7 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import os
 import logging
 
-from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD,\
+from aminer.AminerConfig import build_persistence_file_name, DEBUG_LOG_NAME, KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD, \
     STAT_LOG_NAME, CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX
 from aminer import AminerConfig
 from aminer.AnalysisChild import AnalysisContext
@@ -26,14 +25,16 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 
 
 class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
-    """This class creates events when new values for a given data path were found."""
+    """This class creates events when new values for a given data path were
+    found."""
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", learn_mode=False,
                  output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
-        """
-        Initialize the detector. This will also trigger reading or creation of persistence storage location.
+        """Initialize the detector. This will also trigger reading or creation
+        of persistence storage location.
+
         @param aminer_config configuration from analysis_context.
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
                considered for value range generation.
@@ -46,7 +47,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         @param stop_learning_no_anomaly_time switch the learn_mode to False after no anomaly was detected for that time.
         """
         # avoid "defined outside init" issue
-        self.learn_mode, self.stop_learning_timestamp, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
+        self.stop_learning_time_initialized = None
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
@@ -71,9 +73,15 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
+        if not self.stop_learning_time_initialized:
+            self.stop_learning_time_initialized = True
+            if self.stop_learning_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+            elif self.stop_learning_no_anomaly_time is not None:
+                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+
         match_dict = log_atom.parser_match.get_match_dictionary()
-        if self.learn_mode is True and self.stop_learning_timestamp is not None and \
-                self.stop_learning_timestamp < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -93,9 +101,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                         self.known_values_set.add(match.match_object)
                         self.log_learned_path_values += 1
                         self.log_new_learned_values.append(match.match_object)
-                        if self.stop_learning_timestamp is not None and self.stop_learning_no_anomaly_time is not None:
-                            self.stop_learning_timestamp = max(
-                                self.stop_learning_timestamp, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                        if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                            self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
 
                     if isinstance(match.match_object, bytes):
                         affected_log_atom_values.append(match.match_object.decode(AminerConfig.ENCODING))
@@ -154,8 +161,9 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
-        """
-        Allowlist an event generated by this source using the information emitted when generating the event.
+        """Allowlist an event generated by this source using the information
+        emitted when generating the event.
+
         @return a message with information about allowlisting
         @throws Exception when allowlisting of this special event using given allowlisting_data was not possible.
         """
@@ -172,11 +180,12 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise TypeError(msg)
         self.known_values_set.add(event_data)
-        return f"Allowlisted path(es) {', '.join(self.target_path_list)} with {event_data.decode()}."
+        return f"Allowlisted path(s) {', '.join(self.target_path_list)} with {event_data.decode()}."
 
     def log_statistics(self, component_name):
-        """
-        Log statistics of an AtomHandler. Override this method for more sophisticated statistics output of the AtomHandler.
+        """Log statistics of an AtomHandler.
+
+        Override this method for more sophisticated statistics output of the AtomHandler.
         @param component_name the name of the component which is printed in the log line.
         """
         if AminerConfig.STAT_LEVEL == 1:

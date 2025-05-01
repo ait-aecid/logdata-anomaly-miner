@@ -23,7 +23,7 @@ class NewMatchPathDetectorTest(TestBase):
         Test if log atoms are processed correctly and the detector is learning (learn_mode=True) and stops if learn_mode=False.
         Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
-        expected_string = '%s New path(es) detected\n%s: "None" (%d lines)\n  %s\n\n'
+        expected_string = '%s New path(s) detected\n%s: "None" (%d lines)\n  %s\n\n'
         dtf = "%Y-%m-%d %H:%M:%S"
         # learn_mode = True
         nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, output_logline=False)
@@ -103,12 +103,12 @@ class NewMatchPathDetectorTest(TestBase):
 
         # This test case checks in which cases an event is triggered and compares with expected results.
         self.assertEqual(nmpd.allowlist_event(analysis % nmpd.__class__.__name__, self.match_element1.path, None),
-            "Allowlisted path(es) %s in %s." % (self.match_element1.path, analysis % nmpd.__class__.__name__))
+            "Allowlisted path(s) %s in %s." % (self.match_element1.path, analysis % nmpd.__class__.__name__))
         self.assertEqual(nmpd.known_path_set, {"/s1"})
 
         nmpd.learn_mode = False
         self.assertEqual(nmpd.allowlist_event(analysis % nmpd.__class__.__name__, self.match_element2.path, None),
-            "Allowlisted path(es) %s in %s." % (self.match_element2.path, analysis % nmpd.__class__.__name__))
+            "Allowlisted path(s) %s in %s." % (self.match_element2.path, analysis % nmpd.__class__.__name__))
         self.assertEqual(nmpd.known_path_set, {"/s1", "/d1"})
 
     def test4persistence(self):

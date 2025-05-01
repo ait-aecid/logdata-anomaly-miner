@@ -1,13 +1,18 @@
-#!/usr/bin/python3 -BbbEIsSttW all
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import sys
 import os
 import re
 import argparse
 sys.path = sys.path[1:] + ['/usr/lib/logdata-anomaly-miner', '/etc/aminer/conf-enabled']
-from aminer.AminerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR  # skipcq: FLK-E402
-from aminer.util.StringUtil import colflame, flame, supports_color  # skipcq: FLK-E402
-from aminer.util.PersistenceUtil import clear_persistence, copytree  # skipcq: FLK-E402
-from metadata import __version_string__  # skipcq: FLK-E402
+venv_path = "/usr/lib/logdata-anomaly-miner/.venv/lib"
+if os.path.exists(venv_path):
+    python_version = os.listdir(venv_path)[0]
+    sys.path += [os.path.join(venv_path, python_version, "site-packages")]
+from aminer.AminerConfig import load_config, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_PERSISTENCE_DIR  # noqa: E402
+from aminer.util.StringUtil import colflame, flame, supports_color  # noqa: E402
+from aminer.util.PersistenceUtil import clear_persistence, copytree  # noqa: E402
+from metadata import __version_string__  # noqa: E402
 
 
 def main():
@@ -40,12 +45,10 @@ def main():
     config_file_name = args.config
     rc_response_string = 'Remote execution response: '
     if args.list:
-        # skipcq: BAN-B605, BAN-B607
-        process = os.popen('sudo aminerremotecontrol --exec "list_backups(analysis_context)"')
+        process = os.popen('/usr/bin/aminerremotecontrol --exec "list_backups(analysis_context)"')  # nosec B605
         print(process.read().strip('\n').strip(rc_response_string))
     if args.backup:
-        # skipcq: BAN-B605, BAN-B607
-        process = os.popen('sudo aminerremotecontrol --exec "create_backup(analysis_context)"')
+        process = os.popen('/usr/bin/aminerremotecontrol --exec "create_backup(analysis_context)"')  # nosec B605
         print(process.read().strip('\n').strip(rc_response_string))
     if args.restore is not None:
         if not args.restore.startswith('/'):

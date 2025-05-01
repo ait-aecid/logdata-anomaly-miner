@@ -20,19 +20,20 @@ from aminer.parsing.ModelElementInterface import ModelElementInterface
 
 
 def get_model():
-    """Return a model to parse a audispd message logged via syslog after any standard logging preamble, e.g. from syslog."""
+    """Return a model to parse a audispd message logged via syslog after any
+    standard logging preamble, e.g. from syslog."""
 
     class ExecArgumentDataModelElement(ModelElementInterface):
-        """This is a helper class for parsing the (encoded) exec argument strings found within audit logs."""
+        """This is a helper class for parsing the (encoded) exec argument
+        strings found within audit logs."""
 
         def get_match_element(self, target_path: str, match_context):
-            """
-            Find the maximum number of bytes belonging to an exec argument.
+            """Find the maximum number of bytes belonging to an exec argument.
+
             @return a match when at least two bytes were found including the delimiters.
             """
             data = match_context.match_data
             match_len = 0
-            match_value = b""
             if data[0] == ord(b'"'):
                 match_len = data.find(b'"', 1)
                 if match_len == -1:
@@ -44,6 +45,7 @@ def get_model():
                 match_value = None
             else:
                 # Must be upper case hex encoded:
+                match_value = b""
                 next_value = -1
                 for d_byte in data:
                     if 0x30 <= d_byte <= 0x39:

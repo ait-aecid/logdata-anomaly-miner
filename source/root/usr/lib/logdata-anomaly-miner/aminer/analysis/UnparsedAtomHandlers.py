@@ -1,5 +1,5 @@
-"""
-This module defines a handler that forwards unparsed atoms to the event handlers.
+"""This module defines a handler that forwards unparsed atoms to the event
+handlers.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -21,11 +21,12 @@ import logging
 
 
 class SimpleUnparsedAtomHandler(AtomHandlerInterface):
-    """Handlers of this class will just forward the received unparsed atoms to the registered event handlers."""
+    """Handlers of this class will just forward the received unparsed atoms to
+    the registered event handlers."""
 
     def __init__(self, anomaly_event_handlers):
-        """
-        Initialise the Unparsed atom handler.
+        """Initialise the Unparsed atom handler.
+
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         """
         super().__init__(anomaly_event_handlers=anomaly_event_handlers)
@@ -49,11 +50,12 @@ class SimpleUnparsedAtomHandler(AtomHandlerInterface):
 
 
 class VerboseUnparsedAtomHandler(SimpleUnparsedAtomHandler):
-    """Handlers of this class will forward received unparsed atoms to the registered event handlers applying the DebugMatchContext."""
+    """Handlers of this class will forward received unparsed atoms to the
+    registered event handlers applying the DebugMatchContext."""
 
     def __init__(self, anomaly_event_handlers, parsing_model):
-        """
-        Initialise the Unparsed atom handler.
+        """Initialise the Unparsed atom handler.
+
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         """
         super().__init__(anomaly_event_handlers)

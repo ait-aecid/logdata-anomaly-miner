@@ -1,4 +1,3 @@
-# skipcq: FLK-D400
 """
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -52,10 +51,8 @@ class EventData:
         if self.event_message is not None:
             indent = "  "
             if hasattr(self, "log_atom"):
-                if self.log_atom.get_timestamp() is None:
-                    import time
-                    self.log_atom.set_timestamp(time.time())
-                message += f"{datetime.fromtimestamp(self.log_atom.get_timestamp()).strftime('%Y-%m-%d %H:%M:%S')} "
+                if self.log_atom.get_timestamp() is not None:
+                    message += f"{datetime.fromtimestamp(self.log_atom.get_timestamp()).strftime('%Y-%m-%d %H:%M:%S')} "
                 message += f"{self.event_message}\n"
                 message += f"{self.event_source.__class__.__name__}: {self.description} ({len(self.sorted_log_lines)} lines)\n"
             else:
@@ -63,7 +60,7 @@ class EventData:
         else:
             indent = ""
         for line in self.sorted_log_lines:
-            if isinstance(line, bytes):  # skipcq: PTC-W0048
+            if isinstance(line, bytes):
                 if line != b"":
                     message += indent + line.decode(AminerConfig.ENCODING) + "\n"
             else:

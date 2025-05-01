@@ -13,7 +13,7 @@ class AtomFiltersTest(TestBase):
 
     def test1receive_atom_SubhandlerFilter(self):
         """Test if log atoms are processed correctly with the SubhandlerFilter and the stop_when_handled flag is working properly."""
-        expected_string = '%s New path(es) detected\n%s: "None" (%d lines)\n  %s: %s\n%s\n%s\n\n'
+        expected_string = '%s New path(s) detected\n%s: "None" (%d lines)\n  %s: %s\n%s\n%s\n\n'
         match_path = "fixed/s1"
         datetime_format_string = "%Y-%m-%d %H:%M:%S"
         data = b"25000"

@@ -37,11 +37,6 @@ class SimpleUnparsedAtomHandlerTest(TestBase):
                          f'{simple_unparsed_atom_handler.__class__.__name__}: "None" (1 lines)\n  {self.calculation.decode()}\n\n')
         self.reset_output_stream()
 
-        # the ParserMatch actually is no instance of ParserMatch, but the atom should still be considered to be parsed.
-        log_atom = LogAtom(match_element.match_object, fdme, t, new_match_path_detector1)
-        self.assertFalse(simple_unparsed_atom_handler.receive_atom(log_atom))
-        self.assertEqual(self.output_stream.getvalue(), "")
-
     def test2_receive_atom_VerboseUnparsedAtomHandler(self):
         """Test if the VerboseUnparsedAtomHandler can handle matching log atoms and not matching log atoms."""
         t = time.time()
@@ -66,11 +61,6 @@ class SimpleUnparsedAtomHandlerTest(TestBase):
                          f'{self.calculation.decode()}"\n  Removed: "{self.calculation.decode()}", remaining 0 bytes\n  Shortest unmatched '
                          f'data: ""\n{self.calculation.decode()}\n\n')
         self.reset_output_stream()
-
-        # the ParserMatch actually is no instance of ParserMatch, but the atom should still be considered to be parsed.
-        log_atom = LogAtom(match_element.match_object, fdme, t, new_match_path_detector1)
-        self.assertFalse(verbose_unparsed_atom_handler.receive_atom(log_atom))
-        self.assertEqual(self.output_stream.getvalue(), "")
 
     def test3validate_parameters_SimpleUnparsedAtomHandler(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""

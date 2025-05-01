@@ -3,13 +3,13 @@
 source ../config
 
 # declare all expected values without the variable ones. These arrays are used to compare with the incoming log lines.
-declare -a NEW_PATH_HD_REPAIR_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/DiskUpgrade: " ": System rebooted for hard disk upgrade" "  /model/DiskUpgrade/DTM: " "  /model/DiskUpgrade/UNameSpace1: " "  /model/DiskUpgrade/UName: " "  /model/DiskUpgrade/UNameSpace2: " " /model/DiskUpgrade/User: " "  /model/DiskUpgrade/HDRepair:  System rebooted for hard disk upgrade" "['/model/DiskUpgrade', '/model/DiskUpgrade/DTM', '/model/DiskUpgrade/UNameSpace1', '/model/DiskUpgrade/UName', '/model/DiskUpgrade/UNameSpace2', '/model/DiskUpgrade/User', '/model/DiskUpgrade/HDRepair']" "Original log line: ")
-declare -a UNPARSED_ATOM_1=(" Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" " System rebooted for hard disk upgrad")
-declare -a UNPARSED_ATOM_2=(" Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" ": System rebooted for hard disk upgrade")
-declare -a NEW_PATH_HOME_PATH_ROOT_1=(" New path(es) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/HomePath: The Path of the home directory shown by pwd of the user root is: /root" "  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user " "  /model/HomePath/Username: root" "  /model/HomePath/Is:  is: " "  /model/HomePath/Path: /root" "['/model/HomePath', '/model/HomePath/Pwd', '/model/HomePath/Username', '/model/HomePath/Is', '/model/HomePath/Path']" "Original log line: The Path of the home directory shown by pwd of the user root is: /root")
-declare -a NEW_VALUE_COMBINATION_HOME_PATH_ROOT_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "(b'root', b'/root')" "Original log line: The Path of the home directory shown by pwd of the user root is: /root")
-declare -a NEW_VALUE_COMBINATION_HOME_PATH_USER_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "(b'user', b'/home/user')" "Original log line: The Path of the home directory shown by pwd of the user user is: /home/user")
-declare -a NEW_VALUE_COMBINATION_HOME_PATH_GUEST_1=(" New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "(b'guest', b'/home/guest')" "Original log line: The Path of the home directory shown by pwd of the user guest is: /home/guest")
+declare -a NEW_PATH_HD_REPAIR_1=("New path(s) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/DiskUpgrade: " ": System rebooted for hard disk upgrade" "  /model/DiskUpgrade/DTM: " "  /model/DiskUpgrade/UNameSpace1: " "  /model/DiskUpgrade/UName: " "  /model/DiskUpgrade/UNameSpace2: " " /model/DiskUpgrade/User: " "  /model/DiskUpgrade/HDRepair:  System rebooted for hard disk upgrade" "['/model/DiskUpgrade', '/model/DiskUpgrade/DTM', '/model/DiskUpgrade/UNameSpace1', '/model/DiskUpgrade/UName', '/model/DiskUpgrade/UNameSpace2', '/model/DiskUpgrade/User', '/model/DiskUpgrade/HDRepair']" "Original log line: ")
+declare -a UNPARSED_ATOM_1=("Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" " System rebooted for hard disk upgrad")
+declare -a UNPARSED_ATOM_2=("Unparsed atom received" "SimpleUnparsedAtomHandler: \"UnparsedHandler\" (1 lines)" ": System rebooted for hard disk upgrade")
+declare -a NEW_PATH_HOME_PATH_ROOT_1=("New path(s) detected" "NewMatchPathDetector: \"NewPath\" (1 lines)" "  /model/HomePath: The Path of the home directory shown by pwd of the user root is: /root" "  /model/HomePath/Pwd: The Path of the home directory shown by pwd of the user " "  /model/HomePath/Username: root" "  /model/HomePath/Is:  is: " "  /model/HomePath/Path: /root" "['/model/HomePath', '/model/HomePath/Pwd', '/model/HomePath/Username', '/model/HomePath/Is', '/model/HomePath/Path']" "Original log line: The Path of the home directory shown by pwd of the user root is: /root")
+declare -a NEW_VALUE_COMBINATION_HOME_PATH_ROOT_1=("New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "(b'root', b'/root')" "Original log line: The Path of the home directory shown by pwd of the user root is: /root")
+declare -a NEW_VALUE_COMBINATION_HOME_PATH_USER_1=("New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "(b'user', b'/home/user')" "Original log line: The Path of the home directory shown by pwd of the user user is: /home/user")
+declare -a NEW_VALUE_COMBINATION_HOME_PATH_GUEST_1=("New value combination(s) detected" "NewMatchPathValueComboDetector: \"NewValueCombo\" (1 lines)" "(b'guest', b'/home/guest')" "Original log line: The Path of the home directory shown by pwd of the user guest is: /home/guest")
 declare -a JSON_OUTPUT=()
 read -r -d '' VAR << END
   {
@@ -47,7 +47,7 @@ read -r -d '' VAR << END
     "AnalysisComponentIdentifier": 1,
     "AnalysisComponentType": "NewMatchPathDetector",
     "AnalysisComponentName": "NewPath",
-    "Message": "New path(es) detected",
+    "Message": "New path(s) detected",
     "PersistenceFileName": "Default",
     "TrainingMode": true,
     "AffectedLogAtomPaths": [
@@ -163,7 +163,7 @@ read -r -d '' VAR << END
     "AnalysisComponentIdentifier": 1,
     "AnalysisComponentType": "NewMatchPathDetector",
     "AnalysisComponentName": "NewPath",
-    "Message": "New path(es) detected",
+    "Message": "New path(s) detected",
     "PersistenceFileName": "Default",
     "TrainingMode": true,
     "AffectedLogAtomPaths": [
@@ -325,6 +325,40 @@ read -r -d '' VAR << END
     }
   }
 }
+END
+JSON_OUTPUT+=("$VAR")
+read -r -d '' VAR << END
+{
+  "AnalysisComponent": {
+    "AnalysisComponentIdentifier": 3,
+    "AnalysisComponentType": "SlidingEventFrequencyDetector",
+    "AnalysisComponentName": "SlidingEventFrequencyDetector",
+    "Message": "Frequency exceeds range for the first time",
+    "PersistenceFileName": "Default",
+    "TrainingMode": true,
+    "AffectedLogAtomPaths": [],
+    "AffectedLogAtomValues": [
+      "/model/HomePath",
+      "/model/HomePath/Pwd",
+      "/model/HomePath/Username",
+      "/model/HomePath/Is",
+      "/model/HomePath/Path"
+    ],
+    "LogResource": "file:///tmp/auth.log"
+  },
+  "FrequencyData": {
+    "ExpectedLogAtomValuesFrequencyRange": [
+      0,
+      1
+    ],
+    "LogAtomValuesFrequency": 2,
+    "WindowSize": 2
+  },
+  "LogData": {
+    "RawLogData": [
+      "The Path of the home directory shown by pwd of the user guest is: /home/guest"
+    ],
+    "Timestamps": [
 END
 JSON_OUTPUT+=("$VAR")
 
@@ -718,6 +752,23 @@ function checkAllSyslogs(){
 # This function checks if the output of the Kafka Topic is as expected.
 function checkKafkaTopic(){
   out=$($KAFKA_VERSIONSTRING/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_topic --from-beginning --timeout-ms 60000)
+  for t in "${JSON_OUTPUT[@]}"
+  do
+    if [[ $out != *"$t"* ]]; then
+      echo "searched: $t"
+      echo
+      echo "remaining output: $out"
+      return 1
+    fi
+    # cut the output string to remove timestamps and datetimes.
+    out=${out#*$t}
+  done
+  return 0
+}
+
+# This function checks if the output of the ZMQ Topic is as expected.
+function checkZmqTopic(){
+  out=$(cat /tmp/zmq)
   for t in "${JSON_OUTPUT[@]}"
   do
     if [[ $out != *"$t"* ]]; then

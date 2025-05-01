@@ -1,5 +1,4 @@
-"""
-This module defines functions for reading and writing files in a secure way.
+"""This module defines functions for reading and writing files in a secure way.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -41,9 +40,10 @@ def add_persistable_component(component):
 
 
 def open_persistence_file(file_name, flags):
-    """
-    Open the given persistence file.
-    When O_CREAT was specified, the function will attempt to create the directories too.
+    """Open the given persistence file.
+
+    When O_CREAT was specified, the function will attempt to create the
+    directories too.
     """
     fn_type = type(file_name)
     if fn_type not in (str, bytes):
@@ -87,8 +87,8 @@ def persist_all():
 
 
 def load_json(file_name):
-    """
-    Load persistence data from file.
+    """Load persistence data from file.
+
     @return None if file did not yet exist.
     """
     persistence_data = None
@@ -153,7 +153,11 @@ def clear_persistence(persistence_dir_name):
 
 
 def copytree(src, dst, symlinks=False, ignore=None):
-    """Copy a directory recursively. This method has no issue with the destination directory existing (shutil.copytree has)."""
+    """Copy a directory recursively.
+
+    This method has no issue with the destination directory existing
+    (shutil.copytree has).
+    """
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)

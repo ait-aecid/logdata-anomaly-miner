@@ -1,5 +1,5 @@
-"""
-This module provides support for splitting a data stream into atoms, perform parsing and forward the results.
+"""This module provides support for splitting a data stream into atoms, perform
+parsing and forward the results.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,10 +17,12 @@ import sys
 import time
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.input.LogAtom import LogAtom
-from aminer.input.InputInterfaces import StreamAtomizer
+from aminer.input.InputInterfaces import StreamAtomizer, AtomHandlerInterface
 from aminer.input.JsonStateMachine import json_machine
 from aminer.parsing.MatchContext import MatchContext
 from aminer.parsing.ParserMatch import ParserMatch
+from aminer.parsing.ModelElementInterface import ModelElementInterface
+from aminer.events.EventInterfaces import EventHandlerInterface
 
 
 breakout = False
@@ -30,23 +32,26 @@ line = None
 
 def found_json(_data):
     """Set the breakout variable if the JsonStateMachine finished."""
-    global breakout  # skipcq: PYL-W0603
+    global breakout
     breakout = True
-    global data  # skipcq: PYL-W0603
+    global data
     data = _data
 
 
 class ByteStreamLineAtomizer(StreamAtomizer):
-    """
-    This atomizer consumes binary data from a stream to break it into lines, removing the line separator at the end.
-    With a parsing model, it will also perform line parsing. Failures in atomizing or parsing will cause events to be generated and
-    sent to event handler. Data will be consumed only when there was no downstream handler registered
-    (the data will be discarded in that case) or when at least one downstream consumed the data.
+    """This atomizer consumes binary data from a stream to break it into lines,
+    removing the line separator at the end.
+
+    With a parsing model, it will also perform line parsing. Failures in
+    atomizing or parsing will cause events to be generated and sent to
+    event handler. Data will be consumed only when there was no
+    downstream handler registered (the data will be discarded in that
+    case) or when at least one downstream consumed the data.
     """
 
     COUNTER = 0
 
-    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_path_list, eol_sep=b'\n',
+    def __init__(self, parsing_model, atom_handler_list, event_handler_list, max_line_length, default_timestamp_path_list, eol_sep=b"\n",
                  json_format=False, xml_format=False, use_real_time=False, resource_name=None, continuous_timestamp_missing_warning=True):
         """
         Create the atomizer.
@@ -54,26 +59,74 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         later on.
         @param max_line_length the maximal line length including the final line separator.
         """
+        if not isinstance(parsing_model, ModelElementInterface):
+            msg = "parsing_model must be of type ModelElementInterface!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.parsing_model = parsing_model
+        if atom_handler_list is not None and (not isinstance(atom_handler_list, list) or not all(
+                isinstance(x, AtomHandlerInterface) for x in atom_handler_list)):
+            msg = "atom_handler_list must be None or a list of AtomHandlerInterface!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.atom_handler_list = atom_handler_list
+        if not isinstance(event_handler_list, list) or not all(isinstance(x, EventHandlerInterface) for x in event_handler_list):
+            msg = "event_handler_list must be a list of EventHandlerInterface!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.event_handler_list = event_handler_list
+        if isinstance(max_line_length, bool) or not isinstance(max_line_length, int):
+            msg = "max_line_length must be of type integer!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        if max_line_length <= 0:
+            msg = "max_line_length must be of type integer!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.max_line_length = max_line_length
+        if not isinstance(default_timestamp_path_list, list) or not all(isinstance(x, str) for x in default_timestamp_path_list):
+            msg = "default_timestamp_path_list must be a list of strings!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.default_timestamp_path_list = default_timestamp_path_list
         if not isinstance(eol_sep, bytes):
-            msg = f'{self.__class__.__name__} eol_sep parameter must be of type bytes!'
-            print(msg, file=sys.stderr)
+            msg = "eol_sep parameter must be of type bytes!"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
-            sys.exit(-1)
+            raise TypeError(msg)
+        if len(eol_sep) == 0:
+            msg = "eol_sep parameter must not be empty!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
         self.eol_sep = eol_sep
+        if not isinstance(json_format, bool):
+            msg = "json_format parameter must be of type boolean!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.json_format = json_format
+        if not isinstance(xml_format, bool):
+            msg = "xml_format parameter must be of type boolean!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.xml_format = xml_format
         if json_format is True and xml_format is True:
             msg = "json_format and xml_format can not be true at the same time."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
-        self.resource_name = resource_name
+        if not isinstance(use_real_time, bool):
+            msg = "use_real_time parameter must be of type boolean!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.use_real_time = use_real_time
+        if resource_name is not None and not isinstance(resource_name, (bytes, str)):
+            msg = "resource_name parameter must be of type string or bytes!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
+        self.resource_name = resource_name
         self.printed_warning = False
+        if not isinstance(continuous_timestamp_missing_warning, bool):
+            msg = "continuous_timestamp_missing_warning parameter must be of type boolean!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.continuous_timestamp_missing_warning = continuous_timestamp_missing_warning
 
         self.in_overlong_line_flag = False
@@ -82,8 +135,8 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         self.last_unconsumed_log_atom = None
 
     def consume_data(self, stream_data, end_of_stream_flag=False):
-        """
-        Consume data from the underlying stream for atomizing.
+        """Consume data from the underlying stream for atomizing.
+
         @return the number of consumed bytes, 0 if the atomizer would need more data for a complete atom or -1 when no data was
         consumed at the moment but data might be consumed later on.
         """
@@ -109,9 +162,9 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 break
 
             line_end = None
-            global breakout  # skipcq: PYL-W0603
+            global breakout
             breakout = False
-            global data  # skipcq: PYL-W0603
+            global data
             data = None
             valid_json = False
             if self.json_format:
@@ -124,7 +177,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 # check if the json is still valid, but the stream_data is at the end
                 if not breakout and state is not None and i + consumed_length == len(stream_data) - 1 and not end_of_stream_flag:
                     return consumed_length
-                if 0 < i <= self.max_line_length and b'{' in stream_data[consumed_length:consumed_length+i+1] and data is not None:
+                if 0 < i <= self.max_line_length and b"{" in stream_data[consumed_length:consumed_length+i+1] and data is not None:
                     line_end = consumed_length + i + 1
                     valid_json = True
                 elif i > self.max_line_length:
@@ -136,7 +189,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
                 if line_end < 0:
                     consumed_length = len(stream_data)
                     if end_of_stream_flag:
-                        self.dispatch_event('Overlong line terminated by end of stream', stream_data)
+                        self.dispatch_event("Overlong line terminated by end of stream", stream_data)
                         self.in_overlong_line_flag = False
                     break
                 consumed_length = line_end + len(self.eol_sep)
@@ -147,20 +200,20 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             if line_end < 0:
                 tail_length = len(stream_data) - consumed_length
                 if tail_length > self.max_line_length:
-                    self.dispatch_event('Start of overlong line detected', stream_data[consumed_length:])
+                    self.dispatch_event("Start of overlong line detected", stream_data[consumed_length:])
                     self.in_overlong_line_flag = True
                     consumed_length = len(stream_data)
                     # Stay in loop to handle also endOfStreamFlag!
                     continue
                 if end_of_stream_flag and (tail_length != 0):
-                    self.dispatch_event('Incomplete last line', stream_data[consumed_length:])
+                    self.dispatch_event("Incomplete last line", stream_data[consumed_length:])
                     consumed_length = len(stream_data)
                 break
 
             # This is at least a complete/overlong line.
             line_length = line_end + len(self.eol_sep) - consumed_length
             if line_length > self.max_line_length and not valid_json:
-                self.dispatch_event('Overlong line detected', stream_data[consumed_length:line_end])
+                self.dispatch_event("Overlong line detected", stream_data[consumed_length:line_end])
                 consumed_length = line_end + len(self.eol_sep)
                 continue
 
@@ -182,7 +235,7 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         log_atom = LogAtom(parse_data, None, None, self)
         if self.parsing_model is not None:
             match_context = MatchContext(parse_data)
-            match_element = self.parsing_model.get_match_element('', match_context)
+            match_element = self.parsing_model.get_match_element("", match_context)
             if (match_element is not None) and not match_context.match_data:
                 log_atom.parser_match = ParserMatch(match_element)
                 for default_timestamp_path in self.default_timestamp_path_list:
@@ -196,14 +249,18 @@ class ByteStreamLineAtomizer(StreamAtomizer):
             elif not self.printed_warning or self.continuous_timestamp_missing_warning:
                 msg = "No timestamp was found for a log_atom. The timestamp_paths parameter is probably not set correctly in the" \
                       " Input config which might lead to errors. Alternatively the use_real_time parameter might be used in the Input " \
-                       "config. To show this message only once, set continuous_timestamp_missing_warning to false in the Input config."
+                      "config. To show this message only once, set continuous_timestamp_missing_warning to false in the Input config."
                 print("WARNING: " + msg, file=sys.stderr)
                 logging.getLogger(DEBUG_LOG_NAME).warning(msg)
                 self.printed_warning = True
         return log_atom
 
     def dispatch_atom(self, log_atom):
-        """Dispatch the data using the appropriate handlers. Also clean or set lastUnconsumed fields depending on outcome of dispatching."""
+        """Dispatch the data using the appropriate handlers.
+
+        Also clean or set lastUnconsumed fields depending on outcome of
+        dispatching.
+        """
         type(self).COUNTER = type(self).COUNTER + 1
         if self.COUNTER % 1000 == 0 and self.COUNTER != 0:
             logging.getLogger(DEBUG_LOG_NAME).info("%d log atoms were processed totally.", self.COUNTER)
@@ -222,8 +279,9 @@ class ByteStreamLineAtomizer(StreamAtomizer):
         return was_consumed_flag
 
     def dispatch_event(self, message, line_data):
-        """Dispatch an event with given message and line data to all event handlers."""
+        """Dispatch an event with given message and line data to all event
+        handlers."""
         if self.event_handler_list is None:
             return
         for handler in self.event_handler_list:
-            handler.receive_event(f'Input.{self.__class__.__name__}', message, [line_data], None, None, self)
+            handler.receive_event(f"Input.{self.__class__.__name__}", message, [line_data], None, None, self)

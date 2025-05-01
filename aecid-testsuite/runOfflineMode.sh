@@ -16,7 +16,7 @@ sudo aminer --config ./integration/offline_mode/offline_mode.yml --offline-mode 
 OUTPUT=$(cat /tmp/out.txt)
 
 read -r -d '' VAR << END
- New path(es) detected
+ New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/data: a1
 ['/model/data']
@@ -30,7 +30,7 @@ if [[ "$OUTPUT" != *"$VAR"* ]]; then
 fi
 
 read -r -d '' VAR << END
- New path(es) detected
+ New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/data: b1
 ['/model/data']
@@ -44,7 +44,7 @@ if [[ "$OUTPUT" != *"$VAR"* ]]; then
 fi
 
 read -r -d '' VAR << END
- New path(es) detected
+ New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/data: c1
 ['/model/data']
@@ -58,7 +58,7 @@ if [[ "$OUTPUT" != *"$VAR"* ]]; then
 fi
 
 read -r -d '' VAR << END
- New path(es) detected
+ New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/data: z1
 ['/model/data']
@@ -72,7 +72,7 @@ if [[ "$OUTPUT" != *"$VAR"* ]]; then
 fi
 
 read -r -d '' VAR << END
- New path(es) detected
+ New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/data: a2
 ['/model/data']
@@ -86,7 +86,7 @@ if [[ "$OUTPUT" != *"$VAR"* ]]; then
 fi
 
 read -r -d '' VAR << END
- New path(es) detected
+ New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/data: b2
 ['/model/data']
@@ -100,7 +100,7 @@ if [[ "$OUTPUT" != *"$VAR"* ]]; then
 fi
 
 read -r -d '' VAR << END
- New path(es) detected
+ New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/data: c2
 ['/model/data']
@@ -114,7 +114,7 @@ if [[ "$OUTPUT" != *"$VAR"* ]]; then
 fi
 
 read -r -d '' VAR << END
- New path(es) detected
+ New path(s) detected
 NewMatchPathDetector: "DefaultNewMatchPathDetector" (1 lines)
   /model/data: z2
 ['/model/data']

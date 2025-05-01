@@ -3,7 +3,7 @@
         "AnalysisComponentIdentifier": 1,
         "AnalysisComponentType": "NewMatchPathDetector",
         "AnalysisComponentName": "Path Detector",
-        "Message": "New path(es) detected",
+        "Message": "New path(s) detected",
         "PersistenceFileName": "Default",
         "AffectedLogAtomPaths": [
             "/parser/model/service/dovecot/imap/imap_login/login/disconnected_str/auth/no_auth_str"
@@ -114,7 +114,7 @@
         "AnalysisComponentIdentifier": 1,
         "AnalysisComponentType": "NewMatchPathDetector",
         "AnalysisComponentName": "Path Detector",
-        "Message": "New path(es) detected",
+        "Message": "New path(s) detected",
         "PersistenceFileName": "Default",
         "AffectedLogAtomPaths": [
             "/parser/model/fm/no_host_found",

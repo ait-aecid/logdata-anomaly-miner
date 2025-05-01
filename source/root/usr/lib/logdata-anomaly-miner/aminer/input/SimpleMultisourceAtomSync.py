@@ -1,5 +1,4 @@
-"""
-This module defines a handler that synchronizes different streams.
+"""This module defines a handler that synchronizes different streams.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -13,15 +12,20 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time
+import logging
 from aminer.input.InputInterfaces import AtomHandlerInterface
+from aminer.AminerConfig import DEBUG_LOG_NAME
 
 
 class SimpleMultisourceAtomSync(AtomHandlerInterface):
-    """
-    This class synchronizes different atom streams by forwarding the atoms only from the source delivering the oldest ones.
-    This is done using the atom timestamp value. Atoms without a timestamp are forwarded immediately. When no atoms are received from a
-    source for some time, no more atoms are expected from that source. This will allow forwarding of blocked atoms from
-    other sources afterwards.
+    """This class synchronizes different atom streams by forwarding the atoms
+    only from the source delivering the oldest ones.
+
+    This is done using the atom timestamp value. Atoms without a
+    timestamp are forwarded immediately. When no atoms are received from
+    a source for some time, no more atoms are expected from that source.
+    This will allow forwarding of blocked atoms from other sources
+    afterwards.
     """
 
     def __init__(self, atom_handler_list, sync_wait_time=5):
@@ -29,7 +33,16 @@ class SimpleMultisourceAtomSync(AtomHandlerInterface):
         @param atom_handler_list forward atoms to all handlers in the list, no matter if the log_atom was handled or not.
         @return true as soon as forwarding was attempted, no matter if one downstream handler really consumed the atom.
         """
+        if not atom_handler_list or not isinstance(atom_handler_list, list) or not all(
+                isinstance(x, AtomHandlerInterface) for x in atom_handler_list):
+            msg = "atom_handler_list must be a list of AtomHandlerInterface!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.atom_handler_list = atom_handler_list
+        if isinstance(sync_wait_time, bool) or not isinstance(sync_wait_time, (int, float)):
+            msg = "sync_wait_time must be a float or integer!"
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise TypeError(msg)
         self.sync_wait_time = sync_wait_time
         # Last forwarded log atom timestamp
         self.last_forward_timestamp = 0

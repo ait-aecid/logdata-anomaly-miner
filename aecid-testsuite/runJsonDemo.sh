@@ -1,3 +1,5 @@
+#!/bin/bash
+
 OUT=/tmp/out.txt
 AMINER_PERSISTENCE_PATH=/tmp/lib/aminer/*
 

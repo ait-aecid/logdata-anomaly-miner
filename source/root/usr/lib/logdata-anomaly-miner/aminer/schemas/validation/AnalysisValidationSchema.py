@@ -315,6 +315,8 @@
                     'persistence_id': {'type': 'string', 'empty': False},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
+                    'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'},
                     'avg_factor': {'type': ['integer', 'float'], 'nullable': True, 'min': 0},
                     'var_factor': {'type': ['integer', 'float'], 'nullable': True, 'min': 0},
