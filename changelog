@@ -1,3 +1,31 @@
+logdata-anomaly-miner (2.8.0) unstable; urgency=low
+  Bugfixes:
+  * fix suspendModeTest
+  * fix issues with np.math
+  * fix AMINERSRC variable in aminer_install script
+  * fix error message in ByteStreamLineAtomizer
+  * Fix stop_learning_time
+  * Fix closing of Zmq producer socket at graceful shutdown
+  * Fix sorting of None values in NMPVCD.do_persist()
+
+  Changes: 
+  * Rewrite of aminerwrapper
+  * Set latest working python-kafka version
+  * Remove restrictive flags in aminer, so the conf-enabled directory is not needed any more -> still need to keep conf-enabled to use custom parsing models
+  * Allow resource_name to be of type bytes
+  * Allow ParserMatch to be None in LogAtom
+  * Improve LogResourceList error message when url does not start with file:// or unix://
+  * Add an optional log line identifier to json output
+  * Remove proposed AminerStartTimestamp parameter and implement dynamic per detector stop_learning_time setup in NMPD
+  * Implement dynamic per detector stop_learning_time setup
+  * Add comment explaining the lambda function in the NMPVCD.do_persist() method
+
+
+ -- Markus Wurzenberger <markus.wurzenberger@ait.ac.at> Thu,  01 May 2025 12:00:00 +0000
+
+
+
+
 logdata-anomaly-miner (2.7.0) unstable; urgency=low
   Bugfixes:
   * Fix broken links to python-modules
