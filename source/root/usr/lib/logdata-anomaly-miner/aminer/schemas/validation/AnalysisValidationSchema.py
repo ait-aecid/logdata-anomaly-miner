@@ -184,6 +184,7 @@
                     'paths': {'type': 'list', 'schema': {'type': 'string', 'empty': False}},
                     'id_path_list': {'type': 'list', 'nullable': True},
                     'persistence_id': {'type': 'string', 'empty': False},
+                    'expire_persistence_time': {'type': 'integer', 'nullable': True, 'default': None, 'min': 86400},
                     'learn_mode': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},

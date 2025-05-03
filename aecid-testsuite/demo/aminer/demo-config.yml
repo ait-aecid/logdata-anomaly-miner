@@ -4,6 +4,8 @@ Core.LogDir: '/tmp/lib/aminer/log'
 
 Core.PersistenceDir: '/tmp/lib/aminer'
 
+ExpirePersistenceTime: 2629800  # 1 month
+
 Core.PersistencePeriod: 600
 
 LogResourceList:
@@ -1089,6 +1091,7 @@ Analysis:
             - "/model/DailyCron/JobNumber"
             - "/model/IPAddresses/Username"
           learn_mode: True
+          expire_persistence_time: 172800
         - type: MissingMatchPathValueDetector
           id: MissingMatch
           paths:

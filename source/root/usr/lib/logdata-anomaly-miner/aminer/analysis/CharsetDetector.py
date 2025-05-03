@@ -23,6 +23,8 @@ from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableCompon
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
+from source.root.etc.aminer.template_config import learn_mode
+
 
 class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when numeric values are outside learned
@@ -31,8 +33,8 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list, target_path_list, persistence_id="Default",
-                 learn_mode=False, output_logline=True, ignore_list=None, constraint_list=None, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 expire_persistence_time=None, learn_mode=False, output_logline=True, ignore_list=None, constraint_list=None,
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -42,6 +44,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
                considered for value range generation.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time remove learned values after time of absence in logs.
         @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
@@ -51,17 +54,18 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_time_initialized = None
+        self.stop_learning_time_initialized, self.expire_persistence_time = [None] * 2
         super().__init__(
             mutable_default_args=["ignore_list", "constraint_list", "log_resource_ignore_list"], aminer_config=aminer_config,
             anomaly_event_handlers=anomaly_event_handlers, learn_mode=learn_mode, id_path_list=id_path_list, persistence_id=persistence_id,
-            stop_learning_time=stop_learning_time, output_logline=output_logline, ignore_list=ignore_list,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, target_path_list=target_path_list, constraint_list=constraint_list,
-            log_resource_ignore_list=log_resource_ignore_list
+            expire_persistence_time=expire_persistence_time, stop_learning_time=stop_learning_time, output_logline=output_logline,
+            ignore_list=ignore_list, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, target_path_list=target_path_list,
+            constraint_list=constraint_list, log_resource_ignore_list=log_resource_ignore_list
         )
 
         # Persisted data stores characters as bytes for each id, i.e., [[[<id1, id2, ...>], [<byte1, byte2, ...>]], ...]]
         self.charsets = {}
+        self.charsets_timestamps = {}
         self.persistence_file_name = AminerConfig.build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
         self.load_persistence_data()
@@ -72,15 +76,16 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
+        atom_time = log_atom.atom_time
         if not self.stop_learning_time_initialized:
             self.stop_learning_time_initialized = True
             if self.stop_learning_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+                self.stop_learning_time = atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = atom_time + self.stop_learning_no_anomaly_time
 
         parser_match = log_atom.parser_match
-        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -134,9 +139,14 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         # Check if one of the values has new characters for a specific id path.
         if id_event in self.charsets:
             missing_chars = set()
+            expired_chars = set()
             for c in b"".join(values):
                 if c not in self.charsets[id_event]:
                     missing_chars.add(c)
+                elif learn_mode or (c in self.charsets_timestamps[id_event] and self.charsets_timestamps[id_event][c] >= atom_time):
+                    self.charsets_timestamps[id_event][c] = atom_time + self.expire_persistence_time
+                else:
+                    expired_chars.add(c)
             if len(missing_chars) > 0:
                 try:
                     data = log_atom.raw_data.decode(AminerConfig.ENCODING)
@@ -152,22 +162,30 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                 missing_chars_decoded = []
                 for character in missing_chars:
                     missing_chars_decoded.append(character.to_bytes(1, "big").decode(AminerConfig.ENCODING))
+                expired_chars_decoded = []
+                for character in expired_chars:
+                    expired_chars_decoded.append(character.to_bytes(1, "big").decode(AminerConfig.ENCODING))
                 affected_values = []
                 for value in values:
                     affected_values.append(value.decode(AminerConfig.ENCODING))
                 analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": affected_values,
-                                      "MissingCharacters": missing_chars_decoded}
+                                      "MissingCharacters": missing_chars_decoded, "ExpiredCharacters": expired_chars_decoded}
                 event_data = {"AnalysisComponent": analysis_component}
                 for listener in self.anomaly_event_handlers:
-                    listener.receive_event(f"Analysis.{self.__class__.__name__}", "New character(s) detected", sorted_log_lines,
-                                           event_data, log_atom, self)
+                    listener.receive_event(f"Analysis.{self.__class__.__name__}", "New and/or expired character(s) detected",
+                                           sorted_log_lines, event_data, log_atom, self)
             # Extend charsets if learn mode is active.
             if self.learn_mode:
                 self.charsets[id_event].update(missing_chars)
+                for c in missing_chars:
+                    self.charsets_timestamps[id_event][c] = atom_time + self.expire_persistence_time
                 if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    self.stop_learning_time = max(self.stop_learning_time, atom_time + self.stop_learning_no_anomaly_time)
         else:
             self.charsets[id_event] = set(b"".join(values))
+            self.charsets_timestamps[id_event] = {}
+            for value in values:
+                self.charsets_timestamps[id_event][value] = atom_time + self.expire_persistence_time
         self.log_success += 1
         return True
 
@@ -187,7 +205,8 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         """Immediately write persistence data to storage."""
         lst = []
         for id_ev, charset in self.charsets.items():
-            lst.append([id_ev, list(charset)])
+            # TODO: charset_timestamps needs to be added in the same order as the list of charsets is stored.
+            lst.append([id_ev, list(charset), list(self.charsets_timestamps[id_ev])])
         PersistenceUtil.store_json(self.persistence_file_name, lst)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
@@ -197,6 +216,8 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         if persistence_data is not None:
             for lst in persistence_data:
                 self.charsets[tuple(lst[0])] = set(lst[1])
+                if len(lst) == 3:
+                    self.charsets_timestamps[tuple(lst[0])] = set(lst[2])
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """Allowlist an event generated by this source using the information

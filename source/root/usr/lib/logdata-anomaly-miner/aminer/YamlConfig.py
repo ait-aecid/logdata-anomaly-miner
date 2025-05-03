@@ -412,6 +412,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 learn = yaml_data['LearnMode']
+            expire = None
+            if 'expire_persistence_time' in item:
+                expire = item['expire_persistence_time']
+            elif 'ExpirePersistenceTime' in yaml_data:
+                expire = yaml_data['ExpirePersistenceTime']
+
             func = item['type'].func
             if item['suppress']:
                 if comp_name is None:

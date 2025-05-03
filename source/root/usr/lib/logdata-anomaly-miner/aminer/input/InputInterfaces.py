@@ -112,7 +112,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_stat_stop_update", "num_updates_until_var_reduction", "var_reduction_thres", "num_skipped_ind_for_weights",
             "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr", "used_range_test", "range_alpha", "range_threshold",
             "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics", "idf", "norm", "add_normal", "check_empty_windows",
-            "unique_path_list", "default_freqs", "var_factor", "avg_factor", "log_resource_ignore_list"
+            "unique_path_list", "default_freqs", "var_factor", "avg_factor", "log_resource_ignore_list", "expire_persistence_time"
         ]
         self.log_success = 0
         self.log_total = 0
@@ -189,7 +189,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_end_learning_phase", "check_cor_num_thres",  "min_values_cors_thres", "num_bt", "num_update_unq", "num_s_gof_values",
             "num_s_gof_bt", "num_d_bt", "num_pause_discrete", "num_pause_others", "num_var_type_hist_ref", "num_update_var_type_hist_ref",
             "num_var_type_considered_ind", "num_stat_stop_update", "num_updates_until_var_reduction", "num_skipped_ind_for_weights",
-            "num_ind_for_weights", "num_reinit_range"]
+            "num_ind_for_weights", "num_reinit_range", "expire_persistence_time"]
         non_negative = [
             "set_lower_limit", "time_output_threshold", "disc_div_thres", "num_upd_until_validation", "num_upd_until_validation",
             "check_cor_thres", "check_cor_prob_thres", "check_cor_num_thres", "min_values_cors_thres", "alpha_chisquare_test",
@@ -256,6 +256,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if hasattr(self, "num_s_gof_values") and hasattr(self, "num_init") and hasattr(self, "num_update") and (
                 self.num_s_gof_values < self.num_update or self.num_s_gof_values > self.num_init):
             msg = "num_s_gof_values must be smaller than or equal to num_init and greater than or equal to num_init."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if hasattr(self, "expire_persistence_time") and self.expire_persistence_time is not None and self.expire_persistence_time < 86400:
+            msg = "expire_persistence_time must be greater than or equal to 86400 seconds, when it is not None."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
 
