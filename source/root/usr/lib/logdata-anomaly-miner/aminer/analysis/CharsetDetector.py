@@ -23,8 +23,6 @@ from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableCompon
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
 
-from source.root.etc.aminer.template_config import learn_mode
-
 
 class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
     """This class creates events when numeric values are outside learned
@@ -143,10 +141,14 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             for c in b"".join(values):
                 if c not in self.charsets[id_event]:
                     missing_chars.add(c)
-                elif learn_mode or (c in self.charsets_timestamps[id_event] and self.charsets_timestamps[id_event][c] >= atom_time):
+                elif self.expire_persistence_time is not None and (self.learn_mode or (
+                        c in self.charsets_timestamps[id_event] and self.charsets_timestamps[id_event][c] >= atom_time)):
                     self.charsets_timestamps[id_event][c] = atom_time + self.expire_persistence_time
-                else:
+                elif self.expire_persistence_time is not None and c in self.charsets_timestamps[id_event] and \
+                        self.charsets_timestamps[id_event][c] < atom_time:
                     expired_chars.add(c)
+                    del self.charsets_timestamps[id_event][c]
+                    self.charsets[id_event].remove(c)
             if len(missing_chars) > 0:
                 try:
                     data = log_atom.raw_data.decode(AminerConfig.ENCODING)
@@ -177,15 +179,18 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             # Extend charsets if learn mode is active.
             if self.learn_mode:
                 self.charsets[id_event].update(missing_chars)
-                for c in missing_chars:
-                    self.charsets_timestamps[id_event][c] = atom_time + self.expire_persistence_time
+                if self.expire_persistence_time is not None:
+                    for c in missing_chars:
+                        self.charsets_timestamps[id_event][c] = atom_time + self.expire_persistence_time
                 if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
                     self.stop_learning_time = max(self.stop_learning_time, atom_time + self.stop_learning_no_anomaly_time)
         else:
             self.charsets[id_event] = set(b"".join(values))
-            self.charsets_timestamps[id_event] = {}
-            for value in values:
-                self.charsets_timestamps[id_event][value] = atom_time + self.expire_persistence_time
+            if self.expire_persistence_time is not None:
+                self.charsets_timestamps[id_event] = {}
+                for value in values:
+                    for v in value:
+                        self.charsets_timestamps[id_event][v] = atom_time + self.expire_persistence_time
         self.log_success += 1
         return True
 
@@ -196,17 +201,30 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
-            self.do_persist()
+            self.do_persist(trigger_time)
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
         return delta
 
-    def do_persist(self):
+    def do_persist(self, trigger_time=None):
         """Immediately write persistence data to storage."""
         lst = []
         for id_ev, charset in self.charsets.items():
-            # TODO: charset_timestamps needs to be added in the same order as the list of charsets is stored.
-            lst.append([id_ev, list(charset), list(self.charsets_timestamps[id_ev])])
+            clist = []
+            if self.expire_persistence_time is not None:
+                timestamps_list = []
+                for c in list(charset):
+                    if trigger_time is None or self.charsets_timestamps[id_ev][c] >= trigger_time:
+                        timestamps_list.append(self.charsets_timestamps[id_ev][c])
+                    elif trigger_time is not None:
+                        del self.charsets_timestamps[id_ev][c]
+                        continue
+                    clist.append(c)
+                if len(clist) > 0:
+                    lst.append([id_ev, clist, timestamps_list])
+                    self.charsets[id_ev] = set(clist)
+            else:
+                lst.append([id_ev, clist])
         PersistenceUtil.store_json(self.persistence_file_name, lst)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
