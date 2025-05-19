@@ -16,6 +16,8 @@ from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComb
 from aminer.util import SecureOSFunctions
 from unit.TestBase import TestBase
 
+from source.root.etc.aminer.template_config import learn_mode
+
 
 class PersistenceUtilTest(TestBase):
     """Unittests for the PersistenceUtil class."""
@@ -33,7 +35,7 @@ class PersistenceUtilTest(TestBase):
         self.assertRaises(TypeError, PersistenceUtil.add_persistable_component(some_object))
 
         # working example - the component is added implicitly.
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Test", True)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Test", learn_mode=True)
 
         # check persistence ID warning
         PersistenceUtil.SKIP_PERSISTENCE_ID_WARNING = False

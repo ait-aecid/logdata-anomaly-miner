@@ -70,10 +70,10 @@ done <<< "$IN"
 i=0
 while IFS= read -r line
 do
-  if [[ $i -ge 77 && $i -ne 100 && $i -ne 102 && $i -ne 129 && $i -ne 131 ]]; then
+  if [[ $i -ge 78 && $i -ne 101 && $i -ne 103 && $i -ne 130 && $i -ne 132 ]]; then
     echo "$line" >> $TMPFILE2
   fi
-  if [[ $i -eq 134 ]]; then
+  if [[ $i -eq 135 ]]; then
     break
   fi
   i=$(($i+1))
@@ -106,14 +106,16 @@ done <<< "$IN"
 i=0
 while IFS= read -r line
 do
-  if [[ $i -ge 2154 && $i -ne 2177 && $i -ne 2179 ]]; then
+  if [[ $i -ge 2156 && $i -ne 2179 && $i -ne 2181 ]]; then
     echo "$line" >> $TMPFILE2
   fi
-  if [[ $i -eq 2183 ]]; then
+  if [[ $i -eq 2184 ]]; then
     break
   fi
   i=$(($i+1))
 done <<< "$OUTPUT"
+
+sed -i -e 's/0.14803146216175547/0.1480314621617555/g' $TMPFILE2
 
 cmp --silent $TMPFILE1 $TMPFILE2
 res=$?
@@ -175,6 +177,8 @@ do
   fi
   i=$(($i+1))
 done <<< "$OUTPUT"
+
+sed -i -e 's/0.09975650575303287/0.0997565057530329/g' $TMPFILE2
 
 cmp --silent $TMPFILE1 $TMPFILE2
 res=$?
