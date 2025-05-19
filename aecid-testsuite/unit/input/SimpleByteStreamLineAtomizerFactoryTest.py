@@ -3,8 +3,6 @@ from aminer.input.SimpleByteStreamLineAtomizerFactory import SimpleByteStreamLin
 from aminer.analysis.NewMatchPathDetector import NewMatchPathDetector
 from unit.TestBase import TestBase, DummyFixedDataModelElement
 
-from source.root.etc.aminer.template_config import learn_mode
-
 
 class SimpleByteStreamLineAtomizerFactoryTest(TestBase):
     """The SimpleByteStreamLineAtomizerFactory should return a valid ByteStreamLineAtomizer with all parameters of the Factory."""

@@ -7,8 +7,6 @@ import time
 from datetime import datetime
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
 
-from source.root.etc.aminer.template_config import learn_mode
-
 
 class AtomFiltersTest(TestBase):
     """Unittests for the AtomFilters."""
