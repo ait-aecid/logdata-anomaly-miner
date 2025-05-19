@@ -21,7 +21,7 @@ class TimestampsUnsortedDetectorTest(TestBase):
         match_context_fixed_dme = DummyMatchContext(pid)
         fixed_dme = DummyFixedDataModelElement("s1", pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match", match_context_fixed_dme)
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
 
         t = time.time()
         log_atom = LogAtom(fixed_dme.data, ParserMatch(match_element_fixed_dme), t, new_match_path_detector)

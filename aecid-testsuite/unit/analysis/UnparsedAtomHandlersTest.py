@@ -18,7 +18,7 @@ class SimpleUnparsedAtomHandlerTest(TestBase):
         """Test if the SimpleUnparsedAtomHandler can handle matching log atoms and not matching log atoms."""
         t = time.time()
         fdme = DummyFixedDataModelElement("s1", self.calculation)
-        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
 
         # match exists
         match_context = DummyMatchContext(self.calculation)
@@ -41,7 +41,7 @@ class SimpleUnparsedAtomHandlerTest(TestBase):
         """Test if the VerboseUnparsedAtomHandler can handle matching log atoms and not matching log atoms."""
         t = time.time()
         fdme = DummyFixedDataModelElement("s1", self.calculation)
-        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        new_match_path_detector1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
 
         # match exists
         match_context = DummyMatchContext(self.calculation)

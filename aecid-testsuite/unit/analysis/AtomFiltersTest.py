@@ -7,6 +7,8 @@ import time
 from datetime import datetime
 from unit.TestBase import TestBase, DummyMatchContext, DummyFixedDataModelElement
 
+from source.root.etc.aminer.template_config import learn_mode
+
 
 class AtomFiltersTest(TestBase):
     """Unittests for the AtomFilters."""
@@ -20,8 +22,8 @@ class AtomFiltersTest(TestBase):
         match_context = DummyMatchContext(data)
         fdme = DummyFixedDataModelElement("s1", data)
         match_element = fdme.get_match_element("fixed", match_context)
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
-        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
+        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
         t = time.time()
         log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, nmpd)
 
@@ -49,8 +51,8 @@ class AtomFiltersTest(TestBase):
 
     def test2add_handler_SubhandlerFilter(self):
         """Test if new detectors can be added to the SubhandlerFilter."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", False)
-        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", learn_mode=False)
+        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", learn_mode=False)
         subhandler_filter = SubhandlerFilter([nmpd, other_nmpd], False)
         self.assertEqual(subhandler_filter.subhandler_list, [(nmpd, False), (other_nmpd, False)])
         subhandler_filter.add_handler(nmpd, True)
@@ -61,7 +63,7 @@ class AtomFiltersTest(TestBase):
 
     def test3receive_atom_MatchPathFilter(self):
         """Test if log atoms are processed correctly with the MatchPathFilter and the stop_when_handled flag is working properly."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
         data = b"data"
         match_context = DummyMatchContext(data)
         fdme = DummyFixedDataModelElement("s1", data)
@@ -83,8 +85,8 @@ class AtomFiltersTest(TestBase):
 
     def test4receive_atom_MatchValueFilter(self):
         """Test if log atoms are processed correctly with the MatchValueFilter and the stop_when_handled flag is working properly."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
-        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
+        other_nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
         data = b"data"
         other_data = b"other data"
         match_context = DummyMatchContext(data)
@@ -110,7 +112,7 @@ class AtomFiltersTest(TestBase):
 
     def test5validate_parameters_SubhandlerFilter(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler],"Default", learn_mode=False)
         self.assertRaises(TypeError, SubhandlerFilter, [""], True)
         self.assertRaises(TypeError, SubhandlerFilter, [b""], True)
         self.assertRaises(TypeError, SubhandlerFilter, [True], True)
@@ -137,7 +139,7 @@ class AtomFiltersTest(TestBase):
 
     def test6validate_parameters_MatchPathFilter(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
         self.assertRaises(TypeError, MatchPathFilter, [""])
         self.assertRaises(TypeError, MatchPathFilter, [b""])
         self.assertRaises(TypeError, MatchPathFilter, [True])
@@ -165,7 +167,7 @@ class AtomFiltersTest(TestBase):
 
     def test7validate_parameters_MatchValueFilter(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
         dictionary = {b"val": nmpd}
         path = "path"
         self.assertRaises(ValueError, MatchValueFilter, "", dictionary)
