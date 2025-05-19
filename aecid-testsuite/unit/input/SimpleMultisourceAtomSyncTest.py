@@ -25,8 +25,8 @@ class SimpleMultisourceAtomSyncTest(TestBase):
         # already sorted log atoms
         sync_wait_time = 3
         abdme = AnyByteDataModelElement("a1")
-        nmpd1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False, output_logline=False)
-        nmpd2 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False, output_logline=False)
+        nmpd1 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False, output_logline=False)
+        nmpd2 = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False, output_logline=False)
         smas = SimpleMultisourceAtomSync([nmpd1, nmpd2], sync_wait_time)
 
         t = time()
@@ -106,7 +106,7 @@ class SimpleMultisourceAtomSyncTest(TestBase):
 
     def test2validate_parameters(self):
         """Test all initialization parameters for the atomizer. Input parameters must be validated in the class."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False, output_logline=False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False, output_logline=False)
         self.assertRaises(TypeError, SimpleMultisourceAtomSync, "default", 3)
         self.assertRaises(TypeError, SimpleMultisourceAtomSync, b"Default", 3)
         self.assertRaises(TypeError, SimpleMultisourceAtomSync, None, 3)
