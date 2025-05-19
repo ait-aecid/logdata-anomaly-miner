@@ -16,8 +16,6 @@ from aminer.analysis.NewMatchPathValueComboDetector import NewMatchPathValueComb
 from aminer.util import SecureOSFunctions
 from unit.TestBase import TestBase
 
-from source.root.etc.aminer.template_config import learn_mode
-
 
 class PersistenceUtilTest(TestBase):
     """Unittests for the PersistenceUtil class."""
