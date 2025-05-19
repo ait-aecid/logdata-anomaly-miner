@@ -113,24 +113,57 @@ class NewMatchPathDetectorTest(TestBase):
 
     def test4persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, output_logline=False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, output_logline=False, expire_persistence_time=86400)
         t = round(time.time(), 3)
         log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t, nmpd)
         log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t, nmpd)
-
         self.assertTrue(nmpd.receive_atom(log_atom1))
         self.assertTrue(nmpd.receive_atom(log_atom2))
         self.assertEqual(nmpd.known_path_set, {"/s1", "/d1"})
         nmpd.do_persist()
+        p = t + nmpd.expire_persistence_time
+        self.assertEqual(nmpd.path_timestamps, {"/s1": p, "/d1": p})
         with open(nmpd.persistence_file_name, "r") as f:
-            self.assertEqual(f.read(), '["string:/d1", "string:/s1"]')
+            self.assertEqual(f.read(), f'[["string:/d1", "string:/s1"], [{p}, {p}]]')
+
+        nmpd.learn_mode = False
+        t = p - 1
+
+        log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t + 1, nmpd)
+        log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t + 2, nmpd)
+        self.assertTrue(nmpd.receive_atom(log_atom1))
+        self.assertTrue(nmpd.receive_atom(log_atom2))
+        self.assertEqual(nmpd.known_path_set, {"/s1"})
+        t2 = t + nmpd.expire_persistence_time
+        nmpd.do_persist(t2 + 1)
+        self.assertEqual(nmpd.path_timestamps, {"/s1": t2 + 1})
+        with open(nmpd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[["string:/s1"], [{t2 + 1}]]')
 
         nmpd.known_path_set = set()
         nmpd.load_persistence_data()
-        self.assertEqual(nmpd.known_path_set, {"/s1", "/d1"})
+        self.assertEqual(nmpd.known_path_set, {"/s1"})
 
         other = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=False, output_logline=False)
         self.assertEqual(nmpd.known_path_set, other.known_path_set)
+        self.assertEqual(nmpd.path_timestamps, other.path_timestamps)
+
+        nmpd.expire_persistence_time = None
+        nmpd.do_persist()
+        with open(nmpd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[["string:/s1"]]')
+
+        other = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], learn_mode=True, output_logline=False)
+        self.assertEqual(other.known_path_set, nmpd.known_path_set)
+        self.assertEqual(other.path_timestamps, {})
+
+        other.expire_persistence_time = 86400
+        other.receive_atom(log_atom1)
+        other.receive_atom(log_atom2)
+        t2 = t + other.expire_persistence_time
+        other.do_persist(t2 + 1)
+        self.assertEqual(other.known_path_set, {"/s1", "/d1"})
+        self.assertNotEqual(other.path_timestamps, {})
 
     def test5validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
