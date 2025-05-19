@@ -38,8 +38,8 @@ class NewMatchIdValueComboDetector(
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, id_path_list, min_allowed_time_diff,
-                 persistence_id="Default", allow_missing_values_flag=False, learn_mode=False, output_logline=True,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 persistence_id="Default", expire_persistence_time=None, allow_missing_values_flag=False, learn_mode=False,
+                 output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -61,13 +61,13 @@ class NewMatchIdValueComboDetector(
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_time_initialized = None
+        self.stop_learning_time_initialized, self.expire_persistence_time = [None] * 2
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             id_path_list=id_path_list, min_allowed_time_diff=min_allowed_time_diff, persistence_id=persistence_id,
-            allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode, output_logline=output_logline,
-            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
-            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
+            expire_persistence_time=expire_persistence_time, allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode,
+            output_logline=output_logline, stop_learning_time=stop_learning_time, log_resource_ignore_list=log_resource_ignore_list,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, mutable_default_args=["log_resource_ignore_list"]
         )
         if not self.target_path_list:
             msg = "target_path_list must not be None or empty."

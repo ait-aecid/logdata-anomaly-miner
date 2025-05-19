@@ -49,7 +49,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_time_initialized = None
+        self.stop_learning_time_initialized, self.expire_persistence_time = [None] * 2
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
