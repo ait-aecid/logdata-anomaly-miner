@@ -190,7 +190,7 @@ class CharsetDetectorTest(TestBase):
 
         m7 = MatchElement("/model/id", b"a", b"a", None)
         m8 = MatchElement("/model/value", b"xxx", b"xxx", None)
-        log_atom4 = LogAtom(b"bxxx", ParserMatch(MatchElement("/model", b"bxxx", b"bxxx", [m7, m8])), t + 4, None)
+        log_atom4 = LogAtom(b"axxx", ParserMatch(MatchElement("/model", b"axxx", b"axxx", [m7, m8])), t + 4, None)
 
         m9 = MatchElement("/model/id", b"a", b"a", None)
         m10 = MatchElement("/model/value", b"bass", b"bass", None)
@@ -214,11 +214,11 @@ class CharsetDetectorTest(TestBase):
         cd.learn_mode = False
         t = p - 3
         log_atom1 = LogAtom(b"aabc", ParserMatch(MatchElement("/model", b"aabc", b"aabc", [m1, m2])), t + 1, None)
-        log_atom2 = LogAtom(b"bxyz", ParserMatch(MatchElement("/model", b"bxyz", b"bxyz", [m3, m4])), t + 2, None)
         log_atom3 = LogAtom(b"aasdf", ParserMatch(MatchElement("/model", b"aasdf", b"aasdf", [m5, m6])), t + 3, None)
-        log_atom4 = LogAtom(b"bxxx", ParserMatch(MatchElement("/model", b"bxxx", b"bxxx", [m7, m8])), t + 4, None)
         log_atom5 = LogAtom(b"abass", ParserMatch(MatchElement("/model", b"abass", b"abass", [m9, m10])), t + 5, None)
         log_atom6 = LogAtom(b"bmax", ParserMatch(MatchElement("/model", b"bmax", b"bmax", [m11, m12])), t + 6, None)
+        log_atom2 = LogAtom(b"bxyz", ParserMatch(MatchElement("/model", b"bxyz", b"bxyz", [m3, m4])), t + cd.expire_persistence_time + 2, None)  # x will be missing in 'b'
+        log_atom4 = LogAtom(b"axxx", ParserMatch(MatchElement("/model", b"axxx", b"axxx", [m7, m8])), t + cd.expire_persistence_time + 4, None)  # x will be missing in 'a'
         cd.receive_atom(log_atom1)
         cd.receive_atom(log_atom2)
         cd.receive_atom(log_atom3)
@@ -227,10 +227,10 @@ class CharsetDetectorTest(TestBase):
         cd.receive_atom(log_atom6)
         cd.do_persist(t+cd.expire_persistence_time+3)
 
-        self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abcdfsx"]), ("b",): set([ord(x) for x in "amxyz"])})
+        self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abdfs"]), ("b",): set([ord(x) for x in "am"])})
         cd.charsets = {}
         cd.load_persistence_data()
-        self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abcdfsx"]), ("b",): set([ord(x) for x in "amxyz"])})
+        self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abdfs"]), ("b",): set([ord(x) for x in "am"])})
 
         other = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], learn_mode=True, output_logline=False)
         self.assertEqual(other.charsets, cd.charsets)
