@@ -37,6 +37,7 @@ config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'
 # is used.
 config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 config_properties['Core.PersistencePeriod'] = 600
+config_properties['ExpirePersistenceTime'] = 2629800  # 1 month
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
