@@ -225,7 +225,10 @@ class CharsetDetectorTest(TestBase):
         cd.receive_atom(log_atom4)
         cd.receive_atom(log_atom5)
         cd.receive_atom(log_atom6)
-        cd.do_persist(t+cd.expire_persistence_time+3)
+        t2 = t+cd.expire_persistence_time
+        cd.do_persist(t2+3)
+        with open(cd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[["string:a"], [97, 98, 100, 102, 115], [{t2 + 5}, {t2 + 5}, {t2 + 3}, {t2 + 3}, {t2 + 5}]], [["string:b"], [97, 109], [{t2 + 6}, {t2 + 6}]]]')
 
         self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abdfs"]), ("b",): set([ord(x) for x in "am"])})
         cd.charsets = {}
@@ -235,7 +238,28 @@ class CharsetDetectorTest(TestBase):
         other = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], learn_mode=True, output_logline=False)
         self.assertEqual(other.charsets, cd.charsets)
 
-    def test6validate_parameters(self):
+        cd.expire_persistence_time = None
+        cd.do_persist()
+        with open(cd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[["string:a"], [97, 98, 100, 102, 115]], [["string:b"], [97, 109]]]')
+
+        other = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], learn_mode=True, output_logline=False)
+        self.assertEqual(other.charsets, cd.charsets)
+        self.assertEqual(other.charsets_timestamps, {})
+
+        other.expire_persistence_time = 86400
+        other.receive_atom(log_atom1)
+        other.receive_atom(log_atom2)
+        other.receive_atom(log_atom3)
+        other.receive_atom(log_atom4)
+        other.receive_atom(log_atom5)
+        other.receive_atom(log_atom6)
+        t2 = t + other.expire_persistence_time
+        other.do_persist(t2 + 3)
+        self.assertEqual(other.charsets, {("a",): set([ord(x) for x in "abdfsx"]), ("b",): set([ord(x) for x in "amxyz"])})
+        self.assertNotEqual(other.charsets_timestamps, {})
+
+def test6validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
         self.assertRaises(TypeError, CharsetDetector, self.aminer_config, ["default"], ["/model/id"], ["/model/value"])
         self.assertRaises(TypeError, CharsetDetector, self.aminer_config, None, ["/model/id"], ["/model/value"])

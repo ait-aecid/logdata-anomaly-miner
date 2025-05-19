@@ -139,6 +139,8 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             missing_chars = set()
             expired_chars = set()
             for c in b"".join(values):
+                if id_event not in self.charsets_timestamps:
+                    self.charsets_timestamps[id_event] = {}
                 if c not in self.charsets[id_event]:
                     missing_chars.add(c)
                 elif self.expire_persistence_time is not None and (self.learn_mode or (
@@ -180,6 +182,8 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             if self.learn_mode:
                 self.charsets[id_event].update(missing_chars)
                 if self.expire_persistence_time is not None:
+                    if id_event not in self.charsets_timestamps:
+                        self.charsets_timestamps[id_event] = {}
                     for c in missing_chars:
                         self.charsets_timestamps[id_event][c] = atom_time + self.expire_persistence_time
                 if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
@@ -224,7 +228,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                     lst.append([id_ev, clist, timestamps_list])
                     self.charsets[id_ev] = set(clist)
             else:
-                lst.append([id_ev, clist])
+                lst.append([id_ev, list(charset)])
         PersistenceUtil.store_json(self.persistence_file_name, lst)
         logging.getLogger(AminerConfig.DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
