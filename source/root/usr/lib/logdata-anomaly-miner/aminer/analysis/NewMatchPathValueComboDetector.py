@@ -44,6 +44,7 @@ class NewMatchPathValueComboDetector(
                considered for value range generation.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
         does not refer to an existing parsed data object.
         @param learn_mode when set to True, this detector will report a new value only the first time before including it

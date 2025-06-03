@@ -51,6 +51,7 @@ class NewMatchIdValueComboDetector(
                that is waited for other log atoms with the same id to occur. The maximum possible time to keep an incomplete combo
                is 2*min_allowed_time_diff
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param allow_missing_values_flag when set to True, the detector will also use matches, where one of the paths from target_path_list
                does not refer to an existing parsed data object.
         @param learn_mode when set to True, this detector will report a new value only the first time before including it

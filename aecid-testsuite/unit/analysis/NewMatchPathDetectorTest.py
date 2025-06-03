@@ -191,6 +191,18 @@ class NewMatchPathDetectorTest(TestBase):
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=set())
         NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], persistence_id="Default")
 
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time="Default")
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=b"Default")
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=True)
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=["Default"])
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=[])
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=())
+        self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=set())
+        self.assertRaises(ValueError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=86399)
+        NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=None)
+        NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=86400)
+
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=b"True")
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode="True")
         self.assertRaises(TypeError, NewMatchPathDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=123)

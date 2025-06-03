@@ -48,6 +48,7 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param skip_repetitions boolean that determines whether only distinct values are used for character pair counting. This
                counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param learn_mode when set to True, the detector will extend the table of character pair frequencies based on new values.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.

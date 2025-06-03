@@ -38,6 +38,7 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param learn_mode specifies whether new values should be learned.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param stop_learning_time switch the learn_mode to False after the time.

@@ -42,6 +42,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param target_path_list parser paths of values to be analyzed. Multiple paths mean that all values occurring in these paths are
                considered for value range generation.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param expire_persistence_time remove learned values after time of absence in logs.
         @param learn_mode specifies whether value ranges should be extended when values outside of ranges are observed.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.

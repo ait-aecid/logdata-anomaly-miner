@@ -51,6 +51,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         @param allow_missing_id specifies whether log atoms without id path should be omitted (only if id path is set).
         @param timeout maximum allowed seconds between two entries of sequence; sequence is split in subsequences if exceeded.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param learn_mode specifies whether new frequency measurements override ground truth frequencies.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
