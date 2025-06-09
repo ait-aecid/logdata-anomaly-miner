@@ -76,16 +76,6 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
         self.log_learned_path_value_combos = 0
         self.log_new_learned_values = []
 
-    def load_persistence_data(self):
-        """Load the persistence data from storage."""
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is not None:
-            # Dictionary and tuples were stored as list of lists. Transform
-            # the first lists to tuples to allow hash operation needed by set.
-            for value_tuple, extra_data in persistence_data:
-                self.known_values_dict[tuple(value_tuple)] = extra_data
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
-
     def receive_atom(self, log_atom):
         """Receive on parsed atom and the information about the parser match.
 
@@ -96,19 +86,18 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
+        atom_time = round(log_atom.atom_time, 3)
         if not self.stop_learning_time_initialized:
             self.stop_learning_time_initialized = True
             if self.stop_learning_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+                self.stop_learning_time = atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = atom_time + self.stop_learning_no_anomaly_time
 
         match_dict = log_atom.parser_match.get_match_dictionary()
-        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
-        timestamp = log_atom.get_timestamp()
-        timestamp = round(timestamp, 3)
         match_value_list = []
         for target_path in self.target_path_list:
             match = match_dict.get(target_path)
@@ -129,29 +118,34 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             match_value_list = self.tuple_transformation_function(match_value_list)
         match_value_tuple = tuple(match_value_list)
 
-        if self.known_values_dict.get(match_value_tuple) is None:
-            self.known_values_dict[match_value_tuple] = [timestamp, timestamp, 1]
-            self.log_new_learned_values.append(match_value_tuple)
-        else:
-            extra_data = self.known_values_dict.get(match_value_tuple)
-            extra_data[1] = timestamp
-            extra_data[2] += 1
-
         affected_log_atom_values = []
-        metadata = {}
         for match_value in list(match_value_tuple):
             if isinstance(match_value, bytes):
                 match_value = match_value.decode(AminerConfig.ENCODING)
             affected_log_atom_values.append(str(match_value))
-        values = self.known_values_dict.get(match_value_tuple)
-        metadata["TimeFirstOccurrence"] = values[0]
-        metadata["TimeLastOccurrence"] = values[1]
-        metadata["NumberOfOccurrences"] = values[2]
 
-        analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": affected_log_atom_values,
-                              "Metadata": metadata}
+        analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": affected_log_atom_values}
+        values = self.known_values_dict.get(match_value_tuple)
+        if values is None and self.learn_mode:
+            self.known_values_dict[match_value_tuple] = [atom_time, atom_time, 1]
+            self.log_new_learned_values.append(match_value_tuple)
+            values = self.known_values_dict.get(match_value_tuple)
+        elif values is not None:
+            if self.expire_persistence_time is not None and values is not None and atom_time > values[1] + self.expire_persistence_time:
+                analysis_component["ExpiredValues"] = list(values)
+                del self.known_values_dict[match_value_tuple]
+            else:
+                values[1] = atom_time
+                values[2] += 1
+        if values is not None:
+            metadata = {}
+            metadata["TimeFirstOccurrence"] = values[0]
+            metadata["TimeLastOccurrence"] = values[1]
+            metadata["NumberOfOccurrences"] = values[2]
+            analysis_component["Metadata"] = metadata
+
         event_data = {"AnalysisComponent": analysis_component}
-        if (self.learn_mode and self.known_values_dict.get(match_value_tuple)[2] == 1) or not self.learn_mode:
+        if match_value_tuple not in self.known_values_dict or values[2] == 1 or "ExpiredValues" in analysis_component:
             self.log_learned_path_value_combos += 1
             try:
                 data = log_atom.raw_data.decode(AminerConfig.ENCODING)
@@ -163,10 +157,10 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             else:
                 sorted_log_lines = [str(self.known_values_dict)]
             for listener in self.anomaly_event_handlers:
-                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New value combination(s) detected", sorted_log_lines,
-                                       event_data, log_atom, self)
+                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New value combination(s) detected or values expired",
+                                       sorted_log_lines, event_data, log_atom, self)
             if self.learn_mode and self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                self.stop_learning_time = max(self.stop_learning_time, atom_time + self.stop_learning_no_anomaly_time)
         self.log_success += 1
         return True
 
@@ -177,18 +171,28 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
-            self.do_persist()
+            self.do_persist(trigger_time)
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
         return delta
 
-    def do_persist(self):
+    def do_persist(self, trigger_time=None):
         """Immediately write persistence data to storage."""
         persistence_data = []
         for dict_record in self.known_values_dict.items():
             persistence_data.append(dict_record)
         PersistenceUtil.store_json(self.persistence_file_name, persistence_data)
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        if persistence_data is not None:
+            # Dictionary and tuples were stored as list of lists. Transform
+            # the first lists to tuples to allow hash operation needed by set.
+            for value_tuple, extra_data in persistence_data:
+                self.known_values_dict[tuple(value_tuple)] = extra_data
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """Allowlist an event generated by this source using the information

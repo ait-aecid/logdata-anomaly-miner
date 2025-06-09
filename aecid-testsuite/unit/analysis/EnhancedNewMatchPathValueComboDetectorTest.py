@@ -29,7 +29,7 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         Test if log atoms are processed correctly and the detector is learning (learn_mode=True) and stops if learn_mode=False.
         Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
-        expected_string = '%s New value combination(s) detected\n%s: "None" (%d lines)\n  %s\n\n'
+        expected_string = '%s New value combination(s) detected or values expired\n%s: "None" (%d lines)\n  %s\n\n'
         datetime_format_string = "%Y-%m-%d %H:%M:%S"
         # learn_mode = True
         enmpvcd = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=True, output_logline=False)
@@ -53,21 +53,23 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         enmpvcd.learn_mode = False
         self.assertTrue(enmpvcd.receive_atom(log_atom2))
         self.assertEqual(self.output_stream.getvalue(), expected_string % (
-            datetime.fromtimestamp(t).strftime(datetime_format_string), enmpvcd.__class__.__name__, 1, f"{{(b' pid=', b'25537'): [{t}, {t}, 2], (b'ddd ', b'25538'): [{t}, {t}, 1]}}"))
+            datetime.fromtimestamp(t).strftime(datetime_format_string), enmpvcd.__class__.__name__, 1, f"{{(b' pid=', b'25537'): [{t}, {t}, 2]}}"))
         self.reset_output_stream()
 
         # repeating should produce the same result, but increase the count
         log_atom2.atom_time += 100
         self.assertTrue(enmpvcd.receive_atom(log_atom2))
         self.assertEqual(self.output_stream.getvalue(), expected_string % (
-            datetime.fromtimestamp(t+100).strftime(datetime_format_string), enmpvcd.__class__.__name__, 1, f"{{(b' pid=', b'25537'): [{t}, {t}, 2], (b'ddd ', b'25538'): [{t}, {t+100}, 2]}}"))
+            datetime.fromtimestamp(t+100).strftime(datetime_format_string), enmpvcd.__class__.__name__, 1, f"{{(b' pid=', b'25537'): [{t}, {t}, 2]}}"))
         self.reset_output_stream()
 
         # allow_missing_values_flag=True
         enmpvcd.allow_missing_values_flag = True
+        enmpvcd.learn_mode = True
+        self.maxDiff = None
         self.assertTrue(enmpvcd.receive_atom(log_atom3))
         self.assertEqual(self.output_stream.getvalue(), expected_string % (
-            datetime.fromtimestamp(t).strftime(datetime_format_string), enmpvcd.__class__.__name__, 1, f"{{(b' pid=', b'25537'): [{t}, {t}, 2], (b'ddd ', b'25538'): [{t}, {t+100}, 2], (b'ddd ', None): [{t}, {t}, 1]}}"))
+            datetime.fromtimestamp(t).strftime(datetime_format_string), enmpvcd.__class__.__name__, 1, f"{{(b' pid=', b'25537'): [{t}, {t}, 2], (b'ddd ', None): [{t}, {t}, 1]}}"))
 
         # stop_learning_time
         enmpvcd = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=True, output_logline=False, stop_learning_time=100)
@@ -136,23 +138,64 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
 
     def test4persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        enmpvcd = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=True, output_logline=False)
+        enmpvcd = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=True, output_logline=False, expire_persistence_time=86400)
         t = round(time.time(), 3)
         log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, enmpvcd)
         log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t, enmpvcd)
-
         self.assertTrue(enmpvcd.receive_atom(log_atom1))
         self.assertTrue(enmpvcd.receive_atom(log_atom2))
-        self.assertEqual(enmpvcd.known_values_dict, {(b' pid=', b'25537'): [t, t, 1], (b"ddd ", b"25538"): [t, t, 1]})
+        self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"): [t, t, 1], (b"ddd ", b"25538"): [t, t, 1]})
         enmpvcd.do_persist()
+        p = t + enmpvcd.expire_persistence_time
         with open(enmpvcd.persistence_file_name, "r") as f:
             self.assertEqual(f.read(), f'[[["bytes: pid=", "bytes:25537"], [{t}, {t}, 1]], [["bytes:ddd ", "bytes:25538"], [{t}, {t}, 1]]]')
 
+        enmpvcd.learn_mode = False
+        log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), p, enmpvcd)
+        log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), p + 1, enmpvcd)
+        self.assertTrue(enmpvcd.receive_atom(log_atom1))
+        self.assertTrue(enmpvcd.receive_atom(log_atom2))
+        self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"): [t, p, 2]})
+
+        t2 = t + enmpvcd.expire_persistence_time
+        enmpvcd.do_persist(t2 + 1)
+        with open(enmpvcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[["bytes: pid=", "bytes:25537"], [{t}, {p}, 2]]]')
+
         enmpvcd.known_values_dict = dict()
         enmpvcd.load_persistence_data()
-        self.assertEqual(enmpvcd.known_values_dict, {(b' pid=', b'25537'): [t, t, 1], (b"ddd ", b"25538"): [t, t, 1]})
+        self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"): [t, p, 2]})
 
-        other = EnhancedNewMatchPathValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler])
+        other = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=False)
+        self.assertEqual(enmpvcd.known_values_dict, other.known_values_dict)
+
+        enmpvcd.expire_persistence_time = None
+        enmpvcd.do_persist()
+        with open(enmpvcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[["bytes: pid=", "bytes:25537"], [{t}, {p}, 2]]]')
+        other = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=True)
+        self.assertEqual(enmpvcd.known_values_dict, other.known_values_dict)
+
+        other.expire_persistence_time = 86400
+        other.receive_atom(log_atom1)
+        other.receive_atom(log_atom2)
+        t2 = t + other.expire_persistence_time
+        other.do_persist(t2 + 1)
+        self.assertEqual(other.known_values_dict, {(b" pid=", b"25537"): [t, t2, 3], (b"ddd ", b"25538"): [t2 + 1, t2 + 1, 1]})
+
+        enmpvcd = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], learn_mode=True, allow_missing_values_flag=True)
+        self.assertTrue(enmpvcd.receive_atom(log_atom1))
+        self.assertTrue(enmpvcd.receive_atom(log_atom2))
+        self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"): [t, t2, 4], (b"ddd ", b"25538"): [t2 + 1, t2 + 1, 2]})
+        enmpvcd.do_persist()
+        with open(enmpvcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[["bytes: pid=", "bytes:25537"], [{t}, {t2}, 4]], [["bytes:ddd ", "bytes:25538"], [{t2 + 1}, {t2 + 1}, 2]]]')
+
+        enmpvcd.known_values_dict = dict()
+        enmpvcd.load_persistence_data()
+        self.assertEqual(enmpvcd.known_values_dict, {(b" pid=", b"25537"): [t, t2, 4], (b"ddd ", b"25538"): [t2 + 1, t2 + 1, 2]})
+
+        other = EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler])
         self.assertEqual(enmpvcd.known_values_dict, other.known_values_dict)
 
     def test5validate_parameters(self):
@@ -192,6 +235,18 @@ class EnhancedNewMatchPathValueComboDetectorTest(TestBase):
         self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], persistence_id=())
         self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], persistence_id=set())
         EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], persistence_id="Default")
+
+        self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time="")
+        self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=b"Default")
+        self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=True)
+        self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time={"id": "Default"})
+        self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=["Default"])
+        self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=[])
+        self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=())
+        self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=set())
+        self.assertRaises(ValueError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=86399)
+        EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=None)
+        EnhancedNewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=86400)
 
         self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], allow_missing_values_flag=b"True")
         self.assertRaises(TypeError, EnhancedNewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], allow_missing_values_flag="True")
