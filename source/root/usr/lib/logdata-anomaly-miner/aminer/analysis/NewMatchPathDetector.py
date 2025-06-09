@@ -118,7 +118,9 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                     unknown_path_list) + os.linesep + original_log_line_prefix + data]
             else:
                 sorted_log_lines = [repr(unknown_path_list)]
-            analysis_component = {"AffectedLogAtomPaths": list(unknown_path_list), "ExpiredPaths": list(expired_paths)}
+            analysis_component = {"AffectedLogAtomPaths": list(unknown_path_list)}
+            if self.expire_persistence_time is not None:
+                analysis_component["ExpiredPaths"] = list(expired_paths)
             event_data = {"AnalysisComponent": analysis_component}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", "New path(s) detected", sorted_log_lines, event_data,

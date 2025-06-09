@@ -174,7 +174,9 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                 for value in values:
                     affected_values.append(value.decode(AminerConfig.ENCODING))
                 analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": affected_values,
-                                      "MissingCharacters": missing_chars_decoded, "ExpiredCharacters": expired_chars_decoded}
+                                      "MissingCharacters": missing_chars_decoded}
+                if self.expire_persistence_time is not None:
+                    analysis_component["ExpiredCharacters"] = expired_chars_decoded
                 event_data = {"AnalysisComponent": analysis_component}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "New and/or expired character(s) detected",

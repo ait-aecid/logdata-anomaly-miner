@@ -125,8 +125,9 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                     elif self.learn_mode or self.value_timestamps[value] >= atom_time:
                         self.value_timestamps[value] = atom_time + self.expire_persistence_time
             if len(affected_log_atom_values) > 0:
-                analysis_component = {"AffectedLogAtomPaths": [target_path], "AffectedLogAtomValues": affected_log_atom_values,
-                                      "ExpiredValues": list(expired_values)}
+                analysis_component = {"AffectedLogAtomPaths": [target_path], "AffectedLogAtomValues": affected_log_atom_values}
+                if self.expire_persistence_time is not None:
+                    analysis_component["ExpiredValues"] = list(expired_values)
                 if isinstance(match_dict.get(target_path), list):
                     res = {target_path: affected_log_atom_values}
                 else:
