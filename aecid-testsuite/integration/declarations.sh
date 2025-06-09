@@ -59,7 +59,6 @@ read -r -d '' VAR << END
       "/model/DiskUpgrade/User",
       "/model/DiskUpgrade/HDRepair"
     ],
-    "ExpiredPaths": [],
     "LogResource": "file:///tmp/auth.log"
   },
   "LogData": {
@@ -174,7 +173,6 @@ read -r -d '' VAR << END
       "/model/HomePath/Is",
       "/model/HomePath/Path"
     ],
-    "ExpiredPaths": [],
     "LogResource": "file:///tmp/auth.log"
   },
   "LogData": {
