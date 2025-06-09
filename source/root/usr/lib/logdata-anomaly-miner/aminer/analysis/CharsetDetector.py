@@ -221,10 +221,11 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             if self.expire_persistence_time is not None:
                 timestamps_list = []
                 for c in list(charset):
-                    if trigger_time is None or self.charsets_timestamps[id_ev][c] >= trigger_time:
+                    if trigger_time is None or (c in self.charsets_timestamps[id_ev] and self.charsets_timestamps[id_ev][
+                            c] >= trigger_time):
                         timestamps_list.append(self.charsets_timestamps[id_ev][c])
                     elif trigger_time is not None:
-                        del self.charsets_timestamps[id_ev][c]
+                        self.charsets_timestamps[id_ev].pop(c, None)
                         continue
                     clist.append(c)
                 if len(clist) > 0:

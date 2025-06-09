@@ -72,16 +72,9 @@ class NewMatchPathValueComboDetector(
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.known_values_set = set()
+        self.value_timestamps = {}
         self.load_persistence_data()
         PersistenceUtil.add_persistable_component(self)
-
-    def load_persistence_data(self):
-        """Load the persistence data from storage."""
-        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
-        if persistence_data is not None:
-            # Set and tuples were stored as list of lists. Transform the inner lists to tuples to allow hash operation needed by set.
-            self.known_values_set = {tuple(record) for record in persistence_data}
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def receive_atom(self, log_atom):
         """Receive on parsed atom and the information about the parser match.
@@ -93,14 +86,15 @@ class NewMatchPathValueComboDetector(
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
+        atom_time = log_atom.atom_time
         if not self.stop_learning_time_initialized:
             self.stop_learning_time_initialized = True
             if self.stop_learning_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+                self.stop_learning_time = atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = atom_time + self.stop_learning_no_anomaly_time
 
-        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
         match_dict = log_atom.parser_match.get_match_dictionary()
@@ -132,25 +126,40 @@ class NewMatchPathValueComboDetector(
                 self.log_learned_path_value_combos += 1
                 self.log_new_learned_values.append(match_value_tuple)
                 if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_time = max(
-                        self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    self.stop_learning_time = max(self.stop_learning_time, atom_time + self.stop_learning_no_anomaly_time)
+                if self.expire_persistence_time is not None:
+                    self.value_timestamps[match_value_tuple] = atom_time + self.expire_persistence_time
 
             analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": affected_log_atom_values}
-            event_data = {"AnalysisComponent": analysis_component}
-            try:
-                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
-            except UnicodeError:
-                data = repr(log_atom.raw_data)
-            if self.output_logline:
-                original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-                sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + data]
-            else:
-                sorted_log_lines = [str(match_value_tuple)]
-            for listener in self.anomaly_event_handlers:
-                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New value combination(s) detected", sorted_log_lines,
-                                       event_data, log_atom, self)
+            self.send_event(analysis_component, log_atom, match_value_tuple,
+                            "New value combination(s) detected")
+        elif self.expire_persistence_time and (self.learn_mode or (match_value_tuple in self.value_timestamps and self.value_timestamps[
+                match_value_tuple] >= atom_time)):
+            self.value_timestamps[match_value_tuple] = atom_time + self.expire_persistence_time
+        elif self.expire_persistence_time and match_value_tuple in self.value_timestamps and \
+                self.value_timestamps[match_value_tuple] < atom_time:
+            analysis_component = {"AffectedLogAtomPaths": self.target_path_list, "AffectedLogAtomValues": affected_log_atom_values,
+                                  "ExpiredValues": list(match_value_tuple)}
+            del self.value_timestamps[match_value_tuple]
+            self.known_values_set.remove(match_value_tuple)
+            self.send_event(analysis_component, log_atom, match_value_tuple,
+                            "Values expired already and are removed from the known values set.")
         self.log_success += 1
         return True
+
+    def send_event(self, analysis_component, log_atom, match_value_tuple, msg):
+        event_data = {"AnalysisComponent": analysis_component}
+        try:
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
+        if self.output_logline:
+            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+            sorted_log_lines = [str(match_value_tuple) + os.linesep + original_log_line_prefix + data]
+        else:
+            sorted_log_lines = [str(match_value_tuple)]
+        for listener in self.anomaly_event_handlers:
+            listener.receive_event(f"Analysis.{self.__class__.__name__}", msg, sorted_log_lines, event_data, log_atom, self)
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -159,21 +168,55 @@ class NewMatchPathValueComboDetector(
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
-            self.do_persist()
+            self.do_persist(trigger_time)
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
         return delta
 
-    def do_persist(self):
+    def do_persist(self, trigger_time=None):
         """Immediately write persistence data to storage."""
         try:
             # Sort the known_values_set before storing as json. This improves the deterministic behavior / reproducible results.
             # The Lambda function is only used to allow sorting of tuple values which contain None.
-            PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.known_values_set),
-                                                                          key=lambda L: tuple(el if el is not None else b'-' for el in L)))
+            values = sorted(list(self.known_values_set), key=lambda L: tuple(el if el is not None else b'-' for el in L))
         except TypeError:
-            PersistenceUtil.store_json(self.persistence_file_name, list(self.known_values_set))
+            values = list(self.known_values_set)
+        lst = [[]]
+        if self.expire_persistence_time is not None:
+            timestamps_list = []
+            for value in values:
+                if trigger_time is None or value in self.value_timestamps and self.value_timestamps[value] >= trigger_time:
+                    timestamps_list.append(self.value_timestamps[value])
+                elif trigger_time is not None:
+                    self.value_timestamps.pop(value, None)
+                    continue
+                lst[0].append(value)
+            if len(timestamps_list) > 0:
+                lst.append(timestamps_list)
+        else:
+            lst[0] = values
+        PersistenceUtil.store_json(self.persistence_file_name, lst)
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
+
+    def load_persistence_data(self):
+        """Load the persistence data from storage."""
+        persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.known_values_set = set()
+        self.value_timestamps = {}
+        # Set and tuples were stored as list of lists. Transform the inner lists to tuples to allow hash operation needed by set.
+        if persistence_data is not None:
+            if len(persistence_data) == 2 and all(isinstance(x, list) and all(isinstance(y, list) for y in x) for x in persistence_data):
+                self.known_values_set = {tuple(record) for record in persistence_data[0]}
+                for i in range(len(persistence_data[0])):
+                    self.known_values_set.add(tuple(persistence_data[0][i]))
+                    self.value_timestamps[tuple(persistence_data[0][i])] = persistence_data[1][i]
+            else:
+                if len(persistence_data) > 0:
+                    if isinstance(persistence_data[0], list) and len(persistence_data[0]) > 0 and isinstance(persistence_data[0][0], list):
+                        self.known_values_set = {tuple(record) for record in persistence_data[0]}
+                    else:
+                        self.known_values_set = {tuple(record) for record in persistence_data}
+            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
         """Allowlist an event generated by this source using the information

@@ -172,10 +172,10 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         if self.expire_persistence_time is not None:
             timestamps_list = []
             for value in values:
-                if trigger_time is None or self.value_timestamps[value] >= trigger_time:
+                if trigger_time is None or (value in self.value_timestamps and self.value_timestamps[value] >= trigger_time):
                     timestamps_list.append(self.value_timestamps[value])
                 elif trigger_time is not None:
-                    del self.value_timestamps[value]
+                    self.value_timestamps.pop(value, None)
                     continue
                 lst[0].append(value)
             if len(timestamps_list) > 0:
@@ -189,10 +189,13 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """Load the persistence data from storage."""
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.known_values_set = set()
+        self.value_timestamps = {}
         if persistence_data is not None:
             if len(persistence_data) == 2 and all(isinstance(x, list) for x in persistence_data):
-                self.known_values_set = set(persistence_data[0])
-                self.value_timestamps = set(persistence_data[1])
+                for i in range(len(persistence_data[0])):
+                    self.known_values_set.add(persistence_data[0][i])
+                    self.value_timestamps[persistence_data[0][i]] = persistence_data[1][i]
             else:
                 if len(persistence_data) > 0:
                     if isinstance(persistence_data[0], list):

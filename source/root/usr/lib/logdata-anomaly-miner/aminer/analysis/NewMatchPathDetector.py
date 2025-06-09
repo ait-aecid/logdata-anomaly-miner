@@ -146,10 +146,10 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         if self.expire_persistence_time is not None:
             timestamps_list = []
             for path in sorted(list(self.known_path_set)):
-                if trigger_time is None or self.path_timestamps[path] >= trigger_time:
+                if trigger_time is None or (path in self.path_timestamps and self.path_timestamps[path] >= trigger_time):
                     timestamps_list.append(self.path_timestamps[path])
                 elif trigger_time is not None:
-                    del self.path_timestamps[path]
+                    self.path_timestamps.pop(path, None)
                     continue
                 lst[0].append(path)
             if len(timestamps_list) > 0:
@@ -162,10 +162,13 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     def load_persistence_data(self):
         """Load the persistence data from storage."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.known_path_set = set()
+        self.path_timestamps = {}
         if persistence_data is not None:
             if len(persistence_data) == 2 and all(isinstance(x, list) for x in persistence_data):
-                self.known_path_set = set(persistence_data[0])
-                self.path_timestamps = set(persistence_data[1])
+                for i in range(len(persistence_data[0])):
+                    self.known_path_set.add(persistence_data[0][i])
+                    self.path_timestamps[persistence_data[0][i]] = persistence_data[1][i]
             else:
                 if len(persistence_data) > 0:
                     if isinstance(persistence_data[0], list):
