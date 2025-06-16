@@ -84,6 +84,7 @@ class NewMatchIdValueComboDetector(
 
         self.known_values = []
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
+        self.value_timestamps = {}
         self.load_persistence_data()
 
         self.id_dict_current = {}
@@ -100,15 +101,16 @@ class NewMatchIdValueComboDetector(
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
+        atom_time = log_atom.atom_time
         if not self.stop_learning_time_initialized:
             self.stop_learning_time_initialized = True
             if self.stop_learning_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+                self.stop_learning_time = atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = atom_time + self.stop_learning_no_anomaly_time
 
         match_dict = log_atom.parser_match.get_match_dictionary()
-        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -121,15 +123,14 @@ class NewMatchIdValueComboDetector(
         if id_match_element is None:
             return False
 
-        timestamp = log_atom.get_timestamp()
-        if timestamp is not None:
+        if atom_time is not None:
             if self.next_shift_time is None:
-                self.next_shift_time = timestamp + self.min_allowed_time_diff
-            if timestamp > self.next_shift_time:
+                self.next_shift_time = atom_time + self.min_allowed_time_diff
+            if atom_time > self.next_shift_time:
                 # Every min_allowed_time_diff seconds, process all combinations from id_dict_old and then override id_dict_old with
                 # id_dict_current. This guarantees that incomplete combos are hold for at least min_allowed_time_diff seconds before
                 # proceeding.
-                self.next_shift_time = timestamp + self.min_allowed_time_diff
+                self.next_shift_time = atom_time + self.min_allowed_time_diff
                 if self.allow_missing_values_flag:
                     for id_old in self.id_dict_old:
                         self.process_id_dict_entry(self.id_dict_old[id_old], log_atom)
@@ -182,6 +183,8 @@ class NewMatchIdValueComboDetector(
 
     def process_id_dict_entry(self, id_dict_entry, log_atom):
         """Process an entry from the id_dict."""
+        v = tuple(sorted(id_dict_entry.items()))
+        atom_time = log_atom.atom_time
         if id_dict_entry not in self.known_values:
             # Combo is unknown, process and raise anomaly
             if self.learn_mode:
@@ -189,23 +192,35 @@ class NewMatchIdValueComboDetector(
                 self.log_learned_path_value_combos += 1
                 self.log_new_learned_values.append(id_dict_entry)
                 if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                    self.stop_learning_time = max(self.stop_learning_time, atom_time + self.stop_learning_no_anomaly_time)
+                if self.expire_persistence_time is not None:
+                    self.value_timestamps[v] = atom_time + self.expire_persistence_time
 
             analysis_component = {"AffectedLogAtomValues": [str(i) for i in list(id_dict_entry.values())]}
-            event_data = {"AnalysisComponent": analysis_component}
-            try:
-                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
-            except UnicodeError:
-                data = repr(log_atom.raw_data)
-            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-            if self.output_logline:
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match("") + os.linesep + repr(
-                    id_dict_entry) + os.linesep + original_log_line_prefix + data]
-            else:
-                sorted_log_lines = [repr(id_dict_entry)]
-            for listener in self.anomaly_event_handlers:
-                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New value combination(s) detected", sorted_log_lines,
-                                       event_data, log_atom, self)
+            self.send_event(analysis_component, log_atom, id_dict_entry, "New value combination(s) detected")
+        elif self.expire_persistence_time and (self.learn_mode or (v in self.value_timestamps and self.value_timestamps[v] >= atom_time)):
+            self.value_timestamps[v] = atom_time + self.expire_persistence_time
+        elif self.expire_persistence_time and v in self.value_timestamps and \
+                self.value_timestamps[v] < atom_time:
+            analysis_component = {
+                "AffectedLogAtomValues": [str(i) for i in list(id_dict_entry.values())], "ExpiredValues": list(id_dict_entry)}
+            self.send_event(
+                analysis_component, log_atom, id_dict_entry, "Values expired already and are removed from the known values set.")
+
+    def send_event(self, analysis_component, log_atom, id_dict_entry, msg):
+        event_data = {"AnalysisComponent": analysis_component}
+        try:
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+        if self.output_logline:
+            sorted_log_lines = [log_atom.parser_match.match_element.annotate_match("") + os.linesep + repr(
+                id_dict_entry) + os.linesep + original_log_line_prefix + data]
+        else:
+            sorted_log_lines = [repr(id_dict_entry)]
+        for listener in self.anomaly_event_handlers:
+            listener.receive_event(f"Analysis.{self.__class__.__name__}", msg, sorted_log_lines, event_data, log_atom, self)
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -214,24 +229,52 @@ class NewMatchIdValueComboDetector(
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
-            self.do_persist()
+            self.do_persist(trigger_time)
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
         return delta
 
-    def do_persist(self):
+    def do_persist(self, trigger_time=None):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, self.known_values)
+        lst = [[]]
+        values = self.known_values
+        if self.expire_persistence_time is not None:
+            timestamps_list = []
+            for value in values:
+                v = tuple(sorted(value.items()))
+                if trigger_time is None or v in self.value_timestamps and self.value_timestamps[v] >= trigger_time:
+                    timestamps_list.append(self.value_timestamps[v])
+                elif trigger_time is not None:
+                    self.value_timestamps.pop(v, None)
+                    continue
+                lst[0].append(value)
+            if len(timestamps_list) > 0:
+                lst.append(timestamps_list)
+        else:
+            lst[0] = values
+        PersistenceUtil.store_json(self.persistence_file_name, lst)
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.known_values = []
+        self.value_timestamps = {}
         if persistence_data is not None:
-            # Combinations are stored as list of dictionaries
-            for record in persistence_data:
-                self.known_values.append(record)
-            logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
+            if len(persistence_data) == 2 and all(isinstance(x, list) for x in persistence_data):
+                for i in range(len(persistence_data[0])):
+                    self.known_values.append(persistence_data[0][i])
+                    self.value_timestamps[tuple(sorted(persistence_data[0][i].items()))] = persistence_data[1][i]
+            else:
+                if len(persistence_data) > 0:
+                    if isinstance(persistence_data[0], list):
+                        for record in persistence_data[0]:
+                            self.known_values.append(record)
+                    else:
+                        # Combinations are stored as list of dictionaries
+                        for record in persistence_data:
+                            self.known_values.append(record)
+        logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
         PersistenceUtil.add_persistable_component(self)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
