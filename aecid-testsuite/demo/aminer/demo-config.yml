@@ -1091,7 +1091,7 @@ Analysis:
             - "/model/DailyCron/JobNumber"
             - "/model/IPAddresses/Username"
           learn_mode: True
-          #expire_persistence_time: 172800
+          expire_persistence_time: 172800
         - type: MissingMatchPathValueDetector
           id: MissingMatch
           paths:
