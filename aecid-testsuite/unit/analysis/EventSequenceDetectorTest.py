@@ -223,43 +223,81 @@ class EventSequenceDetectorTest(TestBase):
 
     def test5persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        t = time.time()
-        esd = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/model/id"], target_path_list=["/model/value"], seq_len=2, learn_mode=True)
+        t = round(time.time(), 3)
+        esd = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/model/id"], target_path_list=["/model/value"], seq_len=2, learn_mode=True, expire_persistence_time=86400)
         m1 = MatchElement("/model/id", b"1", b"1", None)
         m2 = MatchElement("/model/value", b"a", b"a", None)
-        log_atom1 = LogAtom(b"1a", ParserMatch(MatchElement("/model", b"1a", b"1a", [m1, m2])), t + 1, None)
-
+        log_atom1 = LogAtom(b"1a", ParserMatch(MatchElement("/model", b"1a", b"1a", [m1, m2])), t, esd)
         m4 = MatchElement("/model/value", b"b", b"b", None)
-        log_atom2 = LogAtom(b"1b", ParserMatch(MatchElement("/model", b"1b", b"1b", [m4])), t + 2, None)
-
+        log_atom2 = LogAtom(b"1b", ParserMatch(MatchElement("/model", b"1b", b"1b", [m4])), t, esd)
         m5 = MatchElement("/model/id", b"2", b"2", None)
         m6 = MatchElement("/model/value", b"a", b"a", None)
-        log_atom3 = LogAtom(b"2a", ParserMatch(MatchElement("/model", b"2a", b"2a", [m5, m6])), t + 3, None)
-
+        log_atom3 = LogAtom(b"2a", ParserMatch(MatchElement("/model", b"2a", b"2a", [m5, m6])), t, esd)
         m7 = MatchElement("/model/id", b"1", b"1", None)
         m8 = MatchElement("/model/value", b"c", b"c", None)
-        log_atom4 = LogAtom(b"1c", ParserMatch(MatchElement("/model", b"1c", b"1c", [m7, m8])), t + 4, None)
-
+        log_atom4 = LogAtom(b"1c", ParserMatch(MatchElement("/model", b"1c", b"1c", [m7, m8])), t, esd)
         m9 = MatchElement("/model/id", b"2", b"2", None)
         m10 = MatchElement("/model/value", b"b", b"b", None)
-        log_atom5 = LogAtom(b"2b", ParserMatch(MatchElement("/model", b"2b", b"2b", [m9, m10])), t + 5, None)
-
+        log_atom5 = LogAtom(b"2b", ParserMatch(MatchElement("/model", b"2b", b"2b", [m9, m10])), t, esd)
         esd.receive_atom(log_atom1)
         esd.receive_atom(log_atom2)
         esd.receive_atom(log_atom3)
         esd.receive_atom(log_atom4)
         esd.receive_atom(log_atom5)
-        esd.do_persist()
-        with open(esd.persistence_file_name, "r") as f:
-            self.assertEqual(f.read(), '[[["string:a"], ["string:b"]], [["string:a"], ["string:c"]]]')
-
         self.assertEqual(esd.sequences, {(("a",), ("b",)), (("a",), ("c",))})
+        esd.do_persist()
+        p = t + esd.expire_persistence_time
+        self.assertEqual(esd.sequence_timestamps, {(("a",), ("b",)): p, (("a",), ("c",)): p})
+        with open(esd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[[["string:a"], ["string:b"]], [["string:a"], ["string:c"]]], [{p}, {p}]]')
+
+        esd.learn_mode = False
+        t = p - 4
+
+        log_atom1 = LogAtom(b"1a", ParserMatch(MatchElement("/model", b"1a", b"1a", [m1, m2])), t + 1, esd)
+        log_atom2 = LogAtom(b"1b", ParserMatch(MatchElement("/model", b"1b", b"1b", [m4])), t + 2, esd)
+        log_atom3 = LogAtom(b"2a", ParserMatch(MatchElement("/model", b"2a", b"2a", [m5, m6])), t + 3, esd)
+        log_atom4 = LogAtom(b"1c", ParserMatch(MatchElement("/model", b"1c", b"1c", [m7, m8])), t + 4, esd)
+        log_atom5 = LogAtom(b"2b", ParserMatch(MatchElement("/model", b"2b", b"2b", [m9, m10])), t + 5, esd)
+        esd.receive_atom(log_atom1)
+        esd.receive_atom(log_atom2)
+        esd.receive_atom(log_atom3)
+        esd.receive_atom(log_atom4)
+        esd.receive_atom(log_atom5)
+        self.assertEqual(esd.sequences, {(("a",), ("c",))})
+        t2 = t + esd.expire_persistence_time
+        esd.do_persist(t2 + 1)
+        self.assertEqual(esd.sequence_timestamps, {(("a",), ("c",)): t2 + 4})
+        with open(esd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[[["string:a"], ["string:c"]]], [{t2 + 4}]]')
+
         esd.sequences = set()
         esd.load_persistence_data()
-        self.assertEqual(esd.sequences, {(("a",), ("b",)), (("a",), ("c",))})
+        self.assertEqual(esd.sequences, {(("a",), ("c",))})
+
+        other = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/model/id"], target_path_list=["/model/value"], seq_len=2, learn_mode=False)
+        self.assertEqual(esd.sequences, other.sequences)
+        self.assertEqual(esd.sequence_timestamps, other.sequence_timestamps)
+
+        esd.expire_persistence_time = None
+        esd.do_persist()
+        with open(esd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[[["string:a"], ["string:c"]]]]')
 
         other = EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], id_path_list=["/model/id"], target_path_list=["/model/value"], seq_len=2, learn_mode=True)
         self.assertEqual(other.sequences, esd.sequences)
+        self.assertEqual(other.sequence_timestamps, {})
+
+        other.expire_persistence_time = 86400
+        other.receive_atom(log_atom1)
+        other.receive_atom(log_atom2)
+        other.receive_atom(log_atom3)
+        other.receive_atom(log_atom4)
+        other.receive_atom(log_atom5)
+        t2 = t + other.expire_persistence_time
+        other.do_persist(t2 + 4)
+        self.assertEqual(esd.sequences, {(("a",), ("c",))})
+        self.assertNotEqual(other.sequence_timestamps, {})
 
     def test6validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
@@ -334,6 +372,18 @@ class EventSequenceDetectorTest(TestBase):
         self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=())
         self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], persistence_id=set())
         EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], persistence_id="Default")
+
+        self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time="")
+        self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=b"Default")
+        self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=True)
+        self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time={"id": "Default"})
+        self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=["Default"])
+        self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=[])
+        self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=())
+        self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=set())
+        self.assertRaises(ValueError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=86399)
+        EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=None)
+        EventSequenceDetector(self.aminer_config, [self.stream_printer_event_handler], expire_persistence_time=86400)
 
         self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode=b"True")
         self.assertRaises(TypeError, EventSequenceDetector, self.aminer_config, [self.stream_printer_event_handler], learn_mode="True")
