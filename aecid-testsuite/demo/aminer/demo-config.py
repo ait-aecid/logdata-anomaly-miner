@@ -329,7 +329,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
-                                   hypothesis_max_delta_time=1.0, learn_mode=True)
+                                   hypothesis_max_delta_time=1.0, learn_mode=True, severity=0.3)
     analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
     atom_filter.add_handler(ecd)
 

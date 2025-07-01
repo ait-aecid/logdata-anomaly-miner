@@ -902,6 +902,7 @@ Analysis:
           check_rules_flag: True
           hypothesis_max_delta_time: 1.0
           learn_mode: True
+          severity: 0.3
         - type: EventFrequencyDetector
           id: EventFrequencyDetector
           window_size: 0.5

@@ -426,6 +426,19 @@ class EventCorrelationDetectorTest(TestBase):
         self.assertRaises(TypeError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=set())
         EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(ValueError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity=-1)
+        self.assertRaises(ValueError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity=1.1)
+        self.assertRaises(TypeError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity=b"Default")
+        self.assertRaises(TypeError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity="123")
+        self.assertRaises(TypeError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, EventCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], severity=set())
+        EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0)
+        EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0.5)
+        EventCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], severity=1)
+
     @classmethod
     def setUpClass(cls):
         """Set up the data for the all tests."""

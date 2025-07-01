@@ -518,7 +518,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     prob_thresh=item['prob_thresh'], default_freqs=item['default_freqs'],
                                     skip_repetitions=item['skip_repetitions'],
-                                    persistence_id=item['persistence_id'], learn_mode=learn,
+                                    persistence_id=item['persistence_id'], learn_mode=learn, severity=item['severity'],
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
@@ -569,7 +569,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     max_observations=item['max_observations'], p0=item['p0'], alpha=item['alpha'], candidates_size=item['candidates_size'],
                     hypotheses_eval_delta_time=item['hypotheses_eval_delta_time'], constraint_list=item['constraint_list'],
                     delta_time_to_discard_hypothesis=item['delta_time_to_discard_hypothesis'], check_rules_flag=item['check_rules_flag'],
-                    learn_mode=learn, ignore_list=item['ignore_list'], persistence_id=item['persistence_id'],
+                    learn_mode=learn, ignore_list=item['ignore_list'], persistence_id=item['persistence_id'], severity=item['severity'],
                     log_resource_ignore_list=item['log_resource_ignore_list'], stop_learning_time=item['stop_learning_time'],
                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'NewMatchIdValueComboDetector':

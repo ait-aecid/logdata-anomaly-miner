@@ -34,7 +34,7 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list, prob_thresh=0.05, default_freqs=False,
                  skip_repetitions=False, persistence_id="Default", expire_persistence_time=None, learn_mode=False, output_logline=True,
-                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, severity=None,
                  log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
@@ -64,7 +64,7 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
             prob_thresh=prob_thresh, default_freqs=default_freqs, skip_repetitions=skip_repetitions, persistence_id=persistence_id,
             expire_persistence_time=expire_persistence_time, learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list,
-            constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            constraint_list=constraint_list, stop_learning_time=stop_learning_time, severity=severity,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
 
@@ -169,6 +169,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                                       "AffectedLogAtomValues": [value.decode(AminerConfig.ENCODING)],
                                       "CriticalValue": critical_val, "ProbabilityThreshold": self.prob_thresh}
                 event_data = {"AnalysisComponent": analysis_component}
+                if self.severity is not None:
+                    event_data["Tags"] = {"Severity": self.severity}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "Value entropy anomaly detected", sorted_log_lines,
                                            event_data, log_atom, self)

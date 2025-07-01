@@ -562,6 +562,20 @@ class EntropyDetectorTest(TestBase):
         self.assertRaises(TypeError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=set())
         EntropyDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(ValueError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=-1)
+        self.assertRaises(ValueError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=1.1)
+        self.assertRaises(TypeError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=b"Default")
+        self.assertRaises(TypeError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity="123")
+        self.assertRaises(TypeError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity={"id": "Default"})
+        self.assertRaises(TypeError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=["Default"])
+        self.assertRaises(TypeError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=[])
+        self.assertRaises(TypeError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=())
+        self.assertRaises(TypeError, EntropyDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=set())
+        EntropyDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=None)
+        EntropyDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=0)
+        EntropyDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=0.5)
+        EntropyDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=1)
+
     @staticmethod
     def add_data(string, freq, total_freq):
         for i, x in enumerate(string):
