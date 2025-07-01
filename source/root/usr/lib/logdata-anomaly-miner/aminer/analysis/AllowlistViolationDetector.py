@@ -28,13 +28,14 @@ class AllowlistViolationDetector(AtomHandlerInterface):
     that set off an alarm by themselves.
     """
 
-    def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_logline=True, log_resource_ignore_list=None):
+    def __init__(self, aminer_config, allowlist_rules, anomaly_event_handlers, output_logline=True, log_resource_ignore_list=None,
+                 severity=None):
         """Initialize the detector.
 
         @param allowlist_rules list of rules executed until the first rule matches.
         """
         super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, output_logline=output_logline,
-                         allowlist_rules=allowlist_rules, log_resource_ignore_list=log_resource_ignore_list,
+                         allowlist_rules=allowlist_rules, log_resource_ignore_list=log_resource_ignore_list, severity=severity,
                          mutable_default_args=["log_resource_ignore_list"])
         if allowlist_rules is None:
             msg = "allowlist_rules must not be empty."
@@ -69,6 +70,8 @@ class AllowlistViolationDetector(AtomHandlerInterface):
         analysis_component = {"AffectedLogAtomPaths": list(log_atom.parser_match.get_match_dictionary()), "AffectedLogAtomValues": [data]}
         sorted_log_lines = [original_log_line_prefix + data]
         event_data["AnalysisComponent"] = analysis_component
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(f"Analysis.{self.__class__.__name__}", "No allowlisting for current atom", sorted_log_lines,
                                    event_data, log_atom, self)

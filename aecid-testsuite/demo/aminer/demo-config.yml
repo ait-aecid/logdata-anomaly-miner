@@ -1027,6 +1027,7 @@ Analysis:
           id: TimeAllowlist
           allowlist_rules:
             - "time_and_match_rule"
+          severity: 0.1
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50

@@ -96,7 +96,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "time_output_threshold", "anomaly_threshold", "default_interval", "realert_interval", "combine_values", "min_allowed_time_diff",
             "target_label_list", "split_reports_flag", "event_type_detector", "num_init", "force_period_length", "set_period_length",
             "alpha_bt", "num_results_bt", "num_min_time_history", "num_max_time_history", "num_periods_tsa_ini", "time_period_length",
-            "max_time_diff", "num_reduce_time_list", "min_anomaly_score", "min_variance", "parallel_check_count",
+            "max_time_diff", "num_reduce_time_list", "min_anomaly_score", "min_variance", "parallel_check_count", "severity",
             "record_count_before_event", "use_path_match", "use_value_match", "min_rule_attributes", "max_rule_attributes",
             "exit_on_error_flag", "acf_pause_interval_percentage", "acf_auto_pause_interval", "acf_auto_pause_interval_num_min",
             "build_sum_over_values", "num_division_time_step", "acf_threshold", "round_time_interval_threshold",
@@ -213,12 +213,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "generation_probability", "generation_factor", "p0", "alpha", "confidence_factor", "prob_thresh", "anomaly_threshold",
             "alpha", "alpha_bt", "acf_pause_interval_percentage", "acf_threshold", "round_time_interval_threshold", "min_variance",
             "local_maximum_threshold", "disc_div_thres", "check_cor_thres", "check_cor_prob_thres", "alpha_chisquare_test",
-            "max_dist_rule_distr", "percentage_random_cors", "match_disc_vals_sim_tresh", "exclude_due_distr_lower_limit",
+            "max_dist_rule_distr", "percentage_random_cors", "match_disc_vals_sim_tresh", "exclude_due_distr_lower_limit", "severity",
             "match_disc_distr_threshold", "validate_cor_cover_vals_thres", "validate_cor_distinct_thres", "gof_alpha", "s_gof_alpha",
             "s_gof_bt_alpha", "d_alpha", "d_bt_alpha", "div_thres", "sim_thres", "indicator_thres", "var_reduction_thres", "range_alpha",
             "range_threshold", "dw_alpha"]
         nullable = ["stop_learning_time", "stop_learning_no_anomaly_time", "set_lower_limit", "set_upper_limit", "timeout",
-                    "expire_persistence_time"]
+                    "expire_persistence_time", "severity"]
         for attr in set([] + integer_only + non_negative + non_zero_or_negative + zero_to_one):
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)

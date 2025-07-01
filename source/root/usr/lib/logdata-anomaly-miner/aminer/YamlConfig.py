@@ -823,7 +823,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         raise ValueError(msg)
                     allowlist_rules.append(match_rules_dict[rule])
-                tmp_analyser = func(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
+                tmp_analyser = func(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers, severity=item['severity'],
                                     output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'])
             elif item['type'].name == 'EventTypeDetector':
                 tmp_analyser = func(

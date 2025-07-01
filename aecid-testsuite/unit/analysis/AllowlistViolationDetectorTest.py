@@ -102,6 +102,21 @@ class AllowlistViolationDetectorTest(TestBase):
         self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=set())
         AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=b"True")
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity="True")
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=123.22)
+        self.assertRaises(ValueError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=-0.1)
+        AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=0)
+        AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=1)
+        AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=0.1)
+        AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()
