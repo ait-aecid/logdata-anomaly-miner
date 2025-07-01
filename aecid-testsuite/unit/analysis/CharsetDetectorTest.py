@@ -389,6 +389,23 @@ def test6validate_parameters(self):
         self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], log_resource_ignore_list=set())
         CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity="Test")
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=b"Default")
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=True)
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity={"id": "Default"})
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=["Default"])
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=[])
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=())
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=set())
+        self.assertRaises(ValueError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=123)
+        self.assertRaises(ValueError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=123.22)
+        self.assertRaises(ValueError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=-0.22)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=None)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=0)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=1)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=0.1)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()

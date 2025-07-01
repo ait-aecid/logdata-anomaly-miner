@@ -34,7 +34,7 @@ class NewMatchPathValueComboDetector(
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", expire_persistence_time=None,
-                 allow_missing_values_flag=False, learn_mode=False, output_logline=True, stop_learning_time=None,
+                 allow_missing_values_flag=False, learn_mode=False, output_logline=True, stop_learning_time=None, severity=None,
                  stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
@@ -61,7 +61,7 @@ class NewMatchPathValueComboDetector(
             persistence_id=persistence_id, expire_persistence_time=expire_persistence_time, output_logline=output_logline,
             allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
-            mutable_default_args=["log_resource_ignore_list"]
+            mutable_default_args=["log_resource_ignore_list"], severity=severity
         )
         if not self.target_path_list:
             msg = "target_path_list must not be None or empty."
@@ -149,6 +149,8 @@ class NewMatchPathValueComboDetector(
 
     def send_event(self, analysis_component, log_atom, match_value_tuple, msg):
         event_data = {"AnalysisComponent": analysis_component}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         try:
             data = log_atom.raw_data.decode(AminerConfig.ENCODING)
         except UnicodeError:

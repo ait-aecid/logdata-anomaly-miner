@@ -112,6 +112,7 @@ class AllowlistViolationDetectorTest(TestBase):
         self.assertRaises(ValueError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=123)
         self.assertRaises(ValueError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=123.22)
         self.assertRaises(ValueError, AllowlistViolationDetector, self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=-0.1)
+        AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=None)
         AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=0)
         AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=1)
         AllowlistViolationDetector(self.aminer_config, allowlist_rules, [self.stream_printer_event_handler], severity=0.1)

@@ -32,7 +32,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list, target_path_list, persistence_id="Default",
                  expire_persistence_time=None, learn_mode=False, output_logline=True, ignore_list=None, constraint_list=None,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -59,7 +59,7 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
             anomaly_event_handlers=anomaly_event_handlers, learn_mode=learn_mode, id_path_list=id_path_list, persistence_id=persistence_id,
             expire_persistence_time=expire_persistence_time, stop_learning_time=stop_learning_time, output_logline=output_logline,
             ignore_list=ignore_list, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, target_path_list=target_path_list,
-            constraint_list=constraint_list, log_resource_ignore_list=log_resource_ignore_list
+            constraint_list=constraint_list, log_resource_ignore_list=log_resource_ignore_list, severity=severity
         )
 
         # Persisted data stores characters as bytes for each id, i.e., [[[<id1, id2, ...>], [<byte1, byte2, ...>]], ...]]
@@ -178,6 +178,8 @@ class CharsetDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                 if self.expire_persistence_time is not None:
                     analysis_component["ExpiredCharacters"] = expired_chars_decoded
                 event_data = {"AnalysisComponent": analysis_component}
+                if self.severity is not None:
+                    event_data["Tags"] = {"Severity": self.severity}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "New and/or expired character(s) detected",
                                            sorted_log_lines, event_data, log_atom, self)

@@ -222,7 +222,7 @@
                 'avg_factor': {'type': 'float', 'min': 0, 'default': 1},
                 'var_factor': {'type': 'float', 'min': 0, 'default': 2},
                 'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
-                'severity': {'type': 'float', 'default': None}
+                'severity': {'type': 'float', 'default': None, 'nullable': True}
             }
         }
     }

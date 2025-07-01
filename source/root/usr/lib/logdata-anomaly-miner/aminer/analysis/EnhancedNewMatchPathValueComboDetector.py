@@ -39,7 +39,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default",
                  expire_persistence_time=None, allow_missing_values_flag=False, learn_mode=False, tuple_transformation_function=None,
-                 output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None,
+                 severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -67,7 +68,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, expire_persistence_time=expire_persistence_time, output_logline=output_logline,
             allow_missing_values_flag=allow_missing_values_flag, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list)
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
+            severity=severity)
         if not self.target_path_list:
             msg = "target_path_list must not be None or empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -145,6 +147,8 @@ class EnhancedNewMatchPathValueComboDetector(NewMatchPathValueComboDetector):
             analysis_component["Metadata"] = metadata
 
         event_data = {"AnalysisComponent": analysis_component}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         if match_value_tuple not in self.known_values_dict or values[2] == 1 or "ExpiredValues" in analysis_component:
             self.log_learned_path_value_combos += 1
             try:

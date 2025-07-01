@@ -339,6 +339,23 @@ class NewMatchPathValueComboDetectorTest(TestBase):
         self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], log_resource_ignore_list=set())
         NewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity="Test")
+        self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=b"Default")
+        self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=True)
+        self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=123.22)
+        self.assertRaises(ValueError, NewMatchPathValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=-0.22)
+        NewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=None)
+        NewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0)
+        NewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=1)
+        NewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0.1)
+        NewMatchPathValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()
