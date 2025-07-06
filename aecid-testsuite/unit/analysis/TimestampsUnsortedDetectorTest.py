@@ -88,6 +88,21 @@ class TimestampsUnsortedDetectorTest(TestBase):
         self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], output_logline=set())
         TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], output_logline=True)
 
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=b"True")
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity="True")
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=123.22)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=None)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=1)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0.1)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -577,7 +577,8 @@
                     'ruleset': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'required': True},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'},
-                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True}
+                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'severity': {'type': 'float', 'min': 0, 'max': 1, 'nullable': True}
                 },
                 {
                     'type': {'type': 'string', 'allowed': ['CorrelationRule'], 'required': True},
@@ -600,7 +601,8 @@
                     'exit_on_error_flag': {'type': 'boolean'},
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
-                    'suppress': {'type': 'boolean'}
+                    'suppress': {'type': 'boolean'},
+                    'severity': {'type': 'float', 'min': 0, 'max': 1, 'nullable': True}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
