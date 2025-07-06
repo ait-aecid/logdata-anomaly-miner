@@ -314,6 +314,22 @@ class PathValueTimeIntervalDetectorTest(TestBase):
         self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=set())
         PathValueTimeIntervalDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity="")
+        self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=b"Default")
+        self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=True)
+        self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity={"id": "Default"})
+        self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=["Default"])
+        self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=[])
+        self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=())
+        self.assertRaises(TypeError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=set())
+        self.assertRaises(ValueError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=123)
+        self.assertRaises(ValueError, PathValueTimeIntervalDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=123.22)
+        PathValueTimeIntervalDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=None)
+        PathValueTimeIntervalDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=0)
+        PathValueTimeIntervalDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=1)
+        PathValueTimeIntervalDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=0.1)
+        PathValueTimeIntervalDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()

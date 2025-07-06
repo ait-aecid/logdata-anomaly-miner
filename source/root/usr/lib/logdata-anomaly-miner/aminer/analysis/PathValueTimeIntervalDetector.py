@@ -35,7 +35,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list, persistence_id="Default",
                  allow_missing_values_flag=True, ignore_list=None, output_logline=True, learn_mode=False, time_period_length=86400,
                  max_time_diff=360, num_reduce_time_list=10, stop_learning_time=None, stop_learning_no_anomaly_time=None,
-                 log_resource_ignore_list=None):
+                 log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -66,7 +66,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id, target_path_list=target_path_list,
             allow_missing_values_flag=allow_missing_values_flag, ignore_list=ignore_list, output_logline=output_logline,
             learn_mode=learn_mode, time_period_length=time_period_length, max_time_diff=max_time_diff,
-            num_reduce_time_list=num_reduce_time_list, stop_learning_time=stop_learning_time,
+            num_reduce_time_list=num_reduce_time_list, stop_learning_time=stop_learning_time, severity=severity,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
         if not self.target_path_list:
@@ -419,5 +419,7 @@ class PathValueTimeIntervalDetector(AtomHandlerInterface, TimeTriggeredComponent
             analysis_component[key] = value
 
         event_data = {"AnalysisComponent": analysis_component}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, log_atom, self)

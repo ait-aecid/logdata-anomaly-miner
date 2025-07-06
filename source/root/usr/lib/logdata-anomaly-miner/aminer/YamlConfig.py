@@ -428,7 +428,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], output_logline=item['output_logline'],
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'MatchPathFilter':
                 parsed_atom_handler_lookup_list = []
                 for atom_handler in item['parsed_atom_handler_lookup_list']:
@@ -471,7 +471,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     ignore_list=item['ignore_list'], constraint_list=item['constraint_list'],
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'],
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'NewMatchPathValueComboDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
@@ -892,7 +892,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     output_logline=item['output_logline'], time_period_length=item['time_period_length'],
                     max_time_diff=item['max_time_diff'], num_reduce_time_list=item['num_reduce_time_list'], learn_mode=learn,
                     log_resource_ignore_list=item['log_resource_ignore_list'], stop_learning_time=item['stop_learning_time'],
-                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'PathArimaDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -903,7 +903,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     analysis_context.aminer_config, anomaly_event_handlers, etd, persistence_id=item['persistence_id'],
                     target_path_list=item['paths'], output_logline=item['output_logline'], learn_mode=learn,
                     num_init=item['num_init'], force_period_length=item['force_period_length'], set_period_length=item['set_period_length'],
-                    alpha=item['alpha'], alpha_bt=item['alpha_bt'], num_results_bt=item['num_results_bt'],
+                    alpha=item['alpha'], alpha_bt=item['alpha_bt'], num_results_bt=item['num_results_bt'], severity=item['severity'],
                     num_min_time_history=item['num_min_time_history'], num_max_time_history=item['num_max_time_history'],
                     num_periods_tsa_ini=item['num_periods_tsa_ini'], log_resource_ignore_list=item['log_resource_ignore_list'],
                     stop_learning_time=item['stop_learning_time'], stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])

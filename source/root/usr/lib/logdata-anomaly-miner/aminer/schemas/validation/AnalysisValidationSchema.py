@@ -52,7 +52,8 @@
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
-                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True}
+                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'severity': {'type': 'float', 'min': 0, 'max': 1, 'nullable': True}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
@@ -711,7 +712,8 @@
                     'stop_learning_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'min': 0.000001},
                     'suppress': {'type': 'boolean'},
-                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True}
+                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'severity': {'type': 'float', 'min': 0, 'max': 1, 'nullable': True}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},

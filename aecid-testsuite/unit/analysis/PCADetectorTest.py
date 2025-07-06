@@ -374,6 +374,22 @@ class PCADetectorTest(TestBase):
         self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, log_resource_ignore_list=set())
         PCADetector(self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity="")
+        self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=b"Default")
+        self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=True)
+        self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity={"id": "Default"})
+        self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=["Default"])
+        self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=[])
+        self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=())
+        self.assertRaises(TypeError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=set())
+        self.assertRaises(ValueError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=123)
+        self.assertRaises(ValueError, PCADetector, self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=123.22)
+        PCADetector(self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=None)
+        PCADetector(self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=0)
+        PCADetector(self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=1)
+        PCADetector(self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=0.1)
+        PCADetector(self.aminer_config, ["/value"], [self.stream_printer_event_handler], 10, 2, 0.9, 3, severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()
