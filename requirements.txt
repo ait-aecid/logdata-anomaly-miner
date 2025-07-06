@@ -1,21 +1,19 @@
 orjson
 pyzmq
 cerberus
-kafka-python==2.0.6
+kafka-python
 patsy
-statsmodels
+statsmodels==0.14.0 # temporary fix to ImportError: cannot import name '_lazywhere' from 'scipy._lib._util' (/usr/lib/logdata-anomaly-miner/.venv/lib/python3.12/site-packages/scipy/_lib/_util.py)
 importlib-metadata
 tz
-scipy
+scipy==1.11.3 # temporary fix to ImportError: cannot import name '_lazywhere' from 'scipy._lib._util' (/usr/lib/logdata-anomaly-miner/.venv/lib/python3.12/site-packages/scipy/_lib/_util.py)
 numpy
 setuptools
-dateutil
 six
 kafka
 urllib3
 defusedxml
-yaml
-patsy
+PyYAML
 pylibacl
 mypy
 pytz
