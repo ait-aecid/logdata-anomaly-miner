@@ -10,7 +10,6 @@ scipy==1.11.3 # temporary fix to ImportError: cannot import name '_lazywhere' fr
 numpy
 setuptools
 six
-kafka
 urllib3
 defusedxml
 PyYAML

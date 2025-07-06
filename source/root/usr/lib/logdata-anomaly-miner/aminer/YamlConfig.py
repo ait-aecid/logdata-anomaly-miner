@@ -535,7 +535,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     constraint_list=item['constraint_list'], season=item['season'],
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'],
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'EventCountClusterDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     persistence_id=item['persistence_id'], id_path_list=item['id_path_list'],
