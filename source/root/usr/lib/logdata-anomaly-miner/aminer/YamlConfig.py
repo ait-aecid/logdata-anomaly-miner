@@ -579,7 +579,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     allow_missing_values_flag=item['allow_missing_values'], output_logline=item['output_logline'],
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'SlidingEventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
                                     scoring_path_list=item['scoring_path_list'], persistence_id=item['persistence_id'],
@@ -664,7 +664,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     learn_mode=learn, output_logline=item['output_logline'],
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif 'MatchAction' in item['type'].name:
                 if comp_name is None:
                     msg = f'The {item["type"].name} must have an id!'

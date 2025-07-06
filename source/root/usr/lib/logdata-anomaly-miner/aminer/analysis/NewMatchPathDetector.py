@@ -31,7 +31,8 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, persistence_id="Default", expire_persistence_time=None, learn_mode=False,
-                 output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None,
+                 severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -50,9 +51,8 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id,
             expire_persistence_time=expire_persistence_time, learn_mode=learn_mode, output_logline=output_logline,
-            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
-            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
-        )
+            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, severity=severity,
+            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"])
         self.log_learned_paths = 0
         self.log_new_learned_paths = []
         self.known_path_set = set()
@@ -122,6 +122,8 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             if self.expire_persistence_time is not None:
                 analysis_component["ExpiredPaths"] = list(expired_paths)
             event_data = {"AnalysisComponent": analysis_component}
+            if self.severity is not None:
+                event_data["Tags"] = {"Severity": self.severity}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", "New path(s) detected", sorted_log_lines, event_data,
                                        log_atom, self)
