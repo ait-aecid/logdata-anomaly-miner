@@ -49,7 +49,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
                  used_multinomial_test='Chi', use_empiric_distr=True, used_range_test='MinMax', range_alpha=0.05, range_threshold=1,
                  num_reinit_range=100, range_limits_factor=1, dw_alpha=0.05, save_statistics=True, output_logline=True, ignore_list=None,
                  constraint_list=None, learn_mode=True, stop_learning_time=None, stop_learning_no_anomaly_time=None,
-                 log_resource_ignore_list=None):
+                 log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -127,7 +127,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             indicator_thres=indicator_thres, num_init=num_init, num_update=num_update, num_update_unq=num_update_unq,
             num_s_gof_values=num_s_gof_values, num_s_gof_bt=num_s_gof_bt, num_d_bt=num_d_bt, num_pause_discrete=num_pause_discrete,
             num_pause_others=num_pause_others, test_gof_int=test_gof_int, num_stop_update=num_stop_update,
-            silence_output_without_confidence=silence_output_without_confidence,
+            silence_output_without_confidence=silence_output_without_confidence, severity=severity,
             silence_output_except_indicator=silence_output_except_indicator, num_var_type_hist_ref=num_var_type_hist_ref,
             num_update_var_type_hist_ref=num_update_var_type_hist_ref, num_var_type_considered_ind=num_var_type_considered_ind,
             num_stat_stop_update=num_stat_stop_update, num_updates_until_var_reduction=num_updates_until_var_reduction,
@@ -136,8 +136,7 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             used_range_test=used_range_test, range_alpha=range_alpha, range_threshold=range_threshold, num_reinit_range=num_reinit_range,
             range_limits_factor=range_limits_factor, dw_alpha=dw_alpha, save_statistics=save_statistics, output_logline=output_logline,
             ignore_list=ignore_list, constraint_list=constraint_list, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
-        )
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list)
         if not isinstance(self.event_type_detector, EventTypeDetector):
             msg = "event_type_detector must be an instance of EventTypeDetector."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -2183,6 +2182,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         else:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': type_info}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)
 
@@ -2221,6 +2222,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         else:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {'from': vt_old[0], 'to': vt_new[0], 'lines': self.event_type_detector.num_event_lines[event_index]}}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         vt_old_string = get_vt_string(vt_old)
         vt_new_string = get_vt_string(vt_new)
         for listener in self.anomaly_event_handlers:
@@ -2260,6 +2263,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         else:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {'reject': vt[0], 'lines': self.event_type_detector.num_event_lines[event_index]}}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(
                 f'Analysis.{self.__class__.__name__}',
@@ -2303,6 +2308,8 @@ class VariableTypeDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         else:
             event_data = {'AnalysisComponent': analysis_component, 'TotalRecords': self.event_type_detector.total_records,
                           'TypeInfo': {'Confidence': confidence, 'Indicator': indicator}}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(f'Analysis.{self.__class__.__name__}', message, sorted_log_lines, event_data, log_atom, self)
 

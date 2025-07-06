@@ -858,7 +858,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     num_reinit_range=item['num_reinit_range'], dw_alpha=item['dw_alpha'], output_logline=item['output_logline'],
                     ignore_list=item['ignore_list'], constraint_list=item['constraint_list'], learn_mode=learn,
                     log_resource_ignore_list=item['log_resource_ignore_list'], stop_learning_time=item['stop_learning_time'],
-                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'VariableCorrelationDetector':
                 etd = analysis_context.get_component_by_name(item['event_type_detector'])
                 if etd is None:
@@ -880,7 +880,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     exclude_due_distr_lower_limit=item['exclude_due_distr_lower_limit'],
                     match_disc_distr_threshold=item['match_disc_distr_threshold'], used_cor_meth=item['used_cor_meth'],
                     used_validate_cor_meth=item['used_validate_cor_meth'],
-                    validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'],
+                    validate_cor_cover_vals_thres=item['validate_cor_cover_vals_thres'], severity=item['severity'],
                     validate_cor_distinct_thres=item['validate_cor_distinct_thres'], ignore_list=item['ignore_list'],
                     constraint_list=item['constraint_list'], learn_mode=learn, log_resource_ignore_list=item['log_resource_ignore_list'],
                     stop_learning_time=item['stop_learning_time'], stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
