@@ -38,7 +38,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
 
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, waiting_time=1000,
                  num_sections_waiting_time=100, acf_pause_interval_percentage=0.2, acf_auto_pause_interval=True,
-                 acf_auto_pause_interval_num_min=10, build_sum_over_values=False, num_periods_tsa_ini=15,
+                 acf_auto_pause_interval_num_min=10, build_sum_over_values=False, num_periods_tsa_ini=15, severity=None,
                  num_division_time_step=10, alpha=0.05, num_min_time_history=20, num_max_time_history=30, num_results_bt=15, alpha_bt=0.05,
                  acf_threshold=0.2, round_time_interval_threshold=0.02, force_period_length=False, set_period_length=604800,
                  min_log_lines_per_time_step=10, persistence_id="Default", target_path_list=None, ignore_list=None, output_logline=True,
@@ -92,7 +92,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
             num_periods_tsa_ini=num_periods_tsa_ini, num_division_time_step=num_division_time_step, alpha=alpha,
             num_min_time_history=num_min_time_history, num_max_time_history=num_max_time_history, num_results_bt=num_results_bt,
             alpha_bt=alpha_bt, acf_threshold=acf_threshold, round_time_interval_threshold=round_time_interval_threshold,
-            force_period_length=force_period_length, set_period_length=set_period_length,
+            force_period_length=force_period_length, set_period_length=set_period_length, severity=severity,
             min_log_lines_per_time_step=min_log_lines_per_time_step, waiting_time=waiting_time,
             num_sections_waiting_time=num_sections_waiting_time, persistence_id=persistence_id, target_path_list=target_path_list,
             ignore_list=ignore_list, output_logline=output_logline, learn_mode=learn_mode, stop_learning_time=stop_learning_time,
@@ -565,5 +565,7 @@ class TSAArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Pe
         else:
             event_data = {"AnalysisComponent": analysis_component, "TotalRecords": self.event_type_detector.total_records,
                           "TypeInfo": {}}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(f"Analysis.{self.__class__.__name__}", message, sorted_log_lines, event_data, log_atom, self)
