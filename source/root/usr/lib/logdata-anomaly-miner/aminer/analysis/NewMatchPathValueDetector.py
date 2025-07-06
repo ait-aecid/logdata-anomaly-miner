@@ -32,7 +32,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", expire_persistence_time=None,
                  learn_mode=False, output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None,
-                 log_resource_ignore_list=None):
+                 log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -55,8 +55,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
-            expire_persistence_time=expire_persistence_time, mutable_default_args=["log_resource_ignore_list"]
-        )
+            expire_persistence_time=expire_persistence_time, mutable_default_args=["log_resource_ignore_list"], severity=severity)
         if not self.target_path_list:
             msg = "target_path_list must not be None or empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -144,6 +143,8 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                 else:
                     sorted_log_lines = [str(res)]
                 event_data = {"AnalysisComponent": analysis_component}
+                if self.severity is not None:
+                    event_data["Tags"] = {"Severity": self.severity}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "New value(s) detected", sorted_log_lines, event_data,
                                            log_atom, self)

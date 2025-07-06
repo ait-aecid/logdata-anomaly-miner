@@ -281,6 +281,22 @@ class NewMatchPathValueDetectorTest(TestBase):
         self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], log_resource_ignore_list=set())
         NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity="")
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=b"Default")
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=True)
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=123.22)
+        NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=None)
+        NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0)
+        NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=1)
+        NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0.1)
+        NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()

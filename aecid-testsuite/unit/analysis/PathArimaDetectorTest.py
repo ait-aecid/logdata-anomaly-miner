@@ -316,6 +316,20 @@ class PathArimaDetectorTest(TestBase):
         self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=set())
         PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=-1)
+        self.assertRaises(ValueError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=1.1)
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=b"Default")
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity="123")
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity={"id": "Default"})
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=["Default"])
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=[])
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=())
+        self.assertRaises(TypeError, PathArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=set())
+        PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, severity=None)
+        PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, severity=0)
+        PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, severity=0.5)
+        PathArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, severity=1)
+
     @classmethod
     def setUpClass(cls):
         """Set up the data for the all tests."""
