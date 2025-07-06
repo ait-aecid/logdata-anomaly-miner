@@ -484,14 +484,14 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     realert_interval=item['realert_interval'], combine_values=item['combine_values'],
                                     output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'],
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'MissingMatchPathListValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['path'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], default_interval=item['check_interval'],
                                     realert_interval=item['realert_interval'], combine_values=item['combine_values'],
                                     output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'],
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'EventSequenceDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], seq_len=item['seq_len'],
@@ -935,7 +935,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     id_path_list=item['id_path_list'], ignore_list=item['ignore_list'], allow_missing_id=item['allow_missing_id'],
                     num_log_lines_solidify_matrix=item['num_log_lines_solidify_matrix'],
                     time_output_threshold=item['time_output_threshold'], log_resource_ignore_list=item['log_resource_ignore_list'],
-                    stop_learning_time=item['stop_learning_time'],
+                    stop_learning_time=item['stop_learning_time'], severity=item['severity'],
                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], anomaly_threshold=item['anomaly_threshold'])
             elif item["type"].name in ("VerboseUnparsedAtomHandler", "SimpleUnparsedAtomHandler"):
                 has_unparsed_handler = True

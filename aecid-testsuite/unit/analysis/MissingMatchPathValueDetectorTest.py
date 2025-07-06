@@ -504,6 +504,21 @@ class MissingMatchPathValueDetectorTest(TestBase):
         self.assertRaises(TypeError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], log_resource_ignore_list=set())
         MissingMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=b"True")
+        self.assertRaises(TypeError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity="True")
+        self.assertRaises(TypeError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, MissingMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=123.22)
+        MissingMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=None)
+        MissingMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0)
+        MissingMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=1)
+        MissingMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0.1)
+        MissingMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()
