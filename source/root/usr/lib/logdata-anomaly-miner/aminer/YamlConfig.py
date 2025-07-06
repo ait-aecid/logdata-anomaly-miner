@@ -618,7 +618,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     histogram_definitions.append((histogram_definition[0], analysis_dict[histogram_definition[1]]))
                 tmp_analyser = func(analysis_context.aminer_config, histogram_definitions, item['report_interval'], anomaly_event_handlers,
                                     reset_after_report_flag=item['reset_after_report_flag'], output_logline=item['output_logline'],
-                                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    log_resource_ignore_list=item['log_resource_ignore_list'], severity=item['severity'])
             elif item['type'].name == 'PathDependentHistogramAnalysis':
                 if item['bin_definition'] not in analysis_dict:
                     msg = f'{item["bin_definition"]} first must be defined before used.'
@@ -627,7 +627,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(
                     analysis_context.aminer_config, item['path'], analysis_dict[item['bin_definition']], item['report_interval'],
                     anomaly_event_handlers, reset_after_report_flag=item['reset_after_report_flag'], output_logline=item['output_logline'],
-                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                    log_resource_ignore_list=item['log_resource_ignore_list'], severity=item['severity'])
             elif item['type'].name == 'EnhancedNewMatchPathValueComboDetector':
                 tuple_transformation_function = None
                 if item['tuple_transformation_function'] == 'demo':

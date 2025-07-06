@@ -290,7 +290,8 @@
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'},
-                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True}
+                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'severity': {'type': 'float', 'min': 0, 'max': 1, 'nullable': True}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},
@@ -302,7 +303,8 @@
                     'output_logline': {'type': 'boolean'},
                     'output_event_handlers': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
                     'suppress': {'type': 'boolean'},
-                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True}
+                    'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string', 'empty': False}, 'nullable': True},
+                    'severity': {'type': 'float', 'min': 0, 'max': 1, 'nullable': True}
                 },
                 {
                     'id': {'type': 'string', 'nullable': True, 'empty': False},

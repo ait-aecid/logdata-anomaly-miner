@@ -337,7 +337,7 @@ class HistogramAnalysis(AtomHandlerInterface):
     a parsed atom."""
 
     def __init__(self, aminer_config, histogram_definitions, report_interval, anomaly_event_handlers, reset_after_report_flag=True,
-                 output_logline=True, log_resource_ignore_list=None):
+                 output_logline=True, log_resource_ignore_list=None, severity=None):
         """Initialize the analysis component.
 
         @param aminer_config configuration from analysis_context.
@@ -351,9 +351,8 @@ class HistogramAnalysis(AtomHandlerInterface):
         self.log_success, self.log_total = [None]*2
         super().__init__(
             aminer_config=aminer_config, report_interval=report_interval, anomaly_event_handlers=anomaly_event_handlers,
-            reset_after_report_flag=reset_after_report_flag, output_logline=output_logline,
-            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
-        )
+            reset_after_report_flag=reset_after_report_flag, output_logline=output_logline, severity=severity,
+            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"])
         if not isinstance(histogram_definitions, list):
             msg = "histogram_definitions has to be a list of tuples of paths and bin definitions."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -439,6 +438,10 @@ class HistogramAnalysis(AtomHandlerInterface):
         analysis_component["ReportInterval"] = self.report_interval
         analysis_component["ResetAfterReportFlag"] = self.reset_after_report_flag
         event_data = {"AnalysisComponent": analysis_component}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         if len(res) > 0:
             res[0] = report_str
             for listener in self.anomaly_event_handlers:
@@ -462,7 +465,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
     """
 
     def __init__(self, aminer_config, target_path, bin_definition, report_interval, anomaly_event_handlers, reset_after_report_flag=True,
-                 output_logline=True, log_resource_ignore_list=None):
+                 output_logline=True, log_resource_ignore_list=None, severity=None):
         """Initialize the analysis component.
 
         @param aminer_config configuration from analysis_context.
@@ -477,7 +480,7 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
         # avoid "defined outside init" issue
         self.log_success, self.log_total = [None]*2
         super().__init__(
-            aminer_config=aminer_config, target_path=target_path, report_interval=report_interval,
+            aminer_config=aminer_config, target_path=target_path, report_interval=report_interval, severity=severity,
             anomaly_event_handlers=anomaly_event_handlers, reset_after_report_flag=reset_after_report_flag, output_logline=output_logline,
             log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
         )
@@ -617,6 +620,8 @@ class PathDependentHistogramAnalysis(AtomHandlerInterface):
         analysis_component["ReportInterval"] = self.report_interval
         analysis_component["ResetAfterReportFlag"] = self.reset_after_report_flag
         event_data = {"AnalysisComponent": analysis_component}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
 
         if self.reset_after_report_flag:
             histogram_mapping[1].reset()
