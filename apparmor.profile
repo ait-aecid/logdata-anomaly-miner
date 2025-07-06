@@ -17,6 +17,7 @@ include <tunables/global>
   network inet stream,
 
   # config files may only be located in allowed locations such as /etc/aminer
+  # test with `sudo journalctl -xe | grep DENIED` to adapt the profile for specific needs.
 
   # Allow temporary files
   /tmp/ rw,
