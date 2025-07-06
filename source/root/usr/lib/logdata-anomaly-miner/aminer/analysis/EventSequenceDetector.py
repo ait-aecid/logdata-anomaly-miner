@@ -36,7 +36,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list=None, target_path_list=None, seq_len=3, allow_missing_id=False,
                  timeout=None, persistence_id="Default", expire_persistence_time=None, learn_mode=False, output_logline=True,
-                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, severity=None,
                  log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
@@ -67,7 +67,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
             mutable_default_args=["id_path_list", "target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, id_path_list=id_path_list,
             target_path_list=target_path_list, seq_len=seq_len, allow_missing_id=allow_missing_id, timeout=timeout,
-            persistence_id=persistence_id, expire_persistence_time=expire_persistence_time, learn_mode=learn_mode,
+            persistence_id=persistence_id, expire_persistence_time=expire_persistence_time, learn_mode=learn_mode, severity=severity,
             output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
@@ -236,6 +236,8 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         else:
             sorted_log_lines = [data]
         event_data = {"AnalysisComponent": analysis_component}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         for listener in self.anomaly_event_handlers:
             listener.receive_event(f"Analysis.{self.__class__.__name__}", msg, sorted_log_lines, event_data, log_atom, self)
 
