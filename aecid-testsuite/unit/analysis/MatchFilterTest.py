@@ -110,6 +110,20 @@ class MatchFilterTest(TestBase):
         self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], log_resource_ignore_list=set())
         MatchFilter(self.aminer_config, ["Default"], [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity="")
+        self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=b"Default")
+        self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=["default"])
+        self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, MatchFilter, self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=123.3)
+        MatchFilter(self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=None)
+        MatchFilter(self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=0)
+        MatchFilter(self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=1)
+        MatchFilter(self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=0.1)
+        MatchFilter(self.aminer_config, ["Default"], [self.stream_printer_event_handler], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()

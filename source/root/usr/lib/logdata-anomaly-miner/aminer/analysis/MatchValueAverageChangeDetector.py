@@ -33,7 +33,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
 
     def __init__(self, aminer_config, anomaly_event_handlers, timestamp_path, target_path_list, min_bin_elements, min_bin_time,
                  debug_mode=False, persistence_id="Default", output_logline=True, learn_mode=False, avg_factor=1, var_factor=2,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -59,8 +59,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             target_path_list=target_path_list, min_bin_elements=min_bin_elements, min_bin_time=min_bin_time, debug_mode=debug_mode,
             persistence_id=persistence_id, output_logline=output_logline, avg_factor=avg_factor, var_factor=var_factor,
             learn_mode=learn_mode, stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
-            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"]
-        )
+            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"], severity=severity)
         if not self.target_path_list:
             msg = "target_path_list must not be empty or None."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -139,6 +138,8 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
                                   "MinBinTime": self.min_bin_time,
                                   "DebugMode": self.debug_mode}
             event_data = {"AnalysisComponent": analysis_component}
+            if self.severity is not None:
+                event_data["Tags"] = {"Severity": self.severity}
 
         if analysis_summary:
             res = [""] * stat_data[2][0]
@@ -246,7 +247,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             if (current_variance > self.var_factor * old_bin[4]) or (abs(current_average - old_bin[3]) > self.avg_factor * old_bin[4]) or \
                self.debug_mode:
                 res = [f"Change: new: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}; old: n = "
-                       f"{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = { old_bin[4]}", current_bin[0],
+                       f"{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = {old_bin[4]}", current_bin[0],
                        current_average + stat_data[1], current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]]
                 return res
         return None

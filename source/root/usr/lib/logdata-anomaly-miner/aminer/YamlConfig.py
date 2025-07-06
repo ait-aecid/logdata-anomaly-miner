@@ -642,7 +642,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
             elif item['type'].name == 'MatchFilter':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers,
-                                    target_value_list=item['value_list'], output_logline=item['output_logline'])
+                                    target_value_list=item['value_list'], output_logline=item['output_logline'], severity=item['severity'])
             elif item['type'].name == 'MatchValueAverageChangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['timestamp_path'], item['paths'],
                                     item['min_bin_elements'], item['min_bin_time'], debug_mode=item['debug_mode'],
@@ -650,7 +650,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     avg_factor=item['avg_factor'], var_factor=item['var_factor'], learn_mode=learn,
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'],
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'MatchValueStreamWriter':
                 stream = sys.stdout
                 if item['stream'] == 'sys.stderr':
