@@ -31,7 +31,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, EventSourceInterface):
     def __init__(self, aminer_config, anomaly_event_handlers, set_upper_limit, target_path_list=None, scoring_path_list=None,
                  window_size=600, local_maximum_threshold=0.2, persistence_id="Default", learn_mode=False, output_logline=True,
                  ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
-                 log_resource_ignore_list=None):
+                 log_resource_ignore_list=None, severity=None):
         """Initialize the detector.
 
         @param aminer_config configuration from analysis_context.
@@ -58,7 +58,7 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, EventSourceInterface):
             mutable_default_args=["target_path_list", "scoring_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, window_size=window_size, anomaly_event_handlers=anomaly_event_handlers,
             target_path_list=target_path_list, scoring_path_list=scoring_path_list, set_upper_limit=set_upper_limit,
-            local_maximum_threshold=local_maximum_threshold, persistence_id=persistence_id, learn_mode=learn_mode,
+            local_maximum_threshold=local_maximum_threshold, persistence_id=persistence_id, learn_mode=learn_mode, severity=severity,
             output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
@@ -239,6 +239,8 @@ class SlidingEventFrequencyDetector(AtomHandlerInterface, EventSourceInterface):
                 frequency_info["IdValues"] = list(self.scoring_value_list[log_event])[:self.max_frequency[log_event]]
 
         event_data = {"AnalysisComponent": analysis_component, "FrequencyData": frequency_info}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         if first_exceeded_threshold:
             message = "Frequency exceeds range for the first time"
         else:

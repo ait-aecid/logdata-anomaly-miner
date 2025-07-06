@@ -37,7 +37,7 @@ class TimeCorrelationDetector(AtomHandlerInterface):
 
     def __init__(self, aminer_config, anomaly_event_handlers, parallel_check_count, persistence_id="Default",
                  record_count_before_event=10000, output_logline=True, use_path_match=True, use_value_match=True,
-                 min_rule_attributes=1, max_rule_attributes=5, log_resource_ignore_list=None):
+                 min_rule_attributes=1, max_rule_attributes=5, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -57,7 +57,7 @@ class TimeCorrelationDetector(AtomHandlerInterface):
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, parallel_check_count=parallel_check_count,
             persistence_id=persistence_id, record_count_before_event=record_count_before_event, output_logline=output_logline,
             use_path_match=use_path_match, use_value_match=use_value_match, min_rule_attributes=min_rule_attributes,
-            max_rule_attributes=max_rule_attributes, log_resource_ignore_list=log_resource_ignore_list,
+            max_rule_attributes=max_rule_attributes, log_resource_ignore_list=log_resource_ignore_list, severity=severity,
             mutable_default_args=["log_resource_ignore_list"]
         )
         self.last_timestamp = 0.0
@@ -139,6 +139,8 @@ class TimeCorrelationDetector(AtomHandlerInterface):
             analysis_component["TotalRecords"] = self.total_records
 
             event_data["AnalysisComponent"] = analysis_component
+            if self.severity is not None:
+                event_data["Tags"] = {"Severity": self.severity}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", "Correlation report", result, event_data, log_atom, self)
             self.reset_statistics()

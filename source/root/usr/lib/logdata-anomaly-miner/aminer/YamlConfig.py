@@ -552,7 +552,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     output_logline=item['output_logline'], use_path_match=item['use_path_match'],
                                     use_value_match=item['use_value_match'], min_rule_attributes=item['min_rule_attributes'],
                                     max_rule_attributes=item['max_rule_attributes'],
-                                    log_resource_ignore_list=item['log_resource_ignore_list'])
+                                    log_resource_ignore_list=item['log_resource_ignore_list'], severity=item['severity'])
             elif item['type'].name == 'ParserCount':
                 tmp_analyser = func(
                     analysis_context.aminer_config,
@@ -588,7 +588,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
                                     stop_learning_time=item['stop_learning_time'],
-                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
+                                    stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'], severity=item['severity'])
             elif item['type'].name == 'LinearNumericBinDefinition':
                 if comp_name is None:
                     msg = f'The {item["type"].name} must have an id!'
