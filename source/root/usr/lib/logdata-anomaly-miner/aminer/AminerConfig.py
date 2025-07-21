@@ -17,45 +17,45 @@ import sys
 import importlib.util
 import logging
 
-KEY_LOG_SOURCES_LIST = 'LogResourceList'
-KEY_AMINER_USER = 'AminerUser'
-KEY_AMINER_GROUP = 'AminerGroup'
-KEY_ANALYSIS_CONFIG_FILE = 'AnalysisConfigFile'
-KEY_PERSISTENCE_DIR = 'Core.PersistenceDir'
-KEY_LOG_DIR = 'Core.LogDir'
-DEFAULT_PERSISTENCE_DIR = '/var/lib/aminer'
-DEFAULT_LOG_DIR = '/var/lib/aminer/log'
-KEY_PERSISTENCE_PERIOD = 'Core.PersistencePeriod'
+KEY_LOG_SOURCES_LIST = "LogResourceList"
+KEY_AMINER_USER = "AminerUser"
+KEY_AMINER_GROUP = "AminerGroup"
+KEY_ANALYSIS_CONFIG_FILE = "AnalysisConfigFile"
+KEY_PERSISTENCE_DIR = "Core.PersistenceDir"
+KEY_LOG_DIR = "Core.LogDir"
+DEFAULT_PERSISTENCE_DIR = "/var/lib/aminer"
+DEFAULT_LOG_DIR = "/var/lib/aminer/log"
+KEY_PERSISTENCE_PERIOD = "Core.PersistencePeriod"
 DEFAULT_PERSISTENCE_PERIOD = 600
-KEY_REMOTE_CONTROL_SOCKET_PATH = 'RemoteControlSocket'
-KEY_LOG_PREFIX = 'LogPrefix'
-KEY_RESOURCES_MAX_MEMORY_USAGE = 'Resources.MaxMemoryUsage'
-REMOTE_CONTROL_LOG_NAME = 'REMOTE_CONTROL'
-KEY_REMOTE_CONTROL_LOG_FILE = 'Log.RemoteControlLogFile'
-DEFAULT_REMOTE_CONTROL_LOG_FILE = 'aminerRemoteLog.log'
+KEY_REMOTE_CONTROL_SOCKET_PATH = "RemoteControlSocket"
+KEY_LOG_PREFIX = "LogPrefix"
+KEY_RESOURCES_MAX_MEMORY_USAGE = "Resources.MaxMemoryUsage"
+REMOTE_CONTROL_LOG_NAME = "REMOTE_CONTROL"
+KEY_REMOTE_CONTROL_LOG_FILE = "Log.RemoteControlLogFile"
+DEFAULT_REMOTE_CONTROL_LOG_FILE = "aminerRemoteLog.log"
 configFN = None
 STAT_LEVEL = 1
-STAT_LOG_NAME = 'STAT'
-KEY_STAT_LOG_FILE = 'Log.StatisticsFile'
-DEFAULT_STAT_LOG_FILE = 'statistics.log'
+STAT_LOG_NAME = "STAT"
+KEY_STAT_LOG_FILE = "Log.StatisticsFile"
+DEFAULT_STAT_LOG_FILE = "statistics.log"
 DEBUG_LEVEL = 1
-DEBUG_LOG_NAME = 'DEBUG'
-KEY_DEBUG_LOG_FILE = 'Log.DebugFile'
-DEFAULT_DEBUG_LOG_FILE = 'aminer.log'
-KEY_LOG_STAT_PERIOD = 'Log.StatisticsPeriod'
+DEBUG_LOG_NAME = "DEBUG"
+KEY_DEBUG_LOG_FILE = "Log.DebugFile"
+DEFAULT_DEBUG_LOG_FILE = "aminer.log"
+KEY_LOG_STAT_PERIOD = "Log.StatisticsPeriod"
 DEFAULT_STAT_PERIOD = 3600
-KEY_LOG_STAT_LEVEL = 'Log.StatisticsLevel'
-KEY_LOG_DEBUG_LEVEL = 'Log.DebugLevel'
-KEY_LOG_ROTATION_MAX_BYTES = 'Log.Rotation.MaxBytes'
+KEY_LOG_STAT_LEVEL = "Log.StatisticsLevel"
+KEY_LOG_DEBUG_LEVEL = "Log.DebugLevel"
+KEY_LOG_ROTATION_MAX_BYTES = "Log.Rotation.MaxBytes"
 DEFAULT_LOG_ROTATION_MAX_BYTES = 2 << 19  # 1 Megabyte
-KEY_LOG_ROTATION_BACKUP_COUNT = 'Log.Rotation.BackupCount'
+KEY_LOG_ROTATION_BACKUP_COUNT = "Log.Rotation.BackupCount"
 DEFAULT_LOG_ROTATION_BACKUP_COUNT = 5
-CONFIG_KEY_LOG_LINE_PREFIX = 'LogPrefix'
-DEFAULT_LOG_LINE_PREFIX = ''
-CONFIG_KEY_ENCODING = 'Log.Encoding'
-ENCODING = 'utf-8'
-KEY_AMINER_ID = 'AminerId'
-KEY_LOG_LINE_IDENTIFIER = 'LogLineIdentifier'
+CONFIG_KEY_LOG_LINE_PREFIX = "LogPrefix"
+DEFAULT_LOG_LINE_PREFIX = ""
+CONFIG_KEY_ENCODING = "Log.Encoding"
+ENCODING = "utf-8"
+KEY_AMINER_ID = "AminerId"
+KEY_LOG_LINE_IDENTIFIER = "LogLineIdentifier"
 
 
 def load_config(config_file_name):
@@ -63,15 +63,15 @@ def load_config(config_file_name):
     aminer_config = None
     global configFN
     configFN = config_file_name
-    ymlext = ['.YAML', '.YML', '.yaml', '.yml']
+    ymlext = [".YAML", ".YML", ".yaml", ".yml"]
     extension = os.path.splitext(config_file_name)[1]
     yaml_config = None
 
     if extension in ymlext:
         yaml_config = config_file_name
-        config_file_name = os.path.dirname(os.path.abspath(__file__)) + '/' + 'YamlConfig.py'
+        config_file_name = os.path.dirname(os.path.abspath(__file__)) + "/" + "YamlConfig.py"
     try:
-        spec = importlib.util.spec_from_file_location('aminer_config', config_file_name)
+        spec = importlib.util.spec_from_file_location("aminer_config", config_file_name)
         aminer_config = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(aminer_config)
         if extension in ymlext:
@@ -99,7 +99,7 @@ def build_persistence_file_name(aminer_config, *args):
 def save_config(analysis_context, new_file):
     """Save the current configuration to a file by using the
     aminerRemoteControl."""
-    register_component = 'register_component('
+    register_component = "register_component("
     VAR_ID = 0
     msg = ""
     with open(configFN, "r") as file:
@@ -111,10 +111,10 @@ def save_config(analysis_context, new_file):
         if pos == -1:
             msg += f"WARNING: {find_str}not found in the old config file.\n"
             rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
-            rc_logger.warning(msg.strip('\n'))
+            rc_logger.warning(msg.strip("\n"))
         else:
             string = old[pos + len(find_str):]
-            old_len = string.find('\n')
+            old_len = string.find("\n")
             string = string[:old_len]
             prop = analysis_context.aminer_config.config_properties[config_property]
             if (string[0] == "'" and string[-1] == "'") or (string[0] == '"' and string[-1] == '"'):
@@ -129,16 +129,16 @@ def save_config(analysis_context, new_file):
         old_start = 0
         for i in range(0, component_id + 1):
             start = start + 1
-            start = old.find('.register_component(', start)
+            start = old.find(".register_component(", start)
         if old_start > start:
             break
         old_start = start
 
-        if old.find('component_name', start) < old.find(')', start):
-            old_component_name_start = old.find('"', old.find('component_name', start))
+        if old.find("component_name", start) < old.find(")", start):
+            old_component_name_start = old.find('"', old.find("component_name", start))
             old_component_name_end = old.find('"', old_component_name_start + 1)
-            if old_component_name_start > old.find(')', start) or old_component_name_start == -1:
-                old_component_name_start = old.find("'", old.find('component_name', start))
+            if old_component_name_start > old.find(")", start) or old_component_name_start == -1:
+                old_component_name_start = old.find("'", old.find("component_name", start))
                 old_component_name_end = old.find("'", old_component_name_start + 1)
             old_len = old_component_name_end - old_component_name_start + 1
             old_component_name = old[old_component_name_start:]
@@ -154,7 +154,7 @@ def save_config(analysis_context, new_file):
             logs = logFile.readlines()
     except OSError as e:
         msg = f"Could not read {remote_control_log_file}: {e}\n"
-        logging.getLogger(DEBUG_LOG_NAME).error(msg.strip('\n'))
+        logging.getLogger(DEBUG_LOG_NAME).error(msg.strip("\n"))
         print(msg, file=sys.stderr)
 
     i = len(logs) - 1
@@ -166,8 +166,8 @@ def save_config(analysis_context, new_file):
 
     for i, log in enumerate(logs):
         if "REMOTECONTROL change_attribute_of_registered_analysis_component" in log:
-            log = log[:log.find('#')]
-            arr = log.split(',', 3)
+            log = log[:log.find("#")]
+            arr = log.split(",", 3)
             if arr[1].find("'") != -1:
                 component_name = arr[1].split("'")[1]
             else:
@@ -181,10 +181,10 @@ def save_config(analysis_context, new_file):
             pos = old.find(f'component_name="{component_name}"')
             if pos == -1:
                 pos = old.find(f"component_name='{component_name}'")
-            while old[pos] != '\n':
+            while old[pos] != "\n":
                 pos = pos - 1
             pos = old.find(register_component, pos) + len(register_component)
-            var = old[pos:old.find(',', pos)]
+            var = old[pos:old.find(",", pos)]
             pos = old.find(f"{var} =")
             if pos == -1:
                 pos = old.find(f"{var}=")
@@ -196,7 +196,7 @@ def save_config(analysis_context, new_file):
             elif p1 == -1 and p2 == -1:
                 msg += f"WARNING: '{component_name}.{attr}' could not be found in the current config!\n"
                 rc_logger = logging.getLogger(REMOTE_CONTROL_LOG_NAME)
-                rc_logger.warning(msg.strip('\n'))
+                rc_logger.warning(msg.strip("\n"))
                 continue
             elif p1 == -1:
                 end = p2
@@ -210,14 +210,14 @@ def save_config(analysis_context, new_file):
             # find the name of the filter_config variable in the old config.
             pos = old.find(parameters[1].strip())
             new_pos = pos
-            while old[new_pos] != '\n':
+            while old[new_pos] != "\n":
                 new_pos = new_pos - 1
             filter_config = old[new_pos:pos]
             pos = filter_config.find(register_component) + len(register_component)
-            filter_config = filter_config[pos:filter_config.find(',', pos)].strip()
+            filter_config = filter_config[pos:filter_config.find(",", pos)].strip()
 
             new_parameters = parameters[2].split(")")
-            component_name = new_parameters[1].strip(', ')
+            component_name = new_parameters[1].strip(", ")
 
             var = f"analysis_component{VAR_ID}"
             VAR_ID = VAR_ID + 1
@@ -226,7 +226,7 @@ def save_config(analysis_context, new_file):
             old = old + f"\n  {filter_config}.add_handler({var})\n"
 
     # remove double lines
-    old = old.replace('\n\n\n', '\n\n')
+    old = old.replace("\n\n\n", "\n\n")
 
     try:
         with open(new_file, "w") as file:

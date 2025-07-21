@@ -87,7 +87,7 @@ class AnalysisContext:
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         logging.getLogger(DEBUG_LOG_NAME).debug(
-            'Called %s for the component %s', 'add_time_triggered_component', component.__class__.__name__)
+            "Called %s for the component %s", "add_time_triggered_component", component.__class__.__name__)
 
     def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
         """Register a new component. A component implementing the
@@ -104,11 +104,11 @@ class AnalysisContext:
         if component_name is None:
             component_name = str(component.__class__.__name__) + str(self.next_registry_id)
         if component_name in self.registered_components_by_name:
-            msg = 'Component with same name already registered'
+            msg = "Component with same name already registered"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if register_time_trigger_class_override is not None and not isinstance(component, TimeTriggeredComponentInterface):
-            msg = 'Requesting override on component not implementing TimeTriggeredComponentInterface'
+            msg = "Requesting override on component not implementing TimeTriggeredComponentInterface"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
@@ -226,7 +226,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         self.run_analysis_loop_flag = True
         self.log_streams_by_name = {}
         self.persistence_file_name = build_persistence_file_name(
-            self.analysis_context.aminer_config, self.__class__.__name__ + '/RepositioningData')
+            self.analysis_context.aminer_config, self.__class__.__name__ + "/RepositioningData")
         self.next_persist_time = time.time() + self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
         self.repositioning_data_dict = {}
         self.master_control_socket = None
@@ -271,8 +271,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         # Locate the real analysis configuration.
         self.analysis_context.build_analysis_pipeline()
         if self.analysis_context.atomizer_factory is None:
-            msg = 'build_analysis_pipeline() did not initialize atomizer_factory, terminating'
-            print('FATAL: ' + msg, file=sys.stderr)
+            msg = "build_analysis_pipeline() did not initialize atomizer_factory, terminating"
+            print("FATAL: " + msg, file=sys.stderr)
             logging.getLogger(DEBUG_LOG_NAME).critical(msg)
             return 1
 
@@ -284,10 +284,10 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             try:
                 max_memory_mb = int(max_memory_mb)
                 resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb * 1024 * 1024, resource.RLIM_INFINITY))
-                logging.getLogger(DEBUG_LOG_NAME).debug('set max memory limit to %d MB.', max_memory_mb)
+                logging.getLogger(DEBUG_LOG_NAME).debug("set max memory limit to %d MB.", max_memory_mb)
             except ValueError:
                 msg = f"{KEY_RESOURCES_MAX_MEMORY_USAGE} must be an integer, terminating"
-                print('FATAL: ' + msg, file=sys.stderr)
+                print("FATAL: " + msg, file=sys.stderr)
                 logging.getLogger(DEBUG_LOG_NAME).critical(msg)
                 return 1
 
@@ -370,7 +370,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                         logging.getLogger(DEBUG_LOG_NAME).error(msg)
                         print(msg, file=sys.stderr)
                     if fd_handler_object.is_dead():
-                        logging.getLogger(DEBUG_LOG_NAME).debug('Deleting fd %s from tracked_fds_dict.', str(read_fd))
+                        logging.getLogger(DEBUG_LOG_NAME).debug("Deleting fd %s from tracked_fds_dict.", str(read_fd))
                         del self.tracked_fds_dict[read_fd]
                     # Reading is only attempted when output buffer was already flushed. Try processing the next request to fill the output
                     # buffer for next round.
@@ -432,7 +432,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
             if real_time >= next_statistics_log_time:
                 next_statistics_log_time = real_time + log_stat_period
-                logging.getLogger(DEBUG_LOG_NAME).debug('Statistics logs are written..')
+                logging.getLogger(DEBUG_LOG_NAME).debug("Statistics logs are written..")
                 # log the statistics for every component.
                 for component_name in self.analysis_context.registered_components_by_name:
                     component = self.analysis_context.registered_components_by_name[component_name]
@@ -452,17 +452,17 @@ class AnalysisChild(TimeTriggeredComponentInterface):
 
             # backup the persistence data.
             backup_time = time.time()
-            backup_time_str = datetime.fromtimestamp(backup_time).strftime('%Y-%m-%d-%H-%M-%S')
+            backup_time_str = datetime.fromtimestamp(backup_time).strftime("%Y-%m-%d-%H-%M-%S")
             persistence_dir = self.analysis_context.aminer_config.config_properties.get(
                 KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR)
-            persistence_dir = persistence_dir.rstrip('/')
-            backup_path = persistence_dir + '/backup/'
+            persistence_dir = persistence_dir.rstrip("/")
+            backup_path = persistence_dir + "/backup/"
             backup_path_with_date = os.path.join(backup_path, backup_time_str)
             if next_backup_time_trigger_time is None or backup_time >= next_backup_time_trigger_time:
                 next_trigger_offset = 3600 * 24
                 if next_backup_time_trigger_time is not None:
-                    shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns('backup*'))
-                    logging.getLogger(DEBUG_LOG_NAME).info('Persistence backup created in %s.', backup_path_with_date)
+                    shutil.copytree(persistence_dir, backup_path_with_date, ignore=shutil.ignore_patterns("backup*"))
+                    logging.getLogger(DEBUG_LOG_NAME).info("Persistence backup created in %s.", backup_path_with_date)
                 next_backup_time_trigger_time = backup_time + next_trigger_offset
 
             if len(self.tracked_fds_dict) == 1 and self.offline_mode:
@@ -484,19 +484,19 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         """
         # We cannot fail with None here as the socket was in the readList.
         (received_fd, received_type_info, annotation_data) = SecureOSFunctions.receive_annotated_file_descriptor(self.master_control_socket)
-        if received_type_info == b'logstream':
+        if received_type_info == b"logstream":
             repositioning_data = self.repositioning_data_dict.get(annotation_data, None)
             if repositioning_data is not None:
                 del self.repositioning_data_dict[annotation_data]
             res = None
-            if annotation_data.startswith(b'file://'):
+            if annotation_data.startswith(b"file://"):
                 from aminer.input.LogStream import FileLogDataResource
                 res = FileLogDataResource(annotation_data, received_fd, repositioning_data=repositioning_data)
-            elif annotation_data.startswith(b'unix://'):
+            elif annotation_data.startswith(b"unix://"):
                 from aminer.input.LogStream import UnixSocketLogDataResource
                 res = UnixSocketLogDataResource(annotation_data, received_fd)
             else:
-                msg = 'Filedescriptor of unknown type received'
+                msg = "Filedescriptor of unknown type received"
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
             # Make fd nonblocking.
@@ -510,9 +510,9 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                 self.log_streams_by_name[res.get_resource_name()] = log_stream
             else:
                 log_stream.add_next_resource(res)
-        elif received_type_info == b'remotecontrol':
+        elif received_type_info == b"remotecontrol":
             if self.remote_control_socket is not None:
-                msg = 'Received another remote control socket: multiple remote control not supported (yet?).'
+                msg = "Received another remote control socket: multiple remote control not supported (yet?)."
                 logging.getLogger(DEBUG_LOG_NAME).error(msg)
                 raise Exception(msg)
             self.remote_control_socket = socket.fromfd(received_fd, socket.AF_UNIX, socket.SOCK_STREAM, 0)
@@ -528,7 +528,8 @@ class AnalysisChild(TimeTriggeredComponentInterface):
         invocation. The caller may decide to invoke this method earlier than
         requested during the previous call. Classes implementing this method
         have to handle such cases. Each class should try to limit the time
-        spent in this method as it might delay trigger signals to other
+        spent in this method as it might delay trigger signals to other.
+
         components. For extensive computational work or IO, a separate thread should be used.
         @param trigger_time the time this trigger is invoked. This might be the current real time when invoked from real time
         timers or the forensic log timescale time value.
@@ -544,7 +545,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
             PersistenceUtil.store_json(self.persistence_file_name, self.repositioning_data_dict)
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
-            logging.getLogger(DEBUG_LOG_NAME).debug('Repositioning data was persisted.')
+            logging.getLogger(DEBUG_LOG_NAME).debug("Repositioning data was persisted.")
         return delta
 
 
@@ -563,12 +564,12 @@ class AnalysisChildRemoteControlHandler:
     * Data
 
     The handler processes following types:
-    * Execute request ('EEEE'): Data is loaded as json artefact containing a list with two elements. The first one is the
-      Python code to be executed. The second one is available within the execution namespace as 'remoteControlData'.
+    * Execute request ("EEEE"): Data is loaded as json artefact containing a list with two elements. The first one is the
+      Python code to be executed. The second one is available within the execution namespace as "remoteControlData".
 
     The handler produces following requests:
-    * Execution response ('RRRR'): The response contains a json artefact with a two element list. The first element is the
-      content of 'remoteControlResponse' from the Python execution namespace. The second one is the exception message and traceback
+    * Execution response ("RRRR"): The response contains a json artefact with a two element list. The first element is the
+      content of "remoteControlResponse" from the Python execution namespace. The second one is the exception message and traceback
       as string if an error has occured.
 
     Method naming:
@@ -582,8 +583,8 @@ class AnalysisChildRemoteControlHandler:
     def __init__(self, control_client_socket):
         self.control_client_socket = control_client_socket
         self.remote_control_fd = control_client_socket.fileno()
-        self.input_buffer = b''
-        self.output_buffer = b''
+        self.input_buffer = b""
+        self.output_buffer = b""
 
     def may_receive(self):
         """Check if this handler may receive more requests."""
@@ -595,14 +596,14 @@ class AnalysisChildRemoteControlHandler:
         if request_data is None:
             return
         request_type = request_data[4:8]
-        if request_type == b'EEEE':
+        if request_type == b"EEEE":
             json_remote_control_response = None
             exception_data = None
             try:
                 json_request_data = (json.loads(request_data[8:].decode()))
                 json_request_data = JsonUtil.decode_object(json_request_data)
                 if (json_request_data is None) or (not isinstance(json_request_data, list)) or (len(json_request_data) != 2):
-                    msg = 'Invalid request data'
+                    msg = "Invalid request data"
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise Exception(msg)
                 if json_request_data[0] and isinstance(json_request_data[0], bytes):
@@ -626,83 +627,83 @@ class AnalysisChildRemoteControlHandler:
                     TimeCorrelationViolationDetector, TimestampCorrectionFilters, TimestampsUnsortedDetector, VariableTypeDetector, \
                     AllowlistViolationDetector, EventCountClusterDetector
                 exec_locals = {
-                    'analysis_context': analysis_context, 'remote_control_data': json_request_data[1],
-                    'print_current_config': methods.print_current_config, 'print_config_property': methods.print_config_property,
-                    'print_attribute_of_registered_analysis_component': methods.print_attribute_of_registered_analysis_component,
-                    'change_config_property': methods.change_config_property,
-                    'change_attribute_of_registered_analysis_component': methods.change_attribute_of_registered_analysis_component,
-                    'rename_registered_analysis_component': methods.rename_registered_analysis_component,
-                    'add_handler_to_atom_filter_and_register_analysis_component':
+                    "analysis_context": analysis_context, "remote_control_data": json_request_data[1],
+                    "print_current_config": methods.print_current_config, "print_config_property": methods.print_config_property,
+                    "print_attribute_of_registered_analysis_component": methods.print_attribute_of_registered_analysis_component,
+                    "change_config_property": methods.change_config_property,
+                    "change_attribute_of_registered_analysis_component": methods.change_attribute_of_registered_analysis_component,
+                    "rename_registered_analysis_component": methods.rename_registered_analysis_component,
+                    "add_handler_to_atom_filter_and_register_analysis_component":
                         methods.add_handler_to_atom_filter_and_register_analysis_component,
-                    'save_current_config': methods.save_current_config,
-                    'allowlist_event_in_component': methods.allowlist_event_in_component,
-                    'blocklist_event_in_component': methods.blocklist_event_in_component,
-                    'print_persistence_event_in_component': methods.print_persistence_event_in_component,
-                    'add_to_persistence_event_in_component': methods.add_to_persistence_event_in_component,
-                    'remove_from_persistence_event_in_component': methods.remove_from_persistence_event_in_component,
-                    'dump_events_from_history': methods.dump_events_from_history,
-                    'ignore_events_from_history': methods.ignore_events_from_history,
-                    'list_events_from_history': methods.list_events_from_history,
-                    'allowlist_events_from_history': methods.allowlist_events_from_history,
-                    'persist_all': methods.persist_all,
-                    'list_backups': methods.list_backups,
-                    'create_backup': methods.create_backup,
-                    'reopen_event_handler_streams': methods.reopen_event_handler_streams,
-                    'EnhancedNewMatchPathValueComboDetector': EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
-                    'EventCorrelationDetector': EventCorrelationDetector.EventCorrelationDetector,
-                    'EventCountClusterDetector': EventCountClusterDetector.EventCountClusterDetector,
-                    'EventTypeDetector': EventTypeDetector.EventTypeDetector,
-                    'EventFrequencyDetector': EventFrequencyDetector.EventFrequencyDetector,
-                    'EventSequenceDetector': EventSequenceDetector.EventSequenceDetector,
-                    'HistogramAnalysis': HistogramAnalysis.HistogramAnalysis,
-                    'PathDependentHistogramAnalysis': HistogramAnalysis.PathDependentHistogramAnalysis,
-                    'MatchFilter': MatchFilter.MatchFilter,
-                    'MatchValueAverageChangeDetector': MatchValueAverageChangeDetector.MatchValueAverageChangeDetector,
-                    'MatchValueStreamWriter': MatchValueStreamWriter.MatchValueStreamWriter,
-                    'MissingMatchPathValueDetector': MissingMatchPathValueDetector.MissingMatchPathValueDetector,
-                    'NewMatchIdValueComboDetector': NewMatchIdValueComboDetector.NewMatchIdValueComboDetector,
-                    'NewMatchPathDetector': NewMatchPathDetector.NewMatchPathDetector,
-                    'NewMatchPathValueComboDetector': NewMatchPathValueComboDetector.NewMatchPathValueComboDetector,
-                    'NewMatchPathValueDetector': NewMatchPathValueDetector.NewMatchPathValueDetector,
-                    'ParserCount': ParserCount.ParserCount,
-                    'Rules': Rules,
-                    'TimeCorrelationDetector': TimeCorrelationDetector.TimeCorrelationDetector,
-                    'TimeCorrelationViolationDetector': TimeCorrelationViolationDetector.TimeCorrelationViolationDetector,
-                    'SimpleMonotonicTimestampAdjust': TimestampCorrectionFilters.SimpleMonotonicTimestampAdjust,
-                    'TimestampsUnsortedDetector': TimestampsUnsortedDetector.TimestampsUnsortedDetector,
-                    'VariableTypeDetector': VariableTypeDetector.VariableTypeDetector,
-                    'AllowlistViolationDetector': AllowlistViolationDetector.AllowlistViolationDetector
+                    "save_current_config": methods.save_current_config,
+                    "allowlist_event_in_component": methods.allowlist_event_in_component,
+                    "blocklist_event_in_component": methods.blocklist_event_in_component,
+                    "print_persistence_event_in_component": methods.print_persistence_event_in_component,
+                    "add_to_persistence_event_in_component": methods.add_to_persistence_event_in_component,
+                    "remove_from_persistence_event_in_component": methods.remove_from_persistence_event_in_component,
+                    "dump_events_from_history": methods.dump_events_from_history,
+                    "ignore_events_from_history": methods.ignore_events_from_history,
+                    "list_events_from_history": methods.list_events_from_history,
+                    "allowlist_events_from_history": methods.allowlist_events_from_history,
+                    "persist_all": methods.persist_all,
+                    "list_backups": methods.list_backups,
+                    "create_backup": methods.create_backup,
+                    "reopen_event_handler_streams": methods.reopen_event_handler_streams,
+                    "EnhancedNewMatchPathValueComboDetector": EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
+                    "EventCorrelationDetector": EventCorrelationDetector.EventCorrelationDetector,
+                    "EventCountClusterDetector": EventCountClusterDetector.EventCountClusterDetector,
+                    "EventTypeDetector": EventTypeDetector.EventTypeDetector,
+                    "EventFrequencyDetector": EventFrequencyDetector.EventFrequencyDetector,
+                    "EventSequenceDetector": EventSequenceDetector.EventSequenceDetector,
+                    "HistogramAnalysis": HistogramAnalysis.HistogramAnalysis,
+                    "PathDependentHistogramAnalysis": HistogramAnalysis.PathDependentHistogramAnalysis,
+                    "MatchFilter": MatchFilter.MatchFilter,
+                    "MatchValueAverageChangeDetector": MatchValueAverageChangeDetector.MatchValueAverageChangeDetector,
+                    "MatchValueStreamWriter": MatchValueStreamWriter.MatchValueStreamWriter,
+                    "MissingMatchPathValueDetector": MissingMatchPathValueDetector.MissingMatchPathValueDetector,
+                    "NewMatchIdValueComboDetector": NewMatchIdValueComboDetector.NewMatchIdValueComboDetector,
+                    "NewMatchPathDetector": NewMatchPathDetector.NewMatchPathDetector,
+                    "NewMatchPathValueComboDetector": NewMatchPathValueComboDetector.NewMatchPathValueComboDetector,
+                    "NewMatchPathValueDetector": NewMatchPathValueDetector.NewMatchPathValueDetector,
+                    "ParserCount": ParserCount.ParserCount,
+                    "Rules": Rules,
+                    "TimeCorrelationDetector": TimeCorrelationDetector.TimeCorrelationDetector,
+                    "TimeCorrelationViolationDetector": TimeCorrelationViolationDetector.TimeCorrelationViolationDetector,
+                    "SimpleMonotonicTimestampAdjust": TimestampCorrectionFilters.SimpleMonotonicTimestampAdjust,
+                    "TimestampsUnsortedDetector": TimestampsUnsortedDetector.TimestampsUnsortedDetector,
+                    "VariableTypeDetector": VariableTypeDetector.VariableTypeDetector,
+                    "AllowlistViolationDetector": AllowlistViolationDetector.AllowlistViolationDetector
                 }
                 logging.getLogger(REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
-                logging.getLogger(DEBUG_LOG_NAME).debug('Remote control: %s', json_request_data[0])
+                logging.getLogger(DEBUG_LOG_NAME).debug("Remote control: %s", json_request_data[0])
 
                 global suspended_flag
-                if json_request_data[0] in ('suspend_aminer()', 'suspend_aminer', 'suspend'):
+                if json_request_data[0] in ("suspend_aminer()", "suspend_aminer", "suspend"):
                     suspended_flag = True
-                    msg = methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is suspended now.'
+                    msg = methods.REMOTE_CONTROL_RESPONSE + "OK. aminer is suspended now."
                     json_remote_control_response = json.dumps(msg)
                     logging.getLogger(DEBUG_LOG_NAME).info(msg)
-                elif json_request_data[0] in ('activate_aminer()', 'activate_aminer', 'activate'):
+                elif json_request_data[0] in ("activate_aminer()", "activate_aminer", "activate"):
                     suspended_flag = False
-                    msg = methods.REMOTE_CONTROL_RESPONSE + 'OK. aminer is activated now.'
+                    msg = methods.REMOTE_CONTROL_RESPONSE + "OK. aminer is activated now."
                     json_remote_control_response = json.dumps(msg)
                     logging.getLogger(DEBUG_LOG_NAME).info(msg)
                 else:
-                    exec(json_request_data[0], {'__builtins__': None}, exec_locals)  # nosec B102
-                    json_remote_control_response = json.dumps(exec_locals.get('remoteControlResponse'))
-                    if methods.REMOTE_CONTROL_RESPONSE == '':
+                    exec(json_request_data[0], {"__builtins__": None}, exec_locals)  # nosec B102
+                    json_remote_control_response = json.dumps(exec_locals.get("remoteControlResponse"))
+                    if methods.REMOTE_CONTROL_RESPONSE == "":
                         methods.REMOTE_CONTROL_RESPONSE = None
-                    if exec_locals.get('remoteControlResponse') is None:
+                    if exec_locals.get("remoteControlResponse") is None:
                         json_remote_control_response = json.dumps(methods.REMOTE_CONTROL_RESPONSE)
                     else:
                         json_remote_control_response = json.dumps(
-                            exec_locals.get('remoteControlResponse') + methods.REMOTE_CONTROL_RESPONSE)
+                            exec_locals.get("remoteControlResponse") + methods.REMOTE_CONTROL_RESPONSE)
             except Exception:
                 exception_data = traceback.format_exc()
-                logging.getLogger(DEBUG_LOG_NAME).debug('Remote control exception data: %s', str(exception_data))
+                logging.getLogger(DEBUG_LOG_NAME).debug("Remote control exception data: %s", str(exception_data))
             # This is little dirty but avoids having to pass over remoteControlResponse dumping again.
             if json_remote_control_response is None:
-                json_remote_control_response = 'null'
+                json_remote_control_response = "null"
             json_response = f"[{json.dumps(exception_data)}, {json_remote_control_response}]"
             if len(json_response) + 8 > self.max_control_packet_size:
                 # Damn: the response would be larger than packet size. Fake a secondary exception and return part of the json string
@@ -724,7 +725,7 @@ class AnalysisChildRemoteControlHandler:
                 json_response = min_include_response_data
             # Now size is OK, send the data
             json_response = json_response.encode()
-            self.output_buffer += struct.pack("!I", len(json_response) + 8) + b'RRRR' + json_response
+            self.output_buffer += struct.pack("!I", len(json_response) + 8) + b"RRRR" + json_response
         else:
             msg = f"Invalid request type {repr(request_type)}"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -780,7 +781,7 @@ class AnalysisChildRemoteControlHandler:
         """
         send_length = os.write(self.remote_control_fd, self.output_buffer)
         if send_length == len(self.output_buffer):
-            self.output_buffer = b''
+            self.output_buffer = b""
             return True
         self.output_buffer = self.output_buffer[send_length:]
         return False
@@ -788,23 +789,23 @@ class AnalysisChildRemoteControlHandler:
     def put_request(self, request_type, request_data):
         """Add a request of given type to the send queue.
 
-        @param request_type is a byte string denoting the type of the request. Currently only 'EEEE' is supported.
+        @param request_type is a byte string denoting the type of the request. Currently only "EEEE" is supported.
         @param request_data is a byte string denoting the content of the request.
         """
         if not isinstance(request_type, bytes):
-            msg = 'Request type is not a byte string'
+            msg = "Request type is not a byte string"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if len(request_type) != 4:
-            msg = 'Request type has to be 4 bytes long'
+            msg = "Request type has to be 4 bytes long"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if not isinstance(request_data, bytes):
-            msg = 'Request data is not a byte string'
+            msg = "Request data is not a byte string"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         if len(request_data) + 8 > self.max_control_packet_size:
-            msg = 'Data too large to fit into single packet'
+            msg = "Data too large to fit into single packet"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
         self.output_buffer += struct.pack("!I", len(request_data) + 8) + request_type + request_data
@@ -812,7 +813,7 @@ class AnalysisChildRemoteControlHandler:
     def put_execute_request(self, remote_control_code, remote_control_data):
         """Add a request to send exception data to the send queue."""
         remote_control_data = json.dumps([JsonUtil.encode_object(remote_control_code), JsonUtil.encode_object(remote_control_data)])
-        self.put_request(b'EEEE', remote_control_data.encode())
+        self.put_request(b"EEEE", remote_control_data.encode())
 
     def add_select_fds(self, input_select_fd_list, output_select_fd_list):
         """Update the file descriptor lists for selecting on read and write
@@ -829,7 +830,7 @@ class AnalysisChildRemoteControlHandler:
         self.control_client_socket = None
         self.remote_control_fd = -1
         if self.input_buffer or self.output_buffer:
-            msg = 'Unhandled input data'
+            msg = "Unhandled input data"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise Exception(msg)
 
