@@ -41,6 +41,8 @@ from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentIn
 from aminer.util import JsonUtil
 from aminer.AminerRemoteControlExecutionMethods import AminerRemoteControlExecutionMethods
 
+LIVE_CONFIG_TEMPFILE = "/tmp/live.conf"  # nosec B108
+
 
 class AnalysisContext:
     """This class collects information about the current analysis context to
@@ -219,9 +221,10 @@ class AnalysisChild(TimeTriggeredComponentInterface):
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
     offline_mode = False
 
-    def __init__(self, program_name, aminer_config):
+    def __init__(self, program_name, aminer_config, config_filename):
         self.program_name = program_name
         self.aminer_config = aminer_config
+        self.config_filename = config_filename
         self.analysis_context = AnalysisContext(aminer_config)
         self.run_analysis_loop_flag = True
         self.log_streams_by_name = {}
@@ -387,7 +390,7 @@ class AnalysisChild(TimeTriggeredComponentInterface):
                     # resources by hogging open connections.
                     (control_client_socket, _remote_address) = self.remote_control_socket.accept()
                     # Keep track of information received via this remote control socket.
-                    remote_control_handler = AnalysisChildRemoteControlHandler(control_client_socket)
+                    remote_control_handler = AnalysisChildRemoteControlHandler(control_client_socket, self.config_filename)
                     self.tracked_fds_dict[control_client_socket.fileno()] = remote_control_handler
                     continue
 
@@ -580,8 +583,9 @@ class AnalysisChildRemoteControlHandler:
 
     max_control_packet_size = 1 << 32
 
-    def __init__(self, control_client_socket):
+    def __init__(self, control_client_socket, config_filename):
         self.control_client_socket = control_client_socket
+        self.config_filename = config_filename
         self.remote_control_fd = control_client_socket.fileno()
         self.input_buffer = b""
         self.output_buffer = b""
@@ -619,7 +623,7 @@ class AnalysisChildRemoteControlHandler:
                         json_request_data[1] = new_list
                     else:
                         json_request_data[1] = json_request_data[1].decode()
-                methods = AminerRemoteControlExecutionMethods()
+                methods = AminerRemoteControlExecutionMethods(self.config_filename, LIVE_CONFIG_TEMPFILE)
                 from aminer.analysis import EnhancedNewMatchPathValueComboDetector, EventCorrelationDetector, EventTypeDetector, \
                     EventFrequencyDetector, EventSequenceDetector, HistogramAnalysis, MatchFilter, MatchValueAverageChangeDetector, \
                     MatchValueStreamWriter, MissingMatchPathValueDetector, NewMatchIdValueComboDetector, NewMatchPathDetector, \

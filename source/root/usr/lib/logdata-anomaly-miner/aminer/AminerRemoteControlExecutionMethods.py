@@ -35,8 +35,17 @@ component_not_found = 'Event history component not found.'
 class AminerRemoteControlExecutionMethods:
     """This class defines all possible methods for the remote control."""
 
-    REMOTE_CONTROL_RESPONSE = ""
-    ERROR_MESSAGE_RESOURCE_NOT_FOUND = '"Resource \\"%s\\" could not be found."'
+    def __init__(self, config_filename, live_config_tempfile):
+        self.config_filename = config_filename
+        self.live_config_tempfile = live_config_tempfile
+        conf = self.config_filename
+        if os.path.exists(live_config_tempfile):
+            conf = live_config_tempfile
+        with open(conf, "r") as f:
+            self.live_config = f.read().split("\n")
+        self.aminer_config_constants = {k: v for k, v in vars(AminerConfig).items() if k.startswith("KEY_") or k.startswith("DEFAULT_")}
+        self.REMOTE_CONTROL_RESPONSE = ""
+        self.ERROR_MESSAGE_RESOURCE_NOT_FOUND = '"Resource \\"%s\\" could not be found."'
 
     CONFIG_KEY_MAIL_TARGET_ADDRESS = "MailAlerting.TargetAddress"
     CONFIG_KEY_MAIL_FROM_ADDRESS = "MailAlerting.FromAddress"
@@ -49,15 +58,19 @@ class AminerRemoteControlExecutionMethods:
 
     MAIL_CONFIG_PROPERTIES = [CONFIG_KEY_MAIL_TARGET_ADDRESS, CONFIG_KEY_MAIL_FROM_ADDRESS]
     INTEGER_CONFIG_PROPERTY_LIST = [
-        CONFIG_KEY_MAIL_ALERT_GRACE_TIME, CONFIG_KEY_EVENT_COLLECT_TIME, CONFIG_KEY_ALERT_MIN_GAP, CONFIG_KEY_ALERT_MAX_GAP,
-        CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_LEVEL, KEY_LOG_DEBUG_LEVEL, KEY_LOG_STAT_PERIOD,
-        KEY_RESOURCES_MAX_MEMORY_USAGE]
+            CONFIG_KEY_MAIL_ALERT_GRACE_TIME, CONFIG_KEY_EVENT_COLLECT_TIME, CONFIG_KEY_ALERT_MIN_GAP, CONFIG_KEY_ALERT_MAX_GAP,
+            CONFIG_KEY_ALERT_MAX_EVENTS_PER_MESSAGE, KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_LEVEL, KEY_LOG_DEBUG_LEVEL, KEY_LOG_STAT_PERIOD,
+            KEY_RESOURCES_MAX_MEMORY_USAGE]
     STRING_CONFIG_PROPERTY_LIST = [
-        CONFIG_KEY_MAIL_TARGET_ADDRESS, CONFIG_KEY_MAIL_FROM_ADDRESS, CONFIG_KEY_MAIL_SUBJECT_PREFIX, KEY_LOG_PREFIX, KEY_AMINER_ID]
+            CONFIG_KEY_MAIL_TARGET_ADDRESS, CONFIG_KEY_MAIL_FROM_ADDRESS, CONFIG_KEY_MAIL_SUBJECT_PREFIX, KEY_LOG_PREFIX, KEY_AMINER_ID]
     ROOT_CONFIG_PROPERTIES = [
-        KEY_PERSISTENCE_DIR, KEY_LOG_SOURCES_LIST, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_LOG_DIR, KEY_DEBUG_LOG_FILE, KEY_STAT_LOG_FILE,
-        KEY_REMOTE_CONTROL_LOG_FILE, KEY_REMOTE_CONTROL_SOCKET_PATH, KEY_ANALYSIS_CONFIG_FILE, KEY_LOG_ROTATION_MAX_BYTES,
-        KEY_LOG_ROTATION_BACKUP_COUNT, KEY_LOG_LINE_IDENTIFIER]
+            KEY_PERSISTENCE_DIR, KEY_LOG_SOURCES_LIST, KEY_AMINER_USER, KEY_AMINER_GROUP, KEY_LOG_DIR, KEY_DEBUG_LOG_FILE,
+            KEY_STAT_LOG_FILE, KEY_REMOTE_CONTROL_LOG_FILE, KEY_REMOTE_CONTROL_SOCKET_PATH, KEY_ANALYSIS_CONFIG_FILE,
+            KEY_LOG_ROTATION_MAX_BYTES, KEY_LOG_ROTATION_BACKUP_COUNT, KEY_LOG_LINE_IDENTIFIER]
+
+    def save_live_config(self):
+        with open(self.live_config_tempfile, "w") as f:
+            f.write("\n".join(self.live_config))
 
     def print_response(self, value):
         """Add a value to the response string."""
@@ -65,6 +78,11 @@ class AminerRemoteControlExecutionMethods:
 
     def change_config_property(self, analysis_context, property_name, value):
         """Change a config_property in a running aminer instance."""
+        conf = self.config_filename
+        if os.path.exists(self.live_config_tempfile):
+            conf = self.live_config_tempfile
+        with open(conf, "r") as f:
+            self.live_config = f.read().split("\n")
         result = 0
         config_keys_mail_alerting = [
             self.CONFIG_KEY_MAIL_TARGET_ADDRESS, self.CONFIG_KEY_MAIL_FROM_ADDRESS, self.CONFIG_KEY_MAIL_SUBJECT_PREFIX,
@@ -96,7 +114,6 @@ class AminerRemoteControlExecutionMethods:
         elif property_name in config_keys_mail_alerting:
             result = self.change_config_property_mail_alerting(analysis_context, property_name, value)
         elif property_name in (KEY_LOG_PREFIX, KEY_PERSISTENCE_PERIOD, KEY_LOG_STAT_PERIOD, KEY_AMINER_ID):
-            analysis_context.aminer_config.config_properties[property_name] = value
             result = 0
         elif property_name == KEY_LOG_STAT_LEVEL:
             result = self.change_config_property_log_stat_level(analysis_context, value)
@@ -105,6 +122,27 @@ class AminerRemoteControlExecutionMethods:
         else:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: property {property_name} could not be changed. Please check the property_name again."
             return
+        analysis_context.aminer_config.config_properties[property_name] = value
+        added = False
+        for i, line in enumerate(self.live_config):
+            if f"config_properties['{property_name}']" in line or f"config_properties[\"{property_name}\"]" in line:
+                data = line.strip().split("=")
+                data1 = data[-1].split(" ")
+                data1[-1] = str(value)
+                data[-1] = " ".join(data1)
+                line = "=".join(data)
+                self.live_config[i] = line
+                added = True
+                break
+        if not added:
+            self.live_config.append(f"config_properties[\"{property_name}\"] = {value}")
+        self.save_live_config()
+        conf = self.config_filename
+        if os.path.exists(self.live_config_tempfile):
+            conf = self.live_config_tempfile
+        with open(conf, "r") as f:
+            self.live_config = f.read().split("\n")
+
         if result == 0:
             msg = f"'{property_name}' changed to '{value}' successfully."
             self.REMOTE_CONTROL_RESPONSE += msg
@@ -116,7 +154,6 @@ class AminerRemoteControlExecutionMethods:
         if property_name in self.MAIL_CONFIG_PROPERTIES and not is_email.match(value):
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: MailAlerting.TargetAddress and MailAlerting.FromAddress must be email addresses!"
             return 1
-        analysis_context.aminer_config.config_properties[property_name] = value
         for analysis_component_id in analysis_context.get_registered_component_ids():
             component = analysis_context.get_component_by_id(analysis_component_id)
             if component.__class__.__name__ == "DefaultMailNotificationEventHandler":
@@ -131,7 +168,6 @@ class AminerRemoteControlExecutionMethods:
                 self.REMOTE_CONTROL_RESPONSE += "FAILURE: it is not safe to run the aminer with less than 32MB RAM."
                 return 1
             resource.setrlimit(resource.RLIMIT_AS, (max_memory_mb * 1024 * 1024, resource.RLIM_INFINITY))
-            analysis_context.aminer_config.config_properties[KEY_RESOURCES_MAX_MEMORY_USAGE] = max_memory_mb
             return 0
         except ValueError:
             self.REMOTE_CONTROL_RESPONSE += "FAILURE: property 'maxMemoryUsage' must be of type Integer!"
@@ -140,7 +176,6 @@ class AminerRemoteControlExecutionMethods:
     def change_config_property_log_stat_level(self, analysis_context, stat_level):
         """Set the statistic logging level."""
         if stat_level in (0, 1, 2):
-            analysis_context.aminer_config.config_properties[KEY_LOG_STAT_LEVEL] = stat_level
             AminerConfig.STAT_LEVEL = stat_level
             return 0
         self.REMOTE_CONTROL_RESPONSE += f"FAILURE: STAT_LEVEL {stat_level} is not allowed. Allowed STAT_LEVEL values are 0, 1, 2."
@@ -149,7 +184,6 @@ class AminerRemoteControlExecutionMethods:
     def change_config_property_log_debug_level(self, analysis_context, debug_level):
         """Set the debug log level."""
         if debug_level in (0, 1, 2):
-            analysis_context.aminer_config.config_properties[KEY_LOG_DEBUG_LEVEL] = debug_level
             AminerConfig.DEBUG_LEVEL = debug_level
             debug_logger = logging.getLogger(DEBUG_LOG_NAME)
             if debug_level == 0:
@@ -206,10 +240,14 @@ class AminerRemoteControlExecutionMethods:
         @param analysis_context the analysis context of the aminer.
         @param property_name the name of the property to be printed.
         """
-        if property_name not in analysis_context.aminer_config.config_properties:
+        if property_name in analysis_context.aminer_config.config_properties:
+            val = analysis_context.aminer_config.config_properties[property_name]
+        elif property_name in self.aminer_config_constants.values():
+            val = self.aminer_config_constants[list(self.aminer_config_constants.keys())[
+                list(self.aminer_config_constants.values()).index(property_name)].replace("KEY_", "DEFAULT_")]
+        else:
             self.REMOTE_CONTROL_RESPONSE = self.ERROR_MESSAGE_RESOURCE_NOT_FOUND % property_name
             return
-        val = analysis_context.aminer_config.config_properties[property_name]
         if isinstance(val, list):
             val = str(val).replace('"False"', "false").replace('"True"', "true").replace('"None"', "null").strip(" ").replace("'", '"')
         else:
@@ -267,30 +305,12 @@ class AminerRemoteControlExecutionMethods:
         else:
             self.REMOTE_CONTROL_RESPONSE += f"FAILURE: the component '{component_name}' does not have an attribute named '{attribute}'."
 
-    def print_current_config(self, analysis_context):
+    def print_current_config(self):
         """Print the entire aminer config.
 
         @param analysis_context the analysis context of the aminer.
         """
-        for config_property in analysis_context.aminer_config.config_properties:
-            if isinstance(analysis_context.aminer_config.config_properties[config_property], str):
-                self.REMOTE_CONTROL_RESPONSE += f'"{config_property}": ' \
-                                                f'"{analysis_context.aminer_config.config_properties[config_property]}",\n'
-            else:
-                self.REMOTE_CONTROL_RESPONSE += attr_str % (
-                    config_property, analysis_context.aminer_config.config_properties[config_property])
-        for component_id in analysis_context.get_registered_component_ids():
-            self.REMOTE_CONTROL_RESPONSE += \
-                f'"{analysis_context.get_name_by_component(analysis_context.get_component_by_id(component_id))}": ' + '{\n'
-            component = analysis_context.get_component_by_id(component_id)
-            self.REMOTE_CONTROL_RESPONSE += self.get_all_vars(component, '  ')
-            self.REMOTE_CONTROL_RESPONSE += "},\n\n"
-        match = re.search(r'"aminer_config":\s*"<module \\"aminer_config\\" from \\"(.*?)\\">"', self.REMOTE_CONTROL_RESPONSE)
-        config_path = match.group(1)
-        self.REMOTE_CONTROL_RESPONSE = self.REMOTE_CONTROL_RESPONSE.replace(
-            f'"aminer_config": "<module \\"aminer_config\\" from \\"{config_path}\\">"',
-            f'"aminer_config": "<module \\\\"aminer_config\\\\" from \\\\"{config_path}\\\\">"').replace("'", '"').replace(
-            '"False"', "false").replace('"True"', "true").replace('"None"', "null").replace('\\"', '"').rstrip(",\n\n\n") + "\n\n"
+        self.REMOTE_CONTROL_RESPONSE += "\n".join(self.live_config)
 
     def get_all_vars(self, obj, indent):
         """Return all variables in string representation."""
@@ -330,14 +350,19 @@ class AminerRemoteControlExecutionMethods:
                 return True
         return False
 
-    def save_current_config(self, analysis_context, destination_file):
+    def save_current_config(self, destination_file):
         """Save the current live config into a file.
 
         @param analysis_context the analysis context of the aminer.
         @param destination_file the path to the file in which the config is saved.
         """
         if re.match("^(/[^/ ]*)+/?$", destination_file) is not None:
-            msg = AminerConfig.save_config(analysis_context, destination_file)
+            if os.path.exists(os.path.dirname(destination_file)):
+                with open(destination_file, "w") as f:
+                    f.write("\n".join(self.live_config))
+                msg = f"Successfully saved the current config to {destination_file}."
+            else:
+                msg = f"Exception: The directory {os.path.dirname(destination_file)} does not exist!"
         else:
             msg = f"Exception: {destination_file} is not a valid filename!"
         self.REMOTE_CONTROL_RESPONSE = msg
