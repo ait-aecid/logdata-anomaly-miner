@@ -70,6 +70,7 @@ include <tunables/global>
   # Crash reports
   /var/crash/ rw,
   /var/crash/** rwk,
+  /var/log/** rwk,
 
   # Deny sensitive files
   deny /root/** rwklx,
