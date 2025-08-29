@@ -1,15 +1,16 @@
 """This module contains classes for execution of py child process main analysis
 loop.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with
-this program. If not, see <http://www.gnu.org/licenses/>.
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version. This program is distributed in the hope that
+it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details. You should have received a
+copy of the GNU General Public License along with this program. If not,
+see
+<http://www.gnu.org/licenses/>.
 """
 
 import base64
@@ -28,9 +29,10 @@ import logging
 from datetime import datetime
 import shutil
 
-from aminer.AminerConfig import DEBUG_LOG_NAME, build_persistence_file_name, KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_STAT_PERIOD, \
-    DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD, \
-    DEFAULT_PERSISTENCE_PERIOD
+from aminer.AminerConfig import (
+    DEBUG_LOG_NAME, build_persistence_file_name, KEY_RESOURCES_MAX_MEMORY_USAGE, KEY_LOG_STAT_PERIOD,
+    DEFAULT_STAT_PERIOD, KEY_PERSISTENCE_DIR, DEFAULT_PERSISTENCE_DIR, REMOTE_CONTROL_LOG_NAME, KEY_PERSISTENCE_PERIOD,
+    DEFAULT_PERSISTENCE_PERIOD)
 from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
 from aminer.events.ZmqEventHandler import ZmqEventHandler
 from aminer.events.JsonConverterHandler import JsonConverterHandler
@@ -92,16 +94,13 @@ class AnalysisContext:
             "Called %s for the component %s", "add_time_triggered_component", component.__class__.__name__)
 
     def register_component(self, component, component_name=None, register_time_trigger_class_override=None):
-        """Register a new component. A component implementing the
-        TimeTriggeredComponentInterface will also be added to the appropriate
-        lists unless.
+        """Register a new component.
 
-        registerTimeTriggerClassOverride is specified.
         @param component the component to be registered.
         @param component_name an optional name assigned to the component when registering. When no name is specified, the detector class
-        name plus an identifier will be used. When a component with the same name was already registered, this will cause an error.
+               name plus an identifier will be used. When a component with the same name was already registered, this will cause an error.
         @param register_time_trigger_class_override if not none, ignore the time trigger class supplied by the component and register
-        it for the classes specified in the override list. Use an empty list to disable registration.
+               it for the classes specified in the override list. Use an empty list to disable registration.
         """
         if component_name is None:
             component_name = str(component.__class__.__name__) + str(self.next_registry_id)
@@ -612,6 +611,7 @@ class AnalysisChildRemoteControlHandler:
                     raise Exception(msg)
                 if json_request_data[0] and isinstance(json_request_data[0], bytes):
                     json_request_data[0] = json_request_data[0].decode()
+                json_request_data[0] = json_request_data[0].replace("'\"", "\"").replace("\"'", "\"")
                 if json_request_data[1]:
                     if isinstance(json_request_data[1], list):
                         new_list = []
@@ -624,12 +624,16 @@ class AnalysisChildRemoteControlHandler:
                     else:
                         json_request_data[1] = json_request_data[1].decode()
                 methods = AminerRemoteControlExecutionMethods(self.config_filename, LIVE_CONFIG_TEMPFILE)
-                from aminer.analysis import EnhancedNewMatchPathValueComboDetector, EventCorrelationDetector, EventTypeDetector, \
-                    EventFrequencyDetector, EventSequenceDetector, HistogramAnalysis, MatchFilter, MatchValueAverageChangeDetector, \
-                    MatchValueStreamWriter, MissingMatchPathValueDetector, NewMatchIdValueComboDetector, NewMatchPathDetector, \
-                    NewMatchPathValueComboDetector, NewMatchPathValueDetector, ParserCount, Rules, TimeCorrelationDetector, \
-                    TimeCorrelationViolationDetector, TimestampCorrectionFilters, TimestampsUnsortedDetector, VariableTypeDetector, \
-                    AllowlistViolationDetector, EventCountClusterDetector
+                methods.__raw_command__ = json_request_data[0]
+                from aminer.analysis import (
+                    EnhancedNewMatchPathValueComboDetector, EventCorrelationDetector, EventTypeDetector,
+                    EventFrequencyDetector, EventSequenceDetector, HistogramAnalysis, MatchFilter, MatchValueAverageChangeDetector,
+                    MatchValueStreamWriter, MissingMatchPathValueDetector, NewMatchIdValueComboDetector, NewMatchPathDetector,
+                    NewMatchPathValueComboDetector, NewMatchPathValueDetector, ParserCount, Rules, TimeCorrelationDetector,
+                    TimeCorrelationViolationDetector, TimestampCorrectionFilters, TimestampsUnsortedDetector, VariableTypeDetector,
+                    AllowlistViolationDetector, EventCountClusterDetector, CharsetDetector, EntropyDetector,
+                    MinimalTransitionTimeDetector, PathArimaDetector, PathValueTimeIntervalDetector, PCADetector,
+                    SlidingEventFrequencyDetector, TSAArimaDetector, ValueRangeDetector, VariableCorrelationDetector)
                 exec_locals = {
                     "analysis_context": analysis_context, "remote_control_data": json_request_data[1],
                     "print_current_config": methods.print_current_config, "print_config_property": methods.print_config_property,
@@ -653,30 +657,40 @@ class AnalysisChildRemoteControlHandler:
                     "list_backups": methods.list_backups,
                     "create_backup": methods.create_backup,
                     "reopen_event_handler_streams": methods.reopen_event_handler_streams,
+                    "AllowlistViolationDetector": AllowlistViolationDetector.AllowlistViolationDetector,
+                    "CharsetDetector": CharsetDetector.CharsetDetector,
                     "EnhancedNewMatchPathValueComboDetector": EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
+                    "EntropyDetector": EntropyDetector.EntropyDetector,
                     "EventCorrelationDetector": EventCorrelationDetector.EventCorrelationDetector,
                     "EventCountClusterDetector": EventCountClusterDetector.EventCountClusterDetector,
-                    "EventTypeDetector": EventTypeDetector.EventTypeDetector,
                     "EventFrequencyDetector": EventFrequencyDetector.EventFrequencyDetector,
                     "EventSequenceDetector": EventSequenceDetector.EventSequenceDetector,
+                    "EventTypeDetector": EventTypeDetector.EventTypeDetector,
                     "HistogramAnalysis": HistogramAnalysis.HistogramAnalysis,
                     "PathDependentHistogramAnalysis": HistogramAnalysis.PathDependentHistogramAnalysis,
                     "MatchFilter": MatchFilter.MatchFilter,
                     "MatchValueAverageChangeDetector": MatchValueAverageChangeDetector.MatchValueAverageChangeDetector,
                     "MatchValueStreamWriter": MatchValueStreamWriter.MatchValueStreamWriter,
+                    "MinimalTransitionTimeDetector": MinimalTransitionTimeDetector.MinimalTransitionTimeDetector,
                     "MissingMatchPathValueDetector": MissingMatchPathValueDetector.MissingMatchPathValueDetector,
                     "NewMatchIdValueComboDetector": NewMatchIdValueComboDetector.NewMatchIdValueComboDetector,
                     "NewMatchPathDetector": NewMatchPathDetector.NewMatchPathDetector,
                     "NewMatchPathValueComboDetector": NewMatchPathValueComboDetector.NewMatchPathValueComboDetector,
                     "NewMatchPathValueDetector": NewMatchPathValueDetector.NewMatchPathValueDetector,
                     "ParserCount": ParserCount.ParserCount,
+                    "PathArimaDetector": PathArimaDetector.PathArimaDetector,
+                    "PathValueTimeIntervalDetector": PathValueTimeIntervalDetector.PathValueTimeIntervalDetector,
+                    "PCADetector": PCADetector.PCADetector,
                     "Rules": Rules,
+                    "SlidingEventFrequencyDetector": SlidingEventFrequencyDetector.SlidingEventFrequencyDetector,
                     "TimeCorrelationDetector": TimeCorrelationDetector.TimeCorrelationDetector,
                     "TimeCorrelationViolationDetector": TimeCorrelationViolationDetector.TimeCorrelationViolationDetector,
                     "SimpleMonotonicTimestampAdjust": TimestampCorrectionFilters.SimpleMonotonicTimestampAdjust,
                     "TimestampsUnsortedDetector": TimestampsUnsortedDetector.TimestampsUnsortedDetector,
-                    "VariableTypeDetector": VariableTypeDetector.VariableTypeDetector,
-                    "AllowlistViolationDetector": AllowlistViolationDetector.AllowlistViolationDetector
+                    "TSAArimaDetector": TSAArimaDetector.TSAArimaDetector,
+                    "ValueRangeDetector": ValueRangeDetector.ValueRangeDetector,
+                    "VariableCorrelationDetector": VariableCorrelationDetector,
+                    "VariableTypeDetector": VariableTypeDetector.VariableTypeDetector
                 }
                 logging.getLogger(REMOTE_CONTROL_LOG_NAME).log(15, json_request_data[0])
                 logging.getLogger(DEBUG_LOG_NAME).debug("Remote control: %s", json_request_data[0])
