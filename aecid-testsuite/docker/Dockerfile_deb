@@ -5,6 +5,7 @@
 ARG vardistri
 
 FROM $vardistri
+ARG vardistri
 ARG varbranch
 
 ENV BRANCH=$varbranch
