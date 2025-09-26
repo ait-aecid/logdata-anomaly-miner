@@ -61,7 +61,7 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 ADD . /home/aminer/logdata-anomaly-miner
-RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b development -s /home/aminer/logdata-anomaly-miner -r /home/aminer/aminer-rest
+RUN cd /home/aminer/logdata-anomaly-miner && echo Y | scripts/aminer_install.sh -b development -s /home/aminer/logdata-anomaly-miner -r /home/aminer/aminer-rest
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner

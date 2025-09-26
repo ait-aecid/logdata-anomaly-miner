@@ -107,11 +107,25 @@ EOF
 
 if [ -n "$AMINERREST" ]
 then
-	git clone -b $BRANCH $RESTGITURL $AMINERREST
-	cat >> playbook.yml << EOF
+	while true; do
+	  read -p "aminer-rest [$RESTGITURL] is only a development tool and should in no circumstances be used in production environments.\nDo you still want to proceed with the installation? (Y/n) " answer
+    case "$answer" in
+      [Y] )
+        #exit 1
+        git clone -b "$BRANCH" "$RESTGITURL" "$AMINERREST"
+        cat >> playbook.yml << EOF
          aminerrest_repopath: "${RESTDST}"
 EOF
+        break
+        ;;
+      [n] )
+        echo "Skipping aminer-rest installation."
+        break
+        ;;
+    esac
+  done
 fi
+#exit 2
 
 # Use this command to deploy the aminer-files
 # You can add your changes in the aminer-directory
