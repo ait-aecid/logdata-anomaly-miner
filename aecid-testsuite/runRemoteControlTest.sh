@@ -27,7 +27,6 @@ fi
 START_TIME=$(date +%s)
 
 PREFIX="Remote execution response: "
-NOT_FOUND_WARNINGS="WARNING: config_properties['Core.PersistencePeriod'] = not found in the old config file.\nWARNING: config_properties['Log.StatisticsLevel'] = not found in the old config file.\nWARNING: config_properties['Log.DebugLevel'] = not found in the old config file.\nWARNING: config_properties['Log.StatisticsPeriod'] = not found in the old config file.\n"
 ERROR="Error at:"
 exit_code=0
 expected_list=""
@@ -47,7 +46,7 @@ fi
 
 echo "print_config_property(analysis_context, 'Core.PersistencePeriod')" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "print_config_property(analysis_context, 'Core.PersistencePeriod')")
-expected="$PREFIX'\"Resource \\\\\"Core.PersistencePeriod\\\\\" could not be found.\"'"
+expected="$PREFIX'\"Core.PersistencePeriod\": 600'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -353,9 +352,9 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "save_current_config(analysis_context,'/tmp/config.py')" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "save_current_config(analysis_context,'/tmp/config.py')")
-expected="${PREFIX}\"${NOT_FOUND_WARNINGS}Successfully saved the current config to /tmp/config.py.\""
+echo "save_current_config('/tmp/config.py')" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "save_current_config('/tmp/config.py')")
+expected="${PREFIX}'Successfully saved the current config to /tmp/config.py.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -367,8 +366,8 @@ if [[ "$stdout" != "$expected" ]]; then
 fi
 sudo rm /tmp/config.py
 
-echo "save_current_config(analysis_context,'[/path/config.py')" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "save_current_config(analysis_context,'[/path/config.py')")
+echo "save_current_config('[/path/config.py')" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "save_current_config('[/path/config.py')")
 expected="${PREFIX}'Exception: [/path/config.py is not a valid filename!'"
 expected_list="${expected_list}${expected}
 "
@@ -380,9 +379,9 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "save_current_config(analysis_context,'/notExistingPath/config.py')" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "save_current_config(analysis_context,'/notExistingPath/config.py')")
-expected="${PREFIX}\"${NOT_FOUND_WARNINGS}FAILURE: file '/notExistingPath/config.py' could not be found or opened!\""
+echo "save_current_config('/notExistingPath/config.py')" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "save_current_config('/notExistingPath/config.py')")
+expected="${PREFIX}'Exception: The directory /notExistingPath does not exist!'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then

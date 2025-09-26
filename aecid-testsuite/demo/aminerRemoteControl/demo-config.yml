@@ -1,0 +1,609 @@
+LearnMode: False
+
+Core.LogDir: '/tmp/lib/aminer/log'
+
+Core.PersistenceDir: '/tmp/lib/aminer'
+
+Core.PersistencePeriod: 600
+
+LogResourceList:
+        - 'file:///tmp/syslog'
+
+RemoteControlSocket: '/var/run/aminer-remote.socket'
+
+MailAlerting.TargetAddress: 'root@localhost'
+
+MailAlerting.FromAddress: 'root@localhost'
+
+MailAlerting.SubjectPrefix: 'aminer Alerts:'
+
+MailAlerting.AlertGraceTime: 0
+
+MailAlerting.EventCollectTime: 0
+
+MailAlerting.MinAlertGap: 0
+
+MailAlerting.MaxAlertGap: 600
+
+MailAlerting.MaxEventsPerMessage: 1000
+
+LogPrefix: 'Original log line: '
+
+AminerId: 'demo-aminer'
+
+Parser:
+       - id: space
+         type: FixedDataModelElement
+         name: 'Space'
+         args: ' Current Disk Data is: Filesystem     Type  Size  Used Avail Use%'
+
+       - id: data
+         type: DelimitedDataModelElement
+         name: 'Data'
+         delimiter: '%''/'
+
+       - id: rest
+         type: AnyByteDataModelElement
+         name: 'Rest'
+
+       - id: userLoginDetails
+         type: FixedDataModelElement
+         name: 'User'
+         args: 'User '
+
+       - id: userIpAddress
+         type: FixedDataModelElement
+         name: 'User'
+         args: 'User '
+
+       - id: username
+         type: DelimitedDataModelElement
+         name: 'Username'
+         delimiter: ' '
+
+       - id: status
+         type: FixedWordlistDataModelElement
+         name: 'Status'
+         args:
+           - ' logged in'
+           - ' logged out'
+
+       - id: blank
+         type: FixedDataModelElement
+         name: 'Blank'
+         args: ' '
+
+       - id: minutes
+         type: DecimalIntegerValueModelElement
+         name: 'Minutes'
+
+       - id: ago
+         type: FixedDataModelElement
+         name: 'Ago'
+         args: ' minutes ago.'
+
+       - id: time
+         type: SequenceModelElement
+         name: 'Time'
+         args:
+           - blank
+           - minutes
+           - ago
+
+       - id: pastTime
+         type: OptionalMatchModelElement
+         name: 'PastTime'
+         args: time
+
+       - id: dtm
+         type: DateTimeModelElement
+         name: 'DTM'
+         date_format: '%Y-%m-%d %H:%M:%S'
+         start_year: null
+         text_locale: null
+         max_time_jump_seconds: 86400
+
+       - id: uNameSpace1
+         type: FixedDataModelElement
+         name: 'UNameSpace1'
+         args: ' '
+
+       - id: uName
+         type: DelimitedDataModelElement
+         name: 'UName'
+         delimiter: ' '
+
+       - id: uNameSpace2
+         type: FixedDataModelElement
+         name: 'UNameSpace2'
+         args: ' '
+
+       - id: delimitedUser
+         type: DelimitedDataModelElement
+         name: 'User'
+         delimiter: ' '
+
+       - id: cron
+         type: FixedDataModelElement
+         name: 'Cron'
+         args: ' cron['
+
+       - id: jobNumber
+         type: DecimalIntegerValueModelElement
+         name: 'JobNumber'
+
+       - id: details
+         type: FixedDataModelElement
+         name: 'Details'
+         args: ']: Job `cron.daily` started.'
+
+       - id: spaceRandom
+         type: FixedDataModelElement
+         name: 'Space'
+         args: 'Random: '
+
+       - id: random
+         type: DecimalIntegerValueModelElement
+         name: 'Random'
+
+       - id: fixedTemp
+         type: FixedDataModelElement
+         name: 'FixedTemp'
+         args: 'CPU Temp: '
+
+       - id: temp
+         type: DecimalIntegerValueModelElement
+         name: 'Temp'
+
+       - id: degrees
+         type: FixedDataModelElement
+         name: 'Degrees'
+         args: '°C'
+
+       - id: cpuTemp
+         type: SequenceModelElement
+         name: 'CPUTemp'
+         args:
+           - fixedTemp
+           - temp
+           - degrees
+
+       - id: space1
+         type: FixedDataModelElement
+         name: 'Space1'
+         args: ', '
+
+       - id: fixedWorkload
+         type: FixedDataModelElement
+         name: 'FixedWorkload'
+         args: 'CPU Workload: '
+
+       - id: workload
+         type: DecimalIntegerValueModelElement
+         name: 'Workload'
+
+       - id: percent
+         type: FixedDataModelElement
+         name: 'Percent'
+         args: '%'
+
+       - id: cpuWorkload
+         type: SequenceModelElement
+         name: 'CPUWorkload'
+         args:
+           - fixedWorkload
+           - workload
+           - percent
+
+       - id: space2
+         type: FixedDataModelElement
+         name: 'Space2'
+         args: ', '
+
+       - id: action
+         type: FixedDataModelElement
+         name: 'Action'
+         args: ' changed IP address to '
+
+       - id: ip
+         type: IpAddressDataModelElement
+         name: 'IP'
+
+       - id: fixedSpace
+         type: FixedDataModelElement
+         name: 'Space'
+         args: ' '
+
+       - id: run
+         type: FixedDataModelElement
+         name: 'Run'
+         args: ']: Will run job `'
+
+       - id: cronType
+         type: FixedWordlistDataModelElement
+         name: 'CronType'
+         args:
+           - 'cron.daily'
+           - 'cron.hourly'
+           - 'cron.monthly'
+           - 'cron.weekly'
+
+       - id: startTime
+         type: FixedDataModelElement
+         name: 'StartTime'
+         args: "' in 5 min."
+
+       - id: emptySpace1
+         type: FixedDataModelElement
+         name: 'Space1'
+         args: ' '
+
+       - id: job
+         type: FixedDataModelElement
+         name: 'Job'
+         args: ']: Job `'
+
+       - id: started
+         type: FixedDataModelElement
+         name: 'Started'
+         args: "' started"
+
+       - id: cronAnnouncement
+         type: SequenceModelElement
+         name: 'CronAnnouncement'
+         args:
+           - dtm
+           - fixedSpace
+           - uName
+           - cron
+           - jobNumber
+           - run
+           - cronType
+           - startTime
+
+       - id: cronExecution
+         type: SequenceModelElement
+         name: 'CronExecution'
+         args:
+           - dtm
+           - emptySpace1
+           - uName
+           - cron
+           - jobNumber
+           - job
+           - cronType
+           - started
+
+       - id: dailyCron
+         type: SequenceModelElement
+         name: 'DailyCron'
+         args:
+           - dtm
+           - uNameSpace1
+           - uName
+           - uNameSpace2
+           - delimitedUser
+           - cron
+           - jobNumber
+           - details
+
+       - id: diskReport
+         type: SequenceModelElement
+         name: 'DiskReport'
+         args:
+           - space
+           - data
+           - rest
+
+       - id: loginDetails
+         type: SequenceModelElement
+         name: 'LoginDetails'
+         args:
+           - userLoginDetails
+           - username
+           - status
+           - pastTime
+
+       - id: randomTime
+         type: SequenceModelElement
+         name: 'RandomTime'
+         args:
+           - spaceRandom
+           - random
+
+       - id: sensors
+         type: SequenceModelElement
+         name: 'Sensors'
+         args:
+           - cpuTemp
+           - space1
+           - cpuWorkload
+           - space2
+           - dtm
+
+       - id: ipAddresses
+         type: SequenceModelElement
+         name: 'IPAddresses'
+         args:
+           - userIpAddress
+           - username
+           - action
+           - ip
+
+       - id: model
+         start: True
+         type: FirstMatchModelElement
+         name: 'model'
+         args:
+           - cronAnnouncement
+           - cronExecution
+           - dailyCron
+           - diskReport
+           - loginDetails
+           - random
+           - randomTime
+           - sensors
+           - ipAddresses
+
+Input:
+        timestamp_paths: ["/model/DailyCron/DTM"]
+        adjust_timestamps: True
+        use_real_time: True
+
+Analysis:
+        - type: TimestampsUnsortedDetector
+          id: TimestampsUnsortedDetector
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule1
+          path: "/model/LoginDetails/PastTime/Time/Minutes"
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule2
+          path: "/model/LoginDetails"
+        - type: ValueMatchRule
+          id: value_match_rule
+          path: "/model/LoginDetails/Username"
+          value: "root"
+        - type: NegationMatchRule
+          id: negation_match_rule1
+          sub_rule: "value_match_rule"
+        - type: NegationMatchRule
+          id: negation_match_rule2
+          sub_rule: "path_exists_match_rule2"
+        - type: AndMatchRule
+          id: and_match_rule1
+          sub_rules:
+            - "path_exists_match_rule1"
+            - "negation_match_rule1"
+        - type: AndMatchRule
+          id: and_match_rule2
+          sub_rules:
+            - "negation_match_rule1"
+            - "path_exists_match_rule2"
+        - type: OrMatchRule
+          id: or_match_rule
+          sub_rules:
+            - "and_match_rule1"
+            - "and_match_rule2"
+            - "negation_match_rule2"
+        - type: AllowlistViolationDetector
+          id: Allowlist
+          allowlist_rules:
+            - "or_match_rule"
+        - type: ParserCount
+          id: ParserCount
+          report_interval: 10
+        - type: MatchFilter
+          id: MatchFilter
+          paths:
+            - "/model/Random"
+          value_list:
+            - 1
+            - 10
+            - 100
+        - type: EnhancedNewMatchPathValueComboDetector
+          id: EnhancedNewValueCombo
+          paths:
+            - "/model/DailyCron/UName"
+            - "/model/DailyCron/JobNumber"
+          tuple_transformation_function: "demo"
+          learn_mode: True
+        - type: ModuloTimeMatchRule
+          id: "mt"
+          path: "mtmr"
+          seconds_modulo: 3
+          lower_limit: 0
+          upper_limit: 3
+        - type: ValueDependentModuloTimeMatchRule
+          id: "vdmt"
+          path: "vdmtmr"
+          seconds_modulo: 3
+          paths:
+            - "/model/ECD/g"
+            - "/model/ECD/h"
+            - "/model/ECD/i"
+            - "/model/ECD/j"
+            - "/model/ECD/k"
+            - "/model/ECD/l"
+          limit_lookup_dict:
+            e:
+              - 0
+              - 2.95
+          default_limit:
+            - 0
+            - 3
+        - type: ValueDependentDelegatedMatchRule
+          id: "value_dependent_delegated_match_rule"
+          paths:
+            - "/model/ECD/g"
+            - "/model/ECD/h"
+            - "/model/ECD/i"
+            - "/model/ECD/j"
+            - "/model/ECD/k"
+            - "/model/ECD/l"
+          rule_lookup_dict:
+            (b"g",): "mt"
+            (b"h",): "mt"
+            (b"i",): "mt"
+            (b"j",): "vdmt"
+            (b"k",): "vdmt"
+            (b"l",): "vdmt"
+          default_rule: "mt"
+        - type: EventGenerationMatchAction
+          id: "ip_match_action"
+          event_type: "Analysis.Rules.IPv4InRFC1918MatchRule"
+          event_message: "Private IP address occurred!"
+        - type: IPv4InRFC1918MatchRule
+          id: "ipv4_in_rfc1918_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          match_action: "ip_match_action"
+        - type: DebugHistoryMatchRule
+          id: "debug_history_match_rule"
+          debug_mode: True
+        - type: ValueListMatchRule
+          id: "value_list_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          value_list:
+            - 134744072
+            - 134743044
+        - type: NegationMatchRule
+          id: "negation_list"
+          sub_rule: "value_list_match_rule"
+        - type: ValueRangeMatchRule
+          id: "value_range_match_rule"
+          path: "/model/ParsingME/se2/IpAddressDataModelElement"
+          lower_limit: 167772160
+          upper_limit: 184549375
+        - type: NegationMatchRule
+          id: "negation_range"
+          sub_rule: "value_range_match_rule"
+        - type: StringRegexMatchRule
+          id: "string_regex_match_rule"
+          path: "/model/type/syscall/success"
+          regex: "^no$"
+        - type: NegationMatchRule
+          id: "negation_string_regex"
+          sub_rule: "string_regex_match_rule"
+        - type: ParallelMatchRule
+          id: "parallel_match_rule"
+          sub_rules:
+            - "value_dependent_delegated_match_rule"
+            - "ipv4_in_rfc1918_match_rule"
+            - "debug_history_match_rule"
+        - type: AndMatchRule
+          id: "time_and_match_rule"
+          sub_rules:
+            - "parallel_match_rule"
+            - "negation_list"
+            - "negation_range"
+            - "negation_string_regex"
+        - type: AllowlistViolationDetector
+          id: TimeAllowlist
+          allowlist_rules:
+            - "time_and_match_rule"
+        - type: LinearNumericBinDefinition
+          id: linear_numeric_bin_definition
+          lower_limit: 50
+          bin_size: 5
+          bin_count: 20
+          outlier_bins_flag: True
+        - type: ModuloTimeBinDefinition
+          id: modulo_time_bin_definition
+          modulo_value: 86400
+          time_unit: 3600
+          lower_limit: 0
+          bin_size: 1
+          bin_count: 24
+          outlier_bins_flag: True
+        - type: HistogramAnalysis
+          id: HistogramAnalysis
+          histogram_defs: [["/model/RandomTime/Random", "linear_numeric_bin_definition"]]
+          report_interval: 10
+        - type: PathDependentHistogramAnalysis
+          id: PathDependentHistogramAnalysis
+          path: "/model/RandomTime"
+          bin_definition: "modulo_time_bin_definition"
+          report_interval: 10
+        - type: MatchValueAverageChangeDetector
+          id: MatchValueAverageChange
+          timestamp_path: null
+          paths:
+            - "/model/Random"
+          min_bin_elements: 100
+          min_bin_time: 10
+        - type: MatchValueStreamWriter
+          id: MatchValueStreamWriter
+          stream: "sys.stdout"
+          paths:
+            - "/model/Sensors/CPUTemp"
+            - "/model/Sensors/CPUWorkload"
+            - "/model/Sensors/DTM"
+          separator: ";"
+          missing_value_string: ""
+        - type: NewMatchPathValueComboDetector
+          id: NewMatchPathValueCombo
+          paths:
+            - "/model/IPAddresses/Username"
+            - "/model/IPAddresses/IP"
+          learn_mode: False
+          log_resource_ignore_list:
+            - 'file:///tmp/other_syslog'
+        - type: NewMatchIdValueComboDetector
+          id: NewMatchIdValueComboDetector
+          paths:
+            - "/model/type/path/name"
+            - "/model/type/syscall/syscall"
+          id_path_list:
+            - "/model/type/path/id"
+            - "/model/type/syscall/id"
+          min_allowed_time_diff: 5
+          allow_missing_values: True
+          learn_mode: True
+        - type: NewMatchPathValueDetector
+          id: NewMatchPathValue
+          paths:
+            - "/model/DailyCron/JobNumber"
+            - "/model/IPAddresses/Username"
+          learn_mode: True
+        - type: MissingMatchPathValueDetector
+          id: MissingMatch
+          paths:
+            - "/model/DiskReport/Space"
+          check_interval: 2
+          realert_interval: 5
+          learn_mode: True
+        - type: TimeCorrelationDetector
+          id: TimeCorrelationDetector
+          parallel_check_count: 2
+          min_rule_attributes: 1
+          max_rule_attributes: 5
+          record_count_before_event: 10000
+        - type: CorrelationRule
+          rule_id: correlation_rule
+          min_time_delta: 5
+          max_time_delta: 6
+          artefact_match_parameters: [["/model/CronAnnouncement/JobNumber", "/model/CronExecution/JobNumber"]]
+        - type: EventClassSelector
+          action_id: a_class_selector
+          artefact_a_rules:
+            - correlation_rule
+        - type: EventClassSelector
+          action_id: b_class_selector
+          artefact_b_rules:
+            - correlation_rule
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule3
+          path: "/model/CronAnnouncement/Run"
+          match_action: a_class_selector
+        - type: PathExistsMatchRule
+          id: path_exists_match_rule4
+          path: "/model/CronExecution/Job"
+          match_action: b_class_selector
+        - type: TimeCorrelationViolationDetector
+          id: TimeCorrelationViolationDetector
+          ruleset:
+            - path_exists_match_rule3
+            - path_exists_match_rule4
+
+EventHandlers:
+        - id: stpe
+          type: StreamPrinterEventHandler

@@ -31,6 +31,8 @@ from aminer.AnalysisChild import AnalysisChildRemoteControlHandler  # noqa: E402
 from aminer.util.StringUtil import colflame, flame, supports_color  # noqa: E402
 from metadata import __version_string__  # noqa: E402
 
+LIVE_CONFIG_TEMPFILE = "/tmp/live.conf"  # nosec B108
+
 help_message = 'aminerremotecontrol\n'
 if supports_color():
     help_message += colflame
@@ -79,7 +81,7 @@ except socket.error as connectException:
     sys.exit(1)
 remote_control_socket.setblocking(True)
 
-control_handler = AnalysisChildRemoteControlHandler(remote_control_socket)
+control_handler = AnalysisChildRemoteControlHandler(remote_control_socket, LIVE_CONFIG_TEMPFILE)
 
 for remote_control_code in command_list:
     control_handler.put_execute_request(remote_control_code, remote_control_data)
