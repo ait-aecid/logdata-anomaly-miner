@@ -66,7 +66,7 @@ elif [ -e /etc/fedora-release ] || [ -e /etc/redhat-release ]; then
 	sudo dnf install -y ansible git
 else
 	echo "Currently only Debian and Fedora based distributions are supported."
-	echo "More specifically this includes Debian Buster, Debian Bullseye, Debian Bookworm, Ubuntu 20, Ubuntu 22, Ubuntu 24, Fedora, and RedHat."
+	echo "More specifically this includes Debian Bullseye, Debian Bookworm, Debian Trixie, Ubuntu 20, Ubuntu 22, Ubuntu 24, Fedora, and RedHat."
 	echo "If you decide to install the AMiner on another system, please add **--extra-vars \"ansible_distribution == '$DIST' ansible_distribution_major_version == '$VER'\"**."
 	echo "Choose the best-fitting related distribution of the supported ones for $DIST and $VER."
 	exit 1
