@@ -18,7 +18,7 @@
 #
 
 # Pull base image.
-FROM debian:bookworm
+FROM debian:trixie
 ARG UNAME=aminer
 ARG UID=1000
 ARG GID=1000
