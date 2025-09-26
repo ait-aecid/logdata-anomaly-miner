@@ -66,7 +66,7 @@ class JsonAccessObject:
                     self.flatten(k, list)
                 else:
                     if self.debug:
-                        print(f"{ self.join_levels() }[{ islist }]: { k }")
+                        print(f"{self.join_levels()}[{islist}]: {k}")
                     self.create_collection_entry("%s[%d]" % (self.join_levels(), islist), self.levels, k)
                     islist = islist + 1
         else:
@@ -84,16 +84,16 @@ class JsonAccessObject:
                 else:
                     if len(self.levels) == 0:
                         if self.debug:
-                            print(f"{ k } : { v }")
+                            print(f"{k} : {v}")
                         self.create_collection_entry(k, deque([k]), v)
                     else:
                         if islist > -1:
-                            self.levels.append(f"{k}[{ islist}]")
+                            self.levels.append(f"{k}[{islist}]")
                             islist = islist+1
                         else:
                             self.levels.append(k)
                         if self.debug:
-                            print(f"{ self.join_levels() } : { v }")
+                            print(f"{self.join_levels()} : {v}")
                         self.create_collection_entry(self.join_levels(), self.levels, v)
                         self.levels.pop()
 
@@ -144,7 +144,7 @@ class JsonStringModelElement(ModelElementInterface):
 
     def get_match_element(self, path: str, match_context):
         """Just return a match including all data from the context."""
-        current_path = f"{ path }/ { self.element_id }"
+        current_path = f"{path}/ {self.element_id}"
         logging.getLogger(DEBUG_LOG_NAME).info("JsonStringModelElement %s/%s", path, match_context.match_data.decode('utf-8'))
         matches = []
         try:
@@ -198,7 +198,7 @@ class JsonStringModelElement(ModelElementInterface):
                         return None
                     matches += [child_match]
         except orjson.JSONDecodeError as exception:
-            msg = f"JsonStringModelElement { exception }: { match_context.match_data.decode('utf-8') }"
+            msg = f"JsonStringModelElement {exception}: {match_context.match_data.decode('utf-8')}"
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             return None
 
