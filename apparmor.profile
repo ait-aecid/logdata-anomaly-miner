@@ -2,7 +2,8 @@ abi <abi/3.0>,
 
 include <tunables/global>
 
- /usr/local/bin/aminerwrapper.sh {
+/usr/local/bin/aminerwrapper.sh,
+/usr/lib/logdata-anomaly-miner/aminer.py {
   include <abstractions/base>
   include <abstractions/bash>
   include <abstractions/consoles>
