@@ -18,7 +18,7 @@
 #
 
 # Pull base image.
-FROM debian:bookworm
+FROM debian:trixie
 ARG UNAME=aminer
 ARG UID=1000
 ARG GID=1000
@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     postfix \
-    openjdk-17-jre \
+    openjdk-21-jre \
     locales \
     locales-all \
     rsyslog \
