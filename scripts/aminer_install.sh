@@ -110,6 +110,4 @@ then
 	test -d $AMINERDST && rm -rf $AMINERDST
 fi
 
-sudo /usr/lib/logdata-anomaly-miner/.venv/bin/python3 -m pip install -U -r requirements.txt # temporary fix to ImportError: cannot import name '_lazywhere' from 'scipy._lib._util' (/usr/lib/logdata-anomaly-miner/.venv/lib/python3.12/site-packages/scipy/_lib/_util.py)
-
 exit 0
