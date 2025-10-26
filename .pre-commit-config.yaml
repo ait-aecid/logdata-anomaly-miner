@@ -25,7 +25,7 @@ repos:
     -   id: python-no-log-warn
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+    rev: v1.17.1
     hooks:
     -   id: mypy
         additional_dependencies: [pydantic, types-PyYAML]
@@ -33,37 +33,23 @@ repos:
         exclude: aecid-testsuite|source/root/usr/lib/logdata-anomaly-miner/aminer/__init__.py
 
 -   repo: https://github.com/PyCQA/flake8
-    rev: 7.2.0
+    rev: 7.3.0
     hooks:
     - id: flake8
       exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/|.venv/
       args: [--statistics]
 
 -   repo: https://github.com/PyCQA/docformatter
-    rev: v1.7.5
+    rev: v1.7.8-rc1
     hooks:
     - id: docformatter
       exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/|.venv/
 
-# Installation of this pre-commit hook does not work at the moment - setuptools broken
-#-   repo: https://github.com/PyCQA/bandit
-#    rev: 1.8.3
-#    hooks:
-#    - id: bandit
-#      exclude: ^aecid-testsuite/
-
-# install bandit with pip install bandit instead.
--    repo: local
-     hooks:
-     - id: bandit
-       name: bandit
-       entry: bandit
-       language: python
-       language_version: python3
-       types: [ python ]
-       require_serial: true
-       exclude: ^aecid-testsuite/
-
+-   repo: https://github.com/PyCQA/bandit
+    rev: 1.8.6
+    hooks:
+    - id: bandit
+      exclude: ^aecid-testsuite/
 
 -   repo: https://github.com/jendrikseipp/vulture
     rev: 'v2.14'
