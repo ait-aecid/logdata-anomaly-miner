@@ -138,5 +138,4 @@ then
 	test -d $AMINERDST && rm -rf $AMINERDST
 fi
 
-
 exit 0
