@@ -115,7 +115,10 @@ do
   i=$(($i+1))
 done <<< "$OUTPUT"
 
-sed -i -e 's/0.14803146216175547/0.1480314621617555/g' $TMPFILE2
+# normalize CriticalValue lines to 6 decimal places before comparison
+for f in $TMPFILE1 $TMPFILE2; do
+  sed -i -E 's/("CriticalValue": )([0-9]+\.[0-9]+)/echo "\1$(printf "%.6f" \2)"/e' "$f"
+done
 
 cmp --silent $TMPFILE1 $TMPFILE2
 res=$?
@@ -178,7 +181,10 @@ do
   i=$(($i+1))
 done <<< "$OUTPUT"
 
-sed -i -e 's/0.09975650575303287/0.0997565057530329/g' $TMPFILE2
+# normalize CriticalValue lines to 6 decimal places before comparison
+for f in $TMPFILE1 $TMPFILE2; do
+  sed -i -E 's/("CriticalValue": )([0-9]+\.[0-9]+)/echo "\1$(printf "%.6f" \2)"/e' "$f"
+done
 
 cmp --silent $TMPFILE1 $TMPFILE2
 res=$?

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 TESTDIR=/home/aminer/logdata-anomaly-miner/aecid-testsuite
+RESTDIR=/home/aminer/aminer-rest
 
 if [ $# -gt 0 ]
 then
@@ -125,9 +126,14 @@ case "$1" in
 		./${1}.sh ${*:2}
 		exit $?
 		;;
-  runReleaseStringCheck)
+	runReleaseStringCheck)
 		cd $TESTDIR
 		./${1}.sh ${*:2}
+		exit $?
+		;;
+	runRestApiUnittests)
+		cd $RESTDIR
+		./runUnittests.sh ${*:2}
 		exit $?
 		;;
 	ALL)
@@ -138,35 +144,37 @@ case "$1" in
 		./runFlake8.sh
 		./runMccabe.sh
 		./runReleaseStringCheck.sh
-    ./runSuspendModeTest.sh
-    ./runUnittests.sh
-    ./runRemoteControlTest.sh
-    ./runConfAvailableTest.sh
-    ./runAminerDemo.sh demo/aminer/demo-config.py
-    ./runAminerDemo.sh demo/aminer/jsonConverterHandler-demo-config.py
-    ./runAminerDemo.sh demo/aminer/template_config.py
-    ./runAminerDemo.sh demo/aminer/template_config.yml
-    ./runAminerDemo.sh demo/aminer/demo-config.yml
-    ./runAminerEncodingDemo.sh demo/aminer/demo-config.py
-    ./runAminerEncodingDemo.sh demo/aminer/demo-config.yml
-    ./runAminerJsonInputDemo.sh
-    ./runAminerXmlInputDemo.sh
-    ./runJsonDemo.sh demo/aminerJsonInputDemo/json-aminer-demo.yml
-    ./runJsonDemo.sh demo/aminerJsonInputDemo/json-elastic-demo.yml
-    ./runJsonDemo.sh demo/aminerJsonInputDemo/json-eve-demo.yml
-    ./runJsonDemo.sh demo/aminerJsonInputDemo/json-journal-demo.yml
-    ./runJsonDemo.sh demo/aminerJsonInputDemo/json-wazuh-demo.yml
-    ./runAminerIntegrationTest.sh aminerIntegrationTest.sh config.py
-    ./runAminerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
-    ./runOfflineMode.sh
-    ./runGettingStarted.sh
-    ./runTryItOut.sh
-    ./runHowToCreateYourOwnSequenceDetector.sh
-    ./runHowToCreateYourOwnFrequencyDetector.sh
-    ./runHowToMissingMatchPathValueDetector.sh
-    ./runHowToEntropyDetector.sh
-    ./runCoverageTests.sh
-    exit $?
+		./runSuspendModeTest.sh
+		./runUnittests.sh
+		./runRemoteControlTest.sh
+		./runConfAvailableTest.sh
+		./runAminerDemo.sh demo/aminer/demo-config.py
+		./runAminerDemo.sh demo/aminer/jsonConverterHandler-demo-config.py
+		./runAminerDemo.sh demo/aminer/template_config.py
+		./runAminerDemo.sh demo/aminer/template_config.yml
+		./runAminerDemo.sh demo/aminer/demo-config.yml
+		./runAminerEncodingDemo.sh demo/aminer/demo-config.py
+		./runAminerEncodingDemo.sh demo/aminer/demo-config.yml
+		./runAminerJsonInputDemo.sh
+		./runAminerXmlInputDemo.sh
+		./runJsonDemo.sh demo/aminerJsonInputDemo/json-aminer-demo.yml
+		./runJsonDemo.sh demo/aminerJsonInputDemo/json-elastic-demo.yml
+		./runJsonDemo.sh demo/aminerJsonInputDemo/json-eve-demo.yml
+		./runJsonDemo.sh demo/aminerJsonInputDemo/json-journal-demo.yml
+		./runJsonDemo.sh demo/aminerJsonInputDemo/json-wazuh-demo.yml
+		./runAminerIntegrationTest.sh aminerIntegrationTest.sh config.py
+		./runAminerIntegrationTest.sh aminerIntegrationTest2.sh config21.py config22.py
+		./runOfflineMode.sh
+		./runGettingStarted.sh
+		./runTryItOut.sh
+		./runHowToCreateYourOwnSequenceDetector.sh
+		./runHowToCreateYourOwnFrequencyDetector.sh
+		./runHowToMissingMatchPathValueDetector.sh
+		./runHowToEntropyDetector.sh
+		./runCoverageTests.sh
+		cd $RESTDIR
+		./runUnittests.sh
+		exit $?
 		;;
 	SHELL)
 		bash ${*:2}
@@ -177,7 +185,7 @@ case "$1" in
 		echo "         runAminerXmlInputDemo | runAminerIntegrationTest | runOfflineMode | runCoverageTests | runRemoteControlTest"
 		echo "         runTryItOut | runGettingStarted | runHowToCreateYourOwnSequenceDetector | runHowToCreateYourOwnFrequencyDetector"
 		echo "         runHowToMissingMatchPathValueDetector | runHowToEntropyDetector | runAminerEncodingDemo | runMypy | runBandit"
-		echo "         runVulture | runFlake8 | runMccabe | runConfAvailableTest | runReleaseStringCheck ] <options>"
+		echo "         runVulture | runFlake8 | runMccabe | runConfAvailableTest | runReleaseStringCheck | runRestApiUnittest ] <options>"
 		exit 1
 		;;
 

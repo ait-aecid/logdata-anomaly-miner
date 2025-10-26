@@ -5,16 +5,17 @@
 DELDIR=1
 BRANCH="main"
 URL="https://github.com/ait-aecid/logdata-anomaly-miner.git"
+RESTGITURL="https://github.com/ait-aecid/aminer-rest.git"
 AMINERDST=`mktemp -d`
 AMINERSRC="0"
 DISON=0
 
 help() {
-	echo "Usage: $0 [-h] [-b BRANCH] [-u GITURL] [-s LOCAL_GITREPO_PATH] [-d DIRECTORY]" 1>&2
+	echo "Usage: $0 [-h] [-b BRANCH] [-u GITURL] [-s LOCAL_GITREPO_PATH] [-d DIRECTORY] [-r AMINER_REST_PATH] [-g AMINER_REST_URL]" 1>&2
 }
 
 
-while getopts "hb:u:s:d:" options; do
+while getopts "hb:u:s:d:r:g:" options; do
 	case "${options}" in
 		b)
 			BRANCH=${OPTARG}
@@ -45,6 +46,12 @@ while getopts "hb:u:s:d:" options; do
 			fi
 			DELDIR=0
 			;;
+		r)
+			AMINERREST=${OPTARG}
+			;;
+		g)
+			RESTGITURL=${OPTARG}
+			;;
 		:)
 			echo "$0: Must supply an argument to -$OPTARG." >&2
 			exit 1
@@ -66,7 +73,7 @@ elif [ -e /etc/fedora-release ] || [ -e /etc/redhat-release ]; then
 	sudo dnf install -y ansible git
 else
 	echo "Currently only Debian and Fedora based distributions are supported."
-	echo "More specifically this includes Debian Buster, Debian Bullseye, Debian Bookworm, Ubuntu 20, Ubuntu 22, Ubuntu 24, Fedora, and RedHat."
+	echo "More specifically this includes Debian Bullseye, Debian Bookworm, Debian Trixie, Ubuntu 20, Ubuntu 22, Ubuntu 24, Fedora, and RedHat."
 	echo "If you decide to install the AMiner on another system, please add **--extra-vars \"ansible_distribution == '$DIST' ansible_distribution_major_version == '$VER'\"**."
 	echo "Choose the best-fitting related distribution of the supported ones for $DIST and $VER."
 	exit 1
@@ -88,16 +95,37 @@ cd $AMINERDST
 test -d roles || mkdir roles
 git clone -b $BRANCH https://github.com/ait-aecid/aminer-ansible roles/aminer
 
-
 cat > playbook.yml << EOF
 - hosts: localhost
+  roles:
+         - aminer
   vars:
          aminer_gitrepo: False
          # We assume that we cloned the aminer to /home/developer/aminer
          aminer_repopath: "${AMINERDST}"
-  roles:
-         - aminer
 EOF
+
+if [ -n "$AMINERREST" ]
+then
+	while true; do
+	  read -p "aminer-rest [$RESTGITURL] is only a development tool and should in no circumstances be used in production environments.\nDo you still want to proceed with the installation? (Y/n) " answer
+    case "$answer" in
+      [Y] )
+        #exit 1
+        git clone -b "$BRANCH" "$RESTGITURL" "$AMINERREST"
+        cat >> playbook.yml << EOF
+         aminerrest_repopath: "${RESTDST}"
+EOF
+        break
+        ;;
+      [n] )
+        echo "Skipping aminer-rest installation."
+        break
+        ;;
+    esac
+  done
+fi
+#exit 2
 
 # Use this command to deploy the aminer-files
 # You can add your changes in the aminer-directory
