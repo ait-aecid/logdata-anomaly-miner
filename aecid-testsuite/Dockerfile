@@ -18,7 +18,7 @@
 #
 
 # Pull base image.
-FROM debian:bookworm
+FROM debian:trixie
 ARG UNAME=aminer
 ARG UID=1000
 ARG GID=1000
@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     postfix \
-    openjdk-17-jre \
+    openjdk-21-jre \
     locales \
     locales-all \
     rsyslog \
@@ -64,7 +64,7 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 ADD . /home/aminer/logdata-anomaly-miner
-RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b development -s /home/aminer/logdata-anomaly-miner
+RUN cd /home/aminer/logdata-anomaly-miner && echo Y | scripts/aminer_install.sh -b development -s /home/aminer/logdata-anomaly-miner -r /home/aminer/aminer-rest
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner

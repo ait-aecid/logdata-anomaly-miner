@@ -271,7 +271,7 @@ class CorrelationRule:
                     if isinstance(violation_line, bytes):
                         violation_line = violation_line.decode()
                         if num_violations < self.max_violations:
-                            violation_message += f"FAIL: B-Event for \"{violation_line}\" ({ a_event[2].action_id}) was not found in" \
+                            violation_message += f"FAIL: B-Event for \"{violation_line}\" ({a_event[2].action_id}) was not found in" \
                                                  f" time!\n"
                         violation_logs.append(violation_line)
                         del self.history_a_events[a_pos]

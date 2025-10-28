@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
     -   id: trailing-whitespace
         exclude: aecid-testsuite/runAminerXmlInputDemo.sh
@@ -25,7 +25,7 @@ repos:
     -   id: python-no-log-warn
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
+    rev: v1.17.1
     hooks:
     -   id: mypy
         additional_dependencies: [pydantic, types-PyYAML]
@@ -33,26 +33,26 @@ repos:
         exclude: aecid-testsuite|source/root/usr/lib/logdata-anomaly-miner/aminer/__init__.py
 
 -   repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
+    rev: 7.3.0
     hooks:
     - id: flake8
       exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/|.venv/
       args: [--statistics]
 
 -   repo: https://github.com/PyCQA/docformatter
-    rev: v1.7.5
+    rev: v1.7.8-rc1
     hooks:
     - id: docformatter
       exclude: ^aecid-testsuite/unit/|^aecid-testsuite/system/|^aecid-testsuite/integration/|.venv/
 
 -   repo: https://github.com/PyCQA/bandit
-    rev: 1.7.8
+    rev: 1.8.6
     hooks:
     - id: bandit
       exclude: ^aecid-testsuite/
 
 -   repo: https://github.com/jendrikseipp/vulture
-    rev: 'v2.11'
+    rev: 'v2.14'
     hooks:
       - id: vulture
 

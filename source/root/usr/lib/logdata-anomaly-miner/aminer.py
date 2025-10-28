@@ -60,7 +60,7 @@ child_termination_triggered_flag = False
 offline_mode = False
 
 
-def run_analysis_child(aminer_config, program_name):
+def run_analysis_child(aminer_config, program_name, config_filename):
     """Run the Analysis Child."""
     # Verify existence and ownership of persistence directory.
     logging.getLogger(AminerConfig.REMOTE_CONTROL_LOG_NAME).info('aminer started.')
@@ -86,7 +86,7 @@ def run_analysis_child(aminer_config, program_name):
     except OSError:  # system does not support POSIX ACLs.
         pass
 
-    child = AnalysisChild(program_name, aminer_config)
+    child = AnalysisChild(program_name, aminer_config, config_filename)
     child.offline_mode = offline_mode
     # This function call will only return on error or signal induced normal termination.
     child_return_status = child.run_analysis(3)
@@ -476,7 +476,7 @@ def main():
 
     if run_analysis_child_flag:
         # Call analysis process, this function will never return.
-        run_analysis_child(aminer_config, program_name)
+        run_analysis_child(aminer_config, program_name, args.config)
 
     # Start importing of aminer specific components after reading of "config.py" to allow replacement of components via sys.path
     # from within configuration.
@@ -729,7 +729,7 @@ def main():
             SecureOSFunctions.send_logstream_descriptor(parent_socket, log_resource.get_file_descriptor(), url)
             log_resource.close()
 
-    # Send the remote control server socket, if any and close it afterwards. It is not needed any more on parent side.
+    # Send the remote control server socket, if any and close it afterward. It is not needed any more on parent side.
     if remote_control_socket is not None:
         SecureOSFunctions.send_annotated_file_descriptor(parent_socket, remote_control_socket.fileno(), 'remotecontrol', '')
         remote_control_socket.close()
