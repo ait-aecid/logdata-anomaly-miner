@@ -20,7 +20,9 @@ config_properties = {}
 # to be readable by the aminer process! Supported types are:
 # * file://[path]: Read data from file, reopen it after rollover
 # * unix://[path]: Open the path as UNIX local socket for reading
-config_properties['LogResourceList'] = ['file:///tmp/syslog']
+
+# can not use unix socket for aminer-rest, because the socket needs to be open, while aminer-rest needs aminer running at startup.
+config_properties['LogResourceList'] = ['file:///tmp/syslog', 'file:///tmp/aminer-rest-input.log']
 
 # Define the uid/gid of the process that runs the calculation
 # after opening the log files:
@@ -159,10 +161,21 @@ def build_analysis_pipeline(analysis_context):
     analysis_context.register_component(simple_monotonic_timestamp_adjust, component_name="SimpleMonotonicTimestampAdjust")
 
     from aminer.events.StreamPrinterEventHandler import StreamPrinterEventHandler
-    stream_printer_event_handler = StreamPrinterEventHandler(analysis_context)
+    import os
+    import stat
+    stpe = StreamPrinterEventHandler(analysis_context)
+    aminer_rest_output = "/tmp/aminer-rest-output.log"
+    mode = 'w+'
+    if os.path.exists(aminer_rest_output) and stat.S_ISFIFO(os.stat(aminer_rest_output).st_mode):
+        mode = 'w'
+    stream = open(aminer_rest_output, mode)
+    aminer_rest_stpe = StreamPrinterEventHandler(analysis_context, stream)
+    from aminer.events.JsonConverterHandler import JsonConverterHandler
+    aminer_rest_jch = JsonConverterHandler([aminer_rest_stpe], analysis_context, pretty_print=False)
+
     from aminer.events.Utils import VolatileLogarithmicBackoffEventHistory
     volatile_logarithmic_backoff_event_history = VolatileLogarithmicBackoffEventHistory(100)
-    anomaly_event_handlers = [stream_printer_event_handler, volatile_logarithmic_backoff_event_history]
+    anomaly_event_handlers = [stpe, aminer_rest_jch, volatile_logarithmic_backoff_event_history]
     analysis_context.register_component(volatile_logarithmic_backoff_event_history, component_name="VolatileLogarithmicBackoffEventHistory")
 
     # Now define the AtomizerFactory using the model. A simple line based one is usually sufficient.

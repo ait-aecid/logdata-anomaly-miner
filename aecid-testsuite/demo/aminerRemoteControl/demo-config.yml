@@ -6,8 +6,10 @@ Core.PersistenceDir: '/tmp/lib/aminer'
 
 Core.PersistencePeriod: 600
 
+# can not use unix socket for aminer-rest, because the socket needs to be open, while aminer-rest needs aminer running at startup.
 LogResourceList:
         - 'file:///tmp/syslog'
+        - 'file:///tmp/aminer-rest-input.log'
 
 RemoteControlSocket: '/var/run/aminer-remote.socket'
 
@@ -607,3 +609,8 @@ Analysis:
 EventHandlers:
         - id: stpe
           type: StreamPrinterEventHandler
+
+        - id: aminer-rest-stpe
+          type: StreamPrinterEventHandler
+          json: True
+          output_file_path: /tmp/aminer-rest-output.log
