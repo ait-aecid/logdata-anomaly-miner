@@ -18,7 +18,10 @@
 #
 
 # Pull base image.
-FROM debian:bookworm
+FROM debian:trixie
+ARG UNAME=aminer
+ARG UID=1000
+ARG GID=1000
 
 # allow the system to use two package managers (apt and pip), as we do it intentionally (needed since Debain Bookworm - see PEP 668
 ENV PIP_BREAK_SYSTEM_PACKAGES=1
@@ -44,7 +47,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     postfix \
-    openjdk-17-jre \
+    openjdk-21-jre \
     locales \
     locales-all \
     rsyslog \
@@ -80,14 +83,14 @@ ADD scripts/aminerwrapper.sh /aminerwrapper.sh
 # Prepare the system and link all python-modules
 RUN chmod 0755 /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py \
 	&& mkdir -p /var/lib/aminer/log && chmod 0755 /aminerwrapper.sh \
-    && chown aminer.aminer -R /var/lib/aminer && chmod 0755 /etc/aminer
+    && chown $UID.$GID -R /var/lib/aminer && chmod 0755 /etc/aminer
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE
 
 # Add config
 ADD source/root/etc/aminer /etc/aminer
 
-RUN chown aminer.aminer -R /home/aminer \
+RUN chown $UID.$GID -R /home/aminer \
     && ln -sf /usr/lib/logdata-anomaly-miner/aminer /home/aminer/logdata-anomaly-miner/aecid-testsuite/aminer \
     && ln -s /etc/aminer/template_config.py /home/aminer/logdata-anomaly-miner/aecid-testsuite/demo/aminer/template_config.py \
     && ln -s /etc/aminer/template_config.yml /home/aminer/logdata-anomaly-miner/aecid-testsuite/demo/aminer/template_config.yml \

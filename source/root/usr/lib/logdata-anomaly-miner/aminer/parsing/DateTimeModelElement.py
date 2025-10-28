@@ -500,7 +500,7 @@ class MultiLocaleDateTimeModelElement(ModelElementInterface):
         # Restore previous locale settings. There seems to be no way in python to get back to the exact same state. Hence, perform the
         # reset only when locale has changed. This would also change the locale from (None, None) to some system-dependent locale.
         if locale.getlocale() != default_locale:
-            locale.resetlocale()
+            locale.setlocale(locale.LC_ALL, '')
 
         if (not format_has_year_flag) and (start_year is None):
             self.start_year = time.gmtime(None).tm_year

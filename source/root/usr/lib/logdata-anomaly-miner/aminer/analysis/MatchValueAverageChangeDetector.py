@@ -246,7 +246,7 @@ class MatchValueAverageChangeDetector(AtomHandlerInterface, TimeTriggeredCompone
             if (current_variance > self.var_factor * old_bin[4]) or (abs(current_average - old_bin[3]) > self.avg_factor * old_bin[4]) or \
                self.debug_mode:
                 res = [f"Change: new: n = {current_bin[0]}, avg = {current_average + stat_data[1]}, var = {current_variance}; old: n = "
-                       f"{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = { old_bin[4]}", current_bin[0],
+                       f"{old_bin[0]}, avg = {old_bin[3] + stat_data[1]}, var = {old_bin[4]}", current_bin[0],
                        current_average + stat_data[1], current_variance, old_bin[0], old_bin[3] + stat_data[1], old_bin[4]]
                 return res
         return None

@@ -11,9 +11,9 @@ void setBuildStatus(String message, String state) {
 def  ubuntu20image = false
 def  ubuntu22image = false
 def  ubuntu24image = false
-def  debianbusterimage = false
 def  debianbullseyeimage = false
 def  debianbookwormimage = false
+def  debiantrixieimage = false
 def  productionimage = false
 def  docsimage = false
 def	 fedoraimage = false
@@ -196,6 +196,21 @@ pipeline {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runConfAvailableTest"
                     }
                 }
+                stage("Debian Trixie Docker") {
+                    steps {
+                        script {
+                            debiantrixieimage = true
+                        }
+                        sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-debian-trixie:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=debian:trixie ."
+                        sh "mkdir -p /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
+                        sh "cp aecid-testsuite/demo/aminer/access.log /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
+                        sh "cp -r source/root/etc/aminer /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
+                        sh "cp /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
+                        sh "cp /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
+                        sh "cd /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                        sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-trixie:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
+                    }
+                }
                 stage("Debian Bookworm Docker") {
                     steps {
                         script {
@@ -224,21 +239,6 @@ pipeline {
                         sh "cp /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
                         sh "cd /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-bullseye:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
-                    }
-                }
-                stage("Debian Buster Docker") {
-                    steps {
-                        script {
-                            debianbusterimage = true
-                        }
-                        sh "docker build -f aecid-testsuite/docker/Dockerfile_deb -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID --build-arg=varbranch=development --build-arg=vardistri=debian:buster ."
-                        sh "mkdir -p /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && mkdir /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/persistency && mkdir /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs"
-                        sh "cp aecid-testsuite/demo/aminer/access.log /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/logs/"
-                        sh "cp -r source/root/etc/aminer /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg"
-                        sh "cp /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/template_config.yml /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/config.yml"
-                        sh "cp /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-available/generic/ApacheAccessModel.py /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID/aminercfg/conf-enabled"
-                        sh "cd /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
-                        sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
                 stage("Production Docker Image") {
@@ -443,9 +443,9 @@ pipeline {
                     sh "docker rmi aecid/aminer-debian-bullseye:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                     sh "cd / && test -d /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && rm -rf /tmp/simplerun-bullseye-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                 }
-                if( debianbusterimage == true ) {
-                    sh "docker rmi aecid/aminer-debian-buster:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
-                    sh "cd / && test -d /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && rm -rf /tmp/simplerun-buster-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                if( debiantrixieimage == true ) {
+                    sh "docker rmi aecid/aminer-debian-trixie:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
+                    sh "cd / && test -d /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID && rm -rf /tmp/simplerun-trixie-$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                 }
                 if( productionimage == true ) {
                     sh "docker rmi aecid/aminer-production:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
