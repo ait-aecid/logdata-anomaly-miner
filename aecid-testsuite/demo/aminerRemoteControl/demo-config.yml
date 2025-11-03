@@ -1,4 +1,4 @@
-LearnMode: False
+LearnMode: True
 
 Core.LogDir: '/tmp/lib/aminer/log'
 
@@ -250,10 +250,489 @@ Parser:
          name: 'Started'
          args: "' started"
 
+       - id: typePath
+         type: FixedDataModelElement
+         name: 'type'
+         args: 'type=PATH '
+
+       - id: msgAudit
+         type: FixedDataModelElement
+         name: 'msg_audit'
+         args: 'msg=audit('
+
+       - id: msg
+         type: DelimitedDataModelElement
+         name: 'msg'
+         delimiter: ':'
+
+       - id: placeholder
+         type: FixedDataModelElement
+         name: 'placeholder'
+         args: ':'
+
+       - id: id
+         type: DecimalIntegerValueModelElement
+         name: 'id'
+
+       - id: item_string
+         type: FixedDataModelElement
+         name: 'item_string'
+         args: '): item='
+
+       - id: item
+         type: DecimalIntegerValueModelElement
+         name: 'item'
+
+       - id: name_string
+         type: FixedDataModelElement
+         name: 'name_string'
+         args: ' name="'
+
+       - id: name
+         type: DelimitedDataModelElement
+         name: 'name'
+         delimiter: '"'
+
+       - id: inode_string
+         type: FixedDataModelElement
+         name: 'inode_string'
+         args: '" inode='
+
+       - id: inode
+         type: DecimalIntegerValueModelElement
+         name: 'inode'
+
+       - id: dev_string
+         type: FixedDataModelElement
+         name: 'dev_string'
+         args: ' dev='
+
+       - id: dev
+         type: DelimitedDataModelElement
+         name: 'dev'
+         delimiter: ' '
+
+       - id: mode_string
+         type: FixedDataModelElement
+         name: 'mode_string'
+         args: ' mode='
+
+       - id: mode
+         type: DecimalIntegerValueModelElement
+         name: 'mode'
+         value_pad_type: "zero"
+
+       - id: ouid_string
+         type: FixedDataModelElement
+         name: 'ouid_string'
+         args: ' ouid='
+
+       - id: ouid
+         type: DecimalIntegerValueModelElement
+         name: 'ouid'
+
+       - id: ogid_string
+         type: FixedDataModelElement
+         name: 'ogid_string'
+         args: ' ogid='
+
+       - id: ogid
+         type: DecimalIntegerValueModelElement
+         name: 'ogid'
+
+       - id: rdev_string
+         type: FixedDataModelElement
+         name: 'rdev_string'
+         args: ' rdev='
+
+       - id: rdev
+         type: DelimitedDataModelElement
+         name: 'rdev'
+         delimiter: ' '
+
+       - id: nametype_string
+         type: FixedDataModelElement
+         name: 'nametype_string'
+         args: ' nametype='
+
+       - id: nametype
+         type: FixedWordlistDataModelElement
+         name: 'nametype'
+         args:
+           - 'NORMAL'
+           - 'ERROR'
+
+       - id: path
+         type: SequenceModelElement
+         name: 'path'
+         args:
+           - typePath
+           - msgAudit
+           - msg
+           - placeholder
+           - id
+           - item_string
+           - item
+           - name_string
+           - name
+           - inode_string
+           - inode
+           - dev_string
+           - dev
+           - mode_string
+           - mode
+           - ouid_string
+           - ouid
+           - ogid_string
+           - ogid
+           - rdev_string
+           - rdev
+           - nametype_string
+           - nametype
+
+       - id: typeSyscall
+         type: FixedDataModelElement
+         name: 'type'
+         args: 'type=SYSCALL '
+
+       - id: arch_string
+         type: FixedDataModelElement
+         name: 'arch_string'
+         args: '): arch='
+
+       - id: arch
+         type: DelimitedDataModelElement
+         name: 'arch'
+         delimiter: ' '
+
+       - id: syscall_string
+         type: FixedDataModelElement
+         name: 'syscall_string'
+         args: ' syscall='
+
+       - id: syscall1
+         type: DecimalIntegerValueModelElement
+         name: 'syscall'
+
+       - id: success_string
+         type: FixedDataModelElement
+         name: 'success_string'
+         args: ' success='
+
+       - id: success
+         type: FixedWordlistDataModelElement
+         name: 'success'
+         args:
+           - 'yes'
+           - 'no'
+
+       - id: exit_string
+         type: FixedDataModelElement
+         name: 'exit_string'
+         args: ' exit='
+
+       - id: exit
+         type: DecimalIntegerValueModelElement
+         name: 'exit'
+
+       - id: remainding_data
+         type: AnyByteDataModelElement
+         name: 'remainding_data'
+
+       - id: syscall
+         type: SequenceModelElement
+         name: 'syscall'
+         args:
+           - typeSyscall
+           - msgAudit
+           - msg
+           - placeholder
+           - id
+           - arch_string
+           - arch
+           - syscall_string
+           - syscall1
+           - success_string
+           - success
+           - exit_string
+           - exit
+           - remainding_data
+
+       - id: dateTimeModelElement
+         type: DateTimeModelElement
+         name: 'DateTimeModelElement'
+         date_format: 'Current DateTime: %d.%m.%Y %H:%M:%S'
+         time_zone: 'UTC'
+
+       - id: decimalFloatValueModelElement
+         type: DecimalFloatValueModelElement
+         name: 'DecimalFloatValueModelElement'
+         value_sign_type: 'optional'
+
+       - id: decimalIntegerValueModelElement
+         type: DecimalIntegerValueModelElement
+         name: 'DecimalIntegerValueModelElement'
+         value_sign_type: 'optional'
+         value_pad_type: 'blank'
+
+       - id: delimitedDataModelElement
+         type: DelimitedDataModelElement
+         name: 'DelimitedDataModelElement'
+         delimiter: ';'
+
+       - id: fixedDataModelElement1
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: ';'
+
+       - id: se
+         type: SequenceModelElement
+         name: 'se'
+         args:
+           - delimitedDataModelElement
+           - fixedDataModelElement1
+
+       - id: fixed1
+         type: FixedDataModelElement
+         name: 'fixed1'
+         args: 'match '
+
+       - id: fixed2
+         type: FixedDataModelElement
+         name: 'fixed2'
+         args: 'fixed String'
+
+       - id: wordlist
+         type: FixedWordlistDataModelElement
+         name: 'wordlist'
+         args:
+           - 'data: '
+           - 'string: '
+
+       - id: decimal
+         type: DecimalIntegerValueModelElement
+         name: 'decimal'
+
+       - id: seq1
+         type: SequenceModelElement
+         name: 'seq1'
+         args:
+           - fixed1
+           - wordlist
+
+       - id: seq2
+         type: SequenceModelElement
+         name: 'seq2'
+         args:
+           - fixed1
+           - wordlist
+           - fixed2
+
+       - id: first
+         type: FirstMatchModelElement
+         name: 'first'
+         args:
+           - seq1
+           - seq2
+
+       - id: elementValueBranchModelElement
+         type: ElementValueBranchModelElement
+         name: 'ElementValueBranchModelElement'
+         args:
+           - first
+           - 'wordlist'
+         branch_model_dict:
+           - id: 0
+             model: decimal
+           - id: 1
+             model: fixed2
+
+       - id: hexStringModelElement
+         type: HexStringModelElement
+         name: 'HexStringModelElement'
+
+       - id: fixedDataModelElement2
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: 'Gateway IP-Address: '
+
+       - id: ipAddressDataModelElement
+         type: IpAddressDataModelElement
+         name: 'IpAddressDataModelElement'
+
+       - id: se2
+         type: SequenceModelElement
+         name: 'se2'
+         args:
+           - fixedDataModelElement2
+           - ipAddressDataModelElement
+
+       - id: multiLocaleDateTimeModelElement
+         type: MultiLocaleDateTimeModelElement
+         name: 'MultiLocaleDateTimeModelElement'
+         date_formats:
+           - format:
+             - '%b %d %Y'
+             - null
+             - 'en_US.utf8'
+
+       - id: fixedDataModelElementDrawnNumber
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: '[drawn number]: '
+
+       - id: decimalIntegerValueModelElement1
+         type: DecimalIntegerValueModelElement
+         name: 'DecimalIntegerValueModelElement'
+
+       - id: sequenceModelElement
+         type: SequenceModelElement
+         name: 'SequenceModelElement'
+         args:
+           - fixedDataModelElementDrawnNumber
+           - decimalIntegerValueModelElement1
+
+       - id: repeatedElementDataModelElement
+         type: RepeatedElementDataModelElement
+         name: 'RepeatedElementDataModelElement'
+         args:
+           - sequenceModelElement
+           - 1
+
+       - id: variableByteDataModelElement
+         type: VariableByteDataModelElement
+         name: 'VariableByteDataModelElement'
+         args: '-@#'
+
+       - id: whiteSpaceLimitedDataModelElement
+         type: WhiteSpaceLimitedDataModelElement
+         name: 'WhiteSpaceLimitedDataModelElement'
+
+       - id: fixed
+         type: FixedDataModelElement
+         name: 'fixed'
+         args: ' '
+
+       - id: se3
+         type: SequenceModelElement
+         name: 'se3'
+         args:
+           - whiteSpaceLimitedDataModelElement
+           - fixed
+
+       - id: base64StringModelElement
+         type: Base64StringModelElement
+         name: 'Base64StringModelElement'
+
+       - id: fixed3
+         type: FixedDataModelElement
+         name: 'FixedDataModelElement'
+         args: 'The-searched-element-was-found!'
+
+       - id: fixedDME
+         type: FixedDataModelElement
+         name: 'fixedDME'
+         args: 'Any:'
+
+       - id: any
+         type: AnyByteDataModelElement
+         name: 'AnyByteDataModelElement'
+
+       - id: seq4
+         type: SequenceModelElement
+         name: 'se4'
+         args:
+           - fixedDME
+           - any
+
+       - id: firstMatchModelElement
+         type: FirstMatchModelElement
+         name: 'FirstMatchModelElement//optional'
+         args:
+           - fixed3
+           - seq4
+
+       - id: optionalMatchModelElement
+         type: OptionalMatchModelElement
+         name: '/'
+         args: firstMatchModelElement
+
+       - id: g
+         type: FixedDataModelElement
+         name: 'g'
+         args: 'g'
+
+       - id: h
+         type: FixedDataModelElement
+         name: 'h'
+         args: 'h'
+
+       - id: i
+         type: FixedDataModelElement
+         name: 'i'
+         args: 'i'
+
+       - id: j
+         type: FixedDataModelElement
+         name: 'j'
+         args: 'j'
+
+       - id: k
+         type: FixedDataModelElement
+         name: 'k'
+         args: 'k'
+
+       - id: l
+         type: FixedDataModelElement
+         name: 'l'
+         args: 'l'
+
+       - id: source
+         type: DelimitedDataModelElement
+         name: 'source'
+         delimiter: '['
+         consume_delimiter: True
+
+       - id: log_id
+         type: DecimalIntegerValueModelElement
+         name: 'log_id'
+
+       - id: brackets
+         type: FixedDataModelElement
+         name: 'brackets'
+         args: "] "
+
+       - id: severity
+         type: FixedWordlistDataModelElement
+         name: 'Severity'
+         args:
+           - 'info'
+           - 'error'
+           - 'warning'
+           - 'debug'
+           - 'critical'
+
+       - id: space4
+         type: FixedDataModelElement
+         name: 'space'
+         args: ": "
+
+       - id: prefix
+         type: SequenceModelElement
+         name: 'Prefix'
+         args:
+           - dtm
+           - source
+           - log_id
+           - brackets
+           - severity
+           - space4
+
        - id: cronAnnouncement
          type: SequenceModelElement
          name: 'CronAnnouncement'
          args:
+           - prefix
            - dtm
            - fixedSpace
            - uName
@@ -267,6 +746,7 @@ Parser:
          type: SequenceModelElement
          name: 'CronExecution'
          args:
+           - prefix
            - dtm
            - emptySpace1
            - uName
@@ -280,6 +760,7 @@ Parser:
          type: SequenceModelElement
          name: 'DailyCron'
          args:
+           - prefix
            - dtm
            - uNameSpace1
            - uName
@@ -293,6 +774,7 @@ Parser:
          type: SequenceModelElement
          name: 'DiskReport'
          args:
+           - prefix
            - space
            - data
            - rest
@@ -301,6 +783,7 @@ Parser:
          type: SequenceModelElement
          name: 'LoginDetails'
          args:
+           - prefix
            - userLoginDetails
            - username
            - status
@@ -310,6 +793,7 @@ Parser:
          type: SequenceModelElement
          name: 'RandomTime'
          args:
+           - prefix
            - spaceRandom
            - random
 
@@ -317,6 +801,7 @@ Parser:
          type: SequenceModelElement
          name: 'Sensors'
          args:
+           - prefix
            - cpuTemp
            - space1
            - cpuWorkload
@@ -327,10 +812,68 @@ Parser:
          type: SequenceModelElement
          name: 'IPAddresses'
          args:
+           - prefix
            - userIpAddress
            - username
            - action
            - ip
+
+       - id: typeFM
+         type: FirstMatchModelElement
+         name: 'typeFM'
+         args:
+           - path
+           - syscall
+
+       - id: type
+         type: SequenceModelElement
+         name: 'type'
+         args:
+           - prefix
+           - typeFM
+
+       - id: ecdFM
+         type: FirstMatchModelElement
+         name: 'ECDFM'
+         args:
+           - g
+           - h
+           - i
+           - j
+           - k
+           - l
+
+       - id: ecd
+         type: SequenceModelElement
+         name: 'ECD'
+         args:
+           - prefix
+           - ecdFM
+
+       - id: parsingMEFM
+         type: FirstMatchModelElement
+         name: 'ParsingME'
+         args:
+           - dateTimeModelElement
+           - decimalFloatValueModelElement
+           - decimalIntegerValueModelElement
+           - se
+           - elementValueBranchModelElement
+           - hexStringModelElement
+           - se2
+           - multiLocaleDateTimeModelElement
+           - repeatedElementDataModelElement
+           - variableByteDataModelElement
+           - se3
+           - base64StringModelElement
+           - optionalMatchModelElement
+
+       - id: parsingME
+         type: SequenceModelElement
+         name: 'parsingME'
+         args:
+           - prefix
+           - parsingMEFM
 
        - id: model
          start: True
@@ -342,10 +885,12 @@ Parser:
            - dailyCron
            - diskReport
            - loginDetails
-           - random
            - randomTime
            - sensors
            - ipAddresses
+           - type
+           - ecd
+           - parsingME
 
 Input:
         timestamp_paths: ["/model/DailyCron/DTM"]
@@ -358,6 +903,9 @@ Analysis:
         - type: PathExistsMatchRule
           id: path_exists_match_rule1
           path: "/model/LoginDetails/PastTime/Time/Minutes"
+        - type: DebugMatchRule
+          id: debug_match_rule
+          debug_mode: True
         - type: PathExistsMatchRule
           id: path_exists_match_rule2
           path: "/model/LoginDetails"
@@ -376,11 +924,13 @@ Analysis:
           sub_rules:
             - "path_exists_match_rule1"
             - "negation_match_rule1"
+            - "debug_match_rule"
         - type: AndMatchRule
           id: and_match_rule2
           sub_rules:
             - "negation_match_rule1"
             - "path_exists_match_rule2"
+            - "debug_match_rule"
         - type: OrMatchRule
           id: or_match_rule
           sub_rules:
@@ -394,6 +944,45 @@ Analysis:
         - type: ParserCount
           id: ParserCount
           report_interval: 10
+        - type: EventTypeDetector
+          id: EventTypeDetector
+        - type: VariableTypeDetector
+          id: VariableTypeDetector
+          event_type_detector: EventTypeDetector
+          silence_output_except_indicator: False
+          output_logline: False
+          ignore_list:
+            - "/model/RandomTime"
+        - type: VariableCorrelationDetector
+          id: VariableCorrelationDetector
+          event_type_detector: EventTypeDetector
+          ignore_list:
+            - "/model/RandomTime"
+        - type: TSAArimaDetector
+          id: TSAArimaDetector
+          event_type_detector: EventTypeDetector
+        - type: EventCorrelationDetector
+          id: EventCorrelationDetector
+          check_rules_flag: True
+          hypothesis_max_delta_time: 1.0
+          learn_mode: True
+        - type: EventFrequencyDetector
+          id: EventFrequencyDetector
+          window_size: 0.5
+        - type: EventSequenceDetector
+          id: EventSequenceDetector
+          id_path_list:
+            - '/model/ParsingME'
+          ignore_list:
+            - '/model/ECD/g'
+            - '/model/ECD/h'
+            - '/model/ECD/i'
+            - '/model/ECD/j'
+            - '/model/ECD/k'
+            - '/model/ECD/l'
+            - '/model/Random'
+            - '/model/RandomTime'
+            - '/model/DailyCron'
         - type: MatchFilter
           id: MatchFilter
           paths:
