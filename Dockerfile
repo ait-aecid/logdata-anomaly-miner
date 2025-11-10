@@ -87,8 +87,4 @@ WORKDIR /home/aminer
 
 # The following volumes can be mounted
 VOLUME ["/etc/aminer","/var/lib/aminer","/logs"]
-
-ENTRYPOINT ["/aminerwrapper.sh"]
-
-# Default command for the ENTRYPOINT(wrapper)
 CMD ["aminer","--config","/etc/aminer/config.yml"]
