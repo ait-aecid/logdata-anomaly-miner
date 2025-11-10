@@ -550,8 +550,8 @@ if [[ "$stdout" != "$expected" ]]; then
 fi
 EXEC_TIME=$(($(date +%s)-START_TIME))
 
-echo "print_current_config(analysis_context)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "print_current_config(analysis_context)")
+echo "print_current_config()" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "print_current_config()")
 expected="$PREFIX None"
 if [[ "$stdout" == "$expected" ]]; then
 	echo "$ERROR print config had an execution error."
