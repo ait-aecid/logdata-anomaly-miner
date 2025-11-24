@@ -1,14 +1,15 @@
 """This module defines the event handler for reporting via emails.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with
-this program. If not, see <http://www.gnu.org/licenses/>.
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version. This program is distributed in the hope that
+it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details. You should have received a
+copy of the GNU General Public License along with this program. If not,
+see
+<http://www.gnu.org/licenses/>.
 """
 
 import shlex
@@ -148,7 +149,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
         @param log_atom the log atom which produced the event.
         @param event_source reference to detector generating the event.
         """
-        if hasattr(event_source, "output_event_handlers") and event_source.output_event_handlers is not None and self not in \
+        if hasattr(event_source, "output_event_handlers") and event_source.output_event_handlers is not None and self not in\
                 event_source.output_event_handlers:
             return True
         if self.alert_grace_time_end != 0:
@@ -214,7 +215,7 @@ class DefaultMailNotificationEventHandler(EventHandlerInterface, TimeTriggeredCo
             # timeout explicitly needs to be set None, because in python version < 3.7 socket.settimeout() sets the socket type
             # SOCK_NONBLOCKING and the code fails.
             smtp_obj = SMTP("127.0.0.1", port=25, timeout=5)
-            smtp_obj.sendmail(self.sender_address, self.recipient_address, message)
+            smtp_obj.sendmail(self.sender_address, self.recipient_address, message.encode())
             smtp_obj.quit()
         except SMTPException as e:
             print(e, file=sys.stderr)
