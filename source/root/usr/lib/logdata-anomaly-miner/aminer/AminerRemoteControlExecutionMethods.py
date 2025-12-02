@@ -455,6 +455,9 @@ class AminerRemoteControlExecutionMethods:
                 return True
         return False
 
+    def get_processed_log_count(self, analysis_context):
+        self.REMOTE_CONTROL_RESPONSE = str(analysis_context.atomizer_factory.get_atomizer_for_resource(None).__class__.COUNTER)
+
     def save_current_config(self, destination_file):
         """Save the current live config into a file.
 

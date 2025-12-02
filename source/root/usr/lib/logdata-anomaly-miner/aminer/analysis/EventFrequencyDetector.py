@@ -23,6 +23,7 @@ from aminer.events.EventInterfaces import EventSourceInterface
 from aminer.input.InputInterfaces import AtomHandlerInterface, PersistableComponentInterface
 from aminer.util import PersistenceUtil
 from aminer.util.TimeTriggeredComponentInterface import TimeTriggeredComponentInterface
+from aminer.util.JsonUtil import to_python
 
 
 class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, EventSourceInterface, PersistableComponentInterface):
@@ -253,13 +254,13 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                     # In case that scoring_path_list is set, give their values to the event handlers for further analysis.
                     if len(self.scoring_path_list) > 0:
                         frequency_info["IdValues"] = self.scoring_value_list[log_ev]
-                    event_data = {"AnalysisComponent": analysis_component, "FrequencyData": frequency_info}
+                    event_data = {"AnalysisComponent": analysis_component, "FrequencyData": to_python(frequency_info)}
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event(f"Analysis.{self.__class__.__name__}", "Frequency anomaly detected", sorted_log_lines,
                                                event_data, self.last_seen_log[log_ev], self)
                     if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
                         self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
-                    # Reset exceeded_range_frequency to output a warning when the count exceedes the ranges next time
+                    # Reset exceeded_range_frequency to output a warning when the count exceeds the ranges next time
                     self.exceeded_range_frequency[log_ev] = False
 
                 # Reset counter and range estimation
@@ -301,7 +302,7 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
                                   "LogAtomValuesFrequency": self.counts[log_event][-1],
                                   "WindowSize": self.window_size,
                                   "ConfidenceFactor": self.confidence_factor}
-                event_data = {"AnalysisComponent": analysis_component, "FrequencyData": frequency_info}
+                event_data = {"AnalysisComponent": analysis_component, "FrequencyData": to_python(frequency_info)}
                 if self.severity is not None:
                     event_data["Tags"] = {"Severity": self.severity}
                 for listener in self.anomaly_event_handlers:
@@ -488,12 +489,12 @@ class EventFrequencyDetector(AtomHandlerInterface, TimeTriggeredComponentInterfa
             if event_data[0] in self.counts and self.ranges[event_data[0]] is not None:
                 if self.counts[event_data[0]][-1] < self.ranges[event_data[0]][0] or\
                         self.counts[event_data[0]][-1] > self.ranges[event_data[0]][1]:
-                    string = f"The current count {self.counts[event_data[0]][-1]} is outside the frequency interval ["\
-                             f"{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. "\
+                    string = f"The current count {self.counts[event_data[0]][-1]} is outside the frequency interval [" \
+                             f"{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. " \
                              f"The count will reset at {self.next_check_time} (unix time stamp)"
                 else:
-                    string = f"The current count {self.counts[event_data[0]][-1]} is in the frequency interval ["\
-                             f"{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. "\
+                    string = f"The current count {self.counts[event_data[0]][-1]} is in the frequency interval [" \
+                             f"{self.ranges[event_data[0]][0]}, {self.ranges[event_data[0]][1]}] for {event_data[0]}. " \
                              f"The count will reset at {self.next_check_time} (unix time stamp)"
             else:
                 string = f"Persistency includes no information for {event_data[0]}."
