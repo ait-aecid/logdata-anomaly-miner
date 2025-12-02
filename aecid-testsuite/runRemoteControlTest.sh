@@ -8,6 +8,7 @@ sudo rm -r /tmp/lib/aminer/* 2> /dev/null
 sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
+sudo rm /tmp/live.conf 2> /dev/null
 touch /tmp/syslog
 OUTPUT_FILE=/tmp/output.txt
 
@@ -486,7 +487,7 @@ fi
 
 echo "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/name':1, '/model/type/syscall/syscall':1},allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/name':1, '/model/type/syscall/syscall':1},allowlisting_data=None)")
-expected="${PREFIX}\"Allowlisted path(s) /model/type/path/id, /model/type/syscall/id with {'/model/type/path/name': 1, '/model/type/syscall/syscall': 1}.\""
+expected="${PREFIX}\"Allowlisted path(s) /model/type/path/name, /model/type/syscall/syscall with {'/model/type/path/name': 1, '/model/type/syscall/syscall': 1}.\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -586,6 +587,7 @@ sudo mkdir -p /tmp/lib/aminer/log
 sudo chown -R aminer:aminer /tmp/lib 2> /dev/null
 sudo rm /tmp/syslog 2> /dev/null
 touch /tmp/syslog
+sudo rm /tmp/live.conf 2> /dev/null
 sudo aminer --config "$FILE" & > $OUTPUT_FILE
 for i in {1..60}; do grep "INFO aminer started." /tmp/lib/aminer/log/aminer.log > /dev/null 2>&1; if [[ $? == 0 ]]; then break; fi; sleep 1; done
 
@@ -608,6 +610,9 @@ sudo pkill -x aminer
 sleep 3
 sudo rm $CMD_PATH
 sudo rm $OUTPUT_FILE
+sudo rm -r /tmp/lib/aminer/* 2> /dev/null
+sudo rm /tmp/syslog 2> /dev/null
+sudo rm /tmp/live.conf 2> /dev/null
 echo "Command execution time with --exec ${EXEC_TIME}s"
 echo "Command execution time with --exec-file ${EXEC_FILE_TIME}s"
 exit $exit_code

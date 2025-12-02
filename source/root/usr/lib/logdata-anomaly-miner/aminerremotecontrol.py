@@ -64,8 +64,8 @@ if args.exec_file is not None:
     if not os.path.exists(args.exec_file):
         print(f"File {args.exec_file} does not exist")
         sys.exit(1)
-    with open(args.exec_file, 'rb') as exec_file:
-        command_list += exec_file.readlines()
+    with open(args.exec_file, 'r') as exec_file:
+        command_list += [x.replace("\n", "") for x in exec_file.readlines()]
 string_response_flag = args.string_response
 
 if not command_list:
