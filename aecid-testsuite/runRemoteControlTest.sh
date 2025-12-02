@@ -484,9 +484,9 @@ if [[ "$stdout" != "$expected" ]]; then
 	exit_code=1
 fi
 
-echo "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/id':1, '/model/type/syscall/id':1},allowlisting_data=None)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/id':1, '/model/type/syscall/id':1},allowlisting_data=None)")
-expected="${PREFIX}\"Allowlisted path(s) /model/type/path/id, /model/type/syscall/id with {'/model/type/path/id': 1, '/model/type/syscall/id': 1}.\""
+echo "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/name':1, '/model/type/syscall/syscall':1},allowlisting_data=None)" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchIdValueComboDetector',{'/model/type/path/name':1, '/model/type/syscall/syscall':1},allowlisting_data=None)")
+expected="${PREFIX}\"Allowlisted path(s) /model/type/path/id, /model/type/syscall/id with {'/model/type/path/name': 1, '/model/type/syscall/syscall': 1}.\""
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -512,7 +512,7 @@ fi
 
 echo "allowlist_event_in_component(analysis_context,'NewMatchPathValue',b'/model/somepath',allowlisting_data=None)" >> $CMD_PATH
 stdout=$(sudo aminerremotecontrol --exec "allowlist_event_in_component(analysis_context,'NewMatchPathValue',b'/model/somepath',allowlisting_data=None)")
-expected="${PREFIX}'Allowlisted path(s) /model/DailyCron/Job Number, /model/IPAddresses/Username with /model/somepath.'"
+expected="${PREFIX}'Allowlisted path(s) /model/DailyCron/JobNumber, /model/IPAddresses/Username with /model/somepath.'"
 expected_list="${expected_list}${expected}
 "
 if [[ "$stdout" != "$expected" ]]; then
@@ -550,8 +550,8 @@ if [[ "$stdout" != "$expected" ]]; then
 fi
 EXEC_TIME=$(($(date +%s)-START_TIME))
 
-echo "print_current_config(analysis_context)" >> $CMD_PATH
-stdout=$(sudo aminerremotecontrol --exec "print_current_config(analysis_context)")
+echo "print_current_config()" >> $CMD_PATH
+stdout=$(sudo aminerremotecontrol --exec "print_current_config()")
 expected="$PREFIX None"
 if [[ "$stdout" == "$expected" ]]; then
 	echo "$ERROR print config had an execution error."

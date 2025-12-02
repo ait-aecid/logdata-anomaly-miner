@@ -14,6 +14,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 import json
 import logging
 import ast
+import numpy as np
 
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.util.StringUtil import encode_byte_string_as_string, decode_string_as_byte_string
@@ -79,3 +80,17 @@ def decode_object(term):
     else:
         decoded_object = term
     return decoded_object
+
+
+def to_python(obj):
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (list, tuple)):
+        return [to_python(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: to_python(v) for k, v in obj.items()}
+    return obj
