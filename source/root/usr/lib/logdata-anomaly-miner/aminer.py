@@ -615,7 +615,7 @@ def main():
             os._exit(0)
         # Move to root directory to avoid lingering in some cwd someone else might want to unmount.
         os.chdir('/')
-        # Change the umask here to clean all group/other mask bits so that accidentially created files are not accessible by others.
+        # Change the umask here to clean all group/other mask bits so that accidentally created files are not accessible by others.
         os.umask(0o77)
 
     # Install a signal handler catching common stop signals and relaying it to all children for sure.

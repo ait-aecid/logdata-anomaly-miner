@@ -657,6 +657,7 @@ class AnalysisChildRemoteControlHandler:
                     "list_backups": methods.list_backups,
                     "create_backup": methods.create_backup,
                     "reopen_event_handler_streams": methods.reopen_event_handler_streams,
+                    "get_processed_log_count": methods.get_processed_log_count,
                     "AllowlistViolationDetector": AllowlistViolationDetector.AllowlistViolationDetector,
                     "CharsetDetector": CharsetDetector.CharsetDetector,
                     "EnhancedNewMatchPathValueComboDetector": EnhancedNewMatchPathValueComboDetector.EnhancedNewMatchPathValueComboDetector,
