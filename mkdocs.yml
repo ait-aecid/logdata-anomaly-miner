@@ -7,7 +7,7 @@ theme:
 nav:
   - Home: index.md
   - Configuration: configuration.md
-  - Security: security.md
+  - Security: SECURITY.md
 
 markdown_extensions:
   - admonition

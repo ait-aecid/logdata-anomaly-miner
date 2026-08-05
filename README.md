@@ -71,7 +71,7 @@ If you encounter any bugs, please create an issue on [Github](https://github.com
 
 ## Security
 
-If you discover any security-related issues read the [SECURITY.md](/SECURITY.md) first and report the issues.
+If you discover any security-related issues read the [SECURITY.md](SECURITY.md) first and report the issues.
 
 ## License
 
