@@ -15,7 +15,6 @@ def  debianbullseyeimage = false
 def  debianbookwormimage = false
 def  debiantrixieimage = false
 def  productionimage = false
-def  docsimage = false
 def	 fedoraimage = false
 def	 redhatimage = false
 
@@ -346,26 +345,6 @@ pipeline {
                         sh "docker run -v $PWD/persistency:/var/lib/aminer -v $PWD/logs:/logs --rm -t aecid/aminer-redhat:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID aminer"
                     }
                 }
-                stage("Build Documentation") {
-                    when {
-                        expression {
-                            BRANCH_NAME == "main" || BRANCH_NAME == "development"
-                        }
-                    }
-                    environment {
-                        BUILDDOCSDIR = sh(script: 'mktemp -p $WORKSPACE_TMP -d | tr -d [:space:]', returnStdout: true)
-                    }
-                    steps {
-                        script {
-                            docsimage = true
-                        }
-                    sh "docker build -f Dockerfile -t aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID ."
-                    sh "chmod 777 ${env.BUILDDOCSDIR}"
-                    sh "chmod g+s ${env.BUILDDOCSDIR}"
-                    sh "docker run --rm -v ${env.BUILDDOCSDIR}:/docs/_build aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID mkdocs"
-                    sh "scripts/deploydocs.sh ${env.BRANCH_NAME} ${env.BUILDDOCSDIR}/html /var/www/aeciddocs/logdata-anomaly-miner"
-                    }
-                }
                 stage("Try It Out") {
                     steps {
                         sh "docker run -m=2G --rm aecid/logdata-anomaly-miner-testing:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID runTryItOut development"
@@ -462,9 +441,6 @@ pipeline {
                 }
                 if( redhatimage == true ) {
                     sh "docker rmi aecid/aminer-redhat:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
-                }
-                if( docsimage == true){
-                    sh "docker rmi aecid/aminer-docs:$JOB_BASE_NAME-$EXECUTOR_NUMBER-$BUILD_ID"
                 }
             }
         }
