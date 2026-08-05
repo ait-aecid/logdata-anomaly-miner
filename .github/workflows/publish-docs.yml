@@ -1,0 +1,51 @@
+name: Publish Docs
+on:
+  release:
+    types: [published]
+  push:
+    branches: [main, development]
+
+concurrency:
+  group: publish-docs
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install mkdocs mike
+
+      - name: Configure Git user
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Deploy release docs
+        if: github.event_name == 'release'
+        run: |
+          # Extract version from tag (remove leading 'V' or 'v' prefix if present)
+          VERSION=${GITHUB_REF_NAME#V}
+          VERSION=${VERSION#v}
+          echo "Deploying version $VERSION"
+          mike deploy --push --update-aliases $VERSION latest
+          # Optional: make the released version the default shown when visiting the site
+          # it's enough to run this once
+          # mike set-default --push latest
+
+      - name: Deploy branch docs
+        if: github.event_name == 'push'
+        run: |
+          echo "Deploying docs for branch $GITHUB_REF_NAME"
+          mike deploy --push --title "$GITHUB_REF_NAME (unreleased)" "$GITHUB_REF_NAME"
