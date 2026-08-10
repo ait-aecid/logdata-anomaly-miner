@@ -1,0 +1,85 @@
+name: Lint & Test
+on: [push, pull_request]
+
+env:
+  PYTHONPATH: ${{ github.workspace }}/source/root/usr/lib/logdata-anomaly-miner
+  # Static analysis / type-checking dependencies, plus everything the aminer
+  # source imports (so mypy/flake8/vulture see the same picture as a real
+  # install). Package names are the correct PyPI names for what
+  # requirements.txt lists under their Debian package names.
+  PY_DEPS: >-
+    orjson pyzmq cerberus kafka-python patsy statsmodels importlib-metadata
+    pytz scipy numpy setuptools python-dateutil six urllib3 defusedxml
+    PyYAML
+
+jobs:
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install $PY_DEPS mypy
+      - run: |
+          set -e
+          for sub in analysis events input parsing util; do
+            mypy source/root/usr/lib/logdata-anomaly-miner/aminer/$sub/ --ignore-missing-imports --disable-error-code attr-defined --implicit-optional
+          done
+          mypy source/root/usr/lib/logdata-anomaly-miner/aminer/ --ignore-missing-imports --disable-error-code attr-defined --implicit-optional
+
+  bandit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install bandit
+      - run: bandit -r source/root/usr/lib/logdata-anomaly-miner --ini .bandit
+
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install flake8
+      - run: python3 -m flake8 source/root/usr/lib/logdata-anomaly-miner --config .flake8
+
+  vulture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install vulture
+      - run: vulture source/root/usr/lib/logdata-anomaly-miner --min-confidence=100
+
+  mccabe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install flake8
+      # informational only (matches the previous Jenkins stage): report
+      # complexity hotspots without failing the build on them.
+      - run: python3 -m flake8 --max-complexity 30 source/root/usr/lib/logdata-anomaly-miner || true
+
+  unittests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install $PY_DEPS
+      - name: Prepare log directory
+        run: |
+          sudo mkdir -p /var/lib/aminer/log
+          sudo chown -R "$(id -u):$(id -g)" /var/lib/aminer
+      - run: python3 aecid-testsuite/run_ci_unittests.py

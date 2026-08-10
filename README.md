@@ -1,4 +1,6 @@
-# logdata-anomaly-miner [![Build Status](https://aecidjenkins.ait.ac.at/buildStatus/icon?job=AECID%2FAECID%2Flogdata-anomaly-miner%2Fmain)]( "https://aecidjenkins.ait.ac.at/job/AECID/job/AECID/job/logdata-anomaly-miner/job/main/") [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
+# logdata-anomaly-miner [![Lint](https://github.com/ait-aecid/logdata-anomaly-miner/actions/workflows/lint-test.yml/badge.svg)](https://github.com/ait-aecid/logdata-anomaly-miner/actions/workflows/lint.yml) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
+
+> **This project is no longer maintained.** Please use [DetectMate](https://github.com/ait-detectmate/DetectMateService) instead.
 
 This tool parses log data and allows to define analysis pipelines for anomaly detection. It was designed to run the analysis with limited resources and lowest possible permissions to make it suitable for production server use.
 
