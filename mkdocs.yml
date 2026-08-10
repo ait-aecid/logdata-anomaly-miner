@@ -1,0 +1,13 @@
+site_name: logdata-anomaly-miner
+site_url: https://ait-aecid.github.io/logdata-anomaly-miner/
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Configuration: configuration.md
+  - Security: SECURITY.md
+
+markdown_extensions:
+  - admonition

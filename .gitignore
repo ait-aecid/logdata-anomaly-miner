@@ -64,13 +64,6 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
-_build
-docs/_build/
-docs/Wiki
-docs/SECURITY.md
-docs/README.md
-docs/LICENSE.md
 
 #docker
 akafka/

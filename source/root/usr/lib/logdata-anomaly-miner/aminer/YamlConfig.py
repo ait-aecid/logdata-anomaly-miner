@@ -14,12 +14,13 @@ import sys
 import logging
 import copy
 import ast
+from typing import Any, Dict
 import pytz
 from aminer.AminerConfig import DEBUG_LOG_NAME
 from aminer.util.StringUtil import decode_string_as_byte_string
 
 
-config_properties = {}
+config_properties: Dict[str, Any] = {}
 yaml_data = None
 enhanced_new_match_path_value_combo_detector_reference = None
 

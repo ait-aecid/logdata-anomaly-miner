@@ -37,13 +37,6 @@ RUN apt-get update && apt-get install -y \
     locales-all \
     rsyslog
 
-# Docs
-RUN apt-get update && apt-get install -y \
-    python3-sphinx \
-    python3-sphinx-rtd-theme \
-    python3-recommonmark \
-    make
-
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     sed -i -e 's/# de_AT ISO-8859-1/de_AT ISO-8859-1/' /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
@@ -55,13 +48,6 @@ ENV LC_ALL=en_US.UTF-8
 
 ADD . /home/aminer/logdata-anomaly-miner
 RUN cd /home/aminer/logdata-anomaly-miner && scripts/aminer_install.sh -b $BRANCH -s /home/aminer/logdata-anomaly-miner
-
-# For Docs
-ADD docs /docs
-ADD README.md /docs
-ADD SECURITY.md /docs
-ADD LICENSE /docs/LICENSE.md
-
 
 # Copy logdata-anomaly-miner-sources
 ADD source/root/usr/lib/logdata-anomaly-miner /usr/lib/logdata-anomaly-miner
@@ -82,7 +68,6 @@ RUN chmod 0755 /usr/lib/logdata-anomaly-miner/aminerremotecontrol.py \
 	&& chmod 0755 /etc/aminer \
 	&& mkdir -p /var/lib/aminer/logs \
     && chown $UID.$GID -R /var/lib/aminer \
-    && chown $UID.$GID -R /docs \
     && chmod 0755 /aminerwrapper.sh
 
 RUN PACK=$(find /usr/lib/python3/dist-packages -name posix1e.cpython\*.so) && FILE=$(echo $PACK | awk -F '/' '{print $NF}') ln -s $PACK /usr/lib/logdata-anomaly-miner/$FILE

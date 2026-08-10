@@ -1,7 +1,6 @@
 #!/bin/sh
 
 METAPATH="source/root/usr/lib/logdata-anomaly-miner/metadata.py"
-DOCSCONF="docs/conf.py"
 
 # fallback if git is not installed
 if [ ! `command -v git` ]
@@ -26,11 +25,6 @@ echo "BUILD_ID: $BUILD_ID"
 if [ -e $METAPATH ]
 then
 sed  -i  "s/__version__\s*=\s*\".*\"/__version__ = \"$BUILD_ID\"/g" $METAPATH
-fi
-
-if [ -e $DOCSCONF ]
-then
-sed  -i  "s/release\s*=\s*'.*'/release = '$BUILD_ID'/g" $DOCSCONF
 fi
 
 exit 0
