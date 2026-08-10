@@ -1,0 +1,3244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://ait-aecid.github.io/logdata-anomaly-miner/development/configuration/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Configuration - logdata-anomaly-miner</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../css/version-select.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Configuration";
+        var mkdocs_page_input_path = "configuration.md";
+        var mkdocs_page_url = "/logdata-anomaly-miner/development/configuration/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> logdata-anomaly-miner
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Configuration</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#analysis-pipeline">Analysis Pipeline</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../SECURITY/">Security</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">logdata-anomaly-miner</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Configuration</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="overview">Overview</h1>
+<p>The logdata-anomaly-miner can be configured in two different formats:
+<strong>yaml</strong> and <strong>python</strong>. The preferred format is yaml and the default
+configuration file for it is <em>/etc/aminer/config.yaml</em>. The python
+format can be configured in <em>/etc/aminer/config.py</em> and offers advanced
+possibilities to configure the logdata-anomaly-miner. However, this is
+only recommended for experts, as no errors are caught in the python
+configuration, which can make debugging very difficult. For both formats
+there are template configurations in <em>/etc/aminer/template_config.yaml</em>
+and <em>/etc/aminer/template_config.py</em>.</p>
+<p>The basic structure of the logdata-anomaly-miner is illustrated in the
+folloging diagram:</p>
+<p><img alt="Structure of the configuration-file: GENERAL, INPUT, PARSING,
+ANALYSING, EVENTHANDLING" src="../images/aminer-config-color.png" /></p>
+<h2 id="analysis-pipeline">Analysis Pipeline</h2>
+<p>The core component of the logdata-anomaly-miner is the "analysis
+pipeline". It consists of the parts INPUT, ANALYSIS and OUTPUT.</p>
+<p><img alt="Parts of the analysis-pipeline" src="../images/analysis-pipeline.png" /></p>
+<h1 id="command-line-parameters">Command-line Parameters</h1>
+<h2 id="-h-help">-h, --help</h2>
+<p>Show the help message and exit.</p>
+<h2 id="-v-version">-v, --version</h2>
+<p>Show program's version number and exit.</p>
+<h2 id="-u-check-updates">-u, --check-updates</h2>
+<p>Check if updates for the aminer are available and exit.</p>
+<h2 id="-c-config-config-config">-c CONFIG, --config CONFIG</h2>
+<ul>
+<li>Default: /etc/aminer/config.yml</li>
+</ul>
+<p>Use the settings of the file CONFIG on startup. Two config-variants are
+allowed: python and yaml.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a href="#overview">Overview</a></p>
+</div>
+<h2 id="-d-daemon">-D, --daemon</h2>
+<p>Run aminer as a daemon process.</p>
+<h2 id="-s-012-stat-012">-s {0,1,2}, --stat {0,1,2}</h2>
+<p>Set the stat level. Possible stat-levels are 0 for no statistics, 1 for
+normal statistic level and 2 for verbose statistics.</p>
+<h2 id="-d-012-debug-012">-d {0,1,2}, --debug {0,1,2}</h2>
+<p>Set the debug level. Possible debug-levels are 0 for no debugging, 1 for
+normal output (INFO and above), 2 for printing all debug information.</p>
+<h2 id="-run-analysis">--run-analysis</h2>
+<p>Run aminer analysis-child.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This parameter is for internal use only.</p>
+</div>
+<h2 id="-c-clear">-C, --clear</h2>
+<p>Remove all persistence directories and run aminer.</p>
+<h2 id="-r-remove-remove-remove">-r REMOVE, --remove REMOVE</h2>
+<p>Remove a specific persistence directory. REMOVE must be the name of the
+directory and must not contain '/' or '.'. Usually this directory can be
+found in '/var/lib/aminer'.</p>
+<h2 id="-r-restore-restore-restore">-R RESTORE, --restore RESTORE</h2>
+<p>Restore a persistence backup. RESTORE must be the name of the directory
+and must not contain '/' or '.'. Usually this directory can be found in
+'/var/lib/aminer'.</p>
+<h2 id="-f-from-begin">-f, --from-begin</h2>
+<p>Removes repositioning data before starting the aminer so that all input
+files will be analyzed starting from the first line in the file rather
+than the last previously analyzed line.</p>
+<h2 id="-o-offline-mode">-o, --offline-mode</h2>
+<p>Stop the aminer after all logs have been processed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This parameter is useful for forensic analysis.</p>
+</div>
+<h2 id="-config-properties-keyvalue-keyvalue">--config-properties KEY=VALUE [KEY=VALUE ...]</h2>
+<p>Set a number of config_properties by using key-value pairs (do not put
+spaces before or after the = sign). If a value contains spaces, you
+should define it with double quotes: 'foo="this is a sentence". Note
+that values are always treated as strings. If values are already defined
+in the config_properties, the input types are converted to the ones
+already existing.</p>
+<h1 id="configuration-reference">Configuration Reference</h1>
+<h2 id="general-configuration">General Configuration</h2>
+<h3 id="learnmode">LearnMode</h3>
+<ul>
+<li>Type: boolean (True,False)</li>
+<li>Default: False</li>
+</ul>
+<p>This options turns the LearnMode on globally.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This option can be overruled by the learn_mode that is configurable per
+analysis component.</p>
+</div>
+<pre><code class="language-yaml">LearnMode: True
+</code></pre>
+<h3 id="amineruser">AminerUser</h3>
+<ul>
+<li>Default: aminer</li>
+</ul>
+<p>This option defines the system-user that owns the aminer-process.</p>
+<pre><code class="language-yaml">AminerUser: 'aminer'
+</code></pre>
+<h3 id="aminergroup">AminerGroup</h3>
+<ul>
+<li>Default: aminer</li>
+</ul>
+<p>This option defines the system-group that owns the aminer-process.</p>
+<pre><code class="language-yaml">AminerGroup: 'aminer'
+</code></pre>
+<h3 id="analysisconfigfile">AnalysisConfigFile</h3>
+<ul>
+<li>Default: None</li>
+</ul>
+<p>This (optional) configuration file contains the whole analysis child
+configuration (code). When missing those configuration parameters are
+also taken from the main config.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This option is only available for python configs. It does not work for
+yaml configs.</p>
+</div>
+<pre><code class="language-python">config_properties['AnalysisConfigFile'] = 'analysis.py'
+</code></pre>
+<h3 id="remotecontrolsocket">RemoteControlSocket</h3>
+<p>This option controls where the unix-domain-socket for the RemoteControl
+should be created. The socket will not be created if this option is not
+set.</p>
+<pre><code class="language-yaml">RemoteControlSocket: '/var/lib/aminer/remcontrol.sock'
+</code></pre>
+<h3 id="suppressnewmatchpathdetector">SuppressNewMatchPathDetector</h3>
+<ul>
+<li>Default: False</li>
+<li>Type: boolean (True,False)</li>
+</ul>
+<p>Disable the output of the NewMatchPathDetector which detects new paths
+for logtypes.</p>
+<pre><code class="language-yaml">SuppressNewMatchPathDetector: False
+</code></pre>
+<h3 id="logresourcelist">LogResourceList</h3>
+<ul>
+<li>Required: <strong>True</strong></li>
+<li>Resource-Types: <code>file://</code>, <code>unix://</code></li>
+</ul>
+<p>Define the list of log resources to read from: the resources named here
+do not need to exist when aminer is started. This will just result in a
+warning. However if they exist, they have to be readable by the aminer
+process! Every resource needs to define the <code>url</code> with the
+resource-type. Optionally every resource can define <code>json</code> parameter
+(boolean) to define if the resource input data is json and <code>parser_id</code>
+to define the parser which should process the log data from this
+resource. By default the <code>json_format</code> parameter in the <code>input</code> section
+is used to determine if the input data is json or not.</p>
+<p>Supported types are:</p>
+<ul>
+<li><a href="file://%5Bpath%5D">file://[path]</a>: Read data from file, reopen it
+    after rollover</li>
+<li>unix://[path]: Open the path as UNIX local socket for reading</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">LogResourceList:
+    - url: 'file:///var/log/apache2/access.log'
+    - url: 'file:///home/ubuntu/data/mail.cup.com-train/daemon.log'
+      json: True
+      parser_id: 'syslog_parser'
+    - url: 'file:///home/ubuntu/data/mail.cup.com-train/auth.log'
+    - url: 'file:///home/ubuntu/data/mail.cup.com-train/suricata/eve.json'
+    - url: 'file:///home/ubuntu/data/mail.cup.com-train/suricata/fast.log'
+      json: True
+      parser_id: 'suricata_fastlog'
+</code></pre>
+<h3 id="corepersistencedir">Core.PersistenceDir</h3>
+<ul>
+<li>Default: /var/lib/aminer</li>
+</ul>
+<p>Read and store information to be used between multiple executions of
+aminer in this directory. The directory must only be accessible to the
+'AminerUser' but not group/world readable. On violation, aminer will
+refuse to start.</p>
+<pre><code class="language-yaml">Core.PersistenceDir: '/var/lib/aminer'
+</code></pre>
+<h3 id="corepersistenceperiod">Core.PersistencePeriod</h3>
+<ul>
+<li>Type: Number of seconds</li>
+<li>Default: 600</li>
+</ul>
+<p>This options controls whether the logdata-anomaly-miner should write its
+persistency to disk.</p>
+<pre><code class="language-yaml">Core.PersistencePeriod: 600
+</code></pre>
+<h3 id="corelogdir">Core.LogDir</h3>
+<ul>
+<li>Default: /var/lib/aminer/log</li>
+</ul>
+<p>Directory for logfiles. This directory must be writeable to the
+'AminerUser'.</p>
+<pre><code class="language-yaml">Core.LogDir: '/var/lib/aminer/log'
+</code></pre>
+<h3 id="mailalertingtargetaddress">MailAlerting.TargetAddress</h3>
+<ul>
+<li>Default: disabled</li>
+</ul>
+<p>Define a target e-mail address to send alerts to. When undefined, no
+e-mail notification hooks are added.</p>
+<pre><code class="language-yaml">MailAlerting.TargetAddress: 'root@localhost'
+</code></pre>
+<h3 id="mailalertingfromaddress">MailAlerting.FromAddress</h3>
+<p>Sender address of e-mail alerts. When undefined, "sendmail"
+implementation on host will decide, which sender address should be used.</p>
+<pre><code class="language-yaml">MailAlerting.FromAddress: 'root@localhost'
+</code></pre>
+<h3 id="mailalertingsubjectprefix">MailAlerting.SubjectPrefix</h3>
+<ul>
+<li>Default: "aminer Alerts"</li>
+</ul>
+<p>Define, which text should be prepended to the standard aminer subject.</p>
+<pre><code class="language-yaml">MailAlerting.SubjectPrefix: 'aminer Alerts:'
+</code></pre>
+<h3 id="mailalertingalertgracetime">MailAlerting.AlertGraceTime</h3>
+<ul>
+<li>Type: Number of seconds</li>
+<li>Default: 0 (any event can immediately trigger alerting)</li>
+</ul>
+<p>Define a grace time after startup before aminer will react to an event
+and send the first alert e-mail.</p>
+<pre><code class="language-yaml">MailAlerting.AlertGraceTime: 0
+</code></pre>
+<h3 id="mailalertingeventcollecttime">MailAlerting.EventCollectTime</h3>
+<ul>
+<li>Type: Number of seconds</li>
+<li>Default: 10</li>
+</ul>
+<p>Define how many seconds to wait after a first event triggered the
+alerting procedure before really sending out the e-mail. In that
+timespan, events are collected and will be sent all using a single
+e-mail.</p>
+<pre><code class="language-yaml">MailAlerting.EventCollectTime: 10
+</code></pre>
+<h3 id="mailalertingminalertgap">MailAlerting.MinAlertGap</h3>
+<ul>
+<li>Type: Number of seconds</li>
+<li>Default: 600</li>
+</ul>
+<p>Define the minimum time between two alert e-mails in seconds to avoid
+spamming. All events during this timespan are collected and sent out
+with the next report.</p>
+<pre><code class="language-yaml">MailAlerting.MinAlertGap: 600
+</code></pre>
+<h3 id="mailalertingmaxalertgap">MailAlerting.MaxAlertGap</h3>
+<ul>
+<li>Type: Number of seconds</li>
+<li>Default: 600</li>
+</ul>
+<p>Define the maximum time between two alert e-mails in seconds. When
+undefined this defaults to "MailAlerting.MinAlertGap". Otherwise this
+will activate an exponential backoff to reduce messages during permanent
+error states by increasing the alert gap by 50% when more alert-worthy
+events were recorded while the previous gap time was not yet elapsed.</p>
+<pre><code class="language-yaml">MailAlerting.MaxAlertGap: 600
+</code></pre>
+<h3 id="mailalertingmaxeventspermessage">MailAlerting.MaxEventsPerMessage</h3>
+<ul>
+<li>Type: Number of events</li>
+<li>Default: 1000</li>
+</ul>
+<p>Define how many events should be included in one alert mail at most.</p>
+<pre><code class="language-yaml">MailAlerting.MaxEventsPerMessage: 1000
+</code></pre>
+<h3 id="logprefix">LogPrefix</h3>
+<p>This option defines the prefix for the output of each anomaly.</p>
+<pre><code class="language-yaml">LogPrefix: ''
+</code></pre>
+<h3 id="logencoding">Log.Encoding</h3>
+<ul>
+<li>Type: string</li>
+<li>Default: 'utf-8'</li>
+</ul>
+<p>This option defines the encoding of the logfiles.</p>
+<pre><code class="language-yaml">Log.Encoding: 'utf-8'
+</code></pre>
+<h3 id="logstatisticsperiod">Log.StatisticsPeriod</h3>
+<ul>
+<li>Type: Number of seconds</li>
+<li>Default: 3600</li>
+</ul>
+<p>Defines how often to write into stat-logfiles.</p>
+<pre><code class="language-yaml">Log.StatisticsPeriod: 3600
+</code></pre>
+<h3 id="logstatisticslevel">Log.StatisticsLevel</h3>
+<ul>
+<li>Type: Number of loglevel</li>
+<li>Default: 1</li>
+</ul>
+<p>Defines the loglevel for the stat logs.</p>
+<pre><code class="language-yaml">Log.StatisticsLevel: 2
+</code></pre>
+<h3 id="logdebuglevel">Log.DebugLevel</h3>
+<ul>
+<li>Type: Number of loglevel</li>
+<li>Default: 1</li>
+</ul>
+<p>Defines the loglevel of the aminer debug-logfile.</p>
+<pre><code class="language-yaml">Log.DebugLevel: 2
+</code></pre>
+<h3 id="logremotecontrollogfile">Log.RemoteControlLogFile</h3>
+<ul>
+<li>Type: string (path to the logfile)</li>
+<li>Default: '/var/lib/aminer/log/aminerRemoteLog.log'</li>
+</ul>
+<p>Defines the path of the logfile for the RemoteControl.</p>
+<pre><code class="language-yaml">Log.RemoteControlLogFile: '/var/log/aminerremotecontrol.log'
+</code></pre>
+<h3 id="logstatisticsfile">Log.StatisticsFile</h3>
+<ul>
+<li>Type: string (path to the logfile)</li>
+<li>Default: '/var/lib/aminer/log/statistics.log'</li>
+</ul>
+<p>Defines the path of the stats-file.</p>
+<pre><code class="language-yaml">Log.StatisticsFile: '/var/log/aminer-stats.log'
+</code></pre>
+<h3 id="logdebugfile">Log.DebugFile</h3>
+<ul>
+<li>Type: string (path to the logfile)</li>
+<li>Default: '/var/lib/aminer/log/aminer.log'</li>
+</ul>
+<p>Defines the path of the debug-log-file.</p>
+<pre><code class="language-yaml">Log.DebugFile: '/var/log/aminer.log'
+</code></pre>
+<h3 id="logrotationmaxbytes">Log.Rotation.MaxBytes</h3>
+<ul>
+<li>Type: number of bytes</li>
+<li>Default: 1048576 (1 Megabyte)</li>
+</ul>
+<p>Defines the number of bytes before "Log.RemoteControlLogFile",
+"Log.StatisticsFile" and "Log.DebugFile" is rotated.</p>
+<pre><code class="language-yaml">Log.Rotation.MaxBytes: 1048576
+</code></pre>
+<h3 id="logrotationbackupcount">Log.Rotation.BackupCount</h3>
+<ul>
+<li>Type: number of old logfiles</li>
+<li>Default: 5</li>
+</ul>
+<p>Defines the number of logfiles saved after rotation of
+"Log.RemoteControlLogFile", "Log.StatisticsFile" and "Log.DebugFile".</p>
+<pre><code class="language-yaml">Log.Rotation.BackupCount: 5
+</code></pre>
+<h2 id="input">Input</h2>
+<h3 id="timestamp_paths">timestamp_paths</h3>
+<ul>
+<li>Type: string or list of strings</li>
+</ul>
+<p>Parser paths to DateTimeModelElements to set timestamp of log events.</p>
+<pre><code class="language-yaml">timestamp_paths: '/model/time'
+</code></pre>
+<pre><code class="language-yaml">timestamp_paths:
+   - '/parser/model/time'
+   - '/parser/model/type/execve/time'
+   - '/parser/model/type/proctitle/time'
+   - '/parser/model/type/syscall/time'
+   - '/parser/model/type/path/time'
+</code></pre>
+<h3 id="multi_source">multi_source</h3>
+<ul>
+<li>Type: boolean (True,False)</li>
+<li>Default: False</li>
+</ul>
+<p>Flag to enable chronologically correct parsing from multiple
+input-logfiles.</p>
+<pre><code class="language-yaml">multi_source: True
+</code></pre>
+<h3 id="eol_sep">eol_sep</h3>
+<ul>
+<li>Default: 'n'</li>
+</ul>
+<p>End of Line seperator for events.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Enables parsing of multiline logs.</p>
+</div>
+<pre><code class="language-yaml">eol_sep: '\r\n'
+</code></pre>
+<h3 id="json_format">json_format</h3>
+<ul>
+<li>Type: boolean (True,False)</li>
+<li>Default: False</li>
+</ul>
+<p>Enables parsing of logs in json-format.</p>
+<pre><code class="language-yaml">json_format: True
+</code></pre>
+<h3 id="suppress_unparsed">suppress_unparsed</h3>
+<ul>
+<li>Default: False</li>
+</ul>
+<p>Boolean value that allows to suppress anomaly output about unparsed log
+atoms.</p>
+<pre><code class="language-yaml">suppress_unparsed: True
+</code></pre>
+<h2 id="parsing">Parsing</h2>
+<p>There are some predefined standard-model-elements like
+<em>IpAddressDataModelElement</em>, <em>DateTimeModelElement</em>,
+<em>FixedDataModelElement</em> and so on. They are located in the
+python-source-tree of logdata-anomaly-miner. A comprehensive list of all
+possible standard-model-elements can be found below. Using these
+standard-model-elements it is possible to create custom parser models.
+Currently there are two methods of doing it:</p>
+<ol>
+<li>Using a python-script that is located in <em>/etc/aminer/conf-enabled</em>:</li>
+</ol>
+<!-- end list -->
+
+<pre><code class="language-python">&quot;&quot;&quot; /etc/aminer/conf-enabled/ApacheAccessParsingModel.py&quot;&quot;&quot;
+from aminer.parsing.DateTimeModelElement import DateTimeModelElement
+from aminer.parsing.DecimalIntegerValueModelElement import DecimalIntegerValueModelElement
+from aminer.parsing.DelimitedDataModelElement import DelimitedDataModelElement
+from aminer.parsing.FirstMatchModelElement import FirstMatchModelElement
+from aminer.parsing.FixedDataModelElement import FixedDataModelElement
+from aminer.parsing.FixedWordlistDataModelElement import FixedWordlistDataModelElement
+from aminer.parsing.IpAddressDataModelElement import IpAddressDataModelElement
+from aminer.parsing.OptionalMatchModelElement import OptionalMatchModelElement
+from aminer.parsing.SequenceModelElement import SequenceModelElement
+from aminer.parsing.VariableByteDataModelElement import VariableByteDataModelElement
+
+def get_model():
+    &quot;&quot;&quot;Return a model to parse Apache Access logs from the AIT-LDS.&quot;&quot;&quot;
+    alphabet = b'!&quot;#$%&amp;\'()*+,-./0123456789:;&lt;&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~=[]'
+
+    model = SequenceModelElement('model', [
+        FirstMatchModelElement('client_ip', [
+            IpAddressDataModelElement('client_ip'),
+            FixedDataModelElement('localhost', b'::1')
+            ]),
+        FixedDataModelElement('sp1', b' '),
+        VariableByteDataModelElement('client_id', alphabet),
+        FixedDataModelElement('sp2', b' '),
+        VariableByteDataModelElement('user_id', alphabet),
+        FixedDataModelElement('sp3', b' ['),
+        DateTimeModelElement('time', b'%d/%b/%Y:%H:%M:%S'),
+        FixedDataModelElement('sp4', b' +'),
+        DecimalIntegerValueModelElement('tz'),
+        FixedDataModelElement('sp5', b'] &quot;'),
+        FirstMatchModelElement('fm', [
+            FixedDataModelElement('dash', b'-'),
+            SequenceModelElement('request', [
+                FixedWordlistDataModelElement('method', [
+                    b'GET', b'POST', b'PUT', b'HEAD', b'DELETE', b'CONNECT', b'OPTIONS', b'TRACE', b'PATCH']),
+                FixedDataModelElement('sp6', b' '),
+                DelimitedDataModelElement('request', b' ', b'\\'),
+                FixedDataModelElement('sp7', b' '),
+                DelimitedDataModelElement('version', b'&quot;'),
+                ])
+            ]),
+        FixedDataModelElement('sp8', b'&quot; '),
+        DecimalIntegerValueModelElement('status_code'),
+        FixedDataModelElement('sp9', b' '),
+        DecimalIntegerValueModelElement('content_size'),
+        OptionalMatchModelElement(
+            'combined', SequenceModelElement('combined', [
+                FixedDataModelElement('sp10', b' &quot;'),
+                DelimitedDataModelElement('referer', b'&quot;', b'\\'),
+                FixedDataModelElement('sp11', b'&quot; &quot;'),
+                DelimitedDataModelElement('user_agent', b'&quot;', b'\\'),
+                FixedDataModelElement('sp12', b'&quot;'),
+                ])),
+        ])
+
+    return model
+</code></pre>
+<p>This parser can be used as "type" in <strong>/etc/aminer/config.yml</strong>:</p>
+<pre><code class="language-yaml">Parser:
+     - id: 'apacheModel'
+       type: ApacheAccessModel
+       name: 'apache'
+</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please do not create files with the ending "ModelElement.py" in
+/etc/aminer/conf-enabled!</p>
+</div>
+<ol>
+<li>Configuring the parser-model inline in <strong>/etc/aminer/config.yml</strong></li>
+</ol>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+        - id: host_name_model
+          type: VariableByteDataModelElement
+          name: 'host'
+          args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+
+        - id: identity_model
+          type: VariableByteDataModelElement
+          name: 'ident'
+          args: '-.01234567890abcdefghijklmnopqrstuvwxyz:'
+
+        - id: user_name_model
+          type: VariableByteDataModelElement
+          name: 'user'
+          args: '0123456789abcdefghijklmnopqrstuvwxyz.-'
+
+        - id: new_time_model
+          type: DateTimeModelElement
+          name: 'time'
+          date_format: '[%d/%b/%Y:%H:%M:%S +0000]'
+
+        - id: sq3
+          type: FixedDataModelElement
+          name: 'sq3'
+          args: ' &quot;'
+
+        - id: request_method_model
+          type: FixedWordlistDataModelElement
+          name: 'method'
+          args:
+                  - 'GET'
+                  - 'POST'
+                  - 'PUT'
+                  - 'HEAD'
+                  - 'DELETE'
+                  - 'CONNECT'
+                  - 'OPTIONS'
+                  - 'TRACE'
+                  - 'PATCH'
+
+        - id: request_model
+          type: VariableByteDataModelElement
+          name: 'request'
+          args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&amp;=&lt;?*+'
+
+        - id: http1
+          type: FixedDataModelElement
+          name: 'http1'
+          args: ' HTTP/'
+
+        - id: version_model
+          type: VariableByteDataModelElement
+          name: 'version'
+          args: '0123456789.'
+
+        - id: sq4
+          type: FixedDataModelElement
+          name: 'sq4'
+          args: '&quot; '
+
+        - id: status_code_model
+          type: DecimalIntegerValueModelElement
+          name: 'status'
+
+        - id: size_model
+          type: DecimalIntegerValueModelElement
+          name: 'size'
+
+        - id: sq5
+          type: FixedDataModelElement
+          name: 'sq5'
+          args: ' &quot;-&quot; &quot;'
+
+        - id: user_agent_model
+          type: VariableByteDataModelElement
+          name: 'useragent'
+          args: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-/()[]{}!$%&amp;=&lt;?*+;:_ '
+
+        - id: sq6
+          type: FixedDataModelElement
+          name: 'sq6'
+          args: '&quot;'
+
+        - id: 'startModel'
+          start: True
+          type: SequenceModelElement
+          name: 'accesslog'
+          args:
+                  - host_name_model
+                  - WHITESPACE
+                  - identity_model
+                  - WHITESPACE
+                  - user_name_model
+                  - WHITESPACE
+                  - new_time_model
+                  - sq3
+                  - request_method_model
+                  - WHITESPACE
+                  - request_model
+                  - http1
+                  - version_model
+                  - sq4
+                  - status_code_model
+                  - WHITESPACE
+                  - size_model
+                  - sq5
+                  - user_agent_model
+                  - sq6
+</code></pre>
+<p>The parsing section in <strong>/etc/aminer/config.yml</strong> starts with the
+statement "Parser:" followed by a list of parser-models. Every
+parser-model in this list must have a unique <strong>id</strong> and a <strong>type</strong>. The
+unique <strong>id</strong> can be used to cascade models by adding the <strong>id</strong> of an
+parser-model as arguments(<strong>args</strong>). One parser of this list must
+contain <span class="title-ref">start: True</span> that indicates the
+root of the parser tree:</p>
+<pre><code class="language-yaml">Parser:
+     - id: 'apacheModel'
+       type: ApacheAccessModel
+       name: 'apache'
+
+     - id: 'startModel'
+       start: True
+       type: SequenceModelElement
+       name: 'model'
+       args: apacheModel
+</code></pre>
+<ul>
+<li><strong>id</strong>: must be a unique string</li>
+<li><strong>type</strong>: must be an existing ModelElement</li>
+<li><strong>name</strong>: string with the element name</li>
+<li><strong>start</strong>: a boolean value that indicates the starting model. Only
+    one parser-model must have enabled this option!</li>
+<li><strong>args</strong>*: a string or a list of strings containing the arguments
+    of the specific parser.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>args can contain the constant WHITESPACE which is a preset for spaces</p>
+</div>
+<h3 id="anybytedatamodelelement">AnyByteDataModelElement</h3>
+<p>This parsing-element matches any byte but at least one. Thus a match
+will always span the complete data from beginning to end.</p>
+<pre><code class="language-yaml">Parser:
+     - id: 'anyModel'
+       type: AnyByteDataModelElement
+       name: 'anymodel'
+</code></pre>
+<h3 id="base64stringmodelelement">Base64StringModelElement</h3>
+<p>This parsing-element matches base64 strings.</p>
+<pre><code class="language-yaml">Parser:
+     - id: 'anyModel'
+       type: Base64StringModelElement
+       name: 'b64model'
+</code></pre>
+<h3 id="datetimemodelelement">DateTimeModelElement</h3>
+<p>This element parses dates using a custom, timezone and locale-aware
+implementation similar to strptime.</p>
+<ul>
+<li>
+<p><strong>args</strong>: a string or list containing the following parameters:</p>
+<ol>
+<li>
+<ul>
+<li>
+<p>date_format:<br />
+        Is a string that represents the date format for parsing, see
+        Python strptime specification for available formats.
+        Supported format specifiers are:</p>
+<blockquote>
+<ul>
+<li>%b: month name in current locale</li>
+<li>%d: day in month, can be space or zero padded when
+    followed by separator or at end of string.</li>
+<li>%f: fraction of seconds (the digits after the the '.')</li>
+<li>%H: hours from 00 to 23</li>
+<li>%M: minutes</li>
+<li>%m: two digit month number</li>
+<li>%S: seconds</li>
+<li>%s: seconds since the epoch (1970-01-01)</li>
+<li>%Y: 4 digit year number</li>
+<li>%z: detect and parse timezone strings like UTC, CET,
+    +0001, etc. automatically.</li>
+</ul>
+</blockquote>
+<ul>
+<li>
+<p>Common formats are:</p>
+<ul>
+<li>'%b %d %H:%M:%S' e.g. for 'Nov 19 05:08:43'</li>
+<li>'%d.%m.%YT%H:%M:%S' e.g. for '07.02.2019T11:40:00'</li>
+<li>'%d.%m.%Y %H:%M:%S.%f' e.g. for '07.02.2019
+    11:40:00.123456'</li>
+<li>'%d.%m.%Y %H:%M:%S%z' e.g. for '07.02.2019
+    11:40:00+0000" or "07.02.2019 11:40:00 UTC'</li>
+<li>'%d.%m.%Y' e.g. for '07.02.2019'</li>
+<li>'%H:%M:%S' e.g. for '11:40:23'</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>time_zone:<br />
+        time_zone the timezone for parsing the values. Default:
+        <strong>UTC</strong>. Within the yaml configuration, only values from
+        <strong>pytz.all_timezones</strong> are accepted as time_zone value.</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>text_local:<br />
+        the locale to use for parsing the day and month names.
+        Default: <strong>system-locale</strong></li>
+</ul>
+</li>
+<li>
+<ul>
+<li>start_year:<br />
+        start_year when parsing date records without any year
+        information, assume this is the year of the first value
+        parsed.</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>max_time_jump_seconds:<br />
+        max_time_jump_seconds for detection of year wraps with
+        date formats missing year information, also the current time
+        of values has to be tracked. This value defines the window
+        within that the time may jump between two matches. When not
+        within that window, the value is still parsed, corrected to
+        the most likely value but does not change the detection
+        year.</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>timestamp_scale:<br />
+        timestamp_scale scales the seconds in %s to get seconds
+        (=1), milliseconds (=1000), microseconds (=1000000), etc.</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p>The following code simply adds a custom date_format:</p>
+<pre><code class="language-yaml">Parser:
+     - id: 'dtm'
+       type: DateTimeModelElement
+       name: 'DTM'
+       date_format: '%Y-%m-%d %H:%M:%S'
+</code></pre>
+<h3 id="debugmodelelement">DebugModelElement</h3>
+<p>This model element matches any data of length zero at any position. Thus
+it can never fail to match and can be inserted at any position in the
+parsing tree, where matching itself does not alter parsing flow (see
+e.g. FirstMatchModelElement). It will immediately write the current
+state of the match to stderr for inspection.</p>
+<pre><code class="language-yaml">Parser:
+     - id: 'dbg1'
+       type: DebugModelElement
+       name: 'DBGM'
+</code></pre>
+<h3 id="decimalfloatvaluemodelelement">DecimalFloatValueModelElement</h3>
+<p>This model element parses decimal values with optional signum, padding
+or exponent. With padding, the signum has to be found before the padding
+characters.</p>
+<ul>
+<li>
+<p><strong>value_sign_type</strong>: Defines if a value sign is required</p>
+<p>Possible values: 'none', 'optional', 'mandatory'</p>
+</li>
+<li>
+<p><strong>value_pad_type</strong>: Defines the padding, for example: "0041"</p>
+<p>Possible values: 'none', 'zero', 'blank'</p>
+</li>
+<li>
+<p><strong>exponent_type</strong>: Defines if an exponent is required</p>
+<p>Possible values: 'none', 'optional', 'mandatory'</p>
+</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+     - id: decimalFloatValueModelElement
+       type: DecimalFloatValueModelElement
+       name: 'DecimalFloatValueModelElement'
+       value_sign_type: 'optional'
+</code></pre>
+<h3 id="decimalintegervaluemodelelement">DecimalIntegerValueModelElement</h3>
+<p>This model element parses integer values with optional signum or
+padding. With padding, the signum has to be found before the padding
+characters.</p>
+<ul>
+<li>
+<p><strong>value_sign_type</strong>: Defines if a value sign is required</p>
+<p>Possible values: 'none', 'optional', 'mandatory'</p>
+</li>
+<li>
+<p><strong>value_pad_type</strong>: Defines the padding, for example: "0041"</p>
+<p>Possible values: 'none', 'zero', 'blank'</p>
+</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: minutes
+    type: DecimalIntegerValueModelElement
+    name: 'Minutes'       - id: minutes
+    type: DecimalIntegerValueModelElement
+    name: 'Minutes'
+</code></pre>
+<h3 id="delimiteddatamodelelement">DelimitedDataModelElement</h3>
+<p>This model element takes any string up to a specific delimiter string.</p>
+<ul>
+<li><strong>delimiter</strong>: defines which delimiter to use</li>
+<li><strong>escape</strong>: defines which escape bytes should be used, default is
+    non-escaped</li>
+<li><strong>consume_delimiter</strong>: defines whether the delimiter should be
+    processed with the match, default is False</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: delimitedDataModelElement
+    type: DelimitedDataModelElement
+    name: 'DelimitedDataModelElement'
+    delimiter: ';'
+</code></pre>
+<h3 id="elementvaluebranchmodelelement">ElementValueBranchModelElement</h3>
+<p>This model element selects a branch path based on a previous model
+value.</p>
+<ul>
+<li><strong>args</strong>: a string or list containing the following parameters:<ol>
+<li>value_model: defines the parsing model holding the element used
+    for branching</li>
+<li>value_path: the path of the element within the value_model
+    used for branching</li>
+</ol>
+</li>
+<li><strong>branch_model_dict</strong>: a dictionary containing the following
+    key-value pairs:<ol>
+<li>id: all possible values that can occur at the element belonging
+    to the value_path</li>
+<li>model: the parsing model to use for the matching id</li>
+</ol>
+</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: fixed1
+    type: FixedDataModelElement
+    name: 'fixed1'
+    args: 'match '
+
+  - id: fixed2
+    type: FixedDataModelElement
+    name: 'fixed2'
+    args: 'fixed String'
+
+  - id: wordlist
+    type: FixedWordlistDataModelElement
+    name: 'wordlist'
+    args:
+      - 'data: '
+      - 'string: '
+
+  - id: seq1
+    type: SequenceModelElement
+    name: 'seq1'
+    args:
+      - fixed1
+      - wordlist
+
+  - id: seq2
+    type: SequenceModelElement
+    name: 'seq2'
+    args:
+      - fixed1
+      - wordlist
+      - fixed2
+
+  - id: first
+    type: FirstMatchModelElement
+    name: 'first'
+    args:
+      - seq1
+      - seq2
+
+  - id: elementValueBranchModelElement
+    type: ElementValueBranchModelElement
+    name: 'ElementValueBranchModelElement'
+    args:
+      - first
+      - 'wordlist'
+    branch_model_dict:
+      - id: 0
+        model: decimal
+      - id: 1
+        model: fixed2
+</code></pre>
+<h3 id="firstmatchmodelelement">FirstMatchModelElement</h3>
+<p>This model element defines branches in the parser tree, where branches
+are checked from start to end of the list and the first matching branch
+is taken.</p>
+<ul>
+<li><strong>args</strong>: a list of id's of parsing elements that are possible
+    branches.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: fixed3
+    type: FixedDataModelElement
+    name: 'FixedDataModelElement'
+    args: 'The-searched-element-was-found!'
+
+  - id: fixedDME
+    type: FixedDataModelElement
+    name: 'fixedDME'
+    args: 'Any:'
+
+  - id: any
+    type: AnyByteDataModelElement
+    name: 'AnyByteDataModelElement'
+
+  - id: seq4
+    type: SequenceModelElement
+    name: 'se4'
+    args:
+      - fixedDME
+      - any
+
+  - id: firstMatchModelElement
+    type: FirstMatchModelElement
+    name: 'FirstMatchModelElement'
+    args:
+      - fixed3
+      - seq4
+</code></pre>
+<h3 id="fixeddatamodelelement">FixedDataModelElement</h3>
+<p>This model defines a fixed string.</p>
+<ul>
+<li><strong>args</strong>: a string to be matched.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: user
+    type: FixedDataModelElement
+    name: 'User'
+    args: 'User '
+</code></pre>
+<h3 id="fixedwordlistdatamodelelement">FixedWordlistDataModelElement</h3>
+<p>This model defines a choice of fixed strings from a list.</p>
+<ul>
+<li><strong>args</strong>: a list of strings of which any can match.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: status
+    type: FixedWordlistDataModelElement
+    name: 'Status'
+    args:
+      - ' logged in'
+      - ' logged out'
+</code></pre>
+<h3 id="hexstringmodelelement">HexStringModelElement</h3>
+<p>This model defines a hex string of arbitrary length.</p>
+<ul>
+<li><strong>args</strong>: upper_case: a bool that defines whether the characters in
+    the hex string are upper or lower case, default is False (lower
+    case)</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: hexStringModelElement
+    type: HexStringModelElement
+    name: 'HexStringModelElement'
+</code></pre>
+<h3 id="ipaddressdatamodelelement">IpAddressDataModelElement</h3>
+<p>This model defines an IP address.</p>
+<ul>
+<li><strong>args</strong>: ipv6: a bool that defines whether the IP address is of
+    IPv4 or IPv6 format, default is False (IPv4)</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: ipAddressDataModelElement
+    type: IpAddressDataModelElement
+    name: 'IpAddressDataModelElement'
+</code></pre>
+<h3 id="jsonmodelelement">JsonModelElement</h3>
+<p>This model defines a json-formatted log line. This model is usually used
+as a start element and with json_format: True set in the Input section
+of the config.yml.</p>
+<ul>
+<li><strong>key_parser_dict</strong>: a dictionary of keys as defined in the
+    json-formatted logs and appropriate parser models as values</li>
+<li><strong>optional_key_prefix</strong>: a string that can be used as a prefix for
+    keys that are optional in the json schema. Default:
+    "optional_key_"</li>
+<li><strong>nullable_key_prefix</strong>: a string that can be used as a prefix for
+    keys where null-values are allowed in the json schema. Default: "+"</li>
+<li><strong>allow_all_fields</strong>: defines if all keys can be optional.
+    Default: False</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: _scroll_id
+    type: Base64StringModelElement
+    name: '_scroll_id'
+
+  - id: took
+    type: DecimalIntegerValueModelElement
+    name: 'took'
+
+  - id: value
+    type: DecimalIntegerValueModelElement
+    name: 'value'
+
+  - id: _index
+    type: DateTimeModelElement
+    name: '_index'
+    date_format: 'aminer-statusinfo-%Y.%m.%d'
+
+  - id: _type
+    type: FixedDataModelElement
+    name: '_type'
+    args: '_doc'
+
+  - id: json
+    start: True
+    type: JsonModelElement
+    name: 'model'
+    allow_all_fields: False
+    optional_key_prefix: &quot;*&quot;
+    nullable_key_prefix: &quot;+&quot;
+    key_parser_dict:
+      _scroll_id: _scroll_id
+      *took: took
+      hits:
+        total:
+          +value: value
+        hits:
+          - _index: _index
+            _type: _type
+</code></pre>
+<h3 id="jsonstringmodelelement">JsonStringModelElement</h3>
+<p>This model parses json-strings very quickly and robust. This parser
+generates verbose debug-logs when aminer was started with debug-level 2</p>
+<ul>
+<li><strong>key_parser_dict</strong>: a dictionary of keys as defined in the
+    json-formatted logs and appropriate parser models as values</li>
+<li><strong>strict</strong>: If strict is set to true all keys must be defined. The
+    parser will fail if the logdata has a json-key that is not defined
+    in the <strong>key_parser_dict</strong></li>
+<li><strong>ignore_null</strong>: This parameter controlls how to handle
+    "null"-values. If set to True it will simply ignore keys with
+    null-values. If set to False it will pass an empty string to the
+    subparser. Default is <strong>True</strong></li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+   - id: agent
+     type: VariableByteDataModelElement
+     name: 'agent'
+     args: ' !&quot;#$%&amp;*=+,-./0123456789:;&lt;&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]()^_`abcdefghijklmnopqrstuvwxyz{|}~'
+
+   - id: timestamp_model
+     type: DateTimeModelElement
+     name: 'timestamp'
+     date_format: '%Y-%m-%dT%H:%M:%S+00:00'
+
+   - id: optional_model
+     type: OptionalMatchModelElement
+     name: 'opt'
+     args: timestamp_model
+
+   - id: 'START'
+     start: True
+     type: JsonStringModelElement
+     name: accesslog
+     strict: True
+     ignore_null: False
+     key_parser_dict:
+       &quot;time&quot;: optional_model
+       &quot;agent&quot;: agent
+</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This parser does not work with multiline json-logs</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Use OptionalMatchModelElement to make the subparser optional with
+null-values</p>
+</div>
+<h3 id="optionalmatchmodelelement">OptionalMatchModelElement</h3>
+<p>This model allows to define optional model elements.</p>
+<ul>
+<li><strong>args</strong>: the id of the optional element that will be skipped if it
+    does not match</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: user
+    type: FixedDataModelElement
+    name: 'User'
+    args: 'User '
+
+  - id: opt
+    type: OptionalMatchModelElement
+    name: 'opt'
+    args: user
+</code></pre>
+<h3 id="repeatedelementdatamodelelement">RepeatedElementDataModelElement</h3>
+<p>This model allows to define elements that repeat a number of times.</p>
+<ul>
+<li><strong>args</strong>: a string or list containing the following parameters:<ol>
+<li>repeated_element: id of element which is repeated</li>
+<li>min_repeat: minimum amount of times the repeated element has to
+    occur, default is 1</li>
+<li>max_repeat: minimum amount of times the repeated element has to
+    occur, default is 1048576</li>
+</ol>
+</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: delimitedDataModelElement
+    type: DelimitedDataModelElement
+    name: 'DelimitedDataModelElement'
+    consume_delimiter: True
+    delimiter: ';'
+
+  - id: repeatedElementDataModelElement
+    type: RepeatedElementDataModelElement
+    name: 'RepeatedElementDataModelElement'
+    args:
+      - sequenceModelElement
+      - 3
+</code></pre>
+<h3 id="sequencemodelelement">SequenceModelElement</h3>
+<p>This model defines a sequence of elements that all have to match.</p>
+<ul>
+<li><strong>args</strong>: a list of elements that form the sequence</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: user
+    type: FixedDataModelElement
+    name: 'User'
+    args: 'User '
+
+  - id: username
+    type: DelimitedDataModelElement
+    name: 'Username'
+    consume_delimiter: True
+    delimiter: ' '
+
+  - id: ip
+    type: IpAddressDataModelElement
+    name: 'IP'
+
+  - id: seq
+    type: SequenceModelElement
+    name: 'seq'
+    args:
+      - user
+      - username
+      - ip
+</code></pre>
+<h3 id="variablebytedatamodelelement">VariableByteDataModelElement</h3>
+<p>This model defines a string of character bytes with variable length from
+a given alphabet.</p>
+<ul>
+<li><strong>args</strong>: string specifying the allowed characters</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: version
+    type: VariableByteDataModelElement
+    name: 'version'
+    args: '0123456789.'
+</code></pre>
+<h3 id="whitespacelimiteddatamodelelement">WhiteSpaceLimitedDataModelElement</h3>
+<p>This model defines a string that is delimited by a white space.</p>
+<pre><code class="language-yaml">Parser:
+  - id: whiteSpaceLimitedDataModelElement
+    type: WhiteSpaceLimitedDataModelElement
+    name: 'WhiteSpaceLimitedDataModelElement'
+</code></pre>
+<h3 id="xmlmodelelement">XmlModelElement</h3>
+<p>This model defines a xml-formatted log line. This model is usually used
+as a start element and with xml_format: True set in the Input section
+of the config.yml.</p>
+<ul>
+<li><strong>key_parser_dict</strong>: a dictionary of keys as defined in the
+    xml-formatted logs and appropriate parser models as values</li>
+<li><strong>attribute_prefix</strong>: a string that marks the element as an
+    attribute of an element in the xml schema. Default: "+"</li>
+<li><strong>optional_attribute_prefix</strong>: a string that can be used as a
+    prefix for attributes that are optional in the xml schema. Default:
+    "_"</li>
+<li><strong>empty_allowed_prefix</strong>: a string that can be used as a prefix
+    for elements where empty values are allowed in the xml schema.
+    Default: "?"</li>
+<li><strong>xml_header_expected</strong>: defines whether a xml-header is expected.
+    Default: False</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Parser:
+  - id: id
+    type: DecimalIntegerValueModelElement
+    name: 'id'
+
+  - id: opt
+    type: FixedDataModelElement
+    name: 'opt'
+    args: 'text'
+
+  - id: to
+    type: AnyByteDataModelElement
+    name: 'to'
+
+  - id: from
+    type: AnyByteDataModelElement
+    name: 'from'
+
+  - id: heading
+    type: AnyByteDataModelElement
+    name: 'heading'
+
+  - id: text1
+    type: AnyByteDataModelElement
+    name: 'text1'
+
+  - id: text2
+    type: AnyByteDataModelElement
+    name: 'text2'
+
+  - id: xml
+    start: True
+    type: XmlModelElement
+    name: 'model'
+    xml_header_expected: True
+    key_parser_dict:
+      messages:
+        - note:
+            +id: id
+            _+opt: opt
+            to: to
+            from: from
+            ?heading: heading
+            body:
+              text1: text1
+              text2: text2
+</code></pre>
+<h2 id="analysing">Analysing</h2>
+<p>All detectors have the following parameters and may have additional
+specific parameters that are defined in the respective sections.</p>
+<ul>
+<li><strong>id</strong>: must be a unique string</li>
+<li><strong>type</strong>: must be an existing Analysis component (required)</li>
+</ul>
+<h3 id="allowlistviolationdetector">AllowlistViolationDetector</h3>
+<p>This module defines a detector for log atoms not matching any
+allowlisted rule.</p>
+<ul>
+<li><strong>allowlist_rules</strong>: list of rules executed in same way as inside
+    Rules.OrMatchRule.list of rules executed in same way as inside
+    Rules.OrMatchRule (required, list of strings, defaults to empty
+    list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>output_event_handlers</strong>: a list of event handler identifiers
+    that the detector should forward the anomalies to (list of strings,
+    defaults to empty list).</li>
+<li><strong>output_logline</strong>: a boolean that specifies whether full log event
+    parsing information should be appended to the anomaly when set to
+    True (boolean, defaults to False).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: PathExistsMatchRule
+     id: path_exists_match_rule1
+     path: &quot;/model/LoginDetails/PastTime/Time/Minutes&quot;
+
+   - type: ValueMatchRule
+     id: value_match_rule
+     path: &quot;/model/LoginDetails/Username&quot;
+     value: &quot;root&quot;
+
+   - type: OrMatchRule
+     id: or_match_rule
+     sub_rules:
+       - &quot;path_exists_match_rule1&quot;
+       - &quot;value_match_rule&quot;
+
+   - type: AllowlistViolationDetector
+     id: Allowlist
+     allowlist_rules:
+       - &quot;or_match_rule&quot;
+</code></pre>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a href="#matchrules">MatchRules</a></p>
+</div>
+<h3 id="charsetdetector">CharsetDetector</h3>
+<p>This detector generates anomalies for new characters in parsed elements
+and extends the allowed alphabet when learning is active.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed; multiple paths mean
+    that all values occurring in these paths are considered for
+    character detection (required, list of strings).</li>
+<li><strong>id_path_list</strong> list of strings that specify group identifiers
+    for which alphabets should be learned (list of strings, defaults to
+    empty list).</li>
+<li><strong>persistence_id</strong> the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>learn_mode</strong> specifies whether value ranges should be extended
+    when values outside of ranges are observed (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean).</li>
+<li><strong>ignore_list</strong>: a list of parser paths that are ignored for
+    analysis by this detector (list of strings, defaults to empty list).</li>
+<li><strong>constraint_list</strong>: a list of parser paths that the detector will
+    be constrained to, i.e., other branches of the parser tree are
+    ignored (list of strings, defaults to empty list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>output_event_handlers</strong>: a list of event handler identifiers
+    that the detector should forward the anomalies to (list of strings,
+    defaults to empty list).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'CharsetDetector'
+     paths:
+       - '/parser/value'
+     learn_mode: True
+</code></pre>
+<h3 id="enhancednewmatchpathvaluecombodetector">EnhancedNewMatchPathValueComboDetector</h3>
+<p>In addition to detecting new value combination (see
+NewMatchPathValueComboDetector), this detector also stores combo
+occurrence times and amounts, and allows to execute functions on tuples
+that need to be defined in the python code first.</p>
+<ul>
+<li><strong>paths</strong>: the list of values to extract from each match to create
+    the value combination to be checked (required, list of strings).</li>
+<li><strong>allow_missing_values</strong>: when set to True, the detector will also
+    use matches, where one of the paths from target_path_list does not
+    refer to an existing parsed data object (boolean, defaults to
+    False).</li>
+<li><strong>tuple_transformation_function</strong>: when not None, this function
+    will be invoked on each extracted value combination list to
+    transform it. It may modify the list directly or create a new one to
+    return it (string, defaults to None).</li>
+<li><strong>learn_mode</strong>: when set to True, this detector will report a new
+    value only the first time before including it in the known values
+    set automatically (boolean).</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>output_event_handlers</strong>: a list of event handler identifiers
+    that the detector should forward the anomalies to (list of strings,
+    defaults to empty list).</li>
+<li><strong>output_logline</strong>: a boolean that specifies whether full log event
+    parsing information should be appended to the anomaly when set to
+    True (boolean, defaults to False).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: EnhancedNewMatchPathValueComboDetector
+     id: EnhancedNewValueCombo
+     paths:
+       - &quot;/model/DailyCron/UName&quot;
+       - &quot;/model/DailyCron/JobNumber&quot;
+     tuple_transformation_function: &quot;demo&quot;
+     learn_mode: True
+</code></pre>
+<h3 id="entropydetector">EntropyDetector</h3>
+<p>This detector monitors and learns occurrence probabilities of character
+pairs in values. Many unlikely character pairs in values suggest that
+they are randomly generated or not fitting the learned character
+patterns.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that all values occurring in these paths are considered as if they
+    occur in the same field (required, list of strings).</li>
+<li><strong>prob_thresh</strong> limit for the average probability of character
+    pairs for which anomalies are reported (float, defaults to 0.05).</li>
+<li><strong>default_probs</strong> initializes the probabilities with default values
+    from <a href="https://github.com/markbaggett/freq">https://github.com/markbaggett/freq</a> (boolean, defaults to
+    False).</li>
+<li><strong>skip_repetitions</strong> boolean that determines whether only distinct
+    values are used for character pair counting. This counteracts the
+    problem of imbalanced word frequencies that distort the frequency
+    table generated in a single aminer run (boolean, defaults to False).</li>
+<li><strong>persistence_id</strong> name of persistency document (string, defaults
+    to "Default").</li>
+<li><strong>learn_mode</strong> when set to True, the detector will extend the table
+    of character pair frequencies based on new values (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>output_event_handlers</strong>: a list of event handler identifiers
+    that the detector should forward the anomalies to (list of strings,
+    defaults to empty list).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'EntropyDetector'
+     paths:
+       - '/parser/value'
+     prob_thresh: 0.05
+     default_freqs: false
+     skip_repetitions: false
+     learn_mode: True
+</code></pre>
+<h3 id="eventcorrelationdetector">EventCorrelationDetector</h3>
+<p>This module defines an evaluator and generator for event rules. The
+overall idea of generation is 1. For each processed event A, randomly
+select another event B occurring within queue_delta_time. 2. If B
+chronologically occurs after A, create the hypothesis A =&gt; B (observing
+event A implies that event B must be observed within
+current_time+queue_delta_time). If B chronologically occurs before A,
+create the hypothesis B \&lt;= A (observing event A implies that event B
+must be observed within currentTime-queueDeltaTime). 3. Observe for a
+long time (max_observations) whether the hypothesis holds. 4. If the
+hypothesis holds, transform it to a rule. Otherwise, discard the
+hypothesis.</p>
+<ul>
+<li><strong>paths</strong>: a list of paths where values or value combinations used
+    for correlation occur. If this parameter is not set, correlation is
+    done on event types instead (list of strings, defaults to empty
+    list).</li>
+<li><strong>output_event_handlers</strong>: a list of event handler identifiers
+    that the detector should forward the anomalies to (list of strings,
+    defaults to empty list).</li>
+<li><strong>max_hypotheses</strong> maximum amount of hypotheses and rules hold in
+    memory (integer, defaults to 1000).</li>
+<li><strong>hypothesis_max_delta_time</strong> time span in seconds of events
+    considered for hypothesis generation (float, defaults to 5.0).</li>
+<li><strong>generation_probability</strong> probability in [0, 1] that currently
+    processed log line is considered for hypothesis with each of the
+    candidates (float, defaults to 1.0).</li>
+<li><strong>generation_factor</strong> likelihood in [0, 1] that currently
+    processed log line is added to the set of candidates for hypothesis
+    generation (float, defaults to 1.0).</li>
+<li><strong>max_observations</strong> maximum amount of evaluations before
+    hypothesis is transformed into a rule or discarded or rule is
+    evaluated (integer, defaults to 500).</li>
+<li><strong>p0</strong> expected value for hypothesis evaluation distribution (float,
+    defaults to 0.9).</li>
+<li><strong>alpha</strong> confidence value for hypothesis evaluation (float,
+    defaults to 0.05).</li>
+<li><strong>candidates_size</strong> maximum number of stored candidates used for
+    hypothesis generation (integer, defaults to 10).</li>
+<li><strong>hypotheses_eval_delta_time</strong> duration in seconds between
+    hypothesis evaluation phases that remove old hypotheses that are
+    likely to remain unused (float, 120.0).</li>
+<li><strong>delta_time_to_discard_hypothesis</strong> time span in seconds
+    required for old hypotheses to be discarded (float, defaults to
+    180.0).</li>
+<li><strong>check_rules_flag</strong> specifies whether existing rules are
+    evaluated (boolean, defaults to True).</li>
+<li><strong>ignore_list</strong>: a list of parser paths that are ignored for
+    analysis by this detector (list of strings, defaults to empty list).</li>
+<li><strong>constraint_list</strong>: a list of parser paths that the detector will
+    be constrained to, i.e., other branches of the parser tree are
+    ignored (list of strings, defaults to empty list).</li>
+<li><strong>output_logline</strong>: a boolean that specifies whether full log event
+    parsing information should be appended to the anomaly when set to
+    True (boolean, defaults to False).</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>learn_mode</strong>: specifies whether new hypotheses and rules are
+    generated (boolean).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: EventCorrelationDetector
+     id: EventCorrelationDetector
+     check_rules_flag: True
+     hypothesis_max_delta_time: 1.0
+     learn_mode: True
+</code></pre>
+<h3 id="eventcountclusterdetector">EventCountClusterDetector</h3>
+<p>This module defines a detector that clusters count vectors of event and
+value occurrences.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values are analyzed by their combined occurrences. When no
+    paths are specified, the events given by the full path list are
+    analyzed (list of strings, defaults to empty list).</li>
+<li><strong>output_event_handlers</strong> for handling events, e.g., print events
+    to stdout (list of strings, defaults to empty list).</li>
+<li><strong>window_size</strong> the length of the time window for counting in
+    seconds (float, defaults to 600).</li>
+<li><strong>id_path_list</strong> parser paths of values for which separate count
+    vectors should be generated (list of strings, defaults to empty
+    list).</li>
+<li><strong>num_windows</strong> the number of vectors stored in the models
+    (integer, defaults to 50).</li>
+<li><strong>confidence_factor</strong> minimum similarity threshold in range [0,
+    1] for detection (float, defaults to 0.33).</li>
+<li><strong>idf</strong> when true, value counts are weighted higher when they occur
+    with fewer id_paths (requires that id_path_list is set) (boolean,
+    defaults to False).</li>
+<li><strong>norm</strong> when true, count vectors are normalized so that only
+    relative occurrence frequencies matter for detection (boolean,
+    defaults to False).</li>
+<li><strong>add_normal</strong> when true, count vectors are also added to the model
+    when they exceed the similarity threshold (boolean, defaults to
+    False).</li>
+<li><strong>check_empty_windows</strong> when true, empty count vectors are
+    generated for time windows without event occurrences (boolean,
+    defaults to False).</li>
+<li><strong>persistence_id</strong> name of persistence document (string, defaults
+    to "Default").</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>ignore_list list</strong> of paths that are not considered for analysis,
+    i.e., events that contain one of these paths are omitted. The
+    default value is [] as None is not iterable (list of strings,
+    defaults to empty list).</li>
+<li><strong>constraint_list</strong> list of paths that have to be present in the
+    log atom to be analyzed (list of strings, defaults to empty list).</li>
+<li><strong>stop_learning_time</strong> switch the learn_mode to False after the
+    time (float, defaults to None).</li>
+<li><strong>stop_learning_no_anomaly_time</strong> switch the learn_mode to
+    False after no anomaly was detected for that time (float, defaults
+    to None).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - id: &quot;eccd&quot;
+     type: &quot;EventCountClusterDetector&quot;
+     window_size: 10
+     idf: True
+     confidence_factor: 0.7
+     id_path_list:
+        - '/parser/idp'
+     paths:
+        - '/parser/val'
+</code></pre>
+<h3 id="eventfrequencydetector">EventFrequencyDetector</h3>
+<p>This module defines a detector for event and value frequency deviations.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values are analyzed by their combined occurrences. When no
+    paths are specified, the events given by the full path list are
+    analyzed (list of strings, defaults to empty list).</li>
+<li><strong>scoring_path_list</strong> parser paths of values to be analyzed by
+    following event handlers like the ScoringEventHandler. Multiple
+    paths mean that values are analyzed by their combined occurrences.</li>
+<li><strong>unique_path_list</strong> parser paths of values where only unique
+    value occurrences should be counted for every value occurring at
+    paths.</li>
+<li><strong>output_event_handlers</strong> for handling events, e.g., print events
+    to stdout (list of strings, defaults to empty list).</li>
+<li><strong>window_size</strong> the length of the time window for counting in
+    seconds (float, defaults to 600).</li>
+<li><strong>num_windows</strong> the number of previous time windows considered for
+    expected frequency estimation (integer, defaults to 50).</li>
+<li><strong>confidence_factor</strong> defines range of tolerable deviation of
+    measured frequency from expected frequency according to
+    occurrences_mean +- occurrences_std / self.confidence_factor.
+    Default value is 0.33 = 3 * sigma deviation. confidence_factor
+    must be in range [0, 1] (float, defaults to 0.33).</li>
+<li><strong>empty_window_warnings</strong> whether anomalies should be generated
+    for too small window sizes.</li>
+<li><strong>early_exceeding_anomaly_output</strong> states if a anomaly should be
+    raised the first time the appearance count exceedes the range.</li>
+<li><strong>set_lower_limit</strong> sets the lower limit of the frequency test to
+    the specified value.</li>
+<li><strong>set_upper_limit</strong> sets the upper limit of the frequency test to
+    the specified value.</li>
+<li><strong>season</strong> the seasonality/periodicity of the time-series in
+    seconds.</li>
+<li><strong>learn_mode</strong> specifies whether new frequency measurements
+    override ground truth frequencies (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for analysis,
+    i.e., events that contain one of these paths are omitted (list of
+    strings, defaults to empty list).</li>
+<li><strong>constraint_list</strong> list of paths that have to be present in the
+    log atom to be analyzed (list of strings, defaults to empty list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: EventFrequencyDetector
+     id: EventFrequencyDetector
+     window_size: 10
+</code></pre>
+<h3 id="eventsequencedetector">EventSequenceDetector</h3>
+<p>This module defines an detector for event and value sequences. The
+concept is based on STIDE which was first published by Forrest et al.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values are analyzed by their combined occurrences. When no
+    paths are specified, the events given by the full path list are
+    analyzed (list of strings, defaults to empty list).</li>
+<li><strong>output_event_handlers</strong> for handling events, e.g., print events
+    to stdout (list of strings, defaults to empty list).</li>
+<li><strong>id_path_list</strong> one or more paths that specify the trace of the
+    sequence detection, i.e., incorrect sequences that are generated by
+    interleaved events can be avoided when event sequence identifiers
+    are available (list of strings, defaults to empty list).</li>
+<li><strong>seq_len</strong> the length of the sequences to be learned (larger
+    lengths increase precision, but may overfit the data). (integer,
+    defaults to 3).</li>
+<li><strong>learn_mode</strong> specifies whether newly observed sequences should be
+    added to the learned model (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for analysis,
+    i.e., events that contain one of these paths are omitted (list of
+    strings, defaults to empty list).</li>
+<li><strong>constraint_list</strong> list of paths that have to be present in the
+    log atom to be analyzed (list of strings, defaults to empty list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: EventSequenceDetector
+     id: EventSequenceDetector
+     seq_len: 4
+     paths:
+       - '/model/type/syscall/syscall'
+     id_path_list:
+       - '/model/type/syscall/id'
+</code></pre>
+<h3 id="eventtypedetector">EventTypeDetector</h3>
+<p>This component serves as a basis for the VariableTypeDetector,
+VariableCorrelationDetector, TSAArimaDetector and PathArimaDetector. It
+saves a list of the values to the single paths and tracks the time for
+the TSAArimaDetector.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed (list of strings,
+    defaults to empty list).</li>
+<li><strong>id_path_list</strong> one or more paths that specify the trace of the
+    sequence detection, i.e., incorrect sequences that are generated by
+    interleaved events can be avoided when event sequence identifiers
+    are available (list of strings, defaults to empty list).</li>
+<li><strong>allow_missing_id</strong> specifies whether log atoms without id path
+    should be omitted (boolean, defaults to False. only if id path is
+    set).</li>
+<li><strong>allowed_id_tuples</strong> list of the allowed id tuples. Log atoms
+    with id tuples not in this list are not analyzed, when this list is
+    not empty.</li>
+<li><strong>persistence_id</strong> the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>max_num_vals</strong> maximum number of lines in the value list before
+    it is reduced (integer, defaults to 1500).</li>
+<li><strong>min_num_vals</strong> number of the values which the list is being
+    reduced to (integer, defaults to 1000).</li>
+<li><strong>save_values</strong> if False the values of the paths are not saved for
+    further analysis. The values are not needed for the TSAArimaDetector
+    (boolean, defaults to True).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'EventTypeDetector'
+     id: ETD
+     id_path_list:
+       - '/model/type/syscall/id'
+     allow_missing_id: True
+     save_values: False
+</code></pre>
+<h3 id="histogramanalysis">HistogramAnalysis</h3>
+<p>This component performs a histogram analysis on one or more input
+properties. The properties are parsed values denoted by their parsing
+path. Those values are then handed over to the selected "binning
+function", that calculates the histogram bin.</p>
+<ul>
+<li>Binning:</li>
+</ul>
+<p>Binning can be done using one of the predefined binning functions or by
+creating own subclasses from "HistogramAnalysis.BinDefinition".</p>
+<blockquote>
+<ul>
+<li>LinearNumericBinDefinition: Binning function working on numeric
+    values and sorting them into bins of same size.</li>
+<li>ModuloTimeBinDefinition: Binning function working on parsed
+    datetime values but applying a modulo function to them. This is
+    useful for analysis of periodic activities.</li>
+</ul>
+</blockquote>
+<ul>
+<li><strong>histogram_defs</strong>: list of tuples. First element of the tuple
+    contains the target property path to analyze. The second element
+    contains the id of a bin_definition(LinearNumericBinDefinition or
+    ModuloTimeBinDefinition). List(strings) <strong>Required</strong></li>
+<li><strong>report_interval</strong>: Report_interval delay in seconds between
+    creaton of two reports. The parameter is applied to the parsed
+    record data time, not the system time. Hence reports can be delayed
+    when no data is received. Integer(min: 1) <strong>Required</strong></li>
+<li><strong>reset_after_report_flag</strong>: Zero counters after the report was
+    sent. Boolean(Default: true)</li>
+<li><strong>persistence_id'</strong>: the name of the file where the learned models
+    are stored. String(Default: 'Default')</li>
+<li><strong>output_logline</strong>: specifies whether the full parsed log atom
+    should be provided in the output. Boolean(Default: false)</li>
+<li><strong>output_event_handlers</strong>: List of event-handler-id to send the
+    report to. List(strings)</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True. Boolean(Default: false)</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: LinearNumericBinDefinition
+     id: linear_numeric_bin_definition
+     lower_limit: 50
+     bin_size: 5
+     bin_count: 20
+     outlier_bins_flag: True
+
+   - type: HistogramAnalysis
+     id: HistogramAnalysis
+     histogram_defs: [[&quot;/model/RandomTime/Random&quot;, &quot;linear_numeric_bin_definition&quot;]]
+     report_interval: 10
+</code></pre>
+<h3 id="pathdependenthistogramanalysis">PathDependentHistogramAnalysis</h3>
+<p>This component creates a histogram for only a single input property,
+e.g. an IP address, but for each group of correlated match pathes.
+Assume there two pathes that include the input property but they
+separate after the property was found on the path. This might be for
+example the client IP address in ssh log atoms, where the parsing path
+may split depending if this was a log atom for a successful login,
+logout or some error. This analysis component will then create separate
+histograms, one for the path common to all atoms and one for each
+disjunct part of the subpathes found.</p>
+<p>The component uses the same binning functions as the standard
+HistogramAnalysis.HistogramAnalysis, see documentation there.</p>
+<ul>
+<li><strong>path</strong>: The property-path. String(Required)</li>
+<li><strong>bin_definition</strong>: The id of a
+    bin_definition(LinearNumericBinDefini tion or
+    ModuloTimeBinDefinition). String(Required)</li>
+<li><strong>report_interval</strong>: Report_interval delay in seconds between
+    creaton of two reports. The parameter is applied to the parsed
+    record data time, not the system time. Hence reports can be delayed
+    when no data is received. Integer(min: 1)</li>
+<li><strong>reset_after_report_flag</strong>: Zero counters after the report was
+    sent. Boolean(Default: true)</li>
+<li><strong>persistence_id'</strong>: the name of the file where the learned models
+    are stored. String(Default: 'Default')</li>
+<li><strong>output_logline</strong>: specifies whether the full parsed log atom
+    should be provided in the output. Boolean(Default: false)</li>
+<li><strong>output_event_handlers</strong>: List of event-handler-id to send the
+    report to List(strings).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True. Boolean(Default: false)</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: ModuloTimeBinDefinition
+     id: modulo_time_bin_definition
+     modulo_value: 86400
+     time_unit: 3600
+     lower_limit: 0
+     bin_size: 1
+     bin_count: 24
+     outlier_bins_flag: True
+
+   - type: PathDependentHistogramAnalysis
+     id: PathDependentHistogramAnalysis
+     path: &quot;/model/RandomTime&quot;
+     bin_definition: &quot;modulo_time_bin_definition&quot;
+     report_interval: 10
+</code></pre>
+<h3 id="linearnumericbindefinition">LinearNumericBinDefinition</h3>
+<p>Binning function working on numeric values and sorting them into bins of
+same size.</p>
+<ul>
+<li><strong>lower_limit</strong>: Start on lowest bin. Integer or Float <strong>Required</strong></li>
+<li><strong>bin_size</strong>: Size of bin in reporting units. Integer(min 1)
+    <strong>Required</strong></li>
+<li><strong>bin_count</strong>: Number of bins. Integer(min 1) <strong>Required</strong></li>
+<li><strong>outlier_bins_flag</strong>: Disable outlier bins. Boolean. Default:
+    False</li>
+<li><strong>output_event_handlers</strong>: List of handlers to send the report to.</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: LinearNumericBinDefinition
+     id: linear_numeric_bin_definition
+     lower_limit: 50
+     bin_size: 5
+     bin_count: 20
+     outlier_bins_flag: True
+</code></pre>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a href="#histogramanalysis">HistogramAnalysis</a></p>
+</div>
+<h3 id="modulotimebindefinition">ModuloTimeBinDefinition</h3>
+<p>Binning function working on parsed datetime values but applying a modulo
+function to them. This is useful for analysis of periodic activities.</p>
+<ul>
+<li><strong>modulo_value</strong>: Modulo values in seconds.</li>
+<li><strong>time_unit</strong>: Division factor to get down to reporting unit</li>
+<li><strong>lower_limit</strong>: Start on lowest bin. Integer or Float <strong>Required</strong></li>
+<li><strong>bin_size</strong>: Size of bin in reporting units. Size of bin in
+    reporting units. Integer(min 1) <strong>Required</strong></li>
+<li><strong>bin_count</strong>: Number of bins. Integer(min 1) <strong>Required</strong></li>
+<li><strong>outlier_bins_flag</strong>: Disable outlier bins. Boolean. Default:
+    False</li>
+<li><strong>output_event_handlers</strong>: List of handlers to send the report to.</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: ModuloTimeBinDefinition
+     id: modulo_time_bin_definition
+     modulo_value: 86400
+     time_unit: 3600
+     lower_limit: 0
+     bin_size: 1
+     bin_count: 24
+     outlier_bins_flag: True
+</code></pre>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a href="#pathdependenthistogramanalysis">PathDependentHistogramAnalysis</a></p>
+</div>
+<h3 id="matchfilter">MatchFilter</h3>
+<p>This component creates events for specified paths and values.</p>
+<ul>
+<li><strong>paths</strong>: List of paths defined as strings(Required)</li>
+<li><strong>value_list</strong>: List of values(Required)</li>
+<li><strong>output_logline</strong>: Defines if logline should be added to the
+    output. Boolean(Default: False)</li>
+<li><strong>output_event_handlers</strong>: List of strings with id's of the
+    event_handlers</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: MatchFilter
+     id: MatchFilter
+     paths:
+       - &quot;/model/Random&quot;
+     value_list:
+       - 1
+       - 10
+       - 100
+</code></pre>
+<h3 id="matchvalueaveragechangedetector">MatchValueAverageChangeDetector</h3>
+<p>This detector calculates the average of a given list of values to
+monitor. Reports are generated if the average of the latest diverges
+significantly from the values observed before.</p>
+<ul>
+<li><strong>timestamp_path</strong>: Use this path value for timestamp based bins.
+    String (<strong>required</strong>)</li>
+<li><strong>paths</strong>: List of match paths to analyze in this detector. List of
+    strings( <strong>required</strong>)</li>
+<li><strong>min_bin_elements</strong>: Evaluate the latest bin only after at least
+    that number of elements was added to it. Integer, min: 1
+    (<strong>required</strong>)</li>
+<li><strong>min_bin_time</strong>: Evaluate the latest bin only when the first
+    element is received after min_bin_time has elapsed. Integer, min:
+    1 (<strong>required</strong>)</li>
+<li><strong>avg_factor</strong> the maximum allowed deviation for the average value
+    before an anomaly is raised. Float, default: 1</li>
+<li><strong>var_factor</strong> the maximum allowed deviation for the variance of
+    the value before an anomaly is raised. Float, default: 2</li>
+<li><strong>debug_mode</strong>: Enables debug output. Boolean(Default: False)</li>
+<li><strong>persistence_id</strong>: The name of the file where the learned models
+    are stored. String</li>
+<li><strong>output_logline</strong>: Defines if logline should be added to the
+    output. Boolean(Default: False)</li>
+<li><strong>output_event_handlers</strong>: List of strings with id's of the
+    event_handlers</li>
+<li><strong>suppress</strong>: A boolean that suppresses anomaly output of that
+    detector when set to True.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: MatchValueAverageChangeDetector
+     id: MatchValueAverageChange
+     timestamp_path: None
+     paths:
+       - &quot;/model/Random&quot;
+     min_bin_elements: 100
+     min_bin_time: 10
+</code></pre>
+<h3 id="matchvaluestreamwriter">MatchValueStreamWriter</h3>
+<p>This component extracts values from a given match and writes them to a
+stream. This can be used to forward these values to another program
+(when stream is a wrapped network socket) or to a file for further
+analysis. A stream is used instead of a file descriptor to increase
+performance. To flush it from time to time, add the writer object also
+to the time trigger list.</p>
+<ul>
+<li><strong>stream</strong>: Stream to write the value of the match to. Possible
+    values: 'sys.stdout' or 'sys.stderr' ( <strong>required</strong>)</li>
+<li><strong>paths</strong>: List of match paths to analyze in this detector. List of
+    strings( <strong>required</strong>)</li>
+<li><strong>separator</strong>: Use this string as a seperator for the output. String
+    ( <strong>required</strong>)</li>
+<li><strong>missing_value_string</strong>: Write this string if the value is
+    missing. ( <strong>required</strong>)</li>
+<li><strong>output_event_handlers</strong>: List of strings with id's of the
+    event_handlers</li>
+<li><strong>suppress</strong>: A boolean that suppresses anomaly output of that
+    detector when set to True.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: MatchValueStreamWriter
+     id: MatchValueStreamWriter
+     stream: &quot;sys.stdout&quot;
+     paths:
+       - &quot;/model/Sensors/CPUTemp&quot;
+       - &quot;/model/Sensors/CPUWorkload&quot;
+       - &quot;/model/Sensors/DTM&quot;
+</code></pre>
+<h3 id="minimaltransitiontimedetector">MinimalTransitionTimeDetector</h3>
+<p>This module defines an detector for minimal transition times between
+states (e.g. value combinations of stated paths).</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values are analyzed by their combined occurrences. When no
+    paths are specified, the events given by the full path list are
+    analyzed (list of strings, <strong>required</strong>).</li>
+<li><strong>id_path_list</strong> parser paths where id values can be stored in all
+    relevant log event types (list of strings, <strong>required</strong>).</li>
+<li><strong>ignore_list</strong> parser paths that are not considered for analysis,
+    i.e., events that contain one of these paths are omitted. The
+    default value is [] as None is not iterable (list of strings,
+    default: []).</li>
+<li><strong>allow_missing_id</strong> when set to True, the detector will also use
+    matches, where one of the paths from target_path_list does not
+    refer to an existing parsed data object (boolean, default: False).</li>
+<li><strong>num_log_lines_solidify_matrix</strong> number of processed log lines
+    after which the matrix is solidified. This process is periodically
+    repeated (integer, default: 10000).</li>
+<li><strong>time_output_threshold</strong> threshold for the tested minimal
+    transition time which has to be exceeded to be tested (float,
+    default: 0).</li>
+<li><strong>anomaly_threshold</strong> threshold for the confidence which must be
+    exceeded to raise an anomaly (float, default: 0.05).</li>
+<li><strong>persistence_id</strong> name of persistency document (string, default:
+    'Default').</li>
+<li><strong>learn_mode</strong> specifies whether newly observed sequences should be
+    added to the learned model (boolean, default: True).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, default: False).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: MinimalTransitionTimeDetector
+     id: MinimalTransitionTimeDetector
+     paths:
+       - '/model/type/syscall/syscall'
+     id_path_list:
+       - '/model/type/syscall/id'
+     anomaly_threshold: 0.05
+</code></pre>
+<h3 id="missingmatchpathvaluedetector">MissingMatchPathValueDetector</h3>
+<p>This component creates events when an expected value is not seen within
+a given timespan. For example because the service was deactivated or
+logging disabled unexpectedly. This is complementary to the function
+provided by NewMatchPathValueDetector. For each unique value extracted
+by target_path_list, a tracking record is added to
+expected_values_dict. It stores three numbers: the timestamp the
+extracted value was last seen, the maximum allowed gap between
+observations and the next alerting time when currently in error state.
+When in normal (alerting) state, the value is zero.</p>
+<ul>
+<li><strong>paths</strong>: List of match paths to analyze in this detector. List of
+    strings( <strong>required</strong>)</li>
+<li><strong>learn_mode</strong> specifies whether newly observed value combinations
+    should be added to the learned model (boolean).</li>
+<li><strong>check_interval</strong>: This integer(seconds) defines the interval in
+    which pre-set or learned values need to appear. Integer min:1
+    (Default: 3600)</li>
+<li><strong>realert_interval</strong>: This integer(seconds) defines the interval in
+    which the AMiner should alert us about missing token values. Integer
+    min: 1 (Default: 3600)</li>
+<li><strong>persistence_id</strong>: The name of the file where the learned models
+    are stored. String</li>
+<li><strong>output_logline</strong>: Defines if logline should be added to the
+    output. Boolean(Default: False)</li>
+<li><strong>output_event_handlers</strong>: List of strings with id's of the
+    event_handlers</li>
+<li><strong>suppress</strong>: A boolean that suppresses anomaly output of that
+    detector when set to True.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: MissingMatchPathValueDetector
+     id: MissingMatch
+     paths:
+       - &quot;/model/DiskReport/Space&quot;
+     check_interval: 2
+     realert_interval: 5
+     learn_mode: True
+</code></pre>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a href="https://github.com/ait-aecid/logdata-anomaly-miner/wiki/HowTo-MissingMatchPathValueDetector">Wiki: HowTo
+MissingMatchPathValueDetector</a></p>
+</div>
+<h3 id="newmatchidvaluecombodetector">NewMatchIdValueComboDetector</h3>
+<p>This detector works similar to the NewMatchPathValueComboDetector, but
+allows to generate combos across multiple log events that are connected
+by a common value, e.g., trace ID.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed (required, list of
+    strings).</li>
+<li><strong>id_path_list</strong> one or more paths that specify trace information,
+    i.e., an identifier that specifies which log events belong together
+    (required, list of strings, defaults to empty list).</li>
+<li><strong>min_allowed_time_diff</strong> the minimum amount of time in seconds
+    after the first appearance of a log atom with a specific id that is
+    waited for other log atoms with the same id to occur. The maximum
+    possible time to keep an incomplete combo is
+    2*min_allowed_time_diff (required, float, defaults to 5.0).</li>
+<li><strong>output_event_handlers</strong> for handling events, e.g., print events
+    to stdout (list of strings, defaults to empty list).</li>
+<li><strong>allow_missing_values</strong>: when set to True, the detector will also
+    use matches, where one of the paths does not refer to an existing
+    parsed data object (boolean, defaults to False).</li>
+<li><strong>learn_mode</strong> specifies whether newly observed value combinations
+    should be added to the learned model (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for analysis,
+    i.e., events that contain one of these paths are omitted (list of
+    strings, defaults to empty list).</li>
+<li><strong>constraint_list</strong> list of paths that have to be present in the
+    log atom to be analyzed (list of strings, defaults to empty list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: NewMatchIdValueComboDetector
+     id: NewMatchIdValueComboDetector
+     paths:
+       - &quot;/model/type/path/name&quot;
+       - &quot;/model/type/syscall/syscall&quot;
+     id_path_list:
+       - &quot;/model/type/path/id&quot;
+       - &quot;/model/type/syscall/id&quot;
+     min_allowed_time_diff: 5
+     allow_missing_values: True
+     learn_mode: True
+</code></pre>
+<h3 id="newmatchpathdetector">NewMatchPathDetector</h3>
+<p>This class creates events when new data path was found in a parsed atom.</p>
+<ul>
+<li><strong>output_event_handlers</strong> for handling events, e.g., print events
+    to stdout (list of strings, defaults to empty list).</li>
+<li><strong>learn_mode</strong> specifies whether newly observed value combinations
+    should be added to the learned model (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: NewMatchPathDetector
+     id: NewMatchPathDetector
+     learn_mode: True
+</code></pre>
+<h3 id="newmatchpathvaluecombodetector">NewMatchPathValueComboDetector</h3>
+<p>This module defines a detector for new value combinations in multiple
+parser paths.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed (required, list of
+    strings).</li>
+<li><strong>output_event_handlers</strong> for handling events, e.g., print events
+    to stdout (list of strings, defaults to empty list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>allow_missing_values</strong>: when set to True, the detector will also
+    use matches, where one of the paths does not refer to an existing
+    parsed data object (boolean, defaults to False).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>learn_mode</strong> specifies whether newly observed value combinations
+    should be added to the learned model (boolean).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: NewMatchPathValueComboDetector
+     id: NewMatchPathValueCombo
+     paths:
+       - &quot;/model/IPAddresses/Username&quot;
+       - &quot;/model/IPAddresses/IP&quot;
+     learn_mode: True
+</code></pre>
+<h3 id="newmatchpathvaluedetector">NewMatchPathValueDetector</h3>
+<p>This module defines a detector for new values in a parser path.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values from all specified paths are mixed together (required,
+    list of strings).</li>
+<li><strong>output_event_handlers</strong> for handling events, e.g., print events
+    to stdout (list of strings, defaults to empty list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>learn_mode</strong> specifies whether newly observed values should be
+    added to the learned model (boolean).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: NewMatchPathValueDetector
+     id: NewMatchPathValue
+     paths:
+       - &quot;/model/DailyCron/JobNumber&quot;
+       - &quot;/model/IPAddresses/Username&quot;
+     learn_mode: True
+</code></pre>
+<h3 id="parsercount">ParserCount</h3>
+<p>This component counts occurring combinations of values and periodically
+sends the results as a report.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed (list of strings,
+    defaults to empty list).</li>
+<li><strong>report_interval</strong> time interval in seconds in which the reports
+    are sent (integer, defaults to 10).</li>
+<li><strong>labels</strong> list of strings that are added to the report for each
+    path in paths parameter (must be the same length as paths list).
+    (list of strings, defaults to empty list)</li>
+<li><strong>split_reports_flag</strong> boolean flag to send report for each path
+    in paths parameter separately when set to True (boolean, defaults to
+    False).</li>
+<li><strong>output_event_handlers</strong> for handling events, e.g., print events
+    to stdout (list of strings, defaults to empty list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: ParserCount
+     id: ParserCount
+     paths:
+       - &quot;/model/type/syscall/syscall&quot;
+     report_interval: 10
+</code></pre>
+<h3 id="patharimadetector">PathArimaDetector</h3>
+<p>This detector uses a tsa-arima model to analyze the values of the chosen
+paths.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values are analyzed by their combined occurrences. When no
+    paths are specified, the events given by the full path list are
+    analyzed.</li>
+<li><strong>event_type_detector</strong> used to track the number of events in the
+    time windows.</li>
+<li><strong>persistence_id</strong> name of persistency document.</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output.</li>
+<li><strong>learn_mode</strong> specifies whether new frequency measurements
+    override ground truth frequencies.</li>
+<li><strong>num_init</strong> number of lines processed before the period length is
+    calculated.</li>
+<li><strong>force_period_length</strong> states if the period length is calculated
+    through the ACF, or if the period length is forced to be set to
+    set_period_length.</li>
+<li><strong>set_period_length</strong> states how long the period length is if
+    force_period_length is set to True.</li>
+<li><strong>alpha</strong> significance level of the estimated values.</li>
+<li><strong>alpha_bt</strong> significance level for the bt test.</li>
+<li><strong>num_results_bt</strong> number of results which are used in the
+    binomial test.</li>
+<li><strong>num_min_time_history</strong> number of lines processed before the
+    period length is calculated.</li>
+<li><strong>num_max_time_history</strong> maximum number of values of the
+    time_history.</li>
+<li><strong>num_periods_tsa_ini</strong> number of periods used to initialize the
+    Arima-model.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: &quot;EventTypeDetector&quot;
+     id: ETD
+
+   - type: 'PathArimaDetector'
+     id: PTSA
+     event_type_detector: ETD
+     paths: [&quot;/model/model/val1&quot;, &quot;/model/model/val2&quot;]
+     num_init: 20
+     force_period_length: True
+     set_period_length: 15
+     num_periods_tsa_ini: 10
+</code></pre>
+<h3 id="pathvaluetimeintervaldetector">PathValueTimeIntervalDetector</h3>
+<p>This detector analyzes the time intervals of the appearance of
+log_atoms. It sends a report if log_atoms appear at times outside of
+the intervals. The considered time intervals depend on the combination
+of values in the target_paths of target_path_list.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values are analyzed by their combined occurrences. When no
+    paths are specified, the events given by the full path list are
+    analyzed (list of strings, defaults to empty list).</li>
+<li><strong>persistence_id</strong> the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>allow_missing_values</strong> when set to True, the detector will also
+    use matches, where one of the paths from target_path_list does not
+    refer to an existing parsed data object (boolean, defaults to True).</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for
+    correlation, i.e., events that contain one of these paths are
+    omitted (string of lists, defaults to empty list).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to false).</li>
+<li><strong>learn_mode</strong> specifies whether new frequency measurements
+    override ground truth frequencies (boolean).</li>
+<li><strong>time_period_length</strong> length of the time window in seconds for
+    which the appearances of log lines are identified with each other
+    (integer, defaults to 86400).</li>
+<li><strong>max_time_diff</strong> maximal time difference in seconds for new
+    times. If the difference of the new time to all previous times is
+    greater than max_time_diff the new time is considered an anomaly
+    (integer, defaults to 360).</li>
+<li><strong>num_reduce_time_list</strong> number of new time entries appended to
+    the time list, before the list is being reduced (integer, defaults
+    to 10).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: PathValueTimeIntervalDetector
+     id: PathValueTimeIntervalDetector
+     paths:
+       - &quot;/model/DailyCron/UName&quot;
+       - &quot;/model/DailyCron/JobNumber&quot;
+     time_period_length: 86400
+     max_time_diff: 3600
+     num_reduce_time_list: 10
+</code></pre>
+<h3 id="pcadetector">PCADetector</h3>
+<p>This class creates events if event or value occurrence counts are
+outliers in PCA space.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values are analyzed as separate dimensions. When no paths are
+    specified, the events given by the full path list are analyzed (list
+    of strings).</li>
+<li><strong>window_size</strong> the length of the time window for counting in
+    seconds (float, defaults to 600 seconds).</li>
+<li><strong>min_anomaly_score</strong> the minimum computed outlier score for
+    reporting anomalies. Scores are scaled by training data, i.e.,
+    reasonable minimum scores are &gt; 1 to detect outliers with respect
+    to currently trained PCA matrix (float, defaults to 1.1).</li>
+<li><strong>min_variance</strong> the minimum variance covered by the principal
+    components (float in range [0, 1], defaults to 0.98).</li>
+<li><strong>num_windows</strong> the number of time windows in the sliding window
+    approach. Total covered time span = window_size * num_windows
+    (integer, defaults to 50).</li>
+<li><strong>persistence_id</strong> name of persistency document (string, defaults
+    to Default).</li>
+<li><strong>learn_mode</strong> specifies whether new count measurements are added
+    to the PCA count matrix (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to false).</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for analysis,
+    i.e., events that contain one of these paths are omitted (list of
+    strings, defaults to empty list)</li>
+<li><strong>constraint_list</strong> list of paths that have to be present in the
+    log atom to be analyzed (list of strings, defaults to empty list).</li>
+<li><strong>output_event_handlers</strong> list of event handler id that anomalies
+    are forwarded to (list of strings, defaults is to send to all event
+    handlers).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: PCADetector
+     id: PCADetector
+     paths:
+       - &quot;/model/username&quot;
+       - &quot;/model/service&quot;
+     window_size: 60
+     min_anomaly_score: 1.2
+     min_variance: 0.95
+     num_windows: 100
+     learn_mode: true
+</code></pre>
+<h3 id="slidingeventfrequencydetector">SlidingEventFrequencyDetector</h3>
+<p>This module defines a detector for event and value frequency exceedances
+with a sliding window approach.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed. Multiple paths mean
+    that values are analyzed by their combined occurrences. When no
+    paths are specified, the events given by the full path list are
+    analyzed (list of strings, defaults to empty list).</li>
+<li><strong>scoring_path_list</strong> parser paths of values to be analyzed by
+    following event handlers like the ScoringEventHandler. Multiple
+    paths mean that values are analyzed by their combined occurrences.</li>
+<li><strong>window_size</strong> the length of the time window for counting in
+    seconds (float, defaults to 600).</li>
+<li><strong>set_upper_limit</strong> the length of the time window for counting in
+    seconds.</li>
+<li><strong>local_maximum_threshold</strong> sets the threshold for the detection
+    of local maxima in the frequency analysis. A local maximum occurrs
+    if the last maximum of the anomaly is higher than
+    local_maximum_threshold times the upper limit.</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>learn_mode</strong> specifies whether new frequency measurements
+    override ground truth frequencies (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to False).</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for analysis,
+    i.e., events that contain one of these paths are omitted (list of
+    strings, defaults to empty list).</li>
+<li><strong>constraint_list</strong> list of paths that have to be present in the
+    log atom to be analyzed (list of strings, defaults to empty list).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: SlidingEventFrequencyDetector
+     id: SEFD
+     window_size: 3600
+     set_upper_limit: 10
+</code></pre>
+<h3 id="timecorrelationdetector">TimeCorrelationDetector</h3>
+<p>This component tries to find time correlation patterns between different
+log atoms. When a possible correlation rule is detected, it creates an
+event including the rules. This is useful to implement checks as
+depicted in <a href="http://dx.doi.org/10.1016/j.cose.2014.09.006">http://dx.doi.org/10.1016/j.cose.2014.09.006</a>.</p>
+<pre><code class="language-yaml">Analysis:
+   - type: TimeCorrelationDetector
+     id: TimeCorrelationDetector
+     parallel_check_count: 2
+     min_rule_attributes: 1
+     max_rule_attributes: 5
+     record_count_before_event: 10000
+</code></pre>
+<h3 id="timecorrelationviolationdetector">TimeCorrelationViolationDetector</h3>
+<p>This component creates events when one of the given time correlation
+rules is violated. This is used to implement checks as depicted in
+<a href="http://dx.doi.org/10.1016/j.cose.2014.09.006">http://dx.doi.org/10.1016/j.cose.2014.09.006</a></p>
+<pre><code class="language-yaml">Analysis:
+   - type: PathExistsMatchRule
+     id: path_exists_match_rule3
+     path: &quot;/model/CronAnnouncement/Run&quot;
+     match_action: a_class_selector
+   - type: PathExistsMatchRule
+     id: path_exists_match_rule4
+     path: &quot;/model/CronExecution/Job&quot;
+     match_action: b_class_selector
+   - type: TimeCorrelationViolationDetector
+     id: TimeCorrelationViolationDetector
+     ruleset:
+       - path_exists_match_rule3
+       - path_exists_match_rule4
+</code></pre>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a href="#matchrules">MatchRules</a></p>
+</div>
+<h3 id="simplemonotonictimestampadjust">SimpleMonotonicTimestampAdjust</h3>
+<p>Adjust decreasing timestamp of new records to the maximum observed so
+far to ensure monotony for other analysis components.</p>
+<h3 id="timestampsunsorteddetector">TimestampsUnsortedDetector</h3>
+<p>This detector is useful to to detect algorithm malfunction or
+configuration errors, e.g. invalid timezone configuration.</p>
+<pre><code class="language-yaml">Analysis:
+   - type: TimestampsUnsortedDetector
+     id: TimestampsUnsortedDetector
+</code></pre>
+<h3 id="tsaarimadetector">TSAArimaDetector</h3>
+<p>This detector uses a tsa-arima model to track appearance frequencies of
+event lines.</p>
+<ul>
+<li><strong>paths</strong> at least one of the parser paths in this list needs to
+    appear in the event to be analyzed (list of strings).</li>
+<li><strong>event_type_detector</strong> used to track the number of event lines in
+    the time windows (string).</li>
+<li><strong>waiting_time_for_tsa</strong> time in seconds, until the time windows
+    are being initialized (integer, defaults to 300 seconds).</li>
+<li><strong>num_sections_waiting_time_for_tsa</strong> number of sections of the
+    initialization window (integer, defaults to 10).</li>
+<li><strong>acf_pause_interval_percentage</strong> states which area of the
+    results of the ACF are not used to find the highest peak (float,
+    defaults to 0.2).</li>
+<li><strong>build_sum_over_values</strong> states if the sum of a series of counts
+    is built before applying the TSA (boolean, defaults to false).</li>
+<li><strong>num_periods_tsa_ini</strong> Number of periods used to initialize the
+    Arima-model (integer, defaults to 20).</li>
+<li><strong>num_division_time_step</strong> Number of divisions of the time window
+    to calculate the time step (integer, defaults to 10).</li>
+<li><strong>alpha</strong> significance level of the estimated values (float,
+    defaults to 0.05).</li>
+<li><strong>num_min_time_history</strong> minimal number of values of the
+    time_history after it is initialized (integer, defaults to 20).</li>
+<li><strong>num_max_time_history</strong> maximal number of values of the
+    time_history (integer, defaults to 30).</li>
+<li><strong>num_results_bt</strong> number of results which are used in the
+    binomial test, which is used before reinitializing the ARIMA model
+    (integer, defaults to 15).</li>
+<li><strong>alpha_bt</strong> significance level for the bt test (float, defaults to
+    0.05).</li>
+<li><strong>round_time_interval_threshold</strong> Threshold for the rounding of
+    the time_steps to the times in self.assumed_time_steps. The
+    higher the threshold the easier the time is rounded to the next time
+    in the list (float, defaults to 0.02).</li>
+<li><strong>acf_threshold</strong> threshold, which must be exceeded by the highest
+    peak of the cdf function of the time series, to be analyzed (float,
+    defaults to 0.2).</li>
+<li><strong>persistence_id</strong> the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for
+    correlation, i.e., events that contain one of these paths are
+    omitted. The default value is [] as None is not iterable (list of
+    strings, defaults to empty list).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to false).</li>
+<li><strong>learn_mode</strong> specifies whether new frequency measurements
+    override ground truth frequencies (boolean).</li>
+<li><strong>acf_auto_pause_interval</strong> states if the pause area is
+    automatically set. If enabled, the variable
+    acf_pause_interval_percentage loses its functionality.</li>
+<li><strong>acf_auto_pause_interval_num_min</strong> states the number of values
+    in which a local minima must be the minimum, to be considered a
+    local minimum of the function and not an outlier.</li>
+<li><strong>force_period_length</strong> states if the period length is calculated
+    through the ACF, or if the period length is forced to be set to
+    set_period_length.</li>
+<li><strong>set_period_length</strong> states how long the period length is if
+    force_period_length is set to True.</li>
+<li><strong>min_log_lines_per_time_step</strong> states the minimal average
+    number of log lines per time step to make a TSA.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'EventTypeDetector'
+     id: ETD
+     save_values: False
+
+   - type: 'TSAArimaDetector'
+     id: TSA
+     event_type_detector: ETD
+     waiting_time_for_tsa: 1728000
+     num_sections_waiting_time_for_tsa: 1000
+     num_division_time_step: 10
+     alpha: 0.05
+     num_results_bt: 30
+     alpha_bt: 0.05
+     num_max_time_history: 30000
+     round_time_interval_threshold: 0.1
+     acf_threshold: 0.02
+</code></pre>
+<h3 id="verboseunparsedatomhandler">VerboseUnparsedAtomHandler</h3>
+<p>Creates verbose output for unparsed events.</p>
+<ul>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'VerboseUnparsedAtomHandler'
+     id: vuah
+</code></pre>
+<h3 id="simpleunparsedatomhandler">SimpleUnparsedAtomHandler</h3>
+<p>Creates basic output for unparsed events.</p>
+<ul>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'SimpleUnparsedAtomHandler'
+     id: vuah
+</code></pre>
+<h3 id="valuerangedetector">ValueRangeDetector</h3>
+<p>This detector generates ranges for numeric values, detects values
+outside of these ranges, and automatically extends ranges when learning
+is active.</p>
+<ul>
+<li><strong>paths</strong> parser paths of values to be analyzed; multiple paths mean
+    that all values occurring in these paths are considered for value
+    range generation (required, list of strings).</li>
+<li><strong>id_path_list</strong> list of strings that specify group identifiers
+    for which numeric ranges should be learned (list of strings,
+    defaults to empty list).</li>
+<li><strong>persistence_id</strong> the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>learn_mode</strong> specifies whether value ranges should be extended
+    when values outside of ranges are observed (boolean).</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean).</li>
+<li><strong>ignore_list</strong>: a list of parser paths that are ignored for
+    analysis by this detector (list of strings, defaults to empty list).</li>
+<li><strong>constraint_list</strong>: a list of parser paths that the detector will
+    be constrained to, i.e., other branches of the parser tree are
+    ignored (list of strings, defaults to empty list).</li>
+<li><strong>suppress</strong>: a boolean that suppresses anomaly output of that
+    detector when set to True (boolean, defaults to False).</li>
+<li><strong>output_event_handlers</strong>: a list of event handler identifiers
+    that the detector should forward the anomalies to (list of strings,
+    defaults to empty list).</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'ValueRangeDetector'
+     paths:
+       - '/parser/value'
+     id_path_list:
+       - '/parser/id'
+     learn_mode: True
+</code></pre>
+<h3 id="variablecorrelationdetector">VariableCorrelationDetector</h3>
+<p>First, this detector finds a list of viable variables for each event
+type. Second, it builds pairs of variables. Third, correlations are
+generated and thereafter tested and updated.</p>
+<ul>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>event_type_detector</strong> event_type_detector. Used to get the
+    event numbers and values of the variables, etc.</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for
+    correlation, i.e., events that contain one of these paths are
+    omitted.</li>
+<li><strong>constraint_list</strong> list of paths that the detector will be
+    constrained to, i.e., other branches of the parser tree are ignored
+    (list of strings, defaults to empty list).</li>
+<li><strong>num_init</strong> minimal number of lines of one event type to
+    initialize the correlation rules.</li>
+<li><strong>num_update</strong> number of lines after the initialization after which
+    the correlations are periodically tested and updated.</li>
+<li><strong>check_cor_thres</strong> threshold for the number of allowed different
+    values of the distribution to be considerd a correlation.</li>
+<li><strong>check_cor_prob_thres</strong> threshold for the difference of the
+    probability of the values to be considerd a correlation.</li>
+<li><strong>check_cor_num_thres</strong> number of allowed different values for
+    the calculation if the distribution can be considerd a correlation.</li>
+<li><strong>min_values_cors_thres</strong> minimal number of appearances of values
+    on the left side to consider the distribution as a possible
+    correlation.</li>
+<li><strong>new_vals_alarm_thres</strong> threshold which has to be exceeded by
+    the number of new values divided by the number of old values to
+    report an anomaly.</li>
+<li><strong>disc_div_thres</strong> diversity threshold for variables to be
+    considered discrete.</li>
+<li><strong>num_steps_create_new_rules</strong> number of update steps, for which
+    new rules are generated periodically.</li>
+<li><strong>num_upd_until_validation</strong> number of update steps, for which
+    the rules are validated periodically.</li>
+<li><strong>num_end_learning_phase</strong> number of update steps until the
+    update phase ends and the test phase begins. False if no End should
+    be defined.</li>
+<li><strong>num_bt</strong> number of considered testsamples for the binomial test.</li>
+<li><strong>alpha_bt</strong> significance level for the binomialtest for the test
+    results.</li>
+<li><strong>used_homogeneity_test</strong> states the used homogeneity test which
+    is used for the updates and tests of the correlations. The
+    implemented methods are ['Chi', 'MaxDist'].</li>
+<li><strong>alpha_chisquare_test</strong> significance level alpha for the
+    chisquare test.</li>
+<li><strong>max_dist_rule_distr</strong> maximum distance between the distribution
+    of the rule and the distribution of the read in values before the
+    rule fails.</li>
+<li><strong>used_presel_meth</strong> used preselection methods. The implemented
+    methods are ['matchDiscDistr', 'excludeDueDistr', 'matchDiscVals',
+    'random'].</li>
+<li><strong>intersect_presel_meth</strong> states if the intersection or the union
+    of the possible correlations found by the presel_meth is used for
+    the resulting correlations.</li>
+<li><strong>percentage_random_cors</strong> percentage of the randomly picked
+    correlations of all possible ones in the preselection method random.</li>
+<li><strong>match_disc_vals_sim_tresh</strong> similarity threshold for the
+    preselection method pick_cor_match_disc_vals.</li>
+<li><strong>exclude_due_distr_lower_limit</strong> lower limit for the maximal
+    appearance to one value of the distributions. If the maximal
+    appearance is exceeded the variable is excluded.</li>
+<li><strong>match_disc_distr_threshold</strong> threshold for the preselection
+    method pick_cor_match_disc_distr.</li>
+<li><strong>used_cor_meth</strong> used correlation detection methods. The
+    implemented methods are ['Rel', 'WRel'].</li>
+<li><strong>used_validate_cor_meth</strong> used validation methods. The
+    implemented methods are ['coverVals', 'distinctDistr'].</li>
+<li><strong>validate_cor_cover_vals_thres</strong> threshold for the validation
+    method coverVals. The higher the threshold the more correlations
+    must be detected to be validated a correlation.</li>
+<li><strong>validate_cor_distinct_thres</strong> threshold for the validation
+    method distinctDistr. The threshold states which value the variance
+    of the distributions must surpass to be considered real
+    correlations. The lower the value the less likely that the
+    correlations are being rejected.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'EventTypeDetector'
+     id: ETD
+
+   - type: 'VariableCorrelationDetector'
+     event_type_detector: ETD
+     num_init: 10000
+     num_update: 1000
+     num_steps_create_new_rules: 10
+     used_presel_meth: ['matchDiscDistr', 'excludeDueDistr']
+     used_validate_cor_meth: ['distinctDistr', 'coverVals']
+     used_cor_meth: ['WRel']
+</code></pre>
+<h3 id="variabletypedetector">VariableTypeDetector</h3>
+<p>This detector analyses each variable of the event_types by assigning
+them the implemented variable types.</p>
+<ul>
+<li><strong>paths</strong> List of paths, which variables are being tested for a
+    type. All other paths will not get a type assigned.</li>
+<li><strong>learn_mode</strong> states, if found variable types are updated when a
+    test fails.</li>
+<li><strong>persistence_id</strong>: the name of the file where the learned models
+    are stored (string, defaults to "Default").</li>
+<li><strong>event_type_detector</strong> event_type_detector. Used to get the
+    event numbers and values of the variables, etc.</li>
+<li><strong>output_logline</strong> specifies whether the full parsed log atom
+    should be provided in the output (boolean, defaults to false).</li>
+<li><strong>ignore_list</strong> list of paths that are not considered for
+    correlation, i.e., events that contain one of these paths are
+    omitted.</li>
+<li><strong>constraint_list</strong> list of paths that the detector will be
+    constrained to, i.e., other branches of the parser tree are ignored
+    (list of strings, defaults to empty list).</li>
+<li><strong>save_statistics</strong> tracks the indicators and changed variable
+    types, if set to True.</li>
+<li><strong>use_empiric_distr</strong> states if empiric distributions of the
+    values should be used if no continuous distribution is detected</li>
+<li><strong>used_gof_test</strong> states the used test statistic for the
+    continuous data type. Implemented are the 'KS' and 'CM' tests.</li>
+<li><strong>gof_alpha</strong> significance level for p-value for the distribution
+    test of the initialization.</li>
+<li><strong>s_gof_alpha</strong> significance level for p-value for the sliding
+    gof-test in the update step.</li>
+<li><strong>s_gof_bt_alpha</strong> significance level for the binomialtest of the
+    test results of the s_gof-test.</li>
+<li><strong>d_alpha</strong> significance level for the binomialtest of the single
+    discrete variables.</li>
+<li><strong>d_bt_alpha</strong> significance level for the binomialtest of the test
+    results of the discrete tests.</li>
+<li><strong>div_thres</strong> threshold for diversity of the values of a variable.
+    The higher the more values have to be distinct to be considered to
+    be continuous distributed.</li>
+<li><strong>sim_thres</strong> threshold for similarity of the values of a variable.
+    The higher the more values have to be common to be considered
+    discrete.</li>
+<li><strong>indicator_thres</strong> threshold for the variable indicators to be
+    used in the event indicator.</li>
+<li><strong>num_init</strong> number of lines processed before detecting the
+    variable types.</li>
+<li><strong>num_update</strong> number of values for which the variableType is
+    updated.</li>
+<li><strong>num_update_unq</strong> number of values for which the values of type
+    unq is unique (last num_update + num_update_unq values are
+    unique).</li>
+<li><strong>num_s_gof_values</strong> number of values which are tested in the
+    s_gof-test.</li>
+<li><strong>num_s_gof_bt</strong> number of tested s_gof-tests for the
+    binomialtest of the test results of the s_gof-tests.</li>
+<li><strong>num_d_bt</strong> number of tested discrete samples for the
+    binomialtest of the test results of the discrete tests.</li>
+<li><strong>num_pause_discrete</strong> number of paused updates, before the
+    discrete var type is adapted.</li>
+<li><strong>num_pause_others</strong> number of paused updates, before trying to
+    find a new variable type for the variable type others.</li>
+<li><strong>test_gof_int</strong> states if integer number should be tested for the
+    continuous variable type.</li>
+<li><strong>num_stop_update</strong> switch the LearnMode to False after
+    num_stop_update processed lines. If False LearnMode will not be
+    switched to False.</li>
+<li><strong>silence_output_without_confidence</strong> silences all messages
+    without a confidence-entry.</li>
+<li><strong>silence_output_except_indicator</strong> silences all messages which
+    are not related with the calculated indicator.</li>
+<li><strong>num_var_type_hist_ref</strong> states how long the reference for the
+    var_type_history_list is. The reference is used in the
+    evaluation.</li>
+<li><strong>num_update_var_type_hist_ref</strong> number of update steps before
+    the var_type_history_list is being updated.</li>
+<li><strong>num_var_type_considered_ind</strong> this attribute states how many
+    variable types of the history are used as the recent history in the
+    calculation of the indicator. False if no output of the indicator
+    should be generated.</li>
+<li><strong>num_stat_stop_update</strong> number of static values of a variable,
+    to stop tracking the variable type and read in in eventTypeD.
+    Default is False.</li>
+<li><strong>num_updates_until_var_reduction</strong> number of update steps until
+    the variables are tested, if they are suitable for an indicator. If
+    not suitable, they are removed from the tracking of EvTypeD. Set to
+    0 to analyze all variables. Default is 20.</li>
+<li><strong>var_reduction_thres</strong> threshold for the reduction of variable
+    types. The most likely none others var type must have a higher
+    relative appearance for the variable to be further checked.</li>
+<li><strong>num_skipped_ind_for_weights</strong> number of the skipped indicators
+    for the calculation of the indicator weights.</li>
+<li><strong>num_ind_for_weights</strong> number of indicators used in the
+    calculation of the indicator weights.</li>
+<li><strong>used_multinomial_test</strong> states the used multinomial test.
+    Allowed values are 'MT', 'Approx' and 'Chi'. Where 'MT' means the
+    original MT, 'Approx' is the approximation with single BTs and 'Chi'
+    is the ChisquareTest.</li>
+<li><strong>used_range_test</strong> states the used method of range estimation.
+    Allowed values are 'MeanSD', 'EmpiricQuantiles' and 'MinMax'. Where
+    'MeanSD' means the estimation through mean and standard deviation,
+    'EmpiricQuantiles' estimation through the empirical quantiles and
+    'MinMax' the estimation through minimum and maximum.</li>
+<li><strong>range_alpha</strong> significance niveau for the range variable type.</li>
+<li><strong>range_threshold</strong> maximal proportional deviation from the range
+    before the variable type is rejected.</li>
+<li><strong>range_limits_factor</strong> factor for the limits of the range
+    variable type.</li>
+<li><strong>num_reinit_range</strong> number of update steps until the range
+    variable type is reinitialized. Set to zero if not desired.</li>
+<li><strong>dw_alpha</strong> significance niveau of the durbin watson test to test
+    serial correlation. If the test fails the type range is assigned to
+    the variable instead of continuous.</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">Analysis:
+   - type: 'EventTypeDetector'
+     id: ETD
+
+   - type: 'VariableTypeDetector'
+     event_type_detector: ETD
+     num_init: 200
+     num_update: 100
+     num_s_gof_values: 100
+</code></pre>
+<h2 id="matchrules">MatchRules</h2>
+<p>The following detectors work with MatchRules:</p>
+<ul>
+<li><a href="#allowlistviolationdetector">AllowlistViolationDetector</a></li>
+<li><a href="#timecorrelationviolationdetector">TimeCorrelationViolationDetector</a></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>MatchRules must be defined in the "Analysis"-part of the configuration.
+Every MatchRule can also define a <a href="#matchactions">MatchAction</a> which is run when the
+MatchRule is applied.</p>
+</div>
+<h3 id="andmatchrule">AndMatchRule</h3>
+<p>This component provides a rule to match all subRules (logical and).</p>
+<pre><code class="language-yaml">Analysis:
+   - type: AndMatchRule
+     id: and_match_rule1
+     sub_rules:
+       - &quot;path_exists_match_rule1&quot;
+       - &quot;negation_match_rule1&quot;
+</code></pre>
+<h3 id="ormatchrule">OrMatchRule</h3>
+<p>This component provides a rule to match any subRules (logical or).</p>
+<pre><code class="language-yaml">Analysis:
+   - type: OrMatchRule
+     id: or_match_rule
+     sub_rules:
+       - &quot;and_match_rule1&quot;
+       - &quot;and_match_rule2&quot;
+       - &quot;negation_match_rule2&quot;
+</code></pre>
+<h3 id="parallelmatchrule">ParallelMatchRule</h3>
+<p>This component is a rule testing all the subrules in parallel. From the
+behaviour it is similar to the OrMatchRule, returning true if any
+subrule matches. The difference is that matching will not stop after the
+first positive match. This does only make sense when all subrules have
+match actions associated.</p>
+<pre><code class="language-yaml">Analysis:
+   - type: ParallelMatchRule
+     id: parallel_match_rule
+     sub_rules:
+       - &quot;and_match_rule1&quot;
+       - &quot;and_match_rule2&quot;
+       - &quot;negation_match_rule2&quot;
+</code></pre>
+<h3 id="valuedependentdelegatedmatchrule">ValueDependentDelegatedMatchRule</h3>
+<p>This component is a rule delegating rule checking to subrules depending
+on values found within the parser_match. The result of this rule is the
+result of the selected delegation rule.</p>
+<h3 id="negationmatchrule">NegationMatchRule</h3>
+<p>Match elements of this component return true when the subrule did not
+match.</p>
+<pre><code class="language-yaml">Analysis:
+   - type: NegationMatchRule
+     id: negation_match_rule1
+     sub_rule: &quot;value_match_rule&quot;
+   - type: NegationMatchRule
+     id: negation_match_rule2
+     sub_rule: &quot;path_exists_match_rule2&quot;
+</code></pre>
+<h3 id="pathexistsmatchrule">PathExistsMatchRule</h3>
+<p>Match elements of this component return true when the given path was
+found in the parsed match data.</p>
+<pre><code class="language-yaml">Analysis:
+   - type: PathExistsMatchRule
+     id: path_exists_match_rule1
+     path: &quot;/model/LoginDetails/PastTime/Time/Minutes&quot;
+   - type: PathExistsMatchRule
+     id: path_exists_match_rule2
+     path: &quot;/model/LoginDetails&quot;
+</code></pre>
+<h3 id="valuematchrule">ValueMatchRule</h3>
+<p>Match elements of this component return true when the given path exists
+and has exactly the given parsed value.</p>
+<pre><code class="language-yaml">Analysis:
+   - type: ValueMatchRule
+     id: value_match_rule
+     path: &quot;/model/LoginDetails/Username&quot;
+     value: &quot;root&quot;
+</code></pre>
+<h3 id="valuelistmatchrule">ValueListMatchRule</h3>
+<p>Match elements of this component return true when the given path exists
+and has exactly one of the values included in the value list.</p>
+<h3 id="valuerangematchrule">ValueRangeMatchRule</h3>
+<p>Match elements of this component return true when the given path exists
+and the value is included in [lower, upper] range.</p>
+<h3 id="stringregexmatchrule">StringRegexMatchRule</h3>
+<p>Elements of this component return true when the given path exists and
+the string repr of the value matches the regular expression.</p>
+<h3 id="modulotimematchrule">ModuloTimeMatchRule</h3>
+<p>Match elements of this component return true when the following
+conditions are met. The given path exists, denotes a datetime object and
+the seconds since 1970 from that date modulo the given value are
+included in [lower, upper] range.</p>
+<h3 id="valuedependentmodulotimematchrule">ValueDependentModuloTimeMatchRule</h3>
+<p>Match elements of this component return true when the following
+conditions are met. The given path exists, denotes a datetime object and
+the seconds since 1970 rom that date modulo the given value are included
+in a [lower, upper] range selected by values from the match.</p>
+<h3 id="ipv4inrfc1918matchrule">IPv4InRFC1918MatchRule</h3>
+<p>Match elements of this component return true when the path matches and
+contains a valid IPv4 address from the RFC1918 private IP ranges. This
+could also be done by distinct range match elements, but as this kind of
+matching is common, have an own element for it.</p>
+<h3 id="debugmatchrule">DebugMatchRule</h3>
+<blockquote>
+<p>This rule can be inserted into a normal ruleset just to see when a
+match attempt is made. It just prints out the current log_atom that
+is evaluated. The match action is always invoked when defined, no
+matter which match result is returned.</p>
+</blockquote>
+<h3 id="debughistorymatchrule">DebugHistoryMatchRule</h3>
+<p>This rule can be inserted into a normal ruleset just to see when a match
+attempt is made. It just adds the evaluated log_atom to a
+ObjectHistory.</p>
+<h2 id="matchactions">MatchActions</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>MatchActions must be defined in the "Analysis"-part of the
+configuration.</p>
+</div>
+<h3 id="eventgenerationmatchaction">EventGenerationMatchAction</h3>
+<p>This generic match action forwards information about a rule match on
+parsed data to a list of event handlers.</p>
+<pre><code class="language-yaml">Analysis:
+   - type: EventGenerationMatchAction
+     id: ip_match_action
+     event_type: &quot;Analysis.Rules.IPv4InRFC1918MatchRule&quot;
+     event_message: &quot;Private IP address occurred!&quot;
+</code></pre>
+<h3 id="atomfiltermatchaction">AtomFilterMatchAction</h3>
+<p>This generic match rule forwards all rule matches to a list of
+<span class="title-ref">AtomHandlerInterface</span> instances using the
+<span class="title-ref">SubhandlerFilter</span>. When
+<span class="title-ref">delete_components</span> is used, all
+components from the <span class="title-ref">subhandler_list</span> are
+removed from the default
+<span class="title-ref">SubhandlerFilter</span>.</p>
+<pre><code class="language-yaml">Analysis:
+   - type: NewMatchPathValueDetector
+     id: NewMatchPathValueDetector1
+     paths:
+       - &quot;/model/second&quot;
+
+   - type: AtomFilterMatchAction
+     id: afma
+     subhandler_list:
+       - NewMatchPathValueDetector1
+     stop_when_handled_flag: True
+     delete_components: True
+</code></pre>
+<h2 id="eventhandling">EventHandling</h2>
+<p>EventHandler are output modules that allow the logdata-anomaly-miner to
+write alerts to specific targets.</p>
+<p>All EventHandler must have the following parameters and may have
+additional specific parameters that are defined in the respective
+sections.</p>
+<ul>
+<li><strong>id</strong>: must be a unique string (required)</li>
+<li><strong>type</strong>: must be an existing Analysis component (required)</li>
+<li><strong>json</strong>: A boolean value that enables that the output is formatted
+    in json (default: False)</li>
+<li><strong>pretty</strong>: A boolean value that specifies whether json output
+    should be in a single line (False) or pretty printed (True)
+    (default: True)</li>
+<li><strong>score</strong>: A boolean value that enables that a confidence is added
+    to the output of certain detectors (default: False)</li>
+<li><strong>weights</strong>: A dictionary that specifies the weights of values for
+    the scoring. The keys are the strings of the analyzed list and the
+    corresponding values are the assigned weights. Strings that are not
+    present in this dictionary have the weight 0.5 if not automatically
+    weighted (default: None)</li>
+<li><strong>auto_weights</strong>: A boolean value that states if the weights should
+    be automatically calculated through the formula 10 / (10 + number of
+    value appearances) (default: False)</li>
+<li><strong>auto_weights_history_length</strong>: A integer value that specifies
+    the number of values that are considered in the calculation of the
+    weights (default: 1000)</li>
+</ul>
+<h3 id="streamprintereventhandler">StreamPrinterEventHandler</h3>
+<p>The StreamPrinterEventHandler writes alerts to a stream. If no
+output_file_path is defined, it writes the output to <strong>stdout</strong></p>
+<ul>
+<li><strong>output_file_path</strong>: This string value defines a file where the
+    output should be written to. Default: stdout</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">EventHandlers:
+# output to stdout:
+    - id: 'stpe'
+      type: 'StreamPrinterEventHandler'
+
+# output json to file:
+    - id: 'stpefile'
+      type: 'StreamPrinterEventHandler'
+      json: true
+      pretty: true
+      output_file_path: '/tmp/aminer_out.log'
+</code></pre>
+<h3 id="syslogwritereventhandler">SyslogWriterEventHandler</h3>
+<p>The SyslogWriterEventHandler writes alerts to the local syslog instance.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>USE THIS AT YOUR OWN RISK: by creating aminer/syslog log data processing
+loops, you will flood your syslog and probably fill up your disks.0</p>
+</div>
+<ul>
+<li><strong>instance_name</strong>: This string defines the instance_name for the
+    syslog. Default: <strong>aminer</strong></li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">EventHandlers:
+    - id: 'swe'
+      type: 'SyslogWriterEventHandler'
+      instance_name: 'logdata-anomaly-miner'
+</code></pre>
+<h3 id="kafkaeventhandler">KafkaEventHandler</h3>
+<p>The KafkaEventHandler writes it's output to a <a href="https://kafka.apache.org/">Kafka
+Message-Queue</a></p>
+<ul>
+<li>
+<p><strong>topic</strong>: String property with the topic-name for the message queue</p>
+</li>
+<li>
+<p><strong>cfgfile</strong>: String property with the path to the kafka-config file.
+    A comprehensive list of all config-parameters can be found at
+    <a href="https://kafka-python.readthedocs.io/en/master/apidoc/KafkaProducer.html">https://kafka-python.readthedocs.io/en/master/apidoc/KafkaProducer.html</a></p>
+<p>A typical kafka-config-file might look like this:</p>
+</li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">[DEFAULT]
+bootstrap_servers = localhost:9092
+security_protocol = PLAINTEXT
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The header [DEFAULT] is important and must exist in the configuration
+file</p>
+</div>
+<pre><code class="language-yaml">EventHandlers:
+# output to kafka using the topic 'aminer'
+    - id: 'mqe'
+      json: True
+      topic: 'aminer'
+      cfgfile: '/etc/aminer/kafka-client.conf'
+      type: 'KafkaEventHandler'
+</code></pre>
+<h3 id="zmqeventhandler">ZmqEventHandler</h3>
+<p>The ZmqEventHandler writes its output to a <a href="https://zeromq.org/">Zero
+Message-Queue</a></p>
+<ul>
+<li><strong>topic</strong>: String property with the topic-name for the message
+    queue. If topic is not defined, then this handler will send messages
+    without any topic.</li>
+<li><strong>url</strong>: String property with the url for the zmq-listener. If no
+    url is defined, this handler will use 'ipc:///tmp/aminer'. A
+    comprehensive list of all possible "endpoints" can be found at
+    <a href="http://api.zeromq.org/master:zmq-bind">http://api.zeromq.org/master:zmq-bind</a></li>
+</ul>
+<!-- end list -->
+
+<pre><code class="language-yaml">EventHandlers:
+# output to zeromq using the topic 'aminer'
+    - id: &quot;zmqe&quot;
+      type: 'ZmqEventHandler'
+      topic: 'aminer'
+      url: 'tcp://*:5555' # tcp-port 5555 on all interfaces
+</code></pre>
+<h2 id="schemas">Schemas</h2>
+<p>All analysis detectors, parsing models, and event handlers must be
+included in the validation and normalisation schemas for the YAML
+configurations. YamlConfig uses the ConfigValidator to normalize values
+and validate them against the validation schema.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a href="#yamlconfig">YamlConfig</a> <a href="#configvalidator">ConfigValidator</a></p>
+</div>
+<h3 id="baseschema">BaseSchema</h3>
+<p>This module defines general configurations and Input configurations of
+the aminer.</p>
+<h3 id="normalization">Normalization</h3>
+<p>Define all possible parameters and normalisation strategies such as
+default values for the defined group of modules. These groups are
+separated in the following modules:</p>
+<ul>
+<li><strong>AnalysisNormalisationSchema</strong></li>
+<li><strong>EventHandlerNormalisationSchema</strong></li>
+<li><strong>ParserNormalisationSchema</strong></li>
+</ul>
+<h3 id="validation">Validation</h3>
+<p>Define all possible parameters and valid values for each module within
+the defined group of modules. These groups are separated in the
+following modules:</p>
+<ul>
+<li><strong>AnalysisValidationSchema</strong></li>
+<li><strong>EventHandlerValidationSchema</strong></li>
+<li><strong>ParserValidationSchema</strong></li>
+</ul>
+<h2 id="aminer-files">AMiner Files</h2>
+<p>This section explains the functionality of important files of the
+aminer.</p>
+<h3 id="aminer">Aminer</h3>
+<p>This is the main module which starts the aminer program. It parses all
+arguments, initializes loggers, and handles graceful shutdowns. These
+loggers are by default divided into the following files: *
+<strong>aminer.log</strong>: Logs regarding the aminer such as the different startup
+stages of the process. The verbosity can be set with the Log.DebugLevel
+configuration. * <strong>statistics.log</strong>: Logs specific statistics such as
+the number of successfully processed log lines for each analysis
+component. * <strong>aminerRemoteLog.log</strong>: Logs all information about the
+changes done with the remote control using aminerremotecontrol.py. The
+process is started with root privileges to run all necessary tasks and
+it only uses the minimal set of imports. A subprocess starting the
+AnalysisChild is used for the main processing of log data.</p>
+<h3 id="analysischild">AnalysisChild</h3>
+<p>This module handles sockets of the log files, registers all components,
+and runs the main analysis loop. It also handles the remote control
+sockets to change the running configuration using the
+AminerRemoteControlExecutionMethods.</p>
+<h3 id="aminerconfig">AminerConfig</h3>
+<p>This module handles the loading and saving of configurations. When
+loading YAML configurations the configuration file is processed in
+YamlConfig.</p>
+<h3 id="yamlconfig">YamlConfig</h3>
+<p>This module handles the loading of YAML configurations. It uses the
+ConfigValidator to normalize and validate the modules. When adding new
+components, they have to be added in this file.</p>
+<h3 id="configvalidator">ConfigValidator</h3>
+<p>This module normalizes, validates, and imports the modules for YAML
+configurations.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../SECURITY/" class="btn btn-neutral float-right" title="Security">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../SECURITY/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+      <script src="../js/version-select.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

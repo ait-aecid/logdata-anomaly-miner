@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" /><link rel="canonical" href="https://ait-aecid.github.io/logdata-anomaly-miner/development/" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>logdata-anomaly-miner</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="css/version-select.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = "/logdata-anomaly-miner/development/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> logdata-anomaly-miner
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#debian">Debian</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#from-source">From source</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#docker">Docker</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting started</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#publications">Publications</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#contribution">Contribution</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#bugs">Bugs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#security">Security</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#license">License</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#financial-support">Financial Support</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="configuration/">Configuration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="SECURITY/">Security</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">logdata-anomaly-miner</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Home</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="logdata-anomaly-miner">logdata-anomaly-miner <a href="https://github.com/ait-aecid/logdata-anomaly-miner/actions/workflows/lint.yml"><img alt="Lint" src="https://github.com/ait-aecid/logdata-anomaly-miner/actions/workflows/lint-test.yml/badge.svg" /></a> <a href="https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge"><img alt="DeepSource" src="https://static.deepsource.io/deepsource-badge-light-mini.svg" /></a></h1>
+<blockquote>
+<p><strong>This project is no longer maintained.</strong> Please use <a href="https://github.com/ait-detectmate/DetectMateService">DetectMate</a> instead.</p>
+</blockquote>
+<p>This tool parses log data and allows to define analysis pipelines for anomaly detection. It was designed to run the analysis with limited resources and lowest possible permissions to make it suitable for production server use.</p>
+<p><a href="https://www.youtube.com/watch?v=tL7KiMf8NfE"><img alt="AECID Demo – Anomaly Detection with aminer and Reporting to IBM QRadar" src="https://img.youtube.com/vi/tL7KiMf8NfE/0.jpg" /></a></p>
+<h2 id="requirements">Requirements</h2>
+<p>In order to install logdata-anomaly-miner a <strong>Linux system</strong> with <strong>python &gt;= 3.6</strong> is required. All <strong>Ubuntu</strong> and <strong>Debian</strong> versions that we have in the tests are currently recommended.
+There is only experimental support for <strong>Fedora</strong>.
+More specifically the tested systems include Debian Buster, Debian Bullseye, Debian Bookworm, Ubuntu 20.04, Ubuntu 22.04, Fedora (docker image fedora:latest), and RedHat (docker image redhat/ubi9).</p>
+<p><em>See <a href="https://github.com/ait-aecid/logdata-anomaly-miner/requirements.txt">requirements.txt</a> for further module dependencies</em></p>
+<h2 id="installation">Installation</h2>
+<h3 id="debian">Debian</h3>
+<p>There are Debian packages for logdata-anomaly-miner in the official Debian/Ubuntu repositories.</p>
+<pre><code>apt-get update &amp;&amp; apt-get install logdata-anomaly-miner
+</code></pre>
+<h3 id="from-source">From source</h3>
+<p>The following command will install the latest stable release:</p>
+<pre><code>cd $HOME
+wget https://raw.githubusercontent.com/ait-aecid/logdata-anomaly-miner/main/scripts/aminer_install.sh
+chmod +x aminer_install.sh
+./aminer_install.sh
+</code></pre>
+<h3 id="docker">Docker</h3>
+<p>For installation with Docker see: <a href="https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Deployment-with-Docker">Deployment with Docker</a></p>
+<h2 id="getting-started">Getting started</h2>
+<p>Here are some resources to read in order to get started with configurations:</p>
+<ul>
+<li><a href="https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Getting-started-(tutorial)">Getting started</a></li>
+<li><a href="https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/etc/aminer/">Some available configurations</a></li>
+<li><a href="https://ait-aecid.github.io/logdata-anomaly-miner/">Documentation</a></li>
+<li><a href="https://github.com/ait-aecid/logdata-anomaly-miner/wiki">Wiki</a></li>
+</ul>
+<h2 id="publications">Publications</h2>
+<p>Publications and talks:</p>
+<ul>
+<li>Landauer M., Wurzenberger M., Skopik F., Hotwagner W., Höld G. (2023): <a href="https://dl.acm.org/doi/full/10.1145/3567675">AMiner: A Modular Log Data Analysis Pipeline for Anomaly-based Intrusion Detection</a>. <a href="https://dl.acm.org/toc/dtrap/2023/4/1">Digital Threats: Research and Practice</a>, Volume 4, Issue 1. March 2023, pp. 1–16, ACM. [<a href="https://dl.acm.org/doi/pdf/10.1145/3567675">PDF</a>]</li>
+<li>Wurzenberger M., Skopik F., Settanni G., Fiedler R. (2018): <a href="http://www.scitepress.org/DigitalLibrary/Link.aspx?doi=10.5220/0006643003860397">AECID: A Self-learning Anomaly Detection Approach Based on Light-weight Log Parser Models</a>. <a href="http://www.icissp.org/">4th International Conference on Information Systems Security and Privacy (ICISSP 2018)</a>, January 22-24, 2018, Funchal, Madeira - Portugal. INSTICC. [<a href="https://pdfs.semanticscholar.org/cd58/8e51d7a1d7f02f95ef2127623b21e2cd02c6.pdf">PDF</a>]</li>
+<li>Wurzenberger M., Landauer M., Skopik F., Kastner W. (2019): AECID-PG: <a href="https://ieeexplore.ieee.org/document/8717887">AECID-PG: A Tree-Based Log Parser Generator To Enable Log Analysis</a>. <a href="https://annet2019.moogsoft.com/">4th IEEE/IFIP International Workshop on Analytics for Network and Service Management (AnNet 2019)</a> in conjunction with the <a href="https://im2019.ieee-im.org/">IFIP/IEEE International Symposium on Integrated Network Management (IM)</a>, April 8, 2019, Washington D.C., USA. IEEE. [<a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=8717887">PDF</a>]</li>
+<li>Landauer M., Skopik F., Wurzenberger M., Hotwagner W., Rauber A. (2019): <a href="https://ieeexplore.ieee.org/document/9006328">A Framework for Cyber Threat Intelligence Extraction from Raw Log Data</a>. <a href="https://securitylab.no/cyberhunt2019/">International Workshop on Big Data Analytics for Cyber Threat Hunting (CyberHunt 2019)</a> in conjunction with the <a href="http://bigdataieee.org/BigData2019/">IEEE International Conference on Big Data 2019</a>, December 9-12, 2019, Los Angeles, CA, USA. IEEE. [<a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9006328">PDF</a>]</li>
+</ul>
+<p>A complete list of publications can be found at <a href="https://aecid.ait.ac.at/further-information/">https://aecid.ait.ac.at/further-information/</a>.</p>
+<h2 id="contribution">Contribution</h2>
+<p>We're happily taking patches and other contributions. Please see the following links for how to get started:</p>
+<ul>
+<li><a href="https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Installing-a-development-environment"> How to install a development environment </a></li>
+<li><a href="https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Git-development-workflow"> Git development workflow </a></li>
+</ul>
+<h2 id="bugs">Bugs</h2>
+<p>If you encounter any bugs, please create an issue on <a href="https://github.com/ait-aecid/logdata-anomaly-miner/issues">Github</a>.</p>
+<h2 id="security">Security</h2>
+<p>If you discover any security-related issues read the <a href="SECURITY/">SECURITY.md</a> first and report the issues.</p>
+<h2 id="license">License</h2>
+<p><a href="LICENSE">GPL-3.0</a></p>
+<h2 id="financial-support">Financial Support</h2>
+<p>This project received financial support through the research projects CAIS (832345), CIIS (840842), and CISA (850199) in course of the Austrian KIRAS security research programme, the research projects synERGY (855457) and DECEPT (873980) in course of the ICT of the future programme of the Austrian Research Promotion Agency (FFG), the research project PANDORA (SI2.835928) in course of the European Defence Industrial Development Programme (EDIDP), as well as the research projects ECOSSIAN (607577) and GUARD (833456) in course of the European Seventh Framework Programme (FP7) and Horizon 2020.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="configuration/" class="btn btn-neutral float-right" title="Configuration">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+      <span><a href="configuration/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+      <script src="js/version-select.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2026-08-10 12:50:47.962750+00:00
+-->
