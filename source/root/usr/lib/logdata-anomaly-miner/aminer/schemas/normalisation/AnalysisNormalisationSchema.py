@@ -11,6 +11,7 @@
                 'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'persistence_id': {'type': 'string', 'default': 'Default'},
+                'expire_persistence_time': {'type': 'integer', 'nullable': True, 'default': None, 'min': 86400},
                 'output_logline': {'type': 'boolean', 'default': False},
                 'learn_mode': {'type': 'boolean'},
                 'num_windows': {'type': 'integer', 'required': True, 'default': 50},

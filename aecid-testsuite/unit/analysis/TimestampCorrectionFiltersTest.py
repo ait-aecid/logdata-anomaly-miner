@@ -16,7 +16,7 @@ class TimestampCorrectionFiltersTest(TestBase):
         match_context = DummyMatchContext(b" pid=")
         fdme = DummyFixedDataModelElement("s1", b" pid=")
         match_element = fdme.get_match_element("match", match_context)
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False, output_logline=False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False, output_logline=False)
         smta = SimpleMonotonicTimestampAdjust([nmpd], False)
 
         # the atom time should not be set automatically if None.
@@ -44,7 +44,7 @@ class TimestampCorrectionFiltersTest(TestBase):
 
     def test2validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
         self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [""], True)
         self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [b""], True)
         self.assertRaises(TypeError, SimpleMonotonicTimestampAdjust, [True], True)

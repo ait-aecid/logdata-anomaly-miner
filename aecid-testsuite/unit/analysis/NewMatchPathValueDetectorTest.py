@@ -119,24 +119,57 @@ class NewMatchPathValueDetectorTest(TestBase):
 
     def test4persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        nmpvd = NewMatchPathValueDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler], learn_mode=True, output_logline=False)
+        nmpvd = NewMatchPathValueDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler], learn_mode=True, output_logline=False, expire_persistence_time=86400)
         t = round(time.time(), 3)
         log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t, nmpvd)
         log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t, nmpvd)
-
         self.assertTrue(nmpvd.receive_atom(log_atom1))
         self.assertTrue(nmpvd.receive_atom(log_atom2))
         self.assertEqual(nmpvd.known_values_set, {b" pid=", b"25537"})
         nmpvd.do_persist()
+        p = t + nmpvd.expire_persistence_time
+        self.assertEqual(nmpvd.value_timestamps, {b" pid=": p, b"25537": p})
         with open(nmpvd.persistence_file_name, "r") as f:
-            self.assertEqual(f.read(), '["bytes: pid=", "bytes:25537"]')
+            self.assertEqual(f.read(), f'[["bytes: pid=", "bytes:25537"], [{p}, {p}]]')
+
+        nmpvd.learn_mode = False
+        t = p - 1
+
+        log_atom1 = LogAtom(self.fdme1.data, ParserMatch(self.match_element1), t+1, nmpvd)
+        log_atom2 = LogAtom(self.match_context2.match_data, ParserMatch(self.match_element2), t+2, nmpvd)
+        self.assertTrue(nmpvd.receive_atom(log_atom1))
+        self.assertTrue(nmpvd.receive_atom(log_atom2))
+        self.assertEqual(nmpvd.known_values_set, {b" pid="})
+        t2 = t + nmpvd.expire_persistence_time
+        nmpvd.do_persist(t2+1)
+        self.assertEqual(nmpvd.value_timestamps, {b" pid=": t2+1})
+        with open(nmpvd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[["bytes: pid="], [{t2+1}]]')
 
         nmpvd.known_values_set = set()
         nmpvd.load_persistence_data()
-        self.assertEqual(nmpvd.known_values_set, {b" pid=", b"25537"})
+        self.assertEqual(nmpvd.known_values_set, {b" pid="})
 
-        other = NewMatchPathValueDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler])
+        other = NewMatchPathValueDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler], learn_mode=False)
         self.assertEqual(nmpvd.known_values_set, other.known_values_set)
+        self.assertEqual(nmpvd.value_timestamps, other.value_timestamps)
+
+        nmpvd.expire_persistence_time = None
+        nmpvd.do_persist()
+        with open(nmpvd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[["bytes: pid="]]')
+
+        other = NewMatchPathValueDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler], learn_mode=True)
+        self.assertEqual(other.known_values_set, nmpvd.known_values_set)
+        self.assertEqual(other.value_timestamps, {})
+
+        other.expire_persistence_time = 86400
+        other.receive_atom(log_atom1)
+        other.receive_atom(log_atom2)
+        t2 = t + other.expire_persistence_time
+        other.do_persist(t2 + 1)
+        self.assertEqual(other.known_values_set, {b" pid=", b"25537"})
+        self.assertNotEqual(other.value_timestamps, {})
 
     def test5validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
@@ -175,6 +208,18 @@ class NewMatchPathValueDetectorTest(TestBase):
         self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], persistence_id=())
         self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], persistence_id=set())
         NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], persistence_id="Default")
+
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time="")
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=b"Default")
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=True)
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=["Default"])
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=[])
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=())
+        self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=set())
+        self.assertRaises(ValueError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=86399)
+        NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=None)
+        NewMatchPathValueDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], expire_persistence_time=86400)
 
         self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], learn_mode=b"True")
         self.assertRaises(TypeError, NewMatchPathValueDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], learn_mode="True")

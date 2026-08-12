@@ -112,7 +112,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_stat_stop_update", "num_updates_until_var_reduction", "var_reduction_thres", "num_skipped_ind_for_weights",
             "num_ind_for_weights", "used_multinomial_test", "use_empiric_distr", "used_range_test", "range_alpha", "range_threshold",
             "num_reinit_range", "range_limits_factor", "dw_alpha", "save_statistics", "idf", "norm", "add_normal", "check_empty_windows",
-            "unique_path_list", "default_freqs", "var_factor", "avg_factor", "log_resource_ignore_list"
+            "unique_path_list", "default_freqs", "var_factor", "avg_factor", "log_resource_ignore_list", "expire_persistence_time"
         ]
         self.log_success = 0
         self.log_total = 0
@@ -189,7 +189,7 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "num_end_learning_phase", "check_cor_num_thres",  "min_values_cors_thres", "num_bt", "num_update_unq", "num_s_gof_values",
             "num_s_gof_bt", "num_d_bt", "num_pause_discrete", "num_pause_others", "num_var_type_hist_ref", "num_update_var_type_hist_ref",
             "num_var_type_considered_ind", "num_stat_stop_update", "num_updates_until_var_reduction", "num_skipped_ind_for_weights",
-            "num_ind_for_weights", "num_reinit_range"]
+            "num_ind_for_weights", "num_reinit_range", "expire_persistence_time"]
         non_negative = [
             "set_lower_limit", "time_output_threshold", "disc_div_thres", "num_upd_until_validation", "num_upd_until_validation",
             "check_cor_thres", "check_cor_prob_thres", "check_cor_num_thres", "min_values_cors_thres", "alpha_chisquare_test",
@@ -207,7 +207,8 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "time_period_length", "max_time_diff", "num_reduce_time_list", "min_anomaly_score", "num_update", "new_vals_alarm_thres",
             "num_bt", "num_update_unq", "num_s_gof_values", "num_s_gof_bt", "num_d_bt", "num_pause_discrete", "num_var_type_hist_ref",
             "num_update_var_type_hist_ref", "num_var_type_considered_ind", "num_stat_stop_update", "num_updates_until_var_reduction",
-            "num_skipped_ind_for_weights", "num_ind_for_weights", "num_reinit_range", "range_limits_factor", "dw_alpha"]
+            "num_skipped_ind_for_weights", "num_ind_for_weights", "num_reinit_range", "range_limits_factor", "dw_alpha",
+            "stop_learning_time", "stop_learning_no_anomaly_time"]
         zero_to_one = [
             "generation_probability", "generation_factor", "p0", "alpha", "confidence_factor", "prob_thresh", "anomaly_threshold",
             "alpha", "alpha_bt", "acf_pause_interval_percentage", "acf_threshold", "round_time_interval_threshold", "min_variance",
@@ -216,11 +217,12 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
             "match_disc_distr_threshold", "validate_cor_cover_vals_thres", "validate_cor_distinct_thres", "gof_alpha", "s_gof_alpha",
             "s_gof_bt_alpha", "d_alpha", "d_bt_alpha", "div_thres", "sim_thres", "indicator_thres", "var_reduction_thres", "range_alpha",
             "range_threshold", "dw_alpha"]
-        nullable = ["stop_learning_time", "stop_learning_no_anomaly_time", "set_lower_limit", "set_upper_limit", "timeout"]
+        nullable = ["stop_learning_time", "stop_learning_no_anomaly_time", "set_lower_limit", "set_upper_limit", "timeout",
+                    "expire_persistence_time"]
         for attr in set([] + integer_only + non_negative + non_zero_or_negative + zero_to_one):
             if hasattr(self, attr):
                 attr_val = self.__getattribute__(attr)
-                if attr in integer_only and (isinstance(attr_val, bool) or not isinstance(attr_val, int)):
+                if attr in integer_only and attr_val is not None and (isinstance(attr_val, bool) or not isinstance(attr_val, int)):
                     msg = f"{attr} has to be of the type integer."
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise TypeError(msg)
@@ -256,6 +258,10 @@ class AtomHandlerInterface(metaclass=abc.ABCMeta):
         if hasattr(self, "num_s_gof_values") and hasattr(self, "num_init") and hasattr(self, "num_update") and (
                 self.num_s_gof_values < self.num_update or self.num_s_gof_values > self.num_init):
             msg = "num_s_gof_values must be smaller than or equal to num_init and greater than or equal to num_init."
+            logging.getLogger(DEBUG_LOG_NAME).error(msg)
+            raise ValueError(msg)
+        if hasattr(self, "expire_persistence_time") and self.expire_persistence_time is not None and self.expire_persistence_time < 86400:
+            msg = "expire_persistence_time must be greater than or equal to 86400 seconds, when it is not None."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
             raise ValueError(msg)
 
@@ -427,7 +433,7 @@ class PersistableComponentInterface(metaclass=abc.ABCMeta):
         """Initialize the PersistableComponentInterface."""
 
     @abc.abstractmethod
-    def do_persist(self, log_atom):
+    def do_persist(self):
         """Immediately write persistence data to storage."""
 
     @abc.abstractmethod

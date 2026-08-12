@@ -26,6 +26,13 @@
             'default': '/var/lib/aminer',
             'empty': False
         },
+        'ExpirePersistenceTime': {
+            'required': False,
+            'type': 'integer',
+            'default': None,
+            'min': 86400,
+            'nullable': True
+        },
         'Core.LogDir': {
             'required': False,
             'type': 'string',

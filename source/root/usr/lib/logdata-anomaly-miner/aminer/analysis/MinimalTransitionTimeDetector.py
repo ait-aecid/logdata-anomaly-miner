@@ -216,9 +216,9 @@ class MinimalTransitionTimeDetector(
         return True
 
     def solidify_matrix(self):
-        """Solidify minimal time matrix with the trianlge inequality."""
+        """Solidify minimal time matrix with the triangle inequality."""
         # Initialize list old_pairs with all transitions and a list of all values
-        # The list of old_pairs includes the minimal times which can be used to reduce the minimal ransition times of other transitions
+        # The list of old_pairs includes the minimal times which can be used to reduce the minimal transition times of other transitions
         values = list(self.time_matrix.keys())
         for key1 in self.time_matrix:
             values += [key for key in self.time_matrix[key1] if key not in values]

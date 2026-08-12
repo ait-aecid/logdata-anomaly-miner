@@ -10,8 +10,8 @@ class SimpleByteStreamLineAtomizerFactoryTest(TestBase):
     def test1get_atomizer(self):
         """Tests the creating of an SimpleByteStreamLineAtomizer with the Factory."""
         fdme = DummyFixedDataModelElement("fixed", b"fixed data")
-        nmpd1 = NewMatchPathDetector(self.aminer_config, [], "Default", False)
-        nmpd2 = NewMatchPathDetector(self.aminer_config, [], "Default", False)
+        nmpd1 = NewMatchPathDetector(self.aminer_config, [], "Default", learn_mode=False)
+        nmpd2 = NewMatchPathDetector(self.aminer_config, [], "Default", learn_mode=False)
 
         sbslaf = SimpleByteStreamLineAtomizerFactory(fdme, [nmpd1, nmpd2], [self.stream_printer_event_handler], None)
 

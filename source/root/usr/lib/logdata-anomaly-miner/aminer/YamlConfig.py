@@ -413,6 +413,12 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                     logging.getLogger(DEBUG_LOG_NAME).error(msg)
                     raise ValueError(msg)
                 learn = yaml_data['LearnMode']
+            expire = None
+            if 'expire_persistence_time' in item:
+                expire = item['expire_persistence_time']
+            elif 'ExpirePersistenceTime' in yaml_data:
+                expire = yaml_data['ExpirePersistenceTime']
+
             func = item['type'].func
             if item['suppress']:
                 if comp_name is None:
@@ -422,7 +428,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], output_logline=item['output_logline'],
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
-                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
                                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'MatchPathFilter':
                 parsed_atom_handler_lookup_list = []
@@ -471,7 +477,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
                                     output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'],
-                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
                                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'MissingMatchPathValueDetector':
                 tmp_analyser = func(analysis_context.aminer_config, item['paths'], anomaly_event_handlers, learn_mode=learn,
@@ -493,7 +499,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     learn_mode=learn, timeout=item['timeout'], allow_missing_id=item['allow_missing_id'],
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
-                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
                                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'ValueRangeDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, item['id_path_list'],
@@ -507,7 +513,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     target_path_list=item['paths'], persistence_id=item['persistence_id'], learn_mode=learn,
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
-                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
                                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'EntropyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
@@ -516,7 +522,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], learn_mode=learn,
                                     output_logline=item['output_logline'], ignore_list=item['ignore_list'],
                                     constraint_list=item['constraint_list'], log_resource_ignore_list=item['log_resource_ignore_list'],
-                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
                                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'EventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
@@ -573,7 +579,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     learn_mode=learn, persistence_id=item['persistence_id'],
                                     allow_missing_values_flag=item['allow_missing_values'], output_logline=item['output_logline'],
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
-                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
                                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif item['type'].name == 'SlidingEventFrequencyDetector':
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, target_path_list=item['paths'],
@@ -631,7 +637,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                                     persistence_id=item['persistence_id'], allow_missing_values_flag=item['allow_missing_values'],
                                     learn_mode=learn, tuple_transformation_function=tuple_transformation_function,
                                     output_logline=item['output_logline'], log_resource_ignore_list=item['log_resource_ignore_list'],
-                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
                                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
                 global enhanced_new_match_path_value_combo_detector_reference
                 enhanced_new_match_path_value_combo_detector_reference = tmp_analyser
@@ -658,7 +664,7 @@ def build_analysis_components(analysis_context, anomaly_event_handlers, atom_fil
                 tmp_analyser = func(analysis_context.aminer_config, anomaly_event_handlers, persistence_id=item['persistence_id'],
                                     learn_mode=learn, output_logline=item['output_logline'],
                                     log_resource_ignore_list=item['log_resource_ignore_list'],
-                                    stop_learning_time=item['stop_learning_time'],
+                                    stop_learning_time=item['stop_learning_time'], expire_persistence_time=expire,
                                     stop_learning_no_anomaly_time=item['stop_learning_no_anomaly_time'])
             elif 'MatchAction' in item['type'].name:
                 if comp_name is None:

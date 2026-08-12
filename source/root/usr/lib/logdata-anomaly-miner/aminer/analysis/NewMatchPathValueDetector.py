@@ -30,8 +30,9 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", learn_mode=False,
-                 output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+    def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", expire_persistence_time=None,
+                 learn_mode=False, output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -40,6 +41,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
                considered for value range generation.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param learn_mode when set to True, this detector will report a new value only the first time before including it
         in the known values set automatically.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
@@ -48,12 +50,12 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_time_initialized = None
+        self.stop_learning_time_initialized, self.expire_persistence_time = [None] * 2
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
-            mutable_default_args=["log_resource_ignore_list"]
+            expire_persistence_time=expire_persistence_time, mutable_default_args=["log_resource_ignore_list"]
         )
         if not self.target_path_list:
             msg = "target_path_list must not be None or empty."
@@ -63,6 +65,7 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
         self.log_learned_path_values = 0
         self.log_new_learned_values = []
         self.known_values_set = set()
+        self.value_timestamps = {}
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         self.load_persistence_data()
@@ -73,15 +76,16 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
+        atom_time = log_atom.atom_time
         if not self.stop_learning_time_initialized:
             self.stop_learning_time_initialized = True
             if self.stop_learning_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+                self.stop_learning_time = atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = atom_time + self.stop_learning_no_anomaly_time
 
         match_dict = log_atom.parser_match.get_match_dictionary()
-        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -95,21 +99,35 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
             else:
                 matches.append(match)
             affected_log_atom_values = []
+            expired_values = set()
             for match in matches:
-                if match.match_object not in self.known_values_set:
-                    if self.learn_mode:
-                        self.known_values_set.add(match.match_object)
-                        self.log_learned_path_values += 1
-                        self.log_new_learned_values.append(match.match_object)
-                        if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
-                            self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
-
-                    if isinstance(match.match_object, bytes):
-                        affected_log_atom_values.append(match.match_object.decode(AminerConfig.ENCODING))
+                value = match.match_object
+                if value not in self.known_values_set:
+                    if isinstance(value, bytes):
+                        affected_log_atom_values.append(value.decode(AminerConfig.ENCODING))
                     else:
-                        affected_log_atom_values.append(str(match.match_object))
+                        affected_log_atom_values.append(str(value))
+                if self.learn_mode:
+                    if value not in self.known_values_set:
+                        self.log_learned_path_values += 1
+                        self.log_new_learned_values.append(value)
+                        if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
+                            self.stop_learning_time = max(self.stop_learning_time, atom_time + self.stop_learning_no_anomaly_time)
+                    self.known_values_set.add(value)
+                    if self.expire_persistence_time is not None:
+                        self.value_timestamps[value] = atom_time + self.expire_persistence_time
+
+                elif self.expire_persistence_time is not None:
+                    if not self.learn_mode and value in self.value_timestamps and self.value_timestamps[value] < atom_time:
+                        expired_values.add(value)
+                        self.known_values_set.remove(value)
+                        del self.value_timestamps[value]
+                    elif self.learn_mode or self.value_timestamps[value] >= atom_time:
+                        self.value_timestamps[value] = atom_time + self.expire_persistence_time
             if len(affected_log_atom_values) > 0:
                 analysis_component = {"AffectedLogAtomPaths": [target_path], "AffectedLogAtomValues": affected_log_atom_values}
+                if self.expire_persistence_time is not None:
+                    analysis_component["ExpiredValues"] = list(expired_values)
                 if isinstance(match_dict.get(target_path), list):
                     res = {target_path: affected_log_atom_values}
                 else:
@@ -139,25 +157,51 @@ class NewMatchPathValueDetector(AtomHandlerInterface, TimeTriggeredComponentInte
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
-            self.do_persist()
+            self.do_persist(trigger_time)
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
         return delta
 
-    def do_persist(self):
+    def do_persist(self, trigger_time=None):
         """Immediately write persistence data to storage."""
         data = list(self.known_values_set)
         bts = list(filter(lambda x: isinstance(x, bytes), data))
         other = list(filter(lambda x: not isinstance(x, bytes), data))
-        PersistenceUtil.store_json(self.persistence_file_name, sorted(other) + sorted(bts))
+        values = sorted(other) + sorted(bts)
+        lst = [[]]
+        if self.expire_persistence_time is not None:
+            timestamps_list = []
+            for value in values:
+                if trigger_time is None or (value in self.value_timestamps and self.value_timestamps[value] >= trigger_time):
+                    timestamps_list.append(self.value_timestamps[value])
+                elif trigger_time is not None:
+                    self.value_timestamps.pop(value, None)
+                    continue
+                lst[0].append(value)
+            if len(timestamps_list) > 0:
+                lst.append(timestamps_list)
+        else:
+            lst[0] = values
+        PersistenceUtil.store_json(self.persistence_file_name, lst)
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
         PersistenceUtil.add_persistable_component(self)
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.known_values_set = set()
+        self.value_timestamps = {}
         if persistence_data is not None:
-            self.known_values_set = set(persistence_data)
+            if len(persistence_data) == 2 and all(isinstance(x, list) for x in persistence_data):
+                for i in range(len(persistence_data[0])):
+                    self.known_values_set.add(persistence_data[0][i])
+                    self.value_timestamps[persistence_data[0][i]] = persistence_data[1][i]
+            else:
+                if len(persistence_data) > 0:
+                    if isinstance(persistence_data[0], list):
+                        self.known_values_set = set(persistence_data[0])
+                    else:
+                        self.known_values_set = set(persistence_data)
             logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):
