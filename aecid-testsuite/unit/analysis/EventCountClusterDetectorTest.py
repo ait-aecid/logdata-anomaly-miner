@@ -485,6 +485,20 @@ class EventCountClusterDetectorTest(TestBase):
         self.assertRaises(TypeError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=set())
         EventCountClusterDetector(self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(ValueError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity=-1)
+        self.assertRaises(ValueError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity=1.1)
+        self.assertRaises(TypeError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity=b"Default")
+        self.assertRaises(TypeError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity="123")
+        self.assertRaises(TypeError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, EventCountClusterDetector, self.aminer_config, [self.stream_printer_event_handler], severity=set())
+        EventCountClusterDetector(self.aminer_config, [self.stream_printer_event_handler], severity=None)
+        EventCountClusterDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0)
+        EventCountClusterDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0.5)
+        EventCountClusterDetector(self.aminer_config, [self.stream_printer_event_handler], severity=1)
+
 
 if __name__ == "__main__":
     unittest.main()

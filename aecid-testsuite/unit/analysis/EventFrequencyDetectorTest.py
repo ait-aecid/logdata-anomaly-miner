@@ -561,6 +561,20 @@ class EventFrequencyDetectorTest(TestBase):
         self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=set())
         EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity=-1)
+        self.assertRaises(ValueError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity=1.1)
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity=b"Default")
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity="123")
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, EventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], severity=set())
+        EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], severity=None)
+        EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0)
+        EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0.5)
+        EventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], severity=1)
+
     def test7seasonal_frequency_detection(self):
         """
         Test for periodically changing frequencies

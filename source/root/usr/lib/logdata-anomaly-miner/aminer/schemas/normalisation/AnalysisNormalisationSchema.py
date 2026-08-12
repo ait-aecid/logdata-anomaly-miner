@@ -11,6 +11,7 @@
                 'paths': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'labels': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
                 'persistence_id': {'type': 'string', 'default': 'Default'},
+                'expire_persistence_time': {'type': 'integer', 'nullable': True, 'default': None, 'min': 86400},
                 'output_logline': {'type': 'boolean', 'default': False},
                 'learn_mode': {'type': 'boolean'},
                 'num_windows': {'type': 'integer', 'required': True, 'default': 50},
@@ -220,7 +221,8 @@
                 'stop_learning_no_anomaly_time': {'type': ['integer', 'float'], 'nullable': True, 'default': None, 'min': 0.000001},
                 'avg_factor': {'type': 'float', 'min': 0, 'default': 1},
                 'var_factor': {'type': 'float', 'min': 0, 'default': 2},
-                'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None}
+                'log_resource_ignore_list': {'type': 'list', 'schema': {'type': 'string'}, 'nullable': True, 'default': None},
+                'severity': {'type': 'float', 'default': None, 'nullable': True}
             }
         }
     }

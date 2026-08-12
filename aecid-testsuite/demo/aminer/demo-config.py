@@ -37,6 +37,7 @@ config_properties['Core.LogDir'] = '/tmp/lib/aminer/log'
 # is used.
 config_properties['Core.PersistenceDir'] = '/tmp/lib/aminer'
 config_properties['Core.PersistencePeriod'] = 600
+config_properties['ExpirePersistenceTime'] = 2629800  # 1 month
 
 # Define a target e-mail address to send alerts to. When undefined,
 # no e-mail notification hooks are added.
@@ -294,8 +295,8 @@ def build_analysis_pipeline(analysis_context):
                 Rules.DebugMatchRule(debug_match_result=True)]),
             Rules.NegationMatchRule(Rules.PathExistsMatchRule('/model/LoginDetails'))])]
 
-    allowlist_violation_detector = AllowlistViolationDetector(analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers,
-                                                              output_logline=True)
+    allowlist_violation_detector = AllowlistViolationDetector(
+        analysis_context.aminer_config, allowlist_rules, anomaly_event_handlers, output_logline=True, severity=0.1)
     analysis_context.register_component(allowlist_violation_detector, component_name="Allowlist")
     atom_filter.add_handler(allowlist_violation_detector)
 
@@ -328,7 +329,7 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.EventCorrelationDetector import EventCorrelationDetector
     ecd = EventCorrelationDetector(analysis_context.aminer_config, anomaly_event_handlers, check_rules_flag=True,
-                                   hypothesis_max_delta_time=1.0, learn_mode=True)
+                                   hypothesis_max_delta_time=1.0, learn_mode=True, severity=0.3)
     analysis_context.register_component(ecd, component_name="EventCorrelationDetector")
     atom_filter.add_handler(ecd)
 
@@ -446,7 +447,8 @@ def build_analysis_pipeline(analysis_context):
 
     from aminer.analysis.NewMatchPathValueDetector import NewMatchPathValueDetector
     new_match_path_value_detector = NewMatchPathValueDetector(analysis_context.aminer_config, [
-        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, learn_mode=True, output_logline=True)
+        '/model/DailyCron/JobNumber', '/model/IPAddresses/Username'], anomaly_event_handlers, learn_mode=True, output_logline=True,
+        expire_persistence_time=172800)
     analysis_context.register_component(new_match_path_value_detector, component_name="NewMatchPathValue")
     atom_filter.add_handler(new_match_path_value_detector)
 

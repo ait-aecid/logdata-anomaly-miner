@@ -26,7 +26,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface):
     configuration errors, e.g. invalid timezone configuration.
     """
 
-    def __init__(self, aminer_config, anomaly_event_handlers, exit_on_error_flag=False, output_logline=True):
+    def __init__(self, aminer_config, anomaly_event_handlers, exit_on_error_flag=False, output_logline=True, severity=None):
         """Initialize the detector.
 
         @param aminer_config configuration from analysis_context.
@@ -37,7 +37,7 @@ class TimestampsUnsortedDetector(AtomHandlerInterface):
         # avoid "defined outside init" issue
         self.log_success, self.log_total = [None]*2
         super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, exit_on_error_flag=exit_on_error_flag,
-                         output_logline=output_logline)
+                         output_logline=output_logline, severity=severity)
         self.last_timestamp = 0
 
     def receive_atom(self, log_atom):
@@ -62,6 +62,8 @@ class TimestampsUnsortedDetector(AtomHandlerInterface):
                 sorted_log_lines = [original_log_line_prefix + data]
             analysis_component = {"LastTimestamp": self.last_timestamp}
             event_data = {"AnalysisComponent": analysis_component}
+            if self.severity is not None:
+                event_data["Tags"] = {"Severity": self.severity}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(
                     f"Analysis.{self.__class__.__name__}",

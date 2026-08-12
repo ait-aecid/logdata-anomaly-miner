@@ -183,6 +183,22 @@ class TimeCorrelationDetectorTest(TestBase):
         self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=set())
         TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity="")
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity=b"Default")
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity=True)
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity={"id": "Default"})
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity=["Default"])
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity=[])
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity=())
+        self.assertRaises(TypeError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity=set())
+        self.assertRaises(ValueError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity=123)
+        self.assertRaises(ValueError, TimeCorrelationDetector, self.aminer_config, [self.stream_printer_event_handler], 2, severity=123.22)
+        TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, severity=None)
+        TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, severity=0)
+        TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, severity=1)
+        TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, severity=0.1)
+        TimeCorrelationDetector(self.aminer_config, [self.stream_printer_event_handler], 2, severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()

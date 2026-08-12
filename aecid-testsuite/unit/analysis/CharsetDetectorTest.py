@@ -19,7 +19,7 @@ class CharsetDetectorTest(TestBase):
         stops if learn_mode=False. Test if stop_learning_time and stop_learning_no_anomaly_timestamp are implemented properly.
         """
         t = time.time()
-        expected_string = '%s New character(s) detected\n%s: "None" (%d lines)\n  %s\n\n'
+        expected_string = '%s New and/or expired character(s) detected\n%s: "None" (%d lines)\n  %s\n\n'
         dtf = "%Y-%m-%d %H:%M:%S"
 
         # Prepare log atoms that represent two entities (id) with strings (value). Anomalies are generated when new characters are observed.
@@ -175,7 +175,7 @@ class CharsetDetectorTest(TestBase):
     def test5persistence(self):
         """Test the do_persist and load_persistence_data methods."""
         t = time.time()
-        cd = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], learn_mode=True, output_logline=False)
+        cd = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], learn_mode=True, output_logline=False, expire_persistence_time=86400)
         m1 = MatchElement("/model/id", b"a", b"a", None)
         m2 = MatchElement("/model/value", b"abc", b"abc", None)
         log_atom1 = LogAtom(b"aabc", ParserMatch(MatchElement("/model", b"aabc", b"aabc", [m1, m2])), t + 1, None)
@@ -190,13 +190,13 @@ class CharsetDetectorTest(TestBase):
 
         m7 = MatchElement("/model/id", b"a", b"a", None)
         m8 = MatchElement("/model/value", b"xxx", b"xxx", None)
-        log_atom4 = LogAtom(b"bxxx", ParserMatch(MatchElement("/model", b"bxxx", b"bxxx", [m7, m8])), t + 4, None)
+        log_atom4 = LogAtom(b"axxx", ParserMatch(MatchElement("/model", b"axxx", b"axxx", [m7, m8])), t + 4, None)
 
         m9 = MatchElement("/model/id", b"a", b"a", None)
         m10 = MatchElement("/model/value", b"bass", b"bass", None)
         log_atom5 = LogAtom(b"abass", ParserMatch(MatchElement("/model", b"abass", b"abass", [m9, m10])), t + 5, None)
 
-        m11 = MatchElement("/model/id", b"a", b"a", None)
+        m11 = MatchElement("/model/id", b"b", b"b", None)
         m12 = MatchElement("/model/value", b"max", b"max", None)
         log_atom6 = LogAtom(b"bmax", ParserMatch(MatchElement("/model", b"bmax", b"bmax", [m11, m12])), t + 6, None)
 
@@ -207,18 +207,59 @@ class CharsetDetectorTest(TestBase):
         cd.receive_atom(log_atom5)
         cd.receive_atom(log_atom6)
         cd.do_persist()
+        p = t + cd.expire_persistence_time
         with open(cd.persistence_file_name, "r") as f:
-            self.assertEqual(f.read(), '[[["string:a"], [97, 98, 99, 115, 100, 102, 120, 109]], [["string:b"], [120, 121, 122]]]')
+            self.assertEqual(f.read(), f'[[["string:a"], [97, 98, 99, 115, 100, 102, 120], [{p+5}, {p+5}, {p+1}, {p+5}, {p+3}, {p+3}, {p+4}]], [["string:b"], [97, 120, 121, 122, 109], [{p+6}, {p+6}, {p+2}, {p+2}, {p+6}]]]')
 
-        self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abcdfmsx"]), ("b",): set([ord(x) for x in "xyz"])})
+        cd.learn_mode = False
+        t = p - 3
+        log_atom1 = LogAtom(b"aabc", ParserMatch(MatchElement("/model", b"aabc", b"aabc", [m1, m2])), t + 1, None)
+        log_atom3 = LogAtom(b"aasdf", ParserMatch(MatchElement("/model", b"aasdf", b"aasdf", [m5, m6])), t + 3, None)
+        log_atom5 = LogAtom(b"abass", ParserMatch(MatchElement("/model", b"abass", b"abass", [m9, m10])), t + 5, None)
+        log_atom6 = LogAtom(b"bmax", ParserMatch(MatchElement("/model", b"bmax", b"bmax", [m11, m12])), t + 6, None)
+        log_atom2 = LogAtom(b"bxyz", ParserMatch(MatchElement("/model", b"bxyz", b"bxyz", [m3, m4])), t + cd.expire_persistence_time + 2, None)  # x will be missing in 'b'
+        log_atom4 = LogAtom(b"axxx", ParserMatch(MatchElement("/model", b"axxx", b"axxx", [m7, m8])), t + cd.expire_persistence_time + 4, None)  # x will be missing in 'a'
+        cd.receive_atom(log_atom1)
+        cd.receive_atom(log_atom2)
+        cd.receive_atom(log_atom3)
+        cd.receive_atom(log_atom4)
+        cd.receive_atom(log_atom5)
+        cd.receive_atom(log_atom6)
+        t2 = t+cd.expire_persistence_time
+        cd.do_persist(t2+3)
+        with open(cd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[["string:a"], [97, 98, 100, 102, 115], [{t2 + 5}, {t2 + 5}, {t2 + 3}, {t2 + 3}, {t2 + 5}]], [["string:b"], [97, 109], [{t2 + 6}, {t2 + 6}]]]')
+
+        self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abdfs"]), ("b",): set([ord(x) for x in "am"])})
         cd.charsets = {}
         cd.load_persistence_data()
-        self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abcdfmsx"]), ("b",): set([ord(x) for x in "xyz"])})
+        self.assertEqual(cd.charsets, {("a",): set([ord(x) for x in "abdfs"]), ("b",): set([ord(x) for x in "am"])})
 
         other = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], learn_mode=True, output_logline=False)
         self.assertEqual(other.charsets, cd.charsets)
 
-    def test6validate_parameters(self):
+        cd.expire_persistence_time = None
+        cd.do_persist()
+        with open(cd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[["string:a"], [97, 98, 100, 102, 115]], [["string:b"], [97, 109]]]')
+
+        other = CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], learn_mode=True, output_logline=False)
+        self.assertEqual(other.charsets, cd.charsets)
+        self.assertEqual(other.charsets_timestamps, {})
+
+        other.expire_persistence_time = 86400
+        other.receive_atom(log_atom1)
+        other.receive_atom(log_atom2)
+        other.receive_atom(log_atom3)
+        other.receive_atom(log_atom4)
+        other.receive_atom(log_atom5)
+        other.receive_atom(log_atom6)
+        t2 = t + other.expire_persistence_time
+        other.do_persist(t2 + 3)
+        self.assertEqual(other.charsets, {("a",): set([ord(x) for x in "abdfsx"]), ("b",): set([ord(x) for x in "amxyz"])})
+        self.assertNotEqual(other.charsets_timestamps, {})
+
+def test6validate_parameters(self):
         """Test all initialization parameters for the detector. Input parameters must be validated in the class."""
         self.assertRaises(TypeError, CharsetDetector, self.aminer_config, ["default"], ["/model/id"], ["/model/value"])
         self.assertRaises(TypeError, CharsetDetector, self.aminer_config, None, ["/model/id"], ["/model/value"])
@@ -347,6 +388,23 @@ class CharsetDetectorTest(TestBase):
         self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], log_resource_ignore_list=())
         self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], log_resource_ignore_list=set())
         CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], log_resource_ignore_list=["file:///tmp/syslog"])
+
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity="Test")
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=b"Default")
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=True)
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity={"id": "Default"})
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=["Default"])
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=[])
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=())
+        self.assertRaises(TypeError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=set())
+        self.assertRaises(ValueError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=123)
+        self.assertRaises(ValueError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=123.22)
+        self.assertRaises(ValueError, CharsetDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=-0.22)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=None)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=0)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=1)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=0.1)
+        CharsetDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/id"], ["/model/value"], severity=0.99)
 
 
 if __name__ == "__main__":

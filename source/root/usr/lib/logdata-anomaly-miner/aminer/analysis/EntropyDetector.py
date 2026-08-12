@@ -33,8 +33,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list, prob_thresh=0.05, default_freqs=False,
-                 skip_repetitions=False, persistence_id="Default", learn_mode=False, output_logline=True,
-                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None,
+                 skip_repetitions=False, persistence_id="Default", expire_persistence_time=None, learn_mode=False, output_logline=True,
+                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, severity=None,
                  log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
@@ -48,6 +48,7 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         @param skip_repetitions boolean that determines whether only distinct values are used for character pair counting. This
                counteracts the problem of imbalanced word frequencies that distort the frequency table generated in a single aminer run.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param learn_mode when set to True, the detector will extend the table of character pair frequencies based on new values.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
@@ -57,14 +58,14 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_time_initialized = None
+        self.stop_learning_time_initialized, self.expire_persistence_time = [None] * 2
         super().__init__(
             mutable_default_args=["target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
             prob_thresh=prob_thresh, default_freqs=default_freqs, skip_repetitions=skip_repetitions, persistence_id=persistence_id,
-            learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list,
-            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
-            log_resource_ignore_list=log_resource_ignore_list
+            expire_persistence_time=expire_persistence_time, learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list,
+            constraint_list=constraint_list, stop_learning_time=stop_learning_time, severity=severity,
+            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
 
         self.value_set = set()
@@ -168,6 +169,8 @@ class EntropyDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Eve
                                       "AffectedLogAtomValues": [value.decode(AminerConfig.ENCODING)],
                                       "CriticalValue": critical_val, "ProbabilityThreshold": self.prob_thresh}
                 event_data = {"AnalysisComponent": analysis_component}
+                if self.severity is not None:
+                    event_data["Tags"] = {"Severity": self.severity}
                 for listener in self.anomaly_event_handlers:
                     listener.receive_event(f"Analysis.{self.__class__.__name__}", "Value entropy anomaly detected", sorted_log_lines,
                                            event_data, log_atom, self)

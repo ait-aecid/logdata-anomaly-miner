@@ -35,8 +35,9 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
     def __init__(self, aminer_config, anomaly_event_handlers, id_path_list=None, target_path_list=None, seq_len=3, allow_missing_id=False,
-                 timeout=None, persistence_id="Default", learn_mode=False, output_logline=True, ignore_list=None,
-                 constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 timeout=None, persistence_id="Default", expire_persistence_time=None, learn_mode=False, output_logline=True,
+                 ignore_list=None, constraint_list=None, stop_learning_time=None, stop_learning_no_anomaly_time=None, severity=None,
+                 log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -50,6 +51,7 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         @param allow_missing_id specifies whether log atoms without id path should be omitted (only if id path is set).
         @param timeout maximum allowed seconds between two entries of sequence; sequence is split in subsequences if exceeded.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param learn_mode specifies whether new frequency measurements override ground truth frequencies.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param ignore_list list of paths that are not considered for analysis, i.e., events that contain one of these paths are omitted.
@@ -60,16 +62,17 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_time_initialized = None
+        self.stop_learning_time_initialized, self.expire_persistence_time = [None] * 2
         super().__init__(
             mutable_default_args=["id_path_list", "target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, id_path_list=id_path_list,
             target_path_list=target_path_list, seq_len=seq_len, allow_missing_id=allow_missing_id, timeout=timeout,
-            persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list,
-            constraint_list=constraint_list, stop_learning_time=stop_learning_time,
+            persistence_id=persistence_id, expire_persistence_time=expire_persistence_time, learn_mode=learn_mode, severity=severity,
+            output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
         self.sequences = set()
+        self.sequence_timestamps = {}
         self.current_sequences = {}
         self.last_seen_times = {}
         self.log_learned = 0
@@ -86,14 +89,15 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 return False
         parser_match = log_atom.parser_match
         self.log_total += 1
+        atom_time = log_atom.atom_time
         if not self.stop_learning_time_initialized:
             self.stop_learning_time_initialized = True
             if self.stop_learning_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+                self.stop_learning_time = atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = atom_time + self.stop_learning_no_anomaly_time
 
-        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < log_atom.atom_time:
+        if self.learn_mode is True and self.stop_learning_time is not None and self.stop_learning_time < atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
@@ -169,9 +173,9 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         # If too much time passed between two values, start a new sequence
         if self.timeout is not None:
             if id_tuple in self.last_seen_times and self.last_seen_times[id_tuple] is not None and \
-                    log_atom.atom_time is not None and self.last_seen_times[id_tuple] + self.timeout < log_atom.atom_time:
+                    atom_time is not None and self.last_seen_times[id_tuple] + self.timeout < atom_time:
                 self.current_sequences[id_tuple] = ()
-            self.last_seen_times[id_tuple] = log_atom.atom_time
+            self.last_seen_times[id_tuple] = atom_time
 
         # If the sequence has not reached its full length, append the newest element and stop.
         # Otherwise, the current sequence is used as a queue, where the oldest entry is removed.
@@ -190,17 +194,9 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                 self.log_learned += 1
                 self.log_learned_sequences.append(self.current_sequences[id_tuple])
                 if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
-                    self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
-            try:
-                data = log_atom.raw_data.decode(AminerConfig.ENCODING)
-            except UnicodeError:
-                data = repr(log_atom.raw_data)
-            original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
-            if self.output_logline:
-                sorted_log_lines = [log_atom.parser_match.match_element.annotate_match("") + os.linesep + original_log_line_prefix +
-                                    data]
-            else:
-                sorted_log_lines = [data]
+                    self.stop_learning_time = max(self.stop_learning_time, atom_time + self.stop_learning_no_anomaly_time)
+                if self.expire_persistence_time is not None:
+                    self.sequence_timestamps[self.current_sequences[id_tuple]] = atom_time + self.expire_persistence_time
             if self.target_path_list is None or len(self.target_path_list) == 0:
                 analysis_component = {"AffectedLogAtomPaths": self.current_sequences[id_tuple]}
             else:
@@ -208,12 +204,42 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
                                       "AffectedLogAtomValues": list(self.current_sequences[id_tuple])}
             if self.id_path_list is not None:
                 analysis_component["AffectedIdValues"] = list(id_tuple)
-            event_data = {"AnalysisComponent": analysis_component}
-            for listener in self.anomaly_event_handlers:
-                listener.receive_event(f"Analysis.{self.__class__.__name__}", "New sequence detected", sorted_log_lines, event_data,
-                                       log_atom, self)
+            self.send_event(analysis_component, log_atom, "New sequence detected")
+        elif self.expire_persistence_time and (self.learn_mode or (self.current_sequences[
+                id_tuple] in self.sequence_timestamps and self.sequence_timestamps[self.current_sequences[id_tuple]] >= atom_time)):
+            self.sequence_timestamps[self.current_sequences[id_tuple]] = atom_time + self.expire_persistence_time
+        elif self.expire_persistence_time and self.current_sequences[id_tuple] in self.sequence_timestamps and \
+                self.sequence_timestamps[self.current_sequences[id_tuple]] < atom_time:
+            if self.target_path_list is None or len(self.target_path_list) == 0:
+                analysis_component = {"AffectedLogAtomPaths": self.current_sequences[id_tuple]}
+            else:
+                analysis_component = {"AffectedLogAtomPaths": self.target_path_list,
+                                      "AffectedLogAtomValues": list(self.current_sequences[id_tuple])}
+            if self.id_path_list is not None:
+                analysis_component["AffectedIdValues"] = list(id_tuple)
+            analysis_component["ExpiredValues"] = list(self.current_sequences[id_tuple])
+            del self.sequence_timestamps[self.current_sequences[id_tuple]]
+            self.sequences.remove(self.current_sequences[id_tuple])
+            self.send_event(analysis_component, log_atom, "Sequences expired already and are removed from the sequences set.")
         self.log_success += 1
         return True
+
+    def send_event(self, analysis_component, log_atom, msg):
+        try:
+            data = log_atom.raw_data.decode(AminerConfig.ENCODING)
+        except UnicodeError:
+            data = repr(log_atom.raw_data)
+        original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
+        if self.output_logline:
+            sorted_log_lines = [log_atom.parser_match.match_element.annotate_match("") + os.linesep + original_log_line_prefix +
+                                data]
+        else:
+            sorted_log_lines = [data]
+        event_data = {"AnalysisComponent": analysis_component}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
+        for listener in self.anomaly_event_handlers:
+            listener.receive_event(f"Analysis.{self.__class__.__name__}", msg, sorted_log_lines, event_data, log_atom, self)
 
     def do_timer(self, trigger_time):
         """Check if current ruleset should be persisted."""
@@ -222,14 +248,29 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
-            self.do_persist()
+            self.do_persist(trigger_time)
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
         return delta
 
-    def do_persist(self):
+    def do_persist(self, trigger_time=None):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.sequences)))
+        values = sorted(list(self.sequences))
+        lst = [[]]
+        if self.expire_persistence_time is not None:
+            timestamps_list = []
+            for value in values:
+                if trigger_time is None or value in self.sequence_timestamps and self.sequence_timestamps[value] >= trigger_time:
+                    timestamps_list.append(self.sequence_timestamps[value])
+                elif trigger_time is not None:
+                    self.sequence_timestamps.pop(value, None)
+                    continue
+                lst[0].append(value)
+            if len(timestamps_list) > 0:
+                lst.append(timestamps_list)
+        else:
+            lst[0] = values
+        PersistenceUtil.store_json(self.persistence_file_name, lst)
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def load_persistence_data(self):
@@ -237,12 +278,26 @@ class EventSequenceDetector(AtomHandlerInterface, TimeTriggeredComponentInterfac
         # Persisted data contains lists of sequences, i.e., [[<seq1_elem1>, <seq1_elem2>], [<seq2_elem1, ...], ...]
         # Thereby, sequence elements may be tuples, i.e., combinations of values, or paths that define events.
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.sequences = set()
+        self.sequence_timestamps = {}
         if persistence_data is not None:
-            for sequence in persistence_data:
-                sequence_elem_tuple = []
-                for sequence_elem in sequence:
-                    sequence_elem_tuple.append(tuple(sequence_elem))
-                self.sequences.add(tuple(sequence_elem_tuple))
+            if len(persistence_data) == 2 and all(isinstance(x, list) and all(isinstance(y, list) for y in x) for x in persistence_data):
+                for i, sequence in enumerate(persistence_data[0]):
+                    sequence_elem_tuple = []
+                    for sequence_elem in sequence:
+                        sequence_elem_tuple.append(tuple(sequence_elem))
+                    self.sequences.add(tuple(sequence_elem_tuple))
+                    self.sequence_timestamps[tuple(sequence_elem_tuple)] = persistence_data[1][i]
+            else:
+                if len(persistence_data) > 0:
+                    sequences = persistence_data[0]
+                else:
+                    sequences = persistence_data
+                for sequence in sequences:
+                    sequence_elem_tuple = []
+                    for sequence_elem in sequence:
+                        sequence_elem_tuple.append(tuple(sequence_elem))
+                    self.sequences.add(tuple(sequence_elem_tuple))
             logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):

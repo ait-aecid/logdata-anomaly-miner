@@ -384,6 +384,20 @@ class SlidingEventFrequencyDetectorTest(TestBase):
         self.assertRaises(TypeError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, log_resource_ignore_list=set())
         SlidingEventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], 300, log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(ValueError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity=-1)
+        self.assertRaises(ValueError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity=1.1)
+        self.assertRaises(TypeError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity=b"Default")
+        self.assertRaises(TypeError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity="123")
+        self.assertRaises(TypeError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity={"id": "Default"})
+        self.assertRaises(TypeError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity=["Default"])
+        self.assertRaises(TypeError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity=[])
+        self.assertRaises(TypeError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity=())
+        self.assertRaises(TypeError, SlidingEventFrequencyDetector, self.aminer_config, [self.stream_printer_event_handler], 300, severity=set())
+        SlidingEventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], 300, severity=None)
+        SlidingEventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], 300, severity=0)
+        SlidingEventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], 300, severity=0.5)
+        SlidingEventFrequencyDetector(self.aminer_config, [self.stream_printer_event_handler], 300, severity=1)
+
 
 if __name__ == "__main__":
     unittest.main()

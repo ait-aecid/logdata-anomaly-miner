@@ -42,7 +42,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
     def __init__(self, aminer_config, anomaly_event_handlers, event_type_detector, persistence_id="Default", target_path_list=None,
                  output_logline=True, learn_mode=False, num_init=50, force_period_length=False, set_period_length=10, alpha=0.05,
                  alpha_bt=0.05, num_results_bt=15, num_min_time_history=20, num_max_time_history=30, num_periods_tsa_ini=20,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -76,7 +76,7 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
             target_path_list=target_path_list, output_logline=output_logline, learn_mode=learn_mode, num_init=num_init,
             force_period_length=force_period_length, set_period_length=set_period_length, alpha=alpha, alpha_bt=alpha_bt,
             num_results_bt=num_results_bt, num_min_time_history=num_min_time_history, num_max_time_history=num_max_time_history,
-            num_periods_tsa_ini=num_periods_tsa_ini, stop_learning_time=stop_learning_time,
+            num_periods_tsa_ini=num_periods_tsa_ini, stop_learning_time=stop_learning_time, severity=severity,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list
         )
         # Add the PathArimaDetector to the list of the modules, which use the event_type_detector.
@@ -422,6 +422,8 @@ class PathArimaDetector(AtomHandlerInterface, TimeTriggeredComponentInterface, P
             analysis_component = {"AffectedLogAtomPaths": affected_path}
 
         event_data = {"AnalysisComponent": analysis_component, "TotalRecords": self.event_type_detector.total_records, "TypeInfo": {}}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         if self.event_type_detector.id_path_list:
             event_data["IDpaths"] = self.event_type_detector.id_path_list
             event_data["IDvalues"] = list(self.event_type_detector.id_path_list_tuples[self.event_type_detector.current_index])

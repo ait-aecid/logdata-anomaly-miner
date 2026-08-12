@@ -30,7 +30,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, log_resource_ignore_list=None):
+    def __init__(self, aminer_config, ruleset, anomaly_event_handlers, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -39,7 +39,7 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         """
         self.last_log_atom, self.next_persist_time, self.log_success, self.log_total = [None]*4
-        super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers,
+        super().__init__(aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, severity=severity,
                          log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"])
 
         self.ruleset = ruleset
@@ -94,6 +94,8 @@ class TimeCorrelationViolationDetector(AtomHandlerInterface, TimeTriggeredCompon
             r["correlation_history"] = history
             analysis_component = {"Rule": r, "CheckResult": check_result, "NewestTimestamp": newest_timestamp}
             event_data = {"AnalysisComponent": analysis_component}
+            if self.severity is not None:
+                event_data["Tags"] = {"Severity": self.severity}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", f'Correlation rule "{rule.rule_id}" violated',
                                        [check_result[0]], event_data, self.last_log_atom, self)

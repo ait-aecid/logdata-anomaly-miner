@@ -21,7 +21,7 @@ class TimestampsUnsortedDetectorTest(TestBase):
         match_context_fixed_dme = DummyMatchContext(pid)
         fixed_dme = DummyFixedDataModelElement("s1", pid)
         match_element_fixed_dme = fixed_dme.get_match_element("match", match_context_fixed_dme)
-        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        new_match_path_detector = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
 
         t = time.time()
         log_atom = LogAtom(fixed_dme.data, ParserMatch(match_element_fixed_dme), t, new_match_path_detector)
@@ -87,6 +87,21 @@ class TimestampsUnsortedDetectorTest(TestBase):
         self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], output_logline=())
         self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], output_logline=set())
         TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], output_logline=True)
+
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=b"True")
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity="True")
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=["Default"])
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=[])
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, TimestampsUnsortedDetector, self.aminer_config, [self.stream_printer_event_handler], severity=123.22)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=None)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=1)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0.1)
+        TimestampsUnsortedDetector(self.aminer_config, [self.stream_printer_event_handler], severity=0.99)
 
 
 if __name__ == "__main__":

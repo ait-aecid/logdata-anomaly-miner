@@ -222,6 +222,22 @@ class MatchValueAverageChangeDetectorTest(TestBase):
         self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=set())
         MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity="")
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=b"Default")
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=True)
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity={"id": "Default"})
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=["Default"])
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=[])
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=())
+        self.assertRaises(TypeError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=set())
+        self.assertRaises(ValueError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=123)
+        self.assertRaises(ValueError, MatchValueAverageChangeDetector, self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=123.22)
+        MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=None)
+        MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=0)
+        MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=1)
+        MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=0.1)
+        MatchValueAverageChangeDetector(self.aminer_config, [self.stream_printer_event_handler], None, ["/path"], 3, 1, severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -33,7 +33,7 @@ class PersistenceUtilTest(TestBase):
         self.assertRaises(TypeError, PersistenceUtil.add_persistable_component(some_object))
 
         # working example - the component is added implicitly.
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Test", True)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Test", learn_mode=True)
 
         # check persistence ID warning
         PersistenceUtil.SKIP_PERSISTENCE_ID_WARNING = False

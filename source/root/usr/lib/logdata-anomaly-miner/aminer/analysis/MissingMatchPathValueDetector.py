@@ -38,7 +38,7 @@ class MissingMatchPathValueDetector(
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, persistence_id="Default", learn_mode=False,
                  default_interval=3600, realert_interval=86400, combine_values=True, output_logline=True, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -64,7 +64,7 @@ class MissingMatchPathValueDetector(
             persistence_id=persistence_id, learn_mode=learn_mode, default_interval=default_interval, realert_interval=realert_interval,
             output_logline=output_logline, combine_values=combine_values, stop_learning_time=stop_learning_time,
             stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
-            mutable_default_args=["log_resource_ignore_list"]
+            mutable_default_args=["log_resource_ignore_list"], severity=severity
         )
         # This timestamp is compared with timestamp values from log atoms for activation of alerting logic. The first timestamp from logs
         # above this value will trigger alerting.
@@ -251,6 +251,8 @@ class MissingMatchPathValueDetector(
                 analysis_component = {"AffectedLogAtomPaths": affected_log_atom_paths,
                                       "AffectedLogAtomValues": affected_log_atom_values}
                 event_data = {"AnalysisComponent": analysis_component}
+                if self.severity is not None:
+                    event_data["Tags"] = {"Severity": self.severity}
                 for listener in self.anomaly_event_handlers:
                     self.send_event_to_handlers(listener, event_data, log_atom, ["".join(message_part).strip()])
         return True

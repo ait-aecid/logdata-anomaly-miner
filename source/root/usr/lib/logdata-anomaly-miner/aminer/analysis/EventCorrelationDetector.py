@@ -42,7 +42,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
 
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list=None, max_hypotheses=1000, hypothesis_max_delta_time=5.0,
                  generation_probability=1.0, generation_factor=1.0, max_observations=500, p0=0.9, alpha=0.05, candidates_size=10,
-                 hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False,
+                 hypotheses_eval_delta_time=120.0, delta_time_to_discard_hypothesis=180.0, check_rules_flag=False, severity=None,
                  learn_mode=True, ignore_list=None, persistence_id="Default", output_logline=True, constraint_list=None,
                  stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
         """Initialize the detector. This will also trigger reading or creation
@@ -82,7 +82,7 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
         super().__init__(
             mutable_default_args=["target_path_list", "ignore_list", "constraint_list", "log_resource_ignore_list"],
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, target_path_list=target_path_list,
-            max_hypotheses=max_hypotheses, hypothesis_max_delta_time=hypothesis_max_delta_time,
+            max_hypotheses=max_hypotheses, hypothesis_max_delta_time=hypothesis_max_delta_time, severity=severity,
             generation_probability=generation_probability, generation_factor=generation_factor, max_observations=max_observations, p0=p0,
             alpha=alpha, candidates_size=candidates_size, hypotheses_eval_delta_time=hypotheses_eval_delta_time,
             delta_time_to_discard_hypothesis=delta_time_to_discard_hypothesis, check_rules_flag=check_rules_flag, learn_mode=learn_mode,
@@ -284,7 +284,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                 f"{repr(trigger_event)}", sorted_log_lines,
                                 {"RuleInfo": {"Rule": str(rule.trigger_event) + "->" + str(rule.implied_event),
                                               "Expected": str(rule.min_eval_true) + "/" + str(rule.max_observations),
-                                              "Observed": str(sum(rule.rule_observations)) + "/" + str(len(rule.rule_observations))}},
+                                              "Observed": str(sum(rule.rule_observations)) + "/" + str(len(rule.rule_observations))},
+                                 "Severity": self.severity},
                                 log_atom, self)
                         rule.rule_observations = deque([])
                     continue
@@ -342,7 +343,8 @@ class EventCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentInter
                                     f"{repr(trigger_event)}", sorted_log_lines,
                                     {"RuleInfo": {"Rule": str(rule.implied_event) + "<-" + str(rule.trigger_event),
                                                   "Expected": str(rule.min_eval_true) + "/" + str(rule.max_observations),
-                                                  "Observed": str(sum(rule.rule_observations)) + "/" + str(len(rule.rule_observations))}},
+                                                  "Observed": str(sum(rule.rule_observations)) + "/" + str(len(rule.rule_observations))},
+                                     "Severity": self.severity},
                                     log_atom, self)
                             rule.rule_observations = deque([])
 

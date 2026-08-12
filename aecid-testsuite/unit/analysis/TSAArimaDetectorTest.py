@@ -438,6 +438,20 @@ class TSAArimaDetectorTest(TestBase):
         self.assertRaises(TypeError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=set())
         TSAArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(ValueError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=-1)
+        self.assertRaises(ValueError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=1.1)
+        self.assertRaises(TypeError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=b"Default")
+        self.assertRaises(TypeError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity="123")
+        self.assertRaises(TypeError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity={"id": "Default"})
+        self.assertRaises(TypeError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=["Default"])
+        self.assertRaises(TypeError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=[])
+        self.assertRaises(TypeError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=())
+        self.assertRaises(TypeError, TSAArimaDetector, self.aminer_config, [self.stream_printer_event_handler], etd, severity=set())
+        TSAArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, severity=None)
+        TSAArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, severity=0)
+        TSAArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, severity=0.5)
+        TSAArimaDetector(self.aminer_config, [self.stream_printer_event_handler], etd, severity=1)
+
     @classmethod
     def setUpClass(cls):
         """Set up the data for the all tests."""

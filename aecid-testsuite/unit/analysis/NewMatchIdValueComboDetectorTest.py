@@ -141,23 +141,70 @@ class NewMatchIdValueComboDetectorTest(TestBase):
 
     def test4persistence(self):
         """Test the do_persist and load_persistence_data methods."""
-        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100, learn_mode=True, output_logline=False)
+        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100, learn_mode=True, output_logline=False, expire_persistence_time=86400)
         t = round(time.time(), 3)
         log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t, nmivcd)
         log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t, nmivcd)
-
         self.assertTrue(nmivcd.receive_atom(log_atom1))
         self.assertTrue(nmivcd.receive_atom(log_atom2))
         self.assertEqual(nmivcd.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}])
         nmivcd.do_persist()
+        p = t + nmivcd.expire_persistence_time
+        self.assertEqual(nmivcd.value_timestamps, {(("/seq/d1", "25537"), ("/seq/s1", " pid=")): p, (("/seq/d1", "25538"), ("/seq/s1", "ddd ")): p})
         with open(nmivcd.persistence_file_name, "r") as f:
-            self.assertEqual(f.read(), '[{"string:/seq/s1": "string: pid=", "string:/seq/d1": "string:25537"}, {"string:/seq/s1": "string:ddd ", "string:/seq/d1": "string:25538"}]')
+            self.assertEqual(f.read(), f'[[{{"string:/seq/s1": "string: pid=", "string:/seq/d1": "string:25537"}}, {{"string:/seq/s1": "string:ddd ", "string:/seq/d1": "string:25538"}}], [{p}, {p}]]')
+
+        nmivcd.learn_mode = False
+        t = p - 1
+        log_atom1 = LogAtom(self.match_element1.match_string, ParserMatch(self.match_element1), t + 1, nmivcd)
+        log_atom2 = LogAtom(self.match_element2.match_string, ParserMatch(self.match_element2), t + 2, nmivcd)
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertTrue(nmivcd.receive_atom(log_atom2))
+        self.assertEqual(nmivcd.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}])
+        t2 = t + nmivcd.expire_persistence_time
+        nmivcd.do_persist(t2 + 1)
+        self.assertEqual(nmivcd.value_timestamps, {(("/seq/d1", "25537"), ("/seq/s1", " pid=")): t2 + 1})
+        with open(nmivcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[{{"string:/seq/s1": "string: pid=", "string:/seq/d1": "string:25537"}}], [{t2 + 1}]]')
+
+        nmivcd.known_values = []
+        nmivcd.load_persistence_data()
+        self.assertEqual(nmivcd.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}])
+
+        other = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100, learn_mode=False)
+        self.assertEqual(nmivcd.known_values, other.known_values)
+        self.assertEqual(nmivcd.value_timestamps, other.value_timestamps)
+
+        nmivcd.expire_persistence_time = None
+        nmivcd.do_persist()
+        with open(nmivcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), f'[[{{"string:/seq/s1": "string: pid=", "string:/seq/d1": "string:25537"}}]]')
+        other = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100, learn_mode=True)
+        self.assertEqual(other.known_values, nmivcd.known_values)
+        self.assertEqual(other.value_timestamps, {})
+
+        other.expire_persistence_time = 86400
+        other.receive_atom(log_atom1)
+        other.receive_atom(log_atom2)
+        t2 = t + other.expire_persistence_time
+        other.do_persist(t2 + 1)
+        self.assertEqual(other.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}])
+        self.assertNotEqual(other.value_timestamps, {})
+
+        nmivcd = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100, learn_mode=True, output_logline=False, allow_missing_values_flag=True)
+        self.assertTrue(nmivcd.receive_atom(log_atom1))
+        self.assertTrue(nmivcd.receive_atom(log_atom2))
+        self.assertEqual(nmivcd.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}])
+        nmivcd.known_values = {"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}
+        nmivcd.do_persist()
+        with open(nmivcd.persistence_file_name, "r") as f:
+            self.assertEqual(f.read(), '[[{"string:/seq/d1": "string:25537", "string:/seq/s1": "string: pid="}, {"string:/seq/d1": "string:25538", "string:/seq/s1": "string:ddd "}]]')
 
         nmivcd.known_values = []
         nmivcd.load_persistence_data()
         self.assertEqual(nmivcd.known_values, [{"/seq/d1": "25537", "/seq/s1": " pid="}, {"/seq/d1": "25538", "/seq/s1": "ddd "}])
 
-        other = NewMatchIdValueComboDetector(self.aminer_config, [self.match_element1.path, self.match_element2.path], [self.stream_printer_event_handler], ["/seq/s1/id", "/seq/d1/id"], 100)
+        other = NewMatchIdValueComboDetector(self.aminer_config, ["/seq/s1", "/seq/d1"], [self.stream_printer_event_handler], ["/seq/d1"], 100)
         self.assertEqual(nmivcd.known_values, other.known_values)
 
     def test5validate_parameters(self):
@@ -222,6 +269,18 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=())
         self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id=set())
         NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, persistence_id="Default")
+
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time="")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=b"Default")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=True)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=["Default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=[])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=set())
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=86399)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=None)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, expire_persistence_time=86400)
 
         self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag=b"True")
         self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, allow_missing_values_flag="True")
@@ -293,3 +352,19 @@ class NewMatchIdValueComboDetectorTest(TestBase):
         self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, log_resource_ignore_list=())
         self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, log_resource_ignore_list=set())
         NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, log_resource_ignore_list=["file:///tmp/syslog"])
+
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity="")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=b"Default")
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=True)
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity={"id": "Default"})
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=["Default"])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=[])
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=())
+        self.assertRaises(TypeError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=set())
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=123)
+        self.assertRaises(ValueError, NewMatchIdValueComboDetector, self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=123.22)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=None)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=0)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=1)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=0.1)
+        NewMatchIdValueComboDetector(self.aminer_config, ["path"], [self.stream_printer_event_handler], ids, 1, severity=0.99)

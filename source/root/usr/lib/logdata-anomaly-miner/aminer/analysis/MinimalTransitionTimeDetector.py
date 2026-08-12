@@ -33,7 +33,7 @@ class MinimalTransitionTimeDetector(
     def __init__(self, aminer_config, anomaly_event_handlers, target_path_list, id_path_list=None, ignore_list=None, constraint_list=None,
                  allow_missing_id=False, num_log_lines_solidify_matrix=100, time_output_threshold=0, anomaly_threshold=0.05,
                  persistence_id="Default", learn_mode=False, output_logline=True, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -67,7 +67,7 @@ class MinimalTransitionTimeDetector(
             num_log_lines_solidify_matrix=num_log_lines_solidify_matrix, time_output_threshold=time_output_threshold,
             anomaly_threshold=anomaly_threshold, persistence_id=persistence_id, learn_mode=learn_mode, output_logline=output_logline,
             stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
-            log_resource_ignore_list=log_resource_ignore_list
+            log_resource_ignore_list=log_resource_ignore_list, severity=severity
         )
         if not self.target_path_list:
             msg = "target_path_list must not be empty or None."
@@ -216,9 +216,9 @@ class MinimalTransitionTimeDetector(
         return True
 
     def solidify_matrix(self):
-        """Solidify minimal time matrix with the trianlge inequality."""
+        """Solidify minimal time matrix with the triangle inequality."""
         # Initialize list old_pairs with all transitions and a list of all values
-        # The list of old_pairs includes the minimal times which can be used to reduce the minimal ransition times of other transitions
+        # The list of old_pairs includes the minimal times which can be used to reduce the minimal transition times of other transitions
         values = list(self.time_matrix.keys())
         for key1 in self.time_matrix:
             values += [key for key in self.time_matrix[key1] if key not in values]
@@ -565,6 +565,8 @@ class MinimalTransitionTimeDetector(
             analysis_component[key] = value
 
         event_data = {"AnalysisComponent": analysis_component, "TypeInfo": {}}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         if confidence is not None:
             event_data["TypeInfo"]["Confidence"] = confidence
         for listener in self.anomaly_event_handlers:

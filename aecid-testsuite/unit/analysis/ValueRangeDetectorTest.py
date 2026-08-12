@@ -461,6 +461,22 @@ class ValueRangeDetectorTest(TestBase):
         self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], log_resource_ignore_list=set())
         ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity="")
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=b"Default")
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=True)
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity={"id": "Default"})
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=["Default"])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=[])
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=())
+        self.assertRaises(TypeError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=set())
+        self.assertRaises(ValueError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=123)
+        self.assertRaises(ValueError, ValueRangeDetector, self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=123.22)
+        ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=None)
+        ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=0)
+        ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=1)
+        ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=0.1)
+        ValueRangeDetector(self.aminer_config, [self.stream_printer_event_handler], ["Default"], severity=0.99)
+
 
 if __name__ == "__main__":
     unittest.main()

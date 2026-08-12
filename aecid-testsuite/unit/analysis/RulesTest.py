@@ -69,7 +69,7 @@ class RuleTest(TestBase):
         match_context = DummyMatchContext(b"25000")
         fdme = DummyFixedDataModelElement("s1", b"25000")
         match_element = fdme.get_match_element("fixed", match_context)
-        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", False)
+        nmpd = NewMatchPathDetector(self.aminer_config, [self.stream_printer_event_handler], "Default", learn_mode=False)
         afma = AtomFilterMatchAction([nmpd], True)
         log_atom = LogAtom(fdme.data, ParserMatch(match_element), t, afma)
         self.assertTrue(afma.match_action(log_atom))

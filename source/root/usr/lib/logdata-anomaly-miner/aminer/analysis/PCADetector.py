@@ -35,7 +35,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, window_size, min_anomaly_score, min_variance, num_windows,
                  persistence_id="Default", learn_mode=False, output_logline=True, ignore_list=None, constraint_list=None,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -66,7 +66,7 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
             min_anomaly_score=min_anomaly_score, min_variance=min_variance, num_windows=num_windows, persistence_id=persistence_id,
             learn_mode=learn_mode, output_logline=output_logline, ignore_list=ignore_list, constraint_list=constraint_list,
             stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
-            log_resource_ignore_list=log_resource_ignore_list
+            log_resource_ignore_list=log_resource_ignore_list, severity=severity
         )
         if not self.target_path_list:
             msg = "target_path_list must not be empty or None."
@@ -149,6 +149,8 @@ class PCADetector(AtomHandlerInterface, TimeTriggeredComponentInterface, Persist
                     analysis_component = {"AffectedLogAtomPaths": affected_paths, "AffectedLogAtomValues": affected_values,
                                           "AffectedValueCounts": affected_counts, "AnomalyScore": anomaly_score[0]}
                     event_data = {"AnalysisComponent": analysis_component}
+                    if self.severity is not None:
+                        event_data["Tags"] = {"Severity": self.severity}
                     for listener in self.anomaly_event_handlers:
                         listener.receive_event(f"Analysis.{self.__class__.__name__}", "PCA anomaly detected", sorted_log_lines, event_data,
                                                log_atom, self)

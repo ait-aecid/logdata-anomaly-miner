@@ -22,7 +22,7 @@ class MatchFilter(AtomHandlerInterface):
     """This class creates events for specified paths and values."""
 
     def __init__(self, aminer_config, target_path_list, anomaly_event_handlers, target_value_list=None, output_logline=True,
-                 log_resource_ignore_list=None):
+                 log_resource_ignore_list=None, severity=None):
         """Initialize the detector.
 
         @param aminer_config configuration from analysis_context.
@@ -37,8 +37,7 @@ class MatchFilter(AtomHandlerInterface):
         super().__init__(
             aminer_config=aminer_config, target_path_list=target_path_list, anomaly_event_handlers=anomaly_event_handlers,
             target_value_list=target_value_list, output_logline=output_logline, log_resource_ignore_list=log_resource_ignore_list,
-            mutable_default_args=["log_resource_ignore_list"]
-        )
+            mutable_default_args=["log_resource_ignore_list"], severity=severity)
         if len(target_path_list) == 0:
             msg = "target_path_list must not be empty."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -77,6 +76,8 @@ class MatchFilter(AtomHandlerInterface):
             analysis_component = {"AffectedLogAtomPaths": [target_path], "AffectedLogAtomValues": [str(affected_log_atom_values)]}
             sorted_log_lines = [original_log_line_prefix + data]
             event_data = {"AnalysisComponent": analysis_component}
+            if self.severity is not None:
+                event_data["Tags"] = {"Severity": self.severity}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(
                     f"Analysis.{self.__class__.__name__}", "Log Atom Filtered", sorted_log_lines, event_data, log_atom, self)

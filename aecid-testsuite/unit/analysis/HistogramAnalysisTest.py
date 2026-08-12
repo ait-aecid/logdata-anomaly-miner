@@ -510,6 +510,20 @@ class HistogramAnalysisTest(TestBase):
         self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=set())
         HistogramAnalysis(self.aminer_config, defs, 100, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=["default"])
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity="")
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=b"Default")
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, HistogramAnalysis, self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=123.3)
+        HistogramAnalysis(self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=None)
+        HistogramAnalysis(self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=0)
+        HistogramAnalysis(self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=1)
+        HistogramAnalysis(self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=0.1)
+        HistogramAnalysis(self.aminer_config, defs, 100, [self.stream_printer_event_handler], severity=0.99)
+
         self.assertRaises(ValueError, PathDependentHistogramAnalysis, self.aminer_config, "", mtbd, 100, [self.stream_printer_event_handler])
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, b"path", mtbd, 100, [self.stream_printer_event_handler])
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, ["default"], mtbd, 100, [self.stream_printer_event_handler])
@@ -583,6 +597,20 @@ class HistogramAnalysisTest(TestBase):
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=())
         self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=set())
         PathDependentHistogramAnalysis(self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], log_resource_ignore_list=["file:///tmp/syslog"])
+
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=["default"])
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity="")
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=b"Default")
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity={"id": "Default"})
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=())
+        self.assertRaises(TypeError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=set())
+        self.assertRaises(ValueError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=123)
+        self.assertRaises(ValueError, PathDependentHistogramAnalysis, self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=123.3)
+        PathDependentHistogramAnalysis(self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=None)
+        PathDependentHistogramAnalysis(self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=0)
+        PathDependentHistogramAnalysis(self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=1)
+        PathDependentHistogramAnalysis(self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=0.1)
+        PathDependentHistogramAnalysis(self.aminer_config, "path", mtbd, 100, [self.stream_printer_event_handler], severity=0.99)
 
 
 if __name__ == "__main__":

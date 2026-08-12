@@ -30,14 +30,16 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
     time_trigger_class = AnalysisContext.TIME_TRIGGER_CLASS_REALTIME
 
-    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id="Default", learn_mode=False, output_logline=True,
-                 stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+    def __init__(self, aminer_config, anomaly_event_handlers, persistence_id="Default", expire_persistence_time=None, learn_mode=False,
+                 output_logline=True, stop_learning_time=None, stop_learning_no_anomaly_time=None, log_resource_ignore_list=None,
+                 severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
         @param aminer_config configuration from analysis_context.
         @param anomaly_event_handlers for handling events, e.g., print events to stdout.
         @param persistence_id name of persistence file.
+        @param expire_persistence_time if not None, save timestamps of values and implement aging after the time expires.
         @param learn_mode specifies whether new values should be learned.
         @param output_logline specifies whether the full parsed log atom should be provided in the output.
         @param stop_learning_time switch the learn_mode to False after the time.
@@ -45,16 +47,16 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
         """
         # avoid "defined outside init" issue
         self.learn_mode, self.stop_learning_time, self.next_persist_time, self.log_success, self.log_total = [None]*5
-        self.stop_learning_time_initialized = None
+        self.stop_learning_time_initialized, self.expire_persistence_time = [None] * 2
         super().__init__(
             aminer_config=aminer_config, anomaly_event_handlers=anomaly_event_handlers, persistence_id=persistence_id,
-            learn_mode=learn_mode, output_logline=output_logline, stop_learning_time=stop_learning_time,
-            stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, log_resource_ignore_list=log_resource_ignore_list,
-            mutable_default_args=["log_resource_ignore_list"]
-        )
+            expire_persistence_time=expire_persistence_time, learn_mode=learn_mode, output_logline=output_logline,
+            stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time, severity=severity,
+            log_resource_ignore_list=log_resource_ignore_list, mutable_default_args=["log_resource_ignore_list"])
         self.log_learned_paths = 0
         self.log_new_learned_paths = []
         self.known_path_set = set()
+        self.path_timestamps = {}
 
         self.persistence_file_name = build_persistence_file_name(aminer_config, self.__class__.__name__, persistence_id)
         PersistenceUtil.add_persistable_component(self)
@@ -71,28 +73,40 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             if log_atom.source.resource_name.decode() == source:
                 return False
         self.log_total += 1
+        atom_time = log_atom.atom_time
         if not self.stop_learning_time_initialized:
             self.stop_learning_time_initialized = True
             if self.stop_learning_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_time
+                self.stop_learning_time = atom_time + self.stop_learning_time
             elif self.stop_learning_no_anomaly_time is not None:
-                self.stop_learning_time = log_atom.atom_time + self.stop_learning_no_anomaly_time
+                self.stop_learning_time = atom_time + self.stop_learning_no_anomaly_time
 
         unknown_path_list = []
         if self.learn_mode is True and self.stop_learning_time is not None and \
-                self.stop_learning_time < log_atom.atom_time:
+                self.stop_learning_time < atom_time:
             logging.getLogger(DEBUG_LOG_NAME).info("Stopping learning in the %s.", self.__class__.__name__)
             self.learn_mode = False
 
+        expired_paths = set()
         for path in log_atom.parser_match.get_match_dictionary().keys():
             if path not in self.known_path_set:
                 unknown_path_list.append(path)
                 if self.learn_mode:
                     self.known_path_set.add(path)
+                    if self.expire_persistence_time is not None:
+                        self.path_timestamps[path] = atom_time + self.expire_persistence_time
                     self.log_learned_paths += 1
                     self.log_new_learned_paths.append(path)
                     if self.stop_learning_time is not None and self.stop_learning_no_anomaly_time is not None:
-                        self.stop_learning_time = max(self.stop_learning_time, log_atom.atom_time + self.stop_learning_no_anomaly_time)
+                        self.stop_learning_time = max(self.stop_learning_time, atom_time + self.stop_learning_no_anomaly_time)
+            elif self.expire_persistence_time is not None:
+                if not self.learn_mode and path in self.path_timestamps and self.path_timestamps[path] < atom_time:
+                    expired_paths.add(path)
+                    self.known_path_set.remove(path)
+                    del self.path_timestamps[path]
+                elif self.learn_mode or self.path_timestamps[path] >= atom_time:
+                    self.path_timestamps[path] = atom_time + self.expire_persistence_time
+
         if unknown_path_list:
             original_log_line_prefix = self.aminer_config.config_properties.get(CONFIG_KEY_LOG_LINE_PREFIX, DEFAULT_LOG_LINE_PREFIX)
             try:
@@ -105,7 +119,11 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
             else:
                 sorted_log_lines = [repr(unknown_path_list)]
             analysis_component = {"AffectedLogAtomPaths": list(unknown_path_list)}
+            if self.expire_persistence_time is not None:
+                analysis_component["ExpiredPaths"] = list(expired_paths)
             event_data = {"AnalysisComponent": analysis_component}
+            if self.severity is not None:
+                event_data["Tags"] = {"Severity": self.severity}
             for listener in self.anomaly_event_handlers:
                 listener.receive_event(f"Analysis.{self.__class__.__name__}", "New path(s) detected", sorted_log_lines, event_data,
                                        log_atom, self)
@@ -119,21 +137,46 @@ class NewMatchPathDetector(AtomHandlerInterface, TimeTriggeredComponentInterface
 
         delta = self.next_persist_time - trigger_time
         if delta <= 0:
-            self.do_persist()
+            self.do_persist(trigger_time)
             delta = self.aminer_config.config_properties.get(KEY_PERSISTENCE_PERIOD, DEFAULT_PERSISTENCE_PERIOD)
             self.next_persist_time = trigger_time + delta
         return delta
 
-    def do_persist(self):
+    def do_persist(self, trigger_time=None):
         """Immediately write persistence data to storage."""
-        PersistenceUtil.store_json(self.persistence_file_name, sorted(list(self.known_path_set)))
+        lst = [[]]
+        if self.expire_persistence_time is not None:
+            timestamps_list = []
+            for path in sorted(list(self.known_path_set)):
+                if trigger_time is None or (path in self.path_timestamps and self.path_timestamps[path] >= trigger_time):
+                    timestamps_list.append(self.path_timestamps[path])
+                elif trigger_time is not None:
+                    self.path_timestamps.pop(path, None)
+                    continue
+                lst[0].append(path)
+            if len(timestamps_list) > 0:
+                lst.append(timestamps_list)
+        else:
+            lst[0] = sorted(list(self.known_path_set))
+        PersistenceUtil.store_json(self.persistence_file_name, lst)
         logging.getLogger(DEBUG_LOG_NAME).debug("%s persisted data.", self.__class__.__name__)
 
     def load_persistence_data(self):
         """Load the persistence data from storage."""
         persistence_data = PersistenceUtil.load_json(self.persistence_file_name)
+        self.known_path_set = set()
+        self.path_timestamps = {}
         if persistence_data is not None:
-            self.known_path_set = set(persistence_data)
+            if len(persistence_data) == 2 and all(isinstance(x, list) for x in persistence_data):
+                for i in range(len(persistence_data[0])):
+                    self.known_path_set.add(persistence_data[0][i])
+                    self.path_timestamps[persistence_data[0][i]] = persistence_data[1][i]
+            else:
+                if len(persistence_data) > 0:
+                    if isinstance(persistence_data[0], list):
+                        self.known_path_set = set(persistence_data[0])
+                    else:
+                        self.known_path_set = set(persistence_data)
             logging.getLogger(DEBUG_LOG_NAME).debug("%s loaded persistence data.", self.__class__.__name__)
 
     def allowlist_event(self, event_type, event_data, allowlisting_data):

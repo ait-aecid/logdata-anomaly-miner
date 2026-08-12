@@ -423,6 +423,20 @@ class MinimalTransitionTimeDetectorTest(TestBase):
         self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=set())
         MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], log_resource_ignore_list=["file:///tmp/syslog"])
 
+        self.assertRaises(ValueError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=-1)
+        self.assertRaises(ValueError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=1.1)
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=b"Default")
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity="123")
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity={"id": "Default"})
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=["Default"])
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=[])
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=())
+        self.assertRaises(TypeError, MinimalTransitionTimeDetector, self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=set())
+        MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=None)
+        MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=0)
+        MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=1.0)
+        MinimalTransitionTimeDetector(self.aminer_config, [self.stream_printer_event_handler], ["/model/value"], severity=0.5)
+
 
 if __name__ == "__main__":
     unittest.main()

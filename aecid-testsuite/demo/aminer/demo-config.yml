@@ -4,6 +4,8 @@ Core.LogDir: '/tmp/lib/aminer/log'
 
 Core.PersistenceDir: '/tmp/lib/aminer'
 
+ExpirePersistenceTime: 2629800  # 1 month
+
 Core.PersistencePeriod: 600
 
 LogResourceList:
@@ -900,6 +902,7 @@ Analysis:
           check_rules_flag: True
           hypothesis_max_delta_time: 1.0
           learn_mode: True
+          severity: 0.3
         - type: EventFrequencyDetector
           id: EventFrequencyDetector
           window_size: 0.5
@@ -1025,6 +1028,7 @@ Analysis:
           id: TimeAllowlist
           allowlist_rules:
             - "time_and_match_rule"
+          severity: 0.1
         - type: LinearNumericBinDefinition
           id: linear_numeric_bin_definition
           lower_limit: 50
@@ -1089,6 +1093,7 @@ Analysis:
             - "/model/DailyCron/JobNumber"
             - "/model/IPAddresses/Username"
           learn_mode: True
+          expire_persistence_time: 172800
         - type: MissingMatchPathValueDetector
           id: MissingMatch
           paths:

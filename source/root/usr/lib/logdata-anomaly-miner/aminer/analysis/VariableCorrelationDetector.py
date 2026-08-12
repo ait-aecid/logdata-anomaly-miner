@@ -34,7 +34,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                  percentage_random_cors=0.20, match_disc_vals_sim_tresh=0.7, exclude_due_distr_lower_limit=0.4,
                  match_disc_distr_threshold=0.5, used_cor_meth=None, used_validate_cor_meth=None, validate_cor_cover_vals_thres=0.7,
                  validate_cor_distinct_thres=0.05, ignore_list=None, constraint_list=None, learn_mode=True, stop_learning_time=None,
-                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None):
+                 stop_learning_no_anomaly_time=None, log_resource_ignore_list=None, severity=None):
         """Initialize the detector. This will also trigger reading or creation
         of persistence storage location.
 
@@ -107,8 +107,7 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
             used_validate_cor_meth=used_validate_cor_meth, validate_cor_cover_vals_thres=validate_cor_cover_vals_thres,
             validate_cor_distinct_thres=validate_cor_distinct_thres, ignore_list=ignore_list, constraint_list=constraint_list,
             learn_mode=learn_mode, stop_learning_time=stop_learning_time, stop_learning_no_anomaly_time=stop_learning_no_anomaly_time,
-            log_resource_ignore_list=log_resource_ignore_list
-        )
+            log_resource_ignore_list=log_resource_ignore_list, severity=severity)
         if not isinstance(self.event_type_detector, EventTypeDetector):
             msg = "event_type_detector must be an instance of EventTypeDetector."
             logging.getLogger(DEBUG_LOG_NAME).error(msg)
@@ -611,6 +610,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         [None for _ in self.rel_list[event_index][pos_var_cor_index][1]])
                 sorted_log_lines = []
                 event_data = {"EventIndex": event_index}
+                if self.severity is not None:
+                    event_data["Tags"] = {"Severity": self.severity}
                 affected_log_atom_paths = []
                 value_changes = []
                 if self.generate_rules[event_index]:
@@ -754,6 +755,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             len(reported_values_ij[i_val]) / (len(reported_values_ij[i_val]) + 1))
                     sorted_log_lines = []
                     event_data = {"EventIndex": event_index}
+                    if self.severity is not None:
+                        event_data["Tags"] = {"Severity": self.severity}
                     affected_log_atom_paths = []
                     affected_values = []
                     affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
@@ -783,6 +786,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                             len(reported_values_ji[j_val]) / (len(reported_values_ji[j_val]) + 1))
                     sorted_log_lines = []
                     event_data = {"EventIndex": event_index}
+                    if self.severity is not None:
+                        event_data["Tags"] = {"Severity": self.severity}
                     affected_log_atom_paths = []
                     affected_values = []
                     affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][self.discrete_indices[
@@ -1068,6 +1073,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                                 [None for _ in self.w_rel_list[event_index][pos_var_cor_index][1]])
                         sorted_log_lines = []
                         event_data = {"EventIndex": event_index}
+                        if self.severity is not None:
+                            event_data["Tags"] = {"Severity": self.severity}
                         affected_log_atom_paths = []
                         distribution_changes = []
                         for i_val in self.w_rel_list[event_index][pos_var_cor_index][0]:
@@ -1450,6 +1457,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         self.rel_list[event_index][pos_var_cor_index] != [{}, {}]))
         sorted_log_lines = []
         event_data = {"EventIndex": event_index}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         affected_log_atom_paths = []
         affected_log_atom_values = []
         for pos_var_cor_index, pos_var_cor_val in enumerate(self.rel_list[event_index]):
@@ -1507,6 +1516,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
                         enumerate(self.w_rel_list[event_index]) if pos_var_cor_val != [{}, {}]))
         sorted_log_lines = []
         event_data = {"EventIndex": event_index}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         affected_log_atom_paths = []
         affected_log_atom_values = []
         for pos_var_cor_index, pos_var_cor_val in enumerate(self.w_rel_list[event_index]):
@@ -1571,6 +1582,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         confidence = sum(self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1]) / len(
                 self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1])
         event_data = {"EventIndex": event_index}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         affected_log_atom_paths = []
         affected_values = []
         affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][
@@ -1607,6 +1620,8 @@ class VariableCorrelationDetector(AtomHandlerInterface, TimeTriggeredComponentIn
         confidence = sum(self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1]) / len(
                 self.w_rel_confidences[event_index][pos_var_cor_index][cor_direction][value1])
         event_data = {"EventIndex": event_index}
+        if self.severity is not None:
+            event_data["Tags"] = {"Severity": self.severity}
         affected_log_atom_paths = []
         affected_values = []
         affected_log_atom_paths.append(self.event_type_detector.variable_key_list[event_index][
