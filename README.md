@@ -43,7 +43,7 @@ Here are some resources to read in order to get started with configurations:
 
 * [Getting started](https://github.com/ait-aecid/logdata-anomaly-miner/wiki/Getting-started-(tutorial))
 * [Some available configurations](https://github.com/ait-aecid/logdata-anomaly-miner/tree/main/source/root/etc/aminer/)
-* [Documentation](https://aeciddocs.ait.ac.at/logdata-anomaly-miner/)
+* [Documentation](https://ait-aecid.github.io/logdata-anomaly-miner/)
 * [Wiki](https://github.com/ait-aecid/logdata-anomaly-miner/wiki)
 
 ## Publications
