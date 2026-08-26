@@ -1,4 +1,4 @@
-# logdata-anomaly-miner [![Lint](https://github.com/ait-aecid/logdata-anomaly-miner/actions/workflows/lint-test.yml/badge.svg)](https://github.com/ait-aecid/logdata-anomaly-miner/actions/workflows/lint.yml) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
+# logdata-anomaly-miner [![Lint](https://github.com/ait-aecid/logdata-anomaly-miner/actions/workflows/lint.yml/badge.svg)](https://github.com/ait-aecid/logdata-anomaly-miner/actions/workflows/lint.yml) [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/ait-aecid/logdata-anomaly-miner/?ref=repository-badge)
 
 > **This project is no longer maintained.** Please use [DetectMate](https://github.com/ait-detectmate/DetectMateService) instead.
 
